@@ -12,17 +12,19 @@
 #' The pairs of functions involving `ms` (milliseconds) and `sec` (seconds), are identical except
 #' for the change of scale between seconds and milliseconds.
 #' 
-#' @param BPM ***Specify the tempo.***
+#' @param BPM ***The tempo.***
 #' 
 #' Defaults to `60`.
 #' 
-#' Must be `numeric` or `character` string in the format `"MM120"` (for 120 bpm). 
+#' Must be a number or a `character` string in the format `"MM120"` (for 120 bpm). 
 #' 
-#' By default, [with(in).humdrumR][withinHumdrum] passed the `BPM` [field][fields()], if present.
+#' By default, [with(in).humdrumR][withinHumdrum] passes the `BPM` [field][fields()], if present.
 #' 
-#' @param unit ***A value which can be interpreted as a [duration()].***
+#' @param unit ***The "Beat" in BPM.***
 #' 
-#' Must be a value which can be interpreted as a [duration()].
+#' Defaults to a quarter-note.
+#'
+#' Must be a value which can be interpreted as [rhythmic duration][rhythmParsing].
 #'  
 #' @family time functions
 #' @export
@@ -796,42 +798,50 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' for tokens with no (other) duration information, while `Q` should be marked along with
 #' duration information: for example, `aa-q` or `16aa-Q`.
 #' In practice, this distinction is not always made, and is rarely important.
-
+#'
 #' By default, the `**recip` parser treats input marked as grace notes as having a duration of zero.
 #' However, if you pass a `grace` argument to the [rhythm parser][rhythmParsing], you can control this behavior.
 #' If `parse(grace = TRUE)`, grace-note durations (like the `16` in `"16aa-Q"`) are parsed like any other duration.
 #' If `grace = NA`, grace-notes return as `NA`.
 #' If `grace = FALSE`, the duration returns as zero (the default behavior).
-# The `grace` argument can also be any other atomic value, which is returned for grace notes:
-# the most common use is to return grace notes as having zero duration, by specifying `grace = 0`.
 #' 
 #' 
-#' @param x ***An `atomic` vector***
+#' @param x ***An input  vector.***
 #' 
 #' The `x` argument can be any ([atomic][base::vector]) vector, or a [rational (rhythmInterval)][rational], or `NULL`.
+#'
+#' Must be [parsable as rhythm infromation][rhythmParsing].
 #' 
-#' @param ... These arguments are passed to the [rhythm parser][rhythmParsing]. 
-#'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
-
-#' @param scale ***A `numeric` or [rational] value which is used as the output unit of measurement***
+#' @param ... ***Arguments passed to the [rhythm parser][rhythmParsing].***
+#' 
+#' There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
+#'
+#' @param scale ***A `numeric` or [rational] value which is used as the output unit of measurement.***
 #'  
 #' Defaults to `rational(1, 1)`.
 #'  
 #' Must be `numeric` or [rational].
 #'   
-#' @param parseArgs ***A list of arguments that are passed to the [rhythm parser][rhythmParsing].***
+#' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.
+#' Must be a `list` of named arguments to the [rhythm parser][rhythmParsing].
 #' 
-#' @param inPlace ***Whether the result is placed in place or returned***
+#' @param inPlace ***Should non-rhythm information be retained in the output string?***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a `logical`; must be length `1`.
+#' Must be a singleton  `logical` value: an on/off switch.
 #'  
-# @param grace A single `atomic` value. Controls the parsing/deparsing of grace notes.
+# @param grace ***How are grace notes treated?***
+#' 
+#' Defaults to `FALSE`.
+#'
+#' A singleton `logical` value, or `NA`. 
+#'
+#' See "Grace notes" section below.
+#' 
 #'     
 #' 
 #' @name rhythmFunctions
@@ -981,9 +991,11 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' read about the [family of rhythm functions][rhythmFunctions], 
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 #' @family {rhythm functions}
-#' @param sep ***A `character` string to use as the separator between denominator and numerator.***
+#' @param sep ***The separator printed between numerator and denominator.***
+#'
+#' A single `character` string.
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #' 
 #' @inheritParams rhythmFunctions
 #'
@@ -1158,46 +1170,46 @@ dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60',
 #' 
 #' Non-onsets (rests) that occur *before* the first onset are returned as null.
 #' 
-#' @param x ***An `atomic` vector***
+#' @param x ***Input rhythm information.***
 #' 
 #' The `x` argument can be any ([atomic][base::vector]) vector, or `NULL`. 
 #' 
-#' `max`, `median`, or `mode` might be reasonable alternatives.
+#' Must be [parsable as rhythm information][rhythmParsing].
 #' 
-#' @param onsets ***A `logical` vector denotes the onsets***
+#' @param onsets ***A `logical` vector denotes the onsets.***
 #' 
-#' Defaults to `!grepl("r", x) & !is.na(x) & x != "."`.
+#' Defaults to a `logical` vector with `TRUE` wherever there are rests, indicated by the presence of an `"r"` character, in the input `x`.
 #' 
 #' Must be `logical`; must be length `length(x)`.
 #' 
 #' All durations in `x` where `onsets == FALSE` are added to the previous value where `onsets == TRUE`.
 #' 
-#' @param finalOnset ***Whether to count the last onset***
+#' @param finalOnset ***Whether to count the last onset.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, the last IOI is computed between the last onset and the end of the input vector.
 #' Otherwise, this last IOI is undefined (`NA`).
 #' 
-#' @param parseArgs ***A list of arguments that are passed to the [rhythm parser][rhythmParsing].***
+#' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.
+#' Must be a `list` of named arguments to the [rhythm parser][rhythmParsing].
 #' 
-#' @param groupby ***A `list` of vectors to group `x`***
+#' @param groupby ***A `list` of vectors to group `x`.***
 #' 
 #' Defaults to `list()`.
 #' 
 #' Must be a `list`; every element of the list must be length `length(x)`.
 #' 
-#' @param inPlace ***Whether the result is placed in place or returned***
+#' @param inPlace ***Should non-rhythm information be retained in the output string?***
 #' 
-#' Defaults to `FALSE`.
+#' Defaults to `TRUE`.
 #' 
-#' Must be a `logical`; must be length `1`.
+#' Must be a singleton  `logical` value: an on/off switch.
 #'        
 #' @export
 ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
@@ -1243,20 +1255,18 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   
 }
 
-#' @param open ***A `character` string (regular expression) to identify the beginning of ties.***
+#' @param open ***How are the beginnings of ties indicated in `x`?***
 #' 
 #' Defaults to `[`.
 #' 
-#' Must be `character`.
-#' 
-#' May also be formula: see [humWindows].
-#' @param close ***A `character` string (regular expression) to identify the end of ties.***
+#' Must be a single `character` string, interpreted as a regular expression.
+#'
+#' @param close ***How are the ends of ties indicated in `x`?***
 #' 
 #' Defaults to `]`.
 #' 
-#' Must be `character`.
+#' Must be a single `character` string, interpreted as a regular expression.
 #' 
-#' May also be formula: see [humWindows].
 #' @rdname ioi
 #' @export
 untie <- function(x, open = '[', close = ']', ..., 
@@ -1451,39 +1461,42 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' the first complete bar `1` the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 #' 
 #' 
-#' @param x ***An input vector which is parsed for duration information using the [rhythm parser][rhythmParsing].***
-#' 
+#' @param x ***Input rhythm information.***
+#'
 #' Must be `atomic`, or `NULL`.
+#'
+#' Is [parsed as duration information][rhythmParsing].
 #' 
-#' @param start ***A value from which the timeline begins.***
+#' @param start ***Where does timeline begin?***
 #'
 #' Defaults to `0`.
 #' 
-#' Must be `numeric`.
+#' Must be a single number.
 #' 
-#' @param pickup ***A vector to indicate pickup.***
+#' @param pickup ***Where is there a pickup (anacrusis)?***
 #' 
 #' Defaults to `NULL`
 #' 
-#' Must be `logical`; of same length `x`. Or `NULL`.
+#' Must be `logical` of same `length(x)`, Or `NULL`.
+#' See "Pickups" section below.
 #' 
-#' @param minutes ***Whether to return in minutes format.***
+#' @param minutes ***Should minutes be counted in output?***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, output seconds are converted to a character string encoding minutes, seconds, and milliseconds in the format `MM.SS.ms`. 
 #' 
-#' @param BPM ***Specify the tempo.***
+#' @param BPM ***The tempo.***
 #' 
 #' Defaults to `60`.
 #' 
-#' Must be `numeric` or `character` string in the format `"MM120"` (for 120 bpm). 
+#' Must be a single number or a `character` string in the format `"MM120"` (for 120 bpm). 
 #' 
-#' By default, [with(in).humdrumR][withinHumdrum] passed the `BPM` [field][fields()], if present.
+#' By default, [with(in).humdrumR][withinHumdrum] passes the `BPM` [field][fields()], if present.
 #' 
-#' @param groupby ***A `list` of vectors to group `x`***
+#' @param groupby ***A `list` of vectors to group `x`.***
 #' 
 #' Defaults to `list()`.
 #' 
@@ -1492,11 +1505,11 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
 #' Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #'
-#' @param parseArgs ***A list of arguments that are passed to the [rhythm parser][rhythmParsing].***
+#' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.#'
+#' Must be a `list` of named arguments to the [rhythm parser][rhythmParsing].
 #' 
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
@@ -1712,37 +1725,37 @@ rhythmAlign <- function(x, y) {
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 #' @family {rhythm functions}
 #'
-#' @param tick What is the unit of the grid?
+#' @param tick ***What is the unit of the grid?***
 #' 
 #' Defaults to sixteenth-note (`fromgrid()`) or the [tatum()] of the `x` argument.
 #' 
 #' Must be parsed as a rhythm by [rhythmInterval()].
 #' 
-#' @param on,off What represents onsets (attacks) and rests in the grid?
+#' @param on,off ***What represents onsets (attacks) and rests in the grid?***
 #' 
 #' Default to `"X"` and `"O"` respectively.
 #' 
 #' Must be singleton atomic values.
 #'
-#' @param collapse Should the output be collapsed to a single string per measure?
+#' @param collapse ***Should the output be collapsed to a single string per measure?***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be sinleton `logical` value: an on/off switch.
+#' Must be singleton `logical` value: an on/off switch.
 #' 
-#' @param sep What separates each on/off tick in a string?
+#' @param sep ***Separator between ticks in collapsed output.***
 #'
 #' Defaults to an empty string (no separator).
 #'  
 #' Must be a singleton `character` string.
 #' 
-#' @param deparser What output representation should be returned?
+#' @param deparser ***What output representation should be returned?***
 #' 
 #' Defaults to [recip()].
 #' 
 #' Must be a function which accepts [rational()] numbers.
 #' 
-#' @param ... Argments passed to the `deparser`.
+#' @param ... ***Argments passed to the [deparser][rhythmDeparsing].***
 #' 
 #' 
 #' @inheritParams rhythmFunctions 

@@ -17,7 +17,7 @@ spines(humdrumR, drop = FALSE)
 
 Must be \code{humdrumR}.}
 
-\item{drop}{***Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table. ***
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
 
 Defaults to \code{FALSE}.
 

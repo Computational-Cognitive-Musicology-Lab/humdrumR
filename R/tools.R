@@ -175,7 +175,7 @@ applycols <- function(x, f, ...) .apply(x, 2, f, ...)
 #' 
 #' Defaults to `0`.
 #' 
-#' Must be `numeric`.
+#' Must be a natural number.
 #' 
 #' If `n == 0`, `x` is returned unchanged.
 #' 
@@ -593,13 +593,15 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 #'         any = TRUE)
 #' # result is T,F,F,T,T,F,T,F,T,T,F,F
 #' 
-#' @param ... A list of atomic vectors. If the vectors differ in length,
-#' they are all recycled to match the length of the longest vector.
-#' @param reverse ***Whether the excecution order is reversed***
+#' @param ... ***A list of atomic vectors.***
+#'
+#' If the vectors differ in length, they are all recycled to match the length of the longest vector.
+#'
+#' @param reverse ***Whether the excecution order is reversed.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE` the function is excecuted backwards through the input vector(s).
 #' 
@@ -607,23 +609,23 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
-#' @param value ***Whether to return the changed value matrix***
+#' @param value ***Whether to return the changed value matrix.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, the input values where changes occur
 #' are returned in a matrix, with each row matching a change and each column containing the
 #' value from the associated input vector.
 #' 
-#' @param any ***Whether to mark changes in a change in any  or all input vector.***
+#' @param any ***Whether to mark changes any or all input vectors.***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, a change in *any* input vector
 #' is marked a change. If `FALSE`, changes must occur in *all* input vectors to be marked as a change.
@@ -733,33 +735,42 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' Should be either a logical vector where (`length(x) == length(null)`), a numeric
 #' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
 #' 
-#' @param initial ***A value used to pad the beginning (or end, if `reverse == TRUE`) of the output, if necessary.***
+#' @param initial ***Padder for the beginning (or end, if `reverse == TRUE`) of the output, if needed.***
 #'
 #' Defaults to `NA`.
 #' 
 #' Should be the same class as `x`; must be length `1`.
 #'
-#' @param reverse ***Whether the excecution order is reversed***
+#' @param reverse ***Whether the excecution order is reversed.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
 #' *earlier* (lower indices) in the vector. 
 #' 
-#' @param margin ***A vector giving the subscripts which the function will be applied over.*** 
+#' @param margin ***A vector giving the dimensions which the function will be applied over.*** 
 #' 
-#' Defaults to `2` for `matrix` inputs. 
+#' Defaults to `2` (across columns) for `matrix` inputs. 
 #' 
-#' Must be `numeric`.
+#' Must be natural number(s).
 #' 
 #' E.g., for a matrix `1` indicates rows, `2` indicates columns.
 #' Where `x` has named dimnames, it can be a character vector selecting dimension names.
 #' 
-#' @param field ***Which field ([partially matched][partialMatching]) in the `humdrumR` dataset should be dittoed?***
+#' @param field ***Which field to ditto?***
+#'
+#' Must be a single `character` string.
+#'
+#' Is ([partially matched][partialMatching]) against [fields][humTable] in `x`.
+#'
 #' 
-#' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
+#' @param newField ***What to name the new (dittoed) field.***
+#'
+#' Defaults to the `field` name appended with `"_ditto"`.
+#' 
+#' Must be a single `character` string.
 #' 
 #' @inheritParams lag
 #' @inheritSection sigma Grouping
@@ -1444,32 +1455,29 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
 #' The resulting order would be `a b c d e f D G g a`.
 #' 
 #'    
-#' @param x ***The input vector***
+#' @param x ***The input vector.***
 #' 
-#' Must be `atomic`.
+#' Must be `atomic` numbers.
 #' 
 #' `NULL` values are returned `NULL`.
 #' 
-#' @param lag  ***Which lag to use.***
+#' @param lag ***Which lag to use.***
 #' 
 #' Defaults to `1`.
 #' 
-#' Must be integer `numeric`.
-#' 
-#'  (See *Greater lags* section, below.) 
+#' Must be a natural number.
+#' (See *Greater lags* section, below.) 
 #'  
 #' @param skip ***A function to indicate which values to skip.***
 #' 
 #' Defaults to `is.na`.
 #' 
-#' Must be `function`.
-#' 
-#' This must be a function which can be applied to `x` and returns a logical vector
-#' of the same length. And `TRUE` values are skipped over in the calculations.
+#' This must be a `function` which can be applied to `x` to return a `logical` vector
+#' of the same length. `TRUE` values are skipped over in the calculations.
 #' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
 #' The skipped values are returned as is in the output vector.
 #' 
-#' @param init ***Init value to fill the beginning for calculation.***
+#' @param init ***Initial value to fill the beginning for calculation.***
 #' 
 #' Defaults to `0`.
 #' 
@@ -1482,7 +1490,7 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
 #'
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #'
 #' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
 #' 
@@ -1663,7 +1671,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' Defaults to `1`.
 #' 
-#' Must be integer `numeric`; must be length `1`.
+#' Must be a single natural number.
 #' 
 #' Results will look like: `x[i] - x[i - lag]`.
 #' 

@@ -14,26 +14,26 @@ accidental(
 )
 }
 \arguments{
-\item{x}{*** An \code{atomic} vector***
+\item{x}{\emph{\strong{An \code{atomic} vector}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 
 Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.}
 
-\item{inPlace}{*** Whether the result is placed in place or returned ***
+\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
 
 Defaults to \code{FALSE}.
 

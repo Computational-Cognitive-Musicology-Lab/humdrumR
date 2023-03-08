@@ -42,7 +42,7 @@ If sets to \code{'any'}, which lets the output type simply be whatever comes out
 
 Must be \code{humdrumR}.}
 
-\item{dataTypes}{***Which types of humdrum records to include in the census. ***
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
 
 Defaults to \code{"GLIMDd"} for \code{as.lines()} and \code{as.matrix()}; \code{"Dd"} for \code{as.data.frame()};
 \code{"LIMDd"} for \code{as.matrices()} and \code{as.data.frames()}.

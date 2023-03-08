@@ -100,9 +100,9 @@ summary.humdrumR <- function(object) {
 #' like the `groupby` argument to a [with/within][withHumdrum] call.
 #' The by expression must be the full length of the humdrum table.
 #'  
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
 #' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
@@ -114,15 +114,18 @@ summary.humdrumR <- function(object) {
 #'    
 #' @param by ***An arbitrary expression which indicates how to group the data.***
 #' 
-#' Defaults to `Filename`.
+#' Defaults to `Filename` (a humdrumR [data field][humTable]).
 #' 
-#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
-#'     as a regular expression against the "by-group" names.
+#' @param i ***Index for rows.***
+#'
+#' If `numeric`, selects rows by index. 
+#' If `character`, the string is matched  as a regular expression against the "by-group" names.
+#'
 #' @param removeEmpty ***Whether to include zero tokens.***
 #' 
 #' Defaults to `FALSE`
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If set `TRUE`, any groups that have zero tokens are not included in the `humCensus` table.
 #' 
@@ -130,7 +133,7 @@ summary.humdrumR <- function(object) {
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
 #' a `humCensus` table.
@@ -383,15 +386,21 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' 
 #' Must be a `character` string (to look up a reference code) or a [humdrumR][humdrumRclass].
 #' 
-#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
-#'     as a regular expression against filenames in the corpus.
-#' @param j if `numeric` selects columns by index. If `character`, [partially matched][partialMatching]
-#'     against column names (reference codes).
+#' @param i ***Index for rows.***
+#'
+#' If `numeric`, selects rows by index. 
+#' If `character`, the string is matched as a regular expression against filenames in the corpus.
+#'
+#' @param j ***Index for columns.*** 
+#' 
+#' If `numeric`, selects columns by index. 
+#' If `character`, [partially matched][partialMatching] against column names (reference codes).
+#'
 #' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
 #' a `humCensus` table.
@@ -667,18 +676,20 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' When `humSpine` table prints on the command line, "tallies"
 #' of the unique combinations of spines and paths in the files are also printed.
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' @param humdrumR ***HumdrumR data to summarize.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
-#'     as a regular expression against filenames in the corpus.
+#' @param i ***Index for rows.***
+#'
+#' If `numeric`, selects rows by index. If `character`, the string is matched
+#' as a regular expression against filenames in the corpus.
 #'     
 #' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
 #' a `humCensus` table.
@@ -876,12 +887,14 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #'  
 #'     
 #'     
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass] to summarize.***
+#' @param humdrumR ***HumdrumR data to summarize.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param i If `numeric`, selects rows by index. If `character`, the string is matched
-#'     as a regular expression against the filenames in the corpus.
+#' @param i ***Index for rows.***
+#'
+#' If `numeric`, selects rows by index. If `character`, the string is matched
+#' as a regular expression against the filenames in the corpus.
 #' 
 #' @family corpus summary functions
 #' @export

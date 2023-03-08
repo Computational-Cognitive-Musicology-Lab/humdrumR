@@ -338,13 +338,13 @@ partialApply <- function(func, ...) {
 #' 3. A function to dispatch.
 #' 
 #' 
-#' @param str ***The input `character` string, on which dispatch is called.***
+#' @param str ***The input strings, on which dispatch is called.***
 #' 
 #' Must be `character`.
 #' 
 #' @param dispatchDF ***A data.frame which describes what function should be called for which regex input. (See details).***
 #' 
-#' Must be `data.frame`.
+#' Must be a `data.frame`.
 #' 
 #' @param Exclusive ***Exclusive interpretations to dispatch.***
 #' 
@@ -352,13 +352,13 @@ partialApply <- function(func, ...) {
 #' 
 #' If `NULL`, only the regexes are used for dispatch.
 #' 
-#' @param ... Arguments to pass to dispatch functions.
+#' @param ... ***Arguments to pass to dispatch functions.***
 #' 
 #' @param multiDispatch ***Whether to use multiple dispatch function for each interpretation.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`. 
+#' Must be a singleton `logical` value: a on/off switch.
 #' 
 #' If `FALSE` the "best" regex/exclusive match is dispatched for each Exclusive segment. 
 #' If `TRUE`, differenet functions can be dispatched
@@ -368,7 +368,7 @@ partialApply <- function(func, ...) {
 #' 
 #' Defaults to `"character"`.
 #' 
-#' Must be `character`.
+#' Must be single `character` string.
 #'        
 #'        
 #' 

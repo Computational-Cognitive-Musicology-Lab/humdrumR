@@ -54,16 +54,13 @@
 #' the remaining files are renumbered from `2:10` to `1:9`.
 #' Spine renumbering works the same, except it is done independently *within* each file.
 #' 
-#' @param x ***A [humdrumR data object][humdrumRclass].***
+#' @param x ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
-#' 
-#' Must be `humdrumR`.
-#' 
-#' @param ... Arbitrary expressions passed to [with(in)][withinHumdrum]---the "within" expression(s) must evaluate to
-#'   full-length `logical` values.
+#' @param ... ***Arbitrary expressions passed to [with(in)][withinHumdrum].***
+#'
+#' The "within" expression(s) must evaluate to full-length `logical` values.
 #' 
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
@@ -311,10 +308,18 @@ removeEmptyStops <- function(humdrumR) {
 #' the filtered data is set to `NULL`, but not actually removed from the data object.
 #' (See [subset.humdrumR()] for more details.)
 #' 
-#' @param x A [humdrumR data object][humdrumRclass].
-#' @param i A `integer`/`numeric` value or a `character` string treated as a regular expression.
-#' @param j A `integer`/`numeric` value or a `character` string treated as a regular expression.
-#' 
+#' @param x ***HumdrumR data to index.***
+#'
+#' Must be a [humdrumR data object][humdrumRclass].
+#'
+#' @param i ***Index for vectors or matrix/data.frame rows.***
+#'
+#' A numeric vector or a `character` string treated as a regular expression.
+#'
+#' @param j ***Index for matrix/data.frame columns.***
+#'
+#' A numeric vector or a `character` string treated as a regular expression.
+#'
 #' @seealso {These indexing operators work through special calls to [subset.humdrumR()]}
 #' @name indexHumdrum
 NULL

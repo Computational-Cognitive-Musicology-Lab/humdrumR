@@ -19,13 +19,13 @@ ioi(
 untie(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 }
 \arguments{
-\item{x}{*** An \code{atomic} vector***
+\item{x}{\emph{\strong{An \code{atomic} vector}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or \code{NULL}.
 
 \code{max}, \code{median}, or \code{mode} might be reasonable alternatives.}
 
-\item{onsets}{*** A \code{logical} vector denotes the onsets***
+\item{onsets}{\emph{\strong{A \code{logical} vector denotes the onsets}}
 
 Defaults to \code{!grepl("r", x) & !is.na(x) & x != "."}.
 
@@ -33,7 +33,7 @@ Must be \code{logical}; must be length \code{length(x)}.
 
 All durations in \code{x} where \code{onsets == FALSE} are added to the previous value where \code{onsets == TRUE}.}
 
-\item{finalOnset}{*** Whether to count the last onset***
+\item{finalOnset}{\emph{\strong{Whether to count the last onset}}
 
 Defaults to \code{FALSE}.
 
@@ -42,25 +42,25 @@ Must be \code{logical}; must be length \code{1}.
 If \code{TRUE}, the last IOI is computed between the last onset and the end of the input vector.
 Otherwise, this last IOI is undefined (\code{NA}).}
 
-\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}; every element of the list must be length \code{length(x)}.}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.}
 
-\item{inPlace}{*** Whether the result is placed in place or returned ***
+\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
 
 Defaults to \code{FALSE}.
 
 Must be a \code{logical}; must be length \code{1}.}
 
-\item{open}{*** A \code{character} string (regular expression) to identify the beginning of ties. ***
+\item{open}{\emph{\strong{A \code{character} string (regular expression) to identify the beginning of ties.}}
 
 Defaults to \code{[}.
 
@@ -68,7 +68,7 @@ Must be \code{character}.
 
 May also be formula: see \link{humWindows}.}
 
-\item{close}{*** A \code{character} string (regular expression) to identify the end of ties. ***
+\item{close}{\emph{\strong{A \code{character} string (regular expression) to identify the end of ties.}}
 
 Defaults to \verb{]}.
 

@@ -23,7 +23,7 @@ census(humdata)[i]
 
 Must be \code{humdrumR}.}
 
-\item{dataTypes}{***Which types of humdrum records to include in the census. ***
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
 
 Defaults to \code{"GLIMDd"}.
 
@@ -35,7 +35,7 @@ or any combination of these (e.g., \code{"LIM"}).
 
 Defaults to \code{Filename}.}
 
-\item{removeEmpty}{***Whether to include zero tokens. ***
+\item{removeEmpty}{\emph{\strong{Whether to include zero tokens.}}
 
 Defaults to \code{FALSE}
 
@@ -43,7 +43,7 @@ Must be \code{logical}; must be length \code{1}.
 
 If set \code{TRUE}, any groups that have zero tokens are not included in the \code{humCensus} table.}
 
-\item{drop}{***Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table. ***
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
 
 Defaults to \code{FALSE}.
 

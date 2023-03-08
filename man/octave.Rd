@@ -18,44 +18,44 @@ octave(
 )
 }
 \arguments{
-\item{x}{*** An \code{atomic} vector***
+\item{x}{\emph{\strong{An \code{atomic} vector}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{*** Whether the "specific" pitch information (accidentals and qualites) is discarded. ***
+\item{generic}{\emph{\strong{Whether the "specific" pitch information (accidentals and qualites) is discarded.}}
 
 Defaults to \code{FALSE}.
 
 Must be a \code{logical}; must be length \code{1}.}
 
-\item{simple}{*** Whether the "compound" pitch information (octave/contour) is discarded. ***
+\item{simple}{\emph{\strong{Whether the "compound" pitch information (octave/contour) is discarded.}}
 
 Defaults to \code{FALSE}.
 
 Must be a \code{logical}; must be length \code{1}.}
 
-\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 
 Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
 
-\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
+\item{transposeArgs}{\emph{\strong{A list of arguments that are passed to a special call to \link{transpose}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.}
 
-\item{inPlace}{*** Whether the result is placed in place or returned ***
+\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
 
 Defaults to \code{FALSE}.
 

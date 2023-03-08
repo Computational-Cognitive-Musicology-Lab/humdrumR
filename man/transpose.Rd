@@ -7,25 +7,25 @@
 transpose(x, by, Key, to, real, relative, ...)
 }
 \arguments{
-\item{x}{*** The input pitch(es) to transpose. ***
+\item{x}{***The input pitch(es) to transpose. ***
 
 Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
 
-\item{by}{*** The input \code{x} is transposed by this interval.***
+\item{by}{\emph{\strong{The input \code{x} is transposed by this interval.}}
 
 Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
 
-\item{Key}{*** The "from" key of the transposition. ***
+\item{Key}{\emph{\strong{The "from" key of the transposition.}}
 
 Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.
 
 For tonal and/or to transpositions, this is the "from" key. If this value is \code{NULL}, it defaults to C major.}
 
-\item{to}{*** The input \code{x} is transposed to this key. ***
+\item{to}{\emph{\strong{The input \code{x} is transposed to this key.}}
 
 Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.}
 
-\item{real}{*** Whether the transposition is real. ***
+\item{real}{\emph{\strong{Whether the transposition is real.}}
 
 Defaults to \code{TRUE}.
 
@@ -33,7 +33,7 @@ Must be a \code{logical}.
 
 If \code{TRUE}, transposition is real. If \code{FALSE}, transposition is tonal.}
 
-\item{relative}{*** Whether the transposition is relative ***
+\item{relative}{\emph{\strong{Whether the transposition is relative}}
 
 Defaults to \code{FALSE}.
 

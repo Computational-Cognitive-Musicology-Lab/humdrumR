@@ -28,29 +28,29 @@ timestamp(
 )
 }
 \arguments{
-\item{x}{*** An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}. ***
+\item{x}{\emph{\strong{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}}
 
 Must be \code{atomic}, or \code{NULL}.}
 
-\item{start}{*** A value from which the timeline begins. ***
+\item{start}{\emph{\strong{A value from which the timeline begins.}}
 
 Defaults to \code{0}.
 
 Must be \code{numeric}.}
 
-\item{pickup}{*** A vector to indicate pickup. ***
+\item{pickup}{\emph{\strong{A vector to indicate pickup.}}
 
 Defaults to \code{NULL}
 
 Must be \code{logical}; of same length \code{x}. Or \code{NULL}.}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.#'}
 
-\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
 
 Defaults to \code{list()}.
 
@@ -59,7 +59,7 @@ Must be a \code{list}; every element of the list must be length \code{length(x)}
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 
-\item{BPM}{*** Specify the tempo. ***
+\item{BPM}{\emph{\strong{Specify the tempo.}}
 
 Defaults to \code{60}.
 
@@ -67,7 +67,7 @@ Must be \code{numeric} or \code{character} string in the format \code{"MM120"} (
 
 By default, \link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
 
-\item{minutes}{*** Whether to return in minutes format. ***
+\item{minutes}{\emph{\strong{Whether to return in minutes format.}}
 
 Defaults to \code{TRUE}.
 

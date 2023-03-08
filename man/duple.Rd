@@ -7,7 +7,7 @@
 duple(nlevels = 4, measure = 1, tactus = 3L)
 }
 \arguments{
-\item{nlevels}{***The number of duple levels. ***
+\item{nlevels}{\emph{\strong{The number of duple levels.}}
 
 Must be a singleton, positive natural number}
 

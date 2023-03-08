@@ -2,7 +2,7 @@
 #' 
 #' Transform humdrumR's syllabic form of lyrics into complete words, where each row will contain either one word or a null data token.
 #' 
-#' @param data ***The data to be transformed***
+#' @param data ***The data to be transformed.***
 #' 
 #' Must be `character`.
 #' 
@@ -10,19 +10,19 @@
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @param keepSilbe ***Whether the user wants to save silbe format in the output in case needed for back translation later or other uses.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @param indices ***Whether the linguistics version of the word will be printed.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @return the transformed data
 #' 

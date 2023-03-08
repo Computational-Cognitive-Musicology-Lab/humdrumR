@@ -35,7 +35,7 @@ metric level are identified.
 Otherwise, the \code{levels} are parsed with \code{\link[=rhythmInterval]{rhythmInterval()}}; fail to parse may lead to an error.
 The parsed levels must be levels of the given \code{\link[=meter]{meter()}}.}
 
-\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
 
 Defaults to \code{list()}.
 

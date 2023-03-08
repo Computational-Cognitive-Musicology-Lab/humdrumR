@@ -42,13 +42,13 @@ collapseRecords(
 
 Must be \code{humdrumR}.}
 
-\item{by}{***A vector of field names to group the data by. ***
+\item{by}{\emph{\strong{A vector of field names to group the data by.}}
 
 Must be \code{character}.
 
 Data in the \code{collapseField} will be collapsed within these groups.}
 
-\item{collapseField}{(\code{character}, \code{length == 1}) ***The target field in the \code{humdrumR} data to collapse. ***
+\item{collapseField}{(\code{character}, \code{length == 1}) \emph{\strong{The target field in the \code{humdrumR} data to collapse.}}
 
 Defaults to \code{getActiveFields(humdrumR)[1]}.
 
@@ -62,7 +62,7 @@ Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 (see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
 
-\item{collapseAtomic}{*** Whether to collapse the data into single \code{character} string.***
+\item{collapseAtomic}{\emph{\strong{Whether to collapse the data into single \code{character} string.}}
 
 Defaults to \code{TRUE}.
 

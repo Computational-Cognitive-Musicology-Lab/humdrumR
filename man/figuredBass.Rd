@@ -14,33 +14,33 @@ figuredBass(
 )
 }
 \arguments{
-\item{x}{*** An \code{atomic} vector***
+\item{x}{\emph{\strong{An \code{atomic} vector}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
 
-\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 
-Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}.}
 
-\item{transposeArgs}{*** A list of arguments that are passed to a special call to \link{transpose}. ***
+\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a \code{\link[=transpose]{transpose()}} call.}}
 
-Defaults to \code{list()}.
-
-Must be a \code{list}.}
-
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
-
-Defaults to \code{list()}.
+Defaults to an empty \code{list()}.
 
 Must be a \code{list}.}
 
-\item{inPlace}{*** Whether the result is placed in place or returned ***
+\item{parseArgs}{\emph{\strong{An optional list of arguments to the \link[=pitchParsing]{pitch parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list}.}
+
+\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
 
 Defaults to \code{FALSE}.
 
-Must be a \code{logical}; must be length \code{1}.}
+Must be a singleton  \code{logical} value: an on/off switch.}
 }
 \description{
 This function outputs a \href{https://en.wikipedia.org/wiki/Figured_bass}{figured bass}

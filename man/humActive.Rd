@@ -33,7 +33,7 @@ setActiveFields(humdrumR, fieldnames)
 
 Must be \code{humdrumR}.}
 
-\item{dataTypes}{***Which types of humdrum records to include in the census. ***
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
 
 Defaults to \code{"d"}.
 

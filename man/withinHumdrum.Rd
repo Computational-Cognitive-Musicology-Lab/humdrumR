@@ -28,7 +28,7 @@ Must be \code{humdrumR}.}
 "main" \emph{within-expressions}. Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{windows}.
 Other evaluation options can be achieved with \code{recycle} or \code{side} arguments.}
 
-\item{dataTypes}{***Which types of humdrum records to include. ***
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}
 
 Defaults to \code{"D"}.
 
@@ -39,7 +39,7 @@ These characters  correspond to types of humdrum records: \strong{D}ata, null \s
 \strong{M}easures, \strong{L}ocal comments, and \strong{G}lobal comments respectively. The expression
 is only evaluated on data drawn from the specified record types.}
 
-\item{drop}{***Whether to return a simplified data structure. ***
+\item{drop}{\emph{\strong{Whether to return a simplified data structure.}}
 
 Defaults to \code{TRUE}.
 

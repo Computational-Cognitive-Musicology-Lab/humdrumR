@@ -49,29 +49,29 @@ hint(
 )
 }
 \arguments{
-\item{x}{*** An \code{atomic} vector***
+\item{x}{\emph{\strong{An \code{atomic} vector}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
-\item{from}{*** An \code{atomic} vector to for calculate interval from. ***
+\item{from}{\emph{\strong{An \code{atomic} vector to for calculate interval from.}}
 
 Defaults to \code{tint(0L, 0L)}.
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
 
-\item{deparser}{*** A \link[=pitchFunctions]{pitch function} to generate the output representation. ***
+\item{deparser}{\emph{\strong{A \link[=pitchFunctions]{pitch function} to generate the output representation.}}
 
 Defaults to \link[=interval]{interval}.
 
 Must be a \code{Function}.}
 
-\item{incomplete}{*** Whether to pad the incomplete part. ***
+\item{incomplete}{\emph{\strong{Whether to pad the incomplete part.}}
 
 Defaults to \code{NULL} for \code{int()}, \code{kern} for \code{mint()} and \code{hint()}.
 
 Must be either a \link[=pitchFunctions]{pitch function} an atomic value of \code{length(incomplete) == abs(lag)}.}
 
-\item{bracket}{*** Whether print bracket for incomplete parts. ***
+\item{bracket}{\emph{\strong{Whether print bracket for incomplete parts.}}
 
 Defaults to \code{FALSE}.
 
@@ -79,7 +79,7 @@ Must be \code{logical}; must be length \code{1}.
 
 If \code{TRUE}, square brackets (\code{"[]"}) are printed around \code{incomplete} observations.}
 
-\item{classify}{*** Whether output interval class or interval from deparser. ***
+\item{classify}{\emph{\strong{Whether output interval class or interval from deparser.}}
 
 Defaults to \code{FALSE}.
 
@@ -87,13 +87,13 @@ Must be \code{logical}; must be length \code{1}.
 
 If \code{TRUE}, the \code{deparser} is ignored and the output is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.}
 
-\item{lag}{*** For \code{\link[=mint]{mint()}} and \code{\link[=hint]{hint()}}, set the lag between notes to calculate \code{\link[=int]{int()}}. ***
+\item{lag}{\emph{\strong{For \code{\link[=mint]{mint()}} and \code{\link[=hint]{hint()}}, set the lag between notes to calculate \code{\link[=int]{int()}}.}}
 
 Defaults to \code{1}.
 
@@ -101,13 +101,13 @@ Must be either\code{int} or \code{logical}; must be length \code{1}.
 
 A \code{logical} vector with the same length as \code{x} is also accepted, see \link{Logical(ditto) lags}.}
 
-\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}; every element of the list must be length \code{length(x)}.}
 
-\item{orderby}{*** A \code{list} of vectors to group \code{x}***
+\item{orderby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
 
 Defaults to \code{list()}.
 

@@ -56,8 +56,9 @@
 #'                                              | in the input file.
 #' ````
 #' 
-#' @param ... `character`: Arguments passed to [findHumdrum()] to identify files on the local machine
-#' to test for humdrum validity.
+#' @param ... ***Arguments passed to [findHumdrum()].*** 
+#'
+#' Used to identify files on the local machine to test for humdrum validity.
 #' This is mainly used to pass [regex file-path search patterns][readHumdrum()], but may also be used to pass
 #' the `recursive` and/or `contains` arguments to [findHumdrum()].
 #'
@@ -65,7 +66,7 @@
 #' 
 #' Defaults to `NULL`.
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #' 
 #' If `NULL` (the default), no error report files are written.
 #'

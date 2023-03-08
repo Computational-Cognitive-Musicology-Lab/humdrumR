@@ -232,11 +232,11 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 #' parser. If any values fail to parse (returning `NA`), the [diatonicSet()]
 #' parser is called on them.
 #' 
-#' @param x ***Either a `diatonicSet` or `tertianSet`, or something that can be parsed as one***
+#' @param x ***Input data, interpreted as diatonic keys or chords.***
 #' 
 #' Must be a `diatonicSet` or `tertianSet` or something that can be parsed as one.
 #' 
-#' @param ... Parameters passed to the parsers ([tertianSet()] and [diatonicSet()]).
+#' @param ... ***Parameters passed to the parsers ([tertianSet()] and [diatonicSet()]).***
 #' 
 #' @family {Tonal feature functions}
 #' @name is.major
@@ -1055,21 +1055,21 @@ makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
 
 ### Key functions ####
 
-#' @param x ***An `atomic` vector***
+#' @param x ***Input data, interpreted as diatonic keys.***
 #' 
-#' The `x` argument can be any ([atomic][base::vector]) vectors
+#' Must be an `atomic` vector.
 #' 
-#' @param Key ***The input `Key` used by the parser, deparser, and transposer.***
+#' @param Key ***The key used by the parser, deparser, and transposer.***
 #' 
 #' Defaults to `NULL`.
 #' 
 #' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
 #' 
-#' @param parseArgs ***A list of arguments that are passed to the [pitch parser][pitchParsing].***
+#' @param parseArgs ***An optional list of arguments passed to the [key parser][keyParsing].***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.
+#' Must be a `list` of named arguments to the [key parser][keyParsing].
 #' 
 #' @name keyFunctions
 NULL

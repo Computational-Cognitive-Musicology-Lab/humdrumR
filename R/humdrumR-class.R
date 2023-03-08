@@ -465,45 +465,47 @@ is.humdrumR <- function(x){
 #' + `"dont"`: Paths are not padded at all. 
 #' 
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census.***
+#' @param dataTypes ***Which types of humdrum record(s) to include.***
 #' 
 #' Defaults to `"GLIMDd"` for `as.lines()` and `as.matrix()`; `"Dd"` for `as.data.frame()`;
 #' `"LIMDd"` for `as.matrices()` and `as.data.frames()`.
 #' 
-#' Must be `character`. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#'    or any combination of these (e.g., `"LIM"`).
-#'    (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation for explanation.)
 #' 
-#' @param padPaths ***See details for explanation.***
+#' @param padPaths ***Determines how spine-paths are aligned in the output.***
 #' 
 #' Defaults to `"dont"` for `as.lines()`; `"corpus"` for `as.matrix()` and `as.data.frame()`;
 #' `"piece"` for `as.matrices()` and `as.data.frames()`
 #' 
-#' Must be `character`. One of three options: `"corpus"`, `"piece"`, or `"dont"`.
+#' Must be a single `character` string, `"corpus"`, `"piece"`, or `"dont"`.
+#'
+#' See the details for an explanation.
 #'   
-#' @param padder ***Used to fill in differences in the number of columns between files, and or spine paths.***
+#' @param padder ***Used to fill in differences in the number of columns between files and/or spine paths.***
 #' 
 #' Defaults to `NA`.
 #' 
-#' Must be `atomic`; must be length `1`.
+#' Must be a single `atomic` value.
 #' 
-#' @param sep ***Indicating a separator to place between columns in collapsed lines.***
+#' @param sep ***Separator to place between columns in collapsed lines.***
 #' 
-#' Defaults to `"\t"`.
+#' Defaults to `"\t"` (tab).
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #' 
-#' @param mode ***A string naming an [atomic vector type][base::vector] to coerce the output to (if possible).***
+#' @param mode ***The desired output class.***
 #'   
 #' Defaults to `"any"`.
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string naming an [atomic vector type][base::vector] to coerce the output to (i.e., `logical` or `numeric`).
 #'   
-#' If sets to `'any'`, which lets the output type simply be whatever comes out of [evalActive()].
+#' If set to `"any"`, the output type is simply whatever comes out of [evalActive()], which depends on the class of the underlying [fields][humTable].
 #' 
 #' 
 #' 
@@ -696,21 +698,17 @@ isActiveAtomic <- function(humdrumR) {
 #'    + `namesSubcorpora` returns the names of the subcorpora labels (`Label` field).
 #' + `anyMultiPieceFiles`: Returns `TRUE` if any files contain more than one piece (`Piece != File`).
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param x ***A [humdrumRclass] data object.***
-#' 
-#' Must be `humdrumRclass`.
-#' 
-#' @param dataTypes ***Which types of humdrum records to include in the census.***
+#' @param dataTypes ***Which types of humdrum record(s) to include in the census.***
 #' 
 #' Defaults to `"GLIMDd"`.
 #' 
-#' Must be `character`. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#'    or any combination of these (e.g., `"LIM"`).
-#'    (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
 #'     
 #' @name humSize
 #' @export
@@ -914,15 +912,15 @@ mergeHumdrum <- function(...) {
 #' if `asSpines = TRUE`, then copy the path into it's own new spine.
 #' We can then treat that new "full" path/spine just like any other path/spine.
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param asSpines ***Whether the expanded paths are copied into their own new spines (shifting higher spines over as needed).***
+#' @param asSpines ***Should paths expanded into new spines?***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, the expanded paths are copied into their
 #' own new spines (shifting higher spines over as needed).
@@ -1009,43 +1007,47 @@ contractPaths <- function(humtab) {
 #' `collapseStops`, `collapsePaths`, and `collapseRecords` are built-in
 #' calls to `collapseHumtab`, with some additional optimizations.
 #'
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param by  ***A vector of field names to group the data by.***
+#' @param by ***Fields to collapse data within.***
 #' 
 #' Must be `character`. 
 #' 
-#' Data in the `collapseField` will be collapsed within these groups.
+#' Must be a `character` string [partially][partialMatching] matching the name(s) of a data field(s) in the `humdrumR` input.
+#'
+#' Data in the `collapseField` will be collapsed within these fields.
 #' 
-#' @param collapseField (`character`, `length == 1`) ***The target field in the `humdrumR` data to collapse.***
+#' @param collapseField ***The target field in the `humdrumR` data to collapse.***
 #' 
 #' Defaults to `getActiveFields(humdrumR)[1]`.
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #' 
-#' @param dataTypes ***Which types of humdrum records to collapse.***
+#' @param dataTypes ***Which types of humdrum record(s) to collapse.***
 #' 
 #' Defaults to `"GLIMDd"`.
 #' 
 #' Must be `character`. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#'    or any combination of these (e.g., `"LIM"`).
-#'    (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
 #'
-#' @param collapseAtomic ***Whether to collapse the data into single `character` string.***
+#' @param collapseAtomic ***Whether to collapse the data into `character` strings.***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `Logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, data is collapsed into a single `character` string. If `FALSE`, data is conctanated in a `list`.
 #'
-#' @param sep ***If `collapseAtomic == TRUE`, collapsed tokens are separated by this string.***
+#' @param sep ***A separator for collapsed strings.***
 #' 
-#' Defaults to `" "`.
+#' Defaults to `" "` (space).
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
+#'
+#' Only has an effect if `collapseAtomic == TRUE`.
 #' 
 #' @family {Humdrum data reshaping functions}
 #' @seealso The humdrum [folding functions][foldHumdrum()] serve a similar function,
@@ -1267,44 +1269,46 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' Another extremely useful function is [foldExclusive()], which automatically folds spines 
 #' based on their exclusive interpretation.
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param fold ***The target structure (spine, path, etc.) from which to "fold" data to another structural position and field(s).***
+#' @param fold ***Which target structure (spine, path, etc.) to "fold" onto another structural position.***
 #' 
-#' Must be integer `numeric`.
+#' Must be natural numbers.
 #' 
-#' @param onto ***The target structure (spine, path, etc.) to which the "fold" data is moved.***
+#' @param onto ***Which target structure (spine, path, etc.) is the data "folded" onto.***
 #'   
-#' Must be integer `numeric`.  
+#' Must be natural numbers.
 #' 
-#' @param what ***The structural field which is folded across.***
+#' @param what ***The structural (spine, path, etc.) which is folded across.***
 #' 
 #' Defaults to `"Spine"`.
 #' 
-#' Must be `character`; must be length `1`. Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"NData"`.
+#' Must be a single `character` string. Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"NData"`.
 #'
-#' @param File ***Used to specify specific folds for different files in the corpus (see "File-Specific Folding" section, below).***
+#' @param File ***Which files in the corpus shoul be folded (see "File-Specific Folding" section, below).***
 #' 
 #' Defaults to `NULL`.
 #' 
-#' Must be integer `numeric`; must be length `length(onto)`.
+#' Must be natural numbers; must be length `length(onto)`.
 #' 
-#' @param fromField ***A string (partially) matching the name of a data field in the `humdrumR`-object input.***
+#' @param fromField ***Which field to "fold."***
 #' 
 #' Defaults to `getActiveFields(humdrumR)[1]`.
 #' 
-#' Must be `character`; must be length `1`.
-#' 
-#' This field is the field which is "folded" to a new field.
+#' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
+#' For example, `"Tok"` would match the `Token` field.
+#' This is the field which is "folded" into a new field.
 #'   
-#' @param fillFromField ***If the folding field is smaller than the `to` field, should the content of the `fromField` be copied into the `NA` sections?***
+#' @param fillFromField ***Should the content of the `fromField` be copied unfolded sections?***
 #' 
 #' Defaults to `FALSE` for `foldHumdrum()` and `foldStops()`; `TRUE` for `foldPaths()`.
 #' 
-#' Must be `logical`; must be length `1`.
-#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
+#' This only comes into play if the folding field is smaller than the `to` field.
+#'
 #' @param newFieldNames ***Names to use for new fields created by the folding.***
 #' 
 #' Defaults to `NULL`.
@@ -1488,19 +1492,15 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' If no matching exclusive interpetation pairs are found, 
 #' the unchanged `humdrumR` object is returned with a warning.
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param fold ***The target exclusive interpretation(s) from which to "fold" spines to new fields.***
+#' @param fold,onto ***Which exclusive interpretation(s) to "fold" from/to.***
 #'    
-#' Must be integer `numeric`.
+#' Must be non-empty `character` vectors. `onto` must be a single string; `from` may contain multiple exclusive strings.
 #' 
 #' Must be specified *without* the `**` prefix: `"kern"` not `"**kern"`.
-#' 
-#' @param onto ***The target exclusive interpretation (must be only one) to which the "fold" data is moved.***
-#'   
-#' Must be integer `numeric`.
 #' 
 #' @family {Folding functions}
 #' @export
@@ -1667,27 +1667,19 @@ foldGraceNotes <- function(humdrumR) {
 #' 
 #' `getHumtab` extracts the hudrum table from a [humdrumR object][humdrumRclass].
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param dataTypes ***Which types of humdrum records to include in the census.***
+#' @param dataTypes ***Which types of humdrum record(s) to include in the output.***
 #' 
 #' Defaults to `"GLIMDd"`.
 #' 
-#' Must be `character`. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#'    or any combination of these (e.g., `"LIM"`).
+#' Must be a `character` string, which specifies which types of data tokens/records to extract.
+#' Legal values are: `"G"` (global comments), `"L"` (local comments), `"I"` (interpretations),
+#' `"M"` (barlines), `"D"` (non-null data), or `"d"` (null data).
+#' Multiple types can be specified in a single string: e.g., `"GLIMD"`.
 #' 
-#' A `character` vector. Specifies which types of data tokens/records to extract.
-#'   Legal values are: `"G"` (global comments), `"L"` (local comments), `"I"` (interpretations),
-#'   `"M"` (barlines), `"D"` (non-null data), or `"d"` (null data).
-#'   Multiple types can be specified as a vector, or smooshed into a single string: e.g., `"GLIMD"`.
-#' 
-#' @param fromField ***A `list` of string (partially) matching the name of a data field in the `humdrumR`-object input.***
-#' 
-#' Defaults to `getActiveFields(humdrumR)[1]`.
-#' 
-#' Must be `c("Data", "Structure", "Interpretation", "Formal", "Reference")`.
 #' 
 #' @rdname humTable
 #' @export
@@ -1960,35 +1952,41 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' This is exactly what `setActiveFields` does when fed multiple `fieldNames`, as well as the 
 #' special call `humData$All`.
 #' 
-#' @param humdrumR ***A [humdrumR data object][humdrumRclass].***
+#' @param humdrumR ***HumdrumR data.***
 #' 
-#' Must be `humdrumR`.
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
 #' @param dataTypes ***Which types of humdrum records to include in the census.***
 #' 
 #' Defaults to `"d"`.
 #' 
 #' Must be `character`. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#'    or any combination of these (e.g., `"LIM"`).
-#'    (see the [humdrum table][humTable] documentation **Fields** section for explanation.).
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
 #'    
 #' @param forceAtomic ***Whether he evaluated active field is forced/coerced into a atomic vector.***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`
+#' Must be a singleton `logical` value: an on/off switch
 #' 
-#' @param sep ***Only used if `forceAtomic == TRUE`; if coercion involves pasting together lists of vectors, `sep` is used as a separator when [pasting][base::paste()].***
+#' @param sep ***Separator to paste between collapsed strings.***
 #'
 #' Defaults to `", "`.
 #' 
-#' Must be `character`; must be length `1`
+#' Must be a single `character` string.
 #'
-#' @param nullChar ***Only used if `forceAtomic == TRUE`; if `nullChar == TRUE` and `NA`s in the output vector are replaced with humdrum null character tokens: `"."`, `"!"`, `"="`, or `"*"`, depending on type.***
+#' Only used if `forceAtomic == TRUE`, wherein lists of vectors are pasted together.
+#'
+#' @param nullChar ***
 #' 
-#' Defaults to `FALSE`.
+#' Defaults to `FALSE`.	
 #' 
-#' Must be `logical`; must be length `1`
+#' Must be a singleton `logical` value: an on/off switch
+#'
+#' If `nullChar == TRUE` and the output is `character`, `NA`s in the output vector are replaced with humdrum 
+#' null character tokens: `"."`, `"!"`, `"="`, or `"*"`.
+#' If `forceAtomic` is `FALSE`, `nullChar` is ignored.
 #' 
 #' @name humActive 
 #' @export
@@ -2196,13 +2194,12 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 #' Returns a [data.table()][data.table::data.table()], each column corresponding to one field. 
 #' (The `data.table` is a column-subset of the humdrum table).
 #' 
-#' @param fields ***A vector of names which are [partially matched][partialMatching] against field names of the humdrum table.***
+#' @param fields ***Which fields to output.***
 #' 
 #' Defaults to `getActiveFields(humdrumR)`.
 #' 
-#' Must be `character`.
-#' 
-#' If `NULL`, the [active fields][humActive] are returned.
+#' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
+#' For example, `"Tok"` would match the `Token` field.
 #'   
 #' @rdname humTable
 #' @export
@@ -2231,11 +2228,11 @@ getFields <- function(humdrumR, fields = getActiveFields(humdrumR), dataTypes = 
 #' and the `Type` of field (e.g., `"Formal"`).
 #'
 #' 
-#' @param fieldTypes ***A `character` type indicating which types of fields to list.***
+#' @param fieldTypes ***Which types of fields to list.***
 #' 
-#' Defaults to `c("Data", "Structure", "Interpretation", "Formal", "Reference")`.
+#' Shows all fields by default.
 #' 
-#' Must be `character`. Legal options are `"Data"`, `"Structure"`, `"Interpretation"`, `"Formal"`, and `"Reference"`.
+#' Must be a `character` vector. Legal options are `"Data"`, `"Structure"`, `"Interpretation"`, `"Formal"`, and `"Reference"`.
 #' Types can be [partially matched][partialMatching]---for example, `"S"` for `"Structure"`.
 #'   
 #' @rdname humTable

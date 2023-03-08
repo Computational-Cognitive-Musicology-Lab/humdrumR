@@ -7,7 +7,7 @@
 extractTandem(Tandem, regex)
 }
 \arguments{
-\item{Tandem}{*** The \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object} ***
+\item{Tandem}{\emph{\strong{The \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object}.}}
 
 Must be \code{atomic}.
 

@@ -279,23 +279,23 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 #' 
 #' "Generic" intervals belong to a key.
 #' 
-#' @param x ***A `tonalInterval`***
+#' @param x ***Pitch information.***
 #' 
-#' Must be a `tonalInterval` or something that can be parsed as one.
+#' Must be something that can be [parsed as pitch information][pitchParsing].
 #' 
 #' @param octave.round ***The rounding function.***
 #' 
 #' Must be a [rouding function][expand()]. 
 #' 
-#' Controls how simple intervals are interpreted relative to C. 
+#' Controls how simple intervals are interpreted relative to C.
 #' 
-#' @param Key ***The input `Key` used by the parser, deparser, and transposer.***
+#' @param Key ***The diatonic key used to defined generic pitches.***
 #' 
 #' Defaults to `NULL`.
 #' 
-#' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
-
-#' @param ... Parameters passed to [tonalInterval()].
+#' Must be something that can be [parsed as a diatonic key][keyParsing]; must be either length `1` or `length(x)`.
+#'
+#' @param ... ***Parameters passed to [tonalInterval()].***
 #' 
 #' @family {Tonal feature functions}
 #' @export
@@ -2049,7 +2049,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' Must be either `character` or `numeric`.
 #' 
-#' @param Key ***The input `Key` used by the parser, deparser, and transposer.***
+#' @param Key ***The diatonic key used to interpret the pitch information.***
 #' 
 #' Defaults to `NULL`.
 #' 
@@ -2059,7 +2059,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' The output `tonalInterval` is output *within the key*: thus, `tonalInterval('C#', Key = "A:")`
 #' returns the tint representing a **Major 3rd**, because *C#* is the major third of A major.
 #' 
-#' @param Exclusive 
+#' @param Exclusive ***An exclusive interpretation to guide parsing of the input.***
 #' 
 #' Must be `character`; must be either length `1` or `length(x)`.
 #'      
@@ -2664,14 +2664,14 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' this can be used to exclude values, even if they appear in `tint`.
 #' 
 #' 
-#' @param generic Should the gamut include only generic intervals?
+#' @param generic ***Should the gamut include only generic intervals?
 #' 
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: a on/off switch.
 #'
 #' 
-#' @param simple Should the gamut be constrained to one octave?
+#' @param simple ***Should the gamut be constrained to one octave?***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -2687,7 +2687,7 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' This vector is [parsed as pitch][pitchParsing]. 
 #' If it can't be parsed as pitch, it will be ignored.
 #' 
-#' @param deparser A [pitch function][pitchFunctions] to format the output.
+#' @param deparser ***A [pitch function][pitchFunctions] to format the output.***
 #' 
 #' Defaults to [kern()].
 #' 
@@ -2854,24 +2854,25 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?kern`.
 #'     
-#' @param x ***An `atomic` vector***
+#' @param x ***Input data to parse as pitch information.***
 #' 
 #' The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
 #' 
-#' @param ... These arguments are passed to the [pitch deparser][pitchDeparsing]. 
-#'        There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
+#' @param ... ***Arguments passed to the [pitch deparser][pitchDeparsing].***
 #' 
-#' @param generic ***Whether the "specific" pitch information (accidentals and qualites) is discarded.***
+#' There are also two hidden (advanced) arguments you can specify: `memoize` and `deparse` (see the details below).
 #' 
-#' Defaults to `FALSE`.
-#' 
-#' Must be a `logical`; must be length `1`.
-#' 
-#' @param simple ***Whether the "compound" pitch information (octave/contour) is discarded.***
+#' @param generic ***Should "specific" pitch information (accidentals and qualites) be discarded?***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param simple ***Should "compound" pitch information (octave/contour) be discarded?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @param Key ***The input `Key` used by the parser, deparser, and transposer.***
 #' 
@@ -2879,23 +2880,23 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' 
 #' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
 #' 
-#' @param parseArgs ***A list of arguments that are passed to the [pitch parser][pitchParsing].***
+#' @param parseArgs ***An optional list of arguments passed to the [pitch parser][pitchParsing].***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.
+#' Must be a `list` of named arguments to the [pitch parser][pitchParsing].
 #' 
-#' @param transposeArgs ***A list of arguments that are passed to a special call to [transpose].***
+#' @param transposeArgs ***An optional list of arguments passed to a special [transpose()] call.***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.
+#' Must be a `list` of named arguments to [transpose()].
 #' 
-#' @param inPlace ***Whether the result is placed in place or returned***
+#' @param inPlace ***Should non-pitch information be retained in the output string.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a `logical`; must be length `1`.
+#' Must be a singleton  `logical` value: an on/off switch.
 #' 
 #' This argument only has an effect if the input (the `x` argument) is `character` strings,
 #' *and* there is extra, non-pitch information in the input strings "besides" the pitch information.
@@ -3078,19 +3079,19 @@ makePitchTransformer <- function(deparser, callname,
 #' 
 #' Defaults to `440`.
 #' 
-#' Must be `numeric`; must be length `1`.
+#' Must be a single number.
 #' 
 #' @param frequency.reference.note ***The note that the `reference.frequency` tuned to.***
 #' 
 #' Defaults to `"a"`.
 #' 
-#' Can be any parsable pitch representation; must be length `1`.
+#' Can be any [parsable pitch representation][pitchParsing]; must be length `1`.
 #' 
-#' @param tonalHarmonic ***The frequency of the "tonal harmonic" (perfect 10th).***
+#' @param tonalHarmonic ***The frequency of the "tonal harmonic" (perfect 12th).***
 #' 
-#' Defaults to `2^(19/12)`, the 12-tone equal-temperament10th.
+#' Defaults to `2^(19/12)`, the 12-tone-equal-temperament 12th.
 #' 
-#' Must be `numeric`; must be length `1`.
+#' Must be a single number.
 #' 
 #' For [Pythagorean tuning](https://en.wikipedia.org/wiki/Pythagorean_tuning), set `tonalHarmonic = 3`.
 #' 
@@ -3186,21 +3187,21 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist
 #' As encoded in the humdrum 
 #' [`**pc`](https://www.humdrum.org/rep/pc/index.html) interpretation.
 #' 
-#' @param ten ***A shorthand-symbol for "10."***
+#' @param ten ***A shorthand-symbol to use for 10.***
 #' 
 #' Defaults to `"A"`.
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #'
-#' If `NULL`, "10" is used with no shorthand.
+#' If `NULL`, `"10"` is used with no shorthand.
 #' 
-#' @param eleven ***A shorthand-symbol for "10."***
+#' @param eleven ***A shorthand-symbol to use for 11.***
 #' 
 #' Defaults to `"B"`.
 #' 
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #'
-#' If `NULL`, "11" is used with no shorthand.
+#' If `NULL`, `"11"` is used with no shorthand.
 #' 
 #' @family {atonal pitch functions}
 #' @family {pitch functions}
@@ -3342,7 +3343,12 @@ lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' Based on the common German system of notating pitches, as encoded in the humdrum 
 #' [`**Tonh`](https://www.humdrum.org/rep/Tonh/index.html) interpretation.
 #' 
-#' @param S If `S = TRUE`, E-flat (`Ees`) will be written just `"S"`, while A-flat (`Aes`) will be written `"As"`.
+#'
+#' @param S ***Should the special shorthand for Eb and Ab be used?.***
+#' 
+#' Defaults to `TRUE`.
+#'
+#' If `S = TRUE`, E-flat (`Ees`) will be output as `"S"` and A-flat (`Aes`) will be output `"As"`.
 #'
 #' @examples
 #' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
@@ -3790,37 +3796,38 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' 
 #' @param x ***The input pitch(es) to transpose. *** 
 #' 
-#' Can be a `tonalInterval` or something intepretable as a `tonalInterval`. 
+#' Can be a `tonalInterval` or something [intepretable as a pitch information][pitchParsing].
 #' 
-#' @param by ***The input `x` is transposed by this interval.***
+#' @param by ***Transpose by this interval.***
 #' 
 #' Can be a `tonalInterval` or something intepretable as a `tonalInterval`. 
 #'
-#' @param Key ***The "from" key of the transposition.***
+#' @param Key ***Transpose *from* this key (to the `to` key).***
 #' 
 #' Can be a `diatonicSet` or something intepretable as a `diatonicSet`. 
 #' 
 #' For tonal and/or to transpositions, this is the "from" key. If this value is `NULL`, it defaults to C major.
 #' 
-#' @param to ***The input `x` is transposed to this key.***
+#' @param to ***Transpose *to* this key (from the `Key` key).***
 #' 
 #' Can be a `diatonicSet` or something intepretable as a `diatonicSet`.
 #' 
-#' @param real ***Whether the transposition is real.***
+#' @param real ***Should transposition be real (or tonal)?***
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be a `logical`. 
+#' Must be a singleon `logical` value: an on/off switch.
 #' 
-#' If `TRUE`, transposition is real. If `FALSE`, transposition is tonal.
+#' If `real == FALSE`, transposition is tonal.
 #' 
-#' @param relative ***Whether the transposition is relative***
+#' @param relative ***Should transposition between keys be relative (or parallel)?***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a logical. 
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
-#' If `TRUE` transposition is relative. If `FALSE`, transposition is parallel.
+#' Only relavent if using transposing between keys (`Key` and `to`) with different modes.
+#' If `relative == FALSE`, transposition is parallel.
 #' 
 #' @family tonal transformations
 #' @export
@@ -4079,7 +4086,7 @@ invert.factor <- invert.token
 #' If so, intervals are categorized based only on semitone (enharmonic) intervals:
 #' D# and Eb are classified the same.
 #' 
-#' @section Logical(ditto) lags:
+#' @section Logical (ditto) lags:
 #' 
 #' For calls to `hint()` and `mint()` the default behavior is a `numeric` `lag` argument passed to [lag()].
 #' An alternate option is to specify the `lag` argument as  `logical` vector the same length as the input (`x` argument).
@@ -4135,65 +4142,66 @@ invert.factor <- invert.token
 #' However, note that any values *before* the first index where `lag == TRUE`
 #' are calculated relative to that first value.
 #' 
-#' @param x ***An `atomic` vector***
+#' @param x ***Input pitch information.***
 #' 
-#' The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' Can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' Must be [parsable as pitch information][pitchParsing].
+#'
 #' 
-#' @param from ***An `atomic` vector to for calculate interval from.***
+#' @param from ***Pitches to calculate the intervals from.***
 #' 
-#' Defaults to `tint(0L, 0L)`.
+#' Defaults to middle C / unison.
 #' 
-#' The `x` argument can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' Can be any ([atomic][base::vector]) vector, or a [tonalInterval][tonalIntervalS4], or `NULL`.
+#' Must be [parsable as pitch information][pitchParsing].
 #' 
-#' @param lag ***For [mint()] and [hint()], set the lag between notes to calculate [int()].***
+#' @param lag ***The [lag()] to calculate harmonic/melodic intervals between.***
 #' 
-#' Defaults to `1`. 
+#' Defaults to `1`, which means intervals between immediate successors in `x`.
 #' 
-#' Must be either`int` or `logical`; must be length `1`.
+#' Must be either a single number, or a `logical` of `length(x)` (see "Logical lags" section in manual).
 #' 
-#' A `logical` vector with the same length as `x` is also accepted, see [Logical(ditto) lags].
-#' 
-#' @param deparser ***A [pitch function][pitchFunctions] to generate the output representation.***
+#' @param deparser ***What output representation do you want?***
 #' 
 #' Defaults to [interval][interval()].
+#'
+#' Must be a [pitch function][pitchFunctions], like `kern()`.
 #' 
-#' Must be a `Function`.
-#' 
-#' @param incomplete ***Whether to pad the incomplete part.***
+#' @param incomplete ***How to pad incomplete intervals (e.g., the start/end of input).***
 #' 
 #' Defaults to `NULL` for `int()`, `kern` for `mint()` and `hint()`.
 #' 
-#' Must be either a [pitch function][pitchFunctions] an atomic value of `length(incomplete) == abs(lag)`.
+#' Must `NULL`, a [pitch function][pitchFunctions], or an atomic value of `length(incomplete) == abs(lag)`.
 #' 
-#' @param bracket ***Whether print bracket for incomplete parts.***
+#' @param bracket ***Whether to print brackets around `incomplete` output.***
 #' 
-#' Defaults to `FALSE`.
+#' Defaults to `TRUE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, square brackets (`"[]"`) are printed around `incomplete` observations.
 #' 
-#' @param classify ***Whether output interval class or interval from deparser.***
+#' @param classify ***Should intervals be classified as step/skip/leaps?***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, the `deparser` is ignored and the output is classified as `Unison`, `Step`, `Skip`, or `Leap`.
 #'
-#' @param parseArgs ***A list of arguments that are passed to the [pitch parser][pitchParsing].***
+#' @param parseArgs ***An optional list of arguments passed to the [pitch parser][pitchParsing].***
 #' 
-#' Defaults to `list()`.
+#' Defaults to an empty `list()`.
 #' 
-#' Must be a `list`.
+#' Must be a `list` of named arguments to the [pitch parser][pitchParsing].
 #' 
-#' @param groupby ***A `list` of vectors to group `x`***
+#' @param groupby ***A `list` of vectors to group `x`.***
 #' 
 #' Defaults to `list()`.
 #' 
 #' Must be a `list`; every element of the list must be length `length(x)`.
 #' 
-#' @param orderby ***A `list` of vectors to group `x`***
+#' @param orderby ***A `list` of vectors to group `x`.***
 #' 
 #' Defaults to `list()`.
 #' 

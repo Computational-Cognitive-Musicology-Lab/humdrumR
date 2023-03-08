@@ -19,19 +19,19 @@ is.generic(x, Key, ...)
 \method{is.generic}{tonalInterval}(x, Key = NULL)
 }
 \arguments{
-\item{x}{*** A \code{tonalInterval} ***
+\item{x}{\emph{\strong{A \code{tonalInterval}}}
 
 Must be a \code{tonalInterval} or something that can be parsed as one.}
 
 \item{...}{Parameters passed to \code{\link[=tonalInterval]{tonalInterval()}}.}
 
-\item{octave.round}{*** The rounding function. ***
+\item{octave.round}{\emph{\strong{The rounding function.}}
 
 Must be a \link[=expand]{rouding function}.
 
 Controls how simple intervals are interpreted relative to C.}
 
-\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 

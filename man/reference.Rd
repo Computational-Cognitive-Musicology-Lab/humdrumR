@@ -21,7 +21,7 @@ reference(humdata)
 
 Must be a \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR}.}
 
-\item{drop}{***Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table. ***
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
 
 Defaults to \code{FALSE}.
 

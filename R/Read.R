@@ -428,20 +428,25 @@ shortFilenames <- function(fileFrame) {
 #' a [humdrumR data object][humdrumRclass] around the table.
 #' 
 #' 
-#' @param ... character: One or more patterns used to identify files to read.
+#' @param ... ***One or more patterns used to identify files to read.***
+#' 
+#' Must be `character` strings.
+#'
 #' For details: see the "REpath-patterns" section below.
 #' 
-#' @param recursive ***Whether the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.***
+#' @param recursive ***Should files be found recursively through sub directories?***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.
 #' 
 #' @param allowDuplicates ***Indicating what should happen if multiple search patterns match the same files.***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `allowDuplicates = TRUE`,
 #' any such files are read multiple times, grouped into their respective corpora by the `Label` field. 
@@ -465,7 +470,7 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be `logical`; must be length `1`.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `TRUE`, the names of matching files are printed before parsing begins. This is very
 #' useful as a check to make sure you aren't reading the wrong files!
@@ -476,7 +481,7 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' Must be `character`.
 #' 
-#' @param reference ***Controls which, if any, reference recordsare parsed into their own fields.***  
+#' @param reference ***Which reference records should be parsed into fields.***  
 #' 
 #' Defaults to `"all"`. 
 #' 
@@ -1146,15 +1151,15 @@ parseTandem <- function(tandems, known) {
 #' For example, if we wanted to manually extract the key information from the `Tandem` field 
 #' (which `humdrumR` automatically does for you), we could call `extractTandem(Tandem, "[A-Ga-g][#-]*:")`.
 #' 
-#' @param Tandem ***The `Tandem` field from a [humdrumR object][humdrumRclass].***
+#' @param Tandem ***Parsed tandem interpretation data.***
 #' 
 #' Must be `atomic`.
 #' 
 #' Should always be the `Tandem` field from a [humdrumR object][humdrumRclass].
 #' 
-#' @param regex ***A single regular expression to match against the tandem interpretations.***
+#' @param regex ***A regular expression to match tandem interpretations.***
 #'   
-#' Must be `character`; must be length `1`.
+#' Must be a single `character` string.
 #'   
 #' You should not include a `*` at the beginning---the `*` marker for tandem interpretations are already removed from the `Tandem` field.
 #' 

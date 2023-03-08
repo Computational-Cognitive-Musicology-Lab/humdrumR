@@ -60,7 +60,7 @@ Must be a \code{\link[=meter]{meter()}} object or a \code{character} vector.
 For \code{character} input, the string is parsed using \code{\link[=meter]{meter()}}; a
 failure to parse will result in an error.}
 
-\item{pickup}{*** A vector to indicate pickup. ***
+\item{pickup}{\emph{\strong{A vector to indicate pickup.}}
 
 Defaults to \code{NULL}
 
@@ -84,7 +84,7 @@ Defaults to \code{FALSE}.
 
 A singleton \code{logical} value: an on/off switch.}
 
-\item{groupby}{*** A \code{list} of vectors to group \code{x}***
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
 
 Defaults to \code{list()}.
 
@@ -93,13 +93,13 @@ Must be a \code{list}; every element of the list must be length \code{length(x)}
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.#'}
 
-\item{level}{***Which metric level should be counted? ***
+\item{level}{\emph{\strong{Which metric level should be counted?}}
 
 Defaults to the tactus of the \code{meter}.
 

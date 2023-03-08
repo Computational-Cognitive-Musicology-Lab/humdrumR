@@ -16,7 +16,7 @@ bpm2ms(BPM, unit = 0.25)
 ms2bpm(ms, unit = 0.25)
 }
 \arguments{
-\item{BPM}{*** Specify the tempo. ***
+\item{BPM}{\emph{\strong{Specify the tempo.}}
 
 Defaults to \code{60}.
 
@@ -24,7 +24,7 @@ Must be \code{numeric} or \code{character} string in the format \code{"MM120"} (
 
 By default, \link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
 
-\item{unit}{*** A value which can be interpreted as a \code{\link[=duration]{duration()}}. ***
+\item{unit}{\emph{\strong{A value which can be interpreted as a \code{\link[=duration]{duration()}}.}}
 
 Must be a value which can be interpreted as a \code{\link[=duration]{duration()}}.}
 }

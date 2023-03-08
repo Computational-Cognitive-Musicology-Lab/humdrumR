@@ -31,11 +31,11 @@ tonalInterval(...)
 \arguments{
 \item{Exclusive}{Must be \code{character}; must be either length \code{1} or \code{length(x)}.}
 
-\item{str}{*** The input vector. ***
+\item{str}{\emph{\strong{The input vector.}}
 
 Must be either \code{character} or \code{numeric}.}
 
-\item{Key}{*** The input \code{Key} used by the parser, deparser, and transposer. ***
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 

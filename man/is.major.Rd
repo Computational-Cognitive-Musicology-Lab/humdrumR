@@ -22,7 +22,7 @@ is.minor(x, ...)
 \method{is.minor}{default}(x, ...)
 }
 \arguments{
-\item{x}{*** Either a \code{diatonicSet} or \code{tertianSet}, or something that can be parsed as one ***
+\item{x}{\emph{\strong{Either a \code{diatonicSet} or \code{tertianSet}, or something that can be parsed as one}}
 
 Must be a \code{diatonicSet} or \code{tertianSet} or something that can be parsed as one.}
 

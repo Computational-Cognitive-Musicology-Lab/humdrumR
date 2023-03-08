@@ -7,26 +7,26 @@
 notehead(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
-\item{x}{*** An \code{atomic} vector***
+\item{x}{\emph{\strong{An \code{atomic} vector}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
 
 \item{...}{These arguments are passed to the \link[=rhythmParsing]{rhythm parser}.
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{parseArgs}{*** A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}. ***
+\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}.}
 
-\item{scale}{*** A \code{numeric} or \link{rational} value which is used as the output unit of measurement ***
+\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement}}
 
 Defaults to \code{rational(1, 1)}.
 
 Must be \code{numeric} or \link{rational}.}
 
-\item{inPlace}{*** Whether the result is placed in place or returned ***
+\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
 
 Defaults to \code{FALSE}.
 

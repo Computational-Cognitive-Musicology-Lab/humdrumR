@@ -218,8 +218,8 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' 
 #' Must be `character`.
 #' 
-#'  If more than one regex is supplied,
-#'  matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
+#' If more than one regex is supplied,
+#' matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
 #'
 #' @export
 #' @name RegexFind
