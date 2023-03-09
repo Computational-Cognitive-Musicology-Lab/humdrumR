@@ -16,7 +16,7 @@ untie() sums tied durations."><!-- mathjax --><script src="https://cdnjs.cloudfl
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,29 +100,40 @@ non-rest (onset) duration, to create <a href="https://en.wikipedia.org/wiki/Time
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>An input vector which is parsed for duration information using the
-<a href="rhythmParsing.html">rhythm parser</a>. <code>max</code>, <code>median</code>, or <code>mode</code> might be reasonable alternatives.</p></dd>
+<dd><p><em><strong>Input rhythm information.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or <code>NULL</code>.</p>
+<p>Must be <a href="rhythmParsing.html">parsable as rhythm information</a>.</p></dd>
 <dt>onsets</dt>
-<dd><p>A <code>logical</code> vector of the same length as <code>x</code>. All durations in <code>x</code> where <code>onsets == FALSE</code>
-are added to the previous value where <code>onsets == TRUE</code>.</p></dd>
+<dd><p><em><strong>A <code>logical</code> vector denotes the onsets.</strong></em></p>
+<p>Defaults to a <code>logical</code> vector with <code>TRUE</code> wherever there are rests, indicated by the presence of an <code>"r"</code> character, in the input <code>x</code>.</p>
+<p>Must be <code>logical</code>; must be length <code>length(x)</code>.</p>
+<p>All durations in <code>x</code> where <code>onsets == FALSE</code> are added to the previous value where <code>onsets == TRUE</code>.</p></dd>
 <dt>finalOnset</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, the last IOI is computed between the last onset and the end of the input vector.
+<dd><p><em><strong>Whether to count the last onset.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, the last IOI is computed between the last onset and the end of the input vector.
 Otherwise, this last IOI is undefined (<code>NA</code>).</p></dd>
 <dt>groupby</dt>
-<dd><p>A <code>list</code> of vectors, of the same length as <code>x</code>, which are used to group <code>x</code>.</p></dd>
+<dd><p><em><strong>A <code>list</code> of vectors to group <code>x</code>.</strong></em></p>
+<p>Defaults to <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code>; every element of the list must be length <code>length(x)</code>.</p></dd>
 <dt>parseArgs</dt>
-<dd><p>A <code>list</code> of arguments to pass to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="rhythmParsing.html">rhythm parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
-<em>and</em> there is extra, non-pitch information in the input strings "besides" the duration information.
-If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-duration information.
-If <code>inPlace = FALSE</code>, only the rhythm output information will be returned.</p></dd>
+<dd><p><em><strong>Should non-rhythm information be retained in the output string?</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p></dd>
 <dt>open</dt>
-<dd><p>A <code>character</code> string (regular expression) to identify the beginning of ties.
-(May also be formula: see <a href="humWindows.html">humWindows</a>.)</p></dd>
+<dd><p><em><strong>How are the beginnings of ties indicated in <code>x</code>?</strong></em></p>
+<p>Defaults to <code>[</code>.</p>
+<p>Must be a single <code>character</code> string, interpreted as a regular expression.</p></dd>
 <dt>close</dt>
-<dd><p>A <code>character</code> string (regular expression) to identify the end of ties.
-(May also be formula: see <a href="humWindows.html">humWindows</a>.)</p></dd>
+<dd><p><em><strong>How are the ends of ties indicated in <code>x</code>?</strong></em></p>
+<p>Defaults to <code>]</code>.</p>
+<p>Must be a single <code>character</code> string, interpreted as a regular expression.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -140,6 +151,35 @@ last onset's whole duration through the end is returned!</p>
 <p>Non-onsets (rests) that occur <em>before</em> the first onset are returned as null.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">tokens_withrests</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'2c'</span>, <span class="st">'4d'</span>, <span class="st">'4e'</span>, <span class="st">'4r'</span>, <span class="st">'8f'</span>,<span class="st">'8d#'</span>, <span class="st">'4r'</span>, <span class="st">'4e'</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">ioi</span><span class="op">(</span><span class="va">tokens_withrests</span><span class="op">)</span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Passing an environment as data mask is deprecated.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> Please use `new_data_mask()` to transform your environment to a mask.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   env &lt;- env(foo = "bar")</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   # Bad:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   as_data_mask(env)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   eval_tidy(expr, env)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   # Good:</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   mask &lt;- new_data_mask(env)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span>   eval_tidy(expr, mask)</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">This warning is displayed once per session.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2c"   "4d"   "2e"   "."    "8f"   "4.d#" "."    NA    </span>
+<span class="r-in"><span class="fu">ioi</span><span class="op">(</span><span class="va">tokens_withrests</span>, finalOnset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2c"   "4d"   "2e"   "."    "8f"   "4.d#" "."    "4e"  </span>
+<span class="r-in"></span>
+<span class="r-in"><span class="va">tokens_withties</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'2c'</span>, <span class="st">'4d'</span>, <span class="st">'[4e'</span>, <span class="st">'4e]'</span>, <span class="st">'8f'</span>,<span class="st">'[8d#'</span>, <span class="st">'4d#]'</span>, <span class="st">'4e'</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">untie</span><span class="op">(</span><span class="va">tokens_withties</span><span class="op">)</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2c"   "4d"   "2e"   "."    "8f"   "4.d#" "."    "4e"  </span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

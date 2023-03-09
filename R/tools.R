@@ -49,7 +49,7 @@ false <- function(x) is.null(x) || is.logical(x) && !x[1]
 ###
 
 `%class%` <- function(object, newclass){
-  if (!newclass %in% class(object)) class(object) <- append(newclass, class(object))
+  class(object) <- append(newclass, setdiff(class(object), newclass))
   object
 }
 
@@ -167,16 +167,46 @@ applycols <- function(x, f, ...) .apply(x, 2, f, ...)
 #' is `r lag(letters[1:7], wrap = TRUE)`.
 #' 
 #' 
-#' @param x The input argument. Should be a vector (including lists), `matrix`, or `data.frame`.
-#' @param n The amount to lag/lead the data.  If `n == 0`, `x` is returned unchanged.
-#' @param fill If `wrap = FALSE` parts of the output are padded with the `fill` argument. 
+#' @param x ***The input argument.***
+#' 
+#' Should be `list`, `atomic`, `matrix`, or `data.frame`.
+#' 
+#' @param n ***The amount to lag/lead the data.***
+#' 
+#' Defaults to `0`.
+#' 
+#' Must be a natural number.
+#' 
+#' If `n == 0`, `x` is returned unchanged.
+#' 
+#' @param fill ***Tokens used to pad the outputs.***
+#' 
 #' Defaults to `NA`.
-#' @param wrap If `wrap = TRUE`, data from the end (head or tail) is copied to the
-#'  other end of the output, "wrapping" the data
-#' within the data structure.
-#' @param groupby A vector or list of vectors, all of the same length as `x`. Each segment of `x` delineated
-#' by the `groupby` vector(s) is treated separately.
-#' @param margin Arrays and data.frames can be lagged lead in multiple dimensions 
+#' 
+#' Should be the same class as `x`.
+#' 
+#' If `wrap = FALSE` parts of the output are padded with the `fill` argument. 
+#' 
+#' @param wrap ***Whether to wrap the data.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be `logical`. Must be length `1`.
+#' 
+#' If `wrap = TRUE`, data from the end (head or tail) is copied to the
+#'  other end of the output, "wrapping" the data within the data structure.
+#' 
+#' @param groupby ***How to group the data.***
+#' 
+#' Should be `vector` or `list` of `vectors`; must be length `length(x)`. 
+#' 
+#' Each segment of `x` delineated by the `groupby` vector(s) is treated separately.
+#' 
+#' @param margin ***Which dimension to shift.***
+#' 
+#' Must be `numeric`.
+#' 
+#' Arrays and data.frames can be lagged lead in multiple dimensions 
 #' using the `margin` argument: `margin == 1` shifts across rows while `margin == 2`
 #' shifts across columns.
 #' 
@@ -364,6 +394,12 @@ topmost <- function(mat, which = FALSE) most(mat, 'top', which = which)
 bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 
 ## Vectors ----
+
+
+
+
+
+### Other ----
 
 
 
@@ -557,17 +593,43 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 #'         any = TRUE)
 #' # result is T,F,F,T,T,F,T,F,T,T,F,F
 #' 
-#' @param ... A list of atomic vectors. If the vectors differ in length,
-#' they are all recycled to match the length of the longest vector.
-#' @param  reverse (`logical`, `length == 1`) If `TRUE` the function is excecuted 
-#'   backwards through the input vector(s).
-#' @param first (`logical`, `length == 1`) Is the first index (or last index if `reverse == TRUE`)
-#'   marked as a "change."
-#' @param value (`logical`, `length == 1`) If `TRUE`, the input values where changes occur
+#' @param ... ***A list of atomic vectors.***
+#'
+#' If the vectors differ in length, they are all recycled to match the length of the longest vector.
+#'
+#' @param reverse ***Whether the excecution order is reversed.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE` the function is excecuted backwards through the input vector(s).
+#' 
+#' @param first ***Is the first index (or last index if `reverse == TRUE`) marked as a "change."***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param value ***Whether to return the changed value matrix.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, the input values where changes occur
 #' are returned in a matrix, with each row matching a change and each column containing the
 #' value from the associated input vector.
-#' @param any (`logical`, `length == 1`) If `TRUE`, a change in *any* input vector
+#' 
+#' @param any ***Whether to mark changes any or all input vectors.***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, a change in *any* input vector
 #' is marked a change. If `FALSE`, changes must occur in *all* input vectors to be marked as a change.
+#' 
 #' @family {Window functions}
 #' @export
 segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
@@ -662,18 +724,53 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' The `field` argument can be used to indicated a different field to apply to. The result of the dittoing
 #' is saved to a new field---the `newField` argument can be used to control what to name the new field.
 #' 
-#' @param x A vector.
-#' @param null Either a logical vector where (`length(x) == length(null)`), a numeric
+#' @param x ***A vector.***
+#' 
+#' Should be `list`, `atomic`, `matrix`, or `data.frame`.
+#' 
+#' @param null ***Defines which elements needs to be filled.***
+#' 
+#' Defaults to `function(x) is.na(x) | x == "."`.
+#' 
+#' Should be either a logical vector where (`length(x) == length(null)`), a numeric
 #' vector of positive indices, or a function which, when applied to `x` returns an appropriate logical/numeric vector.
-#' @param initial A value (`length == 1`) of the same class as `x`, used to pad the beginning (or end, if `reverse == TRUE`) of the output,
-#' if necessary.
-#' @param reverse (`logical` & `length == 1`) If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
+#' 
+#' @param initial ***Padder for the beginning (or end, if `reverse == TRUE`) of the output, if needed.***
+#'
+#' Defaults to `NA`.
+#' 
+#' Should be the same class as `x`; must be length `1`.
+#'
+#' @param reverse ***Whether the excecution order is reversed.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `reverse == TRUE`, the "non-null" values are coped to overwrite null values
 #' *earlier* (lower indices) in the vector. 
-#' @param margin a vector giving the subscripts which the function will be applied over. 
-#'     E.g., for a matrix `1` indicates rows, `2` indicates columns.
-#'     Where `x` has named dimnames, it can be a character vector selecting dimension names.
-#' @param field Which field ([partially matched][partialMatching]) in the `humdrumR` dataset should be dittoed?
-#' @param newField (`character` of `length == 1`) What to name the new (dittoed) field.
+#' 
+#' @param margin ***A vector giving the dimensions which the function will be applied over.*** 
+#' 
+#' Defaults to `2` (across columns) for `matrix` inputs. 
+#' 
+#' Must be natural number(s).
+#' 
+#' E.g., for a matrix `1` indicates rows, `2` indicates columns.
+#' Where `x` has named dimnames, it can be a character vector selecting dimension names.
+#' 
+#' @param field ***Which field to ditto?***
+#'
+#' Must be a single `character` string.
+#'
+#' Is ([partially matched][partialMatching]) against [fields][humTable] in `x`.
+#'
+#' 
+#' @param newField ***What to name the new (dittoed) field.***
+#'
+#' Defaults to the `field` name appended with `"_ditto"`.
+#' 
+#' Must be a single `character` string.
 #' 
 #' @inheritParams lag
 #' @inheritSection sigma Grouping
@@ -895,12 +992,16 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
 
 .fillout <- function(x, length.out, recycle = TRUE) {
   if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
+
+  if (!(is.vector(x) || is.integer64(x))) return(x)
+
   if (!hasdim(x)) {
     if (length(length.out) > 1) {
       x <- cbind(x) 
     } else {
       return (if (recycle) rep_len(x, length.out) else x[seq_len(length.out)])
     }
+    
   } 
   dim <- dim(x)
   dim[seq_along(length.out) > length(dim)] <- 1
@@ -1060,22 +1161,12 @@ captureValues <- function(expr, env, doatomic = TRUE) {
 
 # Math ----
 
+
 setAs('integer', 'integer64', \(from) as.integer64.integer(from))
 setAs('numeric', 'integer64', \(from) as.integer64.double(from))
 setAs('logical', 'integer64', \(from) as.integer64.logical(from))
 setAs('character', 'integer64', \(from) as.integer64.character(from))
 
-
-entropy <- function(x, base) UseMethod('entropy')
-entropy.table <- function(x, base = 2) {
-  if (sum(x) != 1) x <- x / sum(x)
-  
-  -sum(x * log(x, base))
-  
-}
-entropy.default <- function(x, base = 2) {
-  entropy.table(table(x), base = base)
-}
 
 find2Dlayout <- function(n) {
   
@@ -1364,19 +1455,61 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
 #' The resulting order would be `a b c d e f D G g a`.
 #' 
 #'    
-#' @param x (Any numeric vector.) `NULL` values are returned `NULL`.
-#' @param lag (Non-zero integer.) Which lag to use. (See *Greater lags* section, below.) 
-#' @param skip (`function`.) This must be a function which can be applied to `x` and returns a logical vector
-#' of the same length. And `TRUE` values are skipped over in the calculations.
+#' @param x ***The input vector.***
+#' 
+#' Must be `atomic` numbers.
+#' 
+#' `NULL` values are returned `NULL`.
+#' 
+#' @param lag ***Which lag to use.***
+#' 
+#' Defaults to `1`.
+#' 
+#' Must be a natural number.
+#' (See *Greater lags* section, below.) 
+#'  
+#' @param skip ***A function to indicate which values to skip.***
+#' 
+#' Defaults to `is.na`.
+#' 
+#' This must be a `function` which can be applied to `x` to return a `logical` vector
+#' of the same length. `TRUE` values are skipped over in the calculations.
 #' By default, the `skip` function is `is.na`, so `NA` values in the input (`x` argument) are skipped.
 #' The skipped values are returned as is in the output vector.
-#' @param init (Atomic value of same class as `x`, with `length(init) <= lag`.) `NA` values at the beginning
+#' 
+#' @param init ***Initial value to fill the beginning for calculation.***
+#' 
+#' Defaults to `0`.
+#' 
+#' Should be the same class as `x`; length must be not longer than `lag`.
+#' 
+#' `NA` values at the beginning
 #' (or end of `right == TRUE`) are filled with these values *before* summing.
-#' @param right (single `logical` value) Should the `init` padding be at the "right" (end of the vector)?
+#' 
+#' @param right ***Should the `init` padding be at the "right" (end of the vector)?***
+#'
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
 #' By default, `right == FALSE` so the `init` padding is at the beginning of the output.
-#' @param groupby (vector of same length as `x`, or a list of such vectors) Differences are not calculated
+#' 
+#' @param groupby ***How to group the data.***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Should be `vector` or `list` of `vectors`; must be length `length(x)`. 
+#' 
+#' Differences are not calculated
 #' across groups indicated by the `groupby` vector(s).
-#' @param orderby (vector of same length as `x`, or a list of such vectors) Differences in `x` are calculated
+#' 
+#' @param orderby ***The order for calculating the difference.***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Should be `vector` or `list` of `vectors`; must be length `length(x)`. 
+#' 
+#' Differences in `x` are calculated
 #' based on the order of `orderby` vector(s), as determined by [base::order()].
 #' 
 #' 
@@ -1534,7 +1667,13 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' + \eqn{x_3 - x_4}
 #' + \eqn{x_4 - x_5}
 #' 
-#' @param lag (Non-zero integer.) Which lag to use. Results will look like: `x[i] - x[i - lag]`.
+#' @param lag ***Which lag to use.***
+#' 
+#' Defaults to `1`.
+#' 
+#' Must be a single natural number.
+#' 
+#' Results will look like: `x[i] - x[i - lag]`.
 #' 
 #' @inheritParams sigma
 #' @inheritSection sigma Grouping
@@ -1550,10 +1689,10 @@ delta <- function(x, lag, skip, init, right, ...) UseMethod('delta')
 delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), right = FALSE, 
                           groupby = list(), orderby = list(), ...) {
     if (is.null(x)) return(NULL)
-    checks(x, xnumber)
+    checks(x, xnumber | xclass('tonalInterval'))
     checks(lag, xwholenum & xlen1 & xnotzero)
     checks(skip, xnull | xclass('function'))
-    checks(init, xatomic & xminlength(1) & 
+    checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) & 
              argCheck(\(arg) length(arg) <= abs(lag), 
                       "must be as short or shorter than the absolute lag",  
                       \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
@@ -1893,7 +2032,7 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
     exprA$Type <- if (is.null(expr)) 'NULL' else if (is.atomic(expr)) 'atomic' else {if (is.call(expr)) 'call' else 'symbol'}
     exprA$Class <- if(exprA$Type == 'atomic') class(expr)
     exprA$Head <- switch(exprA$Type,
-                         call = as.character(expr[[1]]),
+                         call = deparse(expr[[1]]),
                          atomic = 'c',
                          symbol = as.character(expr),
                          'NULL' = 'NULL')
@@ -2285,20 +2424,18 @@ matched <- function(x, table, nomatch = NA) {
     args <- list(...)
         # return(paste(args[[1]], collapse = collapse))
     # }
-    
     args <- do.call('match_size', lapply(args, `c`))
     nas <- lapply(args, is.na)
     
     args <- Map(`[<-`, args, nas, value = "")
     nas <- apply(do.call('rbind', nas), 2, na.if)
     
-    if (length(sep) > 1L) {
+    if (length(sep) > 1L && length(args) > 1L) {
       args[1:(length(args) - 1L)] <- Map(\(arg, s) paste0(arg, s), 
                                          args[1:(length(args) - 1L)], 
                                           rep(sep, length.out = length(args) - 1L))
       sep <- ''
     }
-    
     
     
     ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
@@ -2378,6 +2515,11 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     # pastes named elements of ... using order supplied in order
     strs <- list(...) # named vector of strings,
     strs <- strs[lengths(strs) > 0L]
+    
+    if (length(sep) > 1L) {
+      sep <- sep[(order %in% names(strs))[-1]]
+      if (length(sep) == 0L) sep <- ''
+    }
     
     labels <- names(strs)
     ordered <- strs[pmatch( order, labels, nomatch = 0)]
@@ -2536,4 +2678,72 @@ strPartition <- function(str, split = '/') {
 
 
 
+## Token S3 class ----
 
+
+
+#' Humdrum tokens
+#' @export
+token <- function(x, Exclusive = NULL, ...) {
+  
+  attr(x, 'Exclusive') <- Exclusive
+  humdrumRattr(x) <- list(...)
+  
+  class(x) <- c('token', class(x))
+  x
+  
+  
+}
+
+
+#' @rdname token
+#' @export
+`[.token` <- function(x, ...) {
+  
+  result <- NextMethod('[')
+  humdrumRattr(result) <- humdrumRattr(x)
+  class(result) <- class(x)
+  result
+  
+}
+
+#' @rdname token
+#' @export
+print.token <- function(x) {
+  exclusive <- attr(x, 'Exclusive')
+  if (!is.null(exclusive)) {
+    cat('**')
+    cat(exclusive, sep = '**')
+    cat('\n')
+    attr(x, 'Exclusive') <- NULL
+  }
+  class(x) <- setdiff(class(x), 'token')
+  if (is.factor(x)) x <- as.character(x)
+  attributes(x) <- list()
+  print(x, quote = FALSE, na.print = '.')
+}
+
+#' @rdname token
+#' @export
+format.token <- function(x, ...) {
+  x[is.na(x)] <- '.'
+  x
+}
+
+#' @rdname token
+#' @export
+c.token <- function(...) {
+  args <- list(...)
+  
+  exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
+  
+  humattr <- humdrumRattr(args[[1]])
+  
+  args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
+  result <- do.call('c', args)
+  
+  humdrumRattr(result) <- humattr
+  class(result) <- c('token', class(result))
+  result
+  
+}

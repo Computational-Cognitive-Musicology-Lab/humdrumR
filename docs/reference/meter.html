@@ -22,7 +22,7 @@ In addition, each meter has a tactus---the "main" beat level.'><!-- mathjax --><
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -144,11 +144,11 @@ The contents of <code>list</code> are parsed as durations using <code><a href="r
 levels of the meter.
 Failures to parse the input will result in an error.</p></dd>
 <dt>measure, tick, tactus</dt>
-<dd><p>Durations to use longest (measure), shortest (tick), or tactus levels.</p>
+<dd><p><em><strong>Durations to use longest (measure), shortest (tick), or tactus levels.</strong></em></p>
 <p>Must be a singleton <code>character</code> or <code>numeric</code> value, or a <code>list</code> containing a single vector of such values.</p>
 <p>These are parsed as durations using <code><a href="rhythmParsing.html">rhythmInterval()</a></code>; parse failures lead to errors.</p></dd>
 <dt>fill.levels</dt>
-<dd><p>Should "gaps" between specified levels be added to the meter?</p>
+<dd><p><em><strong>Should "gaps" between specified levels be added to the meter?</strong></em></p>
 <p>Must be a singleton <code>logical</code> or <code>character</code> value; <code>character</code> values must be <code>'above'</code>, <code>'below'</code>, <code>'both'</code>, or <code>'neither'</code>.</p>
 <p><code>TRUE</code> is shorthand for <code>'both'</code>; <code>FALSE</code> is shorthand for <code>'neither'</code>.</p></dd>
 <dt>subdiv</dt>

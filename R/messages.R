@@ -242,6 +242,7 @@ dochecks <- function(arg, ...) {
 ### Class ----
 
 xnull <- argCheck(\(arg) is.null(arg), 'must be NULL', .mismatch(is.null))
+xna <- argCheck(\(arg) all(is.na(arg)), 'must be NA', .mismatch(is.na))
 
 xclass <- function(classes) {
   if ('number' %in% classes) classes <- c('numeric', 'integer', 'integer64', classes)
@@ -275,7 +276,8 @@ xnumber  <- argCheck(\(arg) class(arg)[1] %in% .numericClasses, "must be numeric
 
 xatomic <- argCheck(\(arg) is.atomic(arg), "must be an atomic vector (integer, numeric, character, or logical", .mismatch(class))
 
-xcharnotempty <-  xcharacter & argCheck(\(arg) nchar(arg) > 0L, 'cannot be an empty string ("")', \(arg) glue::glue("includes {sum(nchar(arg) == 0)} empty strings"))
+xcharnotempty <-  xcharacter & argCheck(\(arg) all(nchar(arg) > 0L), 'cannot be an empty string ("")', \(arg) glue::glue("includes {sum(nchar(arg) == 0)} empty strings"))
+
 
 # ...atomic <- function(arg) {
 #   if (!is.atomic(arg)) {

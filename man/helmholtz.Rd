@@ -13,27 +13,56 @@ helmholtz(
   Key = NULL,
   transposeArgs = list(),
   parseArgs = list(),
+  gamutArgs = list(),
   inPlace = FALSE
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{\emph{\strong{Input data to parse as pitch information.}}
 
-\item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+
+\item{...}{\emph{\strong{Arguments passed to the \link[=pitchDeparsing]{pitch deparser}.}}
+
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
+\item{generic}{\emph{\strong{Should "specific" pitch information (accidentals and qualites) be discarded?}}
 
-\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
+Defaults to \code{FALSE}.
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
-the parser, deparser, and transposer.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \link{transpose}.}
+\item{simple}{\emph{\strong{Should "compound" pitch information (octave/contour) be discarded?}}
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+Defaults to \code{FALSE}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a special \code{\link[=transpose]{transpose()}} call.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=pitchParsing]{pitch parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=pitchParsing]{pitch parser}.}
+
+\item{inPlace}{\emph{\strong{Should non-pitch information be retained in the output string.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton  \code{logical} value: an on/off switch.
+
+This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
@@ -153,6 +182,32 @@ Note that \code{inPlace = TRUE} will force functions like \code{semits}, which n
 }
 }
 
+\section{Pitch-Gamut Levels}{
+
+
+The \code{\link[=table]{table()}} will automatically generate factor levels
+for pitch data using the \code{\link[=gamut]{gamut()}} function.
+This is makes sure tabulated data sorted in a logical order, and includes
+missing pitches.
+The \code{simple}/\code{complex} and  \code{generic}/\code{specific} arguments are automatically passed to \code{\link[=gamut]{gamut()}}; additional
+arguments can be passed to gamut using \code{gamutArgs = list(...)}, or with the syntactic sugar \code{gamut(...)}.
+(Read the \code{\link[=gamut]{gamut()}} docs for an explanation of gamut generation.)
+This feature be used to control table layout of pitch data, as well as to assure
+consistent tables when grouping data.
+
+When \code{inPlace = TRUE} no special tabulation will occur.
+}
+
+\examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- helmholtz(exampleToken)
+results
+
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], helmholtz(Token))
+results
+
+}
 \seealso{
 To better understand how this function works, read about the \link[=pitchFunctions]{family of pitch functions},
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.

@@ -107,7 +107,7 @@
 #' levels of the meter.
 #' Failures to parse the input will result in an error.
 #' 
-#' @param measure,tick,tactus Durations to use longest (measure), shortest (tick), or tactus levels.
+#' @param measure,tick,tactus ***Durations to use longest (measure), shortest (tick), or tactus levels.***
 #' 
 #' Must be a singleton `character` or `numeric` value, or a `list` containing a single vector of such values.
 #' 
@@ -124,8 +124,8 @@
 #' @param tatum ***Should the least common denominator of all levels be added to the meter?***
 #' 
 #' Must be a singleton `logical` value: a on/off switch.
-
-#' @param fill.levels Should "gaps" between specified levels be added to the meter?
+#'
+#' @param fill.levels ***Should "gaps" between specified levels be added to the meter?***
 #' 
 #' Must be a singleton `logical` or `character` value; `character` values must be `'above'`, `'below'`, `'both'`, or `'neither'`.
 #' 
@@ -248,7 +248,7 @@ meter.list <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.
 #' The default arguments build a 4/4 meter with levels ranging from whole-notes down
 #' to sixteenth-notes, and a quarter-note tactus.
 #' 
-#' @param nlevels ***The number of duple levels. ***
+#' @param nlevels ***The number of duple levels.***
 #' 
 #' Must be a singleton, positive natural number
 #' 
@@ -1092,7 +1092,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' Must be a singleton `logical` value: a on/off switch.
 #' 
-#' @param level ***Which metric level should be counted? ***
+#' @param level ***Which metric level should be counted?***
 #' 
 #' Defaults to the tactus of the `meter`.
 #' 
@@ -1139,7 +1139,7 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
   checks(offBeats, xTF)
   checks(value, xTF)
   checks(remainderSubdivides, xTF)
-  checks(deparser, xclass('rhythmFunction'))
+  checks(deparser, xnull | xclass('rhythmFunction'))
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metlev', ...)

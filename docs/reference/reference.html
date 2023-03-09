@@ -18,7 +18,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,16 +99,22 @@ reference(humdata)
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A <code>character</code> string (to look up a reference code) or a <a href="humdrumRclass.html">humdrumR object</a>.</p></dd>
+<dd><p><em><strong>Input for extracting reference information.</strong></em></p>
+<p>Must be a <code>character</code> string (to look up a reference code) or a <a href="humdrumRclass.html">humdrumR</a>.</p></dd>
 <dt>drop</dt>
-<dd><p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a>
-is returned instead of <code>humReference</code> table.</p></dd>
+<dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+a <code>humCensus</code> table.</p></dd>
 <dt>i</dt>
-<dd><p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
-as a regular expression against filenames in the corpus.</p></dd>
+<dd><p><em><strong>Index for rows.</strong></em></p>
+<p>If <code>numeric</code>, selects rows by index.
+If <code>character</code>, the string is matched as a regular expression against filenames in the corpus.</p></dd>
 <dt>j</dt>
-<dd><p>if <code>numeric</code> selects columns by index. If <code>character</code>, <a href="partialMatching.html">partially matched</a>
-against column names (reference codes).</p></dd>
+<dd><p><em><strong>Index for columns.</strong></em></p>
+<p>If <code>numeric</code>, selects columns by index.
+If <code>character</code>, <a href="partialMatching.html">partially matched</a> against column names (reference codes).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -170,12 +176,95 @@ unique reference records.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM1: Composer, A. </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM2: Composer, B.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="st">'OTL'</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Work Identification Information)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!OTL  =  Title</span>
 <span class="r-in"></span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">humData</span><span class="op">)</span><span class="op">[</span> , <span class="st">'COM'</span><span class="op">]</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reference(humData):</span> object 'humData' not found</span>
+<span class="r-in"><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/RollingStone/.*hum"</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpiec5so/temp_libpath4863748719359/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Thirteen files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating thirteen files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing thirteen files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs" (thirteen files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### By file:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               Rolling Stone List Rank  OTL  COC  RRD    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       all_apologies.hum [ 1]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       back_in_black.hum [ 2]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    blue_suede_shoes.hum [ 3]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     born_to_be_wild.hum [ 4]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      god_only_knows.hum [ 5]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            hey_jude.hum [ 6]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     i_walk_the_line.hum [ 7]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             kashmir.hum [ 8]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               layla.hum [ 9]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  lets_stay_together.hum [10]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> living_for_the_city.hum [11]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  me_and_bobby_mcgee.hum [12]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           your_song.hum [13]                        1    1    1    1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               Rolling Stone List Rank  OTL  COC  RRD    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Totals:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         Any:                       13   13   13   13    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         Sum:                       13   13   13   13    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      Unique:                       13   13   13    9    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs" (thirteen files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                            (five columns not displayed due to screensize***)</span>
 <span class="r-in"></span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">humData</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span>, <span class="op">]</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reference(humData):</span> object 'humData' not found</span>
+<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="st">'COC'</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Authorship Information)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!COC  =  Composer(s) corporate name</span>
+<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span> , <span class="st">'COC'</span><span class="op">]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs[, j]" (thirteen files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### By file:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              COC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      all_apologies.hum [ 1]  Nirvana</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      back_in_black.hum [ 2]  AC/DC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   blue_suede_shoes.hum [ 3]  Carl Perkins</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    born_to_be_wild.hum [ 4]  Steppenwolf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     god_only_knows.hum [ 5]  The Beach Boys</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           hey_jude.hum [ 6]  The Beatles</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    i_walk_the_line.hum [ 7]  Johnny Cash</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            kashmir.hum [ 8]  Led Zeppelin</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              layla.hum [ 9]  Derek and the Dominos</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> lets_stay_together.hum [10]  Al Green</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> living_for_the_city.hum [11]  Stevie Wonder</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> me_and_bobby_mcgee.hum [12]  Janis Joplin</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          your_song.hum [13]  Elton John</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              COC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Totals:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        Any:  13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                        Sum:  13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     Unique:  13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs[, j]" (thirteen files):</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span>, <span class="op">]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs[i]" (one file):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> blue_suede_shoes.hum [3]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	    Rolling Stone List Rank: 95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        OTL: Blue Suede Shoes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        COC: Carl Perkins</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        RRD: 1956/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	 In original RS 5x20 subset: True</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        ONB: Translated from original encodings in the Rolling Stone Corpus (rockcorpus.midside.com), May 2019; Original transcribers noted in comments in each spine: !D.T. = David Temperley; !T.d.C. = Trevor de Clercq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        YOE: David Temperley, Trevor de Clercq</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        EED: Nathaniel Condit-Schultz (fathermckenzie.net)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	                        ENC: Nathaniel Condit-Schultz (fathermckenzie.net), automated</span>
 <span class="r-in">       </span>
 </code></pre></div>
     </div>

@@ -12,7 +12,7 @@ contiguous "segments" indicated in a vector.'><!-- mathjax --><script src="https
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,19 +85,28 @@ contiguous "segments" indicated in a vector.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>...</dt>
-<dd><p>A list of atomic vectors. If the vectors differ in length,
-they are all recycled to match the length of the longest vector.</p></dd>
+<dd><p><em><strong>A list of atomic vectors.</strong></em></p>
+<p>If the vectors differ in length, they are all recycled to match the length of the longest vector.</p></dd>
 <dt>first</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) Is the first index (or last index if <code>reverse == TRUE</code>)
-marked as a "change."</p></dd>
+<dd><p><em><strong>Is the first index (or last index if <code>reverse == TRUE</code>) marked as a "change."</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>any</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, a change in <em>any</em> input vector
+<dd><p><em><strong>Whether to mark changes any or all input vectors.</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, a change in <em>any</em> input vector
 is marked a change. If <code>FALSE</code>, changes must occur in <em>all</em> input vectors to be marked as a change.</p></dd>
 <dt>reverse</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code> the function is excecuted
-backwards through the input vector(s).</p></dd>
+<dd><p><em><strong>Whether the excecution order is reversed.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code> the function is excecuted backwards through the input vector(s).</p></dd>
 <dt>value</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, the input values where changes occur
+<dd><p><em><strong>Whether to return the changed value matrix.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, the input values where changes occur
 are returned in a matrix, with each row matching a change and each column containing the
 value from the associated input vector.</p></dd>
 </dl></div>

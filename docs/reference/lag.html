@@ -16,7 +16,7 @@ They are similar to the data.table::shift() function, but with a few additional 
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -91,21 +91,32 @@ They are similar to the <code><a href="https://Rdatatable.gitlab.io/data.table/r
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>The input argument. Should be a vector (including lists), <code>matrix</code>, or <code>data.frame</code>.</p></dd>
+<dd><p><em><strong>The input argument.</strong></em></p>
+<p>Should be <code>list</code>, <code>atomic</code>, <code>matrix</code>, or <code>data.frame</code>.</p></dd>
 <dt>n</dt>
-<dd><p>The amount to lag/lead the data.  If <code>n == 0</code>, <code>x</code> is returned unchanged.</p></dd>
+<dd><p><em><strong>The amount to lag/lead the data.</strong></em></p>
+<p>Defaults to <code>0</code>.</p>
+<p>Must be a natural number.</p>
+<p>If <code>n == 0</code>, <code>x</code> is returned unchanged.</p></dd>
 <dt>fill</dt>
-<dd><p>If <code>wrap = FALSE</code> parts of the output are padded with the <code>fill</code> argument.
-Defaults to <code>NA</code>.</p></dd>
+<dd><p><em><strong>Tokens used to pad the outputs.</strong></em></p>
+<p>Defaults to <code>NA</code>.</p>
+<p>Should be the same class as <code>x</code>.</p>
+<p>If <code>wrap = FALSE</code> parts of the output are padded with the <code>fill</code> argument.</p></dd>
 <dt>wrap</dt>
-<dd><p>If <code>wrap = TRUE</code>, data from the end (head or tail) is copied to the
-other end of the output, "wrapping" the data
-within the data structure.</p></dd>
+<dd><p><em><strong>Whether to wrap the data.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be <code>logical</code>. Must be length <code>1</code>.</p>
+<p>If <code>wrap = TRUE</code>, data from the end (head or tail) is copied to the
+other end of the output, "wrapping" the data within the data structure.</p></dd>
 <dt>groupby</dt>
-<dd><p>A vector or list of vectors, all of the same length as <code>x</code>. Each segment of <code>x</code> delineated
-by the <code>groupby</code> vector(s) is treated separately.</p></dd>
+<dd><p><em><strong>How to group the data.</strong></em></p>
+<p>Should be <code>vector</code> or <code>list</code> of <code>vectors</code>; must be length <code>length(x)</code>.</p>
+<p>Each segment of <code>x</code> delineated by the <code>groupby</code> vector(s) is treated separately.</p></dd>
 <dt>margin</dt>
-<dd><p>Arrays and data.frames can be lagged lead in multiple dimensions
+<dd><p><em><strong>Which dimension to shift.</strong></em></p>
+<p>Must be <code>numeric</code>.</p>
+<p>Arrays and data.frames can be lagged lead in multiple dimensions
 using the <code>margin</code> argument: <code>margin == 1</code> shifts across rows while <code>margin == 2</code>
 shifts across columns.</p></dd>
 </dl></div>

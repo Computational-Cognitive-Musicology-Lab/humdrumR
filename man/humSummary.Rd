@@ -42,6 +42,11 @@ Each function takes a \link[=humdrumRclass]{humdrumR} object and returns a data.
 The \code{summary} method for \link[=humdrumRclass]{humdrumR objects} simply calls all of the above
 functions and prints a condensed version of each.
 }
+\examples{
+chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+summary(chorales)
+
+}
 \seealso{
 Other corpus summary functions: 
 \code{\link{census}()},

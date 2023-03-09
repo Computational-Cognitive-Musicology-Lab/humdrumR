@@ -19,29 +19,58 @@ ioi(
 untie(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 }
 \arguments{
-\item{x}{An input vector which is parsed for duration information using the
-\link[=rhythmParsing]{rhythm parser}. \code{max}, \code{median}, or \code{mode} might be reasonable alternatives.}
+\item{x}{\emph{\strong{Input rhythm information.}}
 
-\item{onsets}{A \code{logical} vector of the same length as \code{x}. All durations in \code{x} where \code{onsets == FALSE}
-are added to the previous value where \code{onsets == TRUE}.}
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or \code{NULL}.
 
-\item{finalOnset}{(\code{logical}, \code{length == 1}) If \code{TRUE}, the last IOI is computed between the last onset and the end of the input vector.
+Must be \link[=rhythmParsing]{parsable as rhythm information}.}
+
+\item{onsets}{\emph{\strong{A \code{logical} vector denotes the onsets.}}
+
+Defaults to a \code{logical} vector with \code{TRUE} wherever there are rests, indicated by the presence of an \code{"r"} character, in the input \code{x}.
+
+Must be \code{logical}; must be length \code{length(x)}.
+
+All durations in \code{x} where \code{onsets == FALSE} are added to the previous value where \code{onsets == TRUE}.}
+
+\item{finalOnset}{\emph{\strong{Whether to count the last onset.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, the last IOI is computed between the last onset and the end of the input vector.
 Otherwise, this last IOI is undefined (\code{NA}).}
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}.}
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
 
-\item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
+Defaults to \code{list()}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extra, non-pitch information in the input strings "besides" the duration information.
-If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-duration information.
-If \code{inPlace = FALSE}, only the rhythm output information will be returned.}
+Must be a \code{list}; every element of the list must be length \code{length(x)}.}
 
-\item{open}{A \code{character} string (regular expression) to identify the beginning of ties.
-(May also be formula: see \link{humWindows}.)}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-\item{close}{A \code{character} string (regular expression) to identify the end of ties.
-(May also be formula: see \link{humWindows}.)}
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton  \code{logical} value: an on/off switch.}
+
+\item{open}{\emph{\strong{How are the beginnings of ties indicated in \code{x}?}}
+
+Defaults to \code{[}.
+
+Must be a single \code{character} string, interpreted as a regular expression.}
+
+\item{close}{\emph{\strong{How are the ends of ties indicated in \code{x}?}}
+
+Defaults to \verb{]}.
+
+Must be a single \code{character} string, interpreted as a regular expression.}
 }
 \description{
 These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.
@@ -64,4 +93,15 @@ However, if we run \code{ioi(c('4.a','8r', '4.a','8r','2a', '2r'), finalOnset = 
 last onset's whole duration through the end is returned!
 
 Non-onsets (rests) that occur \emph{before} the first onset are returned as null.
+}
+\examples{
+tokens_withrests <- c('2c', '4d', '4e', '4r', '8f','8d#', '4r', '4e')
+
+ioi(tokens_withrests)
+ioi(tokens_withrests, finalOnset = TRUE)
+
+tokens_withties <- c('2c', '4d', '[4e', '4e]', '8f','[8d#', '4d#]', '4e')
+
+untie(tokens_withties) 
+
 }

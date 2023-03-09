@@ -49,28 +49,71 @@ hint(
 )
 }
 \arguments{
-\item{x}{A vector which is parsed as a \link[=tonalInterval]{tonal interval}.}
+\item{x}{\emph{\strong{Input pitch information.}}
 
-\item{from}{A vector which is parsed as a \link[=tonalInterval]{tonal interval}.}
+Can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.
+Must be \link[=pitchParsing]{parsable as pitch information}.}
 
-\item{deparser}{A \link[=pitchFunction]{pitch function} to generate the output representation.
-Defaults to \code{\link[=interval]{interval()}}.}
+\item{from}{\emph{\strong{Pitches to calculate the intervals from.}}
 
-\item{incomplete}{Either a \link{pitch function} or an atomic value of \code{length(incomplete) == abs(lag)}.}
+Defaults to middle C / unison.
 
-\item{bracket}{(\code{logical}, \code{length == 1}) If \code{TRUE}, square brackets (\code{"[]"}) are printed around
-\code{incomplete} observations.}
+Can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.
+Must be \link[=pitchParsing]{parsable as pitch information}.}
 
-\item{classify}{(\code{logical}, \code{length == 1}) If \code{TRUE}, the \code{deparser} is ignored and the output
-is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
+\item{deparser}{\emph{\strong{What output representation do you want?}}
 
-\item{parseArgs}{A \code{list} of arguments to pass to the \link[=tonalInterval]{pitch parser}.}
+Defaults to \link[=interval]{interval}.
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x}
-into.}
+Must be a \link[=pitchFunctions]{pitch function}, like \code{kern()}.}
 
-\item{orderby}{A \code{list} of vectors, of the same length as \code{x}, which are used to
-interpret the order of elements in \code{x}. Lagged computations are done in the indicated
+\item{incomplete}{\emph{\strong{How to pad incomplete intervals (e.g., the start/end of input).}}
+
+Defaults to \code{NULL} for \code{int()}, \code{kern} for \code{mint()} and \code{hint()}.
+
+Must \code{NULL}, a \link[=pitchFunctions]{pitch function}, or an atomic value of \code{length(incomplete) == abs(lag)}.}
+
+\item{bracket}{\emph{\strong{Whether to print brackets around \code{incomplete} output.}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, square brackets (\code{"[]"}) are printed around \code{incomplete} observations.}
+
+\item{classify}{\emph{\strong{Should intervals be classified as step/skip/leaps?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, the \code{deparser} is ignored and the output is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=pitchParsing]{pitch parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=pitchParsing]{pitch parser}.}
+
+\item{lag}{\emph{\strong{The \code{\link[=lag]{lag()}} to calculate harmonic/melodic intervals between.}}
+
+Defaults to \code{1}, which means intervals between immediate successors in \code{x}.
+
+Must be either a single number, or a \code{logical} of \code{length(x)} (see "Logical lags" section in manual).}
+
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.}
+
+\item{orderby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.
+
+Used to interpret the order of elements in \code{x}. Lagged computations are done in the indicated
 order, but the output is returned in the original order.}
 }
 \description{
@@ -167,7 +210,7 @@ If so, intervals are categorized based only on semitone (enharmonic) intervals:
 D# and Eb are classified the same.
 }
 
-\section{Logical(ditto) lags}{
+\section{Logical (ditto) lags}{
 
 
 For calls to \code{hint()} and \code{mint()} the default behavior is a \code{numeric} \code{lag} argument passed to \code{\link[=lag]{lag()}}.
@@ -244,10 +287,17 @@ you could manually set \code{groupby = list(File, Record)}.
 }
 
 \examples{
+exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
+results <- mint(exampleToken)
+results
+results <- hint(exampleToken)
+results
 
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
-
-within(chorales, mint(Token))
+exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+results <- with(exampleHumdrum[[,3:4]], mint(Token))
+results
+results <- with(exampleHumdrum[[,3:4]], hint(Token))
+results
 
 }
 \seealso{

@@ -14,8 +14,7 @@ tint(
   LO5th = 0L,
   cent = numeric(length(octave)),
   partition = FALSE,
-  Key = NULL,
-  octave.round = floor
+  Key = NULL
 )
 
 is.tonalInterval(x)

@@ -17,26 +17,63 @@ writeHumdrum(
 )
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{humdrumR}{\emph{\strong{HumdrumR data to write.}}
 
-\item{prefix}{(\code{character}, \code{length == 1L}) A \code{character} string prepended to the file name.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{renamer}{A \code{function}. Must accept a \code{character} vector and return a new atomic vector
+\item{prefix}{\emph{\strong{A prefix to add to output filenames.}}
+
+Defaults to \code{"humdrumR_"}.
+
+Must be a single \code{character} string.}
+
+\item{renamer}{\emph{\strong{A \code{function} to modify output filenames.}}
+
+Defaults to \code{force} (keep the original filenames).
+
+Must be a \code{function} which accepts a \code{character} vector and returns a new \code{charater} vector
 of the same length.}
 
-\item{affix}{(\code{character}, \code{length == 1L}) A \code{character} string appended to the file name
-(before the extension).}
+\item{affix}{\emph{\strong{An affix to add to output filenames.}}
 
-\item{directory}{(\code{character}, \code{length == 1L}) A directory to write the files into. If \code{NULL},
-files are written to the same directory (or directories) they were \link[=readHumdrum]{read from}.}
+Defaults to \code{""}.
 
-\item{overwrite}{(\code{logical}, \code{length == 1}) If \code{FALSE}, \code{writeHumdrum} will refuse to overwrite
+Must be a single \code{character} string.
+
+Affix is appended at end of filename, but before the extension.}
+
+\item{directory}{\emph{\strong{A directory to write the files into.}}
+
+Defaults to \code{NULL}.
+
+Must be a single \code{character} string.
+
+If \code{NULL}, files are written to the same directory (or directories) they were \link[=readHumdrum]{read from}.}
+
+\item{overwrite}{\emph{\strong{Whether to overite existing files.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{FALSE}, \code{writeHumdrum} will refuse to overwrite
 any files. If \code{TRUE}, \code{writeHumdrum} will overwrite files, but only after an additional prompt from the user.}
 
-\item{verbose}{(\code{logical}, \code{length == 1}) If \code{TRUE}, each \emph{new} output file name is printed on the console
+\item{verbose}{\emph{\strong{Whether to show file names while writing.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, each \emph{new} output file name is printed on the console
 as the writing happens.}
 
-\item{EMD}{(\code{character}, \code{length == 1}) A string to write to a new \verb{!!!EMD:} record in each file.
+\item{EMD}{\emph{\strong{A string to write to a new \verb{!!!EMD:} record in each file.}}
+
+Defaults to "Editing in humdrumR, version X.X.X.XXX, on current data/time."
+
+Must be a single \code{character} string.
+
 If \code{NULL}, not appended.}
 }
 \description{

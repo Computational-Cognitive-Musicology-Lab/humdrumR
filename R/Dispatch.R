@@ -172,7 +172,7 @@ do... <- function(func, args = list(), ..., envir = parent.frame()) {
 do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
   
-  if (is.vector(firstArg) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
+  if (((is.atomic(firstArg) && !is.table(firstArg)) || is.list(firstArg)) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
   Exclusive <- attr(firstArg, 'Exclusive')
@@ -196,7 +196,9 @@ do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs 
   humattr <- humdrumRattr(result)
   
   result <- dimension$Restore(memoize$Restore(naskip$Restore(result)))
-  if ('dispatch' %in% names(humattr)) humattr$dispatch$Original <- firstArg
+  if ('dispatch' %in% names(humattr)) {
+    humattr$dispatch$Original <- firstArg
+  }
   humdrumRattr(result) <- humattr
   
   result
@@ -336,15 +338,37 @@ partialApply <- function(func, ...) {
 #' 3. A function to dispatch.
 #' 
 #' 
-#' @param str The input `character` string, on which dispatch is called.
-#' @param dispatchDF A data.frame which describes what function should be called for 
-#'        which regex input. (See details).
-#' @param Exclusive Defaults to `NULL`. If `NULL`, only the regexes are used for dispatch.
-#' @param ... Arguments to pass to dispatch functions.
-#' @param multiDispatch `logical`, length 1. If `FALSE` (the default) the "best" regex/exclusive match
-#'      is dispatched for each Exclusive segment. If `TRUE`, differenet functions can be dispatched
-#'      within the same input vector. 
-#' @param outputClass Character string: the default output class which the function should return.
+#' @param str ***The input strings, on which dispatch is called.***
+#' 
+#' Must be `character`.
+#' 
+#' @param dispatchDF ***A data.frame which describes what function should be called for which regex input. (See details).***
+#' 
+#' Must be a `data.frame`.
+#' 
+#' @param Exclusive ***Exclusive interpretations to dispatch.***
+#' 
+#' Defaults to `NULL`. 
+#' 
+#' If `NULL`, only the regexes are used for dispatch.
+#' 
+#' @param ... ***Arguments to pass to dispatch functions.***
+#' 
+#' @param multiDispatch ***Whether to use multiple dispatch function for each interpretation.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: a on/off switch.
+#' 
+#' If `FALSE` the "best" regex/exclusive match is dispatched for each Exclusive segment. 
+#' If `TRUE`, differenet functions can be dispatched
+#' within the same input vector. 
+#' 
+#' @param outputClass ***The default output class which the function should return.***
+#' 
+#' Defaults to `"character"`.
+#' 
+#' Must be single `character` string.
 #'        
 #'        
 #' 
@@ -439,7 +463,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 #' @rdname humdrumDispatch
 #' @export
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
-  if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')(Exclusive)
+  if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')
   if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
   
@@ -518,13 +542,14 @@ do_attr <- function(func, x, ...) {
 }
 
 humdrumRattr <- function(x) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key',
+             'deparser', 'factorizer', 'deparseArgs')
   attr <- attributes(x)
   
   attr[names(attr) %in% known]
 }
 `humdrumRattr<-` <- function(x, value) {
-  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive')
+  known <- c('dispatch', 'dispatched', 'visible', 'Exclusive', 'pitchAttr', 'rhythmAttr', 'Key', 'factorizer')
   if (is.null(value)) {
     for (att in known) attr(x, att) <- NULL
   } else {
@@ -542,7 +567,7 @@ rePlace <- function(result, dispatched = attr(result, 'dispatch')) {
   result
 }
 
-reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
+reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers, ...) {
   # if (is.null(dispatched) || length(result) != length(dispatched$Original) || is.character(result)) return(result)
   if (is.null(dispatched) || is.character(result)) return(result)
   
@@ -553,9 +578,9 @@ reParse <- function(result, dispatched = attr(result, 'dispatch'), reParsers) {
   
   result <- if (length(result) > 1L && length(result) == length(dispatched$Segments)) split(result, dispatched$Segments) else list(result)
   
-  result <- unlist(Map(\(res, excl) {
+  result <- do.call('c', Map(\(res, excl) {
     reParser <- match.fun(if (excl %in% reParsers)  excl else reParsers[1])
-    reParser(res, inPlace = FALSE)
+    reParser(res, inPlace = FALSE, ...)
   }, result, exclusives))
   
   names(result) <- names

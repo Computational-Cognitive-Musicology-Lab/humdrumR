@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,31 +121,31 @@ functions take one or more input <em>arguments</em>, and “return” some
 kind of output. For example, the function <code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt()</a></code> takes a
 number as an input argument, and “returns” the square root of that
 number.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">2</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.414214</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">9</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">2</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.414214</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="dv">9</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span></code></pre></div>
 <p>To “call” a function, we write the function’s name, followed by
 parentheses (<code>()</code>). Any input arguments to the function must
 go inside the parentheses, separated by commas if there are more than
 one. Here are some examples of common functions being “called” with zero
 or more input arguments:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abs</span>(<span class="sc">-</span><span class="dv">3</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">max</span>(<span class="dv">1</span>, <span class="dv">5</span>) <span class="co"># two arguments</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">5</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="co"># three arguments</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-02-03 20:05:41 EST"</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">abs</span>(<span class="sc">-</span><span class="dv">3</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">mean</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">3</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">max</span>(<span class="dv">1</span>, <span class="dv">5</span>) <span class="co"># two arguments</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">5</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="co"># three arguments</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-03-09 11:42:19 EST"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -201,14 +201,14 @@ Let’s calculate the square-root of two and save it to a variable:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">tworoot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
 <p>We can then reuse that value as many times as we want:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tworoot<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">2</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>tworoot <span class="sc">*</span> <span class="dv">2</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">2.828427</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(tworoot, tworoot)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.414214</span> <span class="fl">1.414214</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>tworoot<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">2</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>tworoot <span class="sc">*</span> <span class="dv">2</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">2.828427</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="fu">c</span>(tworoot, tworoot)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.414214</span> <span class="fl">1.414214</span></span></code></pre></div>
 <p>You can also assign from left to right, using <code>-&gt;</code>.
 This is useful in combination with pipes:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -274,22 +274,22 @@ values like this are often called “scalars”. However, R doesn’t
 (multiple values)—everything is always a vector. (Still, we sometimes
 refer to length-1 vectors as scalars.)</p>
 <p>To make a vector from scratch in R, use <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, as so:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"Bach"</span>, <span class="st">"Mozart"</span>, <span class="st">"Beethoven"</span>, <span class="st">"Brahms"</span>)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"Bach"</span>      <span class="st">"Mozart"</span>    <span class="st">"Beethoven"</span> <span class="st">"Brahms"</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="cn">TRUE</span> <span class="cn">FALSE</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fl">32.3</span>)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">32.3</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fl">32.3</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">32.3</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"Bach"</span>, <span class="st">"Mozart"</span>, <span class="st">"Beethoven"</span>, <span class="st">"Brahms"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"Bach"</span>      <span class="st">"Mozart"</span>    <span class="st">"Beethoven"</span> <span class="st">"Brahms"</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="cn">TRUE</span> <span class="cn">FALSE</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="fu">c</span>(<span class="fl">32.3</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">32.3</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="fl">32.3</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">32.3</span></span></code></pre></div>
 <p>In this example, we’ve created five vectors.</p>
 <ul>
 <li>A <code>numeric</code> vector of length 3.</li>
@@ -322,10 +322,10 @@ constantly be taking advantage of vectorization to make our lives super
 easy!</p>
 <hr>
 <p>For an example of vectorization, watch this:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">13</span>, <span class="dv">21</span>) <span class="sc">*</span> <span class="dv">2</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">2</span>  <span class="dv">4</span>  <span class="dv">6</span> <span class="dv">10</span> <span class="dv">16</span> <span class="dv">26</span> <span class="dv">42</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">13</span>, <span class="dv">21</span>) <span class="sc">*</span> <span class="dv">2</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">2</span>  <span class="dv">4</span>  <span class="dv">6</span> <span class="dv">10</span> <span class="dv">16</span> <span class="dv">26</span> <span class="dv">42</span></span></code></pre></div>
 <p>We created two <code>numeric</code> vectors:</p>
 <ol style="list-style-type: decimal">
 <li>The first eight numbers of the Fibonacci sequence</li>
@@ -345,40 +345,40 @@ number of the vector, it’s done for us.</p>
 same length, each value in each vector is “lined” up with values in the
 other vector. If we, for example, add two such vectors together, each
 “lined up” pair of numbers is added:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">6</span> <span class="dv">6</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"a 1"</span> <span class="st">"b 2"</span> <span class="st">"c 3"</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">4</span>, <span class="dv">3</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">6</span> <span class="dv">6</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>), <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"a 1"</span> <span class="st">"b 2"</span> <span class="st">"c 3"</span></span></code></pre></div>
 <p>In the second case, one of the vectors is length-1 (a “scalar”). In
 this case, the scalar value is paired with each value in the longer
 vector (as in the Fibonacci example above).</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="dv">5</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">7</span> <span class="dv">8</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>), <span class="dv">1</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"a 1"</span> <span class="st">"b 1"</span> <span class="st">"c 1"</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>) <span class="sc">+</span> <span class="dv">5</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">6</span> <span class="dv">7</span> <span class="dv">8</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">paste</span>(<span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>), <span class="dv">1</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"a 1"</span> <span class="st">"b 1"</span> <span class="st">"c 1"</span></span></code></pre></div>
 <hr>
 <p>What happens if we have vectors that are longer than one, but are not
 the same length? Well, R will generally attempt to “recycle” the shorter
 vector—which means repeat it— as necessary to match the length of the
 longer vector. If the shorter vector evenly divides the longer vector,
 you generally won’t have a problem:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">6</span>  <span class="dv">6</span> <span class="dv">12</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">6</span>  <span class="dv">6</span> <span class="dv">12</span></span></code></pre></div>
 <p>If the division is not perfect, R will still “recycle” the shorter
 vector, but you’ll get a warning:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    Warning <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)<span class="sc">:</span> longer object length is not a multiple of</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    shorter object length</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">6</span> <span class="dv">12</span>  <span class="dv">8</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="sc">&gt;</span>    Warning <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)<span class="sc">:</span> longer object length is not a multiple of</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="sc">&gt;</span>    shorter object length</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>]  <span class="dv">2</span>  <span class="dv">6</span> <span class="dv">12</span>  <span class="dv">8</span></span></code></pre></div>
 <p>You see the warning message R have us?</p>
 <blockquote>
 <p>“longer object length is not a multiple of shorter object length”</p>
@@ -391,6 +391,76 @@ length and/or scalar values (length-1 vectors), so you can avoid
 worrying about how exactly R is “recycling” values. This brings us
 too…</p>
 </div>
+<div class="section level4">
+<h4 id="factors">Factors<a class="anchor" aria-label="anchor" href="#factors"></a>
+</h4>
+<p>Factors are a useful modification of <code>character</code> vectors,
+which keep track of all the possible values (“levels”) you expect in
+your data, <em>even when some of those levels are missing from the
+vector</em>. This is mainly useful when we are counting data with
+<code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code>.</p>
+<p>For example, let’s consider the built-in R object called
+<code>letters</code>:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>letters</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="st">"a"</span> <span class="st">"b"</span> <span class="st">"c"</span> <span class="st">"d"</span> <span class="st">"e"</span> <span class="st">"f"</span> <span class="st">"g"</span> <span class="st">"h"</span> <span class="st">"i"</span> <span class="st">"j"</span> <span class="st">"k"</span> <span class="st">"l"</span> <span class="st">"m"</span> <span class="st">"n"</span> <span class="st">"o"</span> <span class="st">"p"</span> <span class="st">"q"</span> <span class="st">"r"</span> <span class="st">"s"</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">20</span>] <span class="st">"t"</span> <span class="st">"u"</span> <span class="st">"v"</span> <span class="st">"w"</span> <span class="st">"x"</span> <span class="st">"y"</span> <span class="st">"z"</span></span></code></pre></div>
+<p>What happens if we call <code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> on
+<code>letters</code>?:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">table</span>(letters)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="sc">&gt;</span>    letters</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="sc">&gt;</span>    a b c d e f g h i j k l m n o p q r s t u v w x y z </span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
+<p>Every letter appears once in the table, duh! What if we randomly
+sample a handful letters and table the result?</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">sample</span>(letters, <span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="er">&gt;</span>    b d e g i q r s v z </span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">4</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
+<p>Notice that not all the letters from table appear in the output.
+E.g., if a letter never appears in the sample, it doesn’t get
+counted.</p>
+<p>Let’s try something new: before sampling, I will call the command
+<code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code> on <code>letters</code>:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">factor</span>(letters) <span class="sc">|&gt;</span> <span class="fu">sample</span>(<span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="er">&gt;</span>    a b c d e f g h i j k l m n o p q r s t u v w x y z </span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span></span></code></pre></div>
+<p>Ah! Now our table includes all possible letters, even though many of
+them appear <code>0</code> times.</p>
+<hr>
+<p>So how does this work? Well the <code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code> function looks
+at a <code>character</code> vector and outputs a new “factor” vector.
+The factor vector acts just like a <code>character</code> vector, except
+it remembers all the unique values, or “levels”, in the vector:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">factor</span>(letters)</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] a b c d e f g h i j k l m n o p q r s t u v w x y z</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="sc">&gt;</span>    Levels<span class="sc">:</span> a b c d e f g h i j k l m n o p q r s t u v w x y z</span></code></pre></div>
+<p>Even if we remove some values from the factor vector, the vector will
+“remember” these levels. The factor will also remember the
+<em>order</em> of the levels, so you can make tables ordered the way you
+want them.</p>
+<p>You can access, or set, the levels of a factor using these using the
+<code><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels()</a></code> function, or with the <code>levels</code> argument
+to the <code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code> function itself. Maybe we want to tabulate
+the letters, but put the vowels first:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">factor</span>(letters, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'e'</span>, <span class="st">'i'</span>, <span class="st">'o'</span>, <span class="st">'u'</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>                           <span class="st">"b"</span>, <span class="st">"c"</span>, <span class="st">"d"</span>, <span class="st">"f"</span>, <span class="st">"g"</span>, <span class="st">"h"</span>, <span class="st">"j"</span>, <span class="st">"k"</span>, </span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>                           <span class="st">"l"</span>, <span class="st">"m"</span>, <span class="st">"n"</span>, <span class="st">"p"</span>, <span class="st">"q"</span>, <span class="st">"r"</span>, <span class="st">"s"</span>, <span class="st">"t"</span>, <span class="st">"v"</span>, <span class="st">"w"</span>, <span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"z"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="fu">sample</span>(<span class="dv">15</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>  <span class="fu">table</span>()</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="er">&gt;</span>    a e i o u b c d f g h j k l m n p q r s t v w x y z </span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span></span></code></pre></div>
+<p>Note that if a <code>character</code> string contains values that you
+don’t include in your <code>levels</code>, the value will show up
+<code>NA</code> in the resulting factor, and you may see warnigns like
+“<code>invalid factor level, NA generated</code>.”</p>
+</div>
 </div>
 <div class="section level3">
 <h3 id="data-frames">Data frames<a class="anchor" aria-label="anchor" href="#data-frames"></a>
@@ -401,54 +471,54 @@ length</em>—ideal for vectorized operations! The vectors in a
 <code>data.frame</code> are arranged as columns in a two dimension
 table. Let’s make a data frame, by feeding some vectors to the
 [data.frame()] function:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"C"</span>, <span class="st">"D"</span>, <span class="st">"E"</span>, <span class="st">"F"</span>, <span class="st">"G"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">12</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"P1"</span>, <span class="st">"M2"</span>, <span class="st">"M3"</span>, <span class="st">"P4"</span>, <span class="st">"P5"</span>, <span class="st">"M6"</span>, <span class="st">"M7"</span>, <span class="st">"P8"</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X, Y, Z)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>df</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>      X  Y  Z</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> C  <span class="dv">0</span> P1</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span> D  <span class="dv">2</span> M2</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span> E  <span class="dv">4</span> M3</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span> F  <span class="dv">5</span> P4</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span> G  <span class="dv">7</span> P5</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span> A  <span class="dv">9</span> M6</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">7</span> B <span class="dv">11</span> M7</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">8</span> C <span class="dv">12</span> P8</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"C"</span>, <span class="st">"D"</span>, <span class="st">"E"</span>, <span class="st">"F"</span>, <span class="st">"G"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">12</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"P1"</span>, <span class="st">"M2"</span>, <span class="st">"M3"</span>, <span class="st">"P4"</span>, <span class="st">"P5"</span>, <span class="st">"M6"</span>, <span class="st">"M7"</span>, <span class="st">"P8"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(X, Y, Z)</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>df</span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a><span class="sc">&gt;</span>      X  Y  Z</span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> C  <span class="dv">0</span> P1</span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span> D  <span class="dv">2</span> M2</span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span> E  <span class="dv">4</span> M3</span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span> F  <span class="dv">5</span> P4</span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span> G  <span class="dv">7</span> P5</span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span> A  <span class="dv">9</span> M6</span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">7</span> B <span class="dv">11</span> M7</span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">8</span> C <span class="dv">12</span> P8</span></code></pre></div>
 <p>Notice that each of your columns/vectors can be a different type,
 with no problem. Also notice, that each column has a name; we can
 inspect these names using the <code><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames()</a></code> function.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"X"</span> <span class="st">"Y"</span> <span class="st">"Z"</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">colnames</span>(df)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"X"</span> <span class="st">"Y"</span> <span class="st">"Z"</span></span></code></pre></div>
 <p>Or change them:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Letters'</span>, <span class="st">"Semitones"</span>, <span class="st">"Intervals"</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>      Letters Semitones Intervals</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span>       C         <span class="dv">0</span>        P1</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span>       D         <span class="dv">2</span>        M2</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span>       E         <span class="dv">4</span>        M3</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span>       F         <span class="dv">5</span>        P4</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span>       G         <span class="dv">7</span>        P5</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span>       A         <span class="dv">9</span>        M6</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">7</span>       B        <span class="dv">11</span>        M7</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">8</span>       C        <span class="dv">12</span>        P8</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">colnames</span>(df) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'Letters'</span>, <span class="st">"Semitones"</span>, <span class="st">"Intervals"</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>df</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a><span class="sc">&gt;</span>      Letters Semitones Intervals</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span>       C         <span class="dv">0</span>        P1</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span>       D         <span class="dv">2</span>        M2</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span>       E         <span class="dv">4</span>        M3</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span>       F         <span class="dv">5</span>        P4</span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span>       G         <span class="dv">7</span>        P5</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span>       A         <span class="dv">9</span>        M6</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">7</span>       B        <span class="dv">11</span>        M7</span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">8</span>       C        <span class="dv">12</span>        P8</span></code></pre></div>
 <p>Finally, it’s also possible to assign the column name we want when
 creating the data frame:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">Letters =</span> X, <span class="at">Semitones =</span> Y, <span class="at">Intervals =</span> Z)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>      Letters Semitones Intervals</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span>       C         <span class="dv">0</span>        P1</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span>       D         <span class="dv">2</span>        M2</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span>       E         <span class="dv">4</span>        M3</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span>       F         <span class="dv">5</span>        P4</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span>       G         <span class="dv">7</span>        P5</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span>       A         <span class="dv">9</span>        M6</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">7</span>       B        <span class="dv">11</span>        M7</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">8</span>       C        <span class="dv">12</span>        P8</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">Letters =</span> X, <span class="at">Semitones =</span> Y, <span class="at">Intervals =</span> Z)</span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="sc">&gt;</span>      Letters Semitones Intervals</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span>       C         <span class="dv">0</span>        P1</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span>       D         <span class="dv">2</span>        M2</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span>       E         <span class="dv">4</span>        M3</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span>       F         <span class="dv">5</span>        P4</span>
+<span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span>       G         <span class="dv">7</span>        P5</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span>       A         <span class="dv">9</span>        M6</span>
+<span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">7</span>       B        <span class="dv">11</span>        M7</span>
+<span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">8</span>       C        <span class="dv">12</span>        P8</span></code></pre></div>
 <hr>
 <p>Remember, the vectors in a <code>data.frame</code> must all be the
 same length. If you tried to make a <code>data.frame</code> with a
@@ -472,11 +542,11 @@ over and over again, we can use the <code><a href="../reference/withinHumdrum.ht
 <code><a href="../reference/withinHumdrum.html">with()</a></code> allows us to drop “inside” our
 <code>data.frame</code>, where our R commands can “see” the columns
 variables:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(df,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">paste</span>(Intervals, Semitones, <span class="at">sep =</span> <span class="st">' = '</span>))</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"P1 = 0"</span>  <span class="st">"M2 = 2"</span>  <span class="st">"M3 = 4"</span>  <span class="st">"P4 = 5"</span>  <span class="st">"P5 = 7"</span>  <span class="st">"M6 = 9"</span>  <span class="st">"M7 = 11"</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">8</span>] <span class="st">"P8 = 12"</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">with</span>(df,</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>     <span class="fu">paste</span>(Intervals, Semitones, <span class="at">sep =</span> <span class="st">' = '</span>))</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"P1 = 0"</span>  <span class="st">"M2 = 2"</span>  <span class="st">"M3 = 4"</span>  <span class="st">"P4 = 5"</span>  <span class="st">"P5 = 7"</span>  <span class="st">"M6 = 9"</span>  <span class="st">"M7 = 11"</span></span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">8</span>] <span class="st">"P8 = 12"</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -500,10 +570,10 @@ there are values that are missing or problematic. Passing a vector with
 though you’ll often get a warning message instead. For example, consider
 what happens if we apply the command <code><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric()</a></code> to the
 following strings:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>numbers <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"apple"</span>, <span class="st">"4.2"</span>))</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span> NAs introduced by coercion</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>numbers</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.0</span> <span class="fl">2.0</span>  <span class="cn">NA</span> <span class="fl">4.2</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a>numbers <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"apple"</span>, <span class="st">"4.2"</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span> NAs introduced by coercion</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>numbers</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.0</span> <span class="fl">2.0</span>  <span class="cn">NA</span> <span class="fl">4.2</span></span></code></pre></div>
 <p>Four of the strings in this vector are converted to numbers without a
 problem, but the string <code>"apple"</code> makes no sense as a number.
 So what does R do? It converts the three strings to numbers, just like
@@ -513,9 +583,9 @@ message: <code>NAs introduced by coercion</code>. You might see that
 warning sometimes, so now you know what it means!</p>
 <p>What would happen if we tried applying a different function onto our
 vector with an <code>NA</code>?</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(numbers)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.000000</span> <span class="fl">1.414214</span>       <span class="cn">NA</span> <span class="fl">2.049390</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="fu">sqrt</span>(numbers)</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.000000</span> <span class="fl">1.414214</span>       <span class="cn">NA</span> <span class="fl">2.049390</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt()</a></code> function has no problem taking the
 square-roots of the three numbers, and it simply “propogates” the
 <code>NA</code> value in its input through to its output. The
@@ -628,6 +698,24 @@ division</a>; <span class="math inline">\(\lfloor \frac{x}{y}
 </li>
 </ul>
 </div>
+<div class="section level3">
+<h3 id="randomization-functions">Randomization functions<a class="anchor" aria-label="anchor" href="#randomization-functions"></a>
+</h3>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample()</a></code> — Takes a random sample from a vector. Can
+also be used to randomize the order of a vector.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="analysis-functions">Analysis Functions<a class="anchor" aria-label="anchor" href="#analysis-functions"></a>
+</h3>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> — Tabulate all unique values in vector, or
+cross-tabulate across multiple vectors.</li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="making-your-own-functions">Making your own functions<a class="anchor" aria-label="anchor" href="#making-your-own-functions"></a>
@@ -641,7 +729,7 @@ keyword, like so:</p>
 <p>For example, let’s make a function that subtracts the mean from a
 vector of numbers. We’ll have one argument, which we’ll call
 <code>numbers</code>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">myfunc</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">numbers</span><span class="op">)</span> <span class="op">{</span>
   <span class="va">mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">numbers</span><span class="op">)</span>
@@ -650,17 +738,22 @@ vector of numbers. We’ll have one argument, which we’ll call
 <p>We’ve created our function, and assigned it the name
 <code>myfunc</code>, just like any other assignment. Let’s try it
 out:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">myfunc</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="dv">4</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span></span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="fu">myfunc</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">9</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="dv">4</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">-</span><span class="dv">2</span> <span class="sc">-</span><span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span></span></code></pre></div>
 <p>Notice that the <em>last</em> expression in your function definition
 is the value that gets “returned” by the function.</p>
 <hr>
 <p>If you are feeling lazy, you can also define a function using a few
 less keystrokes using the command <code>\()</code> instead of
 <code>function()</code>. For example,</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>\(x) x <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    \(x) x <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>\(x) x <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a><span class="sc">&gt;</span>    \(x) x <span class="sc">+</span> <span class="dv">1</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="common-errors-and-warnings">Common Errors and Warnings<a class="anchor" aria-label="anchor" href="#common-errors-and-warnings"></a>
+</h2>
+<p>TBA</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

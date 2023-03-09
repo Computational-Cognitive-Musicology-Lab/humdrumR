@@ -3,6 +3,23 @@
 \name{keyFunctions}
 \alias{keyFunctions}
 \title{Parsing and deparsing key information}
+\arguments{
+\item{x}{\emph{\strong{Input data, interpreted as diatonic keys.}}
+
+Must be an \code{atomic} vector.}
+
+\item{Key}{\emph{\strong{The key used by the parser, deparser, and transposer.}}
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=keyParsing]{key parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=keyParsing]{key parser}.}
+}
 \description{
 These functions can be used to extract and "translate," or otherwise modify, data representing diatonic key information.
 The functions are:

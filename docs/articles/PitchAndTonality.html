@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-02-03</h4>
+            <h4 data-toc-skip class="date">2023-03-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/PitchAndTonality.Rmd" class="external-link"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
       <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
@@ -115,53 +115,63 @@ suite of pitch functions, like <code>kern</code>, <code>solfa</code>,
 <code>interval</code>, and <code>semits</code>. These functions all work
 in essentially the same way: they take in an input argument and output
 pitch information in their own particular format. For example,</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kern</span>(input)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"c"</span> <span class="st">"d"</span> <span class="st">"e"</span> <span class="st">"g"</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">interval</span>(input)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"P1"</span>  <span class="st">"+M2"</span> <span class="st">"+M3"</span> <span class="st">"+P5"</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">semits</span>(input)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">7</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">solfa</span>(input)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"do"</span> <span class="st">"re"</span> <span class="st">"mi"</span> <span class="st">"so"</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">kern</span>(input)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>kern</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] c d e g</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">interval</span>(input)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>interval</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] P1  <span class="sc">+</span>M2 <span class="sc">+</span>M3 <span class="sc">+</span>P5</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">semits</span>(input)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>semits</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">7</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">solfa</span>(input)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>solfa</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] do re mi so</span></code></pre></div>
 <p>Notice that the functions all recognize the pitch part of these input
 tokens, ignoring the non-pitch (rhythm) information. If you want to keep
 the non-pitch part of your tokens, use the <code>inPlace</code>
 argument:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kern</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.c"</span> <span class="st">"8d"</span>  <span class="st">"4e"</span>  <span class="st">"2.g"</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">interval</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.P1"</span>  <span class="st">"8+M2"</span>  <span class="st">"4+M3"</span>  <span class="st">"2.+P5"</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">semits</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.0"</span> <span class="st">"82"</span>  <span class="st">"44"</span>  <span class="st">"2.7"</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">solfa</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.do"</span> <span class="st">"8re"</span>  <span class="st">"4mi"</span>  <span class="st">"2.so"</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">kern</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.c"</span> <span class="st">"8d"</span>  <span class="st">"4e"</span>  <span class="st">"2.g"</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">interval</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.P1"</span>  <span class="st">"8+M2"</span>  <span class="st">"4+M3"</span>  <span class="st">"2.+P5"</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">semits</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.0"</span> <span class="st">"82"</span>  <span class="st">"44"</span>  <span class="st">"2.7"</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">solfa</span>(input, <span class="at">inPlace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"4.do"</span> <span class="st">"8re"</span>  <span class="st">"4mi"</span>  <span class="st">"2.so"</span></span></code></pre></div>
 <p>The cool thing is that each of these functions can read any of the
 other function’s output. So you can do things like:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">kern</span>(<span class="st">'Cb6'</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"ccc-"</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">pitch</span>(<span class="st">"eee-"</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"Eb6"</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">pitch</span>(<span class="sc">-</span><span class="dv">4</span>) <span class="co"># semio</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"Ab3"</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">kern</span>(<span class="st">'-4'</span>)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"G"</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">solfa</span>(<span class="st">'A#6'</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"^^li"</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">semits</span>(<span class="st">'Ab3'</span>)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="dv">4</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">kern</span>(<span class="st">'Cb6'</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>kern</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] ccc<span class="sc">-</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">pitch</span>(<span class="st">"eee-"</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>pitch</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] Eb6</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">pitch</span>(<span class="sc">-</span><span class="dv">4</span>) <span class="co"># semio</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>pitch</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] Ab3</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">kern</span>(<span class="st">'-4'</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>kern</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] G</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">solfa</span>(<span class="st">'A#6'</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>solfa</span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">^</span><span class="er">^</span>li</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="fu">semits</span>(<span class="st">'Ab3'</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>semits</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="sc">-</span><span class="dv">4</span></span></code></pre></div>
 <hr>
 <p>The complete list of basic pitch functions is:</p>
 <ul>
@@ -254,25 +264,25 @@ intervals</a>”). However, if you specify <code>simple = TRUE</code>, the
 octave information is discarded, leaving only the simple part of the
 pitch information. (You can alternately specify
 <code>compound = FALSE</code>).</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'c'</span>, <span class="st">'dd#'</span>, <span class="st">'G'</span>, <span class="st">'GG'</span>, <span class="st">'GGG-'</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">kern</span>(input, <span class="at">simple =</span> <span class="cn">FALSE</span>), <span class="fu">kern</span>(input, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]  </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"c"</span>  <span class="st">"dd#"</span> <span class="st">"G"</span>  <span class="st">"GG"</span> <span class="st">"GGG-"</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"c"</span>  <span class="st">"d#"</span>  <span class="st">"g"</span>  <span class="st">"g"</span>  <span class="st">"g-"</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">interval</span>(input, <span class="at">simple =</span> <span class="cn">FALSE</span>), <span class="fu">interval</span>(input, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>]  [,<span class="dv">4</span>]   [,<span class="dv">5</span>]  </span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"P1"</span> <span class="st">"+A9"</span> <span class="st">"-P4"</span> <span class="st">"-P11"</span> <span class="st">"-A18"</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"P1"</span> <span class="st">"+A2"</span> <span class="st">"-P4"</span> <span class="st">"-P4"</span>  <span class="st">"-A4"</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">semits</span>(input, <span class="at">compound =</span> <span class="cn">TRUE</span>), <span class="fu">semits</span>(input, <span class="at">compound =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,]    <span class="dv">0</span>   <span class="dv">15</span>   <span class="sc">-</span><span class="dv">5</span>  <span class="sc">-</span><span class="dv">17</span>  <span class="sc">-</span><span class="dv">30</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,]    <span class="dv">0</span>    <span class="dv">3</span>    <span class="dv">7</span>    <span class="dv">7</span>    <span class="dv">6</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">solfa</span>(input, <span class="at">compound =</span> <span class="cn">TRUE</span>), <span class="fu">solfa</span>(input, <span class="at">compound =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>]  [,<span class="dv">4</span>]   [,<span class="dv">5</span>]   </span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"do"</span> <span class="st">"^ri"</span> <span class="st">"vso"</span> <span class="st">"vvso"</span> <span class="st">"vvvse"</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"do"</span> <span class="st">"ri"</span>  <span class="st">"so"</span>  <span class="st">"so"</span>   <span class="st">"se"</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'c'</span>, <span class="st">'dd#'</span>, <span class="st">'G'</span>, <span class="st">'GG'</span>, <span class="st">'GGG-'</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">kern</span>(input, <span class="at">simple =</span> <span class="cn">FALSE</span>), <span class="fu">kern</span>(input, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]  </span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"c"</span>  <span class="st">"dd#"</span> <span class="st">"G"</span>  <span class="st">"GG"</span> <span class="st">"GGG-"</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"c"</span>  <span class="st">"d#"</span>  <span class="st">"g"</span>  <span class="st">"g"</span>  <span class="st">"g-"</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">interval</span>(input, <span class="at">simple =</span> <span class="cn">FALSE</span>), <span class="fu">interval</span>(input, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>]  [,<span class="dv">4</span>]   [,<span class="dv">5</span>]  </span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"P1"</span> <span class="st">"+A9"</span> <span class="st">"-P4"</span> <span class="st">"-P11"</span> <span class="st">"-A18"</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"P1"</span> <span class="st">"+A2"</span> <span class="st">"-P4"</span> <span class="st">"-P4"</span>  <span class="st">"-A4"</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">semits</span>(input, <span class="at">compound =</span> <span class="cn">TRUE</span>), <span class="fu">semits</span>(input, <span class="at">compound =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,]    <span class="dv">0</span>   <span class="dv">15</span>   <span class="sc">-</span><span class="dv">5</span>  <span class="sc">-</span><span class="dv">17</span>  <span class="sc">-</span><span class="dv">30</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,]    <span class="dv">0</span>    <span class="dv">3</span>    <span class="dv">7</span>    <span class="dv">7</span>    <span class="dv">6</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">solfa</span>(input, <span class="at">compound =</span> <span class="cn">TRUE</span>), <span class="fu">solfa</span>(input, <span class="at">compound =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>]  [,<span class="dv">4</span>]   [,<span class="dv">5</span>]   </span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"do"</span> <span class="st">"^ri"</span> <span class="st">"vso"</span> <span class="st">"vvso"</span> <span class="st">"vvvse"</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"do"</span> <span class="st">"ri"</span>  <span class="st">"so"</span>  <span class="st">"so"</span>   <span class="st">"se"</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -287,25 +297,25 @@ or quality labels. If we specify <code>generic = TRUE</code> (or
 printed. In the case of pitch representations without excplicit
 accidentals/qualities (like solfege), the generic version of the pitch
 is printed.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'c'</span>, <span class="st">'d#'</span>, <span class="st">'e'</span>, <span class="st">'f#'</span>, <span class="st">'g'</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">kern</span>(input, <span class="at">generic =</span> <span class="cn">FALSE</span>), <span class="fu">kern</span>(input, <span class="at">generic =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"c"</span>  <span class="st">"d#"</span> <span class="st">"e"</span>  <span class="st">"f#"</span> <span class="st">"g"</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"c"</span>  <span class="st">"d"</span>  <span class="st">"e"</span>  <span class="st">"f"</span>  <span class="st">"g"</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">interval</span>(input, <span class="at">generic =</span> <span class="cn">FALSE</span>), <span class="fu">interval</span>(input, <span class="at">generic =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>]  [,<span class="dv">4</span>]  [,<span class="dv">5</span>] </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"P1"</span> <span class="st">"+A2"</span> <span class="st">"+M3"</span> <span class="st">"+A4"</span> <span class="st">"+P5"</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"1"</span>  <span class="st">"+2"</span>  <span class="st">"+3"</span>  <span class="st">"+4"</span>  <span class="st">"+5"</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">semits</span>(input, <span class="at">specific =</span> <span class="cn">TRUE</span>), <span class="fu">semits</span>(input, <span class="at">specific =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,]    <span class="dv">0</span>    <span class="dv">3</span>    <span class="dv">4</span>    <span class="dv">6</span>    <span class="dv">7</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,]    <span class="dv">0</span>    <span class="dv">2</span>    <span class="dv">4</span>    <span class="dv">5</span>    <span class="dv">7</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">solfa</span>(input, <span class="at">specific =</span> <span class="cn">TRUE</span>), <span class="fu">solfa</span>(input, <span class="at">specific =</span> <span class="cn">FALSE</span>))</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"do"</span> <span class="st">"ri"</span> <span class="st">"mi"</span> <span class="st">"fi"</span> <span class="st">"so"</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"do"</span> <span class="st">"re"</span> <span class="st">"mi"</span> <span class="st">"fa"</span> <span class="st">"so"</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'c'</span>, <span class="st">'d#'</span>, <span class="st">'e'</span>, <span class="st">'f#'</span>, <span class="st">'g'</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">kern</span>(input, <span class="at">generic =</span> <span class="cn">FALSE</span>), <span class="fu">kern</span>(input, <span class="at">generic =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"c"</span>  <span class="st">"d#"</span> <span class="st">"e"</span>  <span class="st">"f#"</span> <span class="st">"g"</span> </span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"c"</span>  <span class="st">"d"</span>  <span class="st">"e"</span>  <span class="st">"f"</span>  <span class="st">"g"</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">interval</span>(input, <span class="at">generic =</span> <span class="cn">FALSE</span>), <span class="fu">interval</span>(input, <span class="at">generic =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>]  [,<span class="dv">3</span>]  [,<span class="dv">4</span>]  [,<span class="dv">5</span>] </span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"P1"</span> <span class="st">"+A2"</span> <span class="st">"+M3"</span> <span class="st">"+A4"</span> <span class="st">"+P5"</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"1"</span>  <span class="st">"+2"</span>  <span class="st">"+3"</span>  <span class="st">"+4"</span>  <span class="st">"+5"</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">semits</span>(input, <span class="at">specific =</span> <span class="cn">TRUE</span>), <span class="fu">semits</span>(input, <span class="at">specific =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,]    <span class="dv">0</span>    <span class="dv">3</span>    <span class="dv">4</span>    <span class="dv">6</span>    <span class="dv">7</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,]    <span class="dv">0</span>    <span class="dv">2</span>    <span class="dv">4</span>    <span class="dv">5</span>    <span class="dv">7</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="fu">rbind</span>(<span class="fu">solfa</span>(input, <span class="at">specific =</span> <span class="cn">TRUE</span>), <span class="fu">solfa</span>(input, <span class="at">specific =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="sc">&gt;</span>         [,<span class="dv">1</span>] [,<span class="dv">2</span>] [,<span class="dv">3</span>] [,<span class="dv">4</span>] [,<span class="dv">5</span>]</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>,] <span class="st">"do"</span> <span class="st">"ri"</span> <span class="st">"mi"</span> <span class="st">"fi"</span> <span class="st">"so"</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">2</span>,] <span class="st">"do"</span> <span class="st">"re"</span> <span class="st">"mi"</span> <span class="st">"fa"</span> <span class="st">"so"</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

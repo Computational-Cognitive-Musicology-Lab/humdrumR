@@ -13,11 +13,22 @@ spines(humdrumR, drop = FALSE)
 \method{print}{humSpines}(spineTable, showEach = TRUE)
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR object}}
+\item{humdrumR}{\emph{\strong{HumdrumR data to summarize.}}
 
-\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of a \code{humSpine} table.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+a \code{humCensus} table.}
+
+\item{i}{\emph{\strong{Index for rows.}}
+
+If \code{numeric}, selects rows by index. If \code{character}, the string is matched
 as a regular expression against filenames in the corpus.}
 }
 \description{
@@ -54,6 +65,11 @@ A \code{humSpines} table has five columns of information about each file:
 
 When \code{humSpine} table prints on the command line, "tallies"
 of the unique combinations of spines and paths in the files are also printed.
+}
+\examples{
+chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+spines(chorales)
+
 }
 \seealso{
 Other corpus summary functions: 

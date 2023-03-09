@@ -14,7 +14,7 @@ Detailed error reports can be generated, pointing to specific problematic record
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,13 +86,15 @@ Detailed error reports can be generated, pointing to specific problematic record
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>...</dt>
-<dd><p><code>character</code>: Arguments passed to <code><a href="readHumdrum.html">findHumdrum()</a></code> to identify files on the local machine
-to test for humdrum validity.
+<dd><p><em><strong>Arguments passed to <code><a href="readHumdrum.html">findHumdrum()</a></code>.</strong></em></p>
+<p>Used to identify files on the local machine to test for humdrum validity.
 This is mainly used to pass <a href="readHumdrum.html">regex file-path search patterns</a>, but may also be used to pass
 the <code>recursive</code> and/or <code>contains</code> arguments to <code><a href="readHumdrum.html">findHumdrum()</a></code>.</p></dd>
 <dt>errorReport.path</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) A directory path where to write error report files.
-If <code>NULL</code> (the default), no error report files are written.</p></dd>
+<dd><p><em><strong>A directory path where to write error report files.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a single <code>character</code> string.</p>
+<p>If <code>NULL</code> (the default), no error report files are written.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -139,6 +141,16 @@ Error message for record three printed here. | Exactly as they did
 
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">validateHumdrum</span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpiec5so/temp_libpath4863748719359/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> One files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

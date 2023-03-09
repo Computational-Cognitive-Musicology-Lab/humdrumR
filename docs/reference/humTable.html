@@ -40,7 +40,7 @@ and the Type of field (e.g., &quot;Formal&quot;)."><!-- mathjax --><script src="
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,19 +132,24 @@ and the <code>Type</code> of field (e.g., <code>"Formal"</code>).</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>A <code>character</code> vector. Specifies which types of data tokens/records to extract.
+<dd><p><em><strong>Which types of humdrum record(s) to include in the output.</strong></em></p>
+<p>Defaults to <code>"GLIMDd"</code>.</p>
+<p>Must be a <code>character</code> string, which specifies which types of data tokens/records to extract.
 Legal values are: <code>"G"</code> (global comments), <code>"L"</code> (local comments), <code>"I"</code> (interpretations),
 <code>"M"</code> (barlines), <code>"D"</code> (non-null data), or <code>"d"</code> (null data).
-Multiple types can be specified as a vector, or smooshed into a single string: e.g., <code>"GLIMD"</code>.</p></dd>
+Multiple types can be specified in a single string: e.g., <code>"GLIMD"</code>.</p></dd>
 <dt>fields</dt>
-<dd><p>(<code>character</code>) A vector of names which are <a href="partialMatching.html">partially matched</a>
-against field names of the humdrum table.
-If <code>NULL</code> (the default), the <a href="humActive.html">active fields</a> are returned.</p></dd>
+<dd><p><em><strong>Which fields to output.</strong></em></p>
+<p>Defaults to <code>getActiveFields(humdrumR)</code>.</p>
+<p>Must be a <code>character</code> string <a href="partialMatching.html">partially</a> matching the name of a data field in the <code>humdrumR</code> input.
+For example, <code>"Tok"</code> would match the <code>Token</code> field.</p></dd>
 <dt>fieldTypes</dt>
-<dd><p>A <code>character</code> type indicating which types of fields to list.
-Legal options are <code>"Data"</code>, <code>"Structure"</code>, <code>"Interpretation"</code>, <code>"Formal"</code>, and <code>"Reference"</code>.
+<dd><p><em><strong>Which types of fields to list.</strong></em></p>
+<p>Shows all fields by default.</p>
+<p>Must be a <code>character</code> vector. Legal options are <code>"Data"</code>, <code>"Structure"</code>, <code>"Interpretation"</code>, <code>"Formal"</code>, and <code>"Reference"</code>.
 Types can be <a href="partialMatching.html">partially matched</a>---for example, <code>"S"</code> for <code>"Structure"</code>.</p></dd>
 </dl></div>
     <div class="section level2">

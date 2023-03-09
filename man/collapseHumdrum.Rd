@@ -38,24 +38,47 @@ collapseRecords(
 )
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-\item{by}{(\code{character}) A vector of field names to group the data by.
-Data in the \code{collapseField} will be collapsed within these groups.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{collapseField}{(\code{character}, \code{length == 1}) The target
-field in the \code{humdrumR} data to collapse. Defaults to the first \link[=humActive]{active field}.}
+\item{by}{\emph{\strong{Fields to collapse data within.}}
 
-\item{dataTypes}{(\code{character}) Which types of humdrum records to collapse.
-Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'} or any combination of
-these (e.g., \code{"LIM"}).}
+Must be \code{character}.
 
-\item{collapseAtomic}{(\code{logical}, \code{length == 1}) If \code{TRUE}, data is collapsed
-into a single \code{character} string.
-If \code{FALSE}, data is conctanated in a \code{list}.}
+Must be a \code{character} string \link[=partialMatching]{partially} matching the name(s) of a data field(s) in the \code{humdrumR} input.
 
-\item{sep}{(\code{character}, \code{length == 1}) If \code{collapseAtomic == TRUE}, collapsed tokens
-are separated by this string.}
+Data in the \code{collapseField} will be collapsed within these fields.}
+
+\item{collapseField}{\emph{\strong{The target field in the \code{humdrumR} data to collapse.}}
+
+Defaults to \code{getActiveFields(humdrumR)[1]}.
+
+Must be a single \code{character} string.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to collapse.}}
+
+Defaults to \code{"GLIMDd"}.
+
+Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
+
+\item{collapseAtomic}{\emph{\strong{Whether to collapse the data into \code{character} strings.}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, data is collapsed into a single \code{character} string. If \code{FALSE}, data is conctanated in a \code{list}.}
+
+\item{sep}{\emph{\strong{A separator for collapsed strings.}}
+
+Defaults to \code{" "} (space).
+
+Must be a single \code{character} string.
+
+Only has an effect if \code{collapseAtomic == TRUE}.}
 }
 \description{
 \code{collapseHumdrum} allows you collapse a data field across

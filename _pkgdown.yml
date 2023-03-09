@@ -64,6 +64,8 @@ reference:
 - title: "Working with Data"
   desc: >
     These pages describe tools used to manipulate the musical data ensconced within humdrumR data structures.
+  contents:
+  - token
 - subtitle: "Manipulating Humdrum Data"
   contents:
   - withinHumdrum
@@ -119,6 +121,7 @@ reference:
   - hint
   - is.simple
   - is.generic
+  - gamut
 - subtitle: "Key and chord functions"
   desc: "These functions translate between diatonic and tertian representations:"
   contents:
@@ -147,7 +150,8 @@ reference:
   - timeline
   - recip
   - duration
-  - noteValue
+  - grid
+  - notehead
   - seconds
   - ioi
   - untie
@@ -187,6 +191,12 @@ reference:
   - struct
 - title: "Other Functions"
   desc: "Other useful tools"
+- subtitle: "Information theory"
+  contents:
+  - entropy
+  - crossentropy
+  - mutualInfo
+  - ptable
 - subtitle: "Numeric values"
   contents:
   - rational

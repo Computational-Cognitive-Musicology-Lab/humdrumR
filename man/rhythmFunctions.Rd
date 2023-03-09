@@ -4,20 +4,39 @@
 \alias{rhythmFunctions}
 \title{Translate between rhythm representations.}
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+\item{x}{\emph{\strong{An input  vector.}}
 
-\item{...}{These arguments are passed to the \link[=rhythmDeparsing]{rhythm deparser}.
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.
+
+Must be \link[=rhythmParsing]{parsable as rhythm infromation}.}
+
+\item{...}{\emph{\strong{Arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
+
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "duration."}
+\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+Defaults to \code{rational(1, 1)}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
-If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+Must be \code{numeric} or \link{rational}.}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton  \code{logical} value: an on/off switch.
+
+Defaults to \code{FALSE}.
+
+A singleton \code{logical} value, or \code{NA}.
+
+See "Grace notes" section below.}
 }
 \description{
 These functions are used to extract and translate between different representations
@@ -31,7 +50,7 @@ The full list of rhythm functions is:
 \item \emph{Symbolic rhythm representations}
 \itemize{
 \item \code{\link[=recip]{recip()}} (reciprocal note values)
-\item \code{\link[=noteValue]{noteValue()}} (traditional note-value symbols)
+\item \code{\link[=notehead]{notehead()}} (traditional note-value symbols)
 }
 \item \emph{Numeric rhythm representations}
 \itemize{
@@ -74,7 +93,7 @@ Underneath the hood, the full processing of each function looks like this:
 To read the details of the parsing step, read \link[=rhythmParsing]{this}.
 To read the details of the "deparsing" step, read \link[=rhythmDeparsing]{this}.
 To read more details about each specific function, click on the links in the list above,
-or type \code{?func} in the R command line: for example, \code{?noteValue}.
+or type \code{?func} in the R command line: for example, \code{?notehead}.
 \subsection{Grace notes}{
 
 \verb{**recip} and \verb{**kern} data sometime include tokens indicating \href{https://en.wikipedia.org/wiki/Grace_note}{grace notes}---a special
@@ -83,6 +102,7 @@ In humdrum data, grace notes are marked with \code{"q"} or \code{"Q"}; \code{q} 
 for tokens with no (other) duration information, while \code{Q} should be marked along with
 duration information: for example, \code{aa-q} or \verb{16aa-Q}.
 In practice, this distinction is not always made, and is rarely important.
+
 By default, the \verb{**recip} parser treats input marked as grace notes as having a duration of zero.
 However, if you pass a \code{grace} argument to the \link[=rhythmParsing]{rhythm parser}, you can control this behavior.
 If \code{parse(grace = TRUE)}, grace-note durations (like the \code{16} in \code{"16aa-Q"}) are parsed like any other duration.

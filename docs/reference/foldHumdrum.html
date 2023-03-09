@@ -22,7 +22,7 @@ We "fold" the data from one structural location over "on top" of other data usin
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,29 +119,37 @@ We "fold" the data from one structural location over "on top" of other data usin
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>fold</dt>
-<dd><p>(<code>numeric</code>, whole number) The target structure (spine, path, etc.) <em>from which</em>
-to "fold" data to another structural position and field(s).</p></dd>
+<dd><p><em><strong>Which target structure (spine, path, etc.) to "fold" onto another structural position.</strong></em></p>
+<p>Must be natural numbers.</p></dd>
 <dt>onto</dt>
-<dd><p>(<code>numeric</code>, whole number) The target structure (spine, path, etc.) <em>to which</em>
-the "fold" data is moved.</p></dd>
+<dd><p><em><strong>Which target structure (spine, path, etc.) is the data "folded" onto.</strong></em></p>
+<p>Must be natural numbers.</p></dd>
 <dt>what</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) The structural field which is folded across.
-Valid options are <code>"Spine"</code>, <code>"Path"</code>, <code>"Stop"</code>, <code>"Record"</code>,and <code>"NData"</code>.</p></dd>
+<dd><p><em><strong>The structural (spine, path, etc.) which is folded across.</strong></em></p>
+<p>Defaults to <code>"Spine"</code>.</p>
+<p>Must be a single <code>character</code> string. Valid options are <code>"Spine"</code>, <code>"Path"</code>, <code>"Stop"</code>, <code>"Record"</code>,and <code>"NData"</code>.</p></dd>
 <dt>File</dt>
-<dd><p>(<code>NULL</code> or <code>numeric</code>, <code>length == length(onto)</code>, whole number) Used to specify
-specific folds for different files in the corpus (see "File-Specific Folding" section, below).</p></dd>
+<dd><p><em><strong>Which files in the corpus shoul be folded (see "File-Specific Folding" section, below).</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be natural numbers; must be length <code>length(onto)</code>.</p></dd>
 <dt>fromField</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) A string (partially) matching the
-name of a data field in the <code>humdrumR</code>-object input. This field is the field which is
-"folded" to a new field.</p></dd>
+<dd><p><em><strong>Which field to "fold."</strong></em></p>
+<p>Defaults to <code>getActiveFields(humdrumR)[1]</code>.</p>
+<p>Must be a <code>character</code> string <a href="partialMatching.html">partially</a> matching the name of a data field in the <code>humdrumR</code> input.
+For example, <code>"Tok"</code> would match the <code>Token</code> field.
+This is the field which is "folded" into a new field.</p></dd>
 <dt>fillFromField</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If the folding field is
-smaller than the <code>to</code> field, should the content of the <code>fromField</code> be copied
-into the <code>NA</code> sections?</p></dd>
+<dd><p><em><strong>Should the content of the <code>fromField</code> be copied unfolded sections?</strong></em></p>
+<p>Defaults to <code>FALSE</code> for <code>foldHumdrum()</code> and <code>foldStops()</code>; <code>TRUE</code> for <code>foldPaths()</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>This only comes into play if the folding field is smaller than the <code>to</code> field.</p></dd>
 <dt>newFieldNames</dt>
-<dd><p>(<code>character</code>) Names to use for new fields created by the folding.</p></dd>
+<dd><p><em><strong>Names to use for new fields created by the folding.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be <code>character</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="from-where-to-where">From where to where<a class="anchor" aria-label="anchor" href="#from-where-to-where"></a></h2>

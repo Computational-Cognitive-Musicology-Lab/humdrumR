@@ -20,7 +20,7 @@ anySubcorpora and namesSubcorpora functions tell us if there are any subcorpora 
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,13 +125,14 @@ For more details, use the <code><a href="census.html">census()</a></code> or <co
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>(<code>character</code>) Which types of humdrum records to count.
-Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code> or any combination of
-these (e.g., <code>"LIM"</code>).</p></dd>
-<dt>x</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumRclass</a> data object.</p></dd>
+<dd><p><em><strong>Which types of humdrum record(s) to include in the census.</strong></em></p>
+<p>Defaults to <code>"GLIMDd"</code>.</p>
+<p>Must be a single <code>character</code> string. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
+or any combination of these (e.g., <code>"LIM"</code>).
+(See the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.)</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

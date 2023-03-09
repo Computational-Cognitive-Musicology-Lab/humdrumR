@@ -1199,20 +1199,56 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
 
 
 
+
 ### Chord functions ####
+
+#' @param x ***An `atomic` vector.***
+#' 
+#' The `x` argument can be any ([atomic][base::vector]) vectors
+#' 
+#' @param Key ***The diatonic key used by the parser, deparser, and transposer.***
+#' 
+#' Defaults to `NULL`, which is interpreted as C major.
+#' 
+#' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`.
+#' 
+#' @param parseArgs ***An optional list of arguments to the [chord parser][chordParsing].***
+#' 
+#' Defaults to an empty `list()`.
+#' 
+#' Must be a `list` of named arguments to the [chord parser][chordParsing].
+#' 
+#' @param transposeArgs ***An optional list of arguments passed to a [transpose()] call.***
+#' 
+#' Defaults to an empty `list()`.
+#' 
+#' Must be a `list` of named arguments to [transpose()].
+#' 
+#' @param inPlace ***Should non-chord information be retained in the output string.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @name chordFunctions
+NULL
 
 #' "Pop/Jazz" chord symbols
 #' 
 #' This function outputs a generic "jazz" chord symbol representation of a tonal harmony.
 #' 
 #' @examples
-#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
-#' results <- chord(exampleToken)
-#' results
+#' romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')
 #' 
-#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum[[,3:4]], chord(Token))
-#' results
+#' chord(romanNumerals)
+#' chord(romanNumerals, Key = 'A:')
+#' 
+#' \dontrun{
+#' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' with(B075[[ , 2]], chord(Token))
+#' } 
+#' 
+#' @inheritParams chordFunctions
 #' @export 
 chord <- makeChordTransformer(tset2chord, 'chord')
 
@@ -1222,13 +1258,20 @@ chord <- makeChordTransformer(tset2chord, 'chord')
 #' representation of a tertian harmony.
 #' 
 #' @examples
-#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
-#' results <- figuredBass(exampleToken)
-#' results
+#' romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')
 #' 
-#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum[[,3:4]], figuredBass(Token))
-#' results
+#' figuredBass(romanNumerals)
+#' 
+#' tertian <- c('CM', 'CMm/3', 'FM', 'Fm', 'D-MM', 'GMmm')
+#' 
+#' figuredBass(tertian)
+#' 
+#' \dontrun{
+#' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' with(B075[[ , 2]], figuredBass(Token))
+#' }
+#' 
+#' @inheritParams chordFunctions
 #' @export 
 figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 
@@ -1242,17 +1285,19 @@ figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' The `roman` function however does output (relatively) traditional figures.
 #' 
 #' @examples
-#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
-#' results <- harm(exampleToken)
-#' results
-#' results <- roman(exampleToken)
-#' results
+#' tertian <- c('AM', 'AMm/3', 'DM', 'Dm', 'B-MM', 'AM/5', 'EMmm')
+#'
+#' harm(tertian, Key = 'A:')
+#' roman(tertian, Key = 'A:')
 #' 
-#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum[[,3:4]], harm(Token))
-#' results
-#' results <- with(exampleHumdrum[[,3:4]], roman(Token))
-#' results
+#' \dontrun{
+#' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#'
+#' with(B075[[ , 2]], harm(Token))
+#' with(B075[[ , 2]], roman(Token))
+#' }
+#' 
+#' @inheritParams chordFunctions
 #' @export 
 harm <- makeChordTransformer(tset2harm, 'harm')
 
@@ -1306,13 +1351,18 @@ roman <- makeChordTransformer(tset2roman, 'roman')
 #' For example, a first-inversion A major chord would be `AM/3`.
 #' 
 #' @examples
-#' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
-#' results <- tertian(exampleToken)
-#' results
+#' romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')
 #' 
-#' exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-#' results <- with(exampleHumdrum[[,3:4]], tertian(Token))
+#' tertian(romanNumerals)
+#' tertian(romanNumerals, Key = 'A:')
+#' 
+#' \dontrun{
+#' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' with(B075[[,2]], tertian(Token))
 #' results
+#' }
+#' 
+#' @inheritParams chordFunctions
 #' @export 
 tertian <- makeChordTransformer(tset2tertian, 'tertian')
 

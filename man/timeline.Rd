@@ -28,23 +28,55 @@ timestamp(
 )
 }
 \arguments{
-\item{x}{An input vector which is parsed for duration information using the \link[=rhythmParsing]{rhythm parser}.}
+\item{x}{\emph{\strong{Input rhythm information.}}
 
-\item{start}{A \code{numeric} value from which the timeline begins. Defauls to \code{0}.}
+Must be \code{atomic}, or \code{NULL}.
 
-\item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
+Is \link[=rhythmParsing]{parsed as duration information}.}
 
-\item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
+\item{start}{\emph{\strong{Where does timeline begin?}}
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
+Defaults to \code{0}.
+
+Must be a single number.}
+
+\item{pickup}{\emph{\strong{Where is there a pickup (anacrusis)?}}
+
+Defaults to \code{NULL}
+
+Must be \code{logical} of same \code{length(x)}, Or \code{NULL}.
+See "Pickups" section below.}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.
+
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 
-\item{minutes}{(\code{logical}, \code{length == 1}) If \code{TRUE}, output seconds are converted to a character string
-encoding minutes, seconds, and milliseconds in the format \code{MM.SS.ms}.}
+\item{BPM}{\emph{\strong{The tempo.}}
 
-\item{`BPM`}{A numeric values or \code{character} string in the format \code{"MM120"} (for 120 bpm). By default,
-\link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
+Defaults to \code{60}.
+
+Must be a single number or a \code{character} string in the format \code{"MM120"} (for 120 bpm).
+
+By default, \link[=withinHumdrum]{with(in).humdrumR} passes the \code{BPM} \link[=fields]{field}, if present.}
+
+\item{minutes}{\emph{\strong{Should minutes be counted in output?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, output seconds are converted to a character string encoding minutes, seconds, and milliseconds in the format \code{MM.SS.ms}.}
 }
 \description{
 These functions calculate the ammount of time (either in beats, or seconds)
@@ -93,6 +125,18 @@ Thus, a common use for the \code{pickup} argument is \verb{within(humData, timel
 the first complete bar \code{1} the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 }
 
+\examples{
+tokens <- c('4.GG', '8G', '16E', '16F#', '16G', '16D', 'q8D#', '4E')
+
+timeline(tokens)
+timestamp(tokens, BPM = '90')
+
+\dontrun{
+B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
+within(B075, timeline(Token))
+}
+
+}
 \seealso{
 {The \code{\link[=count]{count()}} and \code{\link[=metcount]{metcount()}} functions provide "higher level" musical interpretations of timeline information.}
 }

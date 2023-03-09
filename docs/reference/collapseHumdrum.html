@@ -20,7 +20,7 @@ calls to collapseHumtab, with some additional optimizations.'><!-- mathjax --><s
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,24 +123,33 @@ calls to <code>collapseHumtab</code>, with some additional optimizations.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>by</dt>
-<dd><p>(<code>character</code>) A vector of field names to group the data by.
-Data in the <code>collapseField</code> will be collapsed within these groups.</p></dd>
+<dd><p><em><strong>Fields to collapse data within.</strong></em></p>
+<p>Must be <code>character</code>.</p>
+<p>Must be a <code>character</code> string <a href="partialMatching.html">partially</a> matching the name(s) of a data field(s) in the <code>humdrumR</code> input.</p>
+<p>Data in the <code>collapseField</code> will be collapsed within these fields.</p></dd>
 <dt>collapseField</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) The target
-field in the <code>humdrumR</code> data to collapse. Defaults to the first <a href="humActive.html">active field</a>.</p></dd>
+<dd><p><em><strong>The target field in the <code>humdrumR</code> data to collapse.</strong></em></p>
+<p>Defaults to <code>getActiveFields(humdrumR)[1]</code>.</p>
+<p>Must be a single <code>character</code> string.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>(<code>character</code>) Which types of humdrum records to collapse.
-Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code> or any combination of
-these (e.g., <code>"LIM"</code>).</p></dd>
+<dd><p><em><strong>Which types of humdrum record(s) to collapse.</strong></em></p>
+<p>Defaults to <code>"GLIMDd"</code>.</p>
+<p>Must be <code>character</code>. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
+or any combination of these (e.g., <code>"LIM"</code>).
+(See the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.)</p></dd>
 <dt>collapseAtomic</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, data is collapsed
-into a single <code>character</code> string.
-If <code>FALSE</code>, data is conctanated in a <code>list</code>.</p></dd>
+<dd><p><em><strong>Whether to collapse the data into <code>character</code> strings.</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, data is collapsed into a single <code>character</code> string. If <code>FALSE</code>, data is conctanated in a <code>list</code>.</p></dd>
 <dt>sep</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) If <code>collapseAtomic == TRUE</code>, collapsed tokens
-are separated by this string.</p></dd>
+<dd><p><em><strong>A separator for collapsed strings.</strong></em></p>
+<p>Defaults to <code>" "</code> (space).</p>
+<p>Must be a single <code>character</code> string.</p>
+<p>Only has an effect if <code>collapseAtomic == TRUE</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

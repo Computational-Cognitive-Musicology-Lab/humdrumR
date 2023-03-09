@@ -60,7 +60,12 @@ Must be a \code{\link[=meter]{meter()}} object or a \code{character} vector.
 For \code{character} input, the string is parsed using \code{\link[=meter]{meter()}}; a
 failure to parse will result in an error.}
 
-\item{pickup}{\code{NULL}, or a \code{logical} vector of same length as \code{x}.}
+\item{pickup}{\emph{\strong{Where is there a pickup (anacrusis)?}}
+
+Defaults to \code{NULL}
+
+Must be \code{logical} of same \code{length(x)}, Or \code{NULL}.
+See "Pickups" section below.}
 
 \item{value}{\emph{\strong{Should the output levels be represented as rhythmic duration values?}}
 
@@ -80,13 +85,22 @@ Defaults to \code{FALSE}.
 
 A singleton \code{logical} value: an on/off switch.}
 
-\item{groupby}{A \code{list} of vectors, of the same length as \code{x}, which are used to group \code{x} into.
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
+
+Defaults to \code{list()}.
+
+Must be a \code{list}; every element of the list must be length \code{length(x)}.
+
 To function as a by-record timeline, the \code{groupby} list music include a \emph{named} \code{Piece} and \code{Record} fields.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 
-\item{parseArgs}{A \code{list} of arguments to pass to the \link[=rhythmInterval]{rhythm parser}.}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-\item{level}{***Which metric level should be counted? ***
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{level}{\emph{\strong{Which metric level should be counted?}}
 
 Defaults to the tactus of the \code{meter}.
 

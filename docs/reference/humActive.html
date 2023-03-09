@@ -18,7 +18,7 @@ an the objects &quot;Active expression&quot;."><!-- mathjax --><script src="http
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,22 +109,29 @@ $(x, name)</code></pre></div>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) Which types of humdrum records to include.
-Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd', </code>
-or any combination of these in a single string (e.g., <code>"LIM"</code>).
-(see the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for an explanation.).</p></dd>
+<dd><p><em><strong>Which types of humdrum records to include in the census.</strong></em></p>
+<p>Defaults to <code>"d"</code>.</p>
+<p>Must be <code>character</code>. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
+or any combination of these (e.g., <code>"LIM"</code>).
+(See the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.)</p></dd>
 <dt>forceAtomic</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code> (default), the evaluated active field
-is forced/coerced into a atomic vector.</p></dd>
+<dd><p><em><strong>Whether he evaluated active field is forced/coerced into a atomic vector.</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch</p></dd>
 <dt>sep</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) Only used if <code>forceAtomic == TRUE</code>; if coercion involves pasting
-together lists of vectors, <code>sep</code> is used as a separator when <a href="https://rdrr.io/r/base/paste.html" class="external-link">pasting</a>.</p></dd>
+<dd><p><em><strong>Separator to paste between collapsed strings.</strong></em></p>
+<p>Defaults to <code>", "</code>.</p>
+<p>Must be a single <code>character</code> string.</p>
+<p>Only used if <code>forceAtomic == TRUE</code>, wherein lists of vectors are pasted together.</p></dd>
 <dt>nullChar</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) Only used if <code>forceAtomic == TRUE</code>; if <code>nullChar == TRUE</code>
-and <code>NA</code>s in the output vector are replaced with humdrum null character tokens: <code>"."</code>, <code>"!"</code>, <code>"="</code>,
-or <code>"*"</code>, depending on type.</p></dd>
+<dd><p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch</p>
+<p>If <code>nullChar == TRUE</code> and the output is <code>character</code>, <code>NA</code>s in the output vector are replaced with humdrum
+null character tokens: <code>"."</code>, <code>"!"</code>, <code>"="</code>, or <code>"*"</code>.
+If <code>forceAtomic</code> is <code>FALSE</code>, <code>nullChar</code> is ignored.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

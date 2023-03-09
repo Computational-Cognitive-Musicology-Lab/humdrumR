@@ -16,7 +16,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,11 +95,17 @@ print(spineTable, showEach = TRUE)</code></pre></div>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR object</a></p></dd>
+<dd><p><em><strong>HumdrumR data to summarize.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>drop</dt>
-<dd><p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of a <code>humSpine</code> table.</p></dd>
+<dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+a <code>humCensus</code> table.</p></dd>
 <dt>i</dt>
-<dd><p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
+<dd><p><em><strong>Index for rows.</strong></em></p>
+<p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
 as a regular expression against filenames in the corpus.</p></dd>
 </dl></div>
     <div class="section level2">
@@ -127,6 +133,41 @@ of the unique combinations of spines and paths in the files are also printed.</p
 <code><a href="reference.html">reference</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/*.krn"</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpiec5so/temp_libpath4863748719359/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ten files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating ten files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing ten files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-in"><span class="fu">spines</span><span class="op">(</span><span class="va">chorales</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Spine structure in in humdrumR corpus "chorales" (ten files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     Spines  + Paths  In  *^  *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###############################################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor001.krn [ 1]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor002.krn [ 2]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor003.krn [ 3]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor004.krn [ 4]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor005.krn [ 5]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor006.krn [ 6]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor007.krn [ 7]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor008.krn [ 8]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor009.krn [ 9]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chor010.krn [10]       4        0            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###############################################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     Spines  + Paths  In  *^  *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   Tallies:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         10 files with 4 spines</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

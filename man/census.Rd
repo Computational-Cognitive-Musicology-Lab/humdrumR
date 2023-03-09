@@ -19,22 +19,43 @@ census(humdata)[i]
 \method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR object}}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-\item{dataTypes}{Which types of humdrum records to include in the census. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
+
+Defaults to \code{"GLIMDd"}.
+
+Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
 (see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
 
-\item{by}{An arbitrary expression which indicates how to group the data.}
+\item{by}{\emph{\strong{An arbitrary expression which indicates how to group the data.}}
 
-\item{removeEmpty}{(\code{logical}, \code{length == 1}) If set \code{TRUE}, any groups that have zero tokens are
-not included in the \code{humCensus} table.}
+Defaults to \code{Filename} (a humdrumR \link[=humTable]{data field}).}
 
-\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+\item{removeEmpty}{\emph{\strong{Whether to include zero tokens.}}
+
+Defaults to \code{FALSE}
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If set \code{TRUE}, any groups that have zero tokens are not included in the \code{humCensus} table.}
+
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
 a \code{humCensus} table.}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
-as a regular expression against the "by-group" names.}
+\item{i}{\emph{\strong{Index for rows.}}
+
+If \code{numeric}, selects rows by index.
+If \code{character}, the string is matched  as a regular expression against the "by-group" names.}
 }
 \description{
 \code{census} tabulates the raw "size" of a \link[=humdrumRclass]{humdrumR corpus},
@@ -87,6 +108,11 @@ like the \code{groupby} argument to a \link[=withHumdrum]{with/within} call.
 The by expression must be the full length of the humdrum table.
 }
 
+\examples{
+chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+census(chorales)
+
+}
 \seealso{
 Other corpus summary functions: 
 \code{\link{humSummary}},

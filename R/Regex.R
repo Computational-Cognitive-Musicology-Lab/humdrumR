@@ -210,9 +210,16 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' including multiple matches of the same string.
 #' 
 #' 
-#' @param x A `character` vector to search in.
-#' @param regex One or more regular expressions. If more than one regex is supplied,
-#'  matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
+#' @param x ***A `character` vector to search in.***
+#' 
+#' Must be `character`.
+#' 
+#' @param regex ***One or more regular expressions.***
+#' 
+#' Must be `character`.
+#' 
+#' If more than one regex is supplied,
+#' matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
 #'
 #' @export
 #' @name RegexFind
@@ -757,7 +764,7 @@ makeRE.dur <- function(..., sep.time = ':', sep.date = '/', sep.decimal = '\\.',
 makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
   REs <- list(graceMark1 = '([Qq][^0-9q]*)?',
               recip = paste0('(', if (fractions) paste0('([1-9][0-9]*', sep, ')?'),
-                             '[1-9][0-9]*\\.*|0{1,2}\\.*)'),
+                             '[0-9]+\\.*|0{1,2}\\.*)'),
               graceMark2 = '([^qQ]*[Qq])?')
   if (collapse) setNames(cREs(REs), 'recip') else REs
 }
@@ -775,20 +782,25 @@ makeRE.timeSignature <- function(..., sep = '/', collapse = TRUE) {
     
 }
 
+makeRE.grid <- function(..., sep = '', on = 'X', off = 'O') {
+  RE <- paste0(on, '(', sep, off, ')*')
+  
+  setNames(RE, 'grid')
+}
 
-noteValue.unicode <- data.frame(stringsAsFactors = FALSE,
+notehead.unicode <- data.frame(stringsAsFactors = FALSE,
                                 Unicode = c('\U1D15C', '\U1D15D', '\U1D15E', '\U1D15F', 
                                             '\U1D160', '\U1D161', '\U1D162', '\U1D163', '\U1D164'),
                                 Recip = c('0', '1', '2', '4', '8', '16', '32', '64', '128'))
 
-makeRE.noteValue <- function(..., sep = " \U2215", collapse = TRUE) {
+makeRE.notehead <- function(..., sep = " \U2215", collapse = TRUE) {
   
   REs <- list(multiplies = '([1-9][0-9]*)?',
-              value = captureRE(noteValue.unicode$Unicode),
+              value = captureRE(notehead.unicode$Unicode),
               divides = paste0('(', sep, '[1-9][0-9]*)?'),
               space = ' ',
               dots = paste0('(',  '\U1D16D\U2009',')*'))
   
-  if (collapse) setNames(cREs(REs), 'noteValue') else REs
+  if (collapse) setNames(cREs(REs), 'notehead') else REs
 }
 

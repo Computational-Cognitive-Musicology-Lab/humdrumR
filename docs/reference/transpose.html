@@ -20,7 +20,7 @@ functions, so you probably won't call it directly very often."><!-- mathjax --><
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,20 +95,29 @@ functions, so you probably won't call it directly very often.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>The input pitch(es) to transpose. A <code>tonalInterval</code> or something intepretable as a <code>tonalInterval</code>.</p></dd>
+<dd><p>***The input pitch(es) to transpose. ***</p>
+<p>Can be a <code>tonalInterval</code> or something <a href="pitchParsing.html">intepretable as a pitch information</a>.</p></dd>
 <dt>by</dt>
-<dd><p>A <code>tonalInterval</code> or something intepretable as a <code>tonalInterval</code>.
-The input <code>x</code> is transposed by this interval.</p></dd>
+<dd><p><em><strong>Transpose by this interval.</strong></em></p>
+<p>Can be a <code>tonalInterval</code> or something intepretable as a <code>tonalInterval</code>.</p></dd>
 <dt>Key</dt>
-<dd><p>A <code>diatonicSet</code> or something intepretable as a <code>diatonicSet</code>. For tonal and/or to transpositions,
-this is the "from" key. If this value is <code>NULL</code>, it defaults to C major.</p></dd>
+<dd><p><em><strong>Transpose <em>from</em> this key (to the <code>to</code> key).</strong></em></p>
+<p>Can be a <code>diatonicSet</code> or something intepretable as a <code>diatonicSet</code>.</p>
+<p>For tonal and/or to transpositions, this is the "from" key. If this value is <code>NULL</code>, it defaults to C major.</p></dd>
 <dt>to</dt>
-<dd><p>A <code>diatonicSet</code> or something intepretable as a <code>diatonicSet</code>. The input <code>x</code> is transposed
-to this key.</p></dd>
+<dd><p><em><strong>Transpose <em>to</em> this key (from the <code>Key</code> key).</strong></em></p>
+<p>Can be a <code>diatonicSet</code> or something intepretable as a <code>diatonicSet</code>.</p></dd>
 <dt>real</dt>
-<dd><p>A logical. If <code>TRUE</code> (the default), transposition is real. If <code>FALSE</code>, transposition is tonal.</p></dd>
+<dd><p><em><strong>Should transposition be real (or tonal)?</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleon <code>logical</code> value: an on/off switch.</p>
+<p>If <code>real == FALSE</code>, transposition is tonal.</p></dd>
 <dt>relative</dt>
-<dd><p>A logical. If <code>TRUE</code> transposition is relative. If <code>FALSE</code> (the default), transposition is parallel.</p></dd>
+<dd><p><em><strong>Should transposition between keys be relative (or parallel)?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>Only relavent if using transposing between keys (<code>Key</code> and <code>to</code>) with different modes.
+If <code>relative == FALSE</code>, transposition is parallel.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

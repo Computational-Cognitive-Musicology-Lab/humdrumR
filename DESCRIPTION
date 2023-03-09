@@ -1,6 +1,6 @@
 Package: humdrumR
 Title: humdrumR
-Version: 0.5.0.0000
+Version: 0.5.3.1
 Authors@R: c(person("Nathaniel", "Condit-Schultz", email = "natcs@gatech.edu", role = c("aut", "cre")),
              person("Claire", "Arthur", email = "claire.arthur@gatech.edu", role = "aut"))
 Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 
@@ -12,6 +12,7 @@ Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
+         Analysis.R
          messages.R
          Dispatch.R
          humdrumR-class.R

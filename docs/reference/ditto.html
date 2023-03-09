@@ -18,7 +18,7 @@ If the input begins (or ends if reverse == TRUE) with a null value, the initial 
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,27 +116,41 @@ If the input begins (or ends if <code>reverse == TRUE</code>) with a null value,
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A vector.</p></dd>
+<dd><p><em><strong>A vector.</strong></em></p>
+<p>Should be <code>list</code>, <code>atomic</code>, <code>matrix</code>, or <code>data.frame</code>.</p></dd>
 <dt>null</dt>
-<dd><p>Either a logical vector where (<code>length(x) == length(null)</code>), a numeric
+<dd><p><em><strong>Defines which elements needs to be filled.</strong></em></p>
+<p>Defaults to <code>function(x) is.na(x) | x == "."</code>.</p>
+<p>Should be either a logical vector where (<code>length(x) == length(null)</code>), a numeric
 vector of positive indices, or a function which, when applied to <code>x</code> returns an appropriate logical/numeric vector.</p></dd>
 <dt>initial</dt>
-<dd><p>A value (<code>length == 1</code>) of the same class as <code>x</code>, used to pad the beginning (or end, if <code>reverse == TRUE</code>) of the output,
-if necessary.</p></dd>
+<dd><p><em><strong>Padder for the beginning (or end, if <code>reverse == TRUE</code>) of the output, if needed.</strong></em></p>
+<p>Defaults to <code>NA</code>.</p>
+<p>Should be the same class as <code>x</code>; must be length <code>1</code>.</p></dd>
 <dt>reverse</dt>
-<dd><p>(<code>logical</code> &amp; <code>length == 1</code>) If <code>reverse == TRUE</code>, the "non-null" values are coped to overwrite null values
+<dd><p><em><strong>Whether the excecution order is reversed.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>reverse == TRUE</code>, the "non-null" values are coped to overwrite null values
 <em>earlier</em> (lower indices) in the vector.</p></dd>
 <dt>groupby</dt>
-<dd><p>A vector or list of vectors, all of the same length as <code>x</code>. Each segment of <code>x</code> delineated
-by the <code>groupby</code> vector(s) is treated separately.</p></dd>
+<dd><p><em><strong>How to group the data.</strong></em></p>
+<p>Should be <code>vector</code> or <code>list</code> of <code>vectors</code>; must be length <code>length(x)</code>.</p>
+<p>Each segment of <code>x</code> delineated by the <code>groupby</code> vector(s) is treated separately.</p></dd>
 <dt>margin</dt>
-<dd><p>a vector giving the subscripts which the function will be applied over.
-E.g., for a matrix <code>1</code> indicates rows, <code>2</code> indicates columns.
+<dd><p><em><strong>A vector giving the dimensions which the function will be applied over.</strong></em></p>
+<p>Defaults to <code>2</code> (across columns) for <code>matrix</code> inputs.</p>
+<p>Must be natural number(s).</p>
+<p>E.g., for a matrix <code>1</code> indicates rows, <code>2</code> indicates columns.
 Where <code>x</code> has named dimnames, it can be a character vector selecting dimension names.</p></dd>
 <dt>field</dt>
-<dd><p>Which field (<a href="partialMatching.html">partially matched</a>) in the <code>humdrumR</code> dataset should be dittoed?</p></dd>
+<dd><p><em><strong>Which field to ditto?</strong></em></p>
+<p>Must be a single <code>character</code> string.</p>
+<p>Is (<a href="partialMatching.html">partially matched</a>) against <a href="humTable.html">fields</a> in <code>x</code>.</p></dd>
 <dt>newField</dt>
-<dd><p>(<code>character</code> of <code>length == 1</code>) What to name the new (dittoed) field.</p></dd>
+<dd><p><em><strong>What to name the new (dittoed) field.</strong></em></p>
+<p>Defaults to the <code>field</code> name appended with <code>"_ditto"</code>.</p>
+<p>Must be a single <code>character</code> string.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

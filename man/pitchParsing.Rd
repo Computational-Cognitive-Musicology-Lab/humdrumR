@@ -8,6 +8,8 @@
 \alias{tonalInterval.NULL}
 \alias{tonalInterval.numeric}
 \alias{tonalInterval.character}
+\alias{tonalInterval.factor}
+\alias{tonalInterval.token}
 \title{Parsing pitch information}
 \usage{
 tonalInterval(...)
@@ -21,14 +23,26 @@ tonalInterval(...)
 \method{tonalInterval}{numeric}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
 
 \method{tonalInterval}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
+
+\method{tonalInterval}{factor}(x, Exclusive = NULL, ...)
+
+\method{tonalInterval}{token}(x, Exclusive = NULL, ...)
 }
 \arguments{
-\item{Exclusive}{(\code{character},  \code{length == 1 | length == length(x)})}
+\item{Exclusive}{\emph{\strong{An exclusive interpretation to guide parsing of the input.}}
 
-\item{str}{(\code{character} or \code{numeric}) The input vector.}
+Must be \code{character}; must be either length \code{1} or \code{length(x)}.}
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} is used
-to interpret pitch representations.
+\item{str}{\emph{\strong{The input vector.}}
+
+Must be either \code{character} or \code{numeric}.}
+
+\item{Key}{\emph{\strong{The diatonic key used to interpret the pitch information.}}
+
+Defaults to \code{NULL}.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}
+
 For example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
 The output \code{tonalInterval} is output \emph{within the key}: thus, \code{tonalInterval('C#', Key = "A:")}
 returns the tint representing a \strong{Major 3rd}, because \emph{C#} is the major third of A major.}

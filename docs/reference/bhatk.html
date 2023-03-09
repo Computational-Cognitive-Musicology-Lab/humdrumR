@@ -12,7 +12,7 @@ in hindustani music---like solfege."><!-- mathjax --><script src="https://cdnjs.
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,6 +86,7 @@ in hindustani music---like solfege.</p>
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  gamutArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
   inPlace <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -93,23 +94,36 @@ in hindustani music---like solfege.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
+<dd><p><em><strong>Input data to parse as pitch information.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
 <dt>...</dt>
-<dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
-There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+<dd><p><em><strong>Arguments passed to the <a href="pitchDeparsing.html">pitch deparser</a>.</strong></em></p>
+<p>There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>generic</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>generic = TRUE</code> the "specific" pitch information (accidentals and qualites) is discarded.</p></dd>
+<dd><p><em><strong>Should "specific" pitch information (accidentals and qualites) be discarded?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>simple</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "compound" pitch information (octave/contour) is discarded.</p></dd>
+<dd><p><em><strong>Should "compound" pitch information (octave/contour) be discarded?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
-the parser, deparser, and transposer.</p></dd>
+<dd><p><em><strong>The input <code>Key</code> used by the parser, deparser, and transposer.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code></p></dd>
 <dt>transposeArgs</dt>
-<dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <a href="transpose.html">transpose</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to a special <code><a href="transpose.html">transpose()</a></code> call.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to <code><a href="transpose.html">transpose()</a></code>.</p></dd>
 <dt>parseArgs</dt>
-<dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="pitchParsing.html">pitch parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
+<dd><p><em><strong>Should non-pitch information be retained in the output string.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p>
+<p>This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-pitch information.
 If <code>inPlace = FALSE</code>, only the pitch output information will be returned (details below).</p></dd>
@@ -235,6 +249,22 @@ Note that <code>inPlace = TRUE</code> will force functions like <code>semits</co
 
     </div>
     <div class="section level2">
+    <h2 id="pitch-gamut-levels">Pitch-Gamut Levels<a class="anchor" aria-label="anchor" href="#pitch-gamut-levels"></a></h2>
+    
+
+
+<p>The <code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> will automatically generate factor levels
+for pitch data using the <code><a href="gamut.html">gamut()</a></code> function.
+This is makes sure tabulated data sorted in a logical order, and includes
+missing pitches.
+The <code>simple</code>/<code>complex</code> and  <code>generic</code>/<code>specific</code> arguments are automatically passed to <code><a href="gamut.html">gamut()</a></code>; additional
+arguments can be passed to gamut using <code>gamutArgs = list(...)</code>, or with the syntactic sugar <code>gamut(...)</code>.
+(Read the <code><a href="gamut.html">gamut()</a></code> docs for an explanation of gamut generation.)
+This feature be used to control table layout of pitch data, as well as to assure
+consistent tables when grouping data.</p>
+<p>When <code>inPlace = TRUE</code> no special tabulation will occur.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>To better understand how this function works, read about the <a href="pitchFunctions.html">family of pitch functions</a>,
 or how pitches are <a href="pitchParsing.html">parsed</a> and <a href="pitchDeparsing.html">deparsed</a>.</p>
@@ -262,6 +292,32 @@ or how pitches are <a href="pitchParsing.html">parsed</a> and <a href="pitchDepa
 <code><a href="tonh.html">tonh</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">exampleToken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4GG'</span>, <span class="st">'4G'</span>, <span class="st">'4E'</span>, <span class="st">'4F#'</span>, <span class="st">'4G'</span>, <span class="st">'4D'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">bhatk</span><span class="op">(</span><span class="va">exampleToken</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">results</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **bhatk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] P,, P,  G,  m,  P,  R,  G, </span>
+<span class="r-in"></span>
+<span class="r-in"><span class="va">exampleHumdrum</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpiec5so/temp_libpath4863748719359/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> One files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing one files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">exampleHumdrum</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">bhatk</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">results</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **bhatk</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] .   S,  P,  N,, P,  S,  P,  M,, M,  M,, M,  P,, G,  P,, R,  S,  .   G   P  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20] S   G   P,  S   S   G   G   P   G   P   R   M   S   G   S   D   S   D   S  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [39] P   M,  N,  G,  S   .  </span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

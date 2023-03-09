@@ -13,9 +13,13 @@ interpretations(humdrumR)
 \method{print}{humInterpretations}(interps, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
-\item{humdrumR}{A \link[=humdrumR-class]{humdrumR} data object.}
+\item{humdrumR}{\emph{\strong{HumdrumR data to summarize.}}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{i}{\emph{\strong{Index for rows.}}
+
+If \code{numeric}, selects rows by index. If \code{character}, the string is matched
 as a regular expression against the filenames in the corpus.}
 }
 \description{
@@ -63,6 +67,11 @@ The tabulation by \code{interpretations} will return a \code{Key} column with th
 \item \code{3} because there are three unique keys: \verb{*C:}, \verb{*e:} and \verb{*G:}.
 \item \code{2} because the key interpretations only occur in two spines.
 }
+}
+\examples{
+chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
+interpretations(chorales)
+
 }
 \seealso{
 Other corpus summary functions: 

@@ -768,6 +768,8 @@ This will look something like this:
 #' This argument is parsed blah blah blah.
 ```
 
+Note that the formatting `***` that bracket the first part of the description can't have spaces immediately inside them.
+
 #### Description
 
 The description should be concise and readable.

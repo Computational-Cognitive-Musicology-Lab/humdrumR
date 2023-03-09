@@ -18,7 +18,7 @@ so check out the meter() documentation if you are looking for more control of th
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,8 +112,10 @@ metric level are identified.
 Otherwise, the <code>levels</code> are parsed with <code><a href="rhythmParsing.html">rhythmInterval()</a></code>; fail to parse may lead to an error.
 The parsed levels must be levels of the given <code><a href="meter.html">meter()</a></code>.</p></dd>
 <dt>groupby</dt>
-<dd><p>A <code>list</code> of vectors, of the same length as <code>x</code>, which are used to group <code>x</code> into.
-To function as a by-record timeline, the <code>groupby</code> list music include a <em>named</em> <code>Piece</code> and <code>Record</code> fields.
+<dd><p><em><strong>A <code>list</code> of vectors to group <code>x</code>.</strong></em></p>
+<p>Defaults to <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code>; every element of the list must be length <code>length(x)</code>.</p>
+<p>To function as a by-record timeline, the <code>groupby</code> list music include a <em>named</em> <code>Piece</code> and <code>Record</code> fields.
 Luckily, these are automatically passed by <a href="withinHumdrum.html">with(in).humdrumR</a>, so you won't need to worry about it!</p></dd>
 </dl></div>
     <div class="section level2">

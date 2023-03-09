@@ -16,7 +16,7 @@ The written output should match the printout if printing the data in the R termi
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,27 +99,44 @@ The written output should match the printout if printing the data in the <code>R
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dd><p><em><strong>HumdrumR data to write.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>prefix</dt>
-<dd><p>(<code>character</code>, <code>length == 1L</code>) A <code>character</code> string prepended to the file name.</p></dd>
+<dd><p><em><strong>A prefix to add to output filenames.</strong></em></p>
+<p>Defaults to <code>"humdrumR_"</code>.</p>
+<p>Must be a single <code>character</code> string.</p></dd>
 <dt>renamer</dt>
-<dd><p>A <code>function</code>. Must accept a <code>character</code> vector and return a new atomic vector
+<dd><p><em><strong>A <code>function</code> to modify output filenames.</strong></em></p>
+<p>Defaults to <code>force</code> (keep the original filenames).</p>
+<p>Must be a <code>function</code> which accepts a <code>character</code> vector and returns a new <code>charater</code> vector
 of the same length.</p></dd>
 <dt>affix</dt>
-<dd><p>(<code>character</code>, <code>length == 1L</code>) A <code>character</code> string appended to the file name
-(before the extension).</p></dd>
+<dd><p><em><strong>An affix to add to output filenames.</strong></em></p>
+<p>Defaults to <code>""</code>.</p>
+<p>Must be a single <code>character</code> string.</p>
+<p>Affix is appended at end of filename, but before the extension.</p></dd>
 <dt>directory</dt>
-<dd><p>(<code>character</code>, <code>length == 1L</code>) A directory to write the files into. If <code>NULL</code>,
-files are written to the same directory (or directories) they were <a href="readHumdrum.html">read from</a>.</p></dd>
+<dd><p><em><strong>A directory to write the files into.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a single <code>character</code> string.</p>
+<p>If <code>NULL</code>, files are written to the same directory (or directories) they were <a href="readHumdrum.html">read from</a>.</p></dd>
 <dt>overwrite</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>FALSE</code>, <code>writeHumdrum</code> will refuse to overwrite
+<dd><p><em><strong>Whether to overite existing files.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>FALSE</code>, <code>writeHumdrum</code> will refuse to overwrite
 any files. If <code>TRUE</code>, <code>writeHumdrum</code> will overwrite files, but only after an additional prompt from the user.</p></dd>
 <dt>verbose</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>TRUE</code>, each <em>new</em> output file name is printed on the console
+<dd><p><em><strong>Whether to show file names while writing.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, each <em>new</em> output file name is printed on the console
 as the writing happens.</p></dd>
 <dt>EMD</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) A string to write to a new <code>!!!EMD:</code> record in each file.
-If <code>NULL</code>, not appended.</p></dd>
+<dd><p><em><strong>A string to write to a new <code>!!!EMD:</code> record in each file.</strong></em></p>
+<p>Defaults to "Editing in humdrumR, version X.X.X.XXX, on current data/time."</p>
+<p>Must be a single <code>character</code> string.</p>
+<p>If <code>NULL</code>, not appended.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="file-names">File names<a class="anchor" aria-label="anchor" href="#file-names"></a></h2>

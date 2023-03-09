@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,23 +74,37 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">quality</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, Key <span class="op">=</span> <span class="cn">NULL</span>, parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, inPlace <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">quality</span><span class="op">(</span>
+  <span class="va">x</span>,
+  <span class="va">...</span>,
+  Key <span class="op">=</span> <span class="cn">NULL</span>,
+  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  gamutArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
+  inPlace <span class="op">=</span> <span class="cn">FALSE</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
+<dd><p><em><strong>Input data to parse as pitch information.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
 <dt>...</dt>
-<dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
-There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+<dd><p><em><strong>Arguments passed to the <a href="pitchDeparsing.html">pitch deparser</a>.</strong></em></p>
+<p>There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>Key</dt>
-<dd><p>(a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
-the parser, deparser, and transposer.</p></dd>
+<dd><p><em><strong>The input <code>Key</code> used by the parser, deparser, and transposer.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code></p></dd>
 <dt>parseArgs</dt>
-<dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="pitchParsing.html">pitch parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
+<dd><p><em><strong>Should non-pitch information be retained in the output string.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p>
+<p>This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-pitch information.
 If <code>inPlace = FALSE</code>, only the pitch output information will be returned (details below).</p></dd>
