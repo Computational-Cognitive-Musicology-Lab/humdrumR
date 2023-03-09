@@ -19,9 +19,9 @@ census(humdata)[i]
 \method{print}{humCensus}(censusTable, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
 
@@ -33,13 +33,13 @@ or any combination of these (e.g., \code{"LIM"}).
 
 \item{by}{\emph{\strong{An arbitrary expression which indicates how to group the data.}}
 
-Defaults to \code{Filename}.}
+Defaults to \code{Filename} (a humdrumR \link[=humTable]{data field}).}
 
 \item{removeEmpty}{\emph{\strong{Whether to include zero tokens.}}
 
 Defaults to \code{FALSE}
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If set \code{TRUE}, any groups that have zero tokens are not included in the \code{humCensus} table.}
 
@@ -47,13 +47,15 @@ If set \code{TRUE}, any groups that have zero tokens are not included in the \co
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
 a \code{humCensus} table.}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
-as a regular expression against the "by-group" names.}
+\item{i}{\emph{\strong{Index for rows.}}
+
+If \code{numeric}, selects rows by index.
+If \code{character}, the string is matched  as a regular expression against the "by-group" names.}
 }
 \description{
 \code{census} tabulates the raw "size" of a \link[=humdrumRclass]{humdrumR corpus},

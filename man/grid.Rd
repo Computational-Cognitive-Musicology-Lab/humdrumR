@@ -36,55 +36,63 @@ fromgrid(x, tick, meter)
 \method{fromgrid}{integer}(x, tick = "16", deparser = recip, ...)
 }
 \arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector}}
+\item{x}{\emph{\strong{An input  vector.}}
 
-The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.
 
-\item{...}{Argments passed to the \code{deparser}.}
+Must be \link[=rhythmParsing]{parsable as rhythm infromation}.}
 
-\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
+\item{...}{\emph{\strong{Argments passed to the \link[=rhythmDeparsing]{deparser}.}}}
 
-Defaults to \code{list()}.
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-Must be a \code{list}.}
+Defaults to an empty \code{list()}.
 
-\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement}}
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
 
 Defaults to \code{rational(1, 1)}.
 
 Must be \code{numeric} or \link{rational}.}
 
-\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
+\item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
 
 Defaults to \code{FALSE}.
 
-Must be a \code{logical}; must be length \code{1}.}
+Must be a singleton  \code{logical} value: an on/off switch.
 
-\item{tick}{What is the unit of the grid?
+Defaults to \code{FALSE}.
+
+A singleton \code{logical} value, or \code{NA}.
+
+See "Grace notes" section below.}
+
+\item{tick}{\emph{\strong{What is the unit of the grid?}}
 
 Defaults to sixteenth-note (\code{fromgrid()}) or the \code{\link[=tatum]{tatum()}} of the \code{x} argument.
 
 Must be parsed as a rhythm by \code{\link[=rhythmInterval]{rhythmInterval()}}.}
 
-\item{on, off}{What represents onsets (attacks) and rests in the grid?
+\item{on, off}{\emph{\strong{What represents onsets (attacks) and rests in the grid?}}
 
 Default to \code{"X"} and \code{"O"} respectively.
 
 Must be singleton atomic values.}
 
-\item{collapse}{Should the output be collapsed to a single string per measure?
+\item{collapse}{\emph{\strong{Should the output be collapsed to a single string per measure?}}
 
 Defaults to \code{TRUE}.
 
-Must be sinleton \code{logical} value: an on/off switch.}
+Must be singleton \code{logical} value: an on/off switch.}
 
-\item{sep}{What separates each on/off tick in a string?
+\item{sep}{\emph{\strong{Separator between ticks in collapsed output.}}
 
 Defaults to an empty string (no separator).
 
 Must be a singleton \code{character} string.}
 
-\item{deparser}{What output representation should be returned?
+\item{deparser}{\emph{\strong{What output representation should be returned?}}
 
 Defaults to \code{\link[=recip]{recip()}}.
 

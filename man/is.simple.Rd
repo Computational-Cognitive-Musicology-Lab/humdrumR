@@ -19,11 +19,11 @@ is.generic(x, Key, ...)
 \method{is.generic}{tonalInterval}(x, Key = NULL)
 }
 \arguments{
-\item{x}{\emph{\strong{A \code{tonalInterval}}}
+\item{x}{\emph{\strong{Pitch information.}}
 
-Must be a \code{tonalInterval} or something that can be parsed as one.}
+Must be something that can be \link[=pitchParsing]{parsed as pitch information}.}
 
-\item{...}{Parameters passed to \code{\link[=tonalInterval]{tonalInterval()}}.}
+\item{...}{\emph{\strong{Parameters passed to \code{\link[=tonalInterval]{tonalInterval()}}.}}}
 
 \item{octave.round}{\emph{\strong{The rounding function.}}
 
@@ -31,11 +31,11 @@ Must be a \link[=expand]{rouding function}.
 
 Controls how simple intervals are interpreted relative to C.}
 
-\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
+\item{Key}{\emph{\strong{The diatonic key used to defined generic pitches.}}
 
 Defaults to \code{NULL}.
 
-Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+Must be something that can be \link[=keyParsing]{parsed as a diatonic key}; must be either length \code{1} or \code{length(x)}.}
 }
 \description{
 These functions test basic properties of pitch information.

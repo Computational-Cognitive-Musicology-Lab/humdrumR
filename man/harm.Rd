@@ -24,13 +24,13 @@ roman(
 )
 }
 \arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector}}
+\item{x}{\emph{\strong{An \code{atomic} vector.}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
 
-\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
+\item{Key}{\emph{\strong{The diatonic key used by the parser, deparser, and transposer.}}
 
-Defaults to \code{NULL}.
+Defaults to \code{NULL}, which is interpreted as C major.
 
 Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}.}
 
@@ -38,19 +38,19 @@ Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must 
 
 Defaults to an empty \code{list()}.
 
-Must be a \code{list}.}
+Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
 
-\item{parseArgs}{\emph{\strong{An optional list of arguments to the \link[=pitchParsing]{pitch parser}.}}
+\item{parseArgs}{\emph{\strong{An optional list of arguments to the \link[=chordParsing]{chord parser}.}}
 
 Defaults to an empty \code{list()}.
 
-Must be a \code{list}.}
+Must be a \code{list} of named arguments to the \link[=chordParsing]{chord parser}.}
 
-\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
+\item{inPlace}{\emph{\strong{Should non-chord information be retained in the output string.}}
 
 Defaults to \code{FALSE}.
 
-Must be a singleton  \code{logical} value: an on/off switch.}
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
 These functions output \href{https://en.wikipedia.org/wiki/Roman_numeral_analysis}{roman numeral}

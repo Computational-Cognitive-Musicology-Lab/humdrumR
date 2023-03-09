@@ -43,21 +43,17 @@ anySubcorpora(humdrumR)
 namesSubcorpora(humdrumR)
 }
 \arguments{
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to include in the census.}}
 
 Defaults to \code{"GLIMDd"}.
 
-Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
-(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
-
-\item{x}{\emph{\strong{A \link{humdrumRclass} data object.}}
-
-Must be \code{humdrumRclass}.}
+(See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 }
 \description{
 These functions can be used to quickly

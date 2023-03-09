@@ -29,13 +29,15 @@ tonalInterval(...)
 \method{tonalInterval}{token}(x, Exclusive = NULL, ...)
 }
 \arguments{
-\item{Exclusive}{Must be \code{character}; must be either length \code{1} or \code{length(x)}.}
+\item{Exclusive}{\emph{\strong{An exclusive interpretation to guide parsing of the input.}}
+
+Must be \code{character}; must be either length \code{1} or \code{length(x)}.}
 
 \item{str}{\emph{\strong{The input vector.}}
 
 Must be either \code{character} or \code{numeric}.}
 
-\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
+\item{Key}{\emph{\strong{The diatonic key used to interpret the pitch information.}}
 
 Defaults to \code{NULL}.
 

@@ -43,7 +43,7 @@ makeHumdrumDispatcher(
 \arguments{
 \item{dispatchDF}{\emph{\strong{A data.frame which describes what function should be called for which regex input. (See details).}}
 
-Must be \code{data.frame}.}
+Must be a \code{data.frame}.}
 
 \item{Exclusive}{\emph{\strong{Exclusive interpretations to dispatch.}}
 
@@ -55,25 +55,25 @@ If \code{NULL}, only the regexes are used for dispatch.}
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: a on/off switch.
 
 If \code{FALSE} the "best" regex/exclusive match is dispatched for each Exclusive segment.
 If \code{TRUE}, differenet functions can be dispatched
 within the same input vector.}
 
-\item{...}{Arguments to pass to dispatch functions.}
+\item{...}{\emph{\strong{Arguments to pass to dispatch functions.}}}
 
 \item{outputClass}{\emph{\strong{The default output class which the function should return.}}
 
 Defaults to \code{"character"}.
 
-Must be \code{character}.
+Must be single \code{character} string.
 
 Generally, to make sense, all dispatched functions should return the same type, which you should explicitly
 indicate with the \code{outputClass} argument.
 Dispatch functions should also be \link[base:Vectorize]{vectorized}.}
 
-\item{str}{\emph{\strong{The input \code{character} string, on which dispatch is called.}}
+\item{str}{\emph{\strong{The input strings, on which dispatch is called.}}
 
 Must be \code{character}.}
 }

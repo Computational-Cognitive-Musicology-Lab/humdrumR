@@ -56,13 +56,13 @@ The contents of \code{list} are parsed as durations using \code{\link[=rhythmInt
 levels of the meter.
 Failures to parse the input will result in an error.}
 
-\item{measure, tick, tactus}{Durations to use longest (measure), shortest (tick), or tactus levels.
+\item{measure, tick, tactus}{\emph{\strong{Durations to use longest (measure), shortest (tick), or tactus levels.}}
 
 Must be a singleton \code{character} or \code{numeric} value, or a \code{list} containing a single vector of such values.
 
 These are parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}; parse failures lead to errors.}
 
-\item{fill.levels}{Should "gaps" between specified levels be added to the meter?
+\item{fill.levels}{\emph{\strong{Should "gaps" between specified levels be added to the meter?}}
 
 Must be a singleton \code{logical} or \code{character} value; \code{character} values must be \code{'above'}, \code{'below'}, \code{'both'}, or \code{'neither'}.
 

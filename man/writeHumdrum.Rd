@@ -17,34 +17,36 @@ writeHumdrum(
 )
 }
 \arguments{
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object} to write.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data to write.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{prefix}{\emph{\strong{A \code{character} string prepended to the file name.}}
+\item{prefix}{\emph{\strong{A prefix to add to output filenames.}}
 
 Defaults to \code{"humdrumR_"}.
 
-Must be \code{character}; must be length \code{1}.}
+Must be a single \code{character} string.}
 
-\item{renamer}{\emph{\strong{A \code{function} for change the type of \code{Filename} field.}}
+\item{renamer}{\emph{\strong{A \code{function} to modify output filenames.}}
 
-Defaults to \code{force}.
+Defaults to \code{force} (keep the original filenames).
 
-Must be \code{function}. Must accept a \code{character} vector and return a new \code{atomic} vector
+Must be a \code{function} which accepts a \code{character} vector and returns a new \code{charater} vector
 of the same length.}
 
-\item{affix}{\emph{\strong{A \code{character} string appended to the file name (before the extension).}}
+\item{affix}{\emph{\strong{An affix to add to output filenames.}}
 
 Defaults to \code{""}.
 
-Must be \code{character}; must be length \code{1}.}
+Must be a single \code{character} string.
 
-\item{directory}{***A directory to write the files into. ***
+Affix is appended at end of filename, but before the extension.}
+
+\item{directory}{\emph{\strong{A directory to write the files into.}}
 
 Defaults to \code{NULL}.
 
-Must be \code{character}; must be length \code{1}.
+Must be a single \code{character} string.
 
 If \code{NULL}, files are written to the same directory (or directories) they were \link[=readHumdrum]{read from}.}
 
@@ -52,7 +54,7 @@ If \code{NULL}, files are written to the same directory (or directories) they we
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{FALSE}, \code{writeHumdrum} will refuse to overwrite
 any files. If \code{TRUE}, \code{writeHumdrum} will overwrite files, but only after an additional prompt from the user.}
@@ -61,16 +63,16 @@ any files. If \code{TRUE}, \code{writeHumdrum} will overwrite files, but only af
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{TRUE}, each \emph{new} output file name is printed on the console
 as the writing happens.}
 
 \item{EMD}{\emph{\strong{A string to write to a new \verb{!!!EMD:} record in each file.}}
 
-Defaults to \code{paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.Date())}.
+Defaults to "Editing in humdrumR, version X.X.X.XXX, on current data/time."
 
-Must be \code{character}; must be length \code{1}.
+Must be a single \code{character} string.
 
 If \code{NULL}, not appended.}
 }

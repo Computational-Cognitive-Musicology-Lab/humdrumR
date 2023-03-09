@@ -30,45 +30,47 @@ as.matrices(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 as.data.frames(humdrumR, dataTypes = "LIMDd", padPaths = "piece", padder = NA)
 }
 \arguments{
-\item{mode}{\emph{\strong{A string naming an \link[base:vector]{atomic vector type} to coerce the output to (if possible).}}
+\item{mode}{\emph{\strong{The desired output class.}}
 
 Defaults to \code{"any"}.
 
-Must be \code{character}; must be length \code{1}.
+Must be a single \code{character} string naming an \link[base:vector]{atomic vector type} to coerce the output to (i.e., \code{logical} or \code{numeric}).
 
-If sets to \code{'any'}, which lets the output type simply be whatever comes out of \code{\link[=evalActive]{evalActive()}}.}
+If set to \code{"any"}, the output type is simply whatever comes out of \code{\link[=evalActive]{evalActive()}}, which depends on the class of the underlying \link[=humTable]{fields}.}
 
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to include.}}
 
 Defaults to \code{"GLIMDd"} for \code{as.lines()} and \code{as.matrix()}; \code{"Dd"} for \code{as.data.frame()};
 \code{"LIMDd"} for \code{as.matrices()} and \code{as.data.frames()}.
 
-Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
-(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
+(See the \link[=humTable]{humdrum table} documentation for explanation.)}
 
-\item{padPaths}{\emph{\strong{See details for explanation.}}
+\item{padPaths}{\emph{\strong{Determines how spine-paths are aligned in the output.}}
 
 Defaults to \code{"dont"} for \code{as.lines()}; \code{"corpus"} for \code{as.matrix()} and \code{as.data.frame()};
 \code{"piece"} for \code{as.matrices()} and \code{as.data.frames()}
 
-Must be \code{character}. One of three options: \code{"corpus"}, \code{"piece"}, or \code{"dont"}.}
+Must be a single \code{character} string, \code{"corpus"}, \code{"piece"}, or \code{"dont"}.
 
-\item{padder}{\emph{\strong{Used to fill in differences in the number of columns between files, and or spine paths.}}
+See the details for an explanation.}
+
+\item{padder}{\emph{\strong{Used to fill in differences in the number of columns between files and/or spine paths.}}
 
 Defaults to \code{NA}.
 
-Must be \code{atomic}; must be length \code{1}.}
+Must be a single \code{atomic} value.}
 
-\item{sep}{\emph{\strong{Indicating a separator to place between columns in collapsed lines.}}
+\item{sep}{\emph{\strong{Separator to place between columns in collapsed lines.}}
 
-Defaults to \code{"\\t"}.
+Defaults to \code{"\\t"} (tab).
 
-Must be \code{character}; must be length \code{1}.}
+Must be a single \code{character} string.}
 }
 \description{
 Many users may wish to work with humdrum data,

@@ -7,21 +7,21 @@
 romanKey(x, ..., Key = NULL, parseArgs = list())
 }
 \arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector}}
+\item{x}{\emph{\strong{Input data, interpreted as diatonic keys.}}
 
-The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
+Must be an \code{atomic} vector.}
 
-\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
+\item{Key}{\emph{\strong{The key used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 
 Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
 
-\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=keyParsing]{key parser}.}}
 
-Defaults to \code{list()}.
+Defaults to an empty \code{list()}.
 
-Must be a \code{list}.}
+Must be a \code{list} of named arguments to the \link[=keyParsing]{key parser}.}
 }
 \description{
 Roman numeral key areas

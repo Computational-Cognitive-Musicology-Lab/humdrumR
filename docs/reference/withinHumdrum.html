@@ -12,7 +12,7 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,26 +94,33 @@ while employing split/apply/combine, windowing, and other analysis options.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd><p>A <code>[humdrumR][humdrumRclass]</code> data object.</p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>...</dt>
-<dd><p>Any number of expressions to evaluate. Unnamed expressions are interpreted as the
-"main" <em>within-expressions</em>. Possible <em>evaluation control arguments</em> include <code>by</code>, <code>subset</code>, and <code>windows</code>.
+<dd><p><em><strong>Any number of expressions to evaluate.</strong></em></p>
+<p>Unnamed expressions are interpreted as the "main" <em>within-expressions</em>.
+Possible <em>evaluation control arguments</em> include <code>by</code>, <code>subset</code>, and <code>windows</code>.
 Other evaluation options can be achieved with <code>recycle</code> or <code>side</code> arguments.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>A string or vector of characters drawn from <code>c("D", "d", "I", "L", "M","G")</code>.
-These characters  correspond to types of humdrum records: <strong>D</strong>ata, null <strong>d</strong>ata, <strong>I</strong>nterpretations,
-<strong>M</strong>easures, <strong>L</strong>ocal comments, and <strong>G</strong>lobal comments respectively. The expression
-is only evaluated on data drawn from the specified record types (defaults to <code>"D"</code>).</p></dd>
+<dd><p><em><strong>Which types of humdrum records to include.</strong></em></p>
+<p>Defaults to <code>"D"</code>.</p>
+<p>Must be a single <code>character</code> string. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
+or any combination of these (e.g., <code>"LIM"</code>).
+(See the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.)</p></dd>
 <dt>drop</dt>
-<dd><p>This argument is conceptually similar to the <code>drop</code> argument in R matrices.
+<dd><p><em><strong>Whether to return a simplified data structure.</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>This argument is conceptually similar to the <code>drop</code> argument in R matrices.
 If <code>drop = TRUE</code>, the output of <code>with.humdrumR</code> is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If <code>drop = FALSE</code>, the result is <em>always</em>
 a <code>data.table</code>. The default value (<code>drop = TRUE</code>) is usually what we want because it is more
 intuitive, but in more complex code, it can be helpful to set <code>drop = FALSE</code> so that
 the output is consistent.</p></dd>
 <dt>variables</dt>
-<dd><p>A named <code>list</code> of values, which are interpolated into the within-expression(s)
-wherever a variable name matches a named from the list.</p></dd>
+<dd><p><em><strong>A named <code>list</code> of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.</strong></em></p>
+<p>Defaults to <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be <code>list</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -505,7 +512,7 @@ In <code>with</code>/<code>within.humdrumR</code> you can use some
 <a href="https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic" class="external-link">syntactic sugar</a>
 to do just this.
 We can index any field in our call with a <code>splat</code> argument, which must be a <code>Field %in% x</code>.
-For example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>splat <span class="op">=</span> <span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+For example,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humdata</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>splat <span class="op">=</span> <span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/pkg/bit64/man/bit64S3.html" class="external-link">%in%</a></span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
 <p>In this call, the <code>Token</code> field will be divided into two groups, one where <code>Spine == 1</code> and the other where
 <code>Spine == 2</code>; the first group (<code>Spine == 1</code>) will be used as the first argument to <code>list</code>, and the second group

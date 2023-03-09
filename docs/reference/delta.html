@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,25 +95,43 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(Any numeric vector.) <code>NULL</code> values are returned <code>NULL</code>.</p></dd>
+<dd><p><em><strong>The input vector.</strong></em></p>
+<p>Must be <code>atomic</code> numbers.</p>
+<p><code>NULL</code> values are returned <code>NULL</code>.</p></dd>
 <dt>lag</dt>
-<dd><p>(Non-zero integer.) Which lag to use. Results will look like: <code>x[i] - x[i - lag]</code>.</p></dd>
+<dd><p><em><strong>Which lag to use.</strong></em></p>
+<p>Defaults to <code>1</code>.</p>
+<p>Must be a single natural number.</p>
+<p>Results will look like: <code>x[i] - x[i - lag]</code>.</p></dd>
 <dt>skip</dt>
-<dd><p>(<code>function</code>.) This must be a function which can be applied to <code>x</code> and returns a logical vector
-of the same length. And <code>TRUE</code> values are skipped over in the calculations.
+<dd><p><em><strong>A function to indicate which values to skip.</strong></em></p>
+<p>Defaults to <code>is.na</code>.</p>
+<p>This must be a <code>function</code> which can be applied to <code>x</code> to return a <code>logical</code> vector
+of the same length. <code>TRUE</code> values are skipped over in the calculations.
 By default, the <code>skip</code> function is <code>is.na</code>, so <code>NA</code> values in the input (<code>x</code> argument) are skipped.
 The skipped values are returned as is in the output vector.</p></dd>
 <dt>init</dt>
-<dd><p>(Atomic value of same class as <code>x</code>, with <code>length(init) &lt;= lag</code>.) <code>NA</code> values at the beginning
+<dd><p><em><strong>Initial value to fill the beginning for calculation.</strong></em></p>
+<p>Defaults to <code>0</code>.</p>
+<p>Should be the same class as <code>x</code>; length must be not longer than <code>lag</code>.</p>
+<p><code>NA</code> values at the beginning
 (or end of <code>right == TRUE</code>) are filled with these values <em>before</em> summing.</p></dd>
 <dt>right</dt>
-<dd><p>(single <code>logical</code> value) Should the <code>init</code> padding be at the "right" (end of the vector)?
-By default, <code>right == FALSE</code> so the <code>init</code> padding is at the beginning of the output.</p></dd>
+<dd><p><em><strong>Should the <code>init</code> padding be at the "right" (end of the vector)?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>By default, <code>right == FALSE</code> so the <code>init</code> padding is at the beginning of the output.</p></dd>
 <dt>groupby</dt>
-<dd><p>(vector of same length as <code>x</code>, or a list of such vectors) Differences are not calculated
+<dd><p><em><strong>How to group the data.</strong></em></p>
+<p>Defaults to <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Should be <code>vector</code> or <code>list</code> of <code>vectors</code>; must be length <code>length(x)</code>.</p>
+<p>Differences are not calculated
 across groups indicated by the <code>groupby</code> vector(s).</p></dd>
 <dt>orderby</dt>
-<dd><p>(vector of same length as <code>x</code>, or a list of such vectors) Differences in <code>x</code> are calculated
+<dd><p><em><strong>The order for calculating the difference.</strong></em></p>
+<p>Defaults to <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Should be <code>vector</code> or <code>list</code> of <code>vectors</code>; must be length <code>length(x)</code>.</p>
+<p>Differences in <code>x</code> are calculated
 based on the order of <code>orderby</code> vector(s), as determined by <code><a href="https://rdrr.io/r/base/order.html" class="external-link">base::order()</a></code>.</p></dd>
 </dl></div>
     <div class="section level2">

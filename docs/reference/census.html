@@ -16,7 +16,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,22 +100,32 @@ basic <a href="humSummary.html">corpus summary functions</a>.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR object</a></p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>Which types of humdrum records to include in the census. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
+<dd><p><em><strong>Which types of humdrum records to include in the census.</strong></em></p>
+<p>Defaults to <code>"GLIMDd"</code>.</p>
+<p>Must be <code>character</code>. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
 or any combination of these (e.g., <code>"LIM"</code>).
 (see the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.).</p></dd>
 <dt>by</dt>
-<dd><p>An arbitrary expression which indicates how to group the data.</p></dd>
+<dd><p><em><strong>An arbitrary expression which indicates how to group the data.</strong></em></p>
+<p>Defaults to <code>Filename</code> (a humdrumR <a href="humTable.html">data field</a>).</p></dd>
 <dt>removeEmpty</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If set <code>TRUE</code>, any groups that have zero tokens are
-not included in the <code>humCensus</code> table.</p></dd>
+<dd><p><em><strong>Whether to include zero tokens.</strong></em></p>
+<p>Defaults to <code>FALSE</code></p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If set <code>TRUE</code>, any groups that have zero tokens are not included in the <code>humCensus</code> table.</p></dd>
 <dt>drop</dt>
-<dd><p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+<dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
 a <code>humCensus</code> table.</p></dd>
 <dt>i</dt>
-<dd><p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
-as a regular expression against the "by-group" names.</p></dd>
+<dd><p><em><strong>Index for rows.</strong></em></p>
+<p>If <code>numeric</code>, selects rows by index.
+If <code>character</code>, the string is matched  as a regular expression against the "by-group" names.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

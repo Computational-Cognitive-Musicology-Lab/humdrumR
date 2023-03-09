@@ -16,17 +16,19 @@ bpm2ms(BPM, unit = 0.25)
 ms2bpm(ms, unit = 0.25)
 }
 \arguments{
-\item{BPM}{\emph{\strong{Specify the tempo.}}
+\item{BPM}{\emph{\strong{The tempo.}}
 
 Defaults to \code{60}.
 
-Must be \code{numeric} or \code{character} string in the format \code{"MM120"} (for 120 bpm).
+Must be a number or a \code{character} string in the format \code{"MM120"} (for 120 bpm).
 
-By default, \link[=withinHumdrum]{with(in).humdrumR} passed the \code{BPM} \link[=fields]{field}, if present.}
+By default, \link[=withinHumdrum]{with(in).humdrumR} passes the \code{BPM} \link[=fields]{field}, if present.}
 
-\item{unit}{\emph{\strong{A value which can be interpreted as a \code{\link[=duration]{duration()}}.}}
+\item{unit}{\emph{\strong{The "Beat" in BPM.}}
 
-Must be a value which can be interpreted as a \code{\link[=duration]{duration()}}.}
+Defaults to a quarter-note.
+
+Must be a value which can be interpreted as \link[=rhythmParsing]{rhythmic duration}.}
 }
 \description{
 Functions for translating between durations (in seconds) and \emph{tempos}---expressed as BPM (beats-per-minute).

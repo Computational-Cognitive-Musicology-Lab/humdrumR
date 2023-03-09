@@ -25,16 +25,20 @@ Must be a \code{character} string (to look up a reference code) or a \link[=humd
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
 a \code{humCensus} table.}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
-as a regular expression against filenames in the corpus.}
+\item{i}{\emph{\strong{Index for rows.}}
 
-\item{j}{if \code{numeric} selects columns by index. If \code{character}, \link[=partialMatching]{partially matched}
-against column names (reference codes).}
+If \code{numeric}, selects rows by index.
+If \code{character}, the string is matched as a regular expression against filenames in the corpus.}
+
+\item{j}{\emph{\strong{Index for columns.}}
+
+If \code{numeric}, selects columns by index.
+If \code{character}, \link[=partialMatching]{partially matched} against column names (reference codes).}
 }
 \description{
 \code{reference} is used to

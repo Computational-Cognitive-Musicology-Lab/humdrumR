@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,32 +104,45 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>...</dt>
-<dd><p>character: One or more patterns used to identify files to read.
-For details: see the "REpath-patterns" section below.</p></dd>
+<dd><p><em><strong>One or more patterns used to identify files to read.</strong></em></p>
+<p>Must be <code>character</code> strings.</p>
+<p>For details: see the "REpath-patterns" section below.</p></dd>
 <dt>contains</dt>
-<dd><p><code>character</code>. If <code>!is.null(contains)</code>, the <code>contains</code> argument is
+<dd><p><em><strong>REGEX for filtering files.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be <code>character</code>.</p>
+<p>If <code>!is.null(contains)</code>, the <code>contains</code> argument is
 is treated as regular expressions: only files which contain matches to
 <em>all</em> of these regular expressions are read.
 Thus, <code>readHumdrum('.*krn$', contains = "EEE")</code> will only read kern files which contain matches
 to <code>"EE"</code>---which is kern for the E two octaves below middle C (or lower).</p></dd>
 <dt>recursive</dt>
-<dd><p>logical: If <code>TRUE</code>, the final part of the search pattern (i.e., the file search) is searched for
-recursively through all sub directories.</p></dd>
+<dd><p><em><strong>Should files be found recursively through sub directories?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, the final part of the search pattern (i.e., the file search) is searched for recursively through all sub directories.</p></dd>
 <dt>allowDuplicates</dt>
-<dd><p><code>logical</code> of length one, indicating what should happen if multiple search patterns match the same files.
-If <code>allowDuplicates = TRUE</code>,
+<dd><p><em><strong>Indicating what should happen if multiple search patterns match the same files.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>allowDuplicates = TRUE</code>,
 any such files are read multiple times, grouped into their respective corpora by the <code>Label</code> field.
 If <code>allowDuplicates = FALSE</code>, any redundant files are only read into the corpus of the first pattern they
 match.</p></dd>
 <dt>verbose</dt>
-<dd><p>logical: If <code>TRUE</code>, the names of matching files are printed before parsing begins. This is very
+<dd><p><em><strong>Whether to print filename while reading or not.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>TRUE</code>, the names of matching files are printed before parsing begins. This is very
 useful as a check to make sure you aren't reading the wrong files!</p></dd>
 <dt>tandems</dt>
-<dd><p><code>character</code>. This argument controls which, if any, tandem interpretations
-are parsed into their own fields. The default value is <code>"known"</code>.</p></dd>
+<dd><p><em><strong>Controls which, if any, tandem interpretations are parsed into their own fields.</strong></em></p>
+<p>Defaults to <code>"known"</code>.</p>
+<p>Must be <code>character</code>.</p></dd>
 <dt>reference</dt>
-<dd><p><code>character</code>. This argument controls which, if any, reference records
-are parsed into their own fields. The default value is <code>"all"</code>.</p></dd>
+<dd><p><em><strong>Which reference records should be parsed into fields.</strong></em></p>
+<p>Defaults to <code>"all"</code>.</p>
+<p>Must be <code>character</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -297,7 +310,7 @@ the patterns they match, the directories they were found in, <em>and</em> the ra
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '.*' matches 114 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 114 files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating 114 files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 47,073 errors in 114 files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 40,482 errors in 114 files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> zero valid files.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-in"></span>

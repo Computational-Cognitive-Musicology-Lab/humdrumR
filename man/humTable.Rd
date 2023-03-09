@@ -17,42 +17,32 @@ fields(
 )
 }
 \arguments{
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to include in the output.}}
 
 Defaults to \code{"GLIMDd"}.
 
-Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
-or any combination of these (e.g., \code{"LIM"}).
-
-A \code{character} vector. Specifies which types of data tokens/records to extract.
+Must be a \code{character} string, which specifies which types of data tokens/records to extract.
 Legal values are: \code{"G"} (global comments), \code{"L"} (local comments), \code{"I"} (interpretations),
 \code{"M"} (barlines), \code{"D"} (non-null data), or \code{"d"} (null data).
-Multiple types can be specified as a vector, or smooshed into a single string: e.g., \code{"GLIMD"}.}
+Multiple types can be specified in a single string: e.g., \code{"GLIMD"}.}
 
-\item{fields}{\emph{\strong{A vector of names which are \link[=partialMatching]{partially matched} against field names of the humdrum table.}}
+\item{fields}{\emph{\strong{Which fields to output.}}
 
 Defaults to \code{getActiveFields(humdrumR)}.
 
-Must be \code{character}.
+Must be a \code{character} string \link[=partialMatching]{partially} matching the name of a data field in the \code{humdrumR} input.
+For example, \code{"Tok"} would match the \code{Token} field.}
 
-If \code{NULL}, the \link[=humActive]{active fields} are returned.}
+\item{fieldTypes}{\emph{\strong{Which types of fields to list.}}
 
-\item{fieldTypes}{\emph{\strong{A \code{character} type indicating which types of fields to list.}}
+Shows all fields by default.
 
-Defaults to \code{c("Data", "Structure", "Interpretation", "Formal", "Reference")}.
-
-Must be \code{character}. Legal options are \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, and \code{"Reference"}.
+Must be a \code{character} vector. Legal options are \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, and \code{"Reference"}.
 Types can be \link[=partialMatching]{partially matched}---for example, \code{"S"} for \code{"Structure"}.}
-
-\item{fromField}{\emph{\strong{A \code{list} of string (partially) matching the name of a data field in the \code{humdrumR}-object input.}}
-
-Defaults to \code{getActiveFields(humdrumR)[1]}.
-
-Must be \code{c("Data", "Structure", "Interpretation", "Formal", "Reference")}.}
 }
 \description{
 In the \link{humdrumR} package, the fundamental data structure is called a \strong{Humdrum Table}.

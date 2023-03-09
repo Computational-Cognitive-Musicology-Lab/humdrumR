@@ -19,62 +19,58 @@ ioi(
 untie(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 }
 \arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector}}
+\item{x}{\emph{\strong{Input rhythm information.}}
 
 The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or \code{NULL}.
 
-\code{max}, \code{median}, or \code{mode} might be reasonable alternatives.}
+Must be \link[=rhythmParsing]{parsable as rhythm information}.}
 
-\item{onsets}{\emph{\strong{A \code{logical} vector denotes the onsets}}
+\item{onsets}{\emph{\strong{A \code{logical} vector denotes the onsets.}}
 
-Defaults to \code{!grepl("r", x) & !is.na(x) & x != "."}.
+Defaults to a \code{logical} vector with \code{TRUE} wherever there are rests, indicated by the presence of an \code{"r"} character, in the input \code{x}.
 
 Must be \code{logical}; must be length \code{length(x)}.
 
 All durations in \code{x} where \code{onsets == FALSE} are added to the previous value where \code{onsets == TRUE}.}
 
-\item{finalOnset}{\emph{\strong{Whether to count the last onset}}
+\item{finalOnset}{\emph{\strong{Whether to count the last onset.}}
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{TRUE}, the last IOI is computed between the last onset and the end of the input vector.
 Otherwise, this last IOI is undefined (\code{NA}).}
 
-\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}; every element of the list must be length \code{length(x)}.}
 
-\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-Defaults to \code{list()}.
+Defaults to an empty \code{list()}.
 
-Must be a \code{list}.}
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
 
-\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
+\item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
 
-Defaults to \code{FALSE}.
+Defaults to \code{TRUE}.
 
-Must be a \code{logical}; must be length \code{1}.}
+Must be a singleton  \code{logical} value: an on/off switch.}
 
-\item{open}{\emph{\strong{A \code{character} string (regular expression) to identify the beginning of ties.}}
+\item{open}{\emph{\strong{How are the beginnings of ties indicated in \code{x}?}}
 
 Defaults to \code{[}.
 
-Must be \code{character}.
+Must be a single \code{character} string, interpreted as a regular expression.}
 
-May also be formula: see \link{humWindows}.}
-
-\item{close}{\emph{\strong{A \code{character} string (regular expression) to identify the end of ties.}}
+\item{close}{\emph{\strong{How are the ends of ties indicated in \code{x}?}}
 
 Defaults to \verb{]}.
 
-Must be \code{character}.
-
-May also be formula: see \link{humWindows}.}
+Must be a single \code{character} string, interpreted as a regular expression.}
 }
 \description{
 These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.

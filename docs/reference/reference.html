@@ -18,7 +18,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,16 +99,22 @@ reference(humdata)
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>A <code>character</code> string (to look up a reference code) or a <a href="humdrumRclass.html">humdrumR object</a>.</p></dd>
+<dd><p><em><strong>Input for extracting reference information.</strong></em></p>
+<p>Must be a <code>character</code> string (to look up a reference code) or a <a href="humdrumRclass.html">humdrumR</a>.</p></dd>
 <dt>drop</dt>
-<dd><p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a>
-is returned instead of <code>humReference</code> table.</p></dd>
+<dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+a <code>humCensus</code> table.</p></dd>
 <dt>i</dt>
-<dd><p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
-as a regular expression against filenames in the corpus.</p></dd>
+<dd><p><em><strong>Index for rows.</strong></em></p>
+<p>If <code>numeric</code>, selects rows by index.
+If <code>character</code>, the string is matched as a regular expression against filenames in the corpus.</p></dd>
 <dt>j</dt>
-<dd><p>if <code>numeric</code> selects columns by index. If <code>character</code>, <a href="partialMatching.html">partially matched</a>
-against column names (reference codes).</p></dd>
+<dd><p><em><strong>Index for columns.</strong></em></p>
+<p>If <code>numeric</code>, selects columns by index.
+If <code>character</code>, <a href="partialMatching.html">partially matched</a> against column names (reference codes).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

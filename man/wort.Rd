@@ -11,21 +11,21 @@ wort(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE)
 
 Defaults to \code{TRUE}.
 
-Must be \code{logical}; must be length \code{1}.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{keepSilbe}{\emph{\strong{Whether the user wants to save silbe format in the output in case needed for back translation later or other uses.}}
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{indices}{\emph{\strong{Whether the linguistics version of the word will be printed.}}
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{data}{\emph{\strong{The data to be transformed}}
+\item{data}{\emph{\strong{The data to be transformed.}}
 
 Must be \code{character}.}
 }

@@ -7,8 +7,9 @@
 validateHumdrum(..., errorReport.path = NULL)
 }
 \arguments{
-\item{...}{\code{character}: Arguments passed to \code{\link[=findHumdrum]{findHumdrum()}} to identify files on the local machine
-to test for humdrum validity.
+\item{...}{\emph{\strong{Arguments passed to \code{\link[=findHumdrum]{findHumdrum()}}.}}
+
+Used to identify files on the local machine to test for humdrum validity.
 This is mainly used to pass \link[=readHumdrum]{regex file-path search patterns}, but may also be used to pass
 the \code{recursive} and/or \code{contains} arguments to \code{\link[=findHumdrum]{findHumdrum()}}.}
 
@@ -16,7 +17,7 @@ the \code{recursive} and/or \code{contains} arguments to \code{\link[=findHumdru
 
 Defaults to \code{NULL}.
 
-Must be \code{character}; must be length \code{1}.
+Must be a single \code{character} string.
 
 If \code{NULL} (the default), no error report files are written.}
 }

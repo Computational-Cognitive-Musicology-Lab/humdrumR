@@ -13,11 +13,13 @@ interpretations(humdrumR)
 \method{print}{humInterpretations}(interps, showEach = TRUE, screenWidth = options("width")$width - 10L)
 }
 \arguments{
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object} to summarize.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data to summarize.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
+\item{i}{\emph{\strong{Index for rows.}}
+
+If \code{numeric}, selects rows by index. If \code{character}, the string is matched
 as a regular expression against the filenames in the corpus.}
 }
 \description{

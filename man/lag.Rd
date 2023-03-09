@@ -18,7 +18,7 @@ Should be \code{list}, \code{atomic}, \code{matrix}, or \code{data.frame}.}
 
 Defaults to \code{0}.
 
-Must be \code{numeric}.
+Must be a natural number.
 
 If \code{n == 0}, \code{x} is returned unchanged.}
 

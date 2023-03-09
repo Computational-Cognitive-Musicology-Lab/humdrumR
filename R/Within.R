@@ -535,7 +535,7 @@
 #' 
 #' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param ...  ***Any number of expressions to evaluate.*** 
+#' @param ... ***Any number of expressions to evaluate.*** 
 #'
 #' Unnamed expressions are interpreted as the "main" *within-expressions*. 
 #' Possible *evaluation control arguments* include `by`, `subset`, and `windows`.

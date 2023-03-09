@@ -49,65 +49,65 @@ hint(
 )
 }
 \arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector}}
+\item{x}{\emph{\strong{Input pitch information.}}
 
-The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+Can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.
+Must be \link[=pitchParsing]{parsable as pitch information}.}
 
-\item{from}{\emph{\strong{An \code{atomic} vector to for calculate interval from.}}
+\item{from}{\emph{\strong{Pitches to calculate the intervals from.}}
 
-Defaults to \code{tint(0L, 0L)}.
+Defaults to middle C / unison.
 
-The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+Can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.
+Must be \link[=pitchParsing]{parsable as pitch information}.}
 
-\item{deparser}{\emph{\strong{A \link[=pitchFunctions]{pitch function} to generate the output representation.}}
+\item{deparser}{\emph{\strong{What output representation do you want?}}
 
 Defaults to \link[=interval]{interval}.
 
-Must be a \code{Function}.}
+Must be a \link[=pitchFunctions]{pitch function}, like \code{kern()}.}
 
-\item{incomplete}{\emph{\strong{Whether to pad the incomplete part.}}
+\item{incomplete}{\emph{\strong{How to pad incomplete intervals (e.g., the start/end of input).}}
 
 Defaults to \code{NULL} for \code{int()}, \code{kern} for \code{mint()} and \code{hint()}.
 
-Must be either a \link[=pitchFunctions]{pitch function} an atomic value of \code{length(incomplete) == abs(lag)}.}
+Must \code{NULL}, a \link[=pitchFunctions]{pitch function}, or an atomic value of \code{length(incomplete) == abs(lag)}.}
 
-\item{bracket}{\emph{\strong{Whether print bracket for incomplete parts.}}
+\item{bracket}{\emph{\strong{Whether to print brackets around \code{incomplete} output.}}
 
-Defaults to \code{FALSE}.
+Defaults to \code{TRUE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{TRUE}, square brackets (\code{"[]"}) are printed around \code{incomplete} observations.}
 
-\item{classify}{\emph{\strong{Whether output interval class or interval from deparser.}}
+\item{classify}{\emph{\strong{Should intervals be classified as step/skip/leaps?}}
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{TRUE}, the \code{deparser} is ignored and the output is classified as \code{Unison}, \code{Step}, \code{Skip}, or \code{Leap}.}
 
-\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=pitchParsing]{pitch parser}.}}
 
-Defaults to \code{list()}.
+Defaults to an empty \code{list()}.
 
-Must be a \code{list}.}
+Must be a \code{list} of named arguments to the \link[=pitchParsing]{pitch parser}.}
 
-\item{lag}{\emph{\strong{For \code{\link[=mint]{mint()}} and \code{\link[=hint]{hint()}}, set the lag between notes to calculate \code{\link[=int]{int()}}.}}
+\item{lag}{\emph{\strong{The \code{\link[=lag]{lag()}} to calculate harmonic/melodic intervals between.}}
 
-Defaults to \code{1}.
+Defaults to \code{1}, which means intervals between immediate successors in \code{x}.
 
-Must be either\code{int} or \code{logical}; must be length \code{1}.
+Must be either a single number, or a \code{logical} of \code{length(x)} (see "Logical lags" section in manual).}
 
-A \code{logical} vector with the same length as \code{x} is also accepted, see \link{Logical(ditto) lags}.}
-
-\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
+\item{groupby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
 
 Defaults to \code{list()}.
 
 Must be a \code{list}; every element of the list must be length \code{length(x)}.}
 
-\item{orderby}{\emph{\strong{A \code{list} of vectors to group \code{x}}}
+\item{orderby}{\emph{\strong{A \code{list} of vectors to group \code{x}.}}
 
 Defaults to \code{list()}.
 
@@ -210,7 +210,7 @@ If so, intervals are categorized based only on semitone (enharmonic) intervals:
 D# and Eb are classified the same.
 }
 
-\section{Logical(ditto) lags}{
+\section{Logical (ditto) lags}{
 
 
 For calls to \code{hint()} and \code{mint()} the default behavior is a \code{numeric} \code{lag} argument passed to \code{\link[=lag]{lag()}}.

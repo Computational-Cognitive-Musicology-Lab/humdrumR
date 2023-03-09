@@ -16,7 +16,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,11 +95,17 @@ print(spineTable, showEach = TRUE)</code></pre></div>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR object</a></p></dd>
+<dd><p><em><strong>HumdrumR data to summarize.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>drop</dt>
-<dd><p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of a <code>humSpine</code> table.</p></dd>
+<dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+a <code>humCensus</code> table.</p></dd>
 <dt>i</dt>
-<dd><p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
+<dd><p><em><strong>Index for rows.</strong></em></p>
+<p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
 as a regular expression against filenames in the corpus.</p></dd>
 </dl></div>
     <div class="section level2">

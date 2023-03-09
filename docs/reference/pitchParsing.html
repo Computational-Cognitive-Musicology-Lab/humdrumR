@@ -18,7 +18,7 @@ semit(), or solfa().'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,13 +113,16 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>Exclusive</dt>
-<dd><p>(<code>character</code>,  <code>length == 1 | length == length(x)</code>)</p></dd>
+<dd><p><em><strong>An exclusive interpretation to guide parsing of the input.</strong></em></p>
+<p>Must be <code>character</code>; must be either length <code>1</code> or <code>length(x)</code>.</p></dd>
 <dt>str</dt>
-<dd><p>(<code>character</code> or <code>numeric</code>) The input vector.</p></dd>
+<dd><p><em><strong>The input vector.</strong></em></p>
+<p>Must be either <code>character</code> or <code>numeric</code>.</p></dd>
 <dt>Key</dt>
-<dd><p>(a diatonicSet or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> is used
-to interpret pitch representations.
-For example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.
+<dd><p><em><strong>The diatonic key used to interpret the pitch information.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code></p>
+<p>For example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.
 The output <code>tonalInterval</code> is output <em>within the key</em>: thus, <code>tonalInterval('C#', Key = "A:")</code>
 returns the tint representing a <strong>Major 3rd</strong>, because <em>C#</em> is the major third of A major.</p></dd>
 </dl></div>

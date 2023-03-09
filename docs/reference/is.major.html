@@ -22,7 +22,7 @@ and the lydian key is "major."'><!-- mathjax --><script src="https://cdnjs.cloud
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,15 +112,16 @@ and the lydian key is "major."</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>Either a <code>diatonicSet</code> or <code>tertianSet</code>, or something that can be parsed as one.</p></dd>
+<dd><p><em><strong>Input data, interpreted as diatonic keys or chords.</strong></em></p>
+<p>Must be a <code>diatonicSet</code> or <code>tertianSet</code> or something that can be parsed as one.</p></dd>
 <dt>...</dt>
-<dd><p>Parameters passed to the parsers (<code><a href="chordParsing.html">tertianSet()</a></code> and <code>diatonicSet()</code>).</p></dd>
+<dd><p><em><strong>Parameters passed to the parsers (<code><a href="chordParsing.html">tertianSet()</a></code> and <code><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet()</a></code>).</strong></em></p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Either function can be called directly on <a href="tertianSetS4.html">tertian</a> or <a href="diatonicSetS4.html">diatonic</a> sets.
 If called on anything else, the functions first call the <code><a href="chordParsing.html">tertianSet()</a></code>
-parser. If any values fail to parse (returning <code>NA</code>), the <code>diatonicSet()</code>
+parser. If any values fail to parse (returning <code>NA</code>), the <code><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet()</a></code>
 parser is called on them.</p>
     </div>
     <div class="section level2">

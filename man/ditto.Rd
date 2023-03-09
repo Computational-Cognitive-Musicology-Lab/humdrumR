@@ -42,17 +42,17 @@ Defaults to \code{function(x) is.na(x) | x == "."}.
 Should be either a logical vector where (\code{length(x) == length(null)}), a numeric
 vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.}
 
-\item{initial}{\emph{\strong{A value used to pad the beginning (or end, if \code{reverse == TRUE}) of the output, if necessary.}}
+\item{initial}{\emph{\strong{Padder for the beginning (or end, if \code{reverse == TRUE}) of the output, if needed.}}
 
 Defaults to \code{NA}.
 
 Should be the same class as \code{x}; must be length \code{1}.}
 
-\item{reverse}{\emph{\strong{Whether the excecution order is reversed}}
+\item{reverse}{\emph{\strong{Whether the excecution order is reversed.}}
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{reverse == TRUE}, the "non-null" values are coped to overwrite null values
 \emph{earlier} (lower indices) in the vector.}
@@ -63,18 +63,26 @@ Should be \code{vector} or \code{list} of \code{vectors}; must be length \code{l
 
 Each segment of \code{x} delineated by the \code{groupby} vector(s) is treated separately.}
 
-\item{margin}{\emph{\strong{A vector giving the subscripts which the function will be applied over.}}
+\item{margin}{\emph{\strong{A vector giving the dimensions which the function will be applied over.}}
 
-Defaults to \code{2} for \code{matrix} inputs.
+Defaults to \code{2} (across columns) for \code{matrix} inputs.
 
-Must be \code{numeric}.
+Must be natural number(s).
 
 E.g., for a matrix \code{1} indicates rows, \code{2} indicates columns.
 Where \code{x} has named dimnames, it can be a character vector selecting dimension names.}
 
-\item{field}{\emph{\strong{Which field (\link[=partialMatching]{partially matched}) in the \code{humdrumR} dataset should be dittoed?}}}
+\item{field}{\emph{\strong{Which field to ditto?}}
 
-\item{newField}{(\code{character} of \code{length == 1}) What to name the new (dittoed) field.}
+Must be a single \code{character} string.
+
+Is (\link[=partialMatching]{partially matched}) against \link[=humTable]{fields} in \code{x}.}
+
+\item{newField}{\emph{\strong{What to name the new (dittoed) field.}}
+
+Defaults to the \code{field} name appended with \code{"_ditto"}.
+
+Must be a single \code{character} string.}
 }
 \description{
 \code{ditto} is a function that allow you to "fill" null values in a vector

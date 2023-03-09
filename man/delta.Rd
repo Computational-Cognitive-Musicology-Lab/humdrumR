@@ -22,9 +22,9 @@ delta(x, lag, skip, init, right, ...)
 \method{delta}{matrix}(x, margin = 2L, ...)
 }
 \arguments{
-\item{x}{\emph{\strong{The input vector}}
+\item{x}{\emph{\strong{The input vector.}}
 
-Must be \code{atomic}.
+Must be \code{atomic} numbers.
 
 \code{NULL} values are returned \code{NULL}.}
 
@@ -32,7 +32,7 @@ Must be \code{atomic}.
 
 Defaults to \code{1}.
 
-Must be integer \code{numeric}; must be length \code{1}.
+Must be a single natural number.
 
 Results will look like: \code{x[i] - x[i - lag]}.}
 
@@ -40,14 +40,12 @@ Results will look like: \code{x[i] - x[i - lag]}.}
 
 Defaults to \code{is.na}.
 
-Must be \code{function}.
-
-This must be a function which can be applied to \code{x} and returns a logical vector
-of the same length. And \code{TRUE} values are skipped over in the calculations.
+This must be a \code{function} which can be applied to \code{x} to return a \code{logical} vector
+of the same length. \code{TRUE} values are skipped over in the calculations.
 By default, the \code{skip} function is \code{is.na}, so \code{NA} values in the input (\code{x} argument) are skipped.
 The skipped values are returned as is in the output vector.}
 
-\item{init}{\emph{\strong{Init value to fill the beginning for calculation.}}
+\item{init}{\emph{\strong{Initial value to fill the beginning for calculation.}}
 
 Defaults to \code{0}.
 
@@ -60,7 +58,7 @@ Should be the same class as \code{x}; length must be not longer than \code{lag}.
 
 Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}.
+Must be a singleton \code{logical} value: an on/off switch.
 
 By default, \code{right == FALSE} so the \code{init} padding is at the beginning of the output.}
 

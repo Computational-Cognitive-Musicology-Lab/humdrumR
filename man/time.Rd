@@ -44,30 +44,39 @@ dur(
 )
 }
 \arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector}}
+\item{x}{\emph{\strong{An input  vector.}}
 
-The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.
 
-\item{...}{These arguments are passed to the \link[=rhythmParsing]{rhythm parser}.
+Must be \link[=rhythmParsing]{parsable as rhythm infromation}.}
+
+\item{...}{\emph{\strong{Arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
+
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{parseArgs}{\emph{\strong{A list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-Defaults to \code{list()}.
+Defaults to an empty \code{list()}.
 
-Must be a \code{list}.}
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
 
-\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement}}
+\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
 
 Defaults to \code{rational(1, 1)}.
 
 Must be \code{numeric} or \link{rational}.}
 
-\item{inPlace}{\emph{\strong{Whether the result is placed in place or returned}}
+\item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
 
 Defaults to \code{FALSE}.
 
-Must be a \code{logical}; must be length \code{1}.}
+Must be a singleton  \code{logical} value: an on/off switch.
+
+Defaults to \code{FALSE}.
+
+A singleton \code{logical} value, or \code{NA}.
+
+See "Grace notes" section below.}
 }
 \description{
 These functions convert duration values to clock-time representations.

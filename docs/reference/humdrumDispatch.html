@@ -20,7 +20,7 @@ In addition, exclusive interpretations can be used to guide dispatch."><!-- math
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.0000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -126,23 +126,31 @@ In addition, exclusive interpretations can be used to guide dispatch.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>dispatchDF</dt>
-<dd><p>A data.frame which describes what function should be called for
-which regex input. (See details).</p></dd>
+<dd><p><em><strong>A data.frame which describes what function should be called for which regex input. (See details).</strong></em></p>
+<p>Must be a <code>data.frame</code>.</p></dd>
 <dt>Exclusive</dt>
-<dd><p>Defaults to <code>NULL</code>. If <code>NULL</code>, only the regexes are used for dispatch.</p></dd>
+<dd><p><em><strong>Exclusive interpretations to dispatch.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>If <code>NULL</code>, only the regexes are used for dispatch.</p></dd>
 <dt>multiDispatch</dt>
-<dd><p><code>logical</code>, length 1. If <code>FALSE</code> (the default) the "best" regex/exclusive match
-is dispatched for each Exclusive segment. If <code>TRUE</code>, differenet functions can be dispatched
+<dd><p><em><strong>Whether to use multiple dispatch function for each interpretation.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: a on/off switch.</p>
+<p>If <code>FALSE</code> the "best" regex/exclusive match is dispatched for each Exclusive segment.
+If <code>TRUE</code>, differenet functions can be dispatched
 within the same input vector.</p></dd>
 <dt>...</dt>
-<dd><p>Arguments to pass to dispatch functions.</p></dd>
+<dd><p><em><strong>Arguments to pass to dispatch functions.</strong></em></p></dd>
 <dt>outputClass</dt>
-<dd><p>Character string: the default output class which the function should return.</p>
+<dd><p><em><strong>The default output class which the function should return.</strong></em></p>
+<p>Defaults to <code>"character"</code>.</p>
+<p>Must be single <code>character</code> string.</p>
 <p>Generally, to make sense, all dispatched functions should return the same type, which you should explicitly
 indicate with the <code>outputClass</code> argument.
 Dispatch functions should also be <a href="https://rdrr.io/r/base/Vectorize.html" class="external-link">vectorized</a>.</p></dd>
 <dt>str</dt>
-<dd><p>The input <code>character</code> string, on which dispatch is called.</p></dd>
+<dd><p><em><strong>The input strings, on which dispatch is called.</strong></em></p>
+<p>Must be <code>character</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

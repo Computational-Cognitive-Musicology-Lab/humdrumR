@@ -29,9 +29,9 @@ setActiveFields(humdrumR, fieldnames)
 \S4method{$}{humdrumR}(x, name)
 }
 \arguments{
-\item{humdrumR}{\emph{\strong{A \link[=humdrumRclass]{humdrumR data object}.}}
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
-Must be \code{humdrumR}.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum records to include in the census.}}
 
@@ -39,25 +39,29 @@ Defaults to \code{"d"}.
 
 Must be \code{character}. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
 or any combination of these (e.g., \code{"LIM"}).
-(see the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.).}
+(See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 
 \item{forceAtomic}{\emph{\strong{Whether he evaluated active field is forced/coerced into a atomic vector.}}
 
 Defaults to \code{TRUE}.
 
-Must be \code{logical}; must be length \code{1}}
+Must be a singleton \code{logical} value: an on/off switch}
 
-\item{sep}{\emph{\strong{Only used if \code{forceAtomic == TRUE}; if coercion involves pasting together lists of vectors, \code{sep} is used as a separator when \link[base:paste]{pasting}.}}
+\item{sep}{\emph{\strong{Separator to paste between collapsed strings.}}
 
 Defaults to \code{", "}.
 
-Must be \code{character}; must be length \code{1}}
+Must be a single \code{character} string.
 
-\item{nullChar}{\emph{\strong{Only used if \code{forceAtomic == TRUE}; if \code{nullChar == TRUE} and \code{NA}s in the output vector are replaced with humdrum null character tokens: \code{"."}, \code{"!"}, \code{"="}, or \code{"*"}, depending on type.}}
+Only used if \code{forceAtomic == TRUE}, wherein lists of vectors are pasted together.}
 
-Defaults to \code{FALSE}.
+\item{nullChar}{Defaults to \code{FALSE}.
 
-Must be \code{logical}; must be length \code{1}}
+Must be a singleton \code{logical} value: an on/off switch
+
+If \code{nullChar == TRUE} and the output is \code{character}, \code{NA}s in the output vector are replaced with humdrum
+null character tokens: \code{"."}, \code{"!"}, \code{"="}, or \code{"*"}.
+If \code{forceAtomic} is \code{FALSE}, \code{nullChar} is ignored.}
 }
 \description{
 \link[=humdrumRclass]{humdrumR objects} contain many fields of data stored in their underlying

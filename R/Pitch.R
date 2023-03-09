@@ -2045,7 +2045,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' sharp, and vice verse for a descending notes and flats.
 #' For example, while `kern(0:2)` returns `c("c", "d-", "d")`, `kern(0:2, parse(accidental.melodic = TRUE))` returns `c("c", "c#", "d")`.
 #' 
-#' @param str  ***The input vector.***
+#' @param str ***The input vector.***
 #' 
 #' Must be either `character` or `numeric`.
 #' 

@@ -9,37 +9,38 @@ transpose(x, by, Key, to, real, relative, ...)
 \arguments{
 \item{x}{***The input pitch(es) to transpose. ***
 
+Can be a \code{tonalInterval} or something \link[=pitchParsing]{intepretable as a pitch information}.}
+
+\item{by}{\emph{\strong{Transpose by this interval.}}
+
 Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
 
-\item{by}{\emph{\strong{The input \code{x} is transposed by this interval.}}
-
-Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
-
-\item{Key}{\emph{\strong{The "from" key of the transposition.}}
+\item{Key}{\emph{\strong{Transpose \emph{from} this key (to the \code{to} key).}}
 
 Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.
 
 For tonal and/or to transpositions, this is the "from" key. If this value is \code{NULL}, it defaults to C major.}
 
-\item{to}{\emph{\strong{The input \code{x} is transposed to this key.}}
+\item{to}{\emph{\strong{Transpose \emph{to} this key (from the \code{Key} key).}}
 
 Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.}
 
-\item{real}{\emph{\strong{Whether the transposition is real.}}
+\item{real}{\emph{\strong{Should transposition be real (or tonal)?}}
 
 Defaults to \code{TRUE}.
 
-Must be a \code{logical}.
+Must be a singleon \code{logical} value: an on/off switch.
 
-If \code{TRUE}, transposition is real. If \code{FALSE}, transposition is tonal.}
+If \code{real == FALSE}, transposition is tonal.}
 
-\item{relative}{\emph{\strong{Whether the transposition is relative}}
+\item{relative}{\emph{\strong{Should transposition between keys be relative (or parallel)?}}
 
 Defaults to \code{FALSE}.
 
-Must be a logical.
+Must be a singleton \code{logical} value: an on/off switch.
 
-If \code{TRUE} transposition is relative. If \code{FALSE}, transposition is parallel.}
+Only relavent if using transposing between keys (\code{Key} and \code{to}) with different modes.
+If \code{relative == FALSE}, transposition is parallel.}
 }
 \description{
 This function \link[=https://en.wikipedia.org/wiki/Transposition_(music)]{transposes} pitches or keys
