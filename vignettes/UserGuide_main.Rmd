@@ -1,0 +1,26 @@
+[//]: # ---
+[//]: # title: "humdrumR_userGuide"
+[//]: # author: "Claire Arthur, Nat Condit-Schultz"
+[//]: # date: "2023-03-07"
+[//]: # output: html_document
+[//]: # ---
+
+# humdrumR User Guide
+
+This User Guide is modeled on David Huron's [Music Research Using Humdrum: A User's Guide](https://www.humdrum.org/guide/) and Myke Cuthbert's [User Guide for music21](http://web.mit.edu/music21/doc/usersGuide/usersGuide_99_Table_of_Contents.html); two pieces of software for music analysis that inspired us to create humdrumR. This guide encompasses more than a collection of documentation for groups of functions (if you're looking for that, it's [here](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/index.html)), but lays out chapters in a suggested order according to how we envision most people using the software. On that note, while it's certainly possible that some users could end up using humdrumR to compose music, we assume that the typical user is interested in computer-assisted musicological analysis of (primarily) symbolic music data.
+
+Throughout this user guide are mini lessons in practicing computational musicology. It outlines common considerations and problems one faces when attempting to perform a computational analysis in a systematic fashion. While these lessons are by no means intended to be comprehensive, we hope that it may be useful for those who may be new to the field.
+
+[Chapter 1: humdrumR: An Introduction]()  
+[Chapter 2: Basic syntax]()  
+[Chapter 3: Working with existing data]()  
+[Chapter 4: Selecting, subsetting, slicing]()  
+[Chapter 5: Pitch representations and conversions]()  
+[Chapter 6: Metadata]()  
+[Chapter 7: humdrumR Fields]()  
+[Chapter 8: ]()  
+
+
+
+
+

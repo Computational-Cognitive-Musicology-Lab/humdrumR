@@ -20,6 +20,8 @@ Humdrum files are simply [plain text](https://en.wikipedia.org/wiki/Plain_text "
 (This is *unlike* `.pdf` or `.docx` (MS Word) files, which are much more complex "rich text" files.)
 You can open plain-text files in simple text editors like **Notepad** (Windows) or **TextEdit** (MacOS).
 
+**this is an edit**
+
 To be a humdrum file, your text-file must have very general layout which is called the *humdrum syntax*.
 Such a file can be said "to conform to the humdrum syntax," "to be valid humdrum," or most simply "to be a humdrum file."
 
