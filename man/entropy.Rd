@@ -2,12 +2,30 @@
 % Please edit documentation in R/Analysis.R
 \name{entropy}
 \alias{entropy}
+\alias{entropy.default}
+\alias{entropy.table}
+\alias{entropy.density}
+\alias{entropy.numeric}
 \alias{ic}
+\alias{ic.numeric}
+\alias{ic.default}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
 entropy(..., base)
 
+\method{entropy}{default}(..., base = 2, margin = NULL)
+
+\method{entropy}{table}(tab, base = 2, margin = NULL, ...)
+
+\method{entropy}{density}(x, base = 2)
+
+\method{entropy}{numeric}(x, base = 2, ...)
+
 ic(..., distribution, base)
+
+\method{ic}{numeric}(x, distribution = density(x), base = 2)
+
+\method{ic}{default}(..., distribution = ptable(...), base = 2)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},

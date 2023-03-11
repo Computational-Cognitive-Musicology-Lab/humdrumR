@@ -2,10 +2,16 @@
 % Please edit documentation in R/Analysis.R
 \name{mutualInfo}
 \alias{mutualInfo}
+\alias{mutualInfo.table}
+\alias{mutualInfo.default}
 \alias{pmutualInfo}
 \title{Calculate Mutual Information of variables}
 \usage{
 mutualInfo(x, ..., base = 2)
+
+\method{mutualInfo}{table}(x, base = 2)
+
+\method{mutualInfo}{default}(..., base = 2)
 
 pmutualInfo(..., base = base)
 }

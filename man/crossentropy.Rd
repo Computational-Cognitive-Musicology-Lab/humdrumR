@@ -2,9 +2,15 @@
 % Please edit documentation in R/Analysis.R
 \name{crossentropy}
 \alias{crossentropy}
+\alias{crossentropy.table}
+\alias{crossentropy.default}
 \title{Calculate cross entropy between two distributions}
 \usage{
 crossentropy(..., distribution, base)
+
+\method{crossentropy}{table}(tab, distribution, base = 2)
+
+\method{crossentropy}{default}(..., distribution, base = 2)
 }
 \description{
 TBA
