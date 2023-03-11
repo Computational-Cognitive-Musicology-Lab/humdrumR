@@ -341,7 +341,7 @@ plot <- function(x, y = NULL, ..., type = 'p', recycle = TRUE, add = FALSE,
 #' @export
 hist <- function(x, ..., col = flatly[1],
                  log = '', 
-                 xlim = range(x), ylim = NULL,
+                 xlim = range(x, na.rm = TRUE), ylim = NULL,
                  freq = TRUE) {
   
   # if (log == 'x') x <- log(x)
