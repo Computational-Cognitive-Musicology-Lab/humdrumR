@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,7 +92,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-03-09</h4>
+            <h4 data-toc-skip class="date">2023-03-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RhythmAndMeter.Rmd" class="external-link"><code>vignettes/RhythmAndMeter.Rmd</code></a></small>
       <div class="d-none name"><code>RhythmAndMeter.Rmd</code></div>
@@ -378,11 +378,11 @@ whole-notes later; etc. If we combine this with a call to
 <code><a href="../reference/semits.html">semits()</a></code> (check out the [Pitch and
 Tonality][PitchAndTonality.html] guide) we can even make a plot of the
 melody:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="../reference/timeline.html">timeline</a></span><span class="op">(</span><span class="va">row</span><span class="op">)</span>,
-     y <span class="op">=</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">row</span>, Exclusive <span class="op">=</span> <span class="st">'kern'</span><span class="op">)</span>,
-     main <span class="op">=</span> <span class="st">'Row Row Row Your Boat'</span><span class="op">)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> <span class="fu">timeline</span>(row),</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>     <span class="at">y =</span> <span class="fu">semits</span>(row, <span class="at">Exclusive =</span> <span class="st">'kern'</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Row Row Row Your Boat'</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">0.6285714</span></span></code></pre></div>
 <p><img src="RhythmAndMeter_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <hr>
 <p>The <code><a href="../reference/timeline.html">timeline()</a></code> function has extra special functionality

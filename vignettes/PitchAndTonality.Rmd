@@ -24,13 +24,20 @@ For the most part, `r hm`'s pitch tools are focused on the Western system of ton
 # Pitches and Intervals
 
 
-`r Hm` defines a suite of pitch functions, like `kern`, `solfa`, `interval`, and `semits`.
+`r Hm` defines a suite of "pitch functions," like `kern()`, `solfa()`, `interval()`, and `semits()`.
 These functions all work in essentially the same way: they take in an input argument and output pitch information in their own particular format.
-For example,
+For example, let's take a little bit of `**kern` data:
 
 ```{r}
 
 input <- c('4.c', '8d', '4e', '2.g')
+
+```
+
+Notice that this data has both rhythmic information (`4.`, `8`, `4`, `2.`) *and* pitch information (`c`, `d`, `e`, `g`).
+What happens if we give this data to our "pitch functions"?:
+
+```{r}
 
 kern(input)
 interval(input)
@@ -40,12 +47,12 @@ solfa(input)
 ```
 
 
-Notice that the functions all recognize the pitch part of these input tokens, ignoring the non-pitch (rhythm) information.
-If you want to keep the non-pitch part of your tokens, use the `inPlace` argument:
+Each function correctly reads the `**kern` pitch information, ignoring the rhythm information, and outputs the pitch information in a different format.
+This allows us to "translate" between different ways of representing pitch information.
+
+If you *want* to keep the non-pitch (rhythm) information, use the `inPlace` argument:
 
 ```{r}
-
-input <- c('4.c', '8d', '4e', '2.g')
 
 kern(input, inPlace = TRUE)
 interval(input, inPlace = TRUE)
@@ -65,7 +72,7 @@ kern('Cb6')
 
 pitch("eee-")
 
-pitch(-4) # semio
+pitch(-4) # semits
 
 kern('-4')
 
@@ -76,7 +83,6 @@ semits('Ab3')
 
 
 ```
-
 
 
 ----
@@ -98,55 +104,306 @@ cat(unlist(pfs), sep = '\n')
 
 ```
 
+Each one of these functions represents a different way of representing equivalent pitch information.
+
 
 #### Documentation
 
 The global documentation for *all* the pitch functions can be seen by calling `?pitchFunctions`.
 You can also call documentation for any individual function, like `?kern`.
 
+## Scale degree
+
+Some pitch representations encode [scale degree](https://en.wikipedia.org/wiki/Degree_(music)), which depends on the key.
+We can use the `Key` argument to control how our pitch functions interpet key---either translating *from* degrees to absolute pitches, or vice versa.
+Pass the `Key` argument a humdrum key interpretation, like `c:` (c minor) or `A-:` (a-flat major).
+
+```{r}
+
+absoluteInput <- c('c', 'd-', 'e-', 'g', 'a-')
+solfa(absoluteInput)
+solfa(absoluteInput, Key = 'A-:')
+
+degreeInput <- c('do', 're', 'mi', 'fi', 'so')
+
+kern(degreeInput)
+kern(degreeInput, Key = 'A-:')
+
+```
+
+----
+
+The `Key` argument is vectorized (see the [R primer](RPrimer.html) if you don't know what that means!); that means that you can actually read information with different/changing keys.
+
+
+
+## Working with pitch representations
+
+Let's have a look at using pitch functions on real data.
+Let's load `r hm`'s built-in Bach chorales:
+
+```{r}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+```
+
+These chorales are full of `**kern` data in the (default) `Token` field, which can easily be parsed/translated.
+Maybe we'd like to convert the `**kern` to semitones:
+
+```{r}
+within(chorales, semits(Token))
+
+```
+
+We could then, for instance, make a histogram of the semitone values:
+
+```{r}
+
+with(chorales, semits(Token)) |> hist(main = 'Histogram of semits() in 10 chorales')
+
+```
+
+### Keys
+
+The chorale dataset has key information in its built-in `Key` field.
+If we use a pitch function in `with()` or `within()`, they will *automatically* pass the `Key` field as `Key` argument to the function!
+That means if we apply `solfa()`, we will get the correct scale degrees, given the keys in the data:
+
+```{r}
+
+within(chorales, solfa(Token))
+
+```
+
+## Rests
+
+`**kern` data, like in these chorales, includes *rests*, indicated by `r` in place of a pitch.
+What happens when a pitch function sees a rest in our data?
+Let's see:
+
+```{r}
+
+solfa(c('8gg', '8ff', '4ee', '8dd', '8r', '2cc'))
+
+```
+
+The rest token, is output as a null (`NA`) value.
+In fact, any token in the input which fails to parse as pitch will return as `NA`/`.`.
+For example,
+
+```{r}
+kern(c('C4', 'X', 'E4'))
+
+```
+
+
+
+
 # Pitch arguments
 
-## Generic and Simple pitch
+Since all the "pitch functions" do the same sort of task, they share a number of common arguments.
+The complete list of these pitch arguments can be found in the `?pitchParsing` and `?pitchDeparsing` man pages, but the most important ones are described here:
 
-All pitch functions accept logical (`TRUE`/`FALSE`) `generic` and `simple` arguments.
 
-### Simple vs Compound
+#### Generic vs Specific pitch
 
-By default, most pitch functions complete full pitch information, including octave information ("[compound intervals](https://en.wikipedia.org/wiki/Interval_(music)#Simple_and_compound)").
-However, if you specify `simple = TRUE`, the octave information is discarded, leaving only the simple part of the pitch
-information. 
-(You can alternately specify `compound = FALSE`).
+All pitch functions accept logical (`TRUE` or `FALSE`) `generic` and `specific` arguments.
+If `generic == TRUE`, the only generic pitch information is returned.
+This affects different pitch representations in different ways:
 
-```{r}
++ For representations like `kern()`, `pitch()` and `lilypond()`, no accidentals are included in generic output;
++ For `intervals()`, the interval quality is removed;
++ For `solfa`, scale degree four will be "fa", never "fi" (sharp four).
 
-input <- c('c', 'dd#', 'G', 'GG', 'GGG-')
+The `specific` argument is simply the opposite of `generic`, so have the choice of indicating `genric = TRUE` or `specific = FALSE`---they are equivalent.
 
-rbind(kern(input, simple = FALSE), kern(input, simple = TRUE))
-rbind(interval(input, simple = FALSE), interval(input, simple = TRUE))
-rbind(semits(input, compound = TRUE), semits(input, compound = FALSE))
-rbind(solfa(input, compound = TRUE), solfa(input, compound = FALSE))
+---
 
-```
-
-## Generic vs Specific
-
-By default, most pitch functions complete full pitch information, including [specific tonal information](https://en.wikipedia.org/wiki/Generic_and_specific_intervals).
-"Specific" pitch information is usually specified by [accidentals](https://en.wikipedia.org/wiki/Accidental_(music))
-or quality labels.
-If we specify `generic = TRUE` (or `specific = FALSE`), accidentals or qualities are not printed.
-In the case of pitch representations without excplicit accidentals/qualities (like solfege), the generic version of the
-pitch is printed.
+In code:
 
 ```{r}
 
-input <- c('c', 'd#', 'e', 'f#', 'g')
+input <- c('E', 'G#', 'A', 'B-', 'F#', 'G')
 
-rbind(kern(input, generic = FALSE), kern(input, generic = TRUE))
-rbind(interval(input, generic = FALSE), interval(input, generic = TRUE))
-rbind(semits(input, specific = TRUE), semits(input, specific = FALSE))
-rbind(solfa(input, specific = TRUE), solfa(input, specific = FALSE))
+pitch(input, generic = FALSE)
+pitch(input, generic = TRUE)
+
+interval(input, specific = TRUE)
+interval(input, generic = TRUE)
+
+solfa(input, specific = TRUE)
+solfa(input, specific = FALSE)
 
 
 ```
 
+#### Simple vs Compound pitch
 
+All pitch functions accept logical (`TRUE` or `FALSE`) `simple` and `compound` arguments.
+If `simple == TRUE`, octave information is stripped from the output, leaving only "simple" pitch information.
+This affects different pitch representations in different ways:
+
++ For `pitch()` and `degree()`, the octave number is removed.
++ For `lilypond()` and `helmholtz()`, the octave marks `'` and `,` are removed.
++ For `solfa()` and `deg()`, the contour indicators (explanation below) `v` and `^` are removed.
++ For `interval()`, only steps between 1--7 and reterned (i.e., no 10ths).
+
+
+The `compound` argument is simply the opposite of `simple`, so have the choice of indicating `simple = TRUE` or `compound = FALSE`---they are equivalent.
+
+---
+
+In code:
+
+```{r}
+
+input <- c('c', 'a', 'dd#', 'ee', 'G', 'GG', 'GG-', 'CCC')
+
+degree(input, simple = FALSE)
+degree(input, simple = TRUE)
+
+
+lilypond(input, compound = TRUE)
+lilypond(input, simple = TRUE)
+
+semits(input, compound = TRUE) 
+semits(input, compound = FALSE)
+
+solfa(input, compound = TRUE)
+solfa(input, compound = FALSE)
+
+interval(input, simple = FALSE)
+interval(input, simple = TRUE)
+```
+
+### Working with pitch arguments
+
+The `generic` and `simple` arguments useful if you want to tabulate pitch classes, for example:
+
+```{r}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+
+with(chorales, kern(Token, simple = TRUE)) |> table() |> barplot()
+
+```
+
+```{r}
+
+with(chorales, kern(Token, generic = TRUE)) |> table() |> barplot()
+
+```
+
+```{r}
+
+with(chorales, kern(Token, simple = TRUE, generic = TRUE)) |> table() |> barplot()
+
+```
+
+
+## Transposition
+
+All of `r hm`'s pitch functions have built-in transposition functionality.
+You can use this functionality by passing arguments to a `transpose()` call, *inside* the pitch function call, like in this example using the `by` argument:
+
+```{r}
+
+kern(c('c', 'd', 'e', 'f', 'f#', 'g'), transpose(by = 'M2'))
+
+```
+
+Another option is to transpose by key.
+You can pass the `transpose()` command a `to` argument.
+Let's say we have music in A major that we'd like to transpose *to* C major:
+
+```{r}
+Amelody <- c('8A', '8B', '4.c#', '16d', '8c#','8f#', '8e', '8d#', '4e')
+
+kern(Amelody, Key = 'A:', transpose(to = 'C:'))
+
+```
+
+So the `Key` argument to `kern()` indicates the key the music is coming from, and the `to` argument in `tranpose()` indicates where to transpose it to.
+Since `with`/`within` calls automatically use `Key` information from a data set, this makes it very easy to, say, transpose all `**kern` tokens in your data to C major:
+
+```{r}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+with(chorales, kern(Token, transpose(to = 'C:'), simple = TRUE)) |> table() |> barplot()
+
+```
+
+This looks exactly like calling `solfa()` itself:
+
+
+```{r}
+
+with(chorales, solfa(Token, simple=T)) |> table() |> barplot()
+```
+
+
+
+
+
+# Melody and Harmony 
+
+## Melodic Intervals
+
+What if we want to calculate melodic intervals in each part of a score?
+This the purpose of the `mint()` (melodic intervals) command.
+We can use `mint()` on any pitch data:
+
+```{r}
+
+input <- c('d', 'B-', 'A', 'G', 'D', 'd', 'B-', 'G#', 'A', 'f', 'e', 'd')
+
+mint(input)
+
+```
+
+If you use `mint()` in `with`/`within` call on a `r hm` dataobject, `mint()` will automatically be called within each spine/path in each file (this is accomplished using the `groupby` argument to `mint()`):
+
+```{r}
+
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+within(chorales, mint(Token))
+
+```
+`mint()` has a number of special options, which you can read about in the manual by checking out `?mint`.
+For now, we'll just show you the `classify` argument, which can be used to classify output intervals as either `Unison`, `Step`, `Skip`, or `Leap`:
+
+```{r}
+within(chorales, mint(Token, classify = TRUE))
+
+```
+
+
+
+## Harmonic intervals
+
+In parallel to `mint()` is `hint()` (harmonic intervals) command.
+`hint()` works just like `mint()` except it calculates intervals from left to right in each record of a file:
+
+```{r}
+
+within(chorales, hint(Token))
+
+```
+
+A special trick is to use the `lag` argument to calculate harmonic intervals all in relation to the same spine.
+For example, you can caculate harmonic intervals between each voice and the bass voice like so:
+
+```{r}
+within(chorales, hint(Token, lag = Spine == 1))
+
+```
+Or, harmonic intervals from the soprano like so:
+
+```{r}
+within(chorales, hint(Token, lag = Spine == 4))
+
+```
+
+
+Check out the "Logical lags" section of the `?hint` manual for details.
