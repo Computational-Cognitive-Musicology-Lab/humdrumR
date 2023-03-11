@@ -261,7 +261,7 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 `%!~l%` <- Negate(`%~l%`)
 #' @rdname RegexFind
 #' @export
-`%!~i%` <- function(x, pattern) which(!x %~l% pattern)
+`%!~i%` <- function(x, pattern) which(!x %~l% x)
 
 
 
@@ -342,6 +342,11 @@ orRE <- function(...) {
 }
 
 # captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
+
+escapebraces <- function(re) {
+  re[re %in% c('(', ')', '[', ']')] <- paste0('\\', re[re %in% c('(', ')', '[', ']')]) 
+  re
+}
 
 escaper <- function(str) {
     stringr::str_replace_all(str, '\\[\\^', '[\\\\^')

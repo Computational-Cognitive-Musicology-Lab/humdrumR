@@ -135,8 +135,9 @@ parseAnchor.formula <- function(anchor, x, name){
 }
 
 
+
 grepi_multi <- function(x, pattern) {
-  pattern[pattern %in% c('(', ')', '[', ']')] <- paste0('\\', pattern[pattern %in% c('(', ')', '[', ']')])
+  pattern <- escapebraces(pattern)
   
   ns <- x %~n% pattern %|% 0L
   rep(x %~i% pattern, ns[ns > 0L])
@@ -144,7 +145,7 @@ grepi_multi <- function(x, pattern) {
 }
 
 grepn <- function(x, pattern) {
-  pattern[pattern %in% c('(', ')', '[', ']')] <- paste0('\\', pattern[pattern %in% c('(', ')', '[', ']')])
+  pattern <- escapebraces(pattern)
   
   x %~n% pattern %|% 0L
   
@@ -153,8 +154,12 @@ grepn <- function(x, pattern) {
 
 ## Parsing context expressions ----
 
-parseFormula <- function(formula) list(open = parseContextExpression(rlang::f_lhs(formula)),
-                                       close = parseContextExpression(rlang::f_rhs(formula)))
+parseFormula <- function(formula) {
+  open <- parseContextExpression(rlang::f_lhs(formula))
+  close <- parseContextExpression(rlang::f_rhs(formula))
+  
+  list(open = open$Expr, close = close$Expr, Regexes = union(open$Regexes, close$Regexes))
+}
 
 
 parseContextExpression <- function(expr) {
@@ -163,9 +168,12 @@ parseContextExpression <- function(expr) {
                                     'next' = quote(lead(., 1L)),
                                     last = quote(lag(., 1L))))
   
+  regexes <- c()
+  
   expr <- withinExpression(expr, applyTo = c('atomic'),
                            \(Type, Class) Type == 'atomic' && Class == 'character',
                            \(exprA) {
+                             regexes <<- c(regexes, exprA$Args[[1]])
                              exprA$Args <- rlang::expr(grepi_multi(x, !!exprA$Args[[1]]))
                              # exprA$Args <- rlang::expr(grepn(x, !!exprA$Args[[1]]))
                              exprA
@@ -178,7 +186,7 @@ parseContextExpression <- function(expr) {
     exprA$Head <- 'c'
     expr <- unanalyzeExpr(exprA)
   }
-  expr
+  list(Expr = expr, Regexes = regexes)
 }
 
 parseContextRange <- function(exprA) {
@@ -207,11 +215,56 @@ parseContextRange <- function(exprA) {
 #' @export
 context <- function(x, formula, ..., 
                     nested = FALSE, depth = NULL, groupby = NULL,
-                    min_length = 1L, max_length = Inf) {
+                    min_length = 1L, max_length = Inf,
+                    collapse = TRUE, sep = ', ',
+                    openIndex = TRUE, passOutside = FALSE) {
+  
+  
+  windowFrame <- findWindows(x, formula, ...,
+                             nested = nested, depth = depth, groupby = groupby,
+                             min_length = 1L, max_length = Inf)
+  
+  regexes <- attr(windowFrame, 'regexes')
+  for (re in escapebraces(regexes)) x <- gsub(re, '', x)
+ 
+  
+  indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
+  
+  x_windows <- lapply(indices, \(i) x[i])
+  
+  edges <- windowFrame[ , if (openIndex) Open else Close]
+  if (collapse) {
+    output <- rep('.', length(x))
+    output[edges] <- sapply(x_windows, paste, collapse = sep)
+  } else {
+    output <- vector('list', length(x))
+    output[edges] <- x_windows
+    
+  }
+  
+  if (passOutside) {
+    outside <- setdiff(seq_along(x), unlist(indices))
+    output[outside] <- x[outside]
+  }
+  output
+  
+  
+  
+  
+}
+  
+  
+findWindows <- function(x, formula, ..., 
+                        nested = FALSE, depth = NULL, groupby = NULL,
+                        min_length = 1L, max_length = Inf) {
   
   if (!rlang::is_formula(formula)) formula <- rlang::new_formula(quote('.'), 
                                                                  rhs = rlang::expr(!!formula))
   formulae <- parseFormula(formula)
+  regexes <- formulae$Regexes
+  formulae$Regexes <- NULL
+  
+  # do the formulae reference each other?
   independent <- lengths(lapply(formulae, namesInExpr, names = '.')) == 0
   
   if (!any(independent)) .stop("In your call to context, your formula argument is mutually referential in a circular manner.")
@@ -231,11 +284,12 @@ context <- function(x, formula, ...,
   windowFrame <- windowFrame[Open >= 1L & Open <= length(x) & Close >= 1L & Close <= length(x)]
   if (length(groupby)) removeCrossing(windowFrame, groupby)
 
-  if (nested) windowFrame <- depth(windowFrame, depth = depth, ...)
+  windowFrame <- depth(windowFrame, depth = depth, ...)
 
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
   
-  attr(windowFrame, 'vector') <- x
+  attr(windowFrame, 'regexes') <- regexes
+  
   windowFrame
   
 }
