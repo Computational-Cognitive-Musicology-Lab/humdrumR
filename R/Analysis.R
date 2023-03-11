@@ -6,6 +6,12 @@
 #' @export
 ptable <- function(...) UseMethod('ptable')
 
+#' @rdname ptable
+#' @export
+ptable.default <- function(..., margin = NULL) ptable.table(table(...), margin = margin)
+
+
+#' @rdname ptable
 #' @export
 ptable.table <- function(tab, margin = NULL, na.rm = TRUE) {
   na <- is.na(tab)
@@ -17,15 +23,13 @@ ptable.table <- function(tab, margin = NULL, na.rm = TRUE) {
   attr(ptab, 'margin') <- margin
   
   dimnames <- names(dimnames(tab))
-  names(dimnames(tab)) <- ifelse(dimnames == '', 
-                                 make.unique(rep(c('X', 'Y', 'Z', LETTERS[9:23], letters[c(24:26, 9:23)]), length.out = length(dimnames))), 
-                                 dimnames)
+  names(dimnames(ptab)) <- ifelse(dimnames == '', 
+                                  make.unique(rep(c('X', 'Y', 'Z', LETTERS[9:23], letters[c(24:26, 9:23)]), length.out = length(dimnames))), 
+                                  dimnames)
   
   ptab %class% 'ptable'
 }
 
-#' @export
-ptable.default <- function(..., margin = NULL) ptable.table(table(...), margin = margin)
 
 
 
@@ -119,6 +123,13 @@ pdist.name <- function(ptab) {
 #' @family {Information theory functions} 
 #' @export
 entropy <- function(..., base) UseMethod('entropy')
+#' @rdname entropy
+#' @export
+entropy.default <- function(..., base = 2, margin = NULL) {
+  entropy.table(table(...), base = base, margin = margin)
+}
+
+#' @rdname entropy
 #' @export
 entropy.table <- function(tab, base = 2, margin = NULL, ...) {
   info <- information(ptable(tab, margin = margin), base = base)
@@ -129,22 +140,20 @@ entropy.table <- function(tab, base = 2, margin = NULL, ...) {
   setNames(sum(info * frequency, na.rm = TRUE), name)
   
 }
+#' @rdname entropy
 #' @export
 entropy.density <- function(x, base = 2) {
   dx <- diff(x$x[1:2])
   -sum(log(x$y, base = base) * x$y * dx)
 }
+#' @rdname entropy
 #' @export
 entropy.numeric <- function(x, base = 2, ...) entropy.density(density(x, ...), base = base)
-#' @export
-entropy.default <- function(..., base = 2, margin = NULL) {
-  entropy.table(table(...), base = base, margin = margin)
-}
-
 
 #' @rdname entropy
 #' @export
 ic <- function(..., distribution, base) UseMethod('ic')
+#' @rdname entropy
 #' @export
 ic.numeric <-function(x, distribution = density(x), base = 2) {
   
@@ -154,6 +163,7 @@ ic.numeric <-function(x, distribution = density(x), base = 2) {
   pmass[findInterval(x, distribution$x)]
   
 }
+#' @rdname entropy
 #' @export
 ic.default <- function(..., distribution = ptable(...), base = 2) {
   checks(distribution, xclass('table'))
@@ -181,6 +191,7 @@ information <- function(ps, base = 2) {
 #' @export
 mutualInfo <- function(x, ..., base = 2) UseMethod('mutualInfo') 
 
+#' @rdname mutualInfo
 #' @export
 mutualInfo.table <- function(x, base = 2) {
   sum(.mutualinfo(x, base = base) * proportions(x), na.rm = TRUE)
@@ -200,6 +211,7 @@ mutualInfo.table <- function(x, base = 2) {
   log(joint / ind.joint, base = base) 
 }
    
+#' @rdname mutualInfo
 #' @export
 mutualInfo.default <- function(..., base = 2) {
   mutualInfo.table(table(...), base = base)
@@ -225,6 +237,7 @@ pmutualInfo <- function(..., base = base) {
 #' @export
 crossentropy <- function(..., distribution, base) UseMethod('crossentropy')
 
+#' @rdname crossentropy
 #' @export
 crossentropy.table <- function(tab, distribution, base = 2){
   if (!all(dim(tab) == dim(distribution))) .stop("The number of observation vectors must match dimensions of the distribution.")
@@ -243,6 +256,7 @@ crossentropy.table <- function(tab, distribution, base = 2){
   sum(info * frequency)
   
 }
+#' @rdname crossentropy
 #' @export
 crossentropy.default <- function(..., distribution, base = 2) {
   tab <- table(...)
@@ -261,7 +275,8 @@ table <- function(...,
                   dnn = NULL,
                   deparse.level = 1) {
   
-  exprs <- rlang::enexprs(...)
+  # exprs <- rlang::enexprs(...)
+  exprs <- as.list(substitute(list(...)))[-1L]
   
   args <- list(...)
   dimnames <- .names(args)
@@ -304,29 +319,53 @@ factorize <- function(token) {
 ## Plotting defaults stuff ----
 
 #' @export
-plot <- function(x, y, ..., col = sample(flatly[1:5], 1), pch = 16, cex = .5,
-                 log = "",
-                 xaxis, yaxis) {
+plot <- function(x, y = NULL, ..., type = 'p', recycle = TRUE, add = FALSE, 
+                 col = flatly[1], pch = 16, 
+                 cex = seq(.7, .2, length.out = 8)[findInterval(ceiling(log10(length(x))), 1:8)],
+                 log = "", 
+                 xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
+                 col.axis = par('col.axis')) {
   
   if (is.logical(log)) log <- if (log[1]) 'y' else ''
+  print(cex)
   
-  base::plot(x, y, ..., col = col, pch = pch, cex = cex, axes = FALSE)
+  xlabel <- if (!missing(x)) deparse1(substitute(x))
+  ylabel <- if (!missing(y)) deparse1(substitute(y))
   
-  axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
-  axis(2, pretty(y, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+  xy <- xy.coords(x = x, y = y, xlab = xlabel, ylab = ylabel, log = log, recycle = recycle)
+  
+  xlim <- xlim %||% range(xy$x)
+  ylim <- ylim %||% range(xy$y)
+  if (!add) {
+    plot.new()
+    plot.window(xlim = xlim, ylim = ylim, log = log, ...)
+    
+    title(...)
+    axis(1, pretty(xlim, n = 10L, min.n = 5L), las = 1, tick = FALSE, xpd = TRUE)
+    axis(2, pretty(ylim, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+    mtext(xlab %||% xy$xlab, 1, line = 2.5, col = col.axis)
+    ylab <- ylab %||% xy$ylab 
+    mtext(ylab, 2, line = 2.5, las = if (nchar(ylab) <= 3) 1 else 3, col = col.axis)
+  }
+  plot.xy(xy, type = type, ..., col = col, pch = pch, cex = cex)
+    
+    
+  
 }
 
 #' @export
 hist <- function(x, ..., col = flatly[1],
-                 xaxis, yaxis, 
-                 freq = TRUE, probability = !freq) {
+                 log = '', 
+                 xlim = range(x, na.rm = TRUE), ylim = NULL,
+                 freq = TRUE) {
   
+  # if (log == 'x') x <- log(x)
   
-  y <- graphics::hist(x, ..., 
+  y <- graphics::hist(x, ..., xlim = xlim, ylim = ylim,
                       col = col, border = flatly[5],
-                      axes = FALSE, freq = freq, probability = probability)
+                      axes = FALSE, freq = freq)
   
-  axis(1, pretty(x, n = 10L, min.n = 5L), las = 1, tick = FALSE)
+  axis(1, pretty(xlim, n = 10L, min.n = 5L), las = 1, tick = FALSE)
   
   yrange <- pretty(if (freq) y$counts else y$density, n = 10L, min.n = 5L)
   axis(2, yrange, tick = FALSE, las = 1)

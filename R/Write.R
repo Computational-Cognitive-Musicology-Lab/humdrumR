@@ -33,19 +33,63 @@
 #' The default behavior is to print a string indicating the `humdrumR` version number and date.
 #' If `EMD` is set to `NULL`, it is not appended to the files.
 #' 
-#' @param humdrumR A [humdrumR data object][humdrumRclass].
-#' @param renamer A `function`. Must accept a `character` vector and return a new atomic vector
+#' @param humdrumR ***HumdrumR data to write.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#' 
+#' @param renamer ***A `function` to modify output filenames.***
+#' 
+#' Defaults to `force` (keep the original filenames).
+#' 
+#' Must be a `function` which accepts a `character` vector and returns a new `charater` vector
 #' of the same length. 
-#' @param prefix (`character`, `length == 1L`) A `character` string prepended to the file name.
-#' @param affix (`character`, `length == 1L`) A `character` string appended to the file name
-#' (before the extension).
-#' @param directory (`character`, `length == 1L`) A directory to write the files into. If `NULL`,
-#' files are written to the same directory (or directories) they were [read from][readHumdrum()].
-#' @param overwrite (`logical`, `length == 1`) If `FALSE`, `writeHumdrum` will refuse to overwrite
+#' 
+#' @param prefix ***A prefix to add to output filenames.***
+#' 
+#' Defaults to `"humdrumR_"`.
+#' 
+#' Must be a single `character` string.
+#' 
+#' @param affix ***An affix to add to output filenames.***
+#' 
+#' Defaults to `""`.
+#' 
+#' Must be a single `character` string.
+#'
+#' Affix is appended at end of filename, but before the extension.
+#' 
+#' @param directory ***A directory to write the files into.***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be a single `character` string.
+#' 
+#' If `NULL`, files are written to the same directory (or directories) they were [read from][readHumdrum()].
+#' 
+#' @param overwrite ***Whether to overite existing files.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `FALSE`, `writeHumdrum` will refuse to overwrite
 #' any files. If `TRUE`, `writeHumdrum` will overwrite files, but only after an additional prompt from the user.
-#' @param verbose (`logical`, `length == 1`) If `TRUE`, each *new* output file name is printed on the console
+#' 
+#' @param verbose ***Whether to show file names while writing.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, each *new* output file name is printed on the console
 #' as the writing happens.
-#' @param EMD (`character`, `length == 1`) A string to write to a new `!!!EMD:` record in each file.
+#' 
+#' @param EMD ***A string to write to a new `!!!EMD:` record in each file.***
+#' 
+#' Defaults to "Editing in humdrumR, version X.X.X.XXX, on current data/time."
+#' 
+#' Must be a single `character` string.
+#' 
 #' If `NULL`, not appended.
 #' 
 #' 

@@ -531,17 +531,37 @@
 #' 
 #' Each time `with` is called, the `N` in `.^N` is replaced by the current value of `n`.
 #'      
-#' @param data A `[humdrumR][humdrumRclass]` data object.
-#' @param ...  Any number of expressions to evaluate. Unnamed expressions are interpreted as the
-#' "main" *within-expressions*. Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
+#' @param data ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#' 
+#' @param ... ***Any number of expressions to evaluate.*** 
+#'
+#' Unnamed expressions are interpreted as the "main" *within-expressions*. 
+#' Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
 #' Other evaluation options can be achieved with `recycle` or `side` arguments.
-#' @param dataTypes A string or vector of characters drawn from `c("D", "d", "I", "L", "M","G")`. 
-#'     These characters  correspond to types of humdrum records: **D**ata, null **d**ata, **I**nterpretations, 
-#'     **M**easures, **L**ocal comments, and **G**lobal comments respectively. The expression
-#'     is only evaluated on data drawn from the specified record types (defaults to `"D"`).
-#' @param variables A named `list` of values, which are interpolated into the within-expression(s)
-#' wherever a variable name matches a named from the list.
-#' @param drop This argument is conceptually similar to the `drop` argument in R matrices.
+#' 
+#' @param dataTypes ***Which types of humdrum records to include.***
+#' 
+#' Defaults to `"D"`.
+#' 
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
+#' 
+#' @param variables ***A named `list` of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.***
+#' 
+#' Defaults to `list()`.
+#' 
+#' Must be `list`.
+#' 
+#' @param drop ***Whether to return a simplified data structure.***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' This argument is conceptually similar to the `drop` argument in R matrices.
 #' If `drop = TRUE`, the output of `with.humdrumR` is simplified as much as possible (trying to return
 #' the "raw" vector, list, table, etc. within it). If `drop = FALSE`, the result is *always*
 #' a `data.table`. The default value (`drop = TRUE`) is usually what we want because it is more

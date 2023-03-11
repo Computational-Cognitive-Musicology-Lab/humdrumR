@@ -12,7 +12,7 @@ spine in humdrumR object."><!-- mathjax --><script src="https://cdnjs.cloudflare
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,11 +83,13 @@ spine in <a href="humdrumRclass.html">humdrumR object</a>.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>Tandem</dt>
-<dd><p>Should always be the <code>Tandem</code> field from a <a href="humdrumRclass.html">humdrumR object</a>.</p></dd>
+<dd><p><em><strong>Parsed tandem interpretation data.</strong></em></p>
+<p>Must be <code>atomic</code>.</p>
+<p>Should always be the <code>Tandem</code> field from a <a href="humdrumRclass.html">humdrumR object</a>.</p></dd>
 <dt>regex</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>). A single regular expression to match against the
-tandem interpretations. You should not include a <code>*</code> at the beginning---the <code>*</code> marker
-for tandem interpretations are already removed from the <code>Tandem</code> field.</p></dd>
+<dd><p><em><strong>A regular expression to match tandem interpretations.</strong></em></p>
+<p>Must be a single <code>character</code> string.</p>
+<p>You should not include a <code>*</code> at the beginning---the <code>*</code> marker for tandem interpretations are already removed from the <code>Tandem</code> field.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

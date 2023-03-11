@@ -26,12 +26,13 @@ removeEmptyRecords(humdrumR)
 removeEmptyStops(humdrumR)
 }
 \arguments{
-\item{x}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{x}{\emph{\strong{HumdrumR data.}}
 
-\item{...}{Arbitrary expressions passed to \link[=withinHumdrum]{with(in)}---the "within" expression(s) must evaluate to
-full-length \code{logical} values.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{humdrumR}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{...}{\emph{\strong{Arbitrary expressions passed to \link[=withinHumdrum]{with(in)}.}}
+
+The "within" expression(s) must evaluate to full-length \code{logical} values.}
 }
 \description{
 \code{subset.humdrumR} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}.

@@ -31,27 +31,58 @@ ditto(x, ...)
 )
 }
 \arguments{
-\item{x}{A vector.}
+\item{x}{\emph{\strong{A vector.}}
 
-\item{null}{Either a logical vector where (\code{length(x) == length(null)}), a numeric
+Should be \code{list}, \code{atomic}, \code{matrix}, or \code{data.frame}.}
+
+\item{null}{\emph{\strong{Defines which elements needs to be filled.}}
+
+Defaults to \code{function(x) is.na(x) | x == "."}.
+
+Should be either a logical vector where (\code{length(x) == length(null)}), a numeric
 vector of positive indices, or a function which, when applied to \code{x} returns an appropriate logical/numeric vector.}
 
-\item{initial}{A value (\code{length == 1}) of the same class as \code{x}, used to pad the beginning (or end, if \code{reverse == TRUE}) of the output,
-if necessary.}
+\item{initial}{\emph{\strong{Padder for the beginning (or end, if \code{reverse == TRUE}) of the output, if needed.}}
 
-\item{reverse}{(\code{logical} & \code{length == 1}) If \code{reverse == TRUE}, the "non-null" values are coped to overwrite null values
+Defaults to \code{NA}.
+
+Should be the same class as \code{x}; must be length \code{1}.}
+
+\item{reverse}{\emph{\strong{Whether the excecution order is reversed.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{reverse == TRUE}, the "non-null" values are coped to overwrite null values
 \emph{earlier} (lower indices) in the vector.}
 
-\item{groupby}{A vector or list of vectors, all of the same length as \code{x}. Each segment of \code{x} delineated
-by the \code{groupby} vector(s) is treated separately.}
+\item{groupby}{\emph{\strong{How to group the data.}}
 
-\item{margin}{a vector giving the subscripts which the function will be applied over.
+Should be \code{vector} or \code{list} of \code{vectors}; must be length \code{length(x)}.
+
+Each segment of \code{x} delineated by the \code{groupby} vector(s) is treated separately.}
+
+\item{margin}{\emph{\strong{A vector giving the dimensions which the function will be applied over.}}
+
+Defaults to \code{2} (across columns) for \code{matrix} inputs.
+
+Must be natural number(s).
+
 E.g., for a matrix \code{1} indicates rows, \code{2} indicates columns.
 Where \code{x} has named dimnames, it can be a character vector selecting dimension names.}
 
-\item{field}{Which field (\link[=partialMatching]{partially matched}) in the \code{humdrumR} dataset should be dittoed?}
+\item{field}{\emph{\strong{Which field to ditto?}}
 
-\item{newField}{(\code{character} of \code{length == 1}) What to name the new (dittoed) field.}
+Must be a single \code{character} string.
+
+Is (\link[=partialMatching]{partially matched}) against \link[=humTable]{fields} in \code{x}.}
+
+\item{newField}{\emph{\strong{What to name the new (dittoed) field.}}
+
+Defaults to the \code{field} name appended with \code{"_ditto"}.
+
+Must be a single \code{character} string.}
 }
 \description{
 \code{ditto} is a function that allow you to "fill" null values in a vector

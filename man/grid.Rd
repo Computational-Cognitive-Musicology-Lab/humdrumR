@@ -36,45 +36,63 @@ fromgrid(x, tick, meter)
 \method{fromgrid}{integer}(x, tick = "16", deparser = recip, ...)
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.}
+\item{x}{\emph{\strong{An input  vector.}}
 
-\item{...}{Argments passed to the \code{deparser}.}
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=rational]{rational (rhythmInterval)}, or \code{NULL}.
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=rhythmParsing]{rhythm parser}.}
+Must be \link[=rhythmParsing]{parsable as rhythm infromation}.}
 
-\item{scale}{A \code{numeric} or \link{rational} value which is used as the output unit of measurement: the default value for most functions
-is \code{rational(1, 1)}, a whole-note or "duration."}
+\item{...}{\emph{\strong{Argments passed to the \link[=rhythmDeparsing]{deparser}.}}}
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
-\emph{and} there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-rhythm information.
-If \code{inPlace = FALSE}, only the rhythm output information will be returned (details below).}
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-\item{tick}{What is the unit of the grid?
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
+
+Defaults to \code{rational(1, 1)}.
+
+Must be \code{numeric} or \link{rational}.}
+
+\item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton  \code{logical} value: an on/off switch.
+
+Defaults to \code{FALSE}.
+
+A singleton \code{logical} value, or \code{NA}.
+
+See "Grace notes" section below.}
+
+\item{tick}{\emph{\strong{What is the unit of the grid?}}
 
 Defaults to sixteenth-note (\code{fromgrid()}) or the \code{\link[=tatum]{tatum()}} of the \code{x} argument.
 
 Must be parsed as a rhythm by \code{\link[=rhythmInterval]{rhythmInterval()}}.}
 
-\item{on, off}{What represents onsets (attacks) and rests in the grid?
+\item{on, off}{\emph{\strong{What represents onsets (attacks) and rests in the grid?}}
 
 Default to \code{"X"} and \code{"O"} respectively.
 
 Must be singleton atomic values.}
 
-\item{collapse}{Should the output be collapsed to a single string per measure?
+\item{collapse}{\emph{\strong{Should the output be collapsed to a single string per measure?}}
 
 Defaults to \code{TRUE}.
 
-Must be sinleton \code{logical} value: an on/off switch.}
+Must be singleton \code{logical} value: an on/off switch.}
 
-\item{sep}{What separates each on/off tick in a string?
+\item{sep}{\emph{\strong{Separator between ticks in collapsed output.}}
 
 Defaults to an empty string (no separator).
 
 Must be a singleton \code{character} string.}
 
-\item{deparser}{What output representation should be returned?
+\item{deparser}{\emph{\strong{What output representation should be returned?}}
 
 Defaults to \code{\link[=recip]{recip()}}.
 

@@ -16,7 +16,7 @@ onto their respective **kern spines.'><!-- mathjax --><script src="https://cdnjs
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,13 +88,13 @@ onto their respective <code>**kern</code> spines.</p>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>fold</dt>
-<dd><p>(<code>character</code>) The target exclusive interpretation(s) <em>from which</em>
-to "fold" spines to new fields.
-Must be specified <em>without</em> the <code>**</code> prefix: <code>"kern"</code> not <code>"**kern"</code>.</p></dd>
-<dt>onto</dt>
-<dd><p>(<code>character</code>, whole number) The target exclusive interpretation (must be only one) <em>to which</em>
-the "fold" data is moved.</p></dd>
+    <dl><dt>humdrumR</dt>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+<dt>fold, onto</dt>
+<dd><p><em><strong>Which exclusive interpretation(s) to "fold" from/to.</strong></em></p>
+<p>Must be non-empty <code>character</code> vectors. <code>onto</code> must be a single string; <code>from</code> may contain multiple exclusive strings.</p>
+<p>Must be specified <em>without</em> the <code>**</code> prefix: <code>"kern"</code> not <code>"**kern"</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

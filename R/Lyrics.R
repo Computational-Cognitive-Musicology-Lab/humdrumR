@@ -2,13 +2,27 @@
 #' 
 #' Transform humdrumR's syllabic form of lyrics into complete words, where each row will contain either one word or a null data token.
 #' 
-#' @param data The data to be transformed (a character vector)
+#' @param data ***The data to be transformed.***
 #' 
-#' @param nullTokens Boolean expression which determines whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word. Default is TRUE
+#' Must be `character`.
 #' 
-#' @param keepSilbe Boolean expression which determines whether the user wants to save silbe format in the output in case needed for back translation later or other uses. Default is FALSE
+#' @param nullTokens ***Whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word.***
 #' 
-#' @param indices Boolean expression which determines whether the linguistics version of the word will be printed. Default is FALSE.
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param keepSilbe ***Whether the user wants to save silbe format in the output in case needed for back translation later or other uses.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param indices ***Whether the linguistics version of the word will be printed.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @return the transformed data
 #' 
@@ -362,7 +376,11 @@ wort <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
 #' 
 #' Check that the formatting of the lyrics is correct, with -'s in the right places (i.e., to denote the start or end of a syllable)
 #' 
-#' @param cVector The data to be checked for improper formatting (for now, please read in your spine as a dataframe with 1 column)
+#' @param cVector ***The data to be checked for improper formatting.***
+#' 
+#' Must be `data.frame`.
+#' 
+#' For now, please read in your spine as a dataframe with 1 column.
 #' 
 #' @return "Formatted properly." if the lyrics are formatted properly, else print error message with corrections.
 #' 

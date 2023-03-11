@@ -130,7 +130,7 @@ test_that('Examples from Working With Data vignette work', {
   pitches <- with(chorales, pitch(Token))
   
   expect_length(pitches, 2433)
-  expect_equalchar(pitches[567], 'G#4')
+  expect_equal(as.character(pitches[567]), 'G#4')
   
   #
   chorales <- within(chorales, Pitch <- pitch(Token))

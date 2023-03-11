@@ -16,7 +16,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,22 +100,32 @@ basic <a href="humSummary.html">corpus summary functions</a>.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>humdrumR</dt>
-<dd><p>A <a href="humdrumRclass.html">humdrumR object</a></p></dd>
+<dd><p><em><strong>HumdrumR data.</strong></em></p>
+<p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
 <dt>dataTypes</dt>
-<dd><p>Which types of humdrum records to include in the census. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
+<dd><p><em><strong>Which types of humdrum records to include in the census.</strong></em></p>
+<p>Defaults to <code>"GLIMDd"</code>.</p>
+<p>Must be <code>character</code>. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
 or any combination of these (e.g., <code>"LIM"</code>).
 (see the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.).</p></dd>
 <dt>by</dt>
-<dd><p>An arbitrary expression which indicates how to group the data.</p></dd>
+<dd><p><em><strong>An arbitrary expression which indicates how to group the data.</strong></em></p>
+<p>Defaults to <code>Filename</code> (a humdrumR <a href="humTable.html">data field</a>).</p></dd>
 <dt>removeEmpty</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If set <code>TRUE</code>, any groups that have zero tokens are
-not included in the <code>humCensus</code> table.</p></dd>
+<dd><p><em><strong>Whether to include zero tokens.</strong></em></p>
+<p>Defaults to <code>FALSE</code></p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If set <code>TRUE</code>, any groups that have zero tokens are not included in the <code>humCensus</code> table.</p></dd>
 <dt>drop</dt>
-<dd><p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+<dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
+<p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
 a <code>humCensus</code> table.</p></dd>
 <dt>i</dt>
-<dd><p>If <code>numeric</code>, selects rows by index. If <code>character</code>, the string is matched
-as a regular expression against the "by-group" names.</p></dd>
+<dd><p><em><strong>Index for rows.</strong></em></p>
+<p>If <code>numeric</code>, selects rows by index.
+If <code>character</code>, the string is matched  as a regular expression against the "by-group" names.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -159,6 +169,38 @@ The by expression must be the full length of the humdrum table.</p>
 <code><a href="spines.html">spines</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/*.krn"</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGsWK7P/temp_libpath4ee51b3e3c48/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ten files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating ten files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing ten files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-in"><span class="fu">census</span><span class="op">(</span><span class="va">chorales</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Census of GLIMDd records in humdrumR corpus "chorales" (ten files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Grouped by ten Filenames:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    Records   Tokens (unique)   Characters (per token)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor001.krn [ 1]       133      484    (148)         1910      (3.95)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor002.krn [ 2]       124      451    (148)         1897      (4.21)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor003.krn [ 3]       110      386    (132)         1867      (4.84)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor004.krn [ 4]       103      367    (129)         1711      (4.66)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor005.krn [ 5]       172      643    (159)         2233      (3.47)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor006.krn [ 6]        77      263    (125)         1313      (4.99)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor007.krn [ 7]       179      671    (168)         2415       (3.6)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor008.krn [ 8]       171      639    (165)         2298       (3.6)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor009.krn [ 9]       131      479    (167)         1923      (4.01)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor010.krn [10]       100      355    (133)         1599       (4.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Totals:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      1,300    4,738    (503)       19,166      (4.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

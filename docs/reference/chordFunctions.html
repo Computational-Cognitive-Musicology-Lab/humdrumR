@@ -12,7 +12,7 @@ The functions are:'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,6 +76,28 @@ The functions are:</p>
     </div>
 
 
+    <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+    <dl><dt>x</dt>
+<dd><p><em><strong>An <code>atomic</code> vector.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vectors</p></dd>
+<dt>Key</dt>
+<dd><p><em><strong>The diatonic key used by the parser, deparser, and transposer.</strong></em></p>
+<p>Defaults to <code>NULL</code>, which is interpreted as C major.</p>
+<p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code>.</p></dd>
+<dt>parseArgs</dt>
+<dd><p><em><strong>An optional list of arguments to the <a href="chordParsing.html">chord parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="chordParsing.html">chord parser</a>.</p></dd>
+<dt>transposeArgs</dt>
+<dd><p><em><strong>An optional list of arguments passed to a <code><a href="transpose.html">transpose()</a></code> call.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to <code><a href="transpose.html">transpose()</a></code>.</p></dd>
+<dt>inPlace</dt>
+<dd><p><em><strong>Should non-chord information be retained in the output string.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
+</dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     

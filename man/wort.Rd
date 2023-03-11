@@ -7,13 +7,27 @@
 wort(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE)
 }
 \arguments{
-\item{nullTokens}{Boolean expression which determines whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word. Default is TRUE}
+\item{nullTokens}{\emph{\strong{Whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word.}}
 
-\item{keepSilbe}{Boolean expression which determines whether the user wants to save silbe format in the output in case needed for back translation later or other uses. Default is FALSE}
+Defaults to \code{TRUE}.
 
-\item{indices}{Boolean expression which determines whether the linguistics version of the word will be printed. Default is FALSE.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{data}{The data to be transformed (a character vector)}
+\item{keepSilbe}{\emph{\strong{Whether the user wants to save silbe format in the output in case needed for back translation later or other uses.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{indices}{\emph{\strong{Whether the linguistics version of the word will be printed.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{data}{\emph{\strong{The data to be transformed.}}
+
+Must be \code{character}.}
 }
 \value{
 the transformed data

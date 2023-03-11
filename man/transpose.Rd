@@ -7,20 +7,40 @@
 transpose(x, by, Key, to, real, relative, ...)
 }
 \arguments{
-\item{x}{The input pitch(es) to transpose. A \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
+\item{x}{***The input pitch(es) to transpose. ***
 
-\item{by}{A \code{tonalInterval} or something intepretable as a \code{tonalInterval}.
-The input \code{x} is transposed by this interval.}
+Can be a \code{tonalInterval} or something \link[=pitchParsing]{intepretable as a pitch information}.}
 
-\item{Key}{A \code{diatonicSet} or something intepretable as a \code{diatonicSet}. For tonal and/or to transpositions,
-this is the "from" key. If this value is \code{NULL}, it defaults to C major.}
+\item{by}{\emph{\strong{Transpose by this interval.}}
 
-\item{to}{A \code{diatonicSet} or something intepretable as a \code{diatonicSet}. The input \code{x} is transposed
-to this key.}
+Can be a \code{tonalInterval} or something intepretable as a \code{tonalInterval}.}
 
-\item{real}{A logical. If \code{TRUE} (the default), transposition is real. If \code{FALSE}, transposition is tonal.}
+\item{Key}{\emph{\strong{Transpose \emph{from} this key (to the \code{to} key).}}
 
-\item{relative}{A logical. If \code{TRUE} transposition is relative. If \code{FALSE} (the default), transposition is parallel.}
+Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.
+
+For tonal and/or to transpositions, this is the "from" key. If this value is \code{NULL}, it defaults to C major.}
+
+\item{to}{\emph{\strong{Transpose \emph{to} this key (from the \code{Key} key).}}
+
+Can be a \code{diatonicSet} or something intepretable as a \code{diatonicSet}.}
+
+\item{real}{\emph{\strong{Should transposition be real (or tonal)?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleon \code{logical} value: an on/off switch.
+
+If \code{real == FALSE}, transposition is tonal.}
+
+\item{relative}{\emph{\strong{Should transposition between keys be relative (or parallel)?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+Only relavent if using transposing between keys (\code{Key} and \code{to}) with different modes.
+If \code{relative == FALSE}, transposition is parallel.}
 }
 \description{
 This function \link[=https://en.wikipedia.org/wiki/Transposition_(music)]{transposes} pitches or keys

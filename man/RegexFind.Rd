@@ -29,9 +29,15 @@ x \%~\% regex
 x \%!~i\% pattern
 }
 \arguments{
-\item{x}{A \code{character} vector to search in.}
+\item{x}{\emph{\strong{A \code{character} vector to search in.}}
 
-\item{regex}{One or more regular expressions. If more than one regex is supplied,
+Must be \code{character}.}
+
+\item{regex}{\emph{\strong{One or more regular expressions.}}
+
+Must be \code{character}.
+
+If more than one regex is supplied,
 matches to \emph{any} of the regexes are returned. (See "Multiple regexes" section.)}
 }
 \description{

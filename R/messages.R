@@ -242,6 +242,7 @@ dochecks <- function(arg, ...) {
 ### Class ----
 
 xnull <- argCheck(\(arg) is.null(arg), 'must be NULL', .mismatch(is.null))
+xna <- argCheck(\(arg) all(is.na(arg)), 'must be NA', .mismatch(is.na))
 
 xclass <- function(classes) {
   if ('number' %in% classes) classes <- c('numeric', 'integer', 'integer64', classes)

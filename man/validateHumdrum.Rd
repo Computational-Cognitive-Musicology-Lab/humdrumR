@@ -7,12 +7,18 @@
 validateHumdrum(..., errorReport.path = NULL)
 }
 \arguments{
-\item{...}{\code{character}: Arguments passed to \code{\link[=findHumdrum]{findHumdrum()}} to identify files on the local machine
-to test for humdrum validity.
+\item{...}{\emph{\strong{Arguments passed to \code{\link[=findHumdrum]{findHumdrum()}}.}}
+
+Used to identify files on the local machine to test for humdrum validity.
 This is mainly used to pass \link[=readHumdrum]{regex file-path search patterns}, but may also be used to pass
 the \code{recursive} and/or \code{contains} arguments to \code{\link[=findHumdrum]{findHumdrum()}}.}
 
-\item{errorReport.path}{(\code{character}, \code{length == 1}) A directory path where to write error report files.
+\item{errorReport.path}{\emph{\strong{A directory path where to write error report files.}}
+
+Defaults to \code{NULL}.
+
+Must be a single \code{character} string.
+
 If \code{NULL} (the default), no error report files are written.}
 }
 \description{
@@ -67,3 +73,6 @@ Error message for record three printed here. | Exactly as they did
 }
 }
 
+\examples{
+validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+}

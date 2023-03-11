@@ -16,7 +16,7 @@ Lilypond-like rhythms can be creating using the recip function."><!-- mathjax --
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,27 +100,36 @@ Lilypond-like <em>rhythms</em> can be creating using the <a href="recip.html">re
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
+<dd><p><em><strong>Input data to parse as pitch information.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="tonalIntervalS4.html">tonalInterval</a>, or <code>NULL</code>.</p></dd>
 <dt>...</dt>
-<dd><p>These arguments are passed to the <a href="pitchDeparsing.html">pitch deparser</a>.
-There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+<dd><p><em><strong>Arguments passed to the <a href="pitchDeparsing.html">pitch deparser</a>.</strong></em></p>
+<p>There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>generic</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>generic = TRUE</code> the "specific" pitch information (accidentals and qualites) is discarded.</p></dd>
+<dd><p><em><strong>Should "specific" pitch information (accidentals and qualites) be discarded?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>simple</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) If <code>simple = TRUE</code> the "compound" pitch information (octave/contour) is discarded.</p></dd>
+<dd><p><em><strong>Should "compound" pitch information (octave/contour) be discarded?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>Key</dt>
-<dd><p>(a diatonicSet or something coercable to <code>diatonicSet</code>, <code>length == 1 | length == length(x)</code>) The input <code>Key</code> used by
-the parser, deparser, and transposer.</p></dd>
+<dd><p><em><strong>The input <code>Key</code> used by the parser, deparser, and transposer.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code></p></dd>
 <dt>transposeArgs</dt>
-<dd><p>(<code>list</code>) <code>transposeArgs</code> can be a list of arguments that are passed to a special call to <code><a href="transpose.html">transpose()</a></code>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to a special <code><a href="transpose.html">transpose()</a></code> call.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to <code><a href="transpose.html">transpose()</a></code>.</p></dd>
 <dt>parseArgs</dt>
-<dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
-<dt>gamutArgs</dt>
-<dd><p>(<code>list</code>) <code>gamutArgs</code> can be a list of arguments that are passed to a special call to <code><a href="gamut.html">gamut()</a></code>.</p>
-<p>Defaults to <code>TRUE</code> for <code>character</code>-string output (like <code><a href="kern.html">kern()</a></code>) and <code>FALSE</code> for numeric output (like <code><a href="semits.html">semits()</a></code>).</p>
-<p>Must be singleton <code>logical</code> value: an on/off switch.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="pitchParsing.html">pitch parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="pitchParsing.html">pitch parser</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
+<dd><p><em><strong>Should non-pitch information be retained in the output string.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p>
+<p>This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
 <em>and</em> there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-pitch information.
 If <code>inPlace = FALSE</code>, only the pitch output information will be returned (details below).</p></dd>
@@ -161,7 +170,7 @@ see the <a href="pitchDeparsing.html">pitch deparsing documentation</a>.</p>
 <h3 id="key">Key<a class="anchor" aria-label="anchor" href="#key"></a></h3>
 
 
-<p>The <code>Key</code> argument must be a diatonicSet, or something that can be parsed into one.
+<p>The <code>Key</code> argument must be a <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, or something that can be parsed into one.
 The <code>Key</code> argument is passed to the <a href="pitchParsing.html">parser</a>, deparser, <em>and</em> transpose---<em>unless</em>
 an alternate <code>Key</code> is passed to <code>transposeArgs</code> or <code>parseArgs</code>.
 Various deparsing options use the <code>Key</code> argument; for example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.</p>
@@ -191,8 +200,8 @@ For example, we can get the exact same result as before by typing <code>kern('CX
 to <code><a href="transpose.html">transpose()</a></code>, allowing us to easily transpose pitch information.
 For example, we could type <code>kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))</code> can get the output <code>c('d', 'e', 'f#')</code>.
 The possible transpose args are:</p><ul><li><p><code>by</code> (<a href="tonalIntervalS4.html">tonalInterval</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>from</code> (diatonicSet, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>to</code>  (diatonicSet, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>from</code> (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>to</code>  (<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
 <li><p><code>real</code> (<code>logical</code>, <code>length == 1</code>) Should transposition be real or tonal?</p></li>
 <li><p><code>relative</code> (<code>logical</code>, <code>length == 1</code>) Should key-wise transposition be based on relative or parallel keys?</p></li>
 </ul><p>As a convenient shorthand, or "syntactic sugar," you can specify <code>transposeArgs</code> in an alternate way:
@@ -291,6 +300,32 @@ or how pitches are <a href="pitchParsing.html">parsed</a> and <a href="pitchDepa
 <code><a href="tonh.html">tonh</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">exampleToken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4GG'</span>, <span class="st">'4G'</span>, <span class="st">'4E'</span>, <span class="st">'4F#'</span>, <span class="st">'4G'</span>, <span class="st">'4D'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">lilypond</span><span class="op">(</span><span class="va">exampleToken</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">results</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **lilypond</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] g,  g   e   fis g   d   e  </span>
+<span class="r-in"></span>
+<span class="r-in"><span class="va">exampleHumdrum</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGsWK7P/temp_libpath4ee51b3e3c48/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> One files read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing one files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">exampleHumdrum</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">lilypond</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"><span class="va">results</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **lilypond</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] .    f    c'   e    c'   f    c'   bes, bes  bes, bes  c    a    c    g   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16] f    .    a'   c''  f'   a'   c'   f'   f'   a'   a'   c''  a'   c''  g'  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [31] bes' f'   a'   f'   d''  f'   d''  f'   c''  bes  e'   a    f'   .   </span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

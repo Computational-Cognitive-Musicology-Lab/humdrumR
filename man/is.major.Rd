@@ -22,9 +22,11 @@ is.minor(x, ...)
 \method{is.minor}{default}(x, ...)
 }
 \arguments{
-\item{x}{Either a \code{diatonicSet} or \code{tertianSet}, or something that can be parsed as one.}
+\item{x}{\emph{\strong{Input data, interpreted as diatonic keys or chords.}}
 
-\item{...}{Parameters passed to the parsers (\code{\link[=tertianSet]{tertianSet()}} and \code{\link[=diatonicSet]{diatonicSet()}}).}
+Must be a \code{diatonicSet} or \code{tertianSet} or something that can be parsed as one.}
+
+\item{...}{\emph{\strong{Parameters passed to the parsers (\code{\link[=tertianSet]{tertianSet()}} and \code{\link[=diatonicSet]{diatonicSet()}}).}}}
 }
 \description{
 These functions test the majorness/minorness of a

@@ -12,7 +12,7 @@ of rhythmic (time duration) information."><!-- mathjax --><script src="https://c
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,20 +79,27 @@ of rhythmic (time duration) information.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="rational.html">rational (rhythmInterval)</a>, or <code>NULL</code>.</p></dd>
+<dd><p><em><strong>An input  vector.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="rational.html">rational (rhythmInterval)</a>, or <code>NULL</code>.</p>
+<p>Must be <a href="rhythmParsing.html">parsable as rhythm infromation</a>.</p></dd>
 <dt>...</dt>
-<dd><p>These arguments are passed to the <a href="rhythmDeparsing.html">rhythm deparser</a>.
-There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+<dd><p><em><strong>Arguments passed to the <a href="rhythmParsing.html">rhythm parser</a>.</strong></em></p>
+<p>There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>scale</dt>
-<dd><p>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement: the default value for most functions
-is <code>rational(1, 1)</code>, a whole-note or "duration."</p></dd>
+<dd><p><em><strong>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement.</strong></em></p>
+<p>Defaults to <code>rational(1, 1)</code>.</p>
+<p>Must be <code>numeric</code> or <a href="rational.html">rational</a>.</p></dd>
 <dt>parseArgs</dt>
-<dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="rhythmParsing.html">rhythm parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
-<em>and</em> there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-rhythm information.
-If <code>inPlace = FALSE</code>, only the rhythm output information will be returned (details below).</p></dd>
+<dd><p><em><strong>Should non-rhythm information be retained in the output string?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>A singleton <code>logical</code> value, or <code>NA</code>.</p>
+<p>See "Grace notes" section below.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -131,8 +138,8 @@ category of duration, usually used to indicate "freely" a-metric notes in an oth
 In humdrum data, grace notes are marked with <code>"q"</code> or <code>"Q"</code>; <code>q</code> should be reserved
 for tokens with no (other) duration information, while <code>Q</code> should be marked along with
 duration information: for example, <code>aa-q</code> or <code>16aa-Q</code>.
-In practice, this distinction is not always made, and is rarely important.
-By default, the <code>**recip</code> parser treats input marked as grace notes as having a duration of zero.
+In practice, this distinction is not always made, and is rarely important.</p>
+<p>By default, the <code>**recip</code> parser treats input marked as grace notes as having a duration of zero.
 However, if you pass a <code>grace</code> argument to the <a href="rhythmParsing.html">rhythm parser</a>, you can control this behavior.
 If <code>parse(grace = TRUE)</code>, grace-note durations (like the <code>16</code> in <code>"16aa-Q"</code>) are parsed like any other duration.
 If <code>grace = NA</code>, grace-notes return as <code>NA</code>.

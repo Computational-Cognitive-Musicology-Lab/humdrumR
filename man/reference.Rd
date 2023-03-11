@@ -17,16 +17,28 @@ reference(humdata)
 \method{[}{humReference}(refTable, i, j, drop = FALSE)
 }
 \arguments{
-\item{x}{A \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR object}.}
+\item{x}{\emph{\strong{Input for extracting reference information.}}
 
-\item{drop}{If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table}
-is returned instead of \code{humReference} table.}
+Must be a \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR}.}
 
-\item{i}{If \code{numeric}, selects rows by index. If \code{character}, the string is matched
-as a regular expression against filenames in the corpus.}
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
 
-\item{j}{if \code{numeric} selects columns by index. If \code{character}, \link[=partialMatching]{partially matched}
-against column names (reference codes).}
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
+a \code{humCensus} table.}
+
+\item{i}{\emph{\strong{Index for rows.}}
+
+If \code{numeric}, selects rows by index.
+If \code{character}, the string is matched as a regular expression against filenames in the corpus.}
+
+\item{j}{\emph{\strong{Index for columns.}}
+
+If \code{numeric}, selects columns by index.
+If \code{character}, \link[=partialMatching]{partially matched} against column names (reference codes).}
 }
 \description{
 \code{reference} is used to
@@ -79,10 +91,15 @@ unique reference records.
 \examples{
 
 reference('COM')
+reference('OTL')
 
-reference(humData)[ , 'COM']
+rs <- readHumdrum(humdrumRroot, "HumdrumData/RollingStone/.*hum")
+reference(rs)
 
-reference(humData)[3, ]
+reference('COC')
+reference(rs)[ , 'COC']
+
+reference(rs)[3, ]
        
 }
 \seealso{

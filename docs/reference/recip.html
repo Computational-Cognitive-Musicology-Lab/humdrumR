@@ -18,7 +18,7 @@ which also includes pitch information and notation details.'><!-- mathjax --><sc
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,23 +100,31 @@ which also includes <a href="kern.html">pitch</a> information and notation detai
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="rational.html">rational (rhythmInterval)</a>, or <code>NULL</code>.</p></dd>
+<dd><p><em><strong>An input  vector.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="rational.html">rational (rhythmInterval)</a>, or <code>NULL</code>.</p>
+<p>Must be <a href="rhythmParsing.html">parsable as rhythm infromation</a>.</p></dd>
 <dt>...</dt>
-<dd><p>These arguments are passed to the <a href="rhythmDeparsing.html">rhythm deparser</a>.
-There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
+<dd><p><em><strong>Arguments passed to the <a href="rhythmParsing.html">rhythm parser</a>.</strong></em></p>
+<p>There are also two hidden (advanced) arguments you can specify: <code>memoize</code> and <code>deparse</code> (see the details below).</p></dd>
 <dt>sep</dt>
-<dd><p>(<code>character</code>, <code>length == 1</code>) A <code>character</code> string to use as the separator
-between denominator and numerator.</p></dd>
+<dd><p><em><strong>The separator printed between numerator and denominator.</strong></em></p>
+<p>A single <code>character</code> string.</p>
+<p>Must be a single <code>character</code> string.</p></dd>
 <dt>parseArgs</dt>
-<dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="rhythmParsing.html">rhythm parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
 <dt>scale</dt>
-<dd><p>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement: the default value for most functions
-is <code>rational(1, 1)</code>, a whole-note or "duration."</p></dd>
+<dd><p><em><strong>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement.</strong></em></p>
+<p>Defaults to <code>rational(1, 1)</code>.</p>
+<p>Must be <code>numeric</code> or <a href="rational.html">rational</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
-<em>and</em> there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-rhythm information.
-If <code>inPlace = FALSE</code>, only the rhythm output information will be returned (details below).</p></dd>
+<dd><p><em><strong>Should non-rhythm information be retained in the output string?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>A singleton <code>logical</code> value, or <code>NA</code>.</p>
+<p>See "Grace notes" section below.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -141,6 +149,37 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <code><a href="notehead.html">notehead</a>()</code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
+<span class="r-in"><span class="va">tokens</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4.GG'</span>, <span class="st">'8G'</span>, <span class="st">'16E'</span>, <span class="st">'16F#'</span>, <span class="st">'16G'</span>, <span class="st">'16D'</span>, <span class="st">'q8D#'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.  8   16  16  16  16  1%0 4  </span>
+<span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>grace <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4. 8  16 16 16 16 .  4 </span>
+<span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span>, scale <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.  4   8   8   8   8   1%0 2  </span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 4 4 4 2 1</span>
+<span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>unit <span class="op">=</span> <span class="st">'4'</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 16 16 16 16 8  4 </span>
+<span class="r-in"></span>
+<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"><span class="va">B075</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">B075</span>, subset <span class="op">=</span> <span class="va">Spine</span> <span class="op">&gt;</span> <span class="fl">2</span>,  <span class="fu">recip</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">B075</span>, subset <span class="op">=</span> <span class="va">Spine</span> <span class="op">&gt;</span> <span class="fl">2</span>, <span class="fu">recip</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span> |&gt; <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

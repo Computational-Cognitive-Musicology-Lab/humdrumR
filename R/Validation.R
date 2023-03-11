@@ -56,14 +56,22 @@
 #'                                              | in the input file.
 #' ````
 #' 
-#' @param ... `character`: Arguments passed to [findHumdrum()] to identify files on the local machine
-#' to test for humdrum validity.
+#' @param ... ***Arguments passed to [findHumdrum()].*** 
+#'
+#' Used to identify files on the local machine to test for humdrum validity.
 #' This is mainly used to pass [regex file-path search patterns][readHumdrum()], but may also be used to pass
 #' the `recursive` and/or `contains` arguments to [findHumdrum()].
 #'
-#' @param errorReport.path (`character`, `length == 1`) A directory path where to write error report files.
+#' @param errorReport.path ***A directory path where to write error report files.***
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be a single `character` string.
+#' 
 #' If `NULL` (the default), no error report files are written.
 #'
+#' @examples 
+#' validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' @export
 validateHumdrum <- function(..., errorReport.path = NULL) {
 

@@ -12,7 +12,7 @@ The functions are:'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aj
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,6 +77,20 @@ The functions are:</p>
 
 
     <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+    <dl><dt>x</dt>
+<dd><p><em><strong>Input data, interpreted as diatonic keys.</strong></em></p>
+<p>Must be an <code>atomic</code> vector.</p></dd>
+<dt>Key</dt>
+<dd><p><em><strong>The key used by the parser, deparser, and transposer.</strong></em></p>
+<p>Defaults to <code>NULL</code>.</p>
+<p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code></p></dd>
+<dt>parseArgs</dt>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="keyParsing.html">key parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="keyParsing.html">key parser</a>.</p></dd>
+</dl></div>
+    <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     
 <ul><li><p><code><a href="key.html">key()</a></code></p></li>
@@ -86,7 +100,7 @@ The functions are:</p>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>To better understand how these functions work, read about how diatonic keys are
-represented, <a href="keyParsing.html">parsed</a>, and <a href="keyDeparsing.html">deparsed</a>.</p></div>
+<a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">represented</a>, <a href="keyParsing.html">parsed</a>, and <a href="keyDeparsing.html">deparsed</a>.</p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -3,6 +3,35 @@
 \name{chordFunctions}
 \alias{chordFunctions}
 \title{Parsing and deparsing chord information}
+\arguments{
+\item{x}{\emph{\strong{An \code{atomic} vector.}}
+
+The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
+
+\item{Key}{\emph{\strong{The diatonic key used by the parser, deparser, and transposer.}}
+
+Defaults to \code{NULL}, which is interpreted as C major.
+
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}.}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments to the \link[=chordParsing]{chord parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=chordParsing]{chord parser}.}
+
+\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a \code{\link[=transpose]{transpose()}} call.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
+
+\item{inPlace}{\emph{\strong{Should non-chord information be retained in the output string.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+}
 \description{
 These functions can be used to extract and "translate," or otherwise modify, data representing tertian harmony information.
 The functions are:

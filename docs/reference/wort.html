@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,13 +80,20 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>nullTokens</dt>
-<dd><p>Boolean expression which determines whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word. Default is TRUE</p></dd>
+<dd><p><em><strong>Whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word.</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>keepSilbe</dt>
-<dd><p>Boolean expression which determines whether the user wants to save silbe format in the output in case needed for back translation later or other uses. Default is FALSE</p></dd>
+<dd><p><em><strong>Whether the user wants to save silbe format in the output in case needed for back translation later or other uses.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>indices</dt>
-<dd><p>Boolean expression which determines whether the linguistics version of the word will be printed. Default is FALSE.</p></dd>
+<dd><p><em><strong>Whether the linguistics version of the word will be printed.</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>data</dt>
-<dd><p>The data to be transformed (a character vector)</p></dd>
+<dd><p><em><strong>The data to be transformed.</strong></em></p>
+<p>Must be <code>character</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>

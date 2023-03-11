@@ -16,7 +16,7 @@ For example, "X00X00X0" or c(1, 0, 0, 1, 0, 0, 1, 0).'><!-- mathjax --><script s
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,37 +116,44 @@ For example, <code>"X00X00X0"</code> or <code>c(1, 0, 0, 1, 0, 0, 1, 0)</code>.<
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>x</dt>
-<dd><p>(<code>atomic</code> vector) The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="rational.html">rational (rhythmInterval)</a>, or <code>NULL</code>.</p></dd>
+<dd><p><em><strong>An input  vector.</strong></em></p>
+<p>The <code>x</code> argument can be any (<a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic</a>) vector, or a <a href="rational.html">rational (rhythmInterval)</a>, or <code>NULL</code>.</p>
+<p>Must be <a href="rhythmParsing.html">parsable as rhythm infromation</a>.</p></dd>
 <dt>...</dt>
-<dd><p>Argments passed to the <code>deparser</code>.</p></dd>
+<dd><p><em><strong>Argments passed to the <a href="rhythmDeparsing.html">deparser</a>.</strong></em></p></dd>
 <dt>parseArgs</dt>
-<dd><p>(<code>list</code>) <code>parseArgs</code> can be a list of arguments that are passed to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
+<dd><p><em><strong>An optional list of arguments passed to the <a href="rhythmParsing.html">rhythm parser</a>.</strong></em></p>
+<p>Defaults to an empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
+<p>Must be a <code>list</code> of named arguments to the <a href="rhythmParsing.html">rhythm parser</a>.</p></dd>
 <dt>scale</dt>
-<dd><p>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement: the default value for most functions
-is <code>rational(1, 1)</code>, a whole-note or "duration."</p></dd>
+<dd><p><em><strong>A <code>numeric</code> or <a href="rational.html">rational</a> value which is used as the output unit of measurement.</strong></em></p>
+<p>Defaults to <code>rational(1, 1)</code>.</p>
+<p>Must be <code>numeric</code> or <a href="rational.html">rational</a>.</p></dd>
 <dt>inPlace</dt>
-<dd><p>(<code>logical</code>, <code>length == 1</code>) This argument only has an effect if the input (the <code>x</code> argument) is <code>character</code> strings,
-<em>and</em> there is extra, non-duration information in the input strings "besides" the rhythm information.
-If so, and <code>inPlace = TRUE</code>, the output will be placed into an output string beside the original non-rhythm information.
-If <code>inPlace = FALSE</code>, only the rhythm output information will be returned (details below).</p></dd>
+<dd><p><em><strong>Should non-rhythm information be retained in the output string?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton  <code>logical</code> value: an on/off switch.</p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>A singleton <code>logical</code> value, or <code>NA</code>.</p>
+<p>See "Grace notes" section below.</p></dd>
 <dt>tick</dt>
-<dd><p>What is the unit of the grid?</p>
+<dd><p><em><strong>What is the unit of the grid?</strong></em></p>
 <p>Defaults to sixteenth-note (<code>fromgrid()</code>) or the <code><a href="tatum.html">tatum()</a></code> of the <code>x</code> argument.</p>
 <p>Must be parsed as a rhythm by <code><a href="rhythmParsing.html">rhythmInterval()</a></code>.</p></dd>
 <dt>on, off</dt>
-<dd><p>What represents onsets (attacks) and rests in the grid?</p>
+<dd><p><em><strong>What represents onsets (attacks) and rests in the grid?</strong></em></p>
 <p>Default to <code>"X"</code> and <code>"O"</code> respectively.</p>
 <p>Must be singleton atomic values.</p></dd>
 <dt>collapse</dt>
-<dd><p>Should the output be collapsed to a single string per measure?</p>
+<dd><p><em><strong>Should the output be collapsed to a single string per measure?</strong></em></p>
 <p>Defaults to <code>TRUE</code>.</p>
-<p>Must be sinleton <code>logical</code> value: an on/off switch.</p></dd>
+<p>Must be singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>sep</dt>
-<dd><p>What separates each on/off tick in a string?</p>
+<dd><p><em><strong>Separator between ticks in collapsed output.</strong></em></p>
 <p>Defaults to an empty string (no separator).</p>
 <p>Must be a singleton <code>character</code> string.</p></dd>
 <dt>deparser</dt>
-<dd><p>What output representation should be returned?</p>
+<dd><p><em><strong>What output representation should be returned?</strong></em></p>
 <p>Defaults to <code><a href="recip.html">recip()</a></code>.</p>
 <p>Must be a function which accepts <code><a href="rational.html">rational()</a></code> numbers.</p></dd>
 </dl></div>

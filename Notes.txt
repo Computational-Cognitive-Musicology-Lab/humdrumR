@@ -34,3 +34,10 @@ Minor:
 	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?
 
 	Add ordering options to gamut()
+
+	Remove names from output vector in return from with(..., drop =TRUE)
+
+Bugs:
+	Figured bass not working with keys?
+	key('k[f#]') not working
+	key('I', Key = 'A:') not working?

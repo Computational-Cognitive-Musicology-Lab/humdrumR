@@ -18,13 +18,13 @@ gamut(
 )
 }
 \arguments{
-\item{generic}{Should the gamut include only generic intervals?
+\item{generic}{***Should the gamut include only generic intervals?
 
 Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: a on/off switch.}
 
-\item{simple}{Should the gamut be constrained to one octave?
+\item{simple}{\emph{\strong{Should the gamut be constrained to one octave?}}
 
 Defaults to \code{FALSE}.
 
@@ -39,7 +39,7 @@ Must be either \code{NULL}, or a \code{\link[=tonalInterval]{tonalInterval()}}, 
 This vector is \link[=pitchParsing]{parsed as pitch}.
 If it can't be parsed as pitch, it will be ignored.}
 
-\item{deparser}{A \link[=pitchFunctions]{pitch function} to format the output.
+\item{deparser}{\emph{\strong{A \link[=pitchFunctions]{pitch function} to format the output.}}
 
 Defaults to \code{\link[=kern]{kern()}}.
 

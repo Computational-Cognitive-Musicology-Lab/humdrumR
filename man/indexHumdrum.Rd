@@ -29,11 +29,17 @@ humdata[[ , 'regex']]
 humdata[[x:y, l:m]]
 }
 \arguments{
-\item{x}{A \link[=humdrumRclass]{humdrumR data object}.}
+\item{x}{\emph{\strong{HumdrumR data to index.}}
 
-\item{i}{A \code{integer}/\code{numeric} value or a \code{character} string treated as a regular expression.}
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{j}{A \code{integer}/\code{numeric} value or a \code{character} string treated as a regular expression.}
+\item{i}{\emph{\strong{Index for vectors or matrix/data.frame rows.}}
+
+A numeric vector or a \code{character} string treated as a regular expression.}
+
+\item{j}{\emph{\strong{Index for matrix/data.frame columns.}}
+
+A numeric vector or a \code{character} string treated as a regular expression.}
 }
 \description{
 R's built-in indexing operators, \verb{[]} (single brakcets) and \verb{[[]]} (double brackets) can

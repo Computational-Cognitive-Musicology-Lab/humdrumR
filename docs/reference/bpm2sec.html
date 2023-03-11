@@ -14,7 +14,7 @@ unit defaults to .25 (a quarter-note), as is conventional.'><!-- mathjax --><scr
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.0000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,10 +92,14 @@ The "beats" in beats-per-minute are specified using the <code>unit</code> argume
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>BPM</dt>
-<dd><p>A <code>character</code> string (which may or may not be be prefixed with <code>"*MM"</code>) or numeric values,
-which are interpreted as a beats-per-minute value.</p></dd>
+<dd><p><em><strong>The tempo.</strong></em></p>
+<p>Defaults to <code>60</code>.</p>
+<p>Must be a number or a <code>character</code> string in the format <code>"MM120"</code> (for 120 bpm).</p>
+<p>By default, <a href="withinHumdrum.html">with(in).humdrumR</a> passes the <code>BPM</code> <a href="humTable.html">field</a>, if present.</p></dd>
 <dt>unit</dt>
-<dd><p>A value which can be interpreted as a <code><a href="duration.html">duration()</a></code>``</p></dd>
+<dd><p><em><strong>The "Beat" in BPM.</strong></em></p>
+<p>Defaults to a quarter-note.</p>
+<p>Must be a value which can be interpreted as <a href="rhythmParsing.html">rhythmic duration</a>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

@@ -2,11 +2,17 @@
 % Please edit documentation in R/Analysis.R
 \name{ptable}
 \alias{ptable}
+\alias{ptable.default}
+\alias{ptable.table}
 \alias{[.ptable}
 \alias{print.ptable}
 \title{Tabulate and cross proportions}
 \usage{
 ptable(...)
+
+\method{ptable}{default}(..., margin = NULL)
+
+\method{ptable}{table}(tab, margin = NULL, na.rm = TRUE)
 
 \method{[}{ptable}(ptab, i, j, ..., drop = FALSE)
 

@@ -18,29 +18,51 @@ octave(
 )
 }
 \arguments{
-\item{x}{(\code{atomic} vector) The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+\item{x}{\emph{\strong{Input data to parse as pitch information.}}
 
-\item{...}{These arguments are passed to the \link[=pitchDeparsing]{pitch deparser}.
+The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link[=tonalIntervalS4]{tonalInterval}, or \code{NULL}.}
+
+\item{...}{\emph{\strong{Arguments passed to the \link[=pitchDeparsing]{pitch deparser}.}}
+
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{generic}{(\code{logical}, \code{length == 1}) If \code{generic = TRUE} the "specific" pitch information (accidentals and qualites) is discarded.}
+\item{generic}{\emph{\strong{Should "specific" pitch information (accidentals and qualites) be discarded?}}
 
-\item{simple}{(\code{logical}, \code{length == 1}) If \code{simple = TRUE} the "compound" pitch information (octave/contour) is discarded.}
+Defaults to \code{FALSE}.
 
-\item{Key}{(a \link{diatonicSet} or something coercable to \code{diatonicSet}, \code{length == 1 | length == length(x)}) The input \code{Key} used by
-the parser, deparser, and transposer.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{transposeArgs}{(\code{list}) \code{transposeArgs} can be a list of arguments that are passed to a special call to \code{\link[=transpose]{transpose()}}.}
+\item{simple}{\emph{\strong{Should "compound" pitch information (octave/contour) be discarded?}}
 
-\item{parseArgs}{(\code{list}) \code{parseArgs} can be a list of arguments that are passed to the \link[=pitchParsing]{pitch parser}.}
+Defaults to \code{FALSE}.
 
-\item{gamutArgs}{(\code{list}) \code{gamutArgs} can be a list of arguments that are passed to a special call to \code{\link[=gamut]{gamut()}}.
+Must be a singleton \code{logical} value: an on/off switch.}
 
-Defaults to \code{TRUE} for \code{character}-string output (like \code{\link[=kern]{kern()}}) and \code{FALSE} for numeric output (like \code{\link[=semits]{semits()}}).
+\item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
-Must be singleton \code{logical} value: an on/off switch.}
+Defaults to \code{NULL}.
 
-\item{inPlace}{(\code{logical}, \code{length == 1}) This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
+Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a special \code{\link[=transpose]{transpose()}} call.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
+
+\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=pitchParsing]{pitch parser}.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to the \link[=pitchParsing]{pitch parser}.}
+
+\item{inPlace}{\emph{\strong{Should non-pitch information be retained in the output string.}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton  \code{logical} value: an on/off switch.
+
+This argument only has an effect if the input (the \code{x} argument) is \code{character} strings,
 \emph{and} there is extra, non-pitch information in the input strings "besides" the pitch information.
 If so, and \code{inPlace = TRUE}, the output will be placed into an output string beside the original non-pitch information.
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}

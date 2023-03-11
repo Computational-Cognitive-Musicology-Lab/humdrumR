@@ -210,9 +210,16 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 #' including multiple matches of the same string.
 #' 
 #' 
-#' @param x A `character` vector to search in.
-#' @param regex One or more regular expressions. If more than one regex is supplied,
-#'  matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
+#' @param x ***A `character` vector to search in.***
+#' 
+#' Must be `character`.
+#' 
+#' @param regex ***One or more regular expressions.***
+#' 
+#' Must be `character`.
+#' 
+#' If more than one regex is supplied,
+#' matches to *any* of the regexes are returned. (See "Multiple regexes" section.)
 #'
 #' @export
 #' @name RegexFind
@@ -757,7 +764,7 @@ makeRE.dur <- function(..., sep.time = ':', sep.date = '/', sep.decimal = '\\.',
 makeRE.recip <- function(collapse = TRUE, fractions = TRUE, sep = '%', ...) {
   REs <- list(graceMark1 = '([Qq][^0-9q]*)?',
               recip = paste0('(', if (fractions) paste0('([1-9][0-9]*', sep, ')?'),
-                             '[1-9][0-9]*\\.*|0{1,2}\\.*)'),
+                             '[0-9]+\\.*|0{1,2}\\.*)'),
               graceMark2 = '([^qQ]*[Qq])?')
   if (collapse) setNames(cREs(REs), 'recip') else REs
 }
