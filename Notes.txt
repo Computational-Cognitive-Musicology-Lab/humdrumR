@@ -41,3 +41,7 @@ Bugs:
 	Figured bass not working with keys?
 	key('k[f#]') not working
 	key('I', Key = 'A:') not working?
+
+
+Questions:
+	Should collapse and sep be distinct arguments (to some functions), or one argument like in base::paste()?
