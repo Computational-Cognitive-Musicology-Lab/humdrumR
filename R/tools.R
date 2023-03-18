@@ -344,7 +344,12 @@ reorder <- function(xs, orderby = list(), toEnv = TRUE) {
   xs
 } 
   
-   
+take <- function(x, n = 10L) x[seq_len(max(n, 0L))] 
+end <- function(x, n = 10L) x[-seq_len(length(x) - n)]
+end <- function(x, n = 10L) {
+  l <- length(x)
+  if (n > 0) x[(l - n + 1):l] else x[0]
+}
 
 ## Matrices ----
 
@@ -356,10 +361,10 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
   kind <- pmatch(whatmost, c('right', 'left', 'bottom', 'top'))
   if (!hasdim(mat)) {
     ind <- switch(kind,
-           max(which(mat)),
-           which(mat)[1],
-           .stop("A dimensionless vector has no 'topmost'"),
-           .stop("A dimensionless vector as no 'bottomost'"))  
+                  max(which(mat)),
+                  which(mat)[1],
+                 .stop("A dimensionless vector has no 'topmost'"),
+                 .stop("A dimensionless vector as no 'bottomost'"))  
     
     if (which) ind else seq_along(mat) == ind
     
@@ -369,7 +374,7 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     rows <- rowSums(mat) > 0
     ind <- ifelse(rows,
                   max.col(mat, ties.method = c('last', 'first', 'last', 'first')[kind]),
-                  0)
+                  0L)
     
     ind <- cbind(seq_along(rows), ind)
     
@@ -1989,7 +1994,7 @@ substituteName <- function(expr, subs) {
                 if (!is.null(expr[[i]])) expr[[i]] <- Recall(expr[[i]], subs)
             }
   } else { 
-            if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
+            if (any(deparse(expr) %in% names(subs))) expr <- subs[[which(deparse(expr) == names(subs))]]
    
   }
   expr

@@ -15,23 +15,27 @@ parseContextExpression <- function(expr, other) {
                                     prev   = rlang::expr(lag(!!other, 1L)),
                                     last   = rlang::expr(lag(!!other, 1L))))
   
-  regexes <- c()
-  
-  expr <- withinExpression(expr, applyTo = c('atomic'),
-                           \(Type, Class) Type == 'atomic' && Class == 'character',
-                           \(exprA) {
-                             regexes <<- c(regexes, exprA$Args[[1]])
-                             exprA$Args <- rlang::expr(grepi_multi(., !!exprA$Args[[1]]))
-                             # exprA$Args <- rlang::expr(grepn(x, !!exprA$Args[[1]]))
-                             exprA
-                           } )
+  # expr <- withinExpression(expr, applyTo = c('atomic'),
+  #                          \(Type, Class) Type == 'atomic' && Class == 'character',
+  #                          \(exprA) {
+  #                            regexes <<- c(regexes, exprA$Args[[1]])
+  #                            exprA$Args <- rlang::expr(grepi_multi(., !!exprA$Args[[1]]))
+  #                            # exprA$Args <- rlang::expr(grepn(x, !!exprA$Args[[1]]))
+  #                            exprA
+  #                          } )
   
   exprA <- analyzeExpr(expr)
                         
-  if (exprA$Head == ':') expr <- parseContextRange(exprA)
-  if (exprA$Head == '|') {
-    exprA$Head <- 'c'
-    expr <- unanalyzeExpr(exprA)
+  regexes <- c()
+  if(exprA$Type == 'atomic' && exprA$Class == 'character') {
+    regexes <- c(regexes, exprA$Args[[1]])
+    expr <- rlang::expr(grepi_multi(., !!exprA$Args[[1]]))
+  } else {
+    if (exprA$Head == ':') expr <- parseContextRange(exprA)
+    if (exprA$Head == '|') {
+      exprA$Head <- 'c'
+      expr <- unanalyzeExpr(exprA)
+    }
   }
   
   attr(expr, 'regexes') <- regexes
@@ -63,6 +67,7 @@ parseContextRange <- function(exprA) {
 #' Create arbitrary "context" across vectors.
 #' @export
 context <- function(x, open, close, reference = x, ..., 
+                    stripregex = TRUE,
                     nested = FALSE, depth = NULL, groupby = NULL,
                     min_length = 1L, max_length = Inf,
                     collapse = TRUE, sep = ', ',
@@ -75,7 +80,7 @@ context <- function(x, open, close, reference = x, ...,
                              min_length = 1L, max_length = Inf)
   
   regexes <- attr(windowFrame, 'regexes')
-  for (re in escapebraces(regexes)) x <- gsub(re, '', x)
+  if (stripregex) for (re in escapebraces(regexes)) x <- gsub(re, '', x)
  
   expr <- if (collapse) rlang::expr(paste(.x., collapse = !!sep)) else rlang::expr(.x.)
   
@@ -87,6 +92,8 @@ context <- function(x, open, close, reference = x, ...,
   
 }
   
+
+
   
 findWindows <- function(x, open, close = quote(next - 1), ..., 
                         activeField = 'Token', 
@@ -115,25 +122,31 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
 
   open_indices <- close_indices <- NULL
   for (i in order(c(openDepends, closeDepends))) { # this is all just to make sure any the independent expressions are evaluated first
-    assign(c('open_indices', 'close_indices')[i],
-           rlang::eval_tidy(list(open, close)[[i]], 
-                            data = c(x, list(open = open_indices, close = close_indices))))
+    val <- rlang::eval_tidy(list(open, close)[[i]], 
+                            data = c(x, list(open = open_indices, close = close_indices)))
+    if (is.logical(val)) val <- which(val)
+    
+    assign(c('open_indices', 'close_indices')[i], val)
   }
+  
   
   # 
   windowFrame <- align(open_indices, close_indices,
-                       nested = nested, 
+                       nested = nested, groupby = groupby,
                        min_length = min_length, max_length = max_length,
                         ...)
   windowFrame <- windowFrame[Open >= 1L & Open <= nrow(x) & Close >= 1L & Close <= nrow(x)]
-  if (length(groupby)) removeCrossing(windowFrame, groupby)
+  
+  
+  # if (length(groupby)) windowFrame <- removeCrossing(windowFrame, groupby)
+  
 
   windowFrame <- depth(windowFrame, depth = depth, ...)
 
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
   
   attr(windowFrame, 'regexes') <- regexes
-  
+  attr(windowFrame, 'vector') <- x
   windowFrame
   
 }
@@ -141,7 +154,7 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
 
 print.windows <- function(x) {
   plot.new()
-  vec <- attr(x, 'vector')
+  vec <- attr(x, 'vector')[[1]]
   
   plot.window(ylim = c(0, max(x$Depth)),xlim = c(0, length(vec)))
   
@@ -153,8 +166,12 @@ print.windows <- function(x) {
 }
 
 ### Window finding rules ----
+
+
 # 
-align <- function(open, close, nested = FALSE, min_length = 1L, max_length = Inf,...) {
+align <- function(open, close, groupby = list(),
+                  nested = FALSE, overlap = TRUE, greedy = TRUE, share = FALSE,
+                  min_length = 1L, max_length = Inf, ...) {
   # output <- if (length(open) == length(close) && all(ordPredicate(open, close), na.rm = TRUE)) {
     # data.table(Open = open, Close = close)
   # } 
@@ -162,6 +179,11 @@ align <- function(open, close, nested = FALSE, min_length = 1L, max_length = Inf
   open <- open[!is.na(open)]
   close <- close[!is.na(close)]
   dists <- outer(close, open, '-')
+  
+  if (length(groupby)) {
+    groupby <- do.call('paste', groupby)
+    dists[outer(groupby[close], groupby[open], '!=')] <- NA
+  }
   
   
   steps <- c(rep(1, length(open)), rep(-1, length(close)))[order(c(open, close))]
@@ -171,9 +193,18 @@ align <- function(open, close, nested = FALSE, min_length = 1L, max_length = Inf
     samelevel <- outer(depth[steps == -1L] + 1L, depth[steps == 1L], '==')
     dists[!samelevel] <- NA
   } 
+  accept <- !is.na(dists) & dists >= min_length & dists <= max_length
   
-  accept <- rightmost(!is.na(dists) & dists >= min_length & dists <= max_length)
-  accept <- shunt(accept)
+  if (overlap) {
+    accept <- most(accept, whatmost = if (greedy) 'left' else 'right')
+    
+    if (!share) accept <- shunt(accept, right = !greedy) & !is.na(dists) & dists >= min_length
+    
+  } else {
+    
+    accept <- apply(accept, 2L, cumsum) == 1L
+    accept <- most(accept, whatmost = if (greedy) 'left' else 'right')
+  }
   
   accept <- which(accept, arr.ind = TRUE)
   
@@ -189,11 +220,12 @@ align <- function(open, close, nested = FALSE, min_length = 1L, max_length = Inf
   
 }
 
-shunt <- function(accept) {
+shunt <- function(accept, right) {
   # "shunt" looks for window Close positions that have aleady been matched
   # with a previous Open, and "shunts" them to the next Close.
   
   bad <- colSums(accept) > 1L
+  
   
   while (any(bad)) {
     ind <- which(accept, arr.ind = TRUE)
@@ -201,7 +233,12 @@ shunt <- function(accept) {
     
     accept[ind] <- FALSE
     
-    ind[ , 'col'] <- ind[ , 'col'] - unlist(lapply(rle(ind[ , 'col'])$lengths, \(l) l - seq_len(l)))
+    
+    ind[ , 'col'] <- if (right) {
+      ind[ , 'col'] - unlist(lapply(rle(ind[ , 'col'])$lengths, \(l) l - seq_len(l)))
+    } else {
+      ind[ , 'col'] + unlist(lapply(rle(ind[ , 'col'])$lengths, \(l) seq_len(l) - 1L))
+    }
     accept[ind] <- TRUE
     ind <- ind[ind[ , 'col'] >= 1L, ]
     
@@ -211,59 +248,11 @@ shunt <- function(accept) {
   accept
   
 }
-# 
-# align <- function(indices, length, depth = NULL,
-#                   overlap = 'none', 
-#                   duplicateOpen = FALSE, duplicateClose = TRUE,
-#                   min_length = 1, max_length = Inf, 
-#                   groupby = list()) {
-#   open <- indices$Open
-#   close <- indices$Close
-#   
-#   
-#   windowFrame <- as.data.table(expand.grid(iOpen = seq_along(open), iClose = seq_along(close)))
-#   windowFrame[ , Open := open[iOpen]]
-#   windowFrame[ , Close := close[iClose]]
-#   setorder(windowFrame, iOpen, iClose)
-#   
-#   
-#   windowFrame <- windowFrame[ , Length := Close - Open]
-#   windowFrame <- windowFrame[Length <= max_length & Length >= min_length]
-#   
-#   if (length(groupby)) windowFrame <- removeCrossing(windowFrame, checkWindows(x, groupby))
-#   
-#   windowFrame[, XClose := seq_along(Open) - 1, by = factor(iOpen)]
-#   windowFrame[, XOpen := rev(seq_along(Close) - 1L), by = factor(iClose)]
-#   
-#   windowFrame <- switch(overlap,
-#                         nested = windowFrame[XOpen == XClose],
-#                         upward = windowFrame[XOpen == 0L],
-#                         downward = windowFrame[XClose == 0L],
-#                         none = windowFrame[XClose == 0L & XOpen == 0L],
-#                         windowFrame
-#   )
-#   if (overlap == 'shunted') {
-#     # each open pairs with next UNUSED close, no sharing
-#     windowFrame[ , X := seq_along(Open) - 1    , by = factor(iClose)]
-#     windowFrame[ , Y := rev(seq_along(Open)) -1, by = factor(iOpen)]
-#     windowFrame <- windowFrame[XClose == X | XOpen == Y]
-#     windowFrame[, c('X', 'Y') := NULL]
-#   }
-#   
-#   if (!duplicateOpen) windowFrame <- windowFrame[!duplicated(iOpen)]
-#   if (!duplicateClose) windowFrame <- windowFrame[!duplicated(iClose)]
-#   
-#   windowFrame <- depth(windowFrame, depth = depth)
-#   
-#   windowFrame[, c('iClose', 'iOpen', 'XOpen', 'XClose') := NULL]
-#   windowFrame
-#   
-#   
-# }
+
 
 ### Sorting, filtering, or modifying windows ----
 
-depth <- function(windowFrame, depth = NULL) {
+depth <- function(windowFrame, depth = NULL, ...) {
 
   maxdepth <- max(windowFrame$Depth)
   windowFrame$RevDepth <- windowFrame$Depth - maxdepth - 1L
@@ -274,11 +263,11 @@ depth <- function(windowFrame, depth = NULL) {
   
   windowFrame
 }
-
-removeCrossing <- function(windowFrame, groupby) {
-  groupby <- do.call('paste', groupby)
-  windowFrame[groupby[Open] == groupby[Close]]
-}
+# 
+# removeCrossing <- function(windowFrame, groupby) {
+#   groupby <- do.call('paste', groupby)
+#   windowFrame[groupby[Open] == groupby[Close]]
+# }
 
 ##########################################-
 # Applying functions in context #######----
@@ -296,14 +285,22 @@ removeCrossing <- function(windowFrame, groupby) {
 # }
 
 
+windows2groups <- function(dt, windowFrame) {
+  indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
+  
+  dt_extended <- dt[unlist(indices)]
+  dt_extended[ , contextWindow := rep(seq_along(indices), lengths(indices))]
+  
+  dt_extended
+}
+
 .applyWindows <- function(dt, windowFrame, expr, activeField = 'Token', ..., 
                           inPlace = TRUE, alignToOpen = TRUE) {
   indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
   
-  dt_extended <- dt[unlist(indices)]
-  dt_extended[ , .windowN. := rep(seq_along(indices), lengths(indices))]
+  dt_extended <- windows2groups(dt, windowFrame)
   
-  results <- rlang::eval_tidy(rlang::quo({ dt_extended[ , list(list(!!expr)), by = .windowN.]}), env = parent.frame(1))$V1
+  results <- rlang::eval_tidy(rlang::quo({ dt_extended[ , list(list(!!expr)), by = contextWindow]}))$V1
   # should be a list of results, one result per window
   
   # if (!vectorize) {

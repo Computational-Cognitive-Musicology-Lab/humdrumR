@@ -538,7 +538,7 @@
 #' @param ... ***Any number of expressions to evaluate.*** 
 #'
 #' Unnamed expressions are interpreted as the "main" *within-expressions*. 
-#' Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
+#' Possible *evaluation control arguments* include `by`, `subset`, and `context`.
 #' Other evaluation options can be achieved with `recycle` or `side` arguments.
 #' 
 #' @param dataTypes ***Which types of humdrum records to include.***
@@ -597,7 +597,7 @@ with.humdrumR <- function(data, ...,
   ### Do we want extract the results from the data.table? 
   
   if (drop) {
-    parts <- grepl('^_(by|subset)=..*_$', colnames(result))
+    parts <- grepl('^_(by|subset)=..*_$|contextWindow', colnames(result))
     if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
     result <- if (any(!parts)) result[[max(which(!parts))]]
@@ -620,9 +620,10 @@ with.humdrumR <- function(data, ...,
 
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, variables = list()) {
+within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, variables = list()) {
   checks(data, xclass('humdrumR'))
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, 
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
+                       expandPaths = expandPaths, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -650,7 +651,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, var
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  newhumtab <- newhumtab[ , !grep('_by=..*_$|_subset=..*_', colnames(newhumtab)), with = FALSE]
+  newhumtab <- newhumtab[ , !grep('_by=..*_$|_subset=..*_|contextWindow', colnames(newhumtab)), with = FALSE]
   
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -678,7 +679,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, var
 
 }
 
-withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, variables = list(), withFunc) {
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
   
@@ -704,7 +705,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, var
   # 
 
   #evaluate "do" expression! 
-  result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo)
+  result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo, alignLeft = alignLeft)
   
   visible <- attr(result, 'visible')
   attr(result, 'visible') <- NULL
@@ -795,8 +796,8 @@ parseArgs <- function(..., variables = list(), withFunc) {
         keyword <- 'pre'
       }
       
-      if (pmatch(quoA$Head, c('windows'), nomatch = 0)) {
-        keyword <- 'windows'
+      if (pmatch(quoA$Head, c('context'), nomatch = 0)) {
+        keyword <- 'context'
       }
     }
     
@@ -840,9 +841,8 @@ parseKeywords <- function(quoTab, withFunc) {
   
   # classify keywords
   knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo'), #, 'ordofill'),
-                        partitions      = c('by', 'subset'),
-                        ngram           = 'ngram',
-                        windows         = 'windows')
+                        partitions      = c('by', 'subset', 'context'),
+                        ngram           = 'ngram')
   quoTab[ , KeywordType := rep(names(knownKeywords), lengths(knownKeywords))[match(Keyword, unlist(knownKeywords))]]
   
   # check for validity
@@ -885,7 +885,7 @@ partialMatchKeywords <- function(keys) {
                          ordo        = c('complement', 'rest', 'otherwise'),
                          # ordofill    = c('compfill', 'restfill', 'otherfill'),
                          ngram     = c('ngrams'),
-                         windows   = c('windows', 'context'))
+                         context   = c('windows', 'context'))
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
@@ -968,19 +968,19 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
 
     
   # if ngram is present
-  if (any(quoTab$Keyword == 'ngram')) {
-    doQuo <- ngramifyQuo(doQuo, 
-                         quoTab[Keyword == 'ngram']$Quo[[1]], usedInExpr, 
-                         depth = 1L + any(lists))
-  } 
-  
-  if (any(quoTab$Keyword == 'windows')) {
-    doQuo <- windowfyQuo(doQuo,  
-                         quoTab[Keyword == 'windows']$Quo[[1]],
-                         usedInExpr, 
-                         depth = 1L + any(lists))
-  }
-  
+  # if (any(quoTab$Keyword == 'ngram')) {
+  #   doQuo <- ngramifyQuo(doQuo, 
+  #                        quoTab[Keyword == 'ngram']$Quo[[1]], usedInExpr, 
+  #                        depth = 1L + any(lists))
+  # } 
+  # 
+  # if (any(quoTab$Keyword == 'context')) {
+  #   doQuo <- windowfyQuo(doQuo,  
+  #                        quoTab[Keyword == 'context']$Quo[[1]],
+  #                        usedInExpr, 
+  #                        depth = 1L + any(lists))
+  # }
+  # 
 
   # rlang::quo({
     # result <- withVisible(!!doQuo)
@@ -1471,7 +1471,7 @@ interpolateArguments <- function(quo, namedArgs) {
 
 
 
-evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
+evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo, alignLeft) {
     result <- if(nrow(partQuos) == 0L) {
         as.data.table(rlang::eval_tidy(doQuo, data = humtab))
         
@@ -1479,12 +1479,15 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
         evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
     }
    
-    parseResult(result)
+    parseResult(result, alignLeft)
 }
 evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     ### evaluation partition expression and collapse results 
     ## to a single factor
     partType <- partQuos$Keyword[1]
+    
+    if (partType == 'context') return(evalDoQuo_context(doQuo, humtab, partQuos))
+    
     partition <- rlang::eval_tidy(partQuos$Quo[[1]], humtab)
     
     if (!is.list(partition)) partition <- list(partition)
@@ -1583,6 +1586,22 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
    result
 }
 
+evalDoQuo_context <- function(doQuo, humtab, partQuos) {
+  
+  findArgs <- as.list(partQuos$Quo[[1]][[2]][-1])
+  passAsExprs <- .names(findArgs) %in% c('open', 'close', '')
+  findArgs[passAsExprs] <- lapply(findArgs[passAsExprs], \(expr) call('quote', expr))
+ 
+  findArgs$groupby <- findArgs$groupby %||% quote(list(File, Spine, Path)) 
+  
+  windowFrame <- humtab[ , rlang::eval_tidy(rlang::expr(findWindows(.SD, !!!findArgs)))]
+  
+  humtab_extended <- windows2groups(humtab, windowFrame)
+  
+  humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
+  
+}
+
 
 
 
@@ -1593,7 +1612,7 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 
 
 
-parseResult <- function(results) {
+parseResult <- function(results, alignLeft = TRUE) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
   # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
@@ -1622,7 +1641,7 @@ parseResult <- function(results) {
           ifelse = nrow(pairs) > 1L)
   }
   
-  
+  aligner <- if (alignLeft) take else end
   results <- lapply(results, 
                     \(result) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
@@ -1638,7 +1657,9 @@ parseResult <- function(results) {
                       if (!object) {
                         factors <- sum(sapply(result, is.factor))
                         if (factors > 0L && factors < length(result)) result <- lapply(result, as.character)
-                        result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
+                        
+                        result <- Map(aligner, result, pmin(lengths(result), resultLengths))
+                        
                         result <- unlist(result, recursive = FALSE)
                       }
                       
@@ -1648,11 +1669,7 @@ parseResult <- function(results) {
                       result 
                     })
   
-
   
-  
- 
-    
   result <- as.data.table(results)
     
   colnames(result)[colnames(result) == ""] <- "Result"
