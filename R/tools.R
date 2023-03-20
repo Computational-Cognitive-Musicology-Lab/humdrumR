@@ -343,13 +343,7 @@ reorder <- function(xs, orderby = list(), toEnv = TRUE) {
 
   xs
 } 
-  
-take <- function(x, n = 10L) x[seq_len(max(n, 0L))] 
-end <- function(x, n = 10L) x[-seq_len(length(x) - n)]
-end <- function(x, n = 10L) {
-  l <- length(x)
-  if (n > 0) x[(l - n + 1):l] else x[0]
-}
+
 
 ## Matrices ----
 
@@ -474,6 +468,14 @@ multimatch <- function(x, table, ...) {
 
 `%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
 
+
+take <- function(x, n = 10L) x[seq_len(max(n, 0L))] 
+
+end <- function(x, n = 10L) {
+  l <- length(x)
+  if (n > 0) x[(l - n + 1):l] else x[0]
+}
+
 closest <- function(x, where, direction = 'either', diff_func = `-`) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
           
@@ -526,7 +528,7 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     attr <- humdrumRattr(X)
     result <- tapply(X, INDEX, FUN, ..., simplify = FALSE) %<-dim% NULL
     
-    headortail <- if (head) match.fun('head') else tail
+    headortail <- if (head) take else end
     indices <- Map(\(x, n) headortail(x, n), tapply(seq_along(X), INDEX, force), lengths(result))
     
     result <- do.call('c', result)
