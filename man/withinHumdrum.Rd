@@ -17,7 +17,14 @@
   variables = list()
 )
 
-\method{within}{humdrumR}(data, ..., dataTypes = "D", expandPaths = FALSE, variables = list())
+\method{within}{humdrumR}(
+  data,
+  ...,
+  dataTypes = "D",
+  alignLeft = TRUE,
+  expandPaths = FALSE,
+  variables = list()
+)
 }
 \arguments{
 \item{data}{\emph{\strong{HumdrumR data.}}
@@ -27,7 +34,7 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 \item{...}{\emph{\strong{Any number of expressions to evaluate.}}
 
 Unnamed expressions are interpreted as the "main" \emph{within-expressions}.
-Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{windows}.
+Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{context}.
 Other evaluation options can be achieved with \code{recycle} or \code{side} arguments.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}

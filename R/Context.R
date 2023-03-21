@@ -1249,38 +1249,234 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
 
 
 #' Generate regular sequence "along" input
+#' 
+#' `hop()` is similar to base R's [seq()], but with some additional features, including
+#' special sugar when used with humdrumR's [context()] command.
+#' `hop()` is used to create customizable sequences of indices for a vector;
+#' for example, if you want to index every third value from a vector.
+#' This is useful for, as when used with [context()], defining the start points of "rolling-window"
+#' analyses along a vector; the "hop size" is the gap between the start of each window, 
+#' defined by `hop()`'s `by` argument.
+#' 
+#' @details 
+#' 
+#' `hop()` has similar arguments to [base::seq()], but focused on the `along.with` argument,
+#' a vector which you'd like to generate indices for.
+#' If you simply call `hop(myvector)`, the output will be the same as `1:length(myvector)`.
+#' The `by` argument can be used to specify a different "hop" pattern: `by = 2` will get you *every other*
+#' index, `1`, `3`, `5`, `7`, etc.
+#' Unlike [base::seq()], `hop()`'s `by` argument can be a vector of numbers, allowing you to specify a pattern of hops.
+#' For example, `by = c(2, 3)` will first hop `2`, then hop `3`, then repeat---so the output would be `1`, `3`, `6`, `8`, `11`, `13`, etc.
+#' 
+#' The by pattern can be comprised of negative numbers, or a mix of negative and positive numbers.
+#' If `by` mixes negative and positive numbers, the pattern can hop up and down, as it climbs.
+#' For example, you could go up two, then down one, then repeat using `by = c(2,-1)`.
+#' If the pattern is *overall* (sums) negative, the `from` argument must be greater than the `to` argument (see next section);
+#' if the pattern sums to zero, an error occurs because the pattern would never end!
+#' If a pattern changes directions, it is possible for pattern to hop outside the bounds of the vector;
+#' if this happens, the outside indices return `NA`.
+#' 
+#'
+#' @returns
+#' 
+#' By default, `hop()` returns an `integer` vector, appropriates indices for the `along.with` vector.
+#' However, there are two other options:
+#' 
+#' + If `logical = TRUE`, the indices are returned as a logical vector, the same length as `along.with`,
+#'   with `TRUE` values indicating indices. Note that any ordering in the output (due to a mix of positive and negative
+#'   values in the `by` argument) is lost.
+#' + If `value = TRUE`, the actual indixed elements of the `along.with` vector are returned:
+#'   Thus, `hop(myvector, ..., value = TRUE)` is simply the same as `myvector[hop(myvector, ...)]`.
+#'   If `value = TRUE`, the `logical` argument is ignored.
+#' 
+#' 
+#' @section Starting and Ending:
+#' 
+#' By default, `hop()` builds indices from `1` to the end of the `along.with` vector.
+#' The `from` and `to` arguments can be used to control this.
+#' Either argument can simply be a natural number, indicating where to start and end the output sequences.
+#' (If `to` is `NULL`, it is set to `length(along.with)`.)
+#' An alternate approach is to provide either argument a single `character` string, which is treated as a regular 
+#' expression and matched against `along.with`, or  a `logical` vector the same length as `along.with`.
+#' The first match/`TRUE` is used for the `from` index and the last match/`TRUE` for the `to` index.
+#' This means you can say things like `from = Record == 33` in a [within()][withinHumdrum] call.
+#' 
+#' If the `by` argument is *overall* (sums) positive, `from` must be less than `to`.
+#' If the `by` argument is *overall* (sums) negative, `from` must be greater than `to`.
+#' 
+#' If the `by` pattern doesn't ever actually the actual `to` index---perhaps jumping over it---
+#' the output stops when it would *pass* the `to`.
+#' 
+#' @section Grouping:
+#' 
+#' In many cases we want to how along vectors, but *not across certain boundaries*.
+#' For example, if we want all even numbered indices, we can set `by = 2` and `from = 2`.
+#' However, if your vector includes data from multiple pieces, and some of the pieces have an odd number of data points,
+#' our "even" sequence would end up hitting odd numbers in some pieces.
+#' To get around this, the `groupby` argument indicates one, or more, grouping vectors, which break the `x` (input) argument
+#' into groups.
+#' If more than `groupby` vectors are given, a change in *any* vector indicates a boundary.
+#' Each grouped segement of `along.with` is treated just like a separate call to `hop()`;
+#' for example, if `from = 2`, the hop sequence will start on the second index of *each* group.
+#' However, the output indices still represent the original `along.with` indices.
+#' 
+#' Since `hop()` is usually used with [context()] to create rolling windows within musical parts,
+#' we want typically want to apply `hop()` using using `groupby = list(File, Spine, Path)`.
+#' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
+#' three fields as `groupby` arguments to `hop()`.
+#' So any use of `hop()` in a call to [with(in)][withinHumdrum], will automatically generate the hop sequence
+#' in a "melodic" way, within each spine path of each file.
+#'
+#' @param along.with ***The vector you want indices to "hop" along.***
+#' 
+#' Must be a vector (either atomic, or a `list()`).
+#' 
+#' @param by ***The pattern of "hops" to to use.***
+#' 
+#' Defaults to `1`: returning all indices `from:to`.
+#' 
+#' Must be one or more whole numbers.
+#' 
+#' `sum(by)` must non-zero.
+#'
+#' @param from ***Where to start the sequence.***
+#' 
+#' Defaults to `1`: starting from the first index.
+#'
+#' Must be either a single natural number, a single `character` string, or 
+#' a `logical` vector the same length as `along.with`.
+#' 
+#' A `character`-string input is treated as a regular expression,
+#' which is matched against `along.with` using [grepl()] to generate a `logical` vector.
+#' The index of the first `TRUE` is used.
+#' 
+#' @param to ***Where to end the sequence.***
+#' 
+#' Defaults to `NULL`.
+#'
+#' Must be either `NULL`, a single natural number, a single `character` string, or 
+#' a `logical` vector the same length as `along.with`.
+#' 
+#' If `NULL`, `to` is set to the last index of `along.with` (or of each group in `groupby`).
+#' A `character`-string input is treated as a regular expression,
+#' which is matched against `along.with` using [grepl()] to generate a `logical` vector.
+#' The index of the last `TRUE` is used.
+#' 
+#' @param value ***Should actual values from `along.with` be returned?***
+#'
+#' Defaults to `FALSE`.  
+#'
+#' Must be a singleton `logical` value; an on/off switch.
+#' 
+#' @param value ***Should indices be returned as logical `TRUE`s?***
+#'
+#' Defaults to `FALSE`.  
+#'
+#' Must be a singleton `logical` value; an on/off switch.
+#'
+#' @param groupby ***Optional vectors to group hop sequences within.***
+#' 
+#' Defaults to empty `list()`.
+#'
+#' Must be a [list()], which is either empty or contains vectors which are all the same length as `along.with`.
+#' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(File, Spine, Path)` by default.
+#'
+#' @examples 
+#' 
+#' # use the built-in 'letters' vector
+#' 
+#' hop(letters)
+#' 
+#' hop(letters, by = 3)
+#' 
+#' hop(letters, by = 2, from = 4)
+#' 
+#' hop(letters, by = 2, from = 'e', to = 'x'))
+#'
+#' hop(letters, by = c(-1, 2), from = 'e', to = 'w', value = TRUE)
+#' 
+#' hop(letters, by = -1, from = 'z', to = 3)
+#' 
 #' @export
-hop <- function(along.with, by = 1, from = 1L, to = NULL, groupby = list()) {
-  if (is.null(to)) to <- length(along.with)
+hop <- function(along.with, by = 1, from = 1L, to = NULL, value = FALSE, logical = FALSE, groupby = list()) {
+  if (length(along.with) == 0L) return(integer())
   
-  if (length(groupby)) {
-    hops <- tapply(along.with, groupby, hop, by = by, from = from, to = to)
-    offset <- which(do.call('changes', groupby)) - 1
-    return(unlist(Map('+', hops, offset), use.names = FALSE))
-  } 
+  checks(along.with, xvector)
+  checks(by, xwholenum & xminlength(1))
+  checks(from, ((xwholenum | xcharacter) & xlen1) | (xlogical & xmatch(along.with)))
+  checks(to, xnull | ((xwholenum | xcharacter) & xlen1) | (xlogical & xmatch(along.with)))
+  checks(value, xTF)
+  checks(logical, xTF)
   
-  if (!is.numeric(from)) {
+
+  along <- if (length(groupby)) tapply(along.with, groupby, c, simplify = FALSE) else list(along.with)
+  
+  dt <- data.table(i = seq_along(along.with),
+                   Group = if (length(groupby)) squashGroupby(groupby) else 1)
+  dt[, igrouped := seq_along(i), by = Group]
+  dt[ , Max := rep(max(i), length(i)), by = Group]
+  
+  # from
+  starts <- if (is.numeric(from)) {
+    dt[igrouped == from]
+  } else {
     if (is.character(from)) from <- grepl(from, along.with)
-    if (!any(from)) return(integer()) else from <- which(from)[1]
-  }
-  if (!is.numeric(to)) {
-    if (is.character(to)) to <- grepl(to, along.with)
-    if (!any(to)) return(integer()) else to <- which(to)[1]
+    dt[from, .SD[1], by = Group]
   }
   
+  # to
+  if (is.null(to)) to <- max(dt$igrouped)
+  ends <- if (is.numeric(to)) {
+    dt[igrouped <= to, .SD[.N], by = Group]
+  } else {
+    if (is.character(to)) to <- grepl(to, along.with)
+    dt[to, .SD[.N], by = Group]
+  }
+  ranges <- starts[ends, on = 'Group']
+  ranges[ , Length := i.i - i]
+  ranges[ , Length := Length + sign(Length)]
+  
+  
+  ranges <- ranges[!is.na(i) & !is.na(i.i)]
+  
+  # actual sequences!
   interval <- sum(by)
+  if (interval < 0) {
+    if (any(ranges$Length > 0)) .stop("In your call to hop(), your 'by' pattern is negative overall, but your `from` argument is less than your `to` argument.",
+                                      "There is no way to hop down from a lower number to a higher number.")
+    ranges <- ranges[nrow(ranges):1]
+  } else {
+    if (any(ranges$Length < 0)) .stop("In your call to hop(), your 'by' pattern is positive overall, but your `from` argument is greater than your `to` argument.",
+                                      "There is no way to hop up from higher number to a lower number.")
+  }
   
   if (interval == 0L) .stop("In call to hop(), the by argument cannot sum to zero")
   
-  fullpattern <- rep_len(by, ((to - from) / abs(interval)) * length(by))
+  fullpattern <- rep_len(by, (ceiling(max(abs(ranges$Length)) / abs(interval))) * length(by))
+  fullpattern <- cumsum(c(0L, fullpattern))
   
-  result <- if (interval > 0L) {
-    cumsum(c(from, fullpattern))
-  } else {
-    cumsum(c(to, fullpattern))
+  
+  result <- ranges[ , {
+    pat <- fullpattern + i
+    endon <- pat == i.i
+    if (any(endon)) {
+      pat <- pat[1:which(endon)[1]]
+    } else {
+      past <- if (interval > 0L) pat > i.i else pat < i.i
+      if (any(past)) pat <- pat[1:(which(past)[1] - 1L)]
+    }
+    pat[ pat <= (i - igrouped) | pat > Max] <- NA
+    pat
+  }, by = seq_len(nrow(ranges))]$V1
+  
+  if (value) {
+    result <- along.with[result]
+  } else { 
+    if (logical) result <- seq_along(along.with) %in% result
+    
   }
   
-  result[result > 0 & result <= length(along.with)]
+  result
   
 }
 

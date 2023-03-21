@@ -464,6 +464,19 @@ multimatch <- function(x, table, ...) {
   do.call('cbind', lapply(tables, \(tab) match(x, tab, ...)))
 }
 
+squashGroupby <- function(groupby = list()) {
+  
+  factors <- lapply(groupby, \(x) match(x, unique(x)))
+  if (length(factors) == 1L) return(unlist(factors))
+  
+  primes <- c(1L, 2L, 3L, 5L, 7L, 11L, 13L, 17L, 19L, 23L, 29L, 31L)
+  
+  ns <- Reduce('+', Map('*', factors, primes[seq_along(factors)]))
+  
+  match(ns, unique(ns))
+  
+}
+
 `%ins%` <- function(x, table) !is.na(matches(x, table))
 
 `%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
@@ -523,6 +536,8 @@ remove.duplicates <- function(listofvalues) {
     do.call('cbind', x)
     
 }
+
+
 
 tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     attr <- humdrumRattr(X)
@@ -1394,7 +1409,6 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
 #' This behavior is easiest to understand as the inverse of the 
 #' behavior of [delta(lag < 0)][delta], which is more intuitive. (`sigma` is the inverse of [delta()], see the
 #' *Invertability* section above).
-
 #'
 #' 
 #' @section Grouping:

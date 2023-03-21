@@ -358,7 +358,7 @@ partialApply <- function(func, ...) {
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a singleton `logical` value: a on/off switch.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `FALSE` the "best" regex/exclusive match is dispatched for each Exclusive segment. 
 #' If `TRUE`, differenet functions can be dispatched

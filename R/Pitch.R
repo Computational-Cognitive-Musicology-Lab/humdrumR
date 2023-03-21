@@ -2668,14 +2668,14 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a singleton `logical` value: a on/off switch.
+#' Must be a singleton `logical` value: an on/off switch.
 #'
 #' 
 #' @param simple ***Should the gamut be constrained to one octave?***
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a singleton `logical` value: a on/off switch.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' 
 #' @param reference ***An optional reference vector to base the gamut on.***

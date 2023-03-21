@@ -123,7 +123,7 @@
 #' 
 #' @param tatum ***Should the least common denominator of all levels be added to the meter?***
 #' 
-#' Must be a singleton `logical` value: a on/off switch.
+#' Must be a singleton `logical` value: an on/off switch.
 #'
 #' @param fill.levels ***Should "gaps" between specified levels be added to the meter?***
 #' 
@@ -744,13 +744,13 @@ beats.NULL <- function(x) NULL
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be a single `logical` value: a on/off switch.
+#' Must be a single `logical` value: an on/off switch.
 #'
 #' @param groupby ***Optional vectors to group by and count within.***
 #' 
 #' Defaults to empty `list()`.
 #'
-#' Must be a [list()], which is either empty or contains vectors whiare all the same length as `dur`.
+#' Must be a [list()], which is either empty or contains vectors which are all the same length as `dur`.
 #' To function as a by-record timeline, the `groupby` list must include a *named* `Piece` and `Record` vectors.
 #' Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #'   
@@ -1090,7 +1090,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be a singleton `logical` value: a on/off switch.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @param level ***Which metric level should be counted?***
 #' 

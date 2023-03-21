@@ -55,7 +55,7 @@ If \code{NULL}, only the regexes are used for dispatch.}
 
 Defaults to \code{FALSE}.
 
-Must be a singleton \code{logical} value: a on/off switch.
+Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{FALSE} the "best" regex/exclusive match is dispatched for each Exclusive segment.
 If \code{TRUE}, differenet functions can be dispatched

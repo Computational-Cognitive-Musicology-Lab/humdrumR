@@ -10,6 +10,43 @@ context(
   close,
   reference = x,
   ...,
+  stripregex = TRUE,
+  nested = FALSE,
+  depth = NULL,
+  groupby = NULL,
+  min_length = 1L,
+  max_length = Inf,
+  collapse = TRUE,
+  sep = ", ",
+  alignToOpen = TRUE,
+  inPlace = FALSE
+)
+
+context(
+  x,
+  open,
+  close,
+  reference = x,
+  ...,
+  stripregex = TRUE,
+  nested = FALSE,
+  depth = NULL,
+  groupby = NULL,
+  min_length = 1L,
+  max_length = Inf,
+  collapse = TRUE,
+  sep = ", ",
+  alignToOpen = TRUE,
+  inPlace = FALSE
+)
+
+context(
+  x,
+  open,
+  close,
+  reference = x,
+  ...,
+  stripregex = TRUE,
   nested = FALSE,
   depth = NULL,
   groupby = NULL,
@@ -22,5 +59,9 @@ context(
 )
 }
 \description{
+Create arbitrary "context" across vectors.
+
+Create arbitrary "context" across vectors.
+
 Create arbitrary "context" across vectors.
 }

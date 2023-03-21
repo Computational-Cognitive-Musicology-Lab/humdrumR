@@ -15,6 +15,11 @@ Minor:
 
 	Remove names from output vector in return from with(..., drop =TRUE)
 
+	hop()
+
+		add hop.matrix and hop.data.frame
+		add support for negative indexing.
+
 Bugs:
 	Figured bass not working with keys?
 	key('k[f#]') not working

@@ -71,13 +71,13 @@ See "Pickups" section below.}
 
 Defaults to \code{TRUE}.
 
-Must be a singleton \code{logical} value: a on/off switch.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{offBeats}{\emph{\strong{Should off-beat onsets be numbered in the output, or \code{NA}?}}
 
 Defaults to \code{TRUE}.
 
-Must be a single \code{logical} value: a on/off switch.}
+Must be a single \code{logical} value: an on/off switch.}
 
 \item{remainderSubdivides}{\emph{\strong{Should off-beat onsets only be associated with beat levels that they evenly subdivide?}}
 

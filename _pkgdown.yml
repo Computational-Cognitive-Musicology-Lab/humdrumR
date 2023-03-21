@@ -208,6 +208,7 @@ reference:
   - lag
   - segments
   - sigma
+  - hop
 - subtitle: "Regular Expressions"
   desc: >
      [Regular Expressions](https://en.wikipedia.org/wiki/Regular_expression) are essential tools for working with humdrum data.
