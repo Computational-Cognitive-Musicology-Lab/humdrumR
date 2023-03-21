@@ -363,6 +363,8 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     if (which) ind else seq_along(mat) == ind
     
   } else {
+    output <- matrix(FALSE, ncol = ncol(mat), nrow = nrow(mat))
+    
     if (kind > 2) mat <- t(mat)
     
     rows <- rowSums(mat) > 0
@@ -378,7 +380,6 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     
     if (which) return(ind)
     
-    output <- matrix(FALSE, ncol = ncol(mat), nrow = nrow(mat))
     output[ind] <- TRUE
     
     output
