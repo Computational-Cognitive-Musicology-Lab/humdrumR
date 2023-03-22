@@ -1301,7 +1301,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' For example, `"Tok"` would match the `Token` field.
 #' This is the field which is "folded" into a new field.
 #'   
-#' @param fillFromField ***Should the content of the `fromField` be copied unfolded sections?***
+#' @param fillFromField ***Should the content of the `fromField` be to copied unfolded sections?***
 #' 
 #' Defaults to `FALSE` for `foldHumdrum()` and `foldStops()`; `TRUE` for `foldPaths()`.
 #' 
@@ -1384,12 +1384,13 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     newfields <- names(fromTables)
     mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null', 'Filter'))
     humtab <- Reduce(\(htab, ftab) {
-        htab <- rbind(ftab[htab, on = mergeFields], 
+        # htab <- ftab[htab, on = mergeFields]
+        htab <- rbind(ftab[htab, on = mergeFields],
                       # This is necessary if the from spines have extra paths or stops,
-                      ftab[!htab, on = mergeFields], 
+                      ftab[!htab, on = setdiff(mergeFields, 'Type')],
                       # or vice versa
                       # htab[!ftab, on = mergeFields],
-                      fill = TRUE) 
+                      fill = TRUE)
         
         htab$Filter[is.na(htab$Filter)] <- FALSE
         htab$Null[is.na(htab$Null)] <- FALSE
@@ -1506,7 +1507,6 @@ foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NUL
 #' @export
 foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humdrumR)[1]) {
     checks(humdrumR, xhumdrumR)
-    
     checks(fold, xcharnotempty)
     checks(onto, xcharnotempty & xlen1)
     
@@ -1515,16 +1515,15 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
     moves <- humtab[,{
-        toSpine <- unique(Spine[Exclusive == onto])
+        toSpine <- setdiff(unique(Spine[Exclusive == onto]), NA)
         if (length(toSpine)) {
             do.call('rbind', lapply(fold, 
                    \(fromExclusive) {
-                       fromSpine <- unique(Spine[Exclusive == fromExclusive])
+                       fromSpine <- setdiff(unique(Spine[Exclusive == fromExclusive]), NA)
                        if (length(fromSpine) == 0L) return(data.table(From = integer(0), 
                                                                       To = integer(0), 
                                                                       Exclusive = character(0)))
-                       if (length(fromSpine) &&
-                           !(length(fromSpine) == 1L && length(toSpine) == 1L && fromSpine == toSpine)) {
+                       if (!(length(fromSpine) == 1L && length(toSpine) == 1L && fromSpine == toSpine)) {
                         
                            if (all(fromSpine == toSpine)) {
                                fromSpine <- fromSpine[-1]
@@ -1557,7 +1556,8 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
     moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
     moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
     
-    newFieldNames <- stringr::str_to_sentence(unique(moves$Group))
+    newexclusives <- unique(moves$Group)
+    newFieldNames <- stringr::str_to_sentence(newexclusives)
     
     humdrumR <- foldHumdrum(humdrumR, 
                             fold = moves$From, 
@@ -1565,6 +1565,14 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
                             File = moves$File, what = 'Spine',
                             fromField = fromField,
                             newFieldNames = newFieldNames)
+    
+    # add exclusives to data
+    humtab <- getHumtab(humdrumR)
+    for (i in seq_along(newexclusives)) {
+        humtab[[newFieldNames[i]]] <- token(humtab[[newFieldNames[i]]], Exclusive = newexclusives[i]) 
+    }
+    putHumtab(humdrumR) <- humtab
+    
     humdrumR
     
     
