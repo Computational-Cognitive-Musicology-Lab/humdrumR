@@ -1,5 +1,5 @@
 
-testthat('hop() man page examples work',{
+test_that('hop() man page examples work',{
   
   # from the man page
   expect_equal(hop(1:13, by = c(2,3)), c(1,3, 6, 8, 11, 13))
@@ -15,10 +15,12 @@ testthat('hop() man page examples work',{
                
 })
 
-testthat('findWindows works', {
+test_that('findWindows works', {
   testL <- c('(', '(', ')', '(', '(', ')')
   testR <- c('(', ')', ')', '(', ')', ')')
   nest <- c('(', '(', '(', ')', ')', '(', ')', ')')
+  nestdup <-  c('e', 'e', '(e', 'd', '((b', 'c', 'b)', 'd', 'e));', 'f', '(g', 'h)', '((g', 'h)', 'a);')
+  # nestdup includes multiple opens in one token
   
   # testL
   expect_equal(do.call('paste', 
@@ -62,7 +64,19 @@ testthat('findWindows works', {
                        findWindows(nest, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
                c('1 8', '2 5', '3 4', '6 7'))
   
-  
+  # nestdup
+  expect_equal(do.call('paste', 
+                       findWindows(nestdup, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
+               c('3 7', '5 9', '5 9', '11 12', '13 14', '13 15'))
+  expect_equal(do.call('paste', 
+                       findWindows(nestdup, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
+               c('3 7', '5 7', '5 7', '11 12', '13 14', '13 14'))
+  expect_equal(do.call('paste', 
+                       findWindows(nestdup, open = '(', close = ')', overlap = 'none')[ , 1:2]),
+               c('3 7',  '11 12', '13 14'))
+  expect_equal(do.call('paste', 
+                       findWindows(nestdup, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
+               c('3 9', '5 7', '5 9', '11 12', '13 14', '13 15'))
   
   
   

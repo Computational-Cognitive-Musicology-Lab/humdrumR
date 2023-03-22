@@ -25,6 +25,8 @@ Minor:
 		add hop.matrix and hop.data.frame
 		add support for negative indexing.
 
+	when using foldExclusive(), attach exclusive name to each field?
+
 Bugs:
 	Figured bass not working with keys?
 	key('k[f#]') not working

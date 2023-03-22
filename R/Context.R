@@ -164,67 +164,69 @@ align <- function(open, close, groupby = list(),
                   overlap = 'paired', rightward = TRUE, depth = NULL, 
                   min_length = 2L, max_length = Inf) {
 
-  overlap <- pmatch(overlap, c('nested', 'paired', 'edge', 'none'))
- 
+  overlap <- pmatches(overlap, c('nested', 'paired', 'edge', 'none'))
+  
   if (!rightward) {
     openx <- open
     open <- sort(-close)
     close <- sort(-openx)
   }
   
-  if (overlap == 2L && 
+  if (overlap == 'paired' && 
       (length(open) == length(close)) && 
       all((close - open) >= min_length && (close- open) <= max_length, na.rm = TRUE)) {
     
-    windowFrame <- data.table(Open = open, Close = close) 
+      windowFrame <- data.table(Open = open, Close = close) 
     
     if (length(groupby)) {
       groupby <- squashGroupby(groupby)
       windowFrame <- windowFrame[groupby[Open] == groupby[Close]]
-      
     }
     
   } else {
     open <- open[!is.na(open)]
     close <- close[!is.na(close)] 
     
-    dists <- outer(close, open, '-') 
-    accept <- dists >= min_length & dists <= max_length
-    
     if (length(groupby)) {
       groupby <- squashGroupby(groupby)
-      accept[outer(groupby[close], groupby[open], '!=')] <- FALSE
+      groupbyopen <- groupby[open]
+      groupbyclose <- groupby[close]
+    } else {
+      groupbyopen <- groupbyclose <- 1
     }
     
+    openframe  <- data.table(Open = open,   OpenInd = seq_along(open),   Group = groupbyopen)
+    closeframe <- data.table(Close = close, CloseInd = seq_along(close), Group = groupbyclose)
     
-    accept <- switch(overlap,
-                     nested = {
-                       steps <- rep(c(1L, -1L), c(length(open), length(close)))[order(c(open, close))]
-                       stepdepth <- sigma(steps)
-                       samelevel <- outer(stepdepth[steps == -1L] + 1L, stepdepth[steps == 1L], '==')
-                       topmost(accept & samelevel)
-                     },
-                     paired =   shunt(topmost(accept)), 
-                     edge = topmost(accept),
-                     none = leftmost(topmost(accept))
-    )
-    
-    
-    # Prepare windowFrame
-    accept <- which(accept, arr.ind = TRUE)
-    windowFrame <- data.table(Open = open[accept[ , 'col']],
-                              Close = close[accept[ , 'row']])
-  }
+    windowFrame <- openframe[closeframe, on = 'Group', allow.cartesian = TRUE]
+    #
+    windowFrame[ , Length := Close - Open + 1L]
+    windowFrame <- windowFrame[Length >= min_length & Length <= max_length]
   
-
+    
+    if (overlap == 'nested') {
+      
+      windowFrame <- nest(windowFrame)
+    } else {
+      windowFrame[ , Hit := CloseInd == min(CloseInd), by = OpenInd]
+      windowFrame <- windowFrame[Hit == TRUE]
+      windowFrame <- switch(overlap,
+                            paired = shunt(windowFrame, open, close),
+                            edge = windowFrame,
+                            none = { 
+                              windowFrame[ , Hit := OpenInd == min(OpenInd), by = CloseInd]
+                              windowFrame[Hit == TRUE]
+                              }
+                            )
+    }
+    windowFrame[ , c('OpenInd', 'CloseInd', 'Group', 'Hit') := NULL]
+  }
   
   # update depth
   windowFrame <- depth(windowFrame, depth = depth)
 
-  
   if (!rightward) windowFrame[ , c('Open', 'Close') := list(-Close, -Open)]
-  
-  windowFrame[ , Length := Close - Open + 1L]
+
   
   windowFrame
   
@@ -232,30 +234,38 @@ align <- function(open, close, groupby = list(),
 
 
 ### Sorting, filtering, or modifying windows ----
+nest <- function(windowFrame) {
+  
+  open <- windowFrame[!duplicated(OpenInd), Open]
+  close <- windowFrame[!duplicated(CloseInd), Close]
+  
+  steps <- rep(c(1L, -1L), c(length(open), length(close)))[order(c(open, close))]
+  stepdepth <- sigma(steps)
+  
+  opendepth  <- stepdepth[steps == 1L][windowFrame$OpenInd]
+  closedepth <- stepdepth[steps == -1L][windowFrame$CloseInd]
+  
 
-shunt <- function(accept) {
+  windowFrame <- windowFrame[opendepth == (closedepth + 1L)]
+  
+  windowFrame[ , Hit := CloseInd == min(CloseInd), by = OpenInd]
+  windowFrame[Hit == TRUE]
+  
+}
+shunt <- function(windowFrame, open, close) {
   # "shunt" looks for window Close positions that have aleady been matched
   # with a previous Open, and "shunts" them to the next Close.
-  bad <- rowSums(accept) > 1L
+
+  closeinds <- unique(windowFrame$CloseInd)
   
-  while (any(bad)) {
-    ind <- which(accept, arr.ind = TRUE)
-    ind <- ind[order(ind[ , 'row']), , drop = FALSE]
-    ind <- ind[ind[ , 'row'] %in% which(bad), ]
-    
-    accept[ind] <- FALSE
-    
-    move <- unlist(lapply(rle(ind[ , 'row'])$lengths,
-                                           seq_len)) - 1L
-    ind[ , 'row'] <- ind[ , 'row'] + move
-    
-    ind <- ind[ind[ , 'row'] >= 1L & ind[ , 'row'] <= nrow(accept), , drop = FALSE]
-    accept[ind] <- TRUE
-    
-    bad <- rowSums(accept) > 1L
+  while(any(duplicated(windowFrame$CloseInd))) {
+    windowFrame[ , CloseInd := CloseInd + (seq_along(Open) - 1), by = CloseInd]
+    windowFrame <- windowFrame[CloseInd %in% closeinds]
   }
+  windowFrame[ , Open := open[OpenInd]]
+  windowFrame[ , Close := close[CloseInd]]
   
-  accept
+  windowFrame
   
 }
 
