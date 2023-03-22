@@ -374,7 +374,7 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
     
     ind <- cbind(seq_along(rows), ind)
     
-    if (kind > 2) ind <- ind[ , 2:1]
+    if (kind > 2) ind <- ind[ , 2:1, drop = FALSE]
     
     colnames(ind) <- c('row', 'col')
     
@@ -406,6 +406,12 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
+
+indices2logical <- function(indices, along.with = 1:max(indices)) {
+  output <- logical(length(along.with))
+  output[indices] <- TRUE
+  output
+}
 
 list.flatten <- function(list) {
   output <- list()
@@ -466,15 +472,10 @@ multimatch <- function(x, table, ...) {
 }
 
 squashGroupby <- function(groupby = list()) {
-  
-  factors <- lapply(groupby, \(x) match(x, unique(x)))
-  if (length(factors) == 1L) return(unlist(factors))
-  
-  primes <- c(1L, 2L, 3L, 5L, 7L, 11L, 13L, 17L, 19L, 23L, 29L, 31L)
-  
-  ns <- Reduce('+', Map('*', factors, primes[seq_along(factors)]))
-  
-  match(ns, unique(ns))
+  do.call('paste', groupby) # seems to be fastest option
+  # groupby <- as.data.table(groupby)
+  # matches(groupby, unique(groupby))
+
   
 }
 
@@ -489,6 +490,26 @@ end <- function(x, n = 10L) {
   l <- length(x)
   if (n > 0) x[(l - n + 1):l] else x[0]
 }
+
+# positivediffs <- function(x, y) {
+#   groups <- rep(c(0L, 1L), c(length(x), length(y)))[order(c(x, y))]
+#   z <- sort(c(x, y))
+#   
+#   output <- vector('list', 11)
+#   
+#   for (lag in 0:min(50, sum(groups))) {
+#      z[groups == 1L] <- lead(y, n = lag)
+#      ylag <- ditto.default(z, groups == 0L, reverse = TRUE)
+#   
+#      output[[lag + 1]] <- data.table(Open = x, Close = ylag[groups == 0L])
+#     
+#   }
+#   
+#   output <- data.table::rbindlist(output)
+#   
+#   output[!is.na(Close)]
+# }
+
 
 closest <- function(x, where, direction = 'either', diff_func = `-`) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))

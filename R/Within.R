@@ -586,7 +586,6 @@ with.humdrumR <- function(data, ...,
                           expandPaths = FALSE,
                           drop = TRUE,
                           variables = list()) {
-  
   checks(data, xclass('humdrumR'))
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())

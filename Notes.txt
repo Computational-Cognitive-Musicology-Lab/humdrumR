@@ -5,6 +5,9 @@ Nat's ToDo:
 	Add grace slot to rhythmInterval?
 
 
+Major:
+	Allow with to return matrices!
+		What about doing autocorrelation with [lag = 0:10]?
 
 Minor:
 	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?

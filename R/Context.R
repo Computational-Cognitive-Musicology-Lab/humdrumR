@@ -87,7 +87,6 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
   
   
   if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), activeField %||% '.')
-  
   open <- parseContextExpression(open, other = quote(close))
   close <- parseContextExpression(close, other = quote(open))
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
@@ -113,17 +112,28 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
     
     assign(c('open_indices', 'close_indices')[i], val)
   }
-  
-  
-  # 
-  windowFrame <- align(open_indices, close_indices,
-                       overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
-                       min_length = min_length, max_length = max_length)
-                       
-  windowFrame <- windowFrame[Open >= 1L & Open <= nrow(x) & Close >= 1L & Close <= nrow(x)]
-  
+  windowFrame <- data.table(Open = indices2logical(open_indices, x[[1]]),
+                            Close = indices2logical(close_indices, x[[1]]),
+                            Groups = if (length(groupby)) squashGroupby(groupby) else 1,
+                            Index = seq_along(x[[1]]))
+  windowFrame <- windowFrame[ , {
+                                      if (any(Open, na.rm = TRUE) && any(Close, na.rm = TRUE)) {
+                                        firstindex <- min(Index) - 1L
+                                        align(which(Open) + firstindex, 
+                                              which(Close) + firstindex,
+                                              overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
+                                              min_length = min_length, max_length = max_length)
+                                      }
+                                 },
+                              by = Groups]
+  setorder(windowFrame, Groups, Open, Close)
 
-  
+  # 
+  # windowFrame <- align(open_indices, close_indices,
+  #                      overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
+  #                      min_length = min_length, max_length = max_length)
+  #                      
+  windowFrame <- windowFrame[Open >= 1L & Open <= nrow(x) & Close >= 1L & Close <= nrow(x)]
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
   
   attr(windowFrame, 'regexes') <- regexes
@@ -157,7 +167,6 @@ align <- function(open, close, groupby = list(),
   # output <- if (length(open) == length(close) && all(ordPredicate(open, close), na.rm = TRUE)) {
   # data.table(Open = open, Close = close)
   # } 
-  
   open <- open[!is.na(open)]
   close <- close[!is.na(close)] 
   
@@ -168,20 +177,17 @@ align <- function(open, close, groupby = list(),
   }
   
   dists <- outer(close, open, '-') 
-  
-  if (length(groupby)) {
-    groupby <- do.call('paste', groupby)
-    dists[outer(groupby[close], groupby[open], '!=')] <- NA
-  }
-  
   accept <- dists >= min_length & dists <= max_length
   
-
+  # if (length(groupby)) {
+  #   groupby <- squashGroupby(groupby)
+  #   accept[outer(groupby[close], groupby[open], '!=')] <- FALSE
+  # }
   
   overlap <- pmatch(overlap, c('nested', 'paired', 'edge', 'none'))
   accept <- switch(overlap,
                    nested = {
-                     steps <- c(rep(1, length(open)), rep(-1, length(close)))[order(c(open, close))]
+                     steps <- rep(c(1L, -1L), c(length(open), length(close)))[order(c(open, close))]
                      stepdepth <- sigma(steps)
                      samelevel <- outer(stepdepth[steps == -1L] + 1L, stepdepth[steps == 1L], '==')
                      topmost(accept & samelevel)
@@ -194,7 +200,6 @@ align <- function(open, close, groupby = list(),
   
   # Prepare windowFrame
   accept <- which(accept, arr.ind = TRUE)
-  
   windowFrame <- data.table(Open = open[accept[ , 'col']],
                             Close = close[accept[ , 'row']])
   
@@ -207,8 +212,6 @@ align <- function(open, close, groupby = list(),
   
   windowFrame[ , Length := Close - Open + 1L]
   
-  setorder(windowFrame, Open, Close)
-  
   windowFrame
   
 }
@@ -219,7 +222,6 @@ align <- function(open, close, groupby = list(),
 shunt <- function(accept) {
   # "shunt" looks for window Close positions that have aleady been matched
   # with a previous Open, and "shunts" them to the next Close.
-  
   bad <- rowSums(accept) > 1L
   
   while (any(bad)) {
@@ -246,15 +248,18 @@ shunt <- function(accept) {
 
 
 depth <- function(windowFrame, depth = NULL, ...) {
+  if (nrow(windowFrame) == 0L) {
+    windowFrame[ , c('Depth', 'RevDepth') := list(integer(), integer())]
+    return(windowFrame)
+  }
+  
   windowFrame[ , Depth := {
-    steps <- c(rep(1, length(Open)), rep(-1, length(Close)))[order(c(Open, Close))]
+    steps <- rep(c(1L, -1L), c(length(Open), length(Close)))[order(c(Open, Close))]
     stepdepth <- sigma(steps)
     stepdepth[steps == 1L]
   }]
   
-  maxdepth <- max(windowFrame$Depth)
-  windowFrame$RevDepth <- windowFrame$Depth - maxdepth - 1L
-  
+  windowFrame[ , RevDepth := Depth - max(Depth) - 1L]
 
   if (!is.null(depth))   windowFrame <- windowFrame[Depth %in% depth | RevDepth %in% depth]
   
@@ -283,6 +288,7 @@ depth <- function(windowFrame, depth = NULL, ...) {
 
 
 windows2groups <- function(dt, windowFrame) {
+  # expands overlapping windows into "groups" appropriate for use with data.table[ , , by = group]
   indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
   
   dt_extended <- dt[unlist(indices)]
@@ -299,11 +305,6 @@ windows2groups <- function(dt, windowFrame) {
   
   results <- rlang::eval_tidy(rlang::quo({ dt_extended[ , list(list(!!expr)), by = contextWindow]}))$V1
   # should be a list of results, one result per window
-  
-  # if (!vectorize) {
-  #   names(results_windowed) <- windowFrame[ , paste0(Open, ':', Close)]
-  #   return(results_windowed)
-  # }
   
   edges <- windowFrame[ , if (alignToOpen) Open else Close]
   edge <- if (alignToOpen) head else tail
