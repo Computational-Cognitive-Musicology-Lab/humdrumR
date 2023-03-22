@@ -1336,6 +1336,48 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
   
 }
 
+#' Enumerate vector
+#' 
+#' This function enumerates the values of an input vector `x`,
+#' counting along the length of the vector from 1 to `length(x)`.
+#'
+#' @details
+#' 
+#' If `inPlace = TRUE` (and `x` is atomic), the original vector is returned with the counts
+#' pasted to the front of each value, separated by `sep`.
+#' If `inPlace = FALSE`, a new `integer` vector is returned, identical to calling [seq_along(x)][base::seq].
+#' 
+#' @param x ***The input vector to enumrate.***
+#' 
+#' Must be a vector (either atomic, or a `list()`).
+#' 
+#' @param inPlace ***Should the numbers be pasted onto the original vector?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param sep ***Separator between numbers and vector.***
+#' 
+#' Defaults to `":"`.
+#' 
+#' Can be empty string (`""`), if no separator is desired.
+#' 
+#' @examples
+#' 
+#' enum(letters)
+#' enum(letters, inPlace = FALSE)
+#' 
+enum <- function(x, inPlace = TRUE, sep = ':') {
+  checks(x, xvector)
+  checks(inPlace, xTF)
+  checks(sep, xcharacter & xlen1)
+  
+  n <- seq_along(x)
+  if (inPlace && !is.list(x)) paste0(format(n, bigmark = ','), sep, x) else n
+  
+}
+
 #' Cumulative sum of numeric vector
 #' 
 #' Calculate sequential cummulative sum of values in numeric vectors.
