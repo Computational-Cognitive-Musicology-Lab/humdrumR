@@ -9,6 +9,8 @@ Major:
 	Allow with to return matrices!
 		What about doing autocorrelation with [lag = 0:10]?
 
+	humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = ...] is slow
+
 Minor:
 	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?
 

@@ -1594,10 +1594,11 @@ evalDoQuo_context <- function(doQuo, humtab, partQuos) {
   findArgs$groupby <- findArgs$groupby %||% quote(list(File, Spine, Path)) 
   
   windowFrame <- humtab[ , rlang::eval_tidy(rlang::expr(findWindows(.SD, !!!findArgs)))]
-  
   humtab_extended <- windows2groups(humtab, windowFrame)
   
   humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
+  # doQuo <- rlang::quo_squash(doQuo)
+  # humtab_extended[ , eval(doQuo), by = contextWindow]
   
 }
 
