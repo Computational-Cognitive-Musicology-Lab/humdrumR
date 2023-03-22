@@ -1591,7 +1591,7 @@ evalDoQuo_context <- function(doQuo, humtab, partQuos) {
   passAsExprs <- .names(findArgs) %in% c('open', 'close', '')
   findArgs[passAsExprs] <- lapply(findArgs[passAsExprs], \(expr) call('quote', expr))
  
-  findArgs$groupby <- findArgs$groupby %||% quote(list(File, Spine, Path)) 
+  if (!'groupby' %in% names(findArgs)) findArgs$groupby <- quote(list(File, Spine, Path)) 
   
   windowFrame <- humtab[ , rlang::eval_tidy(rlang::expr(findWindows(.SD, !!!findArgs)))]
   humtab_extended <- windows2groups(humtab, windowFrame)

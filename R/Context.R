@@ -8,16 +8,15 @@
 
 
 
-parseContextExpression <- function(expr, other) {
+parseContextExpression <- function(expr, other, groupby) {
   if (is.null(expr)) expr <- quote('.')
   
   expr <- withinExpression(expr, applyTo = 'call', stopOnHit = TRUE,
                          \(Head) Head == 'hop',
                          \(exprA) {
                            
-                           if (!'along.with' %in% .names(exprA$Args)) {
-                             exprA$Args$along.with <- quote(.)
-                           }
+                           exprA$Args$along.with <- exprA$Args$along.with %||% quote(.)
+                           exprA$Args$groupby <- exprA$Args$groupby %||% groupby
                            exprA
                            
                          })
@@ -87,8 +86,8 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
   
   
   if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), activeField %||% '.')
-  open <- parseContextExpression(open, other = quote(close))
-  close <- parseContextExpression(close, other = quote(open))
+  open <- parseContextExpression(open, other = quote(close), groupby = rlang::enexpr(groupby))
+  close <- parseContextExpression(close, other = quote(open), groupby = rlang::enexpr(groupby))
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
   
   if (!is.null(activeField)) {
@@ -164,13 +163,9 @@ print.windows <- function(x) {
 align <- function(open, close, groupby = list(),
                   overlap = 'paired', rightward = TRUE, depth = NULL, 
                   min_length = 2L, max_length = Inf) {
-  # output <- if (length(open) == length(close) && all(ordPredicate(open, close), na.rm = TRUE)) {
-  # data.table(Open = open, Close = close)
-  # } 
+
   overlap <- pmatch(overlap, c('nested', 'paired', 'edge', 'none'))
-  
  
-  
   if (!rightward) {
     openx <- open
     open <- sort(-close)
