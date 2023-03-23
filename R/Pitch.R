@@ -2779,15 +2779,15 @@ gamut <- function(generic = FALSE, simple = FALSE,
 
 
 set.gamut <- function(token) {
-  deparseArgs <- attr(token, 'deparseArgs')
+  deparseArgs <- token@Attributes$deparseArgs
   deparseArgs$Key <- NULL
   
-  levels <- do.call(gamut, c(list(reference = token, 
+  levels <- do.call(gamut, c(list(reference = token@.Data, 
                                   deparseArgs = deparseArgs, 
-                                  deparser = attr(token, 'deparser')), 
-                                  attr(token, 'gamutArgs')))
+                                  deparser = token@Attributes$deparser), 
+                             token@Attributes$gamutArgs))
   
-  factor(token, levels = levels)
+  factor(token@.Data, levels = levels)
 }
 
 
@@ -3054,11 +3054,11 @@ makePitchTransformer <- function(deparser, callname,
       output <- if (inPlace) {
         rePlace(output, attr(parsedTint, 'dispatch'))
       } else {
-        do.call('token', list(output, Exclusive = callname, 
-                                      deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1], 
-                                      gamutArgs = gamutArgs,
-                                      factorizer = set.gamut,
-                                      deparser = !!deparser))
+        token(output, Exclusive = callname,
+              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1],
+              gamutArgs = gamutArgs,
+              factorizer = set.gamut,
+              deparser = !!deparser)
       }
     }
     

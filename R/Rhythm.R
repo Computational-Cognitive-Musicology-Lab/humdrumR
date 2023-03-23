@@ -727,13 +727,13 @@ makeRamut <- function(reference, deparseArgs = list(), deparser) {
 
 
 set.ramut <- function(token) {
-  deparseArgs <- attr(token, 'deparseArgs')
+  deparseArgs <- token@Attributes$deparseArgs
   
-  levels <- do.call(makeRamut, c(list(reference = token, 
-                                  deparseArgs = deparseArgs, 
-                                  deparser = attr(token, 'deparser'))))
+  levels <- do.call(makeRamut, list(reference = token@.Data, 
+                                    deparseArgs = deparseArgs, 
+                                    deparser = token@Attributes$deparser))
   
-  factor(token, levels = levels)
+  factor(token@.Data, levels = levels)
 }
 
 
@@ -945,10 +945,11 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
       output <- if (inPlace) {
         rePlace(output, dispatch)
       } else {
-        do.call('token', list(output, Exclusive = callname, 
-                              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
-                              factorizer = set.ramut,
-                              deparser = !!deparser))
+        token(output, Exclusive = callname, 
+              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
+              factorizer = set.ramut,
+              deparser = !!deparser)
+
       }
       
     }

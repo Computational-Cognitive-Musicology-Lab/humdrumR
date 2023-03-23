@@ -3,40 +3,23 @@
 
 setClassUnion('maybecharacter', c('character', 'NULL'))
 
-setClass('token', contains = 'vector', c(Exclusive = 'maybecharacter')) -> token
-
-
+setClass('token', contains = 'vector', c(Exclusive = 'maybecharacter', Attributes = 'list'))
 
 #' Humdrum tokens
 #' @export
-# token <- function(x, Exclusive = NULL, ...) {
-#   
-#   attr(x, 'Exclusive') <- Exclusive
-#   humdrumRattr(x) <- list(...)
-#   
-#   class(x) <- c('token', class(x))
-#   x
-#   
-#   
-# }
+token <- function(x, Exclusive = NULL, ...) {
+  new('token', x, Exclusive = Exclusive, Attributes = list(...))
+}
 
 
+#' @rdname token
+#' @export
 setMethod('[', 'token',
           function(x, i, ...) {
             x@.Data <- x@.Data[i, ...]
             x
           })
 
-#' @rdname token
-#' @export
-# `[.token` <- function(x, ...) {
-#   
-#   callNextMethod(x)
-#   # humdrumRattr(result) <- humdrumRattr(x)
-#   # class(result) <- class(x)
-#   result
-#   
-# }
 
 
 
@@ -64,44 +47,26 @@ format.token <- function(x, ...) {
   x
 }
 
+
+
 #' @rdname token
 #' @export
-# c.token <- function(...) {
-#   args <- list(...)
-#   
-#   exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
-#   
-#   humattr <- humdrumRattr(args[[1]])
-#   
-#   args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
-#   result <- do.call('c', args)
-#   
-#   humdrumRattr(result) <- humattr
-#   class(result) <- c('token', class(result))
-#   result
-#   
-# }
-
 setMethod('c', c('token'),
           function(x, ...) {
             args <- list(x, ...)
             exclusives <- unique(unlist(lapply(args, \(arg) if (inherits(arg, 'token')) arg@Exclusive else NULL)))
              
-            # humattr <- humdrumRattr(args[[1]])
-            output <- args[[1]]
-            output@.Data <- c(output@.Data, unlist(lapply(args, 
-                                                          \(arg) {
-                                                            if (inherits(arg, 'token')) return(arg@.Data)
-                                                            if (is.vector(arg)) return(arg)
-                                                          })))
-             
-            output@Exclusive <- exclusives
-            # args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
-            # result <- do.call('c', args)
-             
-            # humdrumRattr(result) <- humattr
-            # class(result) <- c('token', class(result))
-            output
+            attributes <- unlist(lapply(args, \(arg) if (inherits(arg, 'token')) arg@Attributes else NULL), recursive = FALSE)
+            attributes <- attributes[!duplicated(.names(attributes))]
+
+            values <-  unlist(lapply(args, 
+                                     \(arg) {
+                                       if (inherits(arg, 'token')) return(arg@.Data)
+                                       if (is.vector(arg)) return(arg)
+                                     }))
+            
+            new('token', values, Exclusive = exclusives, Attributes = attributes)
+         
             
           })
 
@@ -109,6 +74,8 @@ setMethod('c', c('token'),
 
 ## Math ----
 
+#' @rdname token
+#' @export
 setMethod('Arith', c('token', 'token'),
           function(e1, e2) {
            pitch <- unlist(pitchFunctions)
@@ -123,7 +90,8 @@ setMethod('Arith', c('token', 'token'),
              
           })
 
-
+#' @rdname token
+#' @export
 setMethod('Summary', c('token'),
           function(x) {
             pitch <- unlist(pitchFunctions)
