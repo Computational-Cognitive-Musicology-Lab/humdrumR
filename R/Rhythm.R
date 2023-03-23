@@ -679,7 +679,7 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
 rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
   levels <- levels(x)
   
-  rints <- rhythmInterval.character(levels, Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  rints <- rhythmInterval.character(levels, Exclusive = Exclusive, ...)
   
   c(rational(NA), rints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
 }
@@ -687,7 +687,7 @@ rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
 #' @rdname rhythmParsing
 #' @export
 rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
-  rhythmInterval.character(as.character(x), Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  rhythmInterval.character(as.character(x@.Data), Exclusive = Exclusive %||% getExclusive(x), ...)
 }
 
 #### setAs rhythmInterval ####
@@ -880,6 +880,10 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
   # this function will create various rhythm transform functions
   
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
+  humdrumR_exclusives <<- rbind(humdrumR_exclusives, 
+                               data.table(Exclusive = callname, 
+                                          Type = 'rhythm', 
+                                          Parser = 'tonalInterval'))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)

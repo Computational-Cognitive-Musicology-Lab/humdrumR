@@ -1,3 +1,5 @@
+# Package documenation ----
+
 #' humdrumR
 #'
 #' `humdrumR` is a toolkit for the analysis of data encoded in the [humdrum syntax](http://www.humdrum.org/guide/ch05/).
@@ -55,8 +57,14 @@ withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
                      Key = c('mint', 'hint', 'int'),
                      BPM = c('timestamp'))
 
+# Package global data ----
 
-# groupby
+### exclusives ----
+
+humdrumR_exclusives <- data.table(Exclusive = character(0L), Type = character(0L), Parser = character(0L))
+
+### groupby ----
+
 byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
                              Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie'), 
                              Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
@@ -75,6 +83,7 @@ byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                   )
 
 setOldClass('quosure')
+
 
 ####### Pitch  ----
 

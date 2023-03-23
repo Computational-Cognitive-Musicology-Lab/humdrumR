@@ -2,15 +2,20 @@
 % Please edit documentation in R/Token.R
 \name{token}
 \alias{token}
+\alias{c,token-method}
+\alias{rep.token}
 \alias{[,token,ANY,ANY-method}
 \alias{show,token-method}
 \alias{format.token}
-\alias{c,token-method}
 \alias{Arith,token,token-method}
 \alias{Summary,token-method}
 \title{Humdrum tokens}
 \usage{
 token(x, Exclusive = NULL, ...)
+
+\S4method{c}{token}(x, ...)
+
+\method{rep}{token}(x, ...)
 
 \S4method{[}{token,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
@@ -18,12 +23,14 @@ token(x, Exclusive = NULL, ...)
 
 \method{format}{token}(x, ...)
 
-\S4method{c}{token}(x, ...)
-
 \S4method{Arith}{token,token}(e1, e2)
 
 \S4method{Summary}{token}(x)
 }
 \description{
-Humdrum tokens
+\code{token} is an \code{S4} class which acts as a simple
+"wrapper" around \code{atomic} data, allowing \code{humdrumR} to give
+that data special treatment.
+They are basically \code{atomic} vectors with a known
+exclusive interpretation.
 }

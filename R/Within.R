@@ -1628,7 +1628,6 @@ parseResult <- function(results) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
                       first <- result[[1]][[1]]
                       
-                      humattr <- humdrumRattr(first)
                       class <- class(first)
                       object <- length(first) && (is.table(first) || (is.object(first) && !is.atomic(first)))
                       
@@ -1642,9 +1641,15 @@ parseResult <- function(results) {
                         result <- unlist(result, recursive = FALSE)
                       }
                       
-                      humdrumRattr(result) <- humattr
+                      
+                      if (inherits(first, 'token')) {
+                        first@.Data <- result
+                        result <- first
+                      } else {
+                        if (!is.null(result)) class(result) <- if (object) 'list' else class
+                      }
                       attr(result, 'visible') <- NULL
-                      if (!is.null(result)) class(result) <- if (object) 'list' else class
+                     
                       result 
                     })
   

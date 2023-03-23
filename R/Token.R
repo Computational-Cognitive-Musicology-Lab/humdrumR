@@ -1,16 +1,68 @@
+################################## ###
+# token S4 class #####################
+################################## ###
 
-## Token S4 class ----
+## Definition, validity, initialization ####
 
 setClassUnion('maybecharacter', c('character', 'NULL'))
 
+
 setClass('token', contains = 'vector', c(Exclusive = 'maybecharacter', Attributes = 'list'))
 
+## Constructors ####
+
 #' Humdrum tokens
+#' 
+#' `token` is an `S4` class which acts as a simple
+#' "wrapper" around `atomic` data, allowing `humdrumR` to give
+#' that data special treatment.
+#' They are basically `atomic` vectors with a known
+#' exclusive interpretation.
+#' 
+#' 
 #' @export
 token <- function(x, Exclusive = NULL, ...) {
   new('token', x, Exclusive = Exclusive, Attributes = list(...))
 }
 
+
+
+## Accessors ####
+
+getExclusive <- function(x) if (inherits(x, 'token')) x@Exclusive
+
+
+#' @rdname token
+#' @export
+setMethod('c', c('token'),
+          function(x, ...) {
+            args <- list(x, ...)
+            exclusives <- unique(unlist(lapply(args, getExclusive)))
+            
+            attributes <- unlist(lapply(args, \(arg) if (inherits(arg, 'token')) arg@Attributes else NULL), recursive = FALSE)
+            attributes <- attributes[!duplicated(.names(attributes))]
+            
+            values <-  unlist(lapply(args, 
+                                     \(arg) {
+                                       if (inherits(arg, 'token')) return(arg@.Data)
+                                       if (is.vector(arg)) return(arg)
+                                     }))
+            
+            new('token', values, Exclusive = exclusives, Attributes = attributes)
+            
+            
+          })
+
+#' @rdname token
+#' @export
+rep.token <- function(x, ...) {
+  x@.Data <- rep(x@.Data, ...)
+  x
+}
+
+
+
+## Constructors ####
 
 #' @rdname token
 #' @export
@@ -32,7 +84,6 @@ setMethod('show', 'token',
              cat('**')
              cat(exclusive, sep = '**')
              cat('\n')
-             attr(object, 'Exclusive') <- NULL
            }
            x <- object@.Data
            if (is.factor(object)) object <- as.character(object)
@@ -48,27 +99,8 @@ format.token <- function(x, ...) {
 }
 
 
+## Order/relations methods ####
 
-#' @rdname token
-#' @export
-setMethod('c', c('token'),
-          function(x, ...) {
-            args <- list(x, ...)
-            exclusives <- unique(unlist(lapply(args, \(arg) if (inherits(arg, 'token')) arg@Exclusive else NULL)))
-             
-            attributes <- unlist(lapply(args, \(arg) if (inherits(arg, 'token')) arg@Attributes else NULL), recursive = FALSE)
-            attributes <- attributes[!duplicated(.names(attributes))]
-
-            values <-  unlist(lapply(args, 
-                                     \(arg) {
-                                       if (inherits(arg, 'token')) return(arg@.Data)
-                                       if (is.vector(arg)) return(arg)
-                                     }))
-            
-            new('token', values, Exclusive = exclusives, Attributes = attributes)
-         
-            
-          })
 
 
 
@@ -78,12 +110,20 @@ setMethod('c', c('token'),
 #' @export
 setMethod('Arith', c('token', 'token'),
           function(e1, e2) {
-           pitch <- unlist(pitchFunctions)
+           exclusives <- humdrumR_exclusives[Exclusive %in% c(e1@Exclusive, e2@Exclusive)]
+           if (nrow(exclusives) == 0L) .stop("humdrumR can't do arithmetic with this data, because it doesn't know how to parse it.")
            
-           if (!(e1@Exclusive %in% pitch & e2@Exclusive %in% pitch)) .stop("Can't add these tokens together.")
+           parser <- unique(exclusives$Parser)
            
-           e1 <- tonalInterval(e1@.Data)
-           e2 <- tonalInterval(e2@.Data)
+           
+           if (length(parser) > 1L) .stop("You can't do arithmetic with these two different types of humdrum tokens.",
+                                          "Your first argument is {exclusives[1]$Type} data, while",
+                                          "the second is {exclusives[2]$Type} data.")
+           
+           parser <- match.fun(parser)
+           
+           e1 <- parser(e1@.Data)
+           e2 <- parser(e2@.Data)
            
            e3 <- callGeneric(e1, e2)
            token(tint2kern(e3), Exclusive = 'kern')
@@ -94,12 +134,13 @@ setMethod('Arith', c('token', 'token'),
 #' @export
 setMethod('Summary', c('token'),
           function(x) {
-            pitch <- unlist(pitchFunctions)
+            exclusives <- humdrumR_exclusives[Exclusive == x@Exclusive]
             
-            if (!x@Exclusive %in% pitch) .stop("Can't interpret this token.")
+            if (nrow(exclusives) == 0L) .stop("humdrumR can't do max/min/range with this data, because it doesn't know how to parse it.")
             
-            x <- tonalInterval(x@.Data)
+            parser <- match.fun(unique(exclusives$Parser))
             
+            x <- parser(x@.Data)
             output <- callGeneric(x)
             token(tint2kern(output), Exclusive = 'kern')
             

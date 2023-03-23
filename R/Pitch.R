@@ -2595,7 +2595,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
 tonalInterval.factor <- function(x, Exclusive = NULL, ...) {
   levels <- levels(x)
   
-  tints <- tonalInterval.character(levels, Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  tints <- tonalInterval.character(levels, Exclusive = Exclusive, ...)
   
   c(tint(NA), tints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
 }
@@ -2603,7 +2603,7 @@ tonalInterval.factor <- function(x, Exclusive = NULL, ...) {
 #' @rdname pitchParsing
 #' @export
 tonalInterval.token <- function(x, Exclusive = NULL, ...) {
- tonalInterval.character(as.character(x), Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+ tonalInterval.character(as.character(x@.Data), Exclusive = Exclusive %||% getExclusive(x), ...)
 }
 
 
@@ -2797,6 +2797,7 @@ set.gamut <- function(token) {
 
 ## Pitch function documentation ####
 
+
 pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'helmholtz', 'tonh' = 'German-style notation'),
                                     Relative = c('interval', 
                                                  'solfa' = 'relative-do solfege', 
@@ -2965,13 +2966,17 @@ pitchArgCheck <- function(args,  callname) {
 }
 
 
+# this function will create various pitch transform functions
 makePitchTransformer <- function(deparser, callname, 
                                  outputClass = 'character', 
                                  keyed = TRUE,
                                  removeArgs = NULL, extraArgs = alist()) {
-  # this function will create various pitch transform functions
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
   withinFields$Key        <<- c(withinFields$Key, callname)
+  humdrumR_exclusives <<- rbind(humdrumR_exclusives, 
+                               data.table(Exclusive = callname, 
+                                          Type = 'pitch',
+                                          Parser = 'tonalInterval'))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
