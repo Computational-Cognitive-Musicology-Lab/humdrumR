@@ -59,9 +59,6 @@ withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
 
 # Package global data ----
 
-### exclusives ----
-
-humdrumR_exclusives <- data.table(Exclusive = character(0L), Type = character(0L), Parser = character(0L))
 
 ### groupby ----
 

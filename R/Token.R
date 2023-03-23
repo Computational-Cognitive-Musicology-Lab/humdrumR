@@ -110,23 +110,17 @@ format.token <- function(x, ...) {
 #' @export
 setMethod('Arith', c('token', 'token'),
           function(e1, e2) {
-           exclusives <- humdrumR_exclusives[Exclusive %in% c(e1@Exclusive, e2@Exclusive)]
-           if (nrow(exclusives) == 0L) .stop("humdrumR can't do arithmetic with this data, because it doesn't know how to parse it.")
+            
+           parsed1 <- unparse(e1)
+           parsed2 <- unparse(e2)
            
-           parser <- unique(exclusives$Parser)
+           # exclusives <- humdrumR_exclusives[Exclusive %in% c(e1@Exclusive, e2@Exclusive)]
+           if (class(parsed1) != class(parsed2)) .stop("humdrumR can't do arithmetic with this data, because it doesn't know how combine them.")
            
            
-           if (length(parser) > 1L) .stop("You can't do arithmetic with these two different types of humdrum tokens.",
-                                          "Your first argument is {exclusives[1]$Type} data, while",
-                                          "the second is {exclusives[2]$Type} data.")
+           e3 <- callGeneric(parsed1, parsed2)
            
-           parser <- match.fun(parser)
-           
-           e1 <- parser(e1@.Data)
-           e2 <- parser(e2@.Data)
-           
-           e3 <- callGeneric(e1, e2)
-           token(tint2kern(e3), Exclusive = 'kern')
+           reparse(e3, e1)
              
           })
 
@@ -134,14 +128,39 @@ setMethod('Arith', c('token', 'token'),
 #' @export
 setMethod('Summary', c('token'),
           function(x) {
-            exclusives <- humdrumR_exclusives[Exclusive == x@Exclusive]
+            parsedx <- unparse(x)
             
-            if (nrow(exclusives) == 0L) .stop("humdrumR can't do max/min/range with this data, because it doesn't know how to parse it.")
+            if (is.null(parsedx)) .stop("humdrumR can't do max/min/range with this data, because it doesn't know how to parse it.")
             
-            parser <- match.fun(unique(exclusives$Parser))
+            xsummary <- callGeneric(parsedx)
             
-            x <- parser(x@.Data)
-            output <- callGeneric(x)
-            token(tint2kern(output), Exclusive = 'kern')
+            dispatch <- attr(parsedx, 'dispatch')
+            
+            reparse(xsummary, x)
+            # reParse(xsummary, dispatch, c('kern', 'pitch', 'solfa', 'interval', 'degree'))
+            # token(tint2kern(output), Exclusive = 'kern')
             
           })
+
+################################ ###
+# parsing and unparsing tokens ####
+################################ ###
+
+
+unparse <- function(token) {
+  if (!inherits(token, 'token')) return(NULL)
+  parser <- token@Attributes$parser
+  
+  if (is.null(parser)) return(NULL)
+  
+  do.call(parser, c(list(token@.Data), token@Attributes$deparseArgs))
+}
+
+reparse <- function(x, token) {
+  if (!inherits(token, 'token')) return(NULL)
+  deparser <- token@Attributes$deparser
+  
+  if (is.null(deparser)) return(NULL)
+  
+  do.call(deparser, c(list(x), token@Attributes$deparseArgs))
+}

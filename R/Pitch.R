@@ -2973,10 +2973,6 @@ makePitchTransformer <- function(deparser, callname,
                                  removeArgs = NULL, extraArgs = alist()) {
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
   withinFields$Key        <<- c(withinFields$Key, callname)
-  humdrumR_exclusives <<- rbind(humdrumR_exclusives, 
-                               data.table(Exclusive = callname, 
-                                          Type = 'pitch',
-                                          Parser = 'tonalInterval'))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -3063,6 +3059,7 @@ makePitchTransformer <- function(deparser, callname,
               deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1],
               gamutArgs = gamutArgs,
               factorizer = set.gamut,
+              parser = tonalInterval,
               deparser = !!deparser)
       }
     }

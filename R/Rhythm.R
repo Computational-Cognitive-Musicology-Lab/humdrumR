@@ -880,10 +880,6 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
   # this function will create various rhythm transform functions
   
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
-  humdrumR_exclusives <<- rbind(humdrumR_exclusives, 
-                               data.table(Exclusive = callname, 
-                                          Type = 'rhythm', 
-                                          Parser = 'tonalInterval'))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
