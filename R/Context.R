@@ -82,7 +82,7 @@ context <- function(x, open, close, reference = x, ...,
 findWindows <- function(x, open, close = quote(next - 1), ..., 
                         activeField = 'Token', 
                         overlap = 'paired', rightward = TRUE, depth = NULL, groupby = NULL,
-                        min_length = 1L, max_length = Inf) {
+                        min_length = 2L, max_length = Inf) {
   
   
   if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), activeField %||% '.')
@@ -172,11 +172,15 @@ align <- function(open, close, groupby = list(),
     close <- sort(-openx)
   }
   
+  open <- sort(open)
+  close <- sort(close)
+  
   if (overlap == 'paired' && 
       (length(open) == length(close)) && 
       all((close - open) >= min_length && (close- open) <= max_length, na.rm = TRUE)) {
     
       windowFrame <- data.table(Open = open, Close = close) 
+      windowFrame <- windowFrame[!is.na(Open) & !is.na(Close) & Open > 0L & Close > 0L]
     
     if (length(groupby)) {
       groupby <- squashGroupby(groupby)
@@ -184,8 +188,8 @@ align <- function(open, close, groupby = list(),
     }
     
   } else {
-    open <- open[!is.na(open)]
-    close <- close[!is.na(close)] 
+    open <- open[!is.na(open) & open > 0L]
+    close <- close[!is.na(close) & close > 0L] 
     
     if (length(groupby)) {
       groupby <- squashGroupby(groupby)
@@ -214,11 +218,17 @@ align <- function(open, close, groupby = list(),
                             paired = shunt(windowFrame, open, close),
                             edge = windowFrame,
                             none = { 
+                              i <- 1
+                              while(i <= nrow(windowFrame)) {
+                                windowFrame <- windowFrame[Open > Close[i] | Close <= Close[i]]
+                                i <- i + 1
+                              }
                               windowFrame[ , Hit := OpenInd == min(OpenInd), by = CloseInd]
                               windowFrame[Hit == TRUE]
                               }
                             )
     }
+    
     windowFrame[ , c('OpenInd', 'CloseInd', 'Group', 'Hit') := NULL]
   }
   

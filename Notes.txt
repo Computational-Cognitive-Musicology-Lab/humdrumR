@@ -16,16 +16,12 @@ Minor:
 
 	Add ordering options to gamut(), so you could order by LO5th, for example.
 
-	Add arguument to withHumdrum that causes short results to be filled to the right.
-
 	Remove names from output vector in return from with(..., drop =TRUE)
 
 	hop()
-
 		add hop.matrix and hop.data.frame
 		add support for negative indexing.
 
-	when using foldExclusive(), attach exclusive name to each field?
 
 Bugs:
 	Figured bass not working with keys?
