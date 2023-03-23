@@ -948,6 +948,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
         token(output, Exclusive = callname, 
               deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
               factorizer = set.ramut,
+              parser = rhythmInterval,
               deparser = !!deparser)
 
       }

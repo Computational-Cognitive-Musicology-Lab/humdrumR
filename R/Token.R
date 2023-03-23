@@ -113,7 +113,6 @@ setMethod('Arith', c('token', 'token'),
             
            parsed1 <- unparse(e1)
            parsed2 <- unparse(e2)
-           
            # exclusives <- humdrumR_exclusives[Exclusive %in% c(e1@Exclusive, e2@Exclusive)]
            if (class(parsed1) != class(parsed2)) .stop("humdrumR can't do arithmetic with this data, because it doesn't know how combine them.")
            
@@ -122,6 +121,24 @@ setMethod('Arith', c('token', 'token'),
            
            reparse(e3, e1)
              
+          })
+
+#' @rdname token
+#' @export
+setMethod('Arith', c('token', 'character'),
+          function(e1, e2) {
+            parser <- e1@Attributes$parser
+            reparse(callGeneric(unparse(e1), parser(e2)), e1)
+            
+          })
+
+#' @rdname token
+#' @export
+setMethod('Arith', c('character', 'token'),
+          function(e1, e2) {
+            parser <- e2@Attributes$parser
+            reparse(callGeneric(parser(e1), unparse(e2)), e2)
+            
           })
 
 #' @rdname token
@@ -162,5 +179,7 @@ reparse <- function(x, token) {
   
   if (is.null(deparser)) return(NULL)
   
-  do.call(deparser, c(list(x), token@Attributes$deparseArgs))
+  token@.Data <- do.call(deparser, c(list(x), token@Attributes$deparseArgs))
+  token
+  
 }
