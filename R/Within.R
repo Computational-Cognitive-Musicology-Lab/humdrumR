@@ -555,6 +555,12 @@
 #' 
 #' Must be `list`.
 #' 
+#' @param alignLeft ***Should output that is shorter than input be aligned to the left?***
+#'
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
 #' @param drop ***Whether to return a simplified data structure.***
 #' 
 #' Defaults to `TRUE`.
@@ -616,6 +622,7 @@ with.humdrumR <- function(data, ...,
   if (visible) result else invisible(result)
   
 }
+
 
 #' @rdname withinHumdrum
 #' @export

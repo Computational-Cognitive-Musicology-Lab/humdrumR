@@ -22,6 +22,7 @@ parseContextExpression <- function(expr, other, groupby) {
                          })
   
   expr <- substituteName(expr, list('next' = rlang::expr(lead(!!other, 1L)),
+                                    end    = rlang::expr(length(.)),
                                     prev   = rlang::expr(lag(!!other, 1L)),
                                     last   = rlang::expr(lag(!!other, 1L))))
   
@@ -51,22 +52,22 @@ parseContextExpression <- function(expr, other, groupby) {
 #' Create arbitrary "context" across vectors.
 #' @export
 context <- function(x, open, close, reference = x, ..., 
-                    stripregex = TRUE,
-                    nested = FALSE, depth = NULL, groupby = NULL,
-                    min_length = 1L, max_length = Inf,
-                    collapse = TRUE, sep = ', ',
-                    alignToOpen = TRUE, inPlace = FALSE) {
+                    overlap = 'paired', depth = NULL, rightward = TRUE,
+                    min_length = 2L, max_length = Inf,
+                    collapse = TRUE, sep = ',', stripregex = FALSE,  inPlace = FALSE,
+                    alignToOpen = TRUE, groupby = list()
+                    ) {
   
   open  <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
   windowFrame <- findWindows(reference, open, close, ...,
-                             nested = nested, depth = depth, groupby = groupby,
-                             min_length = 1L, max_length = Inf)
+                             overlap = overlap, depth = depth, rightward = rightward,
+                             min_length = min_length, max_length = max_length)
   
   regexes <- attr(windowFrame, 'regexes')
   if (stripregex) for (re in escapebraces(regexes)) x <- gsub(re, '', x)
   
-  expr <- if (collapse) rlang::expr(paste(.x., collapse = !!sep)) else rlang::expr(.x.)
+  expr <- if (collapse) rlang::expr(paste(.x., collapse = !!sep)) else rlang::expr(list(.x.))
   
   .applyWindows(data.table(.x. = x), windowFrame, expr, activeField = '.x.',
                 inPlace = inPlace, alignToOpen = alignToOpen)
@@ -81,7 +82,7 @@ context <- function(x, open, close, reference = x, ...,
 
 findWindows <- function(x, open, close = quote(next - 1), ..., 
                         activeField = 'Token', 
-                        overlap = 'paired', rightward = TRUE, depth = NULL, groupby = NULL,
+                        overlap = 'paired', depth = NULL,  rightward = TRUE, groupby = NULL,
                         min_length = 2L, max_length = Inf) {
   
   
@@ -349,7 +350,7 @@ windows2groups <- function(dt, windowFrame) {
   
   
   output <- if (inPlace) dt[[activeField]] else rep(NA, nrow(dt))
-  output[.unlist(newindices)] <- .unlist(results)
+  output[.unlist(newindices)] <- .unlist(results, recursive = FALSE)
   
   if (inPlace) output[setdiff(unlist(indices), unlist(newindices))] <- NA
   
