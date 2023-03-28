@@ -744,8 +744,10 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
            
            ## 
            parsedfig[ , step := as.integer(step)]
-           parsedfig[ , third := ifelse(step %% 2L == 0L, step - 7L, step)]
-           parsedfig[ , third := as.integer((third - min(third)) %/% 2L)] # translates steps -> thirds
+           
+           parsedfig[ , extension := ifelse(step %% 2L == 0L, step + 7L, step)]
+           setorder(parsedfig, -extension)
+           parsedfig[ , third := ((extension - c(15L, extension)[which.min(diff(c(15L, extension)))]) %/% 2L) %% 7L]
            #
            parsedfig <- parsedfig[!duplicated(third)]
            inversion <- parsedfig[step %in% c(1L, 8L, 15L), third[1]]
@@ -799,9 +801,7 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
                            implicitSpecies = implicitSpecies,
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                            Key = Key, ...)@Fifth
-  
   figurations <- parseFiguration(figurations)
-  
   ### quality of degress
   # extension qualities
   qualities <- extensions2qualities(root, figurations, triadalt, Key = Key, flat = 'b', diminish = diminish, augment = augment, ...)
@@ -1058,7 +1058,7 @@ tertianSet.integer <- integer2tset
 #' @rdname chordParsing
 #' @export
 tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,     harm2tset),
-                                              list('any',  makeRE.roman,    roman2tset),
+                                              list('roman',  makeRE.roman,    roman2tset),
                                               list('any',  makeRE.tertian,  tertian2tset),
                                               list('any',  makeRE.chord,    chord2tset),
                                               funcName = 'tertianSet.character',
