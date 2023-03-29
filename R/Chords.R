@@ -187,7 +187,18 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
 
 ## Arithmetic methods ###
 
-
+#' @export
+setMethod('+', signature = c('tertianSet', 'tonalInterval'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            lof <- e2@Fifth
+            
+            tset(getRoot(e1) + lof, getSignature(e1) + lof,
+                 inversion = e1@Inversion, 
+                 extension = e1@Extensions,  alterations = e1@Alteration)
+            
+          })
 
 
 ###################################################################### ###
@@ -801,6 +812,7 @@ roman2tset <- function(x, Key = dset(0,0), augment = '+', diminish = 'o', implic
                            implicitSpecies = implicitSpecies,
                            step.labels = c('I', 'II', 'III', 'IV', 'V', 'VI', 'VII'),
                            Key = Key, ...)@Fifth
+  
   figurations <- parseFiguration(figurations)
   ### quality of degress
   # extension qualities
@@ -927,6 +939,31 @@ tertian2tset <- function(x, Key = dset(0, 0), ...) {
     
 }
 
+figuredBass2tset <- function(x, ...) {
+  REparse(x,
+          makeRE.figuredBass(..., collapse = FALSE), # bass, bass.sep, figurations 
+          toEnv = TRUE) -> parsed
+  
+  bass <- kern2tint(bass)
+  
+  figurations <- parseFiguration(figurations)
+  
+  tsets <- .unlist(figurations[,
+              {
+                tints <- interval2tint(paste0(Accidentals[[1]], Degrees[[1]]), qualities = FALSE)
+                tints <- tints - tints[1]
+                inversion <- Inversion
+                
+                sciDegrees <- paste(tint2specifier(tints, qualities=T, explicitNaturals = TRUE), collapse = '')
+                list(list(sciQualities2tset(sciDegrees, minor = 'm', diminish = 'd', augment = 'A', major = 'M',
+                                  inversion = inversion) - tints[inversion + 1L]))
+              },
+              by = 1:nrow(figurations)]$V1)
+  
+  tsets + bass
+  
+  
+}
 
 chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = 'b') {
   # preprocessing
@@ -1059,6 +1096,7 @@ tertianSet.integer <- integer2tset
 #' @export
 tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,     harm2tset),
                                               list('roman',  makeRE.roman,    roman2tset),
+                                              list('figuredBass', makeRE.figuredBass, figuredBass2tset),
                                               list('any',  makeRE.tertian,  tertian2tset),
                                               list('any',  makeRE.chord,    chord2tset),
                                               funcName = 'tertianSet.character',
