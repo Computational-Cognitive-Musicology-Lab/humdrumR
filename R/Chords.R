@@ -733,6 +733,53 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, quali
   
 }
 
+tint2thirds <- function(tint) {
+  steps <- tint2step(tint, step.labels = NULL)
+  steps2thirds(steps)
+}
+
+
+steps2thirds <- function(steps) {
+  steps <- 1L + ((steps - 1L) %% 14L)
+  extension <- .extension <- ifelse(steps %% 2L == 0L, steps + 7L, steps)
+  extension <- sort(extension, decreasing = TRUE)
+  
+  
+  thirds <- ((extension - c(15L, extension)[which.min(diff(c(15L, extension)))]) %/% 2L) %% 7L
+  
+  thirds <- thirds[match(.extension, extension)]
+  
+  thirds - min(thirds)
+  
+}
+
+
+figurationFill <- function(species, third, step, Explicit) {
+  # This function "fills" in missing (implicit) tertian degrees in a sonority.
+  # For example, in IV6, there is an implicit 3.
+    
+    newthird <- if (length(third) == 0L) {
+      
+      0L:2L 
+      
+    } else {
+      
+      newthird <- if (all(step <= 3L)) 0:max(third) else 0L:max(2L, max(third))
+      
+      if (all(step == 5L) && species[1] == "") newthird <- setdiff(newthird, 1L) 
+      gaps <- diff(step[Explicit])
+      skips <- gaps > 2L & head(species[Explicit] == '', -1L)
+      if (any(skips)) for (g in gaps[gaps > 2L]) newthird <- setdiff(newthird, third[Explicit][which(skips & gaps == g)] + (1L:((g - 2L) / 2L)))
+      newthird
+      
+    }
+    
+    newaccidentals <- species[match(newthird, third)]
+    newaccidentals[is.na(newaccidentals)] <- ""
+    
+    data.table(species = newaccidentals, step = newthird * 2L + 1L, third = newthird, Explicit = FALSE)
+}
+
 parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALSE, ...) {
   
   # str[str == ''] <- '35'
@@ -755,10 +802,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
            
            ## 
            parsedfig[ , step := as.integer(step)]
-           
-           parsedfig[ , extension := ifelse(step %% 2L == 0L, step + 7L, step)]
-           setorder(parsedfig, -extension)
-           parsedfig[ , third := ((extension - c(15L, extension)[which.min(diff(c(15L, extension)))]) %/% 2L) %% 7L]
+           parsedfig[ , third := steps2thirds(step)]
            #
            parsedfig <- parsedfig[!duplicated(third)]
            inversion <- parsedfig[step %in% c(1L, 8L, 15L), third[1]]
@@ -766,26 +810,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
            # extensions
            setorder(parsedfig, step)
            
-           parsedfig <- parsedfig[  , {
-             newthird <- if (length(third) == 0L) {
-               0L:2L 
-             } else {
-               newthird <- if (all(step <= 3L)) 0:max(third) else 0L:max(2L, max(third))
-               
-               if (all(step == 5L) && species[1] == "") newthird <- setdiff(newthird, 1L) 
-               gaps <- diff(step[Explicit])
-               skips <- gaps > 2L & head(species[Explicit] == '', -1L)
-               if (any(skips)) for (g in gaps[gaps > 2L]) newthird <- setdiff(newthird, third[Explicit][which(skips & gaps == g)] + (1L:((g - 2L) / 2L)))
-               newthird
-               
-             }
-             
-             newaccidentals <- species[match(newthird, third)]
-             newaccidentals[is.na(newaccidentals)] <- ""
-             
-             data.table(species = newaccidentals, step = newthird * 2L + 1L, third = newthird, Explicit = FALSE)
-           }]
-           
+           if (figureFill) parsedfig <- do.call(figurationFill, parsedfig)
            
            extensionInt <- parsedfig[ , as.integer(sum(2^third))]
            #
@@ -1439,7 +1464,41 @@ setMethod('LO5th', 'tertianSet',
             
           })
 
-### Tonal intervals ####   
 
 
-## Tonal transform methods ####
+## Extracting chords ----
+
+
+sonority <- function(x, deparser = tset2chord, figureFill = TRUE, Key = NULL, ...) {
+  tints <- tonalInterval(unique(x))
+  tints <- tints[!is.na(tints) & !duplicated(tints@Fifth)]
+  tints <- sort(tints)
+  
+  step <- tint2step(tints, step.labels = NULL)
+  third <- steps2thirds(step)
+  
+  parsedfig <- data.table(step =  step, third = third, 
+                          species = tint2specifier(tints - tints[third == 0L], 
+                                                   qualities = TRUE, explicitNaturals = TRUE),
+                          Explicit = TRUE)
+  
+  if (figureFill) {
+    parsedfig <- do.call(figurationFill, parsedfig)
+    
+    parsedfig[ , species := {
+      species[species == ''] <- ifelse(third[species == ''] %in% c(0, 2, 5), 'P', 'M')
+      species
+    }]
+  }
+  
+  # setorder(parsedfig, third)
+  tertian <- rep('.', 7L)
+  tertian[parsedfig$third + 1L] <- parsedfig$species
+  
+  tset <- sciQualities2tset(paste(tertian, collapse = ''), diminish = 'd', augment = 'A') + tints[third == 0L]
+  
+  tset@Inversion <- third[1]
+  
+  if (is.null(deparser)) tset else deparser(if (is.null(Key)) tset else tset - Key, ...)
+  
+}
