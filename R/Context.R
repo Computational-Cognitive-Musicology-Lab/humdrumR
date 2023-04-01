@@ -21,10 +21,10 @@ parseContextExpression <- function(expr, other, groupby) {
                            
                          })
   
-  expr <- substituteName(expr, list('next' = rlang::expr(lead(!!other, 1L)),
-                                    end    = rlang::expr(length(.)),
-                                    prev   = rlang::expr(lag(!!other, 1L)),
-                                    last   = rlang::expr(lag(!!other, 1L))))
+  expr <- substituteName(expr, list(nextopen = rlang::expr(lead(!!other, 1L)),
+                                    end  = rlang::expr(length(.)),
+                                    prevclose = rlang::expr(lag(!!other, 1L)),
+                                    lastclose = rlang::expr(lag(!!other, 1L))))
   
   
   
@@ -154,25 +154,25 @@ parseContextExpression <- function(expr, other, groupby) {
 #' The `open` and `close` arguments have a few more special behaviors.
 #' What if we'd like each of our windows to close right before the next window opens?
 #' We can do this by making the `close` argument to refer to the *next* `open`, by
-#' referring to `next` object:
+#' referring to `nextopen` object:
 #' 
 #' ```
-#' context(letters, open = '[aeiou]', close = next - 1L)
+#' context(letters, open = '[aeiou]', close = nextopen - 1L)
 #' ```
 #' 
-#' Conversely, `open` can refer to the `prev` close:
+#' Conversely, `open` can refer to the `prevclose` close:
 #' 
 #' ```
-#' context(letters, open = prev + 1, close = '[aeiou]', alignToOpen = FALSE)
+#' context(letters, open = prevclose + 1, close = '[aeiou]', alignToOpen = FALSE)
 #' ```
 #' 
-#' Notice that when we called `context(letters, open = '[aeiou]', close = next - 1L)`,
+#' Notice that when we called `context(letters, open = '[aeiou]', close = nextopen - 1L)`,
 #' the window opening on `"u"` is not returned.
-#' This is because there is no "`next`" open to close on.
+#' This is because there is no "`nextopen`" open to close on.
 #' We can instead provide an `context()` alternative, using `|` (or):
 #' 
 #' ```
-#' context(letters, open = '[aeiou]', close = next - 1L | 26)
+#' context(letters, open = '[aeiou]', close = nextopen - 1L | 26)
 #' 
 #' ```
 #' 
@@ -180,7 +180,7 @@ parseContextExpression <- function(expr, other, groupby) {
 #' Refer to the `end` object:
 #' 
 #' ```
-#' context(letters, open = '[aeiou]', close = next - 1L | end)
+#' context(letters, open = '[aeiou]', close = nextopen - 1L | end)
 #' ```
 #' 
 #' @section Nested Windows:
@@ -296,7 +296,7 @@ parseContextExpression <- function(expr, other, groupby) {
 #' a single `character` string (interpreted as a regular expression).
 #' May also be an arbitrary expression which returns natural numbers;
 #' the expression can refer to named elements of `reference`, to `end` (last index),
-#' to `close`, or to `prev` (the previous close).
+#' to `close`, or to `prevclose` (the previous close).
 #' 
 #' @param close ***Where to "close" (end) windows.***
 #' 
@@ -304,7 +304,7 @@ parseContextExpression <- function(expr, other, groupby) {
 #' a single `character` string (interpreted as a regular expression).
 #' May also be an arbitrary expression which returns natural numbers;
 #' the expression can refer to named elements of `reference`, to `end` (previous index),
-#' to `open`, or to `next` (the next open).
+#' to `open`, or to `nextopen` (the next open).
 #' 
 #' @param reference ***Vector(s) to use to identify window open/closes.***
 #' 
@@ -395,9 +395,9 @@ parseContextExpression <- function(expr, other, groupby) {
 #'
 #' context(letters, open = hop(4), close = open + 3)
 #' 
-#' context(letters, open = "[aeiou]", close = next - 1 | end)
-#' context(letters, open = "[aeiou]", close = next - 1 | end, inPlace = TRUE)
-#' context(letters, open = "[aeiou]", close = next - 1 | end, collapse = FALSE)
+#' context(letters, open = "[aeiou]", close = nextopen - 1 | end)
+#' context(letters, open = "[aeiou]", close = nextopen - 1 | end, inPlace = TRUE)
+#' context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE)
 #' 
 #' 
 #' \dontrun{
@@ -412,7 +412,7 @@ parseContextExpression <- function(expr, other, groupby) {
 #' # phrases leading to fermatas
 #' with(chorales, 
 #'      paste(Token, collapse = ','), 
-#'      context(open = 1|prev + 1, close = ';', overlap = 'none'))
+#'      context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
 #' }
 #' 
 #' @export
@@ -462,7 +462,7 @@ context <- function(x, open, close, reference = x,
 
 
 
-findWindows <- function(x, open, close = quote(next - 1), ..., 
+findWindows <- function(x, open, close = quote(nextopen - 1), ..., 
                         activeField = 'Token', 
                         overlap = 'paired', depth = NULL,  rightward = TRUE, duplicate_indices = TRUE,
                         groupby = NULL,
@@ -502,7 +502,7 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
 
 
   # 
-  windowFrame <- align(open_indices, close_indices, 
+  windowFrame <- align(open_indices, close_indices, fullLength = nrow(x),
                        overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
                        min_length = min_length, max_length = max_length)
   
@@ -535,16 +535,19 @@ print.windows <- function(x) {
 
 
 # 
-align <- function(open, close, groupby = list(),
+align <- function(open, close, fullLength, groupby = list(),
                   overlap = 'paired', rightward = TRUE, depth = NULL, 
                   min_length = 2L, max_length = Inf) {
 
   overlap <- pmatches(overlap, c('nested', 'paired', 'edge', 'none'))
+  groupby <- squashGroupby(groupby)
   
   if (!rightward) {
     openx <- open
-    open <- sort(-close)
-    close <- sort(-openx)
+    open  <- (fullLength + 1L) - close
+    close <- (fullLength + 1L) - openx
+    groupby <- rev(groupby)
+    
   }
   
   open <- sort(open)
@@ -554,24 +557,23 @@ align <- function(open, close, groupby = list(),
       (length(open) == length(close)) && 
       all((close - open) >= min_length && (close- open) <= max_length, na.rm = TRUE)) {
     
-      windowFrame <- data.table(Open = open, Close = close) 
-      windowFrame <- windowFrame[!is.na(Open) & !is.na(Close) & Open > 0L & Close > 0L]
+    windowFrame <- data.table(Open = open, Close = close) 
+    windowFrame <- windowFrame[!is.na(Open) & !is.na(Close) & Open > 0L & Close > 0L]
     
     if (length(groupby)) {
-      groupby <- squashGroupby(groupby)
       windowFrame <- windowFrame[groupby[Open] == groupby[Close]]
     }
     
   } else {
-    open <- open[!is.na(open) & open > 0L]
-    close <- close[!is.na(close) & close > 0L] 
+    open <- open[!is.na(open)]
+    close <- close[!is.na(close)] 
     
     if (length(groupby)) {
-      groupby <- squashGroupby(groupby)
       groupbyopen <- groupby[open]
       groupbyclose <- groupby[close]
     } else {
-      groupbyopen <- groupbyclose <- 1
+      groupbyopen <- integer(length(open))
+      groupbyclose <- integer(length(close))
     }
     
     openframe  <- data.table(Open = open,   OpenInd = seq_along(open),   Group = groupbyopen)
@@ -611,7 +613,8 @@ align <- function(open, close, groupby = list(),
   # update depth
   windowFrame <- depth(windowFrame, depth = depth)
 
-  if (!rightward) windowFrame[ , c('Open', 'Close') := list(-Close, -Open)]
+  if (!rightward) windowFrame[ , c('Open', 'Close') := list((fullLength + 1L) - Close, 
+                                                            (fullLength + 1L) - Open)]
 
   
   windowFrame
@@ -839,9 +842,11 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
     }
   }
   
-  
-  
-  if (nrow(windowFrame)) x <- windowApply(x, sum, na.rm = na.rm, windows = windowFrame, passOutside = TRUE)
+
+  if (nrow(windowFrame)) x <- .applyWindows(data.table(.x. = x), activeField = '.x.', 
+                                            windowFrame,
+                                            expr = rlang::expr(sum(.x., na.rm = !!na.rm)),
+                                            inPlace = TRUE, complement = TRUE)
   
   x
   

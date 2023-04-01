@@ -1266,13 +1266,19 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   checks(inPlace, xTF)
   
   rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  dispatch <- attr(rint, 'dispatch')
   
   if (any(!onsets)) {
-    windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
-    rint <- windowsSum(rint, windows, na.rm = TRUE)
+    duration <- rint2duration(rint)
+    windowFrame <- findWindows(x, open = which(onsets),
+                               close = which(!onsets),
+                               groupby = groupby,
+                               rightward = FALSE, overlap = 'none')
+    duration <- windowsSum(duration, windowFrame, na.rm = TRUE)
+    rint <- duration2rint(duration)
   }
   
-  dispatch <- attr(rint, 'dispatch')
+  
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
   if (inPlace) {
@@ -1319,14 +1325,16 @@ untie <- function(x, open = '[', close = ']', ...,
   checks(inPlace, xTF)
   
   rint <- rhythmInterval(x, ...)
-  
-  
-  windows <- windows(x, open, close, groupby = groupby)
-  
-  rint <- windowsSum(rint, windows)
-  
-  
   dispatch <- attr(rint, 'dispatch')
+  
+  windows <- findWindows(x, open, close, groupby = groupby, overlap = 'nested')
+  
+  if (nrow(windows)) {
+    duration <- rint2duration(rint)
+    duration <- windowsSum(duration, windows)
+    rint <- duration2rint(duration)
+  }
+  
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
   null <- unlist(Map(":", windows$Open + 1L, windows$Close))

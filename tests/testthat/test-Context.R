@@ -105,15 +105,15 @@ test_that('context() man examples work', {
    expect_equal(humdrumR::context(letters, open = close - 4, close = '[aeiou]', alignToOpen = FALSE),
                 c("a,b,c,d,e", "e,f,g,h,i", "k,l,m,n,o", "q,r,s,t,u"))
    
-   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = next - 1L),
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = nextopen - 1L),
                 c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t"))
    
-   expect_equal(humdrumR::context(letters, open = prev + 1, close = '[aeiou]', alignToOpen = FALSE),
+   expect_equal(humdrumR::context(letters, open = prevclose + 1, close = '[aeiou]', alignToOpen = FALSE),
                 c("b,c,d,e", "f,g,h,i", "j,k,l,m,n,o", "p,q,r,s,t,u"))
-   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = next - 1L | 26),
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = nextopen - 1L | 26),
                 c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t", "u,v,w,x,y,z"))
    
-   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = next - 1L | end),
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = nextopen - 1L | end),
                 c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t", "u,v,w,x,y,z"))
    
    nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
@@ -211,7 +211,7 @@ test_that("context() output options work right", {
   # phrases leading to fermatas
   phrases <- with(chorales, 
                   paste(Token, collapse = ','), 
-                  context(open = 1|prev + 1, close = ';', overlap = 'none'))
+                  context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
   expect_length(phrases, 256)
   expect_equal(unname(phrases[34]), "4e,8f#,4B,8A#,4B,4c#,2.d;")
 })

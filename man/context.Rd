@@ -35,7 +35,7 @@ Can be natural numbers, \code{logical} vectors (of the same length as \code{x}),
 a single \code{character} string (interpreted as a regular expression).
 May also be an arbitrary expression which returns natural numbers;
 the expression can refer to named elements of \code{reference}, to \code{end} (last index),
-to \code{close}, or to \code{prev} (the previous close).}
+to \code{close}, or to \code{prevclose} (the previous close).}
 
 \item{close}{\emph{\strong{Where to "close" (end) windows.}}
 
@@ -43,7 +43,7 @@ Can be natural numbers, \code{logical} vectors (of the same length as \code{x}),
 a single \code{character} string (interpreted as a regular expression).
 May also be an arbitrary expression which returns natural numbers;
 the expression can refer to named elements of \code{reference}, to \code{end} (previous index),
-to \code{open}, or to \code{next} (the next open).}
+to \code{open}, or to \code{nextopen} (the next open).}
 
 \item{reference}{\emph{\strong{Vector(s) to use to identify window open/closes.}}
 
@@ -219,21 +219,21 @@ once windowing is done.
 The \code{open} and \code{close} arguments have a few more special behaviors.
 What if we'd like each of our windows to close right before the next window opens?
 We can do this by making the \code{close} argument to refer to the \emph{next} \code{open}, by
-referring to \code{next} object:\preformatted{context(letters, open = '[aeiou]', close = next - 1L)
+referring to \code{nextopen} object:\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L)
 }
 
-Conversely, \code{open} can refer to the \code{prev} close:\preformatted{context(letters, open = prev + 1, close = '[aeiou]', alignToOpen = FALSE)
+Conversely, \code{open} can refer to the \code{prevclose} close:\preformatted{context(letters, open = prevclose + 1, close = '[aeiou]', alignToOpen = FALSE)
 }
 
-Notice that when we called \code{context(letters, open = '[aeiou]', close = next - 1L)},
+Notice that when we called \code{context(letters, open = '[aeiou]', close = nextopen - 1L)},
 the window opening on \code{"u"} is not returned.
-This is because there is no "\code{next}" open to close on.
-We can instead provide an \code{context()} alternative, using \code{|} (or):\preformatted{context(letters, open = '[aeiou]', close = next - 1L | 26)
+This is because there is no "\code{nextopen}" open to close on.
+We can instead provide an \code{context()} alternative, using \code{|} (or):\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | 26)
 
 }
 
 What if we don't know exactly how long our input vector is?
-Refer to the \code{end} object:\preformatted{context(letters, open = '[aeiou]', close = next - 1L | end)
+Refer to the \code{end} object:\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | end)
 }
 }
 }
@@ -327,9 +327,9 @@ In some cases, you might want to turn \code{duplicate_indices = FALSE}.
 
 context(letters, open = hop(4), close = open + 3)
 
-context(letters, open = "[aeiou]", close = next - 1 | end)
-context(letters, open = "[aeiou]", close = next - 1 | end, inPlace = TRUE)
-context(letters, open = "[aeiou]", close = next - 1 | end, collapse = FALSE)
+context(letters, open = "[aeiou]", close = nextopen - 1 | end)
+context(letters, open = "[aeiou]", close = nextopen - 1 | end, inPlace = TRUE)
+context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE)
 
 
 \dontrun{
@@ -344,7 +344,7 @@ within(chorales,
 # phrases leading to fermatas
 with(chorales, 
      paste(Token, collapse = ','), 
-     context(open = 1|prev + 1, close = ';', overlap = 'none'))
+     context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
 }
 
 }
