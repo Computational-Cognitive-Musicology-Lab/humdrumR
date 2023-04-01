@@ -274,7 +274,7 @@ xnumeric <- xclass('numeric')
 .numericClasses <- c('integer', 'integer64', 'numeric', 'rational')
 xnumber  <- argCheck(\(arg) class(arg)[1] %in% .numericClasses, "must be numeric", .mismatch(class))
 
-xatomic <- argCheck(\(arg) is.atomic(arg), "must be an atomic vector (integer, numeric, character, or logical", .mismatch(class))
+xatomic <- argCheck(\(arg) is.atomic(arg), "must be an atomic vector (integer, numeric, character, or logical)", .mismatch(class))
 xvector <- argCheck(\(arg) is.vector(arg), "must be a vector; i.e., an atomic (integer, numeric, character, logical) vector or a list().", .mismatch(class))
 
 xcharnotempty <-  xcharacter & argCheck(\(arg) all(nchar(arg) > 0L), 'cannot be an empty string ("")', \(arg) glue::glue("includes {sum(nchar(arg) == 0)} empty strings"))
@@ -339,7 +339,16 @@ xlen <- argCheck(\(arg) length(arg) > 0L, "must not be empty", .mismatch(length)
   
 ## Matching another argument ----
 
+xnrowmatch <- function(match) {
+  matchname <- rlang::expr_name(rlang::enexpr(match))
+  rule <- glue::glue("must have one row for each index in the '{matchname}' argument")  
+  nrower <- .mismatch(nrow)
 
+  describe <- \(arg) glue::glue("{nrower(arg)} and", .mismatch(length)(match, matchname))
+  argCheck(\(arg) nrow(arg) == length(match),
+           rule, 
+           describe)
+}
 
 xmatch <- function(match) {
   matchname <- rlang::expr_name(rlang::enexpr(match))

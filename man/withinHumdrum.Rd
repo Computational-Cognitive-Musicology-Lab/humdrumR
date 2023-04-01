@@ -63,6 +63,12 @@ the output is consistent.}
 Defaults to \code{list()}.
 
 Must be \code{list}.}
+
+\item{alignLeft}{\emph{\strong{Should output that is shorter than input be aligned to the left?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \value{
 From \code{within.humdrumR}  a new humdrumR data object.

@@ -72,6 +72,7 @@ reference:
   - subset.humdrumR
   - indexHumdrum
   - humWindows
+  - context
 - title: "Musical Tools"
   desc: >
     These pages describe the classes and functions that directly represent or engage musical/music-theoretic concepts.

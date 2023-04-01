@@ -50,27 +50,409 @@ parseContextExpression <- function(expr, other, groupby) {
 ## Actual window finding ----
 
 #' Create arbitrary "context" across vectors.
+#' 
+#' The `context()` command can be used to group input data (vectors)
+#' into arbitrary contextual windows.
+#' Unlike the contextual-grouping you can achieve with `groupby` arguments
+#' to various functions (or `by` expressions in [with(in).humdrumR)][withHumdrum]),
+#' `context()` can produce windows that *overlap* or, the opposite case, that don't exhaustively
+#' divide the data.
+#' The `context()` should generally be used as a special argument to
+#' [with(in).humdrumR)][withHumdrum], but it can also be called directly itself.
+#'  
+#' @details 
+#' 
+#' `context()` takes an input vector (`x`) and divides it into windows based on
+#' the content of the `reference` vector, which must be the same length as `x`---
+#' by default, `x` is reused as `reference`, so windows are based on the input `x` itself.
+#' As a more complex option, `reference` can be a named `list()` or `data.frame` (`nrow == length(x)`)---
+#' the (named) elements of `reference` are then visible to the `open` and `close` arguments (see below).
+#'
+#' The `collapse`, `inPlace`, and `complement` arguments how windows are output.
+#' 
+#' + The "complement" refers to elements of the input vector that don't fall inside
+#'   any indicated windows: if `complement = FALSE` (the default), these "outside" values are
+#'   dropped; if `complement = TRUE`, they are retained.
+#' + If `inPlace = TRUE`, windows are output in a vector of the same length as the input,
+#'   padded with `NA` as needed---otherwise (the default), only the windows are returned
+#' + If `collapse = TRUE`, the windows are collapsed to strings (separed by `sep`), otherwise,
+#'   a `list()` of windows is returned.
+#'
+#' 
+#' @section Defining windows:
+#' 
+#' The system `context()` uses to define/identify windows in the data is quite sophisticated,
+#' and can take some time to master!
+#' The basic idea is that you must indicate where you want windows to start ("*open*") and 
+#' where you want them to end ("*close*"):
+#' you indicate this using the `open` and `close` arguments.
+#' These arguments simple indicate indices in the input vector;
+#' For example, if we want a window to open at the 4th and 11th indices, 
+#' and close at the 15th and 24th index,
+#' we can write (using the built-in `letters` vector for practice):
+#' 
+#' ```
+#' context(letters, open = c(4, 11), close = c(15, 24))
+#'
+#' ```
+#' 
+#' This is quite trivial.
+#' However, the `open` and `close` arguments can actually be arbitary expressions
+#' which do a number of special tricks, including refering to each other.
+#' For example, if either argument includes a call to [hop()],
+#' `hop()` will automatically be applied along the input vector.
+#' Consider this example:
+#' 
+#' ```
+#' context(letters, open = hop(2), close = open + 3)
+#' ```
+#' 
+#' In this example, the `hop()` command generates `open` indices for every odd
+#' number from `1` to `25`.
+#' The `close` argument then references these `open` indices, and adds `3` to each---
+#' the result is the pairs like `1:4`, `2:5`, `3:6`, `4:7`, etc.
+#' If we give `hop()` different arguments (like `by` or `from`), we can modify this process.
+#' In fact, if we use the default `by` value for `hop()` (`1`), we can use this approach to
+#' create standard N-grams.
+#'
+#'
+#' The minimum and maximum length of windows can be controlled using the `min_length` and `max_length` arguments.
+#' We can also indicate open/closes by providing `logical` vectors (the same length as `x`).
+#'
+#' As mentioned above, if `reference` is a named `list()` or `data.frame()`, `open` and 
+#' `close` and refer to the elements of `reference`.
+#' This is useful if you want to open/close windows in reference to multiple vectors:
+#'
+#' ```
+#' context(letters, 
+#'         reference = data.frame(Threes = rep(1:3, length.out = 26), 
+#'                                Fours = rep(4:1, length.out = 26)),
+#'         open = Threes == Fours, close = Fours == 1)
+#' ```
+#' 
+#' ### Regular Expressions
+#' 
+#' If either `open` or `close` are provided a `character` string, this string is treated
+#' as a regular expression and is matched against the `reference` vector.
+#' For exaple, we could make windows in the alphabet starting or ending on each vowel:
+#' 
+#' ```
+#' context(letters, open = '[aeiou]', close = open + 4)
+#' context(letters, open = close - 4, close = '[aeiou]', alignToOpen = FALSE)
+#' 
+#' ```
+#' 
+#' (Notice that we can use the `alignToOpen` argument to change how the output is aligned.)
+#' 
+#' If the `stripRegex = TRUE` (not the default), the matching `open` or `close` regular expressions are removed
+#' from the output.
+#' This can be useful if the character/tokens used to indicate windows are no longer needed
+#' once windowing is done.
+#' 
+#' ### Special References
+#' 
+#' The `open` and `close` arguments have a few more special behaviors.
+#' What if we'd like each of our windows to close right before the next window opens?
+#' We can do this by making the `close` argument to refer to the *next* `open`, by
+#' referring to `next` object:
+#' 
+#' ```
+#' context(letters, open = '[aeiou]', close = next - 1L)
+#' ```
+#' 
+#' Conversely, `open` can refer to the `prev` close:
+#' 
+#' ```
+#' context(letters, open = prev + 1, close = '[aeiou]', alignToOpen = FALSE)
+#' ```
+#' 
+#' Notice that when we called `context(letters, open = '[aeiou]', close = next - 1L)`,
+#' the window opening on `"u"` is not returned.
+#' This is because there is no "`next`" open to close on.
+#' We can instead provide an `context()` alternative, using `|` (or):
+#' 
+#' ```
+#' context(letters, open = '[aeiou]', close = next - 1L | 26)
+#' 
+#' ```
+#' 
+#' What if we don't know exactly how long our input vector is?
+#' Refer to the `end` object:
+#' 
+#' ```
+#' context(letters, open = '[aeiou]', close = next - 1L | end)
+#' ```
+#' 
+#' @section Nested Windows:
+#' 
+#' A common use case for `context()` is analyzing phrases indicated in music.
+#' In `**kern`, phrases are indicated with opening (`(`) and close (`)`) parentheses,
+#' which we can capture with regular expressions for `open` and `close`.
+#' Here is an example:
+#' 
+#' ```
+#' nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
+#' 
+#' context(nesting1, open = '(', close = ')')
+#' ```
+#' 
+#' Perfect.
+#' However, what if there are nested phrasing indicators?
+#' 
+#' ```
+#' nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
+#' 
+#' context(nesting2, open = '(', close = ')')
+#' ```
+#' 
+#' That's not what we want!
+#' By default, `context()` "pairs" each `open` with the next `close`, which often makes the most sense.
+#' But in this case, we want different behavior.
+#' We can get what we want by specifying `overlap = 'nested'`:
+#' 
+#' ```
+#' context(nesting2, open = '(', close = ')', overlap = 'nested')
+#' ```
+#' 
+#' Now context aligns each `open` with the corresponding `close` at the same *nesting level*.
+#' What if we are only interested in the highest (or lowest) level of nesting?
+#' Use the `depth` argument, which can be non-zero integers: the highest level is `1`,
+#' with "deeper" levels incrementing up.
+#' 
+#' ```
+#' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
+#' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2)
+#' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3)
+#' ```
+#' 
+#' You can also use negative `depth` to specify from the deepest levels outward.
+#' For example, in this case  `depth == -1` should get us that deepest level:
+#' 
+#' ```
+#' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
+#' ```
+#' 
+#' I `depth` is `NULL` (the default), all depths are returned.
+#' 
+#' 
+#' 
+#' 
+#' @section Controlling Overlap:
+#'
+#' There are some other options for controlling how windows can, or cannot, overlap.
+#' Perhaps we'd like to look at every melodic phrase moving from so (dominant) to do (tonic).
+#' 
+#' ```
+#' melody <- c('so', 'la', 'ti', 'do', 'so', 'fi', 'so', 'la', 'ti', 're', 'do', 'so', 'la', 're', 'do')
+#' 
+#' context(melody, open = 'so', close = 'do')
+#' 
+#' ```
+#' 
+#' This output is probably not what we want.
+#' Again, `context()` (by default) pairs each opening with the next close *which hasn't already been paird*.
+#' In this case, that means the third so is getting pairs with the third do, 
+#' even though there is another do in between!
+#' We might want to try either the `"edge"` or `"none"` options for the `overlap` argument:
+#' 
+#' ````
+#' context(melody, open = 'so', close = 'do', overlap = 'edge')
+#' context(melody, open = 'so', close = 'do', overlap = 'none')
+#' ```
+#' 
+#' The `"edge"` option allows the closing edge of windows to share a `close`---in this case,
+#' the second and third so (`open`) are paired with the same do.
+#' On the other hand, with `overlap = "none"`, overlapping windows are simply not allowed, so the third `open` 
+#' simply doesn't get paired with anything.
+#' 
+#' What if you would like to pair windows on their left (opening) edge?
+#' If you specify `rightward = FALSE`, the overlap argument works backwards (right-to-left) through
+#' the input vector, starting on each `close` and ending on each `open`.
+#' By combining `righward = FALSE` with various `overlap` options, you can achieve a lot of windowing 
+#' options you might need.
+#' 
+#' @section Repeated Indices:
+#' 
+#' Note that if `duplicates_indices = TRUE` (the default) the `open` and `close` arguments can 
+#' incorporate repeated indices, including multiple matches to a regular expression in the same index.
+#' This is useful with, for example, nested phrases:
+#' 
+#' ```
+#' nesting3 <- c('(a', 'b)', '((c', 'd', 'e)',  '(d', 'e', 'f))', '(e', 'f', '((f#', 'g)', 'g#)', 'a)')
+#' 
+#' context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 1)
+#' context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 2)
+#' ````
+#'
+#' In some cases, you might want to turn `duplicate_indices = FALSE`. 
+#' 
+#' @param x ***Input data to group into windows.***
+#' 
+#' Must be an atomic vector.
+#' 
+#' @param open ***Where to "open" (start) windows.***
+#' 
+#' Can be natural numbers, `logical` vectors (of the same length as `x`),
+#' a single `character` string (interpreted as a regular expression).
+#' May also be an arbitrary expression which returns natural numbers;
+#' the expression can refer to named elements of `reference`, to `end` (last index),
+#' to `close`, or to `prev` (the previous close).
+#' 
+#' @param close ***Where to "close" (end) windows.***
+#' 
+#' Can be natural numbers, `logical` vectors (of the same length as `x`),
+#' a single `character` string (interpreted as a regular expression).
+#' May also be an arbitrary expression which returns natural numbers;
+#' the expression can refer to named elements of `reference`, to `end` (previous index),
+#' to `open`, or to `next` (the next open).
+#' 
+#' @param reference ***Vector(s) to use to identify window open/closes.***
+#' 
+#' Defaults to `x`.
+#' 
+#' Must be either an atomic vector of the same length as `x`, or a `list()`/`data.frame`
+#' of such vectors, all [named][names()].
+#'  
+#' @param overlap ***How are overlapping windows treated/created?***
+#' 
+#' Defaults to `'paired'`.
+#' 
+#' Must be a single `character`, [partially matching][partialMatching]
+#' either `"paired"`, `"nested"`, `"edge"`, or `"none"`.
+#' 
+#' @param depth ***How "deep" can windows overlap?***
+#'
+#' Defaults to `NULL`.
+#' 
+#' Must be `NULL`, or a vector of non-zero whole numbers.
+#' 
+#' @param rightward ***Should window alignment/overlap be determined from left to right?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param duplicate_indices ***Can the same index open/close multiple windows?***
+#'
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param min_length,max_length ***The minimum/maximum lengths of output windows.***
+#' 
+#' Default to two and infinity (no maximum) respectively.
+#' 
+#' Must be single, positive whole numbers.
+#'
+#' @param inPlace ***Should output be padded to same length as input?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param complement ***Should input "outside" any windows, be output?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param alignToOpen ***Should '`inPlace`' output be aligned to the open of each window?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch. 
+#' 
+#' @param collapse ***Should output windows be collapsed to single `character` strings?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch. 
+#' 
+#' @param sep ***Separator for collapsed output.***
+#' 
+#' Defaults to a comma (`","`).
+#' 
+#' Must be a single `character` string.
+#' 
+#' @param stripRegex ***Should regular expressions matched by the `open`/`close` arguments be removed from the output?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch. 
+#' 
+#' @param groupby ***Optional vectors to group windows within.***
+#' 
+#' Defaults to empty `list()`.
+#' 
+#' Must be a [list()], which is either empty or contains vectors which are all the same length as `x`.
+#' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(File, Spine, Path)` by default.
+#' 
+#' Windows cannot cross group boundaries.
+#' 
+#' @examples 
+#' 
+#' # use the built-in 'letters' vector
+#'
+#' context(letters, open = hop(4), close = open + 3)
+#' 
+#' context(letters, open = "[aeiou]", close = next - 1 | end)
+#' context(letters, open = "[aeiou]", close = next - 1 | end, inPlace = TRUE)
+#' context(letters, open = "[aeiou]", close = next - 1 | end, collapse = FALSE)
+#' 
+#' 
+#' \dontrun{
+#' # within.humdrumR
+#' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
+#' 
+#' # 4-grams
+#' within(chorales,
+#'        paste(Token, collapse = '->'), 
+#'        context(open = hop(), open + 3))
+#'        
+#' # phrases leading to fermatas
+#' with(chorales, 
+#'      paste(Token, collapse = ','), 
+#'      context(open = 1|prev + 1, close = ';', overlap = 'none'))
+#' }
+#' 
 #' @export
-context <- function(x, open, close, reference = x, ..., 
-                    overlap = 'paired', depth = NULL, rightward = TRUE,
+context <- function(x, open, close, reference = x, 
+                    overlap = 'paired', depth = NULL, rightward = TRUE, duplicate_indices = TRUE, 
                     min_length = 2L, max_length = Inf,
-                    collapse = TRUE, sep = ',', stripregex = FALSE,  inPlace = FALSE,
-                    alignToOpen = TRUE, groupby = list()
+                    inPlace = FALSE, complement = FALSE, alignToOpen = TRUE, 
+                    collapse = TRUE, sep = ',', stripRegex = FALSE,  
+                    groupby = list()
                     ) {
+  
+  checks(x, xatomic)
+  # checks(reference, xmatch(x) | xnrowmatch(x))
+  checks(overlap, xplegal(c('paired', 'nested', 'edge', 'none')))
+  checks(depth, xnull | (xwholenum & xnotzero))
+  checks(rightward, xTF)
+  checks(duplicate_indices, xTF)
+  checks(min_length, xpnatural)
+  checks(max_length, xpnatural)
+  checks(inPlace, xTF)
+  checks(complement, xTF)
+  checks(alignToOpen, xTF)
+  checks(collapse, xTF)
+  checks(sep, xcharacter & xlen1)
+  checks(stripRegex, xTF)
   
   open  <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
-  windowFrame <- findWindows(reference, open, close, ...,
+  windowFrame <- findWindows(reference, open, close, 
+                             duplicate_indices = duplicate_indices,
                              overlap = overlap, depth = depth, rightward = rightward,
                              min_length = min_length, max_length = max_length)
   
   regexes <- attr(windowFrame, 'regexes')
-  if (stripregex) for (re in escapebraces(regexes)) x <- gsub(re, '', x)
+  if (stripRegex) for (re in escapebraces(regexes)) x <- gsub(re, '', x)
   
   expr <- if (collapse) rlang::expr(paste(.x., collapse = !!sep)) else rlang::expr(list(.x.))
   
   .applyWindows(data.table(.x. = x), windowFrame, expr, activeField = '.x.',
-                inPlace = inPlace, alignToOpen = alignToOpen)
+                inPlace = inPlace, complement = complement, alignToOpen = alignToOpen)
   
   
   
@@ -82,7 +464,8 @@ context <- function(x, open, close, reference = x, ...,
 
 findWindows <- function(x, open, close = quote(next - 1), ..., 
                         activeField = 'Token', 
-                        overlap = 'paired', depth = NULL,  rightward = TRUE, groupby = NULL,
+                        overlap = 'paired', depth = NULL,  rightward = TRUE, duplicate_indices = TRUE,
+                        groupby = NULL,
                         min_length = 2L, max_length = Inf) {
   
   
@@ -112,26 +495,17 @@ findWindows <- function(x, open, close = quote(next - 1), ...,
     
     assign(c('open_indices', 'close_indices')[i], val)
   }
-  # windowFrame <- data.table(Open = indices2logical(open_indices, x[[1]]),
-  #                           Close = indices2logical(close_indices, x[[1]]),
-  #                           Groups = if (length(groupby)) squashGroupby(groupby) else 1,
-  #                           Index = seq_along(x[[1]]))
-  # windowFrame <- windowFrame[ , {
-  #                                     if (any(Open, na.rm = TRUE) && any(Close, na.rm = TRUE)) {
-  #                                       firstindex <- min(Index) - 1L
-  #                                       align(which(Open) + firstindex, 
-  #                                             which(Close) + firstindex,
-  #                                             overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
-  #                                             min_length = min_length, max_length = max_length)
-  #                                     }
-  #                                },
-  #                             by = Groups]
+  if (!duplicate_indices) {
+    open_indices <- unique(open_indices)
+    close_indices <- unique(close_indices)
+  }
+
 
   # 
-  windowFrame <- align(open_indices, close_indices,
+  windowFrame <- align(open_indices, close_indices, 
                        overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
                        min_length = min_length, max_length = max_length)
-  setorder(windowFrame,  Open, Close)
+  
   #                      
   windowFrame <- windowFrame[Open >= 1L & Open <= nrow(x) & Close >= 1L & Close <= nrow(x)]
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
@@ -230,6 +604,7 @@ align <- function(open, close, groupby = list(),
                             )
     }
     
+    setorder(windowFrame,  OpenInd, CloseInd)
     windowFrame[ , c('OpenInd', 'CloseInd', 'Group', 'Hit') := NULL]
   }
   
@@ -246,7 +621,7 @@ align <- function(open, close, groupby = list(),
 
 ### Sorting, filtering, or modifying windows ----
 nest <- function(windowFrame) {
-  
+  # setorder(windowFrame, Open, Close)
   open <- windowFrame[!duplicated(OpenInd), Open]
   close <- windowFrame[!duplicated(CloseInd), Close]
   
@@ -333,7 +708,7 @@ windows2groups <- function(dt, windowFrame) {
 }
 
 .applyWindows <- function(dt, windowFrame, expr, activeField = 'Token', ..., 
-                          inPlace = TRUE, alignToOpen = TRUE) {
+                          inPlace = TRUE, complement = TRUE, alignToOpen = TRUE) {
   indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
   
   dt_extended <- windows2groups(dt, windowFrame)
@@ -341,20 +716,30 @@ windows2groups <- function(dt, windowFrame) {
   results <- rlang::eval_tidy(rlang::quo({ dt_extended[ , list(list(!!expr)), by = contextWindow]}))$V1
   # should be a list of results, one result per window
   
+  
   edges <- windowFrame[ , if (alignToOpen) Open else Close]
   edge <- if (alignToOpen) head else tail
   
   
   result_lengths <- lengths(results)
-  newindices <- Map(indices, result_lengths, f = \(i, l) edge(i, n = l))
+  edgeindices <- Map(indices, result_lengths, f = \(i, l) edge(i, n = l))
   
   
-  output <- if (inPlace) dt[[activeField]] else rep(NA, nrow(dt))
-  output[.unlist(newindices)] <- .unlist(results, recursive = FALSE)
+  output <- if (complement) dt[[activeField]] else rep(NA, nrow(dt))
+  output[.unlist(edgeindices)] <- .unlist(results, recursive = FALSE)
   
-  if (inPlace) output[setdiff(unlist(indices), unlist(newindices))] <- NA
   
-  output
+  if (inPlace) {
+    output[setdiff(unlist(indices), unlist(edgeindices))] <- NA
+    output
+  } else {
+    if (complement) {
+      output[-setdiff(unlist(indices), unlist(edgeindices))]
+    } else {
+      output[unlist(edgeindices)]
+      
+    }
+  }
   
 } 
 

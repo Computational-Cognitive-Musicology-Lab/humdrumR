@@ -76,9 +76,142 @@ test_that('findWindows works', {
                c('3 7',  '11 12', '13 14'))
   expect_equal(do.call('paste', 
                        findWindows(nestdup, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
-               c('3 9', '5 7', '5 9', '11 12', '13 14', '13 15'))
+               c('3 9', '5 9', '5 7', '11 12', '13 15', '13 14'))
   
   
   
 })
   
+
+test_that('context() man examples work', {
+   
+   expect_equal(humdrumR::context(letters, open = c(4, 11), close = c(15, 24)),
+                c("d,e,f,g,h,i,j,k,l,m,n,o", "k,l,m,n,o,p,q,r,s,t,u,v,w,x"))
+  
+   expect_equal(humdrumR::context(letters, open = hop(2), close = open + 3),
+                c("a,b,c,d", "c,d,e,f", "e,f,g,h", "g,h,i,j", 
+                  "i,j,k,l", "k,l,m,n", "m,n,o,p", "o,p,q,r", 
+                  "q,r,s,t", "s,t,u,v", "u,v,w,x", "w,x,y,z"))
+   
+   expect_equal(humdrumR::context(letters,
+                        reference = data.frame(Threes = rep(1:3, length.out = 26),
+                                               Fours = rep(4:1, length.out = 26)),
+                        open = Threes == Fours, close = Fours == 1),
+                c("d,e,f,g,h", "f,g,h,i,j,k,l", "p,q,r,s,t", "r,s,t,u,v,w,x"))
+
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = open + 4),
+                c("a,b,c,d,e", "e,f,g,h,i", "i,j,k,l,m", "o,p,q,r,s", "u,v,w,x,y"))
+   
+   expect_equal(humdrumR::context(letters, open = close - 4, close = '[aeiou]', alignToOpen = FALSE),
+                c("a,b,c,d,e", "e,f,g,h,i", "k,l,m,n,o", "q,r,s,t,u"))
+   
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = next - 1L),
+                c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t"))
+   
+   expect_equal(humdrumR::context(letters, open = prev + 1, close = '[aeiou]', alignToOpen = FALSE),
+                c("b,c,d,e", "f,g,h,i", "j,k,l,m,n,o", "p,q,r,s,t,u"))
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = next - 1L | 26),
+                c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t", "u,v,w,x,y,z"))
+   
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = next - 1L | end),
+                c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t", "u,v,w,x,y,z"))
+   
+   nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
+   
+   expect_equal(humdrumR::context(nesting1, open = '(', close = ')'),
+                c("(a,b)", "(c,d,e)", "(d,e,f)", "(e,f,f#,g,g#,a)"))
+   
+   nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
+   
+   expect_equal(humdrumR::context(nesting2, open = '(', close = ')'),
+                c("(a,b)", "(c,(d,e)", "(d,e),(d,e)", "(e,(f,(f#,g)"))
+   
+   expect_equal(humdrumR::context(nesting2, open = '(', close = ')', overlap = 'nested'),
+                c("(a,b)", "(c,(d,e),(d,e),f)", "(d,e)", "(d,e)", 
+                  "(e,(f,(f#,g),g#),a)", "(f,(f#,g),g#)", "(f#,g)"))
+   expect_equal(humdrumR::context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1),
+                c("(a,b)", "(c,(d,e),(d,e),f)", "(e,(f,(f#,g),g#),a)"))
+   
+   expect_equal(humdrumR::context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2),
+                c("(d,e)", "(d,e)", "(f,(f#,g),g#)"))
+   expect_equal(humdrumR::context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3),
+                c("(d,e)", "(d,e)", "(f,(f#,g),g#)", "(f#,g)"))
+   expect_equal(humdrumR::context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1),
+                c("(f#,g)"))
+   
+   melody <- c('so', 'la', 'ti', 'do', 'so', 'fi', 'so', 'la', 'ti', 're', 'do', 'so', 'la', 're', 'do')
+   
+   expect_equal(humdrumR::context(melody, open = 'so', close = 'do'),
+                c("so,la,ti,do", "so,fi,so,la,ti,re,do", "so,la,ti,re,do,so,la,re,do"))
+   expect_equal(humdrumR::context(melody, open = 'so', close = 'do', overlap = 'edge'),
+                c("so,la,ti,do", "so,fi,so,la,ti,re,do", "so,la,ti,re,do", "so,la,re,do"))
+   expect_equal(humdrumR::context(melody, open = 'so', close = 'do', overlap = 'none'),
+                c("so,la,ti,do", "so,fi,so,la,ti,re,do", "so,la,re,do"))
+   
+   nesting3 <- c('(a', 'b)', '((c', 'd', 'e)',  '(d', 'e', 'f))', '(e', 'f', '((f#', 'g)', 'g#)', 'a)')
+   
+   expect_equal(humdrumR::context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 1),
+                c("(a,b)", "((c,d,e),(d,e,f))", "(e,f,((f#,g),g#),a)"))
+   expect_equal(humdrumR::context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 2),
+                c("((c,d,e)", "(d,e,f))", "((f#,g),g#)"))
+  
+  
+})
+
+test_that("context() output options work right", {
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2),
+               c("a,b,c", "e,f,g", "i,j,k", "m,n,o", "q,r,s", "u,v,w"))
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, complement = TRUE, sep = '-'),
+               c("a-b-c", "d", "e-f-g", "h", "i-j-k", "l", "m-n-o", "p", "q-r-s", "t", "u-v-w", "x", "y", "z"))
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, inPlace = TRUE),
+               c("a,b,c", NA, NA, NA, "e,f,g", NA, NA, NA, "i,j,k", 
+                 NA, NA, NA, "m,n,o", NA, NA, NA, "q,r,s", NA, NA, NA, "u,v,w", NA, NA, NA, NA, NA))
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, inPlace = TRUE, complement = TRUE),
+               c("a,b,c", NA, NA, "d", "e,f,g", NA, NA, "h", "i,j,k", NA, NA, "l", "m,n,o", 
+                 NA, NA, "p", "q,r,s", NA, NA, "t", "u,v,w", NA, NA, "x", "y", "z"))
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, inPlace = TRUE, alignToOpen = FALSE),
+               c(NA, NA, "a,b,c", NA, NA, NA, "e,f,g", NA, NA, NA, 
+                 "i,j,k", NA, NA, NA, "m,n,o", NA, NA, NA, "q,r,s", NA, NA, NA, "u,v,w", NA, NA, NA))
+  
+  # not collapsed
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, collapse = FALSE),
+               list(c("a", "b", "c"), c("e", "f", "g"), c("i", "j", "k"), c("m", "n", "o"), 
+                    c("q", "r", "s"), c("u", "v", "w"))
+               )
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, complement = TRUE, collapse = FALSE),
+               list(c("a", "b", "c"), "d", c("e", "f", "g"), "h", c("i", "j", "k"), 
+                    "l", c("m", "n", "o"), "p", c("q", "r", "s"), "t", c("u", "v", "w"), "x", "y", "z"))
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, inPlace = TRUE, collapse = FALSE),
+               list(c("a", "b", "c"), NA, NA, NA, c("e", "f", "g"), NA, NA, NA, c("i", "j", "k"), 
+                 NA, NA, NA, c("m", "n", "o"), NA, NA, NA, c("q", "r" ,"s"), NA, NA, NA, c("u", "v" ,"w"), 
+                 NA, NA, NA, NA, NA))
+  
+  expect_equal(humdrumR::context(letters, open = hop(4), open + 2, inPlace = TRUE, complement = TRUE, collapse = FALSE),
+               list(c("a", "b", "c"), NA, NA, c("d"), c("e", "f", "g"), NA, NA, c("h"),
+                    c("i", "j", "k"), NA, NA, c("l"), c("m", "n", "o"), 
+                    NA, NA, c("p"), c("q", "r", "s"), NA, NA, c("t"), c("u", "v","w"), NA, NA, 
+                    c("x"), c("y"), c("z")))
+  
+  
+  # examples
+  chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
+  x <- within(chorales,
+              paste(Token, collapse = '->'), 
+               context(open = hop(), open + 3))
+  expect_equal(with(x, sum(nchar(Result1))), 40301)
+         
+  # phrases leading to fermatas
+  phrases <- with(chorales, 
+                  paste(Token, collapse = ','), 
+                  context(open = 1|prev + 1, close = ';', overlap = 'none'))
+  expect_length(phrases, 256)
+  expect_equal(unname(phrases[34]), "4e,8f#,4B,8A#,4B,4c#,2.d;")
+})
