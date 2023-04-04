@@ -39,6 +39,7 @@ articles:
   contents:
   - Summary
   - WorkingWithData
+  - Context
 - title: Musical Processing
   desc: Functionality for analyzing musical information
   navbar: Musical tools

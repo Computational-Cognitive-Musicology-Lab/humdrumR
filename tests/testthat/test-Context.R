@@ -214,4 +214,23 @@ test_that("context() output options work right", {
                   context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
   expect_length(phrases, 256)
   expect_equal(unname(phrases[34]), "4e,8f#,4B,8A#,4B,4c#,2.d;")
+  
+  chorales <- within(chorales, 
+                     Solfa <- solfa(Token, simple = TRUE),
+                     Duration <- duration(Token))
+  
+  
+  
 })
+
+
+test_that('Context vignette examples work', 
+          {
+            
+            beethoven <- readHumdrum(humdrumRroot, 'HumdrumData/BeethovenVariations/.*krn')
+            
+            beethoven <- subset(beethoven, Exclusive == 'kern' & Stop == 1) |> removeEmptySpines() |> removeEmptyStops()
+            result <- with(beethoven, if (length(Token) == 13) paste0(File, ',', Record), context('(', ')'))
+            expect_equal(unname(c(result)), c("9,46", "9,47", "9,48", "9,49", "9,50", "9,52", "9,53", "9,54", "9,55", "9,56", "9,57", "9,58", "9,59"))
+            
+          })

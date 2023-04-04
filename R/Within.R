@@ -55,8 +55,8 @@
 #' + In a subset of the data using `subset`...
 #'   + either ignoring the rest of the data or evaluating a *different* expression in the other part.
 #' + Separately in different subsets of the data, which are then recombined (split-apply-combine) using `by`.
-#' + Across windows in the data (e.g., ngrams, rolling windows).
-#' + Which produces a plot, with particular [plotting parameters][graphics::par()], and/or without 
+#' + Across contextual windows in the data (e.g., ngrams, rolling windows).
+#' + Which produce a plots with particular [plotting parameters][graphics::par()], and/or without 
 #'   returning anything using `sidefx`.
 #' + "Fill" short results to match the original field size using `fill`.
 #' + Only in certain record types (defaulting only data records) using `dataTypes`.
@@ -708,6 +708,8 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', alignLeft = TRUE, expand
   ### Preparing the "do" expression
   do   <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = FALSE)
   ordo <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = TRUE)
+  
+  quoTab[Keyword == 'context', Quo := prepareContextQuo(Quo[[1]], humdrumR@Active), by = .I]
   # 
 
   #evaluate "do" expression! 
@@ -1468,6 +1470,21 @@ interpolateArguments <- function(quo, namedArgs) {
 }
 
 
+prepareContextQuo <- function(contextQuo, active) {
+  exprA <- analyzeExpr(contextQuo)
+  
+  exprA$Head <- 'findWindows'
+  exprA$Args$activeField <- call('quote', rlang::quo_squash(active))
+  
+  passAsExprs <- .names(exprA$Args) %in% c('open', 'close', '')
+  exprA$Args[passAsExprs] <- lapply(exprA$Args[passAsExprs], \(expr) call('quote', expr))
+  
+  if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Spine, Path)) 
+  exprA$Args$x <- quote(humtab)
+  
+  unanalyzeExpr(exprA)
+}
+
 
 
 ## Evaluating do quo in humtab ----
@@ -1492,7 +1509,7 @@ evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     ## to a single factor
     partType <- partQuos$Keyword[1]
     
-    if (partType == 'context') return(evalDoQuo_context(doQuo, humtab, partQuos))
+    if (partType == 'context') return(evalDoQuo_context(doQuo, humtab, partQuos, ordoQuo))
     
     partition <- rlang::eval_tidy(partQuos$Quo[[1]], humtab)
     
@@ -1535,7 +1552,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     result <- if (nrow(partQuos) > 1) {
       results <- humtab[ , {
         evaled <- evalDoQuo_part(doQuo, .SD, partQuos[-1], ordoQuo)
-        evaled[[partitionName]] <- partition
+        evaled[[partitionName]] <- if (nrow(evaled)) partition else partition[0]
         list(list(evaled)) 
       },
       by = partition, .SDcols = targetFields]
@@ -1592,18 +1609,36 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
    result
 }
 
-evalDoQuo_context <- function(doQuo, humtab, partQuos) {
+evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
   
-  findArgs <- as.list(partQuos$Quo[[1]][[2]][-1])
-  passAsExprs <- .names(findArgs) %in% c('open', 'close', '')
-  findArgs[passAsExprs] <- lapply(findArgs[passAsExprs], \(expr) call('quote', expr))
- 
-  if (!'groupby' %in% names(findArgs)) findArgs$groupby <- quote(list(File, Spine, Path)) 
+  contextQuo <- partQuos$Quo[[1]]
   
-  windowFrame <- humtab[ , rlang::eval_tidy(rlang::expr(findWindows(.SD, !!!findArgs)))]
-  humtab_extended <- windows2groups(humtab, windowFrame)
+  windowFrame <- eval(rlang::quo_squash(contextQuo), envir = humtab)
   
-  humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
+  result <- if (nrow(windowFrame)) {
+    humtab_extended <- windows2groups(humtab, windowFrame)
+    humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
+  } else {
+    data.table(contextWindow = integer(0L), Result = list(), `_rowKey_` = list())
+  }
+
+  
+  
+  if (!is.null(ordoQuo)) {
+    # notused <- setdiff(seq_len(nrow(humtab)))
+    
+    complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!`_rowKey_` %in% unlist(result[['_rowKey_']])]))
+    complement[ , contextWindow := 0L]
+    
+    if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
+    
+    mismatch <-  !colnames(complement) %in% colnames(result)
+    colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
+    
+    result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
+  }
+  
+  result
   # doQuo <- rlang::quo_squash(doQuo)
   # humtab_extended[ , eval(doQuo), by = contextWindow]
   

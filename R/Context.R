@@ -463,20 +463,20 @@ context <- function(x, open, close, reference = x,
 
 
 findWindows <- function(x, open, close = quote(nextopen - 1), ..., 
-                        activeField = 'Token', 
+                        activeField = quote(Token),
                         overlap = 'paired', depth = NULL,  rightward = TRUE, duplicate_indices = TRUE,
-                        groupby = NULL,
+                        groupby = list(),
                         min_length = 2L, max_length = Inf) {
   
   
-  if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), activeField %||% '.')
+  if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), rlang::expr_text(activeField) %||% '.')
+  
   open <- parseContextExpression(open, other = quote(close), groupby = rlang::enexpr(groupby))
   close <- parseContextExpression(close, other = quote(open), groupby = rlang::enexpr(groupby))
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
-  
   if (!is.null(activeField)) {
-    open  <- substituteName(open, list('.' = rlang::sym(activeField)))
-    close <- substituteName(close, list('.' = rlang::sym(activeField)))
+    open  <- substituteName(open, list('.' = activeField))
+    close <- substituteName(close, list('.' = activeField))
   }
   
   # do the expressions reference each other?

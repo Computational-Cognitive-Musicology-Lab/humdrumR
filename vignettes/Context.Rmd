@@ -1,0 +1,630 @@
+---
+title: "Contextualizing data"
+author: "Nathaniel Condit-Schultz"
+date:   "July 2022"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Contextualizing data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE, message=FALSE, echo = FALSE }
+source('vignette_header.R')
+```
+
+When analyzing musical data, we often treat each and every data token as a separate, independent "data point."
+However, in many cases, we want to consider data points *in context*---what other data points are nearby in the data?
+Since the [humdrum syntax](HumdrumSyntax.html) encodes data in temporal order, the "context" usually means either "what is happening before or after this data point?" or "what else is happening at the same time as this this data point?"
+`r Hm` provides a number of ways of analyzing data "in context."
+
+# Groupby 
+
+The most conventionally "R-style" way to look at data context is using R/`r hm`'s various "group by" options.
+This functionality is described elsewhere, for example in the [Working With Data](WorkingWithData.html) article, and in the `within.humdrumR()` man page.
+Group-by functionality isn't necessarily connected to temporal context: you can, for instance, group together all the data from each instrument in an ensemble, across all songs in a dataset---this is useful, but non-temporal-context.
+If you want to use `groupby` to get more temporal context, here are a few good options:
+
+### Group by Record
+
+All `r hm` data has a `Record` field, indicating data points that occur at the same time. 
+Using `within.humdrumR()`'s `groupby` argument, we can perform calculations grouped by record.
+
+Let's load our trusty Bach-chorale data:
+
+```{r message=FALSE}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+```
+
+Let's count how many new note onsets (not rests) occur on each record of the data, and tabulate the results.
+We'll look for tokens that *don't* contain an `r` (for rest), using a regular-expression match `%~% 'r'` and the negating bang (`!`).
+
+```{r}
+
+with(chorales, sum(!Token %~% 'r'), by = list(File, Record)) |> table()
+
+```
+
+Most records have new notes in all four voices---Not surprising for choral music---with *one* onset being the next most common case.
+Note that we include `File` in our groupby argument (e.g., `by = list(File, Record)`).
+Why? Because each piece/file in the data set repeats the same record numbers---you wouldn't want to count the 17th record from the 3rd chorale together with the 17th record from the 7th chorale, for example.
+
+### Group by Bar
+
+Most humdrum data includes bar lines, indicated by `=`.
+When `r hm` [read][readHumdrum()] data, it will look at these barlines, count them in each file, and put that count into a [field][fields()] called `Bar`.
+You can then use this data to group data by bar.
+Remember, that if your data set has no `=` tokens, the `Bar` field will be nothing but useless `0`s.
+
+What if we wanted to know what the lowest note in each bar of the music is.
+Let's first extract [semits()] data, so it is easy to get the lowest value:
+
+```{r}
+within(chorales, 
+       semits(Token) -> Semits, 
+       kern(Token) -> Kern) -> chorales
+
+```
+
+We can now group within bars, get the minimum, an tabulate them.
+
+```{r}
+
+with(chorales, Kern[which.min(Semits)], by = list(File, Bar)) |> table()
+
+
+```
+
+The highest lowest-note-in-bar is `A`.
+
+---
+
+For further analysis, we might want to save the lowest-note into a new field.
+Let's use [within.humdrumR]'s `fill = ` option to duplicate the low note throughout the bar:
+
+
+```{r}
+
+within(chorales, fill = min(Semits) -> Lowest, by = list(File, Bar)) -> chorales
+
+chorales
+```
+
+We could then, for example, subtract the bar's lowest note from each note:
+
+```{r}
+with(chorales, Semits - Lowest) |> table()
+
+```
+
+### Group by Beat
+
+Another useful contextual group is the beat.
+There will be no automatic "beat" field in our data, we'll need to make it---obviously, we need ti have data with rhythmic information encoded (like `**kern` or `**recip`).
+We can use the `count()` function to count the beats in our data. 
+We could count quarter-notes by setting `beat = '4'`; alternatively, if our data includes time-signature interpretations (like `*M3/4`) we could use the `TimeSignature` field to get the tactus of the meter. 
+Let's try the later and save the result to a new field, which we'll call `Beat` (or anything else you want).
+
+```{r}
+within(chorales, count(Token, beat = tactus(TimeSignature)) -> Beat) -> chorales
+
+chorales
+
+```
+
+We can now group by beat.
+Maybe we want to know the range of notes in each beat:
+
+```{r}
+
+with(chorales, diff(range(Semits)), by = list(File, Beat)) |> hist()
+
+
+```
+
+
+> Note: If your data includes spine paths, you'll want to set `within(mydata, count(Token), expandPaths = TRUE, ...)`.
+> Count (and similar functions, like `timeline()`) won't work correctly without [paths expanded][expandPaths].
+
+# Contextual Windows
+
+When you use `groupby`/`by`, your data is exhaustively partitioned into non-overlapping groups; the groups are also not necessarily ordered---we have to explicitely used (temporally) ordered groups like `list(File, Record)` if we want temporal context.
+In contrast, the `context()` function, when used in combination with `with.humdrumR()`, gives us much more flexible control over the context we want for our data.
+
+`context()` takes an input vector and treats it as an ordered sequence of information.
+It then identifies arbitrary contextual windows in the data, based on your criteria.
+The windows created by `context()` are always sequentially ordered, aren't necessarily exhaustive (some data might not fall in any window), and can *overlap* (some data falls in multiple windows).
+
+The way you use `context()` is by telling it when to "open" (begin) and "close" (end) contextual windows, using the `open` and `close` arguments.
+Context can use many criteria to open/close windows.
+In the following sections, we layout just a few examples; we'll use our chorale data again, as well as the built-in Beethoven variation data:
+
+```{r message=FALSE, eval=FALSE}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+```
+
+For most examples, we'll use `within.humdrumR()` and run the command `paste(Token, collapse = '-')`.
+This is the simplest/fastest way to *see* what `context()` is doing!
+
+
+## Regular windows
+
+In some cases, we simply want to progress through data and open/close windows at regular locations.
+We can do this using the `hop()` function.
+(`hop()` is a `r hm` function which is very similar to R's base `seq()` function; however, `hop()` has some special features and, more importantly, gets special treatment from `context()`).
+Maybe we want to open a four-note window on every note:
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(hop(), open + 3))
+
+```
+
+Cool, we've got overlapping four-note windows, running throught each spine!
+How did we do this?
+
+### Regular Open
+
+The first argument to `context()` is the `open` argument;
+we give `open` a set of indices (natural numbers) where to open windows in the data.
+`hop()` simply generates a sequence of numbers "along" the input data---by default, the "hop size" is `1`, but we can change that.
+For example:
+
+```{r}
+hop(letters, by = 1)
+
+hop(letters, by = 2)
+
+```
+
+When we use `hop()` inside `context()`, it automatically knows what the input vector is.
+So now check this out:
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(hop(2), open + 3))
+
+```
+
+By saying `hop(2)`, our windows only open on every *other* index.
+If we don't want our four-note windows to overlap at all, we could set `hop(4)`:
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(hop(4), open + 3))
+```
+
+Note that the `by` argument can be a vector of hop-sizes, which will cause `hop()` to generate a sequence of irregular hops!
+You can also use `hop()`'s `from` and `to` arguments to control when the first/last windows occur, etc.
+When using `to`, you can refer to another special variable---`end`---which `context()` will interpret as the last index.
+So you could, for example, say `hop(from = 5, to = end - 5)`.
+
+### Fixed Close
+
+So `hop()` is telling `context()` when to open windows; how are we telling it when to close windows?
+The second argument to `context()` is the `close` argument.
+Like `open`, the `close` argument should be a set of natural-number indices.
+However, the cool thing is that the `close` argument can *refer to* the `open` argument.
+So rather than manually figuring out what index would go with each `open` (don't try, because the multiple spines etc. make it confusing), we simply say `open + 3`.
+If we want five-note windows, we can say `open + 4`.
+
+----
+
+What if we want to the window to simply close before the next opening? 
+We can do this by having the `close` argument refer to the `nextopen` variable.
+So instead of saying `open + 3` we say `nextopen - 1L`!
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(hop(4), nextopen - 1L))
+```
+
+Now we'll get exhaustive windows no matter where we open the windows.
+For example, we can change the hop size and still get exhaustive windows!
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(hop(6), nextopen - 1L))
+```
+
+We could also close windows at `nextopen - 2` or `nextopen + 1`---whatever we want!
+
+
+### Flip it around
+
+We don't have to define `open` first, then have `close` refer to open---we can also do the opposite!
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(close - 3, hop(4, from = 4)))
+```
+
+We've got the exact same result by telling the window closes to hop along regularly (every four indices) and having the `open` argument refer to the closing indices (`close - 3`).
+The `open` argument can also refer to the `prevclose` (previous close).
+Notice that our output windows are still "placed" to align with the opening---we can set `alignLeft = FALSE` in our call to `within.humdrumR()`, if we want the output to align with the close:
+
+```{r}
+within(chorales, paste(Token, collapse = '-'), context(close - 3, hop(4, from = 4)), alignLeft = FALSE)
+```
+
+----
+
+Note that these regular windows we are creating are examples of N-grams.
+`r Hm` also defines another approach to defining N-grams which will generally be faster than using `context()`---this alternative approach is described in the last section of this article.
+
+
+## Irregular Windows
+
+The regular windows we created in the previous section are useful, but `context()` can do a *lot* more.
+You can tell `context()` to open, or close, windows based on arbitrary criteria!
+For example, let's say you want to open a window any time the leading tone occurs, and stay open until the next tonic.
+To do this, let's get the `solfa()` data into a `Solfa` field:
+
+```{r}
+within(chorales$Token, solfa(Token, simple = TRUE) -> Solfa) -> chorales
+```
+
+Alright, the easy thing to do here is to give `context()`'s `open`/`close` arguments `character` strings, which are matched as regular expressions against the active field:
+
+```{r}
+with(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do'))
+
+```
+
+Pretty cool! 
+But wait, something seems odd; one of the outputs is `"ti-do-fa-re-so-so-fa-so-la-re-so-fa-mi-re-di-re-ti-do"`.
+Why doesn't this window close when it hits that first "do"?
+This has to do with `context()`s treatment of overlapping windows, which is controlled by the `overlap` argument.
+By default, `overlap = 'paired'`, which means `context()` attempts to pair each open with the next *unused* close---the reason we don't close on the first "do" in `"ti-do-fa-re-so-so-fa-so-la-re-so-fa-mi-re-di-re-ti-do"`, is because the "do" was *already* the close of the previous window.
+For this analysis, we might want to try `overlap = 'none'`: with this argument, a new window will only open after the current window is closed.
+
+```{r}
+with(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do', overlap = 'none'))
+
+```
+
+Another option would be to allow multiple windows to close at the same place (i.e., on the same "do").
+This can be achieved with the setting `overlap = 'edge'`:
+
+```{r}
+within(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do', overlap = 'edge'))
+
+```
+
+----
+
+
+If this is a lot to wrap your head around, you are not the only one!
+There are many ways to define/control how contextual windows are defined, and it's often difficult to decide what we want in a particular analysis.
+You can read the `context()` documentation for some more examples, or simply play around!
+The following sections layout a few more examples, just to illustrate some possibilities.
+
+
+### More criteria
+
+What if want to have our windows close on tonic (do), but only on long-durations?
+Let's extract duration information into a new field:
+
+```{r}
+
+within(chorales$Token, duration(Token) -> Duration) -> chorales
+
+```
+
+We could now do something like this:
+
+```{r}
+
+with(chorales$Solfa, paste(Token, collapse = '-'), context('ti', Solfa == 'do' & Duration >= .5, overlap = 'edge'))
+```
+
+Notice that, because our `close` expression is more complicated now, I had to explictely say `Solfa == 'do'` instead of using the shortcut of just providing a single string.
+
+### Open until next/previous
+
+
+We can use what we learned above about the `nextopen` and `nextclose` variables to make windows open/close at matches.
+For example, we could have windows close every time there is a fermata (`";"` token in `**kern`) in the data, but *open* again immediately after each fermata:
+
+
+```{r}
+with(chorales$Token, paste(Token, collapse = '-'), context(prevclose + 1, ';'))
+```
+
+There is an issue here: the first fermata in the data doesn't get paired with anything, because there is no "previous close" before it.
+This will happen whenever you use `nextopen` or `prevclose`!
+You can fix this by explicitely adding an opening window at `1`:
+
+```{r}
+with(chorales$Token, paste(Token, collapse = '-'), context(1 | prevclose + 1, ';'))
+```
+
+By using the `|` (or) command in `context()`, we are saying open a window at `1` *or* at `prevclose + 1`.
+When working with `nextopen` you might want to use the special `end` argument (only available inside `context()`), which is the last index in the input vector.0
+
+
+### Semi-fixed windows
+
+In some cases, you might want to have windows open (or close) at a fixed interval, but close based on something irregular.
+We can do this easily by combining what we've already learned.
+For example, we could open a window on every third index, but close only when we see a fermata.
+We'll want to use `overlap = 'edge'` again.
+
+```{r}
+within(chorales$Token, paste(Token, collapse = '-'), context(hop(4), ';', overlap = 'edge'))
+```
+
+### Slurs
+
+A common case of contextual information in musical scores are slurs, which are used in to indicate articulation (e.g., bowing) and phrasing information.
+In `**kern`, slurs are indicated with parentheses, like `(` or `)`.
+To see some examples, let's load our built-in Beethoven variation dataset and remove multi-stops (which would make this much more complicated).
+
+```{r}
+beethoven <- readHumdrum(humdrumRroot, 'HumdrumData/BeethovenVariations/.*krn')
+
+beethoven <- subset(beethoven, Exclusive == 'kern' & Stop == 1) |> removeEmptySpines() |> removeEmptyStops()
+beethoven
+```
+
+We can see parentheses used to indicate slurs in the piano parts.
+Let's say we want to get the length of all these slurred groups:
+
+```{r}
+slurlengths <- with(beethoven, length(Token), context('(', ')'))
+
+slurlengths |> table()
+
+```
+
+
+Most of the slurts are only 2, 3, or 4 notes.
+But there is one that is 13! I wonder where that is?
+
+```{r}
+with(beethoven, if (length(Token) == 13) paste0(File, ',', Record), context('(', ')'))
+
+```
+
+File 9, records 46--59.
+
+```{r}
+beethoven[9]
+
+```
+
+Sure enough!
+
+---
+
+Ok, what if we want to collapse (`paste()`) our slurred notes together, like we've been doing throughout this article?
+
+```{r}
+within(beethoven, paste(Token, collapse = '-'), context('(', ')'))
+```
+
+That worked...but we lost all the *unslurred* notes.
+We can keep those tokens by adding a `complement` argument to `within.humdrumR()`---this works the same was as the complement
+when you do a subset inside `within.humdrumR()` (see the [Working with humdrum data](WorkingWithData.html) article).
+Basically, any indices in the active field that *aren't* captured in any of your windows, are in the complement.
+If we want to keep the original tokens there, just pass `complement = Token`.
+
+```{r}
+within(beethoven, paste(Token, collapse = '-'), context('(', ')'), complement = Token)
+```
+
+
+
+#### Slurs with multi-stops
+
+In the last section we took the easy way out and remove the multi-stops (chords) being played be the piano.
+Can we analyze slurs without doing this?
+Let's load the data again, but keep the multi-stop tokens:
+
+```{r}
+beethoven <- readHumdrum(humdrumRroot, 'HumdrumData/BeethovenVariations/.*krn')
+
+beethoven <- subset(beethoven, Exclusive == 'kern') |> removeEmptySpines()
+beethoven
+```
+
+It looks like the slurs are always written on the first stop, even though they would probably be interpreted (by a pianist) as encompassing the whole chord.
+We can simply throw a `subset` argument into `within.humdrumR()`, *before* the `context()` command:
+
+```{r}
+
+within(beethoven,
+       subset = Stop == 1, 
+       paste(Token, collapse = '-'), 
+       context('(', ')'), 
+       complement = Token)
+```
+
+The slurs are collapsed (as before) for the first stop, and the other stops are simply left as is.
+
+<!--
+
+How would be modify this to interpret slurs relative to all stops, and use contextual windows within those stops?
+This is mega advanced `r hm`!
+
+The first thing we'd need to do is to copy slur information into the other stops.
+Let's first identify slur open and closes and save them into new fields:
+
+```{r}
+within(beethoven, 
+       Open <- Token %~% '(',
+       Close <- Token %~% ')') -> beethoven
+
+
+```
+
+Let's now copy those slurs into multistops in the same record and spine:
+
+```{r}
+beethoven <- within(beethoven, fill = any(Open) -> Open, fill = any(Close) -> Close, by = list(File, Record, Spine))
+```
+
+-->
+
+### Nested windows
+
+In some cases, we might have contextual windows "nested" inside each other.
+For example, slurs in sheet music might overlap to represent fine gradiations in articulation.
+The `context()` funciton can handle nested windows by setting `overlap = 'nested'`.
+Here is an example file we can experiment with:
+
+```{r}
+nested <- readHumdrum(humdrumRroot, 'examples/Phrases.krn')
+nested
+```
+
+We've got nested slurs. Let's try `context(..., overlap = 'nested')`:
+
+```{r}
+
+with(nested, paste(Token, collapse = '-'), context('(', ')', overlap = 'nested'))
+
+```
+
+Very good! We get all our windows, including the nested ones.
+(Look how the result differs if you set `overlap = 'paired'`.)
+But what if we only want the topmost or bottommost slurs?
+Use the `depth` argument: `depth` should be one or more non-zero integers, indicating how deeply nested you want your windows to be.
+`depth = 1` would be the "top" (unnested) layer, `2` the next-most nested, etc.
+You can also use negative numbers to start from the most nested and work backwards: `-1` is the most deeply nested layer, `-2` the second-most deeply nested, etc.
+Finally, you can specify more than one depths by making depth vector, like `depth = c(1,2)`.
+
+```{r}
+
+with(nested, paste(Token, collapse = '-'), context('(', ')', overlap = 'nested', depth = 1))
+
+with(nested, paste(Token, collapse = '-'), context('(', ')', overlap = 'nested', depth = 2))
+
+with(nested, paste(Token, collapse = '-'), context('(', ')', overlap = 'nested', depth = 2:3))
+
+with(nested, paste(Token, collapse = '-'), context('(', ')', overlap = 'nested', depth = -1))
+
+```
+
+# N-grams
+
+In the previous section, we saw that the `context()` function can be used (inside `within.humdrumR()`) to create n-grams (and so much more).
+`r Hm` also offers a different, lag-based, approach to doing n-gram analyses.
+The main advante of this approach is that it can be much faster than applying `context()`---for large datasets, you might find `context()` takes a while.
+The lag-based approach is more fully vectorized than `context()` which makes it extremely fast, but also less general purpose.
+Depending on what you are doing with you n-grams, `context()` may be the only way that works---basically, if you want to apply an expression separately to each every n-gram, you need to use `context()`.
+
+The idea of lag-based n-grams can be demonstrated quite simply using the `letters` vector (built in to R) and the `lag(n)` command.
+The `lag(n)` command "shifts" a vector over by `n` indices:
+
+```{r}
+cbind(letters, lag(letters), lag(letters, n = 2))
+
+```
+
+What happened here? We give the `cbind()` function three separate arguments: 1) the normal `letters` vector; 2) `letters` lagged by 1; 3) `letters` lagged by 3.
+These three arguments are bound together into a three-column `matrix`.
+We can do the same thing with `paste()`:
+
+```{r}
+paste(letters, lag(letters), lag(letters, n = 2))
+
+```
+
+We made three-grams!
+This approach, if used with fully-vectorized functions will be extremely fast, even for large datasets.
+
+## Lag within humdrumR
+
+The `with`/`within.humdrumR()` functions allow you to create lagged vectors in a special, concise way.
+Let's work again with the chorales, using just simple `kern()` data:
+
+```{r message=FALSE}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+within(chorales, kern(Token, simple = TRUE) -> Kern) -> chorales
+
+```
+
+When using `with`/`within.humdrumR()`, instead of writing `lag(x, n = 1)`, we can write `x[lag = 1]`.
+If we paste a field (like `Kern`) to itself *lagged* like this:
+
+```{r}
+within(chorales, paste(Kern, Kern[lag = 1], sep = ' '))
+
+```
+
+We can use negative or positive lags, depending on how we want the n-grams to line up:
+
+```{r}
+within(chorales, paste(Kern, Kern[lag = -1], sep = ' '))
+
+```
+
+An important point! `with`/`within.humdrumR()` will automatically group lagged data by `list(File, Spine, Path)`, so the n-grams won't cross
+from the end of one file/spine to the beginning of the next, etc.
+
+----
+
+`paste()` isn't the only vectoried function we might want to apply to lagged data.
+Another common example would be `table()`:
+
+```{r}
+with(chorales, table(Kern, Kern[lag = -1]))
+
+```
+
+We get a transition matrix!
+
+## Larger N
+
+For functions that accept unlimited arguments (`...`), like `paste()`, and `table()`, you can easily extend the principle to create longer n-grams:
+
+```{r}
+within(chorales, paste(Kern, Kern[lag = -1], Kern[lag = -2], sep = ' '))
+
+```
+
+But there's an even better way! Simply give that `lag` argument a vector of lags!
+In fact, `lag = 0` spits out the unlagged vector, so you can do it all in a single index command:
+
+```{r}
+within(chorales, paste(Kern[lag = 0:-2], sep = ' '))
+
+```
+
+Let's create 10-grams, and see what the most frequent 10-grams are:
+
+```{r}
+with(chorales, paste(Kern[lag = 0:-9], sep = ' ')) |> 
+  table() |> 
+  sort() |> 
+  tail(n = 10)
+
+```
+
+That's not what we want!
+When you do lagged n-grams, the first and last n-grams get "padded" with `NA` values.
+We'll just need to get rid of these:
+
+
+```{r}
+with(chorales, paste(Kern[lag = 0:-9], sep = ' ')) |> 
+  grep(pattern = 'NA', invert = TRUE, value = TRUE) |> 
+  table() |> 
+  sort() |> 
+  tail(n = 10)
+
+```
+
+That still doesn't seem right, does it?
+Actually, it is right: in these 10 chorales, there are no 10-gram pitch patterns that occur more than once!
+Let's try a 5-gram instead:
+
+```{r}
+with(chorales, paste(Kern[lag = 0:-4], sep = ' ')) |> 
+  grep(pattern = 'NA', invert = TRUE, value = TRUE) |> 
+  table() |> 
+  sort() |> 
+  tail(n = 10)
+
+```
+
+Now we see a couple of n-grams (like 'd e d c b') that occur more often.
