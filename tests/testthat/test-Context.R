@@ -24,58 +24,58 @@ test_that('findWindows works', {
   
   # testL
   expect_equal(do.call('paste', 
-                       findWindows(testL, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
+                       humdrumR:::findWindows(testL, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
                c('1 3', '2 6'))
   expect_equal(do.call('paste', 
-                       findWindows(testL, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
+                       humdrumR:::findWindows(testL, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
                c('1 3', '2 3', '4 6', '5 6'))
   expect_equal(do.call('paste', 
-                       findWindows(testL, open = '(', close = ')', overlap = 'none')[ , 1:2]),
+                       humdrumR:::findWindows(testL, open = '(', close = ')', overlap = 'none')[ , 1:2]),
                c('1 3',  '4 6'))
   expect_equal(do.call('paste', 
-                       findWindows(testL, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
+                       humdrumR:::findWindows(testL, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
                c('2 3', '5 6'))
   
   # testR
   expect_equal(do.call('paste', 
-                       findWindows(testR, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
+                       humdrumR:::findWindows(testR, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
                c('1 2', '4 5'))
   expect_equal(do.call('paste', 
-                       findWindows(testR, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
+                       humdrumR:::findWindows(testR, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
                c('1 2', '4 5'))
   expect_equal(do.call('paste', 
-                       findWindows(testR, open = '(', close = ')', overlap = 'none')[ , 1:2]),
+                       humdrumR:::findWindows(testR, open = '(', close = ')', overlap = 'none')[ , 1:2]),
                c('1 2',  '4 5'))
   expect_equal(do.call('paste', 
-                       findWindows(testR, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
+                       humdrumR:::findWindows(testR, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
                c('1 2',  '4 5'))
   
   # nest
   expect_equal(do.call('paste', 
-                       findWindows(nest, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
+                       humdrumR:::findWindows(nest, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
                c('1 4', '2 5', '3 7', '6 8'))
   expect_equal(do.call('paste', 
-                       findWindows(nest, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
+                       humdrumR:::findWindows(nest, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
                c('1 4', '2 4', '3 4', '6 7'))
   expect_equal(do.call('paste', 
-                       findWindows(nest, open = '(', close = ')', overlap = 'none')[ , 1:2]),
+                       humdrumR:::findWindows(nest, open = '(', close = ')', overlap = 'none')[ , 1:2]),
                c('1 4',  '6 7'))
   expect_equal(do.call('paste', 
-                       findWindows(nest, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
+                       humdrumR:::findWindows(nest, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
                c('1 8', '2 5', '3 4', '6 7'))
   
   # nestdup
   expect_equal(do.call('paste', 
-                       findWindows(nestdup, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
+                       humdrumR:::findWindows(nestdup, open = '(', close = ')', overlap = 'paired')[ , 1:2]),
                c('3 7', '5 9', '5 9', '11 12', '13 14', '13 15'))
   expect_equal(do.call('paste', 
-                       findWindows(nestdup, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
+                       humdrumR:::findWindows(nestdup, open = '(', close = ')', overlap = 'edge')[ , 1:2]),
                c('3 7', '5 7', '5 7', '11 12', '13 14', '13 14'))
   expect_equal(do.call('paste', 
-                       findWindows(nestdup, open = '(', close = ')', overlap = 'none')[ , 1:2]),
+                       humdrumR:::findWindows(nestdup, open = '(', close = ')', overlap = 'none')[ , 1:2]),
                c('3 7',  '11 12', '13 14'))
   expect_equal(do.call('paste', 
-                       findWindows(nestdup, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
+                       humdrumR:::findWindows(nestdup, open = '(', close = ')', overlap = 'nested')[ , 1:2]),
                c('3 9', '5 9', '5 7', '11 12', '13 15', '13 14'))
   
   

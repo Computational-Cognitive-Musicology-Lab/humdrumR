@@ -143,7 +143,6 @@ in a "melodic" way, within each spine path of each file.
 }
 
 \examples{
-
 # use the built-in 'letters' vector
 
 hop(letters)
@@ -152,7 +151,7 @@ hop(letters, by = 3)
 
 hop(letters, by = 2, from = 4)
 
-hop(letters, by = 2, from = 'e', to = 'x'))
+hop(letters, by = 2, from = 'e', to = 'x')
 
 hop(letters, by = c(-1, 2), from = 'e', to = 'w', value = TRUE)
 

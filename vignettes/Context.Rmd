@@ -55,12 +55,12 @@ Why? Because each piece/file in the data set repeats the same record numbers---y
 ### Group by Bar
 
 Most humdrum data includes bar lines, indicated by `=`.
-When `r hm` [read][readHumdrum()] data, it will look at these barlines, count them in each file, and put that count into a [field][fields()] called `Bar`.
+When `r hm` reads data (`?readHumdrumR`) data, it will look at these barlines, count them in each file, and put that count into a field called `Bar` (`?fields`).
 You can then use this data to group data by bar.
 Remember, that if your data set has no `=` tokens, the `Bar` field will be nothing but useless `0`s.
 
 What if we wanted to know what the lowest note in each bar of the music is.
-Let's first extract [semits()] data, so it is easy to get the lowest value:
+Let's first extract `semits()` data, so it is easy to get the lowest value:
 
 ```{r}
 within(chorales, 
@@ -83,7 +83,7 @@ The highest lowest-note-in-bar is `A`.
 ---
 
 For further analysis, we might want to save the lowest-note into a new field.
-Let's use [within.humdrumR]'s `fill = ` option to duplicate the low note throughout the bar:
+Let's use `within.humdrumR`'s `fill = ` option to duplicate the low note throughout the bar:
 
 
 ```{r}
@@ -127,7 +127,7 @@ with(chorales, diff(range(Semits)), by = list(File, Beat)) |> hist()
 
 
 > Note: If your data includes spine paths, you'll want to set `within(mydata, count(Token), expandPaths = TRUE, ...)`.
-> Count (and similar functions, like `timeline()`) won't work correctly without [paths expanded][expandPaths].
+> Count (and similar functions, like `timeline()`) won't work correctly without paths expanded (`?expandPaths`).
 
 # Contextual Windows
 

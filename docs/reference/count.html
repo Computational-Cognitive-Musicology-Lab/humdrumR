@@ -52,6 +52,7 @@ a logical vector for indicating where onsets fall on or off beat."><!-- mathjax 
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -147,11 +148,11 @@ If the input can't be parsed as a duration, an error occurs.</p></dd>
 <dt>offBeats</dt>
 <dd><p><em><strong>Should off-beat onsets be numbered in the output, or <code>NA</code>?</strong></em></p>
 <p>Defaults to <code>TRUE</code>.</p>
-<p>Must be a single <code>logical</code> value: a on/off switch.</p></dd>
+<p>Must be a single <code>logical</code> value: an on/off switch.</p></dd>
 <dt>groupby</dt>
 <dd><p><em><strong>Optional vectors to group by and count within.</strong></em></p>
 <p>Defaults to empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
-<p>Must be a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, which is either empty or contains vectors whiare all the same length as <code>dur</code>.
+<p>Must be a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, which is either empty or contains vectors which are all the same length as <code>dur</code>.
 To function as a by-record timeline, the <code>groupby</code> list must include a <em>named</em> <code>Piece</code> and <code>Record</code> vectors.
 Luckily, these are automatically passed by <a href="withinHumdrum.html">with(in).humdrumR</a>, so you won't need to worry about it!</p></dd>
 </dl></div>
@@ -247,7 +248,7 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGsWK7P/temp_libpath4ee51b3e3c48/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpo3H5yt/temp_libpath38b4d38798125/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

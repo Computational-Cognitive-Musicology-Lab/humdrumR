@@ -405,8 +405,34 @@
 #' 
 #' @section Windowing data:
 #' 
-#' XXXX
+#' `with`/`within.humdrumR` can work in tandem with the `context()` function to evaluate do expressions 
+#' within arbitrary contextual windows.
+#' To do so, simply place a call to `context()` in an unnamed argument to `with`/`within.humdrumR()`;
+#' you must provide `open` and `close` arguments.
+#' The `overlap`, `depth`, `rightward`, `duplicate_indices`, `min_length`, and `max_length` arguments can be used here,
+#' just as they are in a separate call to `context()`---the see the `context()` man page.
+#' Do not give the `context()` command inside a `with`/`within.humdrumR` a `x` or `reference` argument:
+#' The [active field][humActive] is used as the `reference` vector for `context()`---e.g., if `open`
+#' or `close` is a `character` string, they are matched as regular expressions against the [active field][humActive].
+#' `list(File, Record, Spine)` is also automatically passed as the `groupby` argument to `context()`.
 #' 
+#' 
+#' When using `context()` inside `with`/`within.humdrumR`, the `alignToOpen` argument will have no effect.
+#' If you want output to align with the right side of each window, use `alignLeft = FALSE` as an argument to 
+#' **with**/**within**, not as an argument to `context()`.
+#' The `inPlace`, `collapse`, `sep`, and `stripRegex` arguments will have no effect when `context()` is used
+#' as syntactic sugar in a `with`/`within.humdrumR` call.
+#' 
+#' 
+#' As with a `subset` expression, you can provide a `complement` expression to go along with a `context()`.
+#' (Note that the `complement` argument to `context()` itself is ignored.)
+#' The `complement` expression will be evaluated on any data points that aren't captured within *any* contextual windows.
+#' 
+#' 
+#' Any `by` or `subset` expressions placed before a `contest()` expression are evaluated first, in order from left to right.
+#' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
+#' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
+
 #' @section Plotting parameters:
 #'
 #' As mentioned above, plots in within-expressions should (often) be called using the `sidefx` argument name.
@@ -677,7 +703,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expand
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
     addFields(humdrumR) <- newfields
-    humdrumR@Active <- rlang::quo(list(!!!(rlang::syms(newfields))))
+    humdrumR@Active <- if (length(newfields) == 1L) rlang::quo(!!rlang::sym(newfields)) else rlang::quo(list(!!!(rlang::syms(newfields))))
   }
   humdrumR
   # update_humdrumR(humdrumR, field = c(newfields, overWrote))
@@ -709,7 +735,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', alignLeft = TRUE, expand
   do   <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = FALSE)
   ordo <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = TRUE)
   
-  quoTab[Keyword == 'context', Quo := prepareContextQuo(Quo[[1]], humdrumR@Active), by = .I]
+  quoTab$Quo[quoTab$Keyword == 'context'] <- lapply(quoTab$Quo[quoTab$Keyword == 'context'], prepareContextQuo, active = humdrumR@Active)
   # 
 
   #evaluate "do" expression! 
@@ -1474,7 +1500,7 @@ prepareContextQuo <- function(contextQuo, active) {
   exprA <- analyzeExpr(contextQuo)
   
   exprA$Head <- 'findWindows'
-  exprA$Args$activeField <- call('quote', rlang::quo_squash(active))
+  exprA$Args$activeField <- rlang::quo_squash(active)
   
   passAsExprs <- .names(exprA$Args) %in% c('open', 'close', '')
   exprA$Args[passAsExprs] <- lapply(exprA$Args[passAsExprs], \(expr) call('quote', expr))

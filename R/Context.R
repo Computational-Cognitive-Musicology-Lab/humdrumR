@@ -988,7 +988,6 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
 #' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(File, Spine, Path)` by default.
 #'
 #' @examples 
-#' 
 #' # use the built-in 'letters' vector
 #' 
 #' hop(letters)
@@ -997,7 +996,7 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
 #' 
 #' hop(letters, by = 2, from = 4)
 #' 
-#' hop(letters, by = 2, from = 'e', to = 'x'))
+#' hop(letters, by = 2, from = 'e', to = 'x')
 #'
 #' hop(letters, by = c(-1, 2), from = 'e', to = 'w', value = TRUE)
 #' 

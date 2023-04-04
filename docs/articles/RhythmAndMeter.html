@@ -57,6 +57,7 @@
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -92,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-03-10</h4>
+            <h4 data-toc-skip class="date">2023-04-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RhythmAndMeter.Rmd" class="external-link"><code>vignettes/RhythmAndMeter.Rmd</code></a></small>
       <div class="d-none name"><code>RhythmAndMeter.Rmd</code></div>
@@ -287,21 +288,8 @@ includes rests, into IOIs. For example:</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">ioi</span>(melody)</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span> Passing an environment as data mask is deprecated.</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="sc">&gt;</span>    Please use <span class="st">`</span><span class="at">new_data_mask()</span><span class="st">`</span> to transform your environment to a mask.</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="er">&gt;</span>      env <span class="ot">&lt;-</span> <span class="fu">env</span>(<span class="at">foo =</span> <span class="st">"bar"</span>)</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="er">&gt;</span>      <span class="co"># Bad:</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="er">&gt;</span>      <span class="fu">as_data_mask</span>(env)</span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="fu">eval_tidy</span>(expr, env)</span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="er">&gt;</span>      <span class="co"># Good:</span></span>
-<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="er">&gt;</span>      mask <span class="ot">&lt;-</span> <span class="fu">new_data_mask</span>(env)</span>
-<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="fu">eval_tidy</span>(expr, mask)</span>
-<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="sc">&gt;</span>     [90mThis warning is displayed once per session. [39m</span>
-<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="st">"8g"</span>   <span class="st">"8f#"</span>  <span class="st">"4g"</span>   <span class="st">"."</span>    <span class="st">"8g"</span>   <span class="st">"8f#"</span>  <span class="st">"8e"</span>   <span class="st">"8d"</span>   <span class="st">"4.d#"</span> <span class="st">"."</span>   </span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">11</span>] <span class="st">"8f#"</span>  <span class="cn">NA</span>     <span class="st">"."</span></span></code></pre></div>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="st">"8g"</span>   <span class="st">"8f#"</span>  <span class="st">"4g"</span>   <span class="st">"."</span>    <span class="st">"8g"</span>   <span class="st">"8f#"</span>  <span class="st">"8e"</span>   <span class="st">"8d"</span>   <span class="st">"4.d#"</span> <span class="st">"."</span>   </span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">11</span>] <span class="st">"8f#"</span>  <span class="cn">NA</span>     <span class="st">"."</span></span></code></pre></div>
 <p>What did this do?</p>
 <ol style="list-style-type: decimal">
 <li>The duration of each rest is append to the duration of the previous

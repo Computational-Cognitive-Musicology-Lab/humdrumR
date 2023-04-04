@@ -52,6 +52,7 @@ and humdrumR defines methods for calculating both.'><!-- mathjax --><script src=
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -94,7 +95,25 @@ and humdrumR defines methods for calculating both.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">entropy</span><span class="op">(</span><span class="va">...</span>, <span class="va">base</span><span class="op">)</span>
 
-<span class="fu">ic</span><span class="op">(</span><span class="va">...</span>, <span class="va">distribution</span>, <span class="va">base</span><span class="op">)</span></code></pre></div>
+<span class="co"># S3 method for default</span>
+<span class="fu">entropy</span><span class="op">(</span><span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span>, margin <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+
+<span class="co"># S3 method for table</span>
+<span class="fu">entropy</span><span class="op">(</span><span class="va">tab</span>, base <span class="op">=</span> <span class="fl">2</span>, margin <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>
+
+<span class="co"># S3 method for density</span>
+<span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
+
+<span class="co"># S3 method for numeric</span>
+<span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span><span class="op">)</span>
+
+<span class="fu">ic</span><span class="op">(</span><span class="va">...</span>, <span class="va">distribution</span>, <span class="va">base</span><span class="op">)</span>
+
+<span class="co"># S3 method for numeric</span>
+<span class="fu">ic</span><span class="op">(</span><span class="va">x</span>, distribution <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>
+
+<span class="co"># S3 method for default</span>
+<span class="fu">ic</span><span class="op">(</span><span class="va">...</span>, distribution <span class="op">=</span> <span class="fu"><a href="ptable.html">ptable</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
