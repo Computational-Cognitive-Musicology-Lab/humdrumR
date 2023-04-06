@@ -929,19 +929,18 @@ tertian2tset <- function(x, Key = dset(0, 0), ...) {
 
 
 chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = 'b') {
-  
   # preprocessing
-  x <- stringr::str_replace(x, 'maj7', 'majn7')
+  x <- stringr::str_replace(x, '[Mm]aj7', 'majn7')
   x <- stringr::str_replace(x, 'maj([91])', 'majn7\\1')
   
   #
   REparse(x,
-          makeRE.chord(..., flat = flat, collapse = FALSE), # makes tonalChroma, bass, quality, figurations
+          makeRE.chord(..., major = major, minor = minor, augment = augment, diminish = diminish,
+                       flat = flat, collapse = FALSE), # makes tonalChroma, bass, quality, figurations
           toEnv = TRUE) -> parsed
   
   quality[quality == ''] <- major
   quality <- setNames(c('M', 'm', 'A', 'd'), c(major, minor, augment, diminish))[quality]
-  
   makeRE.figs <- partialApply(makeRE.tonalChroma, step.labels = 13:1, 
                          parts = c('species', 'step'), qualities = FALSE,
                          collapse = TRUE)
@@ -973,9 +972,11 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   tset <- tertian2tset(paste0(tonalChroma, quality, sciQualities), flat = flat, ...)
   
   if (any(bass != '')) {
-    bassint <- integer(length(tset))
-    bassint[bass != ''] <- getFifth(kern2tint(stringr::str_sub(bass[bass != ''], start = 2L))) - getFifth(kern2tint(tonalChroma))
-    tset@Inversion <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint + 1L]
+    hasbass <- bass != ''
+    bassint <- integer(sum(hasbass))
+    
+    bassint <- getFifth(kern2tint(stringr::str_sub(bass[hasbass], start = 2L))) - getFifth(kern2tint(tonalChroma[hasbass]))
+    tset@Inversion[hasbass] <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint %% 7L + 1L]
   }
   
   
@@ -1024,42 +1025,42 @@ tertianSet.integer <- integer2tset
 #### Characters ####
 
 
-
-
-
-mapoftset <- function(str, Key = NULL, ..., split = '/') {
-  Key <- Key %||% dset(0L, 0L)
-  Key <- rep(Key, length.out = length(str))
-  
-  parts <- strPartition(str, split = split)
-  Keys <- parts[-1]
-  if (length(Keys) > 0L) {
-    Keys[] <- head(Reduce(\(x, y) {
-      y[!is.na(x)] <- char2dset(x[!is.na(x)], Key = y[!is.na(x)], ...)
-      y
-    }, right = TRUE, 
-    init = dset(integer(length(str)), 0L), 
-    Keys, 
-    accumulate = TRUE), -1L) 
-    
-  } else {
-    Keys <- list(dset(integer(length(str)), 0))
-  }
-  
-  ofMode <- CKey(Keys[[1]])
-  root <- Reduce('+', lapply(Keys, getRoot))
-  ofKey <- ofMode + dset(root, root)
-  
-  tset <- char2tset(parts$base, Key = Key + ofKey, ...)
-  tset + dset(root, root, 0L)
-}
+# 
+# 
+# 
+# mapoftset <- function(str, Key = NULL, ..., split = '/') {
+#   Key <- Key %||% dset(0L, 0L)
+#   Key <- rep(Key, length.out = length(str))
+#   
+#   parts <- strPartition(str, split = split)
+#   Keys <- parts[-1]
+#   if (length(Keys) > 0L) {
+#     Keys[] <- head(Reduce(\(x, y) {
+#       y[!is.na(x)] <- char2dset(x[!is.na(x)], Key = y[!is.na(x)], ...)
+#       y
+#     }, right = TRUE, 
+#     init = dset(integer(length(str)), 0L), 
+#     Keys, 
+#     accumulate = TRUE), -1L) 
+#     
+#   } else {
+#     Keys <- list(dset(integer(length(str)), 0))
+#   }
+#   
+#   ofMode <- CKey(Keys[[1]])
+#   root <- Reduce('+', lapply(Keys, getRoot))
+#   ofKey <- ofMode + dset(root, root)
+#   
+#   tset <- char2tset(parts$base, Key = Key + ofKey, ...)
+#   tset + dset(root, root, 0L)
+# }
 
 #' @rdname chordParsing
 #' @export
-tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,      harm2tset),
-                                              list('any',  makeRE.roman,            roman2tset),
-                                              list('any',  makeRE.tertian,          tertian2tset),
-                                              list('any',  makeRE.chord,            chord2tset),
+tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,     harm2tset),
+                                              list('any',  makeRE.roman,    roman2tset),
+                                              list('any',  makeRE.tertian,  tertian2tset),
+                                              list('any',  makeRE.chord,    chord2tset),
                                               funcName = 'tertianSet.character',
                                               outputClass = 'tertianSet')
   

@@ -327,7 +327,6 @@ plot <- function(x, y = NULL, ..., type = 'p', recycle = TRUE, add = FALSE,
                  col.axis = par('col.axis')) {
   
   if (is.logical(log)) log <- if (log[1]) 'y' else ''
-  print(cex)
   
   xlabel <- if (!missing(x)) deparse1(substitute(x))
   ylabel <- if (!missing(y)) deparse1(substitute(y))

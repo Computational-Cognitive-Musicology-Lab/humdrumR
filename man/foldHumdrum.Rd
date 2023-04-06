@@ -62,7 +62,7 @@ Must be a \code{character} string \link[=partialMatching]{partially} matching th
 For example, \code{"Tok"} would match the \code{Token} field.
 This is the field which is "folded" into a new field.}
 
-\item{fillFromField}{\emph{\strong{Should the content of the \code{fromField} be copied unfolded sections?}}
+\item{fillFromField}{\emph{\strong{Should the content of the \code{fromField} be to copied unfolded sections?}}
 
 Defaults to \code{FALSE} for \code{foldHumdrum()} and \code{foldStops()}; \code{TRUE} for \code{foldPaths()}.
 

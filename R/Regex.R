@@ -662,7 +662,7 @@ makeRE.tertian <- function(..., major = 'M', minor = 'm', augment = '+', diminis
     if (collapse) setNames(cREs(REs), 'tertian') else REs
 }
 
-makeRE.chord <-  function(..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', 
+makeRE.chord <-  function(..., major = '[Mm]aj', minor = 'min', augment = 'aug', diminish = 'dim', 
                                 bass.sep = '/', flat = 'b', 
                                 collapse = TRUE) {
   REs <- makeRE.tonalChroma(parts = c("step", "species"), flat = flat,
