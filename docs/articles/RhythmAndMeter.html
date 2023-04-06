@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-04-04</h4>
+            <h4 data-toc-skip class="date">2023-04-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RhythmAndMeter.Rmd" class="external-link"><code>vignettes/RhythmAndMeter.Rmd</code></a></small>
       <div class="d-none name"><code>RhythmAndMeter.Rmd</code></div>
@@ -119,16 +119,16 @@ information in their own particular format. For example,</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4.c'</span>, <span class="st">'8d'</span>, <span class="st">'4e'</span>, <span class="st">'2.g'</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">duration</span>(input)</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>duration</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">0.375</span> <span class="fl">0.125</span> <span class="fl">0.250</span> <span class="fl">0.750</span></span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">recip</span>(input)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">4.</span> <span class="dv">8</span>  <span class="dv">4</span>  <span class="fl">2.</span></span>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">notehead</span>(input)</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>notehead</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">notehead</span> (character)</span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] 𝅘𝅥 𝅭  𝅘𝅥𝅮    𝅘𝅥    𝅗𝅥 𝅭 </span>
 <span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">quarters</span>(input)</span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>quarters</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">quarters</span> (numeric)</span>
 <span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span> <span class="fl">0.5</span> <span class="fl">1.0</span> <span class="fl">3.0</span></span></code></pre></div>
 <p>Notice that the functions all recognize the rhythm part of these
 input tokens, ignoring the non-rhythm (pitch) information. If you want
@@ -149,20 +149,20 @@ argument:</p>
 other function’s output. So you can do things like:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">recip</span>(<span class="fl">0.375</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">4.</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="fu">quarters</span>(<span class="st">'4.'</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>quarters</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">quarters</span> (numeric)</span>
 <span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span></span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">quarters</span>(<span class="fl">0.375</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>quarters</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">quarters</span> (numeric)</span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">1.5</span></span>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
 <span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#</span></span>
 <span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">recip</span>(<span class="st">"𝅘𝅥 𝅭 "</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">4.</span></span></code></pre></div>
 <hr>
 <p>The complete list of basic pitch functions is:</p>
@@ -237,13 +237,13 @@ durations? Perhaps doubling their length? Simply specify
 <code>scale = 2</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">recip</span>(<span class="fu">c</span>(<span class="st">'8'</span>,<span class="st">'4'</span>,<span class="st">'4.'</span>,<span class="st">'2'</span>), <span class="at">scale =</span> <span class="dv">2</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">4</span>  <span class="dv">2</span>  <span class="fl">2.</span> <span class="dv">1</span></span></code></pre></div>
 <p>Or maybe you’d like <a href="https://en.wikipedia.org/wiki/Diminution" class="external-link">diminish</a> the
 durations, by cutting them in thirds?</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">recip</span>(<span class="fu">c</span>(<span class="st">'8'</span>,<span class="st">'4'</span>,<span class="st">'4.'</span>,<span class="st">'2'</span>), <span class="at">scale =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">24</span> <span class="dv">12</span> <span class="dv">8</span>  <span class="dv">6</span></span></code></pre></div>
 <hr>
 <p>The <code>unit</code> argument can be passed to the rhythm input
@@ -260,10 +260,10 @@ approach. Let’s look at how our output would change:</p>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="fl">0.5</span>, <span class="dv">1</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">recip</span>(input)</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span>  <span class="fl">1.</span> <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">1</span></span>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">recip</span>(input, <span class="fu">parse</span>(<span class="at">unit =</span> <span class="st">'4'</span>))</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>recip</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">recip</span> (character)</span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">4</span>  <span class="fl">4.</span> <span class="dv">2</span>  <span class="dv">4</span>  <span class="dv">8</span>  <span class="dv">4</span></span></code></pre></div>
 <p>As you can see, you could achieve the same difference in output using
 the <code>scale</code> argument (<code>scale = 1/4</code>), but the
@@ -366,11 +366,11 @@ whole-notes later; etc. If we combine this with a call to
 <code><a href="../reference/semits.html">semits()</a></code> (check out the [Pitch and
 Tonality][PitchAndTonality.html] guide) we can even make a plot of the
 melody:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> <span class="fu">timeline</span>(row),</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>     <span class="at">y =</span> <span class="fu">semits</span>(row, <span class="at">Exclusive =</span> <span class="st">'kern'</span>),</span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">'Row Row Row Your Boat'</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="fl">0.6285714</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R">
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="../reference/timeline.html">timeline</a></span><span class="op">(</span><span class="va">row</span><span class="op">)</span>,
+     y <span class="op">=</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">row</span>, Exclusive <span class="op">=</span> <span class="st">'kern'</span><span class="op">)</span>,
+     main <span class="op">=</span> <span class="st">'Row Row Row Your Boat'</span><span class="op">)</span></code></pre></div>
 <p><img src="RhythmAndMeter_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <hr>
 <p>The <code><a href="../reference/timeline.html">timeline()</a></code> function has extra special functionality
@@ -682,16 +682,16 @@ argument to change the scale. Let’s look at our last few examples again,
 but using <code><a href="../reference/count.html">subpos()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a></span>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">subpos</span>(row, <span class="at">scale =</span> <span class="dv">12</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>duration</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>]  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">6</span>  <span class="dv">8</span>  <span class="dv">9</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">7</span>  <span class="dv">8</span>  <span class="dv">9</span> <span class="dv">10</span> <span class="dv">11</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">3</span></span>
 <span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">26</span>]  <span class="dv">5</span>  <span class="dv">6</span></span>
 <span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a></span>
 <span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="fu">subpos</span>(row, <span class="at">beat =</span> <span class="st">'4'</span>, <span class="at">scale =</span> <span class="dv">12</span>)</span>
-<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>duration</span>
+<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span></span>
 <span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a></span>
 <span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="fu">subpos</span>(seven8, <span class="at">beat =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'4.'</span>)), <span class="at">scale =</span> <span class="dv">8</span>)</span>
-<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>duration</span>
+<span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span></span></code></pre></div>
 </div>
 </div>

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-04-04</h4>
+            <h4 data-toc-skip class="date">2023-04-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/GettingStarted.Rmd" class="external-link"><code>vignettes/GettingStarted.Rmd</code></a></small>
       <div class="d-none name"><code>GettingStarted.Rmd</code></div>
@@ -1843,7 +1843,7 @@ calculate the semitone value for each pitch in the chorales:</p>
 <span id="cb21-94"><a href="#cb21-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb21-95"><a href="#cb21-95" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb21-96"><a href="#cb21-96" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
-<span id="cb21-97"><a href="#cb21-97" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> integer</span></code></pre></div>
+<span id="cb21-97"><a href="#cb21-97" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span></code></pre></div>
 <p>It worked! Lets do it again, but save the result in a new field,
 which we will call <code>Semits</code>—of course, you could give it any
 name you want, or just let it be called <code>Result1</code> if you
@@ -1951,7 +1951,7 @@ still there, safely unchanged! Just like before, we can use the
 <span id="cb23-94"><a href="#cb23-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb23-95"><a href="#cb23-95" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb23-96"><a href="#cb23-96" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token  <span class="sc">::</span> character</span>
-<span id="cb23-97"><a href="#cb23-97" tabindex="-1"></a><span class="sc">&gt;</span>                Semits <span class="sc">::</span> integer</span>
+<span id="cb23-97"><a href="#cb23-97" tabindex="-1"></a><span class="sc">&gt;</span>                Semits <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span>
 <span id="cb23-98"><a href="#cb23-98" tabindex="-1"></a></span>
 <span id="cb23-99"><a href="#cb23-99" tabindex="-1"></a>chorales<span class="sc">$</span>Semits</span>
 <span id="cb23-100"><a href="#cb23-100" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# vvv chor001.krn vvv #############################</span></span>
@@ -2048,7 +2048,7 @@ still there, safely unchanged! Just like before, we can use the
 <span id="cb23-191"><a href="#cb23-191" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb23-192"><a href="#cb23-192" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb23-193"><a href="#cb23-193" tabindex="-1"></a><span class="er">&gt;</span>                Token  <span class="sc">::</span> character</span>
-<span id="cb23-194"><a href="#cb23-194" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Semits <span class="sc">::</span> integer</span></code></pre></div>
+<span id="cb23-194"><a href="#cb23-194" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Semits <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span></code></pre></div>
 <p>Whats more, we can use the <code>Semits</code> field <em>just</em>
 like any other field:</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a></span>
@@ -2147,7 +2147,7 @@ like any other field:</p>
 <span id="cb24-94"><a href="#cb24-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb24-95"><a href="#cb24-95" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb24-96"><a href="#cb24-96" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
-<span id="cb24-97"><a href="#cb24-97" tabindex="-1"></a><span class="sc">&gt;</span>                Semits  <span class="sc">::</span> integer</span>
+<span id="cb24-97"><a href="#cb24-97" tabindex="-1"></a><span class="sc">&gt;</span>                Semits  <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span>
 <span id="cb24-98"><a href="#cb24-98" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> character</span></code></pre></div>
 <div class="section level3">
 <h3 id="counting-stuff">Counting stuff<a class="anchor" aria-label="anchor" href="#counting-stuff"></a>

@@ -16,7 +16,7 @@ representation of time."><!-- mathjax --><script src="https://cdnjs.cloudflare.c
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -177,34 +177,34 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-in"><span class="va">tokens</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4.GG'</span>, <span class="st">'8G'</span>, <span class="st">'16E'</span>, <span class="st">'16F#'</span>, <span class="st">'16G'</span>, <span class="st">'16D'</span>, <span class="st">'q8D#'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">seconds</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **seconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **seconds (numeric)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.50 0.50 0.25 0.25 0.25 0.25 0.00 1.00</span>
 <span class="r-in"><span class="fu">seconds</span><span class="op">(</span><span class="va">tokens</span>, BPM <span class="op">=</span> <span class="st">'90'</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **seconds</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **seconds (numeric)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.0000000 0.3333333 0.1666667 0.1666667 0.1666667 0.1666667 0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [8] 0.6666667</span>
 <span class="r-in"><span class="fu">ms</span><span class="op">(</span><span class="va">tokens</span>, BPM <span class="op">=</span> <span class="st">'90'</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **ms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **ms (numeric)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1000.0000  333.3333  166.6667  166.6667  166.6667  166.6667    0.0000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [8]  666.6667</span>
 <span class="r-in"><span class="fu">dur</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **dur</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **dur (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] :1.500 :0.500 :0.250 :0.250 :0.250 :0.250 :0     :1    </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">wholenotes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">90</span>, <span class="fl">310</span>, <span class="fl">5000</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">dur</span><span class="op">(</span><span class="va">wholenotes</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **dur</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **dur (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] :40    :120   :360   :1240  :20000</span>
 <span class="r-in"><span class="fu">dur</span><span class="op">(</span><span class="va">wholenotes</span>, minutes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **dur</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **dur (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] :40     :2:0    :6:0    :20:40  :333:20</span>
 <span class="r-in"><span class="fu">dur</span><span class="op">(</span><span class="va">wholenotes</span>, minutes <span class="op">=</span> <span class="cn">TRUE</span>, hours <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **dur</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **dur (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] :40     :2:0    :6:0    :20:40  5:33:20</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">quarternotes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">30</span>, <span class="fl">90</span>, <span class="fl">310</span>, <span class="fl">5000</span><span class="op">)</span></span>
 <span class="r-in"><span class="fu">dur</span><span class="op">(</span><span class="va">quarternotes</span>, minutes <span class="op">=</span> <span class="cn">TRUE</span>, BPM <span class="op">=</span> <span class="st">'120'</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>unit <span class="op">=</span> <span class="st">'4'</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **dur</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **dur (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] :5     :15    :45    :2:35  :41:40</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>

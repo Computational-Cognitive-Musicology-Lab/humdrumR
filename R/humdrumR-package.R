@@ -159,7 +159,8 @@ oldoptions <- options()
 
 .onLoad <- function(libname, pkgname) {
   oldoptions <<- options()
-  options(prompt = 'humdrumℝ> ', continue = 'humdrumℝ... ', scipen = 4, digits = 7)
+  options(#prompt = 'humdrumℝ> ', continue = 'humdrumℝ... ', 
+          scipen = 4, digits = 7)
 }
 
 .onAttach <- function(libname, pkgname) {

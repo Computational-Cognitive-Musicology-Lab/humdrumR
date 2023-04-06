@@ -264,8 +264,11 @@ within(chorales$Token, solfa(Token, simple = TRUE) -> Solfa) -> chorales
 
 Alright, the easy thing to do here is to give `context()`'s `open`/`close` arguments `character` strings, which are matched as regular expressions against the active field:
 
-```{r}
+```{r, eval = FALSE}
 with(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do'))
+```
+```{r, echo = FALSE}
+with(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do')) |> unname()
 
 ```
 
@@ -276,8 +279,11 @@ This has to do with `context()`s treatment of overlapping windows, which is cont
 By default, `overlap = 'paired'`, which means `context()` attempts to pair each open with the next *unused* close---the reason we don't close on the first "do" in `"ti-do-fa-re-so-so-fa-so-la-re-so-fa-mi-re-di-re-ti-do"`, is because the "do" was *already* the close of the previous window.
 For this analysis, we might want to try `overlap = 'none'`: with this argument, a new window will only open after the current window is closed.
 
-```{r}
+```{r, eval=FALSE}
 with(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do', overlap = 'none'))
+```
+```{r, echo = FALSE}
+with(chorales$Solfa, paste(Solfa, collapse = '-'), context('ti', 'do', overlap = 'none')) |> unname()
 
 ```
 
@@ -311,9 +317,11 @@ within(chorales$Token, duration(Token) -> Duration) -> chorales
 
 We could now do something like this:
 
-```{r}
-
+```{r, eval = FALSE}
 with(chorales$Solfa, paste(Token, collapse = '-'), context('ti', Solfa == 'do' & Duration >= .5, overlap = 'edge'))
+```
+```{r, echo = FALSE}
+with(chorales$Solfa, paste(Token, collapse = '-'), context('ti', Solfa == 'do' & Duration >= .5, overlap = 'edge')) |> unname()
 ```
 
 Notice that, because our `close` expression is more complicated now, I had to explictely say `Solfa == 'do'` instead of using the shortcut of just providing a single string.
@@ -325,16 +333,22 @@ We can use what we learned above about the `nextopen` and `nextclose` variables 
 For example, we could have windows close every time there is a fermata (`";"` token in `**kern`) in the data, but *open* again immediately after each fermata:
 
 
-```{r}
+```{r, eval = FALSE}
 with(chorales$Token, paste(Token, collapse = '-'), context(prevclose + 1, ';'))
+```
+```{r, echo = FALSE}
+with(chorales$Token, paste(Token, collapse = '-'), context(prevclose + 1, ';')) |> unname()
 ```
 
 There is an issue here: the first fermata in the data doesn't get paired with anything, because there is no "previous close" before it.
 This will happen whenever you use `nextopen` or `prevclose`!
 You can fix this by explicitely adding an opening window at `1`:
 
-```{r}
+```{r, eval = FALSE}
 with(chorales$Token, paste(Token, collapse = '-'), context(1 | prevclose + 1, ';'))
+```
+```{r, echo = FALSE}
+with(chorales$Token, paste(Token, collapse = '-'), context(1 | prevclose + 1, ';')) |> unname()
 ```
 
 By using the `|` (or) command in `context()`, we are saying open a window at `1` *or* at `prevclose + 1`.

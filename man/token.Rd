@@ -46,7 +46,7 @@ order.token(
 
 \S4method{Arith}{character,token}(e1, e2)
 
-\S4method{Summary}{token}(x)
+\S4method{Summary}{token}(x, ..., na.rm = FALSE)
 }
 \description{
 \code{token} is an \code{S4} class which acts as a simple

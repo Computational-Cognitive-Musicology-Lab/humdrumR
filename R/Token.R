@@ -200,6 +200,10 @@ setMethod('sort', signature = c(x = 'token'),
 #' @export
 setMethod('Arith', c('token', 'token'),
           function(e1, e2) {
+            if (is.numeric(e1) && is.numeric(e2)) {
+              e1@.Data <-  callGeneric(e1@.Data, e2@.Data)
+              return(e1)
+            }
             
            parsed1 <- unparse(e1)
            parsed2 <- unparse(e2)
@@ -233,12 +237,18 @@ setMethod('Arith', c('character', 'token'),
 #' @rdname token
 #' @export
 setMethod('Summary', c('token'),
-          function(x) {
+          function(x, ..., na.rm = FALSE) {
+            if (is.numeric(x)) {
+              dim(x) <- NULL
+              x@.Data <- callGeneric(x@.Data, ..., na.rm = na.rm)
+              return(x)
+            }
+            
             parsedx <- unparse(x)
             
             if (is.null(parsedx)) .stop("humdrumR can't do max/min/range with this data, because it doesn't know how to parse it.")
             
-            xsummary <- callGeneric(parsedx)
+            xsummary <- callGeneric(parsedx, ..., na.rm = na.rm)
             dispatch <- attr(parsedx, 'dispatch')
             
             reparse(xsummary, x)
