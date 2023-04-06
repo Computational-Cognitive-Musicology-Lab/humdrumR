@@ -4,10 +4,15 @@
 \alias{token}
 \alias{c,token-method}
 \alias{rep.token}
+\alias{unique.token}
 \alias{[,token,ANY,ANY-method}
 \alias{show,token-method}
 \alias{format.token}
+\alias{is.token}
+\alias{order.token}
 \alias{Arith,token,token-method}
+\alias{Arith,token,character-method}
+\alias{Arith,character,token-method}
 \alias{Summary,token-method}
 \title{Humdrum tokens}
 \usage{
@@ -17,13 +22,29 @@ token(x, Exclusive = NULL, ...)
 
 \method{rep}{token}(x, ...)
 
+\method{unique}{token}(x, ...)
+
 \S4method{[}{token,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
 \S4method{show}{token}(object)
 
 \method{format}{token}(x, ...)
 
+is.token(x)
+
+order.token(
+  x,
+  ...,
+  na.last = TRUE,
+  decreasing = FALSE,
+  method = c("auto", "shell", "radix")
+)
+
 \S4method{Arith}{token,token}(e1, e2)
+
+\S4method{Arith}{token,character}(e1, e2)
+
+\S4method{Arith}{character,token}(e1, e2)
 
 \S4method{Summary}{token}(x)
 }
@@ -33,4 +54,6 @@ token(x, Exclusive = NULL, ...)
 that data special treatment.
 They are basically \code{atomic} vectors with a known
 exclusive interpretation.
+You should be able to treat them exactly like their "normal" class
+of \code{atomic} vector---e.g., \code{character}, or \code{numeric}.
 }

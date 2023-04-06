@@ -18,10 +18,21 @@ setClass('token', contains = 'vector', c(Exclusive = 'maybecharacter', Attribute
 #' that data special treatment.
 #' They are basically `atomic` vectors with a known
 #' exclusive interpretation.
+#' You should be able to treat them exactly like their "normal" class
+#' of `atomic` vector---e.g., `character`, or `numeric`.
 #' 
-#' 
+#' @name token
+#' @export
+NULL
+
+
+## Constructors ####
+
+#' @rdname token
 #' @export
 token <- function(x, Exclusive = NULL, ...) {
+  if (is.null(x)) x <- character(0)
+  
   new('token', x, Exclusive = Exclusive, Attributes = list(...))
 }
 
@@ -31,6 +42,8 @@ token <- function(x, Exclusive = NULL, ...) {
 
 getExclusive <- function(x) if (inherits(x, 'token')) x@Exclusive
 
+
+## Vectorization ####
 
 #' @rdname token
 #' @export
@@ -60,9 +73,14 @@ rep.token <- function(x, ...) {
   x
 }
 
+#' @rdname token
+#' @export
+unique.token <- function(x, ...) {
+  x@.Data <- unique(x@.Data, ...)
+  x
+}
 
-
-## Constructors ####
+### Indexing ----
 
 #' @rdname token
 #' @export
@@ -75,6 +93,8 @@ setMethod('[', 'token',
 
 
 
+
+
 #' @rdname token
 #' @export
 setMethod('show', 'token',
@@ -82,7 +102,7 @@ setMethod('show', 'token',
            exclusive <- object@Exclusive
            if (!is.null(exclusive)) {
              cat('**')
-             cat(exclusive, sep = '**')
+             cat(paste(exclusive, collapse = '**'), ' (', class(object@.Data)[1], ')', sep = '')
              cat('\n')
            }
            x <- object@.Data
@@ -98,11 +118,38 @@ format.token <- function(x, ...) {
   x
 }
 
+## Logic methods ####
+
+### is.methods ####
+
+#' @rdname token
+#' @export
+is.token <- function(x) inherits(x, 'token')
+
 
 ## Order/relations methods ####
 
 
+#' @export order.token
+#' @rdname token
+#' @exportMethod > >= < <= Summary abs sign
+order.token <- function(x, ..., na.last = TRUE, decreasing = FALSE,
+                                method = c("auto", "shell", "radix")) {
+  parsedx <- unparse(x)
+  
+  if (is.null(parsedx)) {
+    return(order(x@.Data))
+  } else {
+    order(parsedx)
+  }
+}
 
+
+#' @export
+setMethod('sort', signature = c(x = 'token'),
+          function(x, decreasing = FALSE) {
+            x[order.token(x, decreasing = decreasing)]
+          })
 
 ## Math ----
 
@@ -150,7 +197,6 @@ setMethod('Summary', c('token'),
             if (is.null(parsedx)) .stop("humdrumR can't do max/min/range with this data, because it doesn't know how to parse it.")
             
             xsummary <- callGeneric(parsedx)
-            
             dispatch <- attr(parsedx, 'dispatch')
             
             reparse(xsummary, x)
