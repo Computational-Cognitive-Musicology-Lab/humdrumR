@@ -24,7 +24,7 @@ token(x, Exclusive = NULL, ...)
 
 \method{unique}{token}(x, ...)
 
-\S4method{[}{token,ANY,ANY}(x, i, j, ..., drop = TRUE)
+\S4method{[}{token,ANY,ANY}(x, i, j, ..., drop = FALSE)
 
 \S4method{show}{token}(object)
 

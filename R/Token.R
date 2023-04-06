@@ -42,6 +42,7 @@ token <- function(x, Exclusive = NULL, ...) {
 
 getExclusive <- function(x) if (inherits(x, 'token')) x@Exclusive
 
+untoken <- function(x) x@.Data
 
 ## Vectorization ####
 
@@ -66,6 +67,36 @@ setMethod('c', c('token'),
             
           })
 
+#' @export
+rbind.token <- function(...) {
+  xs <- list(...)
+  
+  xs <- lapply(xs, \(x) if (hasdim(x)) t(x) else x) # keep vectors as vectors
+  
+  t(do.call('cbind.token', xs))
+}
+
+#' @export
+cbind.token <-  function(...) {
+  
+  args <- list(...)
+  args <- Filter(Negate(is.null), args)
+  
+  values <-  do.call('cbind', lapply(args, 
+                                     \(arg) {
+                                       if (inherits(arg, 'token')) return(arg@.Data)
+                                       if (is.vector(arg)) return(arg)
+                                     }))
+  
+  exclusives <- unique(unlist(lapply(args, getExclusive)))
+  attributes <- unlist(lapply(args, \(arg) if (inherits(arg, 'token')) arg@Attributes else NULL), recursive = FALSE)
+  attributes <- attributes[!duplicated(.names(attributes))]
+  
+  
+  new('token', values, Exclusive = exclusives, Attributes = attributes)
+  
+}
+
 #' @rdname token
 #' @export
 rep.token <- function(x, ...) {
@@ -86,10 +117,17 @@ unique.token <- function(x, ...) {
 #' @export
 setMethod('[', 'token',
           function(x, i, j, ..., drop = FALSE) {
-            x@.Data <- x@.Data[i, j, ..., drop = drop]
+            
+            x@.Data <- if (hasdim(x)) {
+              .x <- x@.Data[i, j, ..., drop = drop]
+              if (!hasdim(.x)) dim(x) <- NULL
+              .x
+            } else {
+              x@.Data[i]
+            }
+            
             x
           })
-
 
 
 
@@ -102,7 +140,12 @@ setMethod('show', 'token',
            exclusive <- object@Exclusive
            if (!is.null(exclusive)) {
              cat('**')
-             cat(paste(exclusive, collapse = '**'), ' (', class(object@.Data)[1], ')', sep = '')
+             cat(paste(exclusive, collapse = '**'), 
+                 ' (', 
+                 if (is.array(object@.Data)) paste0(class(object@.Data[1,1])[1], ' array') else class(object@.Data)[1],
+                 ')', 
+                 sep = '')
+             
              cat('\n')
            }
            x <- object@.Data
