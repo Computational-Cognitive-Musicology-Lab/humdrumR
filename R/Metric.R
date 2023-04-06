@@ -450,6 +450,7 @@ tatum.character <- dofunc('x', function(x, deparser = recip) {
   timesignatures <- grepl('^\\*?M', x)
   rint <- .unlist(c(if (any(timesignatures)) tatum.meter(meter.character(x[timesignatures]), deparser = NULL),
                   if (any(!timesignatures)) rhythmInterval.character(unique(x[!timesignatures]))))
+  
   result <- tatum.rational(rint)
   
   if (is.null(deparser)) result else deparser(result)
@@ -468,7 +469,7 @@ tatum.numeric <- dofunc('x', function(x, deparser = duration) {
 })
 #' @rdname tatum
 #' @export
-tatum.rational <- function(x)  do.call('gcd', as.list(unique(x)))
+tatum.rational <- function(x)  do.call('gcd', as.list(unique(x[!is.na(x) & x > rational(0L)])))
 #' @rdname tatum
 #' @export
 tatum.NULL <- function(x) NULL
