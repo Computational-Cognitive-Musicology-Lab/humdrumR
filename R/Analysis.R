@@ -307,9 +307,8 @@ table <- function(...,
 }
 
 factorize <- function(token) {
-  factorizer <- attr(token, 'factorizer')
-  class(token) <- setdiff(class(token), 'token')
-  if (is.null(factorizer)) return(token)
+  factorizer <- token@Attributes$factorizer
+  if (is.null(factorizer)) return(factor(token@.Data))
   
   factorizer(token)
   

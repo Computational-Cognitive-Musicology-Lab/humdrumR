@@ -679,7 +679,7 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
 rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
   levels <- levels(x)
   
-  rints <- rhythmInterval.character(levels, Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  rints <- rhythmInterval.character(levels, Exclusive = Exclusive, ...)
   
   c(rational(NA), rints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
 }
@@ -687,7 +687,7 @@ rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
 #' @rdname rhythmParsing
 #' @export
 rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
-  rhythmInterval.character(as.character(x), Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  rhythmInterval.character(as.character(x@.Data), Exclusive = Exclusive %||% getExclusive(x), ...)
 }
 
 #### setAs rhythmInterval ####
@@ -727,13 +727,13 @@ makeRamut <- function(reference, deparseArgs = list(), deparser) {
 
 
 set.ramut <- function(token) {
-  deparseArgs <- attr(token, 'deparseArgs')
+  deparseArgs <- token@Attributes$deparseArgs
   
-  levels <- do.call(makeRamut, c(list(reference = token, 
-                                  deparseArgs = deparseArgs, 
-                                  deparser = attr(token, 'deparser'))))
+  levels <- do.call(makeRamut, list(reference = token@.Data, 
+                                    deparseArgs = deparseArgs, 
+                                    deparser = token@Attributes$deparser))
   
-  factor(token, levels = levels)
+  factor(token@.Data, levels = levels)
 }
 
 
@@ -945,10 +945,12 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
       output <- if (inPlace) {
         rePlace(output, dispatch)
       } else {
-        do.call('token', list(output, Exclusive = callname, 
-                              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
-                              factorizer = set.ramut,
-                              deparser = !!deparser))
+        token(output, Exclusive = callname, 
+              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
+              factorizer = set.ramut,
+              parser = rhythmInterval,
+              deparser = !!deparser)
+
       }
       
     }
