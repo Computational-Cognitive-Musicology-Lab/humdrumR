@@ -5,9 +5,9 @@
 ## Definition, validity, initialization ####
 
 setClassUnion('maybecharacter', c('character', 'NULL'))
+setClassUnion('matrixorvector', c('vector', 'matrix'))
 
-
-setClass('token', contains = 'vector', c(Exclusive = 'maybecharacter', Attributes = 'list'))
+setClass('token', contains = 'matrixorvector', c(Exclusive = 'maybecharacter', Attributes = 'list'))
 
 ## Constructors ####
 
@@ -85,8 +85,8 @@ unique.token <- function(x, ...) {
 #' @rdname token
 #' @export
 setMethod('[', 'token',
-          function(x, i, ...) {
-            x@.Data <- x@.Data[i, ...]
+          function(x, i, j, ..., drop = FALSE) {
+            x@.Data <- x@.Data[i, j, ..., drop = drop]
             x
           })
 
@@ -163,7 +163,6 @@ setMethod('Arith', c('token', 'token'),
            # exclusives <- humdrumR_exclusives[Exclusive %in% c(e1@Exclusive, e2@Exclusive)]
            if (class(parsed1) != class(parsed2)) .stop("humdrumR can't do arithmetic with this data, because it doesn't know how combine them.")
            
-           
            e3 <- callGeneric(parsed1, parsed2)
            
            reparse(e3, e1)
@@ -220,12 +219,12 @@ unparse <- function(token) {
 }
 
 reparse <- function(x, token) {
-  if (!inherits(token, 'token')) return(NULL)
+  if (!is.token(token)) return(NULL)
   deparser <- token@Attributes$deparser
   
   if (is.null(deparser)) return(NULL)
   
-  token@.Data <- do.call(deparser, c(list(x), token@Attributes$deparseArgs))
+  token@.Data <- do.call(deparser, c(list(c(x)), token@Attributes$deparseArgs)) %<-matchdim% x
   token
   
 }
