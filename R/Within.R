@@ -410,11 +410,11 @@
 #' To do so, simply place a call to `context()` in an unnamed argument to `with`/`within.humdrumR()`;
 #' you must provide `open` and `close` arguments.
 #' The `overlap`, `depth`, `rightward`, `duplicate_indices`, `min_length`, and `max_length` arguments can be used here,
-#' just as they are in a separate call to `context()`---the see the `context()` man page.
-#' Do not give the `context()` command inside a `with`/`within.humdrumR` a `x` or `reference` argument:
-#' The [active field][humActive] is used as the `reference` vector for `context()`---e.g., if `open`
+#' just as they are in a separate call to `context()` --- see the `context()` man page.
+#' Do not give the `context()` command inside a `with`/`within.humdrumR` call a `x` or `reference` argument:
+#' The [active field][humActive] is used as the `reference` vector for `context()` --- e.g., if `open`
 #' or `close` is a `character` string, they are matched as regular expressions against the [active field][humActive].
-#' `list(File, Record, Spine)` is also automatically passed as the `groupby` argument to `context()`.
+#' `list(File, Spine, Path)` is also automatically passed as the `groupby` argument to `context()`.
 #' 
 #' 
 #' When using `context()` inside `with`/`within.humdrumR`, the `alignToOpen` argument will have no effect.
@@ -429,7 +429,7 @@
 #' The `complement` expression will be evaluated on any data points that aren't captured within *any* contextual windows.
 #' 
 #' 
-#' Any `by` or `subset` expressions placed before a `contest()` expression are evaluated first, in order from left to right.
+#' Any `by` or `subset` expressions placed before a `context()` expression are evaluated first, in order from left to right.
 #' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
 #' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
 
@@ -484,11 +484,6 @@
 #' within(humdata,
 #'        list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
-#' 
-#' @section N grams:
-#' 
-#' XXXX
-#' 
 #' 
 #' 
 #' @section Advanced scripting:
