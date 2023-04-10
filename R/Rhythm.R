@@ -687,7 +687,7 @@ rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
 #' @rdname rhythmParsing
 #' @export
 rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
-  rhythmInterval.character(as.character(x@.Data), Exclusive = Exclusive %||% getExclusive(x), ...)
+  rhythmInterval(x@.Data, Exclusive = Exclusive %||% getExclusive(x), ...)
 }
 
 #### setAs rhythmInterval ####
@@ -1369,7 +1369,7 @@ untie <- function(x, open = '[', close = ']', ...,
 #   paste0(sign, minutes, ':', ifelse(seconds >= 10, '', '0'), format(seconds, nsmall = 3L, trim = TRUE))
 # }
 
-### timelines ----
+## Timelines ----
 
 # Calculate overall duration of a group
 # 
@@ -1501,7 +1501,12 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' 
 #' 
 #' Note that, `timeline()` and `timestamp()` follow the default behavior of [duration()] by treating grace-notes as duration `0`.
-#' If you want to use the duration(s) of grace notes, specify `grace = TRUE`.
+#' This means that their position on the timeline is simply inherited from the previous event on the timeline, as if they occur
+#' at the same time.
+#' If you want to use the specified duration(s) of grace notes, specify `grace = TRUE`.
+#' By default, any *other* tokens without (parsable) rhythm information are returned a `NA`.
+#' However, if `threadNA = FALSE`, rhythm-less tokens will be treated as if they have a duration of `0` as well, and thus
+#' have a (shared) position on the timeline.
 #' 
 #' @section Pickups:
 #' 
@@ -1559,6 +1564,12 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' To function as a by-record timeline, the `groupby` list music include a *named* `Piece` and `Record` fields.
 #' Luckily, these are automatically passed by [with(in).humdrumR][withinHumdrum], so you won't need to worry about it!
 #'
+#' @param threadNA ***Should rhythm-less tokens return `NA`?***
+#'
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
 #' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
 #' Defaults to an empty `list()`.
@@ -1579,11 +1590,12 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
 #' @export
-timeline <- function(x, start = 0, pickup = NULL, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timeline <- function(x, start = 0, pickup = NULL, ..., 
+                     Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
    
-  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, callname = 'timeline')
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timeline')
   
   rint2duration(timerints, ...)
   
@@ -1594,12 +1606,13 @@ timeline <- function(x, start = 0, pickup = NULL, ..., Exclusive = NULL, parseAr
 
 #' @rdname timeline
 #' @export
-timestamp <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., Exclusive = NULL, parseArgs = list(), groupby = list()) {
+timestamp <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., 
+                      Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
   seconds <- rint2seconds(rints, BPM = BPM)
   rints <- as.rational(seconds)
-  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, callname = 'timestamp')
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timestamp')
   
   rint2dur(timerints, BPM = 240, minutes = minutes, ...) # BPM has already been incorporated, 240 is value we need now.
   
@@ -1607,12 +1620,13 @@ timestamp <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ...
 }
 
 
-pathSigma <- function(rints, groupby, start, pickup, callname) {
+pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) {
   # this does most of work for timestamp and timeline
 
   start <- rhythmInterval(start)
   
-  rints[is.na(rints)] <- rational(0L)
+  na <- is.na(rints)
+  rints[na] <- rational(0L)
   
   fractions <- match_fraction(numerator(c(start, rints)), denominator(c(start, rints)))
   
@@ -1635,9 +1649,104 @@ pathSigma <- function(rints, groupby, start, pickup, callname) {
   
   
   # .SD$Time
+  if (threadNA) .SD$Time[na] <- NA_integer64_
+  
   rational(.SD$Time, fractions$Denominator)
 }
 
+
+## recordDuration
+
+#' Calculate duration of each record in a corpus
+#' 
+#' @param humdrumR ***HumdrumR data.***
+#'
+#' @export
+recordDuration <- function(humdrumR) {
+  checks(humdrumR, xhumdrumR)
+  
+  
+  humdrumR <- .recordDuration(humdrumR)
+  
+  humdrumR@Humtable[ , ..Timeline.. := NULL]
+  removeFields(humdrumR) <- '..Timeline..'
+  
+  humdrumR 
+}
+
+.recordDuration <- function(humdrumR) {
+  
+  oldActive <- getActive(humdrumR)
+  humtab <- getHumtab(humdrumR, 'LIMDd')
+  
+  humdrumR <- within(humdrumR, ..Timeline.. <- timeline(.))
+  humdrumR@Active <- oldActive
+  
+  humdrumR <- within(humdrumR, dataTypes = c('Dd'),
+                     fill = ..Timeline.. <- max(c(-1, ..Timeline..), na.rm = TRUE), by = list(File, Record))
+  
+  within(humdrumR, RecordDuration <- {
+    
+    tl <- sort(unique(..Timeline..[..Timeline.. != -1]))
+    durs <- diff(sort(unique(..Timeline..[..Timeline.. != -1])))
+    durs <- durs[match(..Timeline.., tl)]
+    durs[is.na(durs)] <- 0
+    durs
+    
+  }, by = File, dataTypes = 'LIMDd')
+  
+}
+
+## Timebase
+
+timebase <- function(humdrumR, tb = '16') {
+  checks(humdrumR, xhumdrumR)
+  
+  oldActive <- getActive(humdrumR)
+  
+  tb <- if (is.null(tb)) with(humdrumR, tatum(., deparser = duration)) else duration(tb)
+  
+  humdrumR <- .recordDuration(humdrumR)
+  
+  humtab <- getHumtab(humdrumR, 'LIMDd')
+  
+  humtab[ , RecordDuration := as.integer(floor(RecordDuration / tb))]
+  # remove records that dont line up with tb
+  humtab <- humtab[is.na(..Timeline..) | (is.whole(..Timeline.. / tb) & ..Timeline.. > -1L)]
+  
+  humtab[ , Nrep := ifelse(RecordDuration == 0 & Type != 'd', 1, RecordDuration)]
+  # humtab <- humtab[Nrep > 0]
+  # humtab$.tatum.[humtab.]
+  
+  humtab <- humtab[rep(seq_len(nrow(humtab)), humtab$Nrep)]
+  
+  humtab[ , Duplicated := duplicated(Record), by = list(File, Spine)]
+  
+  tb <- paste0('*tb', recip(tb))
+  humtab <- rbind(humtab[!Type %in% c('D', 'd')],
+                         humtab[Type %in% c('D', 'd'), {
+                           firstrow <- .SD[1]
+                           firstrow$Token <- tb
+                           firstrow$Type <- 'I'
+                           firstrow$Null <- FALSE
+                           rbind(firstrow, .SD)
+                           
+                         }, by = list(File, Spine)])
+  humtab <- orderHumtab(humtab)
+  humtab[ , Record := seq_along(Token), by = list(File, Spine)]
+  
+  for (field in fields(humdrumR, 'D')$Name) humtab[[field]][humtab$Duplicated] <- NA
+  humtab$Type[humtab$Duplicated] <- 'd'
+  humtab$Null[humtab$Duplicated] <- TRUE
+  
+  # humtab <- update_Null.data.table(humtab, oldActiveFields)
+  putHumtab(humdrumR) <- humtab
+  
+  removeFields(humdrumR) <- c('..Timeline..', 'RecordDuration')
+  humdrumR@Humtable[ , c('..Timeline..', 'RecordDuration') := NULL]
+  humdrumR@Active <- oldActive
+  humdrumR
+}
 
 ## Find lag ----
 

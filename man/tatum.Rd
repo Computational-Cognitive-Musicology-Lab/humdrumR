@@ -6,6 +6,7 @@
 \alias{tatum.character}
 \alias{tatum.numeric}
 \alias{tatum.rational}
+\alias{tatum.token}
 \alias{tatum.NULL}
 \title{Find common denominator of beats}
 \usage{
@@ -18,6 +19,8 @@ tatum(x, ...)
 \method{tatum}{numeric}(x, deparser = duration)
 
 \method{tatum}{rational}(x)
+
+\method{tatum}{token}(x)
 
 \method{tatum}{`NULL`}(x)
 }

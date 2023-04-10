@@ -472,6 +472,11 @@ tatum.numeric <- dofunc('x', function(x, deparser = duration) {
 tatum.rational <- function(x)  do.call('gcd', as.list(unique(x[!is.na(x) & x > rational(0L)])))
 #' @rdname tatum
 #' @export
+tatum.token <- function(x) {
+  tatum(x@.Data)
+}
+#' @rdname tatum
+#' @export
 tatum.NULL <- function(x) NULL
 
 #' Extract levels from meters
