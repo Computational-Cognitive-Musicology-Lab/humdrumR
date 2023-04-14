@@ -472,7 +472,8 @@ multimatch <- function(x, table, ...) {
 }
 
 squashGroupby <- function(groupby = list()) {
-  do.call('paste', groupby) # seems to be fastest option
+  groups <- do.call('paste', groupby) # seems to be fastest option
+  match(groups, unique(groups))
   # groupby <- as.data.table(groupby)
   # matches(groupby, unique(groupby))
 

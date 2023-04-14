@@ -4,6 +4,8 @@ Nat's ToDo:
 
 	Add grace slot to rhythmInterval?
 
+	Add "skip" functionality to mint() and hint()
+
 
 Major:
 	Allow with to return matrices!
@@ -27,6 +29,7 @@ Bugs:
 	Figured bass not working with keys?
 	key('k[f#]') not working
 	key('I', Key = 'A:') not working?
+
 
 
 Questions:

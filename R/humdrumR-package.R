@@ -54,7 +54,7 @@ NULL
 humdrumRroot <- system.file(package = 'humdrumR')
 
 withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
-                     Key = c('mint', 'hint', 'int'),
+                     Key = c('mint', 'hint', 'int', 'sonority'),
                      BPM = c('timestamp'))
 
 # Package global data ----
@@ -66,7 +66,7 @@ byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                              Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie', 'hop'), 
                              Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
                   data.table(Argument = 'groupby', Type = 'harmonic',
-                             Function = c('hint'),
+                             Function = c('hint', 'sonority'),
                              Expression = list(quote(list(Piece = Piece, Record = Record)))),
                            data.table(Argument = 'groupby', Type = 'structure',       
                              Function = c('timeline', 'timestamp', 'count', 'onbeat', 'subpos', 'metlev', 'metcount'),

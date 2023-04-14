@@ -739,22 +739,18 @@ tint2thirds <- function(tint) {
 }
 
 
-steps2thirds <- function(steps) {
+steps2thirds <- function(steps, groupby) {
   steps <- 1L + ((steps - 1L) %% 14L)
   extension <- .extension <- ifelse(steps %% 2L == 0L, steps + 7L, steps)
-  extension <- sort(extension, decreasing = TRUE)
   
-  
-  thirds <- ((extension - c(15L, extension)[which.min(diff(c(15L, extension)))]) %/% 2L) %% 7L
-  
-  thirds <- thirds[match(.extension, extension)]
-  
-  thirds - min(thirds)
-  
+  rotations <- outer(extension, c(2L, 4L, 6L, 8L, 10L, 12L, 14L), '-') %% 14L
+  ranges <- tapply(rotations, list(rep(groupby, 7L), col(rotations)), max)
+  thirds <- as.integer((rotations[cbind(seq_along(extension), max.col(-ranges)[match(groupby, unique(groupby))])] - 1L) / 2L)
+  thirds
 }
 
 
-figurationFill <- function(species, third, step, Explicit) {
+figurationFill <- function(species, third, step, Explicit, ...) {
   # This function "fills" in missing (implicit) tertian degrees in a sonority.
   # For example, in IV6, there is an implicit 3.
     
@@ -777,7 +773,8 @@ figurationFill <- function(species, third, step, Explicit) {
     newaccidentals <- species[match(newthird, third)]
     newaccidentals[is.na(newaccidentals)] <- ""
     
-    data.table(species = newaccidentals, step = newthird * 2L + 1L, third = newthird, Explicit = FALSE)
+    data.table(species = newaccidentals, step = newthird * 2L + 1L, third = newthird, 
+               new = !newthird %in% third, Explicit = FALSE)
 }
 
 parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALSE, ...) {
@@ -802,7 +799,7 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
            
            ## 
            parsedfig[ , step := as.integer(step)]
-           parsedfig[ , third := steps2thirds(step)]
+           parsedfig[ , third := steps2thirds(step, integer(length(step)))]
            #
            parsedfig <- parsedfig[!duplicated(third)]
            inversion <- parsedfig[step %in% c(1L, 8L, 15L), third[1]]
@@ -1468,37 +1465,97 @@ setMethod('LO5th', 'tertianSet',
 
 ## Extracting chords ----
 
+# Algorithm:
+# 
+# C E G Bb D
+# 1 3 5 7  9!
+#   1 3 5  7 13
+#     1 3  5 11 13
+#       1  3 9  11 13
+#          1 7  9  11 13  
+#
+# C F  G
+# 0 11 5 -> want this
+# 0 -1 1 (lof)
+#   0  9  5 -> this is most compact
+#   0  2  1 (lof)
+#      0  7 11
+#
+# C D  G
+# 0 9  5 -> this is most compact
+# 0 1  2 (lof)
+#   0  11 7
+#      0  11 5 -> want this
+#      0 -1  1 (lof)
 
-sonority <- function(x, deparser = tset2chord, figureFill = TRUE, Key = NULL, ...) {
-  tints <- tonalInterval(unique(x))
-  tints <- tints[!is.na(tints) & !duplicated(tints@Fifth)]
-  tints <- sort(tints)
+# C F  G Bb
+# 0 11 2 7 -> want this
+#   0  9 11 2
+#      0 3  11 7
+#        0  9  5  13
+#' Interpret tertian sonority from set of notes.
+#' 
+#' @export
+sonority <- function(x, deparser = chord, fill = TRUE,
+                     figureFill = TRUE, Key = NULL, 
+                     groupby = list(), ...) {
+  groupby <- if (length(groupby)) squashGroupby(groupby) else rep(1L, length(x))
   
-  step <- tint2step(tints, step.labels = NULL)
-  third <- steps2thirds(step)
+  tints <- tonalInterval(x)
   
-  parsedfig <- data.table(step =  step, third = third, 
-                          species = tint2specifier(tints - tints[third == 0L], 
-                                                   qualities = TRUE, explicitNaturals = TRUE),
-                          Explicit = TRUE)
+  
+  notes <- data.table(semits = tint2semits(tints), 
+                      step = tint2step(tints, step.labels = NULL),
+                      order = seq_along(x),
+                      groupby = groupby)
+  # notes <- notes[!is.na(step)]
+  notes[ , height := rank(semits, ties.method = 'min'), by = groupby]
+  setorder(notes, groupby, semits)
+  notes <- notes[!duplicated(cbind(groupby, step))]
+  
+  
+  notes[!is.na(step) , third := steps2thirds(step, groupby)]
+  firstInGroup <- notes[ , min(order, na.rm = TRUE), by = groupby]$V1
+  
+  # tints <- tints[notes$order]
+  roots <- tints[notes[ , if (all(is.na(third))) NA_integer_ else order[!is.na(third) & third == 0L], by = groupby]$V1]
+  notes$species <- tint2specifier((tints - roots[groupby])[notes$order],
+                                  qualities = TRUE, explicitNaturals = TRUE)
   
   if (figureFill) {
-    parsedfig <- do.call(figurationFill, parsedfig)
+    notes$Explicit <- TRUE # this is for figurationFill
+    parsedfig <- notes[!is.na(third),  do.call(figurationFill, .SD),  by = groupby]
     
-    parsedfig[ , species := {
-      species[species == ''] <- ifelse(third[species == ''] %in% c(0, 2, 5), 'P', 'M')
-      species
-    }]
+    notes <- notes[, c('groupby', 'order', 'semits', 'height', 'third'), with = FALSE][parsedfig, on = c('groupby', 'third')]
   }
   
-  # setorder(parsedfig, third)
-  tertian <- rep('.', 7L)
-  tertian[parsedfig$third + 1L] <- parsedfig$species
+  notes[ , species := {
+    species[species == ''] <- ifelse(third[species == ''] %in% c(0, 2, 5), 'P', 'M')
+    species
+  }]
+  #
+  tertian <- matrix('.', ncol = 7, nrow = max(groupby))
+  tertian[notes[ , cbind(groupby, third + 1)]] <- notes$species
+  tertian <- do.call('paste', c(as.data.frame(tertian), list(sep = '')))
+  uniqQual <- unique(tertian)
   
-  tset <- sciQualities2tset(paste(tertian, collapse = ''), diminish = 'd', augment = 'A') + tints[third == 0L]
+  tset <- sciQualities2tset(uniqQual, diminish = 'd', augment = 'A')
+  tset <- tset[match(tertian, uniqQual)] + roots
   
-  tset@Inversion <- third[1]
+  tset@Inversion[!is.na(tset)] <- notes[height == 1, third] 
   
-  if (is.null(deparser)) tset else deparser(if (is.null(Key)) tset else tset - Key, ...)
+  # This assumes that the key is the same for all notes..
+  if (!is.null(Key)) tset <- tset - Key[firstInGroup]
   
+  chords <- if (is.null(deparser)) tset else deparser(tset, ..., 
+                                                      Key = if (!is.null(Key)) Key[firstInGroup])
+  if (fill)  {
+    chords[groupby] 
+  } else {
+    output <- vectorNA(length(chords), class(chords))
+    output[firstInGroup] <- chords
+    output
+    }
 }
+
+

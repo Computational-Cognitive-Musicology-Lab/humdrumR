@@ -1624,7 +1624,11 @@ pathSigma <- function(rints, groupby, start, pickup, callname) {
   
   .SD[ , Time := Time + start]
   
+  # make empty events fill from PREVIOUS event
+  .SD$Time[.SD$Numerator == 0L] <- ditto(.SD$Time, null = .SD$Numerator == 0L)[.SD$Numerator == 0L]
+  
   .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
+  
   
   if (!is.null(pickup)) {
     .SD$Pickup <- pickup
