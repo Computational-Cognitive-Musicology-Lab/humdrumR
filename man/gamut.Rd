@@ -22,13 +22,13 @@ gamut(
 
 Defaults to \code{FALSE}.
 
-Must be a singleton \code{logical} value: a on/off switch.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{simple}{\emph{\strong{Should the gamut be constrained to one octave?}}
 
 Defaults to \code{FALSE}.
 
-Must be a singleton \code{logical} value: a on/off switch.}
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{reference}{\emph{\strong{An optional reference vector to base the gamut on.}}
 

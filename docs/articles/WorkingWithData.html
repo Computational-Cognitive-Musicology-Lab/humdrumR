@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,6 +57,7 @@
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -383,7 +384,7 @@ data into a different pitch representation, like scientific pitch. We
 can do this with the <code>pitch</code> command. If we use
 <code>with</code>…</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">with</span>(chorales, <span class="fu">pitch</span>(Token))</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span>pitch</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">pitch</span> (character)</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="sc">&gt;</span>       [<span class="dv">1</span>] G2  G3  E3  F<span class="co">#3 G3  D3  E3  C3  B2  A2  G2  D3  G2  F#2 G2  A2  B2  C3 </span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="sc">&gt;</span>      [<span class="dv">19</span>] D3  G2  G2  G2  A2  B2  B2  A2  G2  D3  E3  E3  D3  C3  B2  C3  D3  G2 </span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="sc">&gt;</span>      [<span class="dv">37</span>] A2  B2  G2  C3  G2  F<span class="co">#2 G2  A2  B2  G2  D3  E3  D3  C3  B2  A2  G2  D3 </span></span>
@@ -616,7 +617,7 @@ can do this with the <code>pitch</code> command. If we use
 <span id="cb8-93"><a href="#cb8-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb8-94"><a href="#cb8-94" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb8-95"><a href="#cb8-95" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
-<span id="cb8-96"><a href="#cb8-96" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb8-96"><a href="#cb8-96" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span></code></pre></div>
 <p>Now we get our humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> data back, but the
 <code>Token</code> data has been transformed from <code>**kern</code> to
 <code>**pitch</code>. Notice, that there are now two “Data fields”
@@ -724,7 +725,7 @@ expressions in <code>within</code>:</p>
 <span id="cb9-95"><a href="#cb9-95" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb9-96"><a href="#cb9-96" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb9-97"><a href="#cb9-97" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
-<span id="cb9-98"><a href="#cb9-98" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb9-98"><a href="#cb9-98" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -866,7 +867,7 @@ are returned as null:</p>
 <span id="cb12-96"><a href="#cb12-96" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb12-97"><a href="#cb12-97" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb12-98"><a href="#cb12-98" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
-<span id="cb12-99"><a href="#cb12-99" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb12-99"><a href="#cb12-99" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span></code></pre></div>
 <p>Notice, our new <code>Pitch</code> field is <code>NULL</code> in all
 spine except spine 1.</p>
 <div class="section level4">
@@ -979,7 +980,7 @@ spines unchanged</em>:</p>
 <span id="cb13-97"><a href="#cb13-97" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb13-98"><a href="#cb13-98" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb13-99"><a href="#cb13-99" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
-<span id="cb13-100"><a href="#cb13-100" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb13-100"><a href="#cb13-100" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span></code></pre></div>
 <p>This pattern, with <code>comp = Token</code> is quite common.</p>
 </div>
 </div>
@@ -1124,7 +1125,7 @@ each group with the same value:</p>
 <span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">269</span></span>
 <span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 1</span></span>
 <span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">8</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">8</span><span class="sc">:</span>        <span class="er">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits      <span class="sc">**</span>semits</span>
 <span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a><span class="sc">&gt;</span>         <span class="dv">9</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
 <span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">10</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
 <span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">11</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
@@ -1210,9 +1211,9 @@ each group with the same value:</p>
 <span id="cb21-101"><a href="#cb21-101" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb21-102"><a href="#cb21-102" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb21-103"><a href="#cb21-103" tabindex="-1"></a><span class="er">&gt;</span>                Token       <span class="sc">::</span> character</span>
-<span id="cb21-104"><a href="#cb21-104" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch       <span class="sc">::</span> character</span>
-<span id="cb21-105"><a href="#cb21-105" tabindex="-1"></a><span class="sc">&gt;</span>                Semits      <span class="sc">::</span> integer</span>
-<span id="cb21-106"><a href="#cb21-106" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>BarBassNote <span class="sc">::</span> integer</span></code></pre></div>
+<span id="cb21-104"><a href="#cb21-104" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch       <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span>
+<span id="cb21-105"><a href="#cb21-105" tabindex="-1"></a><span class="sc">&gt;</span>                Semits      <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span>
+<span id="cb21-106"><a href="#cb21-106" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>BarBassNote <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span></code></pre></div>
 <p>What did this command do? It looks at every bar in each file and
 finds the lowest note, then “fills” all the notes in that bar with that
 same, single, note. We could then calculate the harmonic interval above
@@ -1314,10 +1315,10 @@ the bar’s bass note:</p>
 <span id="cb22-95"><a href="#cb22-95" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
 <span id="cb22-96"><a href="#cb22-96" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb22-97"><a href="#cb22-97" tabindex="-1"></a><span class="er">&gt;</span>                Token       <span class="sc">::</span> character</span>
-<span id="cb22-98"><a href="#cb22-98" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch       <span class="sc">::</span> character</span>
-<span id="cb22-99"><a href="#cb22-99" tabindex="-1"></a><span class="sc">&gt;</span>                Semits      <span class="sc">::</span> integer</span>
-<span id="cb22-100"><a href="#cb22-100" tabindex="-1"></a><span class="sc">&gt;</span>                BarBassNote <span class="sc">::</span> integer</span>
-<span id="cb22-101"><a href="#cb22-101" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1     <span class="sc">::</span> integer</span>
+<span id="cb22-98"><a href="#cb22-98" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch       <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span>
+<span id="cb22-99"><a href="#cb22-99" tabindex="-1"></a><span class="sc">&gt;</span>                Semits      <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span>
+<span id="cb22-100"><a href="#cb22-100" tabindex="-1"></a><span class="sc">&gt;</span>                BarBassNote <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span>
+<span id="cb22-101"><a href="#cb22-101" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1     <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span>
 <span id="cb22-102"><a href="#cb22-102" tabindex="-1"></a></span>
 <span id="cb22-103"><a href="#cb22-103" tabindex="-1"></a><span class="fu">with</span>(chorales, <span class="fu">hist</span>(Semits <span class="sc">-</span> BarBassNote))</span></code></pre></div>
 <p><img src="WorkingWithData_files/figure-html/unnamed-chunk-22-1.png" width="700"></p>

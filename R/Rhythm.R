@@ -679,7 +679,7 @@ rhythmInterval.character <- makeHumdrumDispatcher(list(c('recip', 'kern', 'harm'
 rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
   levels <- levels(x)
   
-  rints <- rhythmInterval.character(levels, Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  rints <- rhythmInterval.character(levels, Exclusive = Exclusive, ...)
   
   c(rational(NA), rints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
 }
@@ -687,7 +687,7 @@ rhythmInterval.factor <- function(x, Exclusive = NULL, ...) {
 #' @rdname rhythmParsing
 #' @export
 rhythmInterval.token <- function(x, Exclusive = NULL, ...) {
-  rhythmInterval.character(as.character(x), Exclusive = attr(x, 'Exclusive') %||% Exclusive, ...)
+  rhythmInterval.character(as.character(x@.Data), Exclusive = Exclusive %||% getExclusive(x), ...)
 }
 
 #### setAs rhythmInterval ####
@@ -727,13 +727,13 @@ makeRamut <- function(reference, deparseArgs = list(), deparser) {
 
 
 set.ramut <- function(token) {
-  deparseArgs <- attr(token, 'deparseArgs')
+  deparseArgs <- token@Attributes$deparseArgs
   
-  levels <- do.call(makeRamut, c(list(reference = token, 
-                                  deparseArgs = deparseArgs, 
-                                  deparser = attr(token, 'deparser'))))
+  levels <- do.call(makeRamut, list(reference = token@.Data, 
+                                    deparseArgs = deparseArgs, 
+                                    deparser = token@Attributes$deparser))
   
-  factor(token, levels = levels)
+  factor(token@.Data, levels = levels)
 }
 
 
@@ -945,10 +945,12 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
       output <- if (inPlace) {
         rePlace(output, dispatch)
       } else {
-        do.call('token', list(output, Exclusive = callname, 
-                              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
-                              factorizer = set.ramut,
-                              deparser = !!deparser))
+        token(output, Exclusive = callname, 
+              deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
+              factorizer = set.ramut,
+              parser = rhythmInterval,
+              deparser = !!deparser)
+
       }
       
     }
@@ -1266,13 +1268,19 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   checks(inPlace, xTF)
   
   rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  dispatch <- attr(rint, 'dispatch')
   
   if (any(!onsets)) {
-    windows <- windows(x, onsets, ~c(Next(open) - 1L, length(x)), groupby = groupby)
-    rint <- windowsSum(rint, windows, na.rm = TRUE)
+    duration <- rint2duration(rint)
+    windowFrame <- findWindows(x, open = which(onsets),
+                               close = which(!onsets),
+                               groupby = groupby,
+                               rightward = FALSE, overlap = 'none')
+    duration <- windowsSum(duration, windowFrame, na.rm = TRUE)
+    rint <- duration2rint(duration)
   }
   
-  dispatch <- attr(rint, 'dispatch')
+  
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
   if (inPlace) {
@@ -1319,14 +1327,16 @@ untie <- function(x, open = '[', close = ']', ...,
   checks(inPlace, xTF)
   
   rint <- rhythmInterval(x, ...)
-  
-  
-  windows <- windows(x, open, close, groupby = groupby)
-  
-  rint <- windowsSum(rint, windows)
-  
-  
   dispatch <- attr(rint, 'dispatch')
+  
+  windows <- findWindows(x, open, close, groupby = groupby, overlap = 'nested')
+  
+  if (nrow(windows)) {
+    duration <- rint2duration(rint)
+    duration <- windowsSum(duration, windows)
+    rint <- duration2rint(duration)
+  }
+  
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
   null <- unlist(Map(":", windows$Open + 1L, windows$Close))

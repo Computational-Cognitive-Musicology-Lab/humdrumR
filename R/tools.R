@@ -343,8 +343,7 @@ reorder <- function(xs, orderby = list(), toEnv = TRUE) {
 
   xs
 } 
-  
-   
+
 
 ## Matrices ----
 
@@ -356,30 +355,31 @@ most <- function(mat, whatmost = 'right', which = FALSE) {
   kind <- pmatch(whatmost, c('right', 'left', 'bottom', 'top'))
   if (!hasdim(mat)) {
     ind <- switch(kind,
-           max(which(mat)),
-           which(mat)[1],
-           .stop("A dimensionless vector has no 'topmost'"),
-           .stop("A dimensionless vector as no 'bottomost'"))  
+                  max(which(mat)),
+                  which(mat)[1],
+                 .stop("A dimensionless vector has no 'topmost'"),
+                 .stop("A dimensionless vector as no 'bottomost'"))  
     
     if (which) ind else seq_along(mat) == ind
     
   } else {
+    output <- matrix(FALSE, ncol = ncol(mat), nrow = nrow(mat))
+    
     if (kind > 2) mat <- t(mat)
     
     rows <- rowSums(mat) > 0
     ind <- ifelse(rows,
                   max.col(mat, ties.method = c('last', 'first', 'last', 'first')[kind]),
-                  0)
+                  0L)
     
     ind <- cbind(seq_along(rows), ind)
     
-    if (kind > 2) ind <- ind[ , 2:1]
+    if (kind > 2) ind <- ind[ , 2:1, drop = FALSE]
     
     colnames(ind) <- c('row', 'col')
     
     if (which) return(ind)
     
-    output <- matrix(FALSE, ncol = ncol(mat), nrow = nrow(mat))
     output[ind] <- TRUE
     
     output
@@ -406,6 +406,12 @@ bottommost <- function(mat, which = FALSE) most(mat, 'bottom', which = which)
 allsame <- function(x) length(unique(x)) == 1L
 
 hasdim <- function(x) !is.null(dim(x))
+
+indices2logical <- function(indices, along.with = 1:max(indices)) {
+  output <- logical(length(along.with))
+  output[indices] <- TRUE
+  output
+}
 
 list.flatten <- function(list) {
   output <- list()
@@ -465,9 +471,45 @@ multimatch <- function(x, table, ...) {
   do.call('cbind', lapply(tables, \(tab) match(x, tab, ...)))
 }
 
+squashGroupby <- function(groupby = list()) {
+  do.call('paste', groupby) # seems to be fastest option
+  # groupby <- as.data.table(groupby)
+  # matches(groupby, unique(groupby))
+
+  
+}
+
 `%ins%` <- function(x, table) !is.na(matches(x, table))
 
 `%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
+
+
+take <- function(x, n = 10L) x[seq_len(max(n, 0L))] 
+
+end <- function(x, n = 10L) {
+  l <- length(x)
+  if (n > 0) x[(l - n + 1):l] else x[0]
+}
+
+# positivediffs <- function(x, y) {
+#   groups <- rep(c(0L, 1L), c(length(x), length(y)))[order(c(x, y))]
+#   z <- sort(c(x, y))
+#   
+#   output <- vector('list', 11)
+#   
+#   for (lag in 0:min(50, sum(groups))) {
+#      z[groups == 1L] <- lead(y, n = lag)
+#      ylag <- ditto.default(z, groups == 0L, reverse = TRUE)
+#   
+#      output[[lag + 1]] <- data.table(Open = x, Close = ylag[groups == 0L])
+#     
+#   }
+#   
+#   output <- data.table::rbindlist(output)
+#   
+#   output[!is.na(Close)]
+# }
+
 
 closest <- function(x, where, direction = 'either', diff_func = `-`) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
@@ -517,11 +559,13 @@ remove.duplicates <- function(listofvalues) {
     
 }
 
+
+
 tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
     attr <- humdrumRattr(X)
     result <- tapply(X, INDEX, FUN, ..., simplify = FALSE) %<-dim% NULL
     
-    headortail <- if (head) match.fun('head') else tail
+    headortail <- if (head) take else end
     indices <- Map(\(x, n) headortail(x, n), tapply(seq_along(X), INDEX, force), lengths(result))
     
     result <- do.call('c', result)
@@ -1292,6 +1336,48 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
   
 }
 
+#' Enumerate vector
+#' 
+#' This function enumerates the values of an input vector `x`,
+#' counting along the length of the vector from 1 to `length(x)`.
+#'
+#' @details
+#' 
+#' If `inPlace = TRUE` (and `x` is atomic), the original vector is returned with the counts
+#' pasted to the front of each value, separated by `sep`.
+#' If `inPlace = FALSE`, a new `integer` vector is returned, identical to calling [seq_along(x)][base::seq].
+#' 
+#' @param x ***The input vector to enumrate.***
+#' 
+#' Must be a vector (either atomic, or a `list()`).
+#' 
+#' @param inPlace ***Should the numbers be pasted onto the original vector?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param sep ***Separator between numbers and vector.***
+#' 
+#' Defaults to `":"`.
+#' 
+#' Can be empty string (`""`), if no separator is desired.
+#' 
+#' @examples
+#' 
+#' enum(letters)
+#' enum(letters, inPlace = FALSE)
+#' 
+enum <- function(x, inPlace = TRUE, sep = ':') {
+  checks(x, xvector)
+  checks(inPlace, xTF)
+  checks(sep, xcharacter & xlen1)
+  
+  n <- seq_along(x)
+  if (inPlace && !is.list(x)) paste0(format(n, bigmark = ','), sep, x) else n
+  
+}
+
 #' Cumulative sum of numeric vector
 #' 
 #' Calculate sequential cummulative sum of values in numeric vectors.
@@ -1387,7 +1473,6 @@ harmonicInterpolate <- function(x, y, includeEdges = FALSE, bigFirst = FALSE) {
 #' This behavior is easiest to understand as the inverse of the 
 #' behavior of [delta(lag < 0)][delta], which is more intuitive. (`sigma` is the inverse of [delta()], see the
 #' *Invertability* section above).
-
 #'
 #' 
 #' @section Grouping:
@@ -1989,7 +2074,7 @@ substituteName <- function(expr, subs) {
                 if (!is.null(expr[[i]])) expr[[i]] <- Recall(expr[[i]], subs)
             }
   } else { 
-            if (deparse(expr) %in% names(subs)) expr <- subs[[which(deparse(expr) == names(subs))]]
+            if (any(deparse(expr) %in% names(subs))) expr <- subs[[which(deparse(expr) == names(subs))]]
    
   }
   expr
@@ -2097,6 +2182,10 @@ unanalyzeExpr <- function(exprA) {
     expr
 }
 
+literalizeQuo <- function(quo) {
+  
+  if (identical(rlang::get_env(quo), rlang::empty_env())) rlang::eval_tidy(quo) else quo
+}
 
 
 withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
@@ -2312,7 +2401,7 @@ splitExpression <- function(expr, on = '|') {
     
     names(exprs) <- sapply(strsplit(names(exprs), split = '.', fixed = TRUE), \(n) tail(n[n != 'NA'], 1L))
     
-    if (rlang::is_formula(expr)) {
+    if (rlang::is_formula(expr) && !rlang::is_quosure(expr)) {
         lhs <- rlang::f_lhs(expr)
         env <- rlang::f_env(expr)
         exprs <- lapply(exprs, \(ex) rlang::new_formula(lhs, ex, env))
@@ -2678,72 +2767,3 @@ strPartition <- function(str, split = '/') {
 
 
 
-## Token S3 class ----
-
-
-
-#' Humdrum tokens
-#' @export
-token <- function(x, Exclusive = NULL, ...) {
-  
-  attr(x, 'Exclusive') <- Exclusive
-  humdrumRattr(x) <- list(...)
-  
-  class(x) <- c('token', class(x))
-  x
-  
-  
-}
-
-
-#' @rdname token
-#' @export
-`[.token` <- function(x, ...) {
-  
-  result <- NextMethod('[')
-  humdrumRattr(result) <- humdrumRattr(x)
-  class(result) <- class(x)
-  result
-  
-}
-
-#' @rdname token
-#' @export
-print.token <- function(x) {
-  exclusive <- attr(x, 'Exclusive')
-  if (!is.null(exclusive)) {
-    cat('**')
-    cat(exclusive, sep = '**')
-    cat('\n')
-    attr(x, 'Exclusive') <- NULL
-  }
-  class(x) <- setdiff(class(x), 'token')
-  if (is.factor(x)) x <- as.character(x)
-  attributes(x) <- list()
-  print(x, quote = FALSE, na.print = '.')
-}
-
-#' @rdname token
-#' @export
-format.token <- function(x, ...) {
-  x[is.na(x)] <- '.'
-  x
-}
-
-#' @rdname token
-#' @export
-c.token <- function(...) {
-  args <- list(...)
-  
-  exclusives <- unique(unlist(lapply(args, attr, which = 'Exclusive')))
-  
-  humattr <- humdrumRattr(args[[1]])
-  
-  args <- lapply(args, \(x) `class<-`(x, class(x)[-1]))
-  result <- do.call('c', args)
-  
-  humdrumRattr(result) <- humattr
-  class(result) <- c('token', class(result))
-  result
-  
-}

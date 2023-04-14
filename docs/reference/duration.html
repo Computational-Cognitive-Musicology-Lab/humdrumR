@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,7 @@
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -121,10 +122,10 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-in"><span class="va">tokens</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4.GG'</span>, <span class="st">'8G'</span>, <span class="st">'16E'</span>, <span class="st">'16F#'</span>, <span class="st">'16G'</span>, <span class="st">'16D'</span>, <span class="st">'q8D#'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">duration</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **duration</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **duration (numeric)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3750 0.1250 0.0625 0.0625 0.0625 0.0625 0.0000 0.2500</span>
 <span class="r-in"><span class="fu">quarters</span><span class="op">(</span><span class="va">tokens</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>grace <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **quarters</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **quarters (numeric)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.50 0.50 0.25 0.25 0.25 0.25    . 1.00</span>
 <span class="r-in"><span class="fu">quarters</span><span class="op">(</span><span class="va">tokens</span>, inPlace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1.5GG"  "0.5G"   "0.25E"  "0.25F#" "0.25G"  "0.25D"  "0D#"    "1E"    </span>

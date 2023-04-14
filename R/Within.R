@@ -55,8 +55,8 @@
 #' + In a subset of the data using `subset`...
 #'   + either ignoring the rest of the data or evaluating a *different* expression in the other part.
 #' + Separately in different subsets of the data, which are then recombined (split-apply-combine) using `by`.
-#' + Across windows in the data (e.g., ngrams, rolling windows).
-#' + Which produces a plot, with particular [plotting parameters][graphics::par()], and/or without 
+#' + Across contextual windows in the data (e.g., ngrams, rolling windows).
+#' + Which produce a plots with particular [plotting parameters][graphics::par()], and/or without 
 #'   returning anything using `sidefx`.
 #' + "Fill" short results to match the original field size using `fill`.
 #' + Only in certain record types (defaulting only data records) using `dataTypes`.
@@ -405,8 +405,34 @@
 #' 
 #' @section Windowing data:
 #' 
-#' XXXX
+#' `with`/`within.humdrumR` can work in tandem with the `context()` function to evaluate do expressions 
+#' within arbitrary contextual windows.
+#' To do so, simply place a call to `context()` in an unnamed argument to `with`/`within.humdrumR()`;
+#' you must provide `open` and `close` arguments.
+#' The `overlap`, `depth`, `rightward`, `duplicate_indices`, `min_length`, and `max_length` arguments can be used here,
+#' just as they are in a separate call to `context()` --- see the `context()` man page.
+#' Do not give the `context()` command inside a `with`/`within.humdrumR` call a `x` or `reference` argument:
+#' The [active field][humActive] is used as the `reference` vector for `context()` --- e.g., if `open`
+#' or `close` is a `character` string, they are matched as regular expressions against the [active field][humActive].
+#' `list(File, Spine, Path)` is also automatically passed as the `groupby` argument to `context()`.
 #' 
+#' 
+#' When using `context()` inside `with`/`within.humdrumR`, the `alignToOpen` argument will have no effect.
+#' If you want output to align with the right side of each window, use `alignLeft = FALSE` as an argument to 
+#' **with**/**within**, not as an argument to `context()`.
+#' The `inPlace`, `collapse`, `sep`, and `stripRegex` arguments will have no effect when `context()` is used
+#' as syntactic sugar in a `with`/`within.humdrumR` call.
+#' 
+#' 
+#' As with a `subset` expression, you can provide a `complement` expression to go along with a `context()`.
+#' (Note that the `complement` argument to `context()` itself is ignored.)
+#' The `complement` expression will be evaluated on any data points that aren't captured within *any* contextual windows.
+#' 
+#' 
+#' Any `by` or `subset` expressions placed before a `context()` expression are evaluated first, in order from left to right.
+#' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
+#' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
+
 #' @section Plotting parameters:
 #'
 #' As mentioned above, plots in within-expressions should (often) be called using the `sidefx` argument name.
@@ -458,11 +484,6 @@
 #' within(humdata,
 #'        list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
-#' 
-#' @section N grams:
-#' 
-#' XXXX
-#' 
 #' 
 #' 
 #' @section Advanced scripting:
@@ -538,7 +559,7 @@
 #' @param ... ***Any number of expressions to evaluate.*** 
 #'
 #' Unnamed expressions are interpreted as the "main" *within-expressions*. 
-#' Possible *evaluation control arguments* include `by`, `subset`, and `windows`.
+#' Possible *evaluation control arguments* include `by`, `subset`, and `context`.
 #' Other evaluation options can be achieved with `recycle` or `side` arguments.
 #' 
 #' @param dataTypes ***Which types of humdrum records to include.***
@@ -554,6 +575,12 @@
 #' Defaults to `list()`.
 #' 
 #' Must be `list`.
+#' 
+#' @param alignLeft ***Should output that is shorter than input be aligned to the left?***
+#'
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @param drop ***Whether to return a simplified data structure.***
 #' 
@@ -586,7 +613,6 @@ with.humdrumR <- function(data, ...,
                           expandPaths = FALSE,
                           drop = TRUE,
                           variables = list()) {
-  
   checks(data, xclass('humdrumR'))
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())
@@ -597,7 +623,7 @@ with.humdrumR <- function(data, ...,
   ### Do we want extract the results from the data.table? 
   
   if (drop) {
-    parts <- grepl('^_(by|subset)=..*_$', colnames(result))
+    parts <- grepl('^_(by|subset)=..*_$|contextWindow', colnames(result))
     if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
     result <- if (any(!parts)) result[[max(which(!parts))]]
@@ -618,11 +644,13 @@ with.humdrumR <- function(data, ...,
   
 }
 
+
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, variables = list()) {
+within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, variables = list()) {
   checks(data, xclass('humdrumR'))
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, 
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
+                       expandPaths = expandPaths, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -650,7 +678,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, var
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  newhumtab <- newhumtab[ , !grep('_by=..*_$|_subset=..*_', colnames(newhumtab)), with = FALSE]
+  newhumtab <- newhumtab[ , !grep('_by=..*_$|_subset=..*_|contextWindow', colnames(newhumtab)), with = FALSE]
   
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -670,7 +698,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, var
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
     addFields(humdrumR) <- newfields
-    humdrumR@Active <- rlang::quo(list(!!!(rlang::syms(newfields))))
+    humdrumR@Active <- if (length(newfields) == 1L) rlang::quo(!!rlang::sym(newfields)) else rlang::quo(list(!!!(rlang::syms(newfields))))
   }
   humdrumR
   # update_humdrumR(humdrumR, field = c(newfields, overWrote))
@@ -678,7 +706,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', expandPaths = FALSE, var
 
 }
 
-withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, variables = list(), withFunc) {
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, variables = list(), withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
   
@@ -701,10 +729,12 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', expandPaths = FALSE, var
   ### Preparing the "do" expression
   do   <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = FALSE)
   ordo <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = TRUE)
+  
+  quoTab$Quo[quoTab$Keyword == 'context'] <- lapply(quoTab$Quo[quoTab$Keyword == 'context'], prepareContextQuo, active = humdrumR@Active)
   # 
 
   #evaluate "do" expression! 
-  result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo)
+  result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo, alignLeft = alignLeft)
   
   visible <- attr(result, 'visible')
   attr(result, 'visible') <- NULL
@@ -795,8 +825,8 @@ parseArgs <- function(..., variables = list(), withFunc) {
         keyword <- 'pre'
       }
       
-      if (pmatch(quoA$Head, c('windows'), nomatch = 0)) {
-        keyword <- 'windows'
+      if (pmatch(quoA$Head, c('context'), nomatch = 0)) {
+        keyword <- 'context'
       }
     }
     
@@ -840,9 +870,8 @@ parseKeywords <- function(quoTab, withFunc) {
   
   # classify keywords
   knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo'), #, 'ordofill'),
-                        partitions      = c('by', 'subset'),
-                        ngram           = 'ngram',
-                        windows         = 'windows')
+                        partitions      = c('by', 'subset', 'context'),
+                        ngram           = 'ngram')
   quoTab[ , KeywordType := rep(names(knownKeywords), lengths(knownKeywords))[match(Keyword, unlist(knownKeywords))]]
   
   # check for validity
@@ -885,7 +914,7 @@ partialMatchKeywords <- function(keys) {
                          ordo        = c('complement', 'rest', 'otherwise'),
                          # ordofill    = c('compfill', 'restfill', 'otherfill'),
                          ngram     = c('ngrams'),
-                         windows   = c('windows', 'context'))
+                         context   = c('windows', 'context'))
     
     matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
     
@@ -968,19 +997,19 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
 
     
   # if ngram is present
-  if (any(quoTab$Keyword == 'ngram')) {
-    doQuo <- ngramifyQuo(doQuo, 
-                         quoTab[Keyword == 'ngram']$Quo[[1]], usedInExpr, 
-                         depth = 1L + any(lists))
-  } 
-  
-  if (any(quoTab$Keyword == 'windows')) {
-    doQuo <- windowfyQuo(doQuo,  
-                         quoTab[Keyword == 'windows']$Quo[[1]],
-                         usedInExpr, 
-                         depth = 1L + any(lists))
-  }
-  
+  # if (any(quoTab$Keyword == 'ngram')) {
+  #   doQuo <- ngramifyQuo(doQuo, 
+  #                        quoTab[Keyword == 'ngram']$Quo[[1]], usedInExpr, 
+  #                        depth = 1L + any(lists))
+  # } 
+  # 
+  # if (any(quoTab$Keyword == 'context')) {
+  #   doQuo <- windowfyQuo(doQuo,  
+  #                        quoTab[Keyword == 'context']$Quo[[1]],
+  #                        usedInExpr, 
+  #                        depth = 1L + any(lists))
+  # }
+  # 
 
   # rlang::quo({
     # result <- withVisible(!!doQuo)
@@ -1462,6 +1491,21 @@ interpolateArguments <- function(quo, namedArgs) {
 }
 
 
+prepareContextQuo <- function(contextQuo, active) {
+  exprA <- analyzeExpr(contextQuo)
+  
+  exprA$Head <- 'findWindows'
+  exprA$Args$activeField <- rlang::quo_squash(active)
+  
+  passAsExprs <- .names(exprA$Args) %in% c('open', 'close', '')
+  exprA$Args[passAsExprs] <- lapply(exprA$Args[passAsExprs], \(expr) call('quote', expr))
+  
+  if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Spine, Path)) 
+  exprA$Args$x <- quote(humtab)
+  
+  unanalyzeExpr(exprA)
+}
+
 
 
 ## Evaluating do quo in humtab ----
@@ -1471,7 +1515,7 @@ interpolateArguments <- function(quo, namedArgs) {
 
 
 
-evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
+evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo, alignLeft) {
     result <- if(nrow(partQuos) == 0L) {
         as.data.table(rlang::eval_tidy(doQuo, data = humtab))
         
@@ -1479,12 +1523,15 @@ evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo) {
         evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
     }
    
-    parseResult(result)
+    parseResult(result, alignLeft)
 }
 evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
     ### evaluation partition expression and collapse results 
     ## to a single factor
     partType <- partQuos$Keyword[1]
+    
+    if (partType == 'context') return(evalDoQuo_context(doQuo, humtab, partQuos, ordoQuo))
+    
     partition <- rlang::eval_tidy(partQuos$Quo[[1]], humtab)
     
     if (!is.list(partition)) partition <- list(partition)
@@ -1526,7 +1573,7 @@ evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
     result <- if (nrow(partQuos) > 1) {
       results <- humtab[ , {
         evaled <- evalDoQuo_part(doQuo, .SD, partQuos[-1], ordoQuo)
-        evaled[[partitionName]] <- partition
+        evaled[[partitionName]] <- if (nrow(evaled)) partition else partition[0]
         list(list(evaled)) 
       },
       by = partition, .SDcols = targetFields]
@@ -1583,6 +1630,41 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
    result
 }
 
+evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
+  
+  contextQuo <- partQuos$Quo[[1]]
+  
+  windowFrame <- eval(rlang::quo_squash(contextQuo), envir = humtab)
+  
+  result <- if (nrow(windowFrame)) {
+    humtab_extended <- windows2groups(humtab, windowFrame)
+    humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
+  } else {
+    data.table(contextWindow = integer(0L), Result = list(), `_rowKey_` = list())
+  }
+
+  
+  
+  if (!is.null(ordoQuo)) {
+    # notused <- setdiff(seq_len(nrow(humtab)))
+    
+    complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!`_rowKey_` %in% unlist(result[['_rowKey_']])]))
+    complement[ , contextWindow := 0L]
+    
+    if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
+    
+    mismatch <-  !colnames(complement) %in% colnames(result)
+    colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
+    
+    result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
+  }
+  
+  result
+  # doQuo <- rlang::quo_squash(doQuo)
+  # humtab_extended[ , eval(doQuo), by = contextWindow]
+  
+}
+
 
 
 
@@ -1593,7 +1675,7 @@ evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
 
 
 
-parseResult <- function(results) {
+parseResult <- function(results, alignLeft = TRUE) {
     # this takes a nested list of results with associated
     # indices and reconstructs the output object.
   # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
@@ -1622,13 +1704,12 @@ parseResult <- function(results) {
           ifelse = nrow(pairs) > 1L)
   }
   
-  
+  aligner <- if (alignLeft) take else end
   results <- lapply(results, 
                     \(result) {
                       if (!is.list(result)) return(rep(result, resultLengths)) # this should only be partitition columns
                       first <- result[[1]][[1]]
                       
-                      humattr <- humdrumRattr(first)
                       class <- class(first)
                       object <- length(first) && (is.table(first) || (is.object(first) && !is.atomic(first)))
                       
@@ -1638,21 +1719,25 @@ parseResult <- function(results) {
                       if (!object) {
                         factors <- sum(sapply(result, is.factor))
                         if (factors > 0L && factors < length(result)) result <- lapply(result, as.character)
-                        result <- Map(\(r, l) r[seq_len(l)], result, pmin(lengths(result), resultLengths))
+                        
+                        result <- Map(aligner, result, pmin(lengths(result), resultLengths))
+                        
                         result <- unlist(result, recursive = FALSE)
                       }
                       
-                      humdrumRattr(result) <- humattr
+                      
+                      if (inherits(first, 'token')) {
+                        first@.Data <- result
+                        result <- first
+                      } else {
+                        if (!is.null(result)) class(result) <- if (object) 'list' else class
+                      }
                       attr(result, 'visible') <- NULL
-                      if (!is.null(result)) class(result) <- if (object) 'list' else class
+                     
                       result 
                     })
   
-
   
-  
- 
-    
   result <- as.data.table(results)
     
   colnames(result)[colnames(result) == ""] <- "Result"

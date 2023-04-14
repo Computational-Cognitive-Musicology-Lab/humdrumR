@@ -14,7 +14,7 @@ mint() and hint() are special forms for calculating intervals "melodically" or "
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,7 @@ mint() and hint() are special forms for calculating intervals "melodically" or "
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -326,7 +327,7 @@ specially optimized for this functions.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want <code>groupby = list(File, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
-three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, or untie.
+three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
 in a "melodic" way, within each spine path of each file.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
@@ -352,16 +353,16 @@ you could manually set <code>groupby = list(File, Record)</code>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">exampleToken</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4GG'</span>, <span class="st">'4G'</span>, <span class="st">'4E'</span>, <span class="st">'4F#'</span>, <span class="st">'4G'</span>, <span class="st">'4D'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">mint</span><span class="op">(</span><span class="va">exampleToken</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">results</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **interval (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] [GG] +P8  -m3  +M2  +m2  -P4  +M2 </span>
 <span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">hint</span><span class="op">(</span><span class="va">exampleToken</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">results</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **interval (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] [GG] +P8  -m3  +M2  +m2  -P4  +M2 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">exampleHumdrum</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGsWK7P/temp_libpath4ee51b3e3c48/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmppPLRKT/temp_libpath45da68f4ffb3/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -370,13 +371,13 @@ you could manually set <code>groupby = list(File, Record)</code>.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">exampleHumdrum</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">mint</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">results</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **interval (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] .   [F] +P5 -m6 +m6 -P5 +P5 -M9 +P8 -P8 +P8 -m7 +M6 -M6 +P5 -M2 .   [a] +m3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [20] -P5 +M3 -M6 +P4 P1  +M3 P1  +m3 -m3 +m3 -P4 +m3 -P4 +M3 -M3 +M6 -M6 +M6 -M6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [39] +P5 -M9 +A4 -P5 +m6 .  </span>
 <span class="r-in"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">exampleHumdrum</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">hint</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">results</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **interval</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **interval (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] .     [F]   +P5   [E]   +m6   [F]   +P5   [BB-] +P8   [BB-] +P8   [C]  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] +M6   [C]   +P5   [F]   .     [a]   +m3   +P4   +M3   [c]   +P4   [f]  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [25] +M3   [a]   +m3   [a]   +m3   +P5   +m3   +P4   +M3   +P5   +M6   +P5  </span>

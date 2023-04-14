@@ -1773,7 +1773,7 @@ update_Exclusive.humdrumR <- function(hum, ...) {
 }
 update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
     field <- field[1]
-    Exclusive <- attr(hum[[field]], 'Exclusive')
+    Exclusive <- getExclusive(hum[[field]]) 
     
     exclusives <- hum[, Type == 'I' & grepl('^\\*\\*', Token)]
     
@@ -2255,7 +2255,17 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
   
   humtab <- getHumtab(humdrumR)[ , fields, with = FALSE]
   
-  classes <- sapply(humtab, class)
+  classes <- sapply(humtab, 
+                    \(field) {
+                        if (inherits(field, 'token')) {
+                            paste0(class(field@.Data), 
+                                   ' (', if (!is.null(field@Exclusive)) paste0('**', field@Exclusive, ' '), 
+                                   'tokens)')
+                        } else {
+                            class(field)
+                        }
+                        
+                        })
   lists <- classes == 'list'
   if (any(lists)) {
     classes[lists] <- paste0('list (of ',

@@ -175,7 +175,7 @@ do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs 
   if (((is.atomic(firstArg) && !is.table(firstArg)) || is.list(firstArg)) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
-  Exclusive <- attr(firstArg, 'Exclusive')
+  Exclusive <- getExclusive(firstArg)
   
   dimension <- dimParse(args)
   
@@ -185,7 +185,7 @@ do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs 
                             verboseMessage = '"not NA"', ...)
   
   
-  attr(naskip$Args[[1]], 'Exclusive') <- Exclusive
+  # attr(naskip$Args[[1]], 'Exclusive') <- Exclusive
   
   result <- if (length(naskip$Args[[1]])) {
     if (ignoreUnknownArgs) do...(func, naskip$Args) else do.call(func, naskip$Args)
@@ -358,7 +358,7 @@ partialApply <- function(func, ...) {
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a singleton `logical` value: a on/off switch.
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `FALSE` the "best" regex/exclusive match is dispatched for each Exclusive segment. 
 #' If `TRUE`, differenet functions can be dispatched
@@ -463,7 +463,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 #' @rdname humdrumDispatch
 #' @export
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
-  if (!is.null(attr(x, 'Exclusive'))) Exclusive <- attr(x, 'Exclusive')
+  if (!is.null(getExclusive(x))) Exclusive <- getExclusive(x)
   if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
   

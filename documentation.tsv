@@ -85,7 +85,7 @@ Summary.R	interpretations.Rd	corpus summary functions		2744	Yes	Yes	interpretati
 Summary.R	reference.Rd	corpus summary functions		3635	Yes	Yes	reference, reference.character, reference.humdrumR, [.humReference, print.humReference		
 Summary.R	spines.Rd	corpus summary functions		1733	Yes	Yes	spines, [.humSpines, print.humSpines		
 Validation.R	validateHumdrum.Rd			3912	Yes	Yes	validateHumdrum		
-Windows.R	humWindows.Rd			797	X	X	humWindows, windows, nested, hop, windowApply, applyNgram		559
+Windows.R	humWindows.Rd			797	X	X	humWindows, context, nested, hop, windowApply, applyNgram		559
 Within.R	withinHumdrum.Rd		WorkingWithData	24326	Yes	Yes	withinHumdrum, within, with, with.humdrumR, within.humdrumR		376
 Write.R	writeHumdrum.Rd			3583	Yes	Yes	writeHumdrum		562
 humdrumR-class.R	collapseHumdrum.Rd	Humdrum data reshaping functions		2335	Yes	Yes	collapseHumdrum, collapseStops, collapsePaths, collapseRecords		36

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,7 @@
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -98,7 +99,7 @@ the content of humdrum data.</p>
           
           <code><a href="writeHumdrum.html">writeHumdrum()</a></code> 
         </dt>
-        <dd>Write humdrumR data to humdrum files</dd>
+        <dd>Write <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a> to humdrum files</dd>
       </dl></div><div id="" class="section level2">
       
       
@@ -143,7 +144,7 @@ ensconced within humdrumR data structures.</p>
 
       <dl><dt>
           
-          <code><a href="token.html">token()</a></code> <code><a href="token.html">`[`(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">print(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">format(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">c(<i>&lt;token&gt;</i>)</a></code> 
+          <code><a href="token.html">token()</a></code> <code><a href="token.html">c(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">rep(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">unique(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">`[`(<i>&lt;token&gt;</i>,<i>&lt;ANY&gt;</i>,<i>&lt;ANY&gt;</i>)</a></code> <code><a href="token.html">show(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">format(<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">is.token()</a></code> <code><a href="token.html">order.token()</a></code> <code><a href="token.html">Arith(<i>&lt;token&gt;</i>,<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">Arith(<i>&lt;token&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="token.html">Arith(<i>&lt;character&gt;</i>,<i>&lt;token&gt;</i>)</a></code> <code><a href="token.html">Summary(<i>&lt;token&gt;</i>)</a></code> 
         </dt>
         <dd>Humdrum tokens</dd>
       </dl></div><div class="section level2">
@@ -174,9 +175,9 @@ ensconced within humdrumR data structures.</p>
         <dd>Indexing humdrumR objects</dd>
       </dl><dl><dt>
           
-          <code><a href="humWindows.html">windows()</a></code> <code><a href="humWindows.html">nested()</a></code> <code><a href="humWindows.html">hop()</a></code> <code><a href="humWindows.html">windowApply()</a></code> <code><a href="humWindows.html">applyNgram()</a></code> 
+          <code><a href="context.html">context()</a></code> 
         </dt>
-        <dd>Create arbitrary "windows" across vectors.</dd>
+        <dd>Create arbitrary "context" across vectors.</dd>
       </dl></div><div class="section level2">
       <h2 id="musical-tools">Musical Tools<a class="anchor" aria-label="anchor" href="#musical-tools"></a></h2>
       
@@ -623,7 +624,7 @@ contain the musical data.</p>
           
           <code><a href="humActive.html">evalActive()</a></code> <code><a href="humActive.html">getActive()</a></code> <code><a href="humActive.html">getActiveFields()</a></code> <code><a href="humActive.html">setActive()</a></code> <code><a href="humActive.html">setActiveFields()</a></code> <code><a href="humActive.html">`$`(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>The "Active expression" of a humdrumR object</dd>
+        <dd>The "Active expression" of a <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR object</a></dd>
       </dl><dl><dt>
           
           <code><a href="humCoercion.html">as.vector(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.lines()</a></code> <code><a href="humCoercion.html">as.matrix(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.matrices()</a></code> <code><a href="humCoercion.html">as.data.frames()</a></code> 
@@ -668,7 +669,7 @@ contain the musical data.</p>
           
           <code><a href="humSize.html">nrecord()</a></code> <code><a href="humSize.html">nrow(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ntoken()</a></code> <code><a href="humSize.html">npiece()</a></code> <code><a href="humSize.html">nfile()</a></code> <code><a href="humSize.html">length(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ncol(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">dim(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">is.empty()</a></code> <code><a href="humSize.html">anyMultiPieceFiles()</a></code> <code><a href="humSize.html">anyPaths()</a></code> <code><a href="humSize.html">anyStops()</a></code> <code><a href="humSize.html">anySubcorpora()</a></code> <code><a href="humSize.html">namesSubcorpora()</a></code> 
         </dt>
-        <dd>humdrumR data size and shape</dd>
+        <dd><a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a> size and shape</dd>
       </dl><dl><dt>
           
           <code><a href="humTable.html">getHumtab()</a></code> <code><a href="humTable.html">getFields()</a></code> <code><a href="humTable.html">fields()</a></code> 
@@ -773,6 +774,16 @@ contain the musical data.</p>
           <code><a href="sigma.html">sigma()</a></code> 
         </dt>
         <dd>Cumulative sum of numeric vector</dd>
+      </dl><dl><dt>
+          
+          <code><a href="hop.html">hop()</a></code> 
+        </dt>
+        <dd>Generate regular sequence "along" input</dd>
+      </dl><dl><dt>
+          
+          <code><a href="enum.html">enum()</a></code> 
+        </dt>
+        <dd>Enumerate vector</dd>
       </dl></div><div class="section level2">
       
       <h3 id="regular-expressions">Regular Expressions<a class="anchor" aria-label="anchor" href="#regular-expressions"></a></h3>

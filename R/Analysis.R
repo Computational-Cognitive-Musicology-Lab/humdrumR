@@ -307,9 +307,8 @@ table <- function(...,
 }
 
 factorize <- function(token) {
-  factorizer <- attr(token, 'factorizer')
-  class(token) <- setdiff(class(token), 'token')
-  if (is.null(factorizer)) return(token)
+  factorizer <- token@Attributes$factorizer
+  if (is.null(factorizer)) return(factor(token@.Data))
   
   factorizer(token)
   
@@ -395,8 +394,7 @@ barplot <- function(height,  ...,
   
   
   if (missing(yaxis)) {
-    yran <- range(setdiff(height, 0))
-    if (log == 'y') yran <- log10(yran)
+    yran <- if (log == 'y') log10(c(min(10, height), max(height))) else c(0L, max(height))
     yaxis <- axisTicks(yran, log = log == 'y', nint = 12)
     
   }

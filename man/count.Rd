@@ -71,13 +71,13 @@ Must be \code{NULL}, or a \code{logical} vector of the same length as \code{dur}
 
 Defaults to \code{TRUE}.
 
-Must be a single \code{logical} value: a on/off switch.}
+Must be a single \code{logical} value: an on/off switch.}
 
 \item{groupby}{\emph{\strong{Optional vectors to group by and count within.}}
 
 Defaults to empty \code{list()}.
 
-Must be a \code{\link[=list]{list()}}, which is either empty or contains vectors whiare all the same length as \code{dur}.
+Must be a \code{\link[=list]{list()}}, which is either empty or contains vectors which are all the same length as \code{dur}.
 To function as a by-record timeline, the \code{groupby} list must include a \emph{named} \code{Piece} and \code{Record} vectors.
 Luckily, these are automatically passed by \link[=withinHumdrum]{with(in).humdrumR}, so you won't need to worry about it!}
 }

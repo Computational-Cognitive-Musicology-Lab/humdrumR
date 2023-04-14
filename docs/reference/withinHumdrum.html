@@ -12,7 +12,7 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,7 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -88,7 +89,14 @@ while employing split/apply/combine, windowing, and other analysis options.</p>
 <span class="op">)</span>
 
 <span class="co"># S3 method for humdrumR</span>
-<span class="fu">within</span><span class="op">(</span><span class="va">data</span>, <span class="va">...</span>, dataTypes <span class="op">=</span> <span class="st">"D"</span>, expandPaths <span class="op">=</span> <span class="cn">FALSE</span>, variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">within</span><span class="op">(</span>
+  <span class="va">data</span>,
+  <span class="va">...</span>,
+  dataTypes <span class="op">=</span> <span class="st">"D"</span>,
+  alignLeft <span class="op">=</span> <span class="cn">TRUE</span>,
+  expandPaths <span class="op">=</span> <span class="cn">FALSE</span>,
+  variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -99,7 +107,7 @@ while employing split/apply/combine, windowing, and other analysis options.</p>
 <dt>...</dt>
 <dd><p><em><strong>Any number of expressions to evaluate.</strong></em></p>
 <p>Unnamed expressions are interpreted as the "main" <em>within-expressions</em>.
-Possible <em>evaluation control arguments</em> include <code>by</code>, <code>subset</code>, and <code>windows</code>.
+Possible <em>evaluation control arguments</em> include <code>by</code>, <code>subset</code>, and <code>context</code>.
 Other evaluation options can be achieved with <code>recycle</code> or <code>side</code> arguments.</p></dd>
 <dt>dataTypes</dt>
 <dd><p><em><strong>Which types of humdrum records to include.</strong></em></p>
@@ -121,6 +129,10 @@ the output is consistent.</p></dd>
 <dd><p><em><strong>A named <code>list</code> of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.</strong></em></p>
 <p>Defaults to <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
 <p>Must be <code>list</code>.</p></dd>
+<dt>alignLeft</dt>
+<dd><p><em><strong>Should output that is shorter than input be aligned to the left?</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -156,8 +168,8 @@ how your expressions are evaluated.
 You can evaluate expressions...</p><ul><li><p>In a subset of the data using <code>subset</code>...</p><ul><li><p>either ignoring the rest of the data or evaluating a <em>different</em> expression in the other part.</p></li>
 </ul></li>
 <li><p>Separately in different subsets of the data, which are then recombined (split-apply-combine) using <code>by</code>.</p></li>
-<li><p>Across windows in the data (e.g., ngrams, rolling windows).</p></li>
-<li><p>Which produces a plot, with particular <a href="https://rdrr.io/r/graphics/par.html" class="external-link">plotting parameters</a>, and/or without
+<li><p>Across contextual windows in the data (e.g., ngrams, rolling windows).</p></li>
+<li><p>Which produce a plots with particular <a href="https://rdrr.io/r/graphics/par.html" class="external-link">plotting parameters</a>, and/or without
 returning anything using <code>sidefx</code>.</p></li>
 <li><p>"Fill" short results to match the original field size using <code>fill</code>.</p></li>
 <li><p>Only in certain record types (defaulting only data records) using <code>dataTypes</code>.</p></li>
@@ -478,7 +490,27 @@ but this time wherever the `semits` field is greater than the mean value *across
     
 
 
-<p>XXXX</p>
+<p><code>with</code>/<code>within.humdrumR</code> can work in tandem with the <code><a href="context.html">context()</a></code> function to evaluate do expressions
+within arbitrary contextual windows.
+To do so, simply place a call to <code><a href="context.html">context()</a></code> in an unnamed argument to <code>with</code>/<code>within.humdrumR()</code>;
+you must provide <code>open</code> and <code>close</code> arguments.
+The <code>overlap</code>, <code>depth</code>, <code>rightward</code>, <code>duplicate_indices</code>, <code>min_length</code>, and <code>max_length</code> arguments can be used here,
+just as they are in a separate call to <code><a href="context.html">context()</a></code>---the see the <code><a href="context.html">context()</a></code> man page.
+Do not give the <code><a href="context.html">context()</a></code> command inside a <code>with</code>/<code>within.humdrumR</code> a <code>x</code> or <code>reference</code> argument:
+The <a href="humActive.html">active field</a> is used as the <code>reference</code> vector for <code><a href="context.html">context()</a></code>---e.g., if <code>open</code>
+or <code>close</code> is a <code>character</code> string, they are matched as regular expressions against the <a href="humActive.html">active field</a>.
+<code>list(File, Record, Spine)</code> is also automatically passed as the <code>groupby</code> argument to <code><a href="context.html">context()</a></code>.</p>
+<p>When using <code><a href="context.html">context()</a></code> inside <code>with</code>/<code>within.humdrumR</code>, the <code>alignToOpen</code> argument will have no effect.
+If you want output to align with the right side of each window, use <code>alignLeft = FALSE</code> as an argument to
+<strong>with</strong>/<strong>within</strong>, not as an argument to <code><a href="context.html">context()</a></code>.
+The <code>inPlace</code>, <code>collapse</code>, <code>sep</code>, and <code>stripRegex</code> arguments will have no effect when <code><a href="context.html">context()</a></code> is used
+as syntactic sugar in a <code>with</code>/<code>within.humdrumR</code> call.</p>
+<p>As with a <code>subset</code> expression, you can provide a <code>complement</code> expression to go along with a <code><a href="context.html">context()</a></code>.
+(Note that the <code>complement</code> argument to <code><a href="context.html">context()</a></code> itself is ignored.)
+The <code>complement</code> expression will be evaluated on any data points that aren't captured within <em>any</em> contextual windows.</p>
+<p>Any <code>by</code> or <code>subset</code> expressions placed before a <code>contest()</code> expression are evaluated first, in order from left to right.
+This means you can <em>first</em> run subset or <code>groupby</code>, then calculate context within the subset/partition.
+However, any <code>subset</code> or <code>groupby</code> expressions that are passed in an argument <em>after</em> <code><a href="context.html">context()</a></code> are ignored.</p>
     </div>
     <div class="section level2">
     <h2 id="plotting-parameters">Plotting parameters<a class="anchor" aria-label="anchor" href="#plotting-parameters"></a></h2>

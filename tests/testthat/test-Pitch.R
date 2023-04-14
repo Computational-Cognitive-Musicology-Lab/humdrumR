@@ -113,8 +113,7 @@ test_that("Pitch functions return same output, regardless of input.", {
     
     expect_allequal <- function(f, inputs) {
         vals <- lapply(inputs, f)
-        vals <- lapply(vals, \(v) {attr(v, 'Exclusive') <- NULL ; v})
-        
+        vals <- lapply(vals, humdrumR:::untoken)
         Reduce('expect_equal', vals)
     }
     

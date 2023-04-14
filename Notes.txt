@@ -4,40 +4,30 @@ Nat's ToDo:
 
 	Add grace slot to rhythmInterval?
 
-Features:
 
+Major:
+	Allow with to return matrices!
+		What about doing autocorrelation with [lag = 0:10]?
 
-	Windowing
-
-
-Windowing:
-	open		close
-	prev.open + x	open + x
-	prev.open + x	next.open + x
-	prev.close + x	open + x
-
-
-	identify "anchors" in vector
-		could be regex matches
-		could be numeric sequences
-
-	Pick open anchors independently	
-	Pick open anchors dependtly
-		dependent on closes
-		dependent on previous open/closes
-
-	ditto for close
-	
-
+	humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = ...] is slow
 
 Minor:
 	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?
 
-	Add ordering options to gamut()
+	Add ordering options to gamut(), so you could order by LO5th, for example.
 
 	Remove names from output vector in return from with(..., drop =TRUE)
+
+	hop()
+		add hop.matrix and hop.data.frame
+		add support for negative indexing.
+
 
 Bugs:
 	Figured bass not working with keys?
 	key('k[f#]') not working
 	key('I', Key = 'A:') not working?
+
+
+Questions:
+	Should collapse and sep be distinct arguments (to some functions), or one argument like in base::paste()?

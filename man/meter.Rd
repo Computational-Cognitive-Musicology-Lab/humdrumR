@@ -78,7 +78,7 @@ Must be positive natural numbers.}
 
 \item{tatum}{\emph{\strong{Should the least common denominator of all levels be added to the meter?}}
 
-Must be a singleton \code{logical} value: a on/off switch.}
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
 \code{HumdrumR} represents musical meter, internally, using the S4-class \code{meter}.

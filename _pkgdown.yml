@@ -39,6 +39,7 @@ articles:
   contents:
   - Summary
   - WorkingWithData
+  - Context
 - title: Musical Processing
   desc: Functionality for analyzing musical information
   navbar: Musical tools
@@ -71,7 +72,7 @@ reference:
   - withinHumdrum
   - subset.humdrumR
   - indexHumdrum
-  - humWindows
+  - context
 - title: "Musical Tools"
   desc: >
     These pages describe the classes and functions that directly represent or engage musical/music-theoretic concepts.
@@ -208,6 +209,8 @@ reference:
   - lag
   - segments
   - sigma
+  - hop
+  - enum
 - subtitle: "Regular Expressions"
   desc: >
      [Regular Expressions](https://en.wikipedia.org/wiki/Regular_expression) are essential tools for working with humdrum data.

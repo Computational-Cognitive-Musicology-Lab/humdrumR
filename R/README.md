@@ -800,7 +800,7 @@ If there are more than one unrelated constraints, they can be presented in a sem
 However, when possible, constraints should be expressed more concisely in a single sentence.
 For example, instead of saying "Must be `character`; must be a singleton; the string must not be empty", we can write "Must be a singleton, non-empty `character` value."
 
-+ Singleton logical arguments should always be written as "Must be a singleton `logical` value: a on/off switch."
++ Singleton logical arguments should always be written as "Must be a singleton `logical` value: an on/off switch."
 + Arguments that must be integers or natural numbers (i.e., whole numbers) but where the class is allowed to be `numeric` have special descriptions, either:
   + "whole number(s)"
   + "natural number(s)"

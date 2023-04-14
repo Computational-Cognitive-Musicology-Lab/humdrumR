@@ -18,7 +18,7 @@ These functions are particularly useful as arguments to the count and subpos fun
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,7 @@ These functions are particularly useful as arguments to the count and subpos fun
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -147,15 +148,15 @@ an alternative deparser (output format) can be chosen using the <code>deparser</
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "4."</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">measure</span><span class="op">(</span><span class="st">"M4/4"</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">measure</span><span class="op">(</span><span class="st">"M6/8"</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">measure</span><span class="op">(</span><span class="st">"M6/8"</span>, deparser <span class="op">=</span> <span class="va">duration</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **duration</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **duration (numeric)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.75</span>
 <span class="r-in"> </span>
 </code></pre></div>

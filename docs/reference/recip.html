@@ -18,7 +18,7 @@ which also includes pitch information and notation details.'><!-- mathjax --><sc
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,7 @@ which also includes pitch information and notation details.'><!-- mathjax --><sc
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -155,20 +156,20 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-in"><span class="va">tokens</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'4.GG'</span>, <span class="st">'8G'</span>, <span class="st">'16E'</span>, <span class="st">'16F#'</span>, <span class="st">'16G'</span>, <span class="st">'16D'</span>, <span class="st">'q8D#'</span>, <span class="st">'4E'</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.  8   16  16  16  16  1%0 4  </span>
 <span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>grace <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4. 8  16 16 16 16 .  4 </span>
 <span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span>, scale <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.  4   8   8   8   8   1%0 2  </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 4 4 4 2 1</span>
 <span class="r-in"><span class="fu">recip</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>unit <span class="op">=</span> <span class="st">'4'</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> **recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 16 16 16 16 8  4 </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>

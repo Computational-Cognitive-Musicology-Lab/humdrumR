@@ -1,3 +1,5 @@
+# Package documenation ----
+
 #' humdrumR
 #'
 #' `humdrumR` is a toolkit for the analysis of data encoded in the [humdrum syntax](http://www.humdrum.org/guide/ch05/).
@@ -38,7 +40,7 @@
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
 #' @importFrom rlang %|% %||% 
 #' @importFrom bit64 as.integer64 is.integer64
-#' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank
+#' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom lubridate period is.period
 NULL
 
@@ -55,10 +57,13 @@ withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
                      Key = c('mint', 'hint', 'int'),
                      BPM = c('timestamp'))
 
+# Package global data ----
 
-# groupby
+
+### groupby ----
+
 byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
-                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie'), 
+                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie', 'hop'), 
                              Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
                   data.table(Argument = 'groupby', Type = 'harmonic',
                              Function = c('hint'),
@@ -75,6 +80,7 @@ byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                   )
 
 setOldClass('quosure')
+
 
 ####### Pitch  ----
 
@@ -153,7 +159,8 @@ oldoptions <- options()
 
 .onLoad <- function(libname, pkgname) {
   oldoptions <<- options()
-  options(prompt = 'humdrumℝ> ', continue = 'humdrumℝ... ', scipen = 4, digits = 7)
+  options(#prompt = 'humdrumℝ> ', continue = 'humdrumℝ... ', 
+          scipen = 4, digits = 7)
 }
 
 .onAttach <- function(libname, pkgname) {

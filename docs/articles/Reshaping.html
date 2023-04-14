@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,6 +57,7 @@
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -230,7 +231,7 @@ call it <code>Pitch</code>.</p>
 <span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######## ^^^ Reshaping_example.hum ^^^ #########</span></span>
 <span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>kern tokens)</span></code></pre></div>
 <p>We have a new <code>Pitch</code> field, but we can still access the
 original <code>Token</code> field. You can see it easily by setting the
 “active” field back to <code>Token</code>:</p>
@@ -253,7 +254,7 @@ original <code>Token</code> field. You can see it easily by setting the
 <span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######### ^^^ Reshaping_example.hum ^^^ ##########</span></span>
 <span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>kern tokens)</span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -300,8 +301,8 @@ example,</p>
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">########## ^^^ Reshaping_example.hum ^^^ ###########</span></span>
 <span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="er">&gt;</span>                Token  <span class="sc">::</span> character</span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch  <span class="sc">::</span> character</span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Rhythm <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch  <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Rhythm <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>recip tokens)</span></code></pre></div>
 <ol style="list-style-type: decimal">
 <li>uses the <code>pitch</code> function to extract the pitch
 information and saves it to a new field which we call <code>Pitch</code>
@@ -336,8 +337,8 @@ print:</p>
 <span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">########## ^^^ Reshaping_example.hum ^^^ ###########</span></span>
 <span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="er">&gt;</span>                Token  <span class="sc">::</span> character</span>
-<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch  <span class="sc">::</span> character</span>
-<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="sc">&gt;</span>                Rhythm <span class="sc">::</span> character</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Pitch  <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="sc">&gt;</span>                Rhythm <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>recip tokens)</span>
 <span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a></span>
 <span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>example<span class="sc">$</span>Rhythm</span>
 <span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">########## vvv Reshaping_example.hum vvv ###########</span></span>
@@ -358,8 +359,8 @@ print:</p>
 <span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">########## ^^^ Reshaping_example.hum ^^^ ###########</span></span>
 <span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="er">&gt;</span>                Token  <span class="sc">::</span> character</span>
-<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch  <span class="sc">::</span> character</span>
-<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Rhythm <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="sc">&gt;</span>                Pitch  <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>pitch tokens)</span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Rhythm <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>recip tokens)</span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -467,7 +468,7 @@ interpretations in your file:</p>
 <span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="er">&gt;</span>    <span class="co"># ^^^ Reshaping_example.hum ^^^ #</span></span>
 <span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
-<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Silbe <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Silbe <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>silbe tokens)</span></code></pre></div>
 <p>Notice that <code>foldExclusive</code> automatically folded both
 <code>**sible</code> spines onto their respective <code>**kern</code>
 spines, and have them a new field name.</p>
@@ -495,13 +496,12 @@ one spine, on top of another!</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a></span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">with</span>(kernonly, <span class="fu">table</span>(Token, Spine2))</span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="sc">&gt;</span>         Spine2</span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="sc">&gt;</span>    Token 2b <span class="fl">4.</span>e 4a 4cc 4dd 4g 8f</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="sc">&gt;</span>      2g   <span class="dv">1</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">0</span>   <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span></span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="fl">4.</span>c  <span class="dv">0</span>   <span class="dv">1</span>  <span class="dv">0</span>   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="sc">&gt;</span>      4e   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="sc">&gt;</span>      4f   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">1</span>   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span></span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="sc">&gt;</span>      8d   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span></span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="sc">&gt;</span>      .    <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">1</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span></span></code></pre></div>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="sc">&gt;</span>    Token 2b <span class="fl">4.</span>e 4a 4dd 4g 8f</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="sc">&gt;</span>      2g   <span class="dv">1</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="fl">4.</span>c  <span class="dv">0</span>   <span class="dv">1</span>  <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="sc">&gt;</span>      4e   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="sc">&gt;</span>      4f   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">1</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="sc">&gt;</span>      8d   <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>   <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span></span></code></pre></div>
 </div>
 <div class="section level5">
 <h5 id="harmony-spreading-data">Harmony (Spreading Data)<a class="anchor" aria-label="anchor" href="#harmony-spreading-data"></a>
@@ -536,7 +536,7 @@ target spines:</p>
 <span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">##### ^^^ Reshaping_example.hum ^^^ ######</span></span>
 <span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="er">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="er">&gt;</span>                Token <span class="sc">::</span> character</span>
-<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Harm  <span class="sc">::</span> character</span></code></pre></div>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Harm  <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>harm tokens)</span></code></pre></div>
 <p>The harm spine was copied into a new field “on top of” <em>both</em>
 <code>**kern</code> spines!</p>
 </div>

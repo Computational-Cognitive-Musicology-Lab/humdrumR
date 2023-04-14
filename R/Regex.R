@@ -226,6 +226,7 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 `%~l%` <- function(x, regex) {
   checks(x, xatomic)
   checks(regex, xcharacter & xminlength(1))
+  regex <- escapebraces(regex)
   Reduce('|', lapply(regex, grepl, x = x))
 }
 #' @export
@@ -233,6 +234,7 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 `%~i%` <- function(x, regex) {
   checks(x, xatomic)
   checks(regex, xcharacter & xminlength(1))
+  regex <- escapebraces(regex)
   Reduce('union', lapply(regex, grep, x = x))
 }
 #' @export
@@ -240,6 +242,7 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 `%~n%` <- function(x, regex) {
   checks(x, xatomic)
   checks(regex, xcharacter & xminlength(1))
+  regex <- escapebraces(regex)
   Reduce('+', lapply(regex, stringi::stri_count_regex, str = x))
 }
 #' @export
@@ -247,6 +250,7 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 `%~m%` <- function(x, regex) {
   checks(x, xatomic)
   checks(regex, xcharacter & xminlength(1))
+  regex <- escapebraces(regex)
   
   do.call('.paste', c(list(na.if = all), lapply(regex, stringi::stri_extract_first_regex, str = x)))
 }
@@ -261,7 +265,7 @@ REapply <- function(str, regex, .func, inPlace = TRUE, ..., args = list(), outpu
 `%!~l%` <- Negate(`%~l%`)
 #' @rdname RegexFind
 #' @export
-`%!~i%` <- function(x, pattern) which(!x %~l% pattern)
+`%!~i%` <- function(x, pattern) which(!x %~l% x)
 
 
 
@@ -342,6 +346,11 @@ orRE <- function(...) {
 }
 
 # captureUniq <- function(strs, zero = TRUE) paste0('(', captureRE(strs), if (zero) "?", ')\\1*') 
+
+escapebraces <- function(re) {
+  re[re %in% c('(', ')', '[', ']')] <- paste0('\\', re[re %in% c('(', ')', '[', ']')]) 
+  re
+}
 
 escaper <- function(str) {
     stringr::str_replace_all(str, '\\[\\^', '[\\\\^')

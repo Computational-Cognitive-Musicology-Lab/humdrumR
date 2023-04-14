@@ -22,7 +22,7 @@ We "fold" the data from one structural location over "on top" of other data usin
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,7 @@ We "fold" the data from one structural location over "on top" of other data usin
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
     <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
     <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
@@ -142,7 +143,7 @@ We "fold" the data from one structural location over "on top" of other data usin
 For example, <code>"Tok"</code> would match the <code>Token</code> field.
 This is the field which is "folded" into a new field.</p></dd>
 <dt>fillFromField</dt>
-<dd><p><em><strong>Should the content of the <code>fromField</code> be copied unfolded sections?</strong></em></p>
+<dd><p><em><strong>Should the content of the <code>fromField</code> be to copied unfolded sections?</strong></em></p>
 <p>Defaults to <code>FALSE</code> for <code>foldHumdrum()</code> and <code>foldStops()</code>; <code>TRUE</code> for <code>foldPaths()</code>.</p>
 <p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
 <p>This only comes into play if the folding field is smaller than the <code>to</code> field.</p></dd>

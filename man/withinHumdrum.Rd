@@ -17,7 +17,14 @@
   variables = list()
 )
 
-\method{within}{humdrumR}(data, ..., dataTypes = "D", expandPaths = FALSE, variables = list())
+\method{within}{humdrumR}(
+  data,
+  ...,
+  dataTypes = "D",
+  alignLeft = TRUE,
+  expandPaths = FALSE,
+  variables = list()
+)
 }
 \arguments{
 \item{data}{\emph{\strong{HumdrumR data.}}
@@ -27,7 +34,7 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 \item{...}{\emph{\strong{Any number of expressions to evaluate.}}
 
 Unnamed expressions are interpreted as the "main" \emph{within-expressions}.
-Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{windows}.
+Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{context}.
 Other evaluation options can be achieved with \code{recycle} or \code{side} arguments.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}
@@ -56,6 +63,12 @@ the output is consistent.}
 Defaults to \code{list()}.
 
 Must be \code{list}.}
+
+\item{alignLeft}{\emph{\strong{Should output that is shorter than input be aligned to the left?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \value{
 From \code{within.humdrumR}  a new humdrumR data object.
@@ -98,8 +111,8 @@ You can evaluate expressions...
 \item either ignoring the rest of the data or evaluating a \emph{different} expression in the other part.
 }
 \item Separately in different subsets of the data, which are then recombined (split-apply-combine) using \code{by}.
-\item Across windows in the data (e.g., ngrams, rolling windows).
-\item Which produces a plot, with particular \link[graphics:par]{plotting parameters}, and/or without
+\item Across contextual windows in the data (e.g., ngrams, rolling windows).
+\item Which produce a plots with particular \link[graphics:par]{plotting parameters}, and/or without
 returning anything using \code{sidefx}.
 \item "Fill" short results to match the original field size using \code{fill}.
 \item Only in certain record types (defaulting only data records) using \code{dataTypes}.
@@ -425,7 +438,30 @@ but this time wherever the `semits` field is greater than the mean value *across
 \section{Windowing data}{
 
 
-XXXX
+\code{with}/\code{within.humdrumR} can work in tandem with the \code{context()} function to evaluate do expressions
+within arbitrary contextual windows.
+To do so, simply place a call to \code{context()} in an unnamed argument to \code{with}/\code{within.humdrumR()};
+you must provide \code{open} and \code{close} arguments.
+The \code{overlap}, \code{depth}, \code{rightward}, \code{duplicate_indices}, \code{min_length}, and \code{max_length} arguments can be used here,
+just as they are in a separate call to \code{context()}---the see the \code{context()} man page.
+Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} a \code{x} or \code{reference} argument:
+The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()}---e.g., if \code{open}
+or \code{close} is a \code{character} string, they are matched as regular expressions against the \link[=humActive]{active field}.
+\code{list(File, Record, Spine)} is also automatically passed as the \code{groupby} argument to \code{context()}.
+
+When using \code{context()} inside \code{with}/\code{within.humdrumR}, the \code{alignToOpen} argument will have no effect.
+If you want output to align with the right side of each window, use \code{alignLeft = FALSE} as an argument to
+\strong{with}/\strong{within}, not as an argument to \code{context()}.
+The \code{inPlace}, \code{collapse}, \code{sep}, and \code{stripRegex} arguments will have no effect when \code{context()} is used
+as syntactic sugar in a \code{with}/\code{within.humdrumR} call.
+
+As with a \code{subset} expression, you can provide a \code{complement} expression to go along with a \code{context()}.
+(Note that the \code{complement} argument to \code{context()} itself is ignored.)
+The \code{complement} expression will be evaluated on any data points that aren't captured within \emph{any} contextual windows.
+
+Any \code{by} or \code{subset} expressions placed before a \code{contest()} expression are evaluated first, in order from left to right.
+This means you can \emph{first} run subset or \code{groupby}, then calculate context within the subset/partition.
+However, any \code{subset} or \code{groupby} expressions that are passed in an argument \emph{after} \code{context()} are ignored.
 }
 
 \section{Plotting parameters}{
