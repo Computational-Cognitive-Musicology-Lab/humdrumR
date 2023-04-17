@@ -1171,12 +1171,18 @@ tint2pc <- function(x, ten = 'A', eleven = 'B', ...) {
 
 ### Tonal ####
 
-tint2step  <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
+tint2step  <- function(tint, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
   
-  stepint <- c(1L, 5L, 2L, 6L, 3L, 7L, 4L)[1 + (LO5th(x) %% 7L)]
+  stepint <- 1L + (LO5th(tint) * 4L) %% 7L
+  # stepint <- c(1L, 5L, 2L, 6L, 3L, 7L, 4L)[1 + (LO5th(x) %% 7L)]
   
   if (is.null(step.labels))  stepint else step.labels[stepint]
 
+}
+
+
+tint2third <- function(tint) {
+  (LO5th(tint) * 2L) %% 7L
 }
 
 ###### Alteration stuff ###

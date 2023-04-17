@@ -1902,6 +1902,11 @@ locate <- function(x, table) {
 
 # bitwise tools
 
+set2int <- function(set, groupby = integer(length(set))) {
+  set <- as.integer(2L ^ set)
+  c(tapply(set, groupby, sum))
+}
+
 ints2bits <- function(n, nbits = 8) {
     mat <- t(sapply(n, \(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
     

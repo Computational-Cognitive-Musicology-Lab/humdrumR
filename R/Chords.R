@@ -133,7 +133,6 @@ rootPosition <- function(tset) {
 
 
 
-
 ## Logic methods ####
 
 ### is.methods #####
@@ -733,22 +732,55 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, quali
   
 }
 
-tint2thirds <- function(tint) {
-  steps <- tint2step(tint, step.labels = NULL)
-  steps2thirds(steps)
-}
+
+
+
+
+
 
 
 steps2thirds <- function(steps, groupby) {
   steps <- 1L + ((steps - 1L) %% 14L)
-  extension <- .extension <- ifelse(steps %% 2L == 0L, steps + 7L, steps)
+  extension <- ifelse(steps %% 2L == 0L, steps + 7L, steps)
   
   rotations <- outer(extension, c(2L, 4L, 6L, 8L, 10L, 12L, 14L), '-') %% 14L
-  ranges <- tapply(rotations, list(rep(groupby, 7L), col(rotations)), max)
-  thirds <- as.integer((rotations[cbind(seq_along(extension), max.col(-ranges)[match(groupby, unique(groupby))])] - 1L) / 2L)
-  thirds
+
+  # hasroot     <- do.call('cbind', by(rotations == 1L, groupby, colSums))
+  # hasthird    <- do.call('cbind', by(rotations == 3L, groupby, colSums))
+  # haseleventh <- do.call('cbind', by(rotations == 11L, groupby, colSums))
+  # hasfifth    <- do.call('cbind', by(rotations == 5L, groupby, colSums))
+
+  # sums <- do.call('cbind', by(rotations, groupby, colSums, simplify = FALSE))
+  # sums[!hasthird & haseleventh] <- sums[!hasthird & haseleventh] - 7L
+
+  #use order because it does hierarchical ordering
+  # picks <- order(c(col(hasroot)),
+                 # c(-hasroot), c(-hasfifth), c(-hasthird), c(sums))
+  # picks <- (picks[seq_along(picks) %% 7L == 1L] - 1L) %% 7L + 1L
+  
+  #
+  picks <- max.col(-tapply(rotations, list(rep(groupby, 7L), col(rotations)), max))
+  
+  #
+  as.integer((rotations[cbind(seq_along(extension), picks[match(groupby, unique(groupby))])] - 1L) / 2L)
 }
 
+
+findBestInversion <- function(int) {
+  empty <- int == 0L
+  
+  # takes a (bitwise) integer representation of extensions
+  inversions <- outer(int[!empty], 0L:6L, bitwRotateL, nbits = 7L)
+  
+  inversions[inversions %% 2L == 0L] <- 256L
+  
+  bestPick <- integer(length(int))
+  bestPick[!empty] <- max.col(-inversions)
+  
+  int[!empty] <- inversions[cbind(seq_len(nrow(inversions)), bestPick[!empty])]
+  
+  list(NewInt = as.integer(int), Inversion = bestPick - 1L)
+}
 
 figurationFill <- function(species, third, step, Explicit, ...) {
   # This function "fills" in missing (implicit) tertian degrees in a sonority.
@@ -1467,33 +1499,77 @@ setMethod('LO5th', 'tertianSet',
 
 # Algorithm:
 # 
-# C E G Bb D
-# 1 3 5 7  9!
-#   1 3 5  7 13
-#     1 3  5 11 13
-#       1  3 9  11 13
-#          1 7  9  11 13  
+# G  Bb Db  F A   C  E  G  B  D  F# A C
+#                 C  E  G
+#                 E  G              C    
+#           C     G                 E
 #
-# C F  G
-# 0 11 5 -> want this
-# 0 -1 1 (lof)
-#   0  9  5 -> this is most compact
-#   0  2  1 (lof)
-#      0  7 11
+#                 C  E  G  B
+#                 E  G  C           C
+#           C     G  B              E
 #
-# C D  G
-# 0 9  5 -> this is most compact
-# 0 1  2 (lof)
-#   0  11 7
-#      0  11 5 -> want this
-#      0 -1  1 (lof)
+#                 C  E  G  Bb 
+# Bb              E  G              C
+#           C     G  Bb             E
+#                 Bb          C  E  G
+#
+#           F     C     G
+#           C     G        F
+#                 F     C    G
+# G  Bb D   F  A  C  E  G  B  D  F# A  C
+# Gb Bb Db  F  Ab C  Eb G  Bb D  F  A  C 
+# G  B  D   F# A  C# E  G# B  D# F# A# C#
+#       D#  F# A# C# E# G#
+# 2 6 10 -7 -3 1 5 9 13 -4 0  4 8 12 -5 -1 3 7 11 -6 -2    
+        
 
-# C F  G Bb
-# 0 11 2 7 -> want this
-#   0  9 11 2
-#      0 3  11 7
-#        0  9  5  13
-#' Interpret tertian sonority from set of notes.
+sonorityx <- function(x, deparser = chord, fill = TRUE,
+                     figureFill = TRUE, Key = NULL, 
+                     groupby = list(), ...) {
+  groupby <- if (length(groupby)) squashGroupby(groupby) else rep(1L, length(x))
+ 
+  reorder(list(x = x, groupby = groupby), order = groupby, toEnv = TRUE)
+  
+  tints <- tonalInterval(x)
+  tints <- tints[order(groupby, tint2semits(tints))]
+  
+  notes <- data.table(LO5th = LO5th(tints), Third = tint2third(tints), Group = groupby)
+  
+  notes[ , Third := (Third - Third[!duplicated(Group)][Group]) %% 7L]
+  notes[duplicated(cbind(Group, Third)), Third := NA_integer_]
+  # thirds <- (thirds - thirds[!duplicated(groupby)][groupby]) %% 7L
+  # thirds[duplicated(cbind(groupby, thirds))] <- NA_integer_
+  chords <- notes[ , list(Inversion = sum(2L^((Third - Third[1]) %% 7L), na.rm = TRUE)), by = Group]
+  chords <- chords[ , findBestInversion(Inversion)]
+  notes[ , Inversion := chords[ , Inversion[Group]]]
+  # inversion <- findBestInversion(inversion)
+  
+  # root
+  chords[ , Root := 0L]
+  chords$Root[chords$NewInt != 0L] <- notes[(Third + Inversion) %% 7L == 0L, LO5th]
+  
+  # signature
+  chords$Sharpest <- notes[, max(LO5th), by = Group]$V1
+  chords$Flatest  <- notes[, min(LO5th), by = Group]$V1
+  
+  chords[ , Signature := Root + ifelse(Sharpest - Root > 5L, Sharpest - Root, 0L) + pmin(Flatest - Root + 1L, 0L)]
+  tset <- chords[, tset(Root, Signature, extension = NewInt, inversion = Inversion)]
+  
+  if (!is.null(Key)) tset <- tset - Key[changes(groupby)]
+  
+  chords <- if (is.null(deparser)) tset else deparser(tset, ...,
+                                                      Key = if (!is.null(Key)) Key[changes(groupby)])
+  output <- if (fill)  {
+    chords[groupby]
+  } else {
+    output <- vectorNA(length(chords), class(chords))
+    output[changes(groupby)] <- chords
+    output
+  }
+  
+  reorder(output)
+}
+#' Interpret tertian sonorities from set of notes.
 #' 
 #' @export
 sonority <- function(x, deparser = chord, fill = TRUE,
