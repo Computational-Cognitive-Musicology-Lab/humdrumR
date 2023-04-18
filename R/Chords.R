@@ -1540,8 +1540,8 @@ sonorityx <- function(x, deparser = chord, fill = TRUE,
   # thirds <- (thirds - thirds[!duplicated(groupby)][groupby]) %% 7L
   # thirds[duplicated(cbind(groupby, thirds))] <- NA_integer_
   chords <- notes[ , list(Inversion = sum(2L^((Third - Third[1]) %% 7L), na.rm = TRUE)), by = Group]
-  chords <- chords[ , findBestInversion(Inversion)]
-  notes[ , Inversion := chords[ , Inversion[Group]]]
+  chords <- chords[ , c(list(Group = Group), findBestInversion(Inversion))]
+  notes[ , Inversion := chords[ , Inversion[notes$Group]]]
   # inversion <- findBestInversion(inversion)
   
   # root
@@ -1552,8 +1552,29 @@ sonorityx <- function(x, deparser = chord, fill = TRUE,
   chords$Sharpest <- notes[, max(LO5th), by = Group]$V1
   chords$Flatest  <- notes[, min(LO5th), by = Group]$V1
   
-  chords[ , Signature := Root + ifelse(Sharpest - Root > 5L, Sharpest - Root, 0L) + pmin(Flatest - Root + 1L, 0L)]
-  tset <- chords[, tset(Root, Signature, extension = NewInt, inversion = Inversion)]
+  chords[ , Range := Sharpest - Flatest]
+  chords[ , FlatMargin := pmin((Flatest - Root), 0)]
+  chords[ , SharpMargin := pmax((Sharpest - Root) - 5L, 0L)]
+  
+  chords[ , Signature := as.integer(Root + ifelse(FlatMargin == 0L & SharpMargin == 1L, 1L, pmax(-6L, FlatMargin)))]
+  
+  
+  if (any(chords$Range > 7L)) {
+    notes <- notes[chords[Range > 7L], on = 'Group']
+    notes[ , Sharp := LO5th > (5L + Signature)]
+    notes[ , Flat := LO5th < (-1L + Signature)]
+    notes[, Trit := -((LO5th - Root) + 2L) %% 7L]
+    
+    newchords <- chords[notes[ , list(Alteration = sum(-Flat * 3L^Trit + Sharp * 3L^Trit)), by = Group], on = 'Group']
+    chords[ , Alteration := 0L]
+    chords[Range > 7L] <- newchords
+  }  else {
+    chords[ , Alteration := 0L]
+    
+  }
+  
+  
+  tset <- chords[, tset(Root, Signature, extension = NewInt, inversion = Inversion, alterations = as.integer(Alteration))]
   
   if (!is.null(Key)) tset <- tset - Key[changes(groupby)]
   

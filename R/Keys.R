@@ -31,7 +31,6 @@
 #' 
 #' @slot Root integers representing the root of the key on the line-of-fifths
 #' @slot Signature integers representing the signature (number of accidentals) of the key. 
-#' @slot Alteration integers representing alterations of the diatonic set
 #' 
 #' A key is represented by two integers, `Root` and `Signature`.
 #' Root is simply the tonic note of the key on the circle of fifths.
@@ -51,6 +50,8 @@
 #' * Signature - Tonic = -4 => Phyrgian
 #' 
 #' *Note that you can make diatonicSets where the `Root` is outside the `Key`. This is unusual, and may result in sets you wouldn't predict.*
+#' 
+#' @slot Alteration integers representing alterations of the diatonic set (details below).
 #' 
 #' @section Alterations:
 #' 
@@ -196,12 +197,15 @@ getMode <- function(dset) {
 getAlterations <- function(dset) {
     # colnames represent the MAJOR degrees
     alterations <- dset@Alteration %<-matchdim% dset
+
     
     output <- ints2baltern(alterations, 7L) * 7L
     rownames(output) <- NULL
     colnames(output) <- c('4th', 'Root', '5th', '2nd', '6th', '3rd', '7th')
     
     output
+    
+    
 }
 
 
@@ -1131,24 +1135,34 @@ setMethod('LO5th', 'diatonicSet',
             notna <- !is.na(sign) & !is.na(root)
             inversion <- rep(inversion, length.out = length(x))
             
+            scale <- ((0:6) * steporder ) %% 7L
+            scales <- outer(root, scale, '+')
+            
+            scales <- sweep((sweep(scales, 1, sign - 1L, '-')) %% 7L, 1, sign - 1L, '+') + alter[ , match(scale + 1L, c(7L, 1L:6L)), drop = FALSE]
+            scales[ , 1L] <- root_inkey <- ((root - sign + 1L) %% 7L) + sign - 1L
+            
+            if(any(inversion != 0L, na.rm = TRUE)) scales[] <- scales[cbind(c(row(scales)), c(1 + (sweep(col(scales) - 1L, 1, inversion, '+') %% 7L)))]
+            
+            rownames(scales) <- dset2key(dset)
+            
+            scales
             ### get line-of-fifths values
-            LO5ths <- split(outer(sign, -1L:5L, '+') + alter, f = seq_along(sign))
+            # LO5ths <- split(outer(sign, -1L:5L, '+') + alter, f = seq_along(sign))
             
             ### reorder (root/inversion/steporder)
-            root_inkey <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
+            # root_inkey <- ((root - sign + 1L) %% 7L) + sign - 1L # normalize into signature (in case root is outside signature)
             
-            order <- lapply(lapply(root_inkey[notna] + steporder * inversion[notna], seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
-            LO5ths[notna] <- Map(\(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths[notna], order)
+            # order <- lapply(lapply(root_inkey[notna] + steporder * inversion[notna], seq, by = steporder, length.out = 7L), `%%`, e2 = 7L)
+            # LO5ths[notna] <- Map(\(lo5th, ord) lo5th[match(ord, lo5th %% 7)], LO5ths[notna], order)
             
             # LO5ths <- do.call('rbind', Map(\(r,i, inv) LO5ths[i, match(seq(r + steporder * inv, by = steporder, length.out = 7L) %% 7L, LO5ths[i, ] %% 7L, )], 
             # root %% 7L, 1:nrow(LO5ths), inversion))
-            LO5ths <- do.call('rbind', LO5ths)
-            LO5ths[cbind((1:nrow(LO5ths))[notna], 1L + ((7L - inversion[notna]) %% 7L))] <- root[notna]
+            # LO5ths <- do.call('rbind', LO5ths)
+            # LO5ths[cbind((1:nrow(LO5ths))[notna], 1L + ((7L - inversion[notna]) %% 7L))] <- root[notna]
             
-            rownames(LO5ths) <- dset2key(dset)
-            colnames(LO5ths) <- c('Root', nthfix(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
+            # colnames(LO5ths) <- c('Root', nthfix(c(5, 2, 6, 3, 7, 4)))[(seq(0L, by = as.integer(steporder), length.out = 7L) %% 7L) + 1L]
             # 
-            LO5ths
+            # LO5ths
           })
 
 
