@@ -322,8 +322,71 @@ setMethod('Compare', signature = c('diatonicSet', 'diatonicSet'),
 
 ## Arithmetic methods ####
 
-### Addition ####
+### Addition/Subtraction ####
 
+
+#' @export
+setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1 - getRootTint(e2)
+            
+          })
+
+
+#' @export
+setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1 + getRootTint(e2)
+            
+          })
+
+#' @export
+setMethod('+', signature = c('diatonicSet', 'tonalInterval'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            lof <- e2@Fifth
+            
+            dset(getRoot(e1) + lof, getSignature(e1) + lof, e1@Alteration)
+            
+          })
+
+#' @export
+setMethod('+', signature = c('diatonicSet', 'integer'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1@Root <- e1@Root + e2
+            e1@Signature <- e1@Signature + e2
+            e1
+          })
+
+
+#' @export
+setMethod('-', signature = c('diatonicSet', 'integer'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1@Root <- e1@Root - e2
+            e1@Signature <- e1@Signature - e2
+            e1
+          })
+
+
+#' @export
+setMethod('+', signature = c('diatonicSet', 'diatonicSet'),
+          function(e1, e2) {
+            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
+            
+            e1@Root <- e1@Root + e2@Root
+            e1@Signature <- e1@Signature + e2@Signature
+            e1
+            
+          })
 
 ### Division/modulo  ####
 
@@ -390,68 +453,6 @@ setMethod('%%', signature = c('matrix', 'diatonicSet'),
           })
 
 
-#' @export
-setMethod('-', signature = c('tonalInterval', 'diatonicSet'),
-          function(e1, e2) {
-              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-              
-              e1 - getRootTint(e2)
-              
-          })
-
-
-#' @export
-setMethod('+', signature = c('tonalInterval', 'diatonicSet'),
-          function(e1, e2) {
-              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-              
-              e1 + getRootTint(e2)
-              
-          })
-
-#' @export
-setMethod('+', signature = c('diatonicSet', 'tonalInterval'),
-          function(e1, e2) {
-              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-              
-              lof <- e2@Fifth
-              
-              dset(getRoot(e1) + lof, getSignature(e1) + lof, e1@Alteration)
-              
-          })
-
-#' @export
-setMethod('+', signature = c('diatonicSet', 'integer'),
-          function(e1, e2) {
-            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            
-            e1@Root <- e1@Root + e2
-            e1@Signature <- e1@Signature + e2
-            e1
-          })
-
-
-#' @export
-setMethod('-', signature = c('diatonicSet', 'integer'),
-          function(e1, e2) {
-              match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-              
-              e1@Root <- e1@Root - e2
-              e1@Signature <- e1@Signature - e2
-              e1
-          })
-
-
-#' @export
-setMethod('+', signature = c('diatonicSet', 'diatonicSet'),
-          function(e1, e2) {
-            match_size(e1 = e1, e2 = e2, toEnv = TRUE)
-            
-            e1@Root <- e1@Root + e2@Root
-            e1@Signature <- e1@Signature + e2@Signature
-            e1
-            
-          })
 
 ###################################################################### ###
 # Deparsing Key Representations (dset2x) #################################
@@ -1132,7 +1133,6 @@ setMethod('LO5th', 'diatonicSet',
             sign <- getSignature(dset)
             alter <- getAlterations(dset)
             
-            notna <- !is.na(sign) & !is.na(root)
             inversion <- rep(inversion, length.out = length(x))
             
             scale <- ((0:6) * steporder ) %% 7L

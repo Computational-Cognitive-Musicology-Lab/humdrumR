@@ -146,7 +146,7 @@ or more input arguments:</p>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-04-06 12:48:24 EDT"</span></span></code></pre></div>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-04-19 15:52:27 EDT"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -417,8 +417,8 @@ sample a handful letters and table the result?</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a></span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">sample</span>(letters, <span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="er">&gt;</span>    a b c e f j k m o r u x </span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="er">&gt;</span>    a b c d g h j n o t u v </span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
 <p>Notice that not all the letters from table appear in the output.
 E.g., if a letter never appears in the sample, it doesn’t get
 counted.</p>
@@ -428,7 +428,7 @@ counted.</p>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">factor</span>(letters) <span class="sc">|&gt;</span> <span class="fu">sample</span>(<span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="er">&gt;</span>    a b c d e f g h i j k l m n o p q r s t u v w x y z </span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">3</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span></span></code></pre></div>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span></span></code></pre></div>
 <p>Ah! Now our table includes all possible letters, even though many of
 them appear <code>0</code> times.</p>
 <hr>
@@ -456,7 +456,7 @@ the letters, but put the vowels first:</p>
 <span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>  <span class="fu">table</span>()</span>
 <span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="er">&gt;</span>    a e i o u b c d f g h j k l m n p q r s t v w x y z </span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
 <p>Note that if a <code>character</code> string contains values that you
 don’t include in your <code>levels</code>, the value will show up
 <code>NA</code> in the resulting factor, and you may see warnigns like

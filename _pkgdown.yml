@@ -137,6 +137,7 @@ reference:
   - figuredBass
   - is.major
   - is.minor
+  - sonority
 - subtitle: "Rhythm overviews"
   desc: "These pages overview general concepts in humdrumR pitch:"
   contents:

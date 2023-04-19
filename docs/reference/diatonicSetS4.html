@@ -134,11 +134,7 @@ you'll see the key interpretation representation printed.</p>
 
 
 <dt><code>Signature</code></dt>
-<dd><p>integers representing the signature (number of accidentals) of the key.</p></dd>
-
-
-<dt><code>Alteration</code></dt>
-<dd><p>integers representing alterations of the diatonic set</p>
+<dd><p>integers representing the signature (number of accidentals) of the key.</p>
 <p>A key is represented by two integers, <code>Root</code> and <code>Signature</code>.
 Root is simply the tonic note of the key on the circle of fifths.
 Signature is a value on the circle of fifths, indicating the diatonic mode.
@@ -154,6 +150,10 @@ The <a href="https://en.wikipedia.org/wiki/Mode_(music)" class="external-link">t
 <li><p>Signature - Tonic = -5 =&gt; Locrian</p></li>
 <li><p>Signature - Tonic = -4 =&gt; Phyrgian</p></li>
 </ul><p><em>Note that you can make diatonicSets where the <code>Root</code> is outside the <code>Key</code>. This is unusual, and may result in sets you wouldn't predict.</em></p></dd>
+
+
+<dt><code>Alteration</code></dt>
+<dd><p>integers representing alterations of the diatonic set (details below).</p></dd>
 
 
 </dl></div>

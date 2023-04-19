@@ -1947,7 +1947,9 @@ ints2nits <- function(n, it = 2, nits = 8) {
 
 ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
-    tern <- ints2nits(abs(n), it = 3L, ntrits)
+    tern <- ints2nits(abs(n), it = 3L, nits = ntrits)
+    
+    if (any(abs(n) > (3L ^ ntrits))) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to reprsent in {ntrits} trits.")
     
     while(any(tern == 2L, na.rm = TRUE)) {
         twos <- which(tern == 2L, arr.ind = TRUE)
@@ -1967,7 +1969,7 @@ ints2baltern <- function(n, ntrits = 8L) {
     # tern[firstnotzero] <- tern[firstnotzero] * sign(n[n != 0])
     
     ## incorporate sign
-    sweep(tern, c(1, if (length(dim(n))>1) 3), as.integer(sign(n)), '*')
+    sweep(tern, c(1, if (length(dim(n)) > 1) 3), as.integer(sign(n)), '*')
     
 }
 

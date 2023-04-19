@@ -116,12 +116,13 @@ representation of a tertian harmony.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">romanNumerals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'2I'</span>, <span class="st">'2IV7'</span>, <span class="st">'1V'</span>, <span class="st">'2vi'</span>, <span class="st">'2-VI'</span>, <span class="st">'2iio7'</span>, <span class="st">'2Vb9'</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">figuredBass</span><span class="op">(</span><span class="va">romanNumerals</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C "    "F 7"   "G "    "A "    "A- b5" "D 7b5" "G b9" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C "          "F 7"         "G "          "A "          "A- b5b"     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6] "D 7b5"       "F- bb6b4b2b"</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">tertian</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'CM'</span>, <span class="st">'CMm/3'</span>, <span class="st">'FM'</span>, <span class="st">'Fm'</span>, <span class="st">'D-MM'</span>, <span class="st">'GMmm'</span><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">figuredBass</span><span class="op">(</span><span class="va">tertian</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C "     "E 6b5"  "F "     "F b3"   "D- 7b5" "G b9"  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C "      "E 6b5"   "F "      "F b3"    "D- 7b5b" "G 9"    </span>
 <span class="r-in"></span>
 <span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span class="r-in"><span class="va">B075</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>

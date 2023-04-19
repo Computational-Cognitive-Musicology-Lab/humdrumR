@@ -93,12 +93,10 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
 
 
 getBass <- function(tset){
-    is.tertianSet(tset)
     LO5th(tset)[ , 1L]
 }
 
 getBassTint <- function(tset){
-    is.tertianSet(tset)
     tint( , getBass(tset)) 
 } 
 
@@ -184,7 +182,9 @@ setMethod('==', signature = c('tertianSet', 'tertianSet'),
               rowSums(same, na.rm = TRUE) == 7L
           })
 
-## Arithmetic methods ###
+## Arithmetic methods ####
+
+### Addition/Subtraction ####
 
 #' @export
 setMethod('+', signature = c('tertianSet', 'tonalInterval'),
@@ -410,7 +410,14 @@ reduceFigures <- function(alterations, extensions,
   }
   
   # missing triad tones
-  tags[!row(extensions) %in% which(inverted) & is.na(extensions) & col(tags) %in% 2L:3L & is.na(tags)] <- 'no'
+  anysus <- rowSums(tags == 'sus', na.rm = TRUE)
+  powerchords <- rowSums(extensions == 1L | extensions == 5L, na.rm = TRUE)
+  
+  tags[!row(extensions) %in% which(inverted | anysus > 0L | powerchords == 2L) & 
+         is.na(extensions) & 
+         col(tags) %in% 2L:3L 
+       & is.na(tags)] <- 'no'
+  
   extensions[which(tags == 'no')] <- ((col(extensions)[which(tags == 'no')] - 1L) * 2L) + 1L
   #
   if (extension.shorthand) {
@@ -435,10 +442,11 @@ reduceFigures <- function(alterations, extensions,
   alterations[] <- .paste(tags, alterations, if (step) extensions, fill = ".", na.if = all)
   
   figures <- if (!is.null(extension.decreasing)) {
-    Map(\(i,j) alterations[i,j], 1:nrow(alterations),
-                   apply(extensions, 1, order, 
-                         decreasing = extension.decreasing, 
-                         na.last = NA, simplify = FALSE))
+    extensions[grepl('sus|add', alterations)] <- extensions[grepl('sus|add', alterations)] + 20 # put sus last
+    order <- order(row(extensions), extensions, decreasing = extension.decreasing)
+    # order <- order[!is.na(extensions[order])]
+    
+    tapply(alterations[order], row(extensions)[order], c, simplify = FALSE)
   } else {
     lapply(1L:nrow(alterations), \(i) alterations[i, ])
   }
@@ -490,6 +498,7 @@ tset2tonalHarmony <- function(x,
     figuration <- do.call('reduceFigures', c(list(alterations, extensions, ...,
                                                   quality, root.case, if (inversion) getInversion(x) else 0L), figurationArgs))
     quality[quality == '?'] <- ""
+    quality[grepl('sus|add', figuration) & quality %in% c('5MAJOR', '5MINOR')] <- ''
     figuration
     
   }
@@ -766,6 +775,8 @@ steps2thirds <- function(steps, groupby) {
 }
 
 
+
+
 findBestInversion <- function(int) {
   empty <- int == 0L
   
@@ -779,7 +790,22 @@ findBestInversion <- function(int) {
   
   int[!empty] <- inversions[cbind(seq_len(nrow(inversions)), bestPick[!empty])]
   
-  list(NewInt = as.integer(int), Inversion = bestPick - 1L)
+  list(Extension = as.integer(int), Inversion = bestPick - 1L)
+}
+
+completeExtensions <- function(extension, full = FALSE) {
+  empty <- extension == 0L
+  missingfifth <- (extension %% 8L) < 4L
+  extension[!empty & missingfifth] <- extension[!empty & missingfifth] + 4L
+  # missingthird <- (extension %% 4L) < 2L
+  
+  hasseventh <- (extension %% 16L) >= 8L
+  
+  extension <- ifelse(!empty & hasseventh, 15L + extension - (extension %% 16L), extension)
+  extension
+  # as.integer((2 ^ ceiling(log(1L + extension, 2L))) - 1L)
+  
+  
 }
 
 figurationFill <- function(species, third, step, Explicit, ...) {
@@ -1522,13 +1548,114 @@ setMethod('LO5th', 'tertianSet',
 #       D#  F# A# C# E# G#
 # 2 6 10 -7 -3 1 5 9 13 -4 0  4 8 12 -5 -1 3 7 11 -6 -2    
         
-
-sonorityx <- function(x, deparser = chord, fill = TRUE,
-                     figureFill = TRUE, Key = NULL, 
+#' Interpret tertian sonorities from set(s) of notes.
+#' 
+#' The `sonority()` function accepts vectors of notes, usually
+#' grouped into multiple chords by a `groupby` argument, and interprets
+#' those notes as a tertian sonority.
+#' Chords are output using the representation indicated by the `deparser` argument.
+#' By default, [with/within.humdrumR][withinHumdrum] will automatically pass
+#' `sonority` the `groupby` argument `groupby = list(File, Record)`,
+#' so chords are estimated for each record in the dataset.
+#'
+#' @details 
+#' 
+#' 
+#' If `inPlace = TRUE`, sonority()` returns vectorized output,
+#' with the output matching the length of the input vector.
+#' By default, `fill = FALSE`, and each output chord is repeated to align with 
+#' the notes of the chord.
+#' If `fill = FALSE`, each chord is returned only once, but padded
+#' with null tokens to match length of the input.
+#' Finally, if `inPlace = FALSE` only one chord is returned for each group in `groupby`.
+#' 
+#' If `inversions = TRUE`, the notes are interpreted
+#' in the chordal inversion that is most compact (triad like)
+#' on the circle of thirds.
+#' If `inversions = FALSE`, the lowest note is always interpreted as
+#' the root.
+#' 
+#' If `incomplete = TRUE`, incomplete chords are returns as they are,
+#' so you might see things like "C7no5" (seventh chord with no fifth).
+#' If `incomplete = FALSE`, `sonority()` will (attempt) to fill in missing 
+#' but "implied" triad notes, note like missing 5ths.
+#' 
+#' 
+#' @param x ***Input data, interpreted as pitches.***
+#' 
+#' This vector is interpreted as pitch information using [tonalInterval()].
+#' 
+#' @param deparser ***What output representation do you want?***
+#' 
+#' Defaults to [chord()].
+#' 
+#' Must be a [chord function][chordFunctions], like [roman()], [harm()] or [chord()].
+#' 
+#' @param Key ***The input key used by the deparser.***
+#'
+#' Defaults to `NULL`, indicating c major.
+#' However, [with/within.humdrum][withinHumdrum] will automatically pass 
+#' a `Key` field in the data to `sonority`, if there is one.
+#'
+#' Must be a `diatonicSet` or something coercable to `diatonicSet`; must be either length `1` or `length(x)`
+#' 
+#' Some chord parsers don't use `Key`, so it is irrelevant,
+#' you *will* want to use a `Key` for roman numerals.
+#' 
+#' @param inversions ***Should we interpret note sets as inversions?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param incomplete ***Should we return incomplete chords?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param inPlace ***Should the output always match the input?***
+#' 
+#' Defaults to `FALSE` is there is no `groupby` list; but `TRUE` if there is.
+#' 
+#' Must be a singleton `logical` value: an on/off switch. 
+#' 
+#' 
+#' @param fill ***Should the output duplicate each chord for every note in the input?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' This argument only has an effect if `inPlace = TRUE`.
+#' 
+#' @examples 
+#' 
+#' sonority(c('C', 'e', 'g', 'b-'))
+#' sonority(c('G', 'BB', 'd', 'f', 'a'))
+#' 
+#' sonority(c('C', 'b-', 'd', 'f'))
+#' sonority(c('C', 'b-', 'd', 'f'), inversions = FALSE)
+#' 
+#' \dontrun{ 
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' chorales <- within(chorales, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
+#' 
+#' within(chorales, sonority(Token_dittoed))
+#' within(chorales, sonority(Token_dittoed, deparser = harm))
+#' }
+#' @export
+sonority <- function(x, deparser = chord, Key = NULL, 
+                     inversions = TRUE, incomplete = TRUE,
+                     # enharmonic = FALSE,
+                     inPlace = length(groupby) > 0, fill = TRUE, 
                      groupby = list(), ...) {
+  
+  inPlace <- inPlace # this is needed because the inPlace references groupby
   groupby <- if (length(groupby)) squashGroupby(groupby) else rep(1L, length(x))
  
-  reorder(list(x = x, groupby = groupby), order = groupby, toEnv = TRUE)
+  reorder(list(x = x, groupby = groupby, Key = Key), orderby = groupby, toEnv = TRUE)
   
   tints <- tonalInterval(x)
   tints <- tints[order(groupby, tint2semits(tints))]
@@ -1537,35 +1664,55 @@ sonorityx <- function(x, deparser = chord, fill = TRUE,
   
   notes[ , Third := (Third - Third[!duplicated(Group)][Group]) %% 7L]
   notes[duplicated(cbind(Group, Third)), Third := NA_integer_]
-  # thirds <- (thirds - thirds[!duplicated(groupby)][groupby]) %% 7L
-  # thirds[duplicated(cbind(groupby, thirds))] <- NA_integer_
-  chords <- notes[ , list(Inversion = sum(2L^((Third - Third[1]) %% 7L), na.rm = TRUE)), by = Group]
-  chords <- chords[ , c(list(Group = Group), findBestInversion(Inversion))]
+
+  # if (enharmonic) {
+  # 
+  #   notes <- notes[!is.na(Third)  , enharmonicLO5th := {
+  #     minlof <- LO5th[Third == 0L]
+  #     (((LO5th - minlof) + 4L) %% 12L) + minlof - 4L
+  #     }, by = Group]
+  #   notes[ , enharmonicShift := ((LO5th - enharmonicLO5th) %/% 12)]
+  #   notes[ , Third := Third + 4L * enharmonicShift]
+  #   notes[ , LO5th := enharmonicLO5th]
+  # }
+  
+  chords <- notes[ , list(Extension = as.integer(sum(2L^((Third - Third[1]) %% 7L), na.rm = TRUE))), by = Group]
+  if (inversions) {
+    chords <- chords[ , c(list(Group = Group), findBestInversion(Extension))]
+  } else {
+    chords[ , Inversion := 0L]
+  }
+  
+  if (!incomplete) {
+    chords[ , Extension := completeExtensions(Extension)]
+  }
+ 
   notes[ , Inversion := chords[ , Inversion[notes$Group]]]
   # inversion <- findBestInversion(inversion)
   
   # root
   chords[ , Root := 0L]
-  chords$Root[chords$NewInt != 0L] <- notes[(Third + Inversion) %% 7L == 0L, LO5th]
+  chords$Root[chords$Extension != 0L] <- notes[(Third + Inversion) %% 7L == 0L, LO5th]
   
   # signature
-  chords$Sharpest <- notes[, max(LO5th), by = Group]$V1
-  chords$Flatest  <- notes[, min(LO5th), by = Group]$V1
+  chords <- notes[!is.na(LO5th), list(Sharpest = max(LO5th), Flatest = min(LO5th)), by = Group][chords, on = 'Group']
+  
   
   chords[ , Range := Sharpest - Flatest]
-  chords[ , FlatMargin := pmin((Flatest - Root), 0)]
+  chords[ , FlatMargin := pmin((Flatest - Root) + 1L, 0)]
   chords[ , SharpMargin := pmax((Sharpest - Root) - 5L, 0L)]
   
   chords[ , Signature := as.integer(Root + ifelse(FlatMargin == 0L & SharpMargin == 1L, 1L, pmax(-6L, FlatMargin)))]
   
   
-  if (any(chords$Range > 7L)) {
+  if (any(chords$Range > 7L, na.rm = TRUE)) {
     notes <- notes[chords[Range > 7L], on = 'Group']
     notes[ , Sharp := LO5th > (5L + Signature)]
     notes[ , Flat := LO5th < (-1L + Signature)]
     notes[, Trit := -((LO5th - Root) + 2L) %% 7L]
     
-    newchords <- chords[notes[ , list(Alteration = sum(-Flat * 3L^Trit + Sharp * 3L^Trit)), by = Group], on = 'Group']
+    newchords <- chords[notes[!is.na(Third) , # NA Thirds are duplicated
+                              list(Alteration = sum(-Flat * 3L^Trit + Sharp * 3L^Trit, na.rm = TRUE)), by = Group], on = 'Group']
     chords[ , Alteration := 0L]
     chords[Range > 7L] <- newchords
   }  else {
@@ -1574,12 +1721,16 @@ sonorityx <- function(x, deparser = chord, fill = TRUE,
   }
   
   
-  tset <- chords[, tset(Root, Signature, extension = NewInt, inversion = Inversion, alterations = as.integer(Alteration))]
+  tset <- chords[, tset(Root, Signature, extension = Extension, inversion = Inversion, alterations = as.integer(Alteration))]
   
-  if (!is.null(Key)) tset <- tset - Key[changes(groupby)]
+  if (!is.null(Key)) {
+    Key <- tonalInterval(Key[changes(groupby)])@Fifth
+    tset <- tset - Key
+  }
   
-  chords <- if (is.null(deparser)) tset else deparser(tset, ...,
-                                                      Key = if (!is.null(Key)) Key[changes(groupby)])
+  chords <- if (is.null(deparser)) tset else deparser(tset, ..., Key = Key)
+  
+  
   output <- if (fill)  {
     chords[groupby]
   } else {
@@ -1588,71 +1739,10 @@ sonorityx <- function(x, deparser = chord, fill = TRUE,
     output
   }
   
-  reorder(output)
+  output <- reorder(output)
+  
+  if (inPlace) output else output[changes(reorder(groupby))]
 }
-#' Interpret tertian sonorities from set of notes.
-#' 
-#' @export
-sonority <- function(x, deparser = chord, fill = TRUE,
-                     figureFill = TRUE, Key = NULL, 
-                     groupby = list(), ...) {
-  groupby <- if (length(groupby)) squashGroupby(groupby) else rep(1L, length(x))
-  
-  tints <- tonalInterval(x)
-  
-  
-  notes <- data.table(semits = tint2semits(tints), 
-                      step = tint2step(tints, step.labels = NULL),
-                      order = seq_along(x),
-                      groupby = groupby)
-  # notes <- notes[!is.na(step)]
-  notes[ , height := rank(semits, ties.method = 'min'), by = groupby]
-  setorder(notes, groupby, semits)
-  notes <- notes[!duplicated(cbind(groupby, step))]
-  
-  
-  notes[!is.na(step) , third := steps2thirds(step, groupby)]
-  firstInGroup <- notes[ , min(order, na.rm = TRUE), by = groupby]$V1
-  
-  # tints <- tints[notes$order]
-  roots <- tints[notes[ , if (all(is.na(third))) NA_integer_ else order[!is.na(third) & third == 0L], by = groupby]$V1]
-  notes$species <- tint2specifier((tints - roots[groupby])[notes$order],
-                                  qualities = TRUE, explicitNaturals = TRUE)
-  
-  if (figureFill) {
-    notes$Explicit <- TRUE # this is for figurationFill
-    parsedfig <- notes[!is.na(third),  do.call(figurationFill, .SD),  by = groupby]
-    
-    notes <- notes[, c('groupby', 'order', 'semits', 'height', 'third'), with = FALSE][parsedfig, on = c('groupby', 'third')]
-  }
-  
-  notes[ , species := {
-    species[species == ''] <- ifelse(third[species == ''] %in% c(0, 2, 5), 'P', 'M')
-    species
-  }]
-  #
-  tertian <- matrix('.', ncol = 7, nrow = max(groupby))
-  tertian[notes[ , cbind(groupby, third + 1)]] <- notes$species
-  tertian <- do.call('paste', c(as.data.frame(tertian), list(sep = '')))
-  uniqQual <- unique(tertian)
-  
-  tset <- sciQualities2tset(uniqQual, diminish = 'd', augment = 'A')
-  tset <- tset[match(tertian, uniqQual)] + roots
-  
-  tset@Inversion[!is.na(tset)] <- notes[height == 1, third] 
-  
-  # This assumes that the key is the same for all notes..
-  if (!is.null(Key)) tset <- tset - Key[firstInGroup]
-  
-  chords <- if (is.null(deparser)) tset else deparser(tset, ..., 
-                                                      Key = if (!is.null(Key)) Key[firstInGroup])
-  if (fill)  {
-    chords[groupby] 
-  } else {
-    output <- vectorNA(length(chords), class(chords))
-    output[firstInGroup] <- chords
-    output
-    }
-}
+
 
 

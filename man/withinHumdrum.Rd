@@ -443,11 +443,11 @@ within arbitrary contextual windows.
 To do so, simply place a call to \code{context()} in an unnamed argument to \code{with}/\code{within.humdrumR()};
 you must provide \code{open} and \code{close} arguments.
 The \code{overlap}, \code{depth}, \code{rightward}, \code{duplicate_indices}, \code{min_length}, and \code{max_length} arguments can be used here,
-just as they are in a separate call to \code{context()}---the see the \code{context()} man page.
-Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} a \code{x} or \code{reference} argument:
-The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()}---e.g., if \code{open}
+just as they are in a separate call to \code{context()} --- see the \code{context()} man page.
+Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} call a \code{x} or \code{reference} argument:
+The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()} --- e.g., if \code{open}
 or \code{close} is a \code{character} string, they are matched as regular expressions against the \link[=humActive]{active field}.
-\code{list(File, Record, Spine)} is also automatically passed as the \code{groupby} argument to \code{context()}.
+\code{list(File, Spine, Path)} is also automatically passed as the \code{groupby} argument to \code{context()}.
 
 When using \code{context()} inside \code{with}/\code{within.humdrumR}, the \code{alignToOpen} argument will have no effect.
 If you want output to align with the right side of each window, use \code{alignLeft = FALSE} as an argument to
@@ -459,7 +459,7 @@ As with a \code{subset} expression, you can provide a \code{complement} expressi
 (Note that the \code{complement} argument to \code{context()} itself is ignored.)
 The \code{complement} expression will be evaluated on any data points that aren't captured within \emph{any} contextual windows.
 
-Any \code{by} or \code{subset} expressions placed before a \code{contest()} expression are evaluated first, in order from left to right.
+Any \code{by} or \code{subset} expressions placed before a \code{context()} expression are evaluated first, in order from left to right.
 This means you can \emph{first} run subset or \code{groupby}, then calculate context within the subset/partition.
 However, any \code{subset} or \code{groupby} expressions that are passed in an argument \emph{after} \code{context()} are ignored.
 }
@@ -505,12 +505,6 @@ In this call, the \code{Token} field will be divided into two groups, one where 
 Thus, \code{within} translates the previous expression to this:\preformatted{within(humdata,
        list(Token[Spine == 1], Token[Spine == 2]))
 }
-}
-
-\section{N grams}{
-
-
-XXXX
 }
 
 \section{Advanced scripting}{
