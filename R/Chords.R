@@ -793,6 +793,37 @@ findBestInversion <- function(int) {
   list(Extension = as.integer(int), Inversion = bestPick - 1L)
 }
 
+
+collapseEnharmonicSets <- function(notes) {
+  # notes is.data.table with columns LO5th and Group
+  
+  .notes <- notes[!is.na(LO5th)]
+  
+  .notes[ , Range := diff(range(LO5th)), by = Group]
+  
+  while (.notes[ , any(Range >= 7L)]) {
+    .notes[Range >= 7L , LO5th := {
+      if(abs(min(LO5th) - mean(LO5th)) > abs(max(LO5th) - mean(LO5th))) { 
+        ifelse(LO5th == min(LO5th), LO5th + 12L, LO5th) 
+        } else {
+          ifelse(LO5th == max(LO5th), LO5th - 12L, LO5th)}
+      }, by= Group]
+    
+    
+    .notes[ , Range := {
+      newrange <- diff(range(LO5th))
+      
+      if (newrange < Range[1]) newrange else 0L
+      }, by = Group]
+  }
+  
+  .notes[ , Range := NULL]
+  
+  notes <- rbind(notes[is.na(LO5th)], .notes)
+  setorder(notes, Group)
+  notes
+}
+
 completeExtensions <- function(extension, full = FALSE) {
   empty <- extension == 0L
   missingfifth <- (extension %% 8L) < 4L
@@ -1579,6 +1610,17 @@ setMethod('LO5th', 'tertianSet',
 #' so you might see things like "C7no5" (seventh chord with no fifth).
 #' If `incomplete = FALSE`, `sonority()` will (attempt) to fill in missing 
 #' but "implied" triad notes, note like missing 5ths.
+#'
+#' By default, `sonority()` will interpret the spelling of notes strictly, so a
+#' "mispelled" triad, like *B, E♭, F♯* will be interpreted as something weird---in this case
+#' an augmented *Eb* chord with no third and a sharp 9!
+#' Note that in the case of [cross relations](https://en.wikipedia.org/wiki/False_relation)---for example,
+#'  *B♭* **and** *B♮* in the same chord---`sonority()`
+#' will simply ignore the later species that appears.
+#' However, if `enharmonic = TRUE`, `sonority()` will reinterpret input notes
+#' by collapsing them into a single diatonic set on the circle-of-fifths.
+#' This means that the set *B, Eb, F♯* will be interpreted as *B, D♯, F♯*
+#' and the set *B♭, D, F, B♮* will be interpreted as *B♭, D, F, C♭*.
 #' 
 #' 
 #' @param x ***Input data, interpreted as pitches.***
@@ -1611,6 +1653,12 @@ setMethod('LO5th', 'tertianSet',
 #' @param incomplete ***Should we return incomplete chords?***
 #' 
 #' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param enharmonic ***Should pitches be interpreted enharmonically?***
+#' 
+#' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
@@ -1648,7 +1696,7 @@ setMethod('LO5th', 'tertianSet',
 #' @export
 sonority <- function(x, deparser = chord, Key = NULL, 
                      inversions = TRUE, incomplete = TRUE,
-                     # enharmonic = FALSE,
+                     enharmonic = FALSE,
                      inPlace = length(groupby) > 0, fill = TRUE, 
                      groupby = list(), ...) {
   
@@ -1660,22 +1708,14 @@ sonority <- function(x, deparser = chord, Key = NULL,
   tints <- tonalInterval(x)
   tints <- tints[order(groupby, tint2semits(tints))]
   
-  notes <- data.table(LO5th = LO5th(tints), Third = tint2third(tints), Group = groupby)
+  notes <- data.table(LO5th = LO5th(tints), Group = groupby)
   
+  if (enharmonic) notes <- collapseEnharmonicSets(notes)
+  
+  notes[ , Third :=  LO5th2third(LO5th)]
   notes[ , Third := (Third - Third[!duplicated(Group)][Group]) %% 7L]
   notes[duplicated(cbind(Group, Third)), Third := NA_integer_]
 
-  # if (enharmonic) {
-  # 
-  #   notes <- notes[!is.na(Third)  , enharmonicLO5th := {
-  #     minlof <- LO5th[Third == 0L]
-  #     (((LO5th - minlof) + 4L) %% 12L) + minlof - 4L
-  #     }, by = Group]
-  #   notes[ , enharmonicShift := ((LO5th - enharmonicLO5th) %/% 12)]
-  #   notes[ , Third := Third + 4L * enharmonicShift]
-  #   notes[ , LO5th := enharmonicLO5th]
-  # }
-  
   chords <- notes[ , list(Extension = as.integer(sum(2L^((Third - Third[1]) %% 7L), na.rm = TRUE))), by = Group]
   if (inversions) {
     chords <- chords[ , c(list(Group = Group), findBestInversion(Extension))]

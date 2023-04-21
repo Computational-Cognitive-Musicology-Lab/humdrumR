@@ -22,7 +22,7 @@ so chords are estimated for each record in the dataset."><!-- mathjax --><script
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,6 +99,7 @@ so chords are estimated for each record in the dataset.</p>
   Key <span class="op">=</span> <span class="cn">NULL</span>,
   inversions <span class="op">=</span> <span class="cn">TRUE</span>,
   incomplete <span class="op">=</span> <span class="cn">TRUE</span>,
+  enharmonic <span class="op">=</span> <span class="cn">FALSE</span>,
   inPlace <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">groupby</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>,
   fill <span class="op">=</span> <span class="cn">TRUE</span>,
   groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,
@@ -131,6 +132,10 @@ you <em>will</em> want to use a <code>Key</code> for roman numerals.</p></dd>
 <dd><p><em><strong>Should we return incomplete chords?</strong></em></p>
 <p>Defaults to <code>TRUE</code>.</p>
 <p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
+<dt>enharmonic</dt>
+<dd><p><em><strong>Should pitches be interpreted enharmonically?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 <dt>inPlace</dt>
 <dd><p><em><strong>Should the output always match the input?</strong></em></p>
 <p>Defaults to <code>FALSE</code> is there is no <code>groupby</code> list; but <code>TRUE</code> if there is.</p>
@@ -153,20 +158,30 @@ the root.</p>
 so you might see things like "C7no5" (seventh chord with no fifth).
 If <code>incomplete = FALSE</code>, <code>sonority()</code> will (attempt) to fill in missing
 but "implied" triad notes, note like missing 5ths.</p>
+<p>By default, <code>sonority()</code> will interpret the spelling of notes strictly, so a
+"mispelled" triad, like <em>B, E♭, F♯</em> will be interpreted as something weird---in this case
+an augmented <em>Eb</em> chord with no third and a sharp 9!
+Note that in the case of <a href="https://en.wikipedia.org/wiki/False_relation" class="external-link">cross relations</a>---for example,
+<em>B♭</em> <strong>and</strong> <em>B♮</em> in the same chord---<code>sonority()</code>
+will simply ignore the later species that appears.
+However, if <code>enharmonic = TRUE</code>, <code>sonority()</code> will reinterpret input notes
+by collapsing them into a single diatonic set on the circle-of-fifths.
+This means that the set <em>B, Eb, F♯</em> will be interpreted as <em>B, D♯, F♯</em>
+and the set <em>B♭, D, F, B♮</em> will be interpreted as <em>B♭, D, F, C♭</em>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
 <span class="r-in"><span class="fu">sonority</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'C'</span>, <span class="st">'e'</span>, <span class="st">'g'</span>, <span class="st">'b-'</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C7"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C7/Bb"</span>
 <span class="r-in"><span class="fu">sonority</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'G'</span>, <span class="st">'BB'</span>, <span class="st">'d'</span>, <span class="st">'f'</span>, <span class="st">'a'</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "G9/B"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "G9/F"</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">sonority</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'C'</span>, <span class="st">'b-'</span>, <span class="st">'d'</span>, <span class="st">'f'</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bbadd2/C"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bbadd2"</span>
 <span class="r-in"><span class="fu">sonority</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'C'</span>, <span class="st">'b-'</span>, <span class="st">'d'</span>, <span class="st">'f'</span><span class="op">)</span>, inversions <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C17sus2sus4"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bbadd2"</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> </span>
 <span class="r-in"><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span></span>

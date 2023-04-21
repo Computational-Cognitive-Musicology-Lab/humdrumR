@@ -10,6 +10,7 @@ sonority(
   Key = NULL,
   inversions = TRUE,
   incomplete = TRUE,
+  enharmonic = FALSE,
   inPlace = length(groupby) > 0,
   fill = TRUE,
   groupby = list(),
@@ -50,6 +51,12 @@ Defaults to \code{TRUE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
+\item{enharmonic}{\emph{\strong{Should pitches be interpreted enharmonically?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{inPlace}{\emph{\strong{Should the output always match the input?}}
 
 Defaults to \code{FALSE} is there is no \code{groupby} list; but \code{TRUE} if there is.
@@ -86,6 +93,17 @@ If \code{incomplete = TRUE}, incomplete chords are returns as they are,
 so you might see things like "C7no5" (seventh chord with no fifth).
 If \code{incomplete = FALSE}, \code{sonority()} will (attempt) to fill in missing
 but "implied" triad notes, note like missing 5ths.
+
+By default, \code{sonority()} will interpret the spelling of notes strictly, so a
+"mispelled" triad, like \emph{B, E♭, F♯} will be interpreted as something weird---in this case
+an augmented \emph{Eb} chord with no third and a sharp 9!
+Note that in the case of \href{https://en.wikipedia.org/wiki/False_relation}{cross relations}---for example,
+\emph{B♭} \strong{and} \emph{B♮} in the same chord---\code{sonority()}
+will simply ignore the later species that appears.
+However, if \code{enharmonic = TRUE}, \code{sonority()} will reinterpret input notes
+by collapsing them into a single diatonic set on the circle-of-fifths.
+This means that the set \emph{B, Eb, F♯} will be interpreted as \emph{B, D♯, F♯}
+and the set \emph{B♭, D, F, B♮} will be interpreted as \emph{B♭, D, F, C♭}.
 }
 \examples{
 

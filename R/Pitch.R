@@ -1181,9 +1181,10 @@ tint2step  <- function(tint, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'),
 }
 
 
-tint2third <- function(tint) {
-  (LO5th(tint) * 2L) %% 7L
-}
+tint2third <- function(tint) LO5th2third(LO5th(tint))
+
+LO5th2third <- function(lof) (lof * 2L) %% 7L
+  
 
 ###### Alteration stuff ###
 
