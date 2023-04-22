@@ -15,9 +15,9 @@
 #' * [census()]
 #'     + Tabulates the raw size of the humdrumR corpus.
 #' * [reference()]
-#'     + Tabulates reference records (metadata) for each file.
+#'     + Tabulates reference records (metadata) for each piece.
 #' * [spines()]
-#'     + Tabulates the number of spines and spine paths in files in the corpus.
+#'     + Tabulates the number of spines and spine paths in pieces in the corpus.
 #' * [interpretations()]
 #'     + Tabulates the types of exclusive and tandem interpretations in the corpus.
 #' * [sections()]
@@ -86,12 +86,12 @@ summary.humdrumR <- function(object) {
 #' 5. (per token)
 #'     + This is simply `Characters / Tokens`, indicating the mean length of each token.
 #' 
-#' By default, `census` tabulates data within files in the corpus,
-#' with each file tabulated in a row of the `humCensus` table.
+#' By default, `census` tabulates data within pieces in the corpus,
+#' with each piece tabulated in a row of the `humCensus` table.
 #' Rows are labeled with each filename.
 #' When a `humCensus` object is printed,
-#' the totals across all files are printed as well---(unique) and (per token)
-#' values are calculated across all files as well, not summed.
+#' the totals across all pieces are printed as well---(unique) and (per token)
+#' values are calculated across all pieces as well, not summed.
 #' The `by` argument can be used to tabulate data across other divisions in the data (see next section).
 #' 
 #' 
@@ -99,7 +99,7 @@ summary.humdrumR <- function(object) {
 #' @section Tabulate "by" other groups:
 #' 
 #' The `by` argument to `census` indicates groupings in the data to tabulate within, grouping 
-#' across filenames in the corpus by default.
+#' across pieces in the corpus by default.
 #' `by` can be an arbitrary expression which is evaluated inside the [humdrum table][humTable],
 #' like the `groupby` argument to a [with/within][withHumdrum] call.
 #' The by expression must be the full length of the humdrum table.
@@ -118,7 +118,7 @@ summary.humdrumR <- function(object) {
 #'    
 #' @param by ***An arbitrary expression which indicates how to group the data.***
 #' 
-#' Defaults to `Filename` (a humdrumR [data field][humTable]).
+#' Defaults to `Piece` (a humdrumR [data field][humTable]).
 #' 
 #' @param i ***Index for rows.***
 #'
@@ -148,7 +148,7 @@ summary.humdrumR <- function(object) {
 #' 
 #' @family corpus summary functions
 #' @export
-census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = FALSE, drop = FALSE) {
+census <- function(humdrumR, dataTypes = 'GLIMDd', by = Piece, removeEmpty = FALSE, drop = FALSE) {
   corpusName <- rlang::as_label(rlang::enexpr(humdrumR))
   by <- rlang::enexpr(by)
   
@@ -173,12 +173,14 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = 
   ## create the table
   censusTable <- humtab[ , 
       .(
-        Records          = length(unique(Record[Stop == 1L | is.na(Stop)])),
+        Records          = sum(!duplicated(cbind(Record[Stop == 1L | is.na(Stop)], 
+                                                 Piece[Stop == 1L | is.na(Stop)]))), #length(unique(Record[Stop == 1L | is.na(Stop)])),
         Tokens           = nrow(.SD),
         `(unique)`       = list(unique(Token)),
         Characters       = sum(nchar(Token)),
         `(per token)`    = round(mean(nchar(Token)), 2),
-        Files            = list(unique(File))
+        Filenames        = list(unique(Filename)),
+        Pieces            = list(unique(Piece))
       )
   ,
   by = partition]
@@ -191,8 +193,8 @@ census <- function(humdrumR, dataTypes = 'GLIMDd', by = Filename, removeEmpty = 
                                     Records = 0L, Tokens = 0L, `(unique)` = list(), Characters = 0L, `(per token)` = NA_integer_))
   }
 
-  censusTable$partition <- as.character(censusTable$partition)
   data.table::setorder(censusTable, partition)
+  censusTable$partition <- as.character(censusTable$partition)
   
   attr(censusTable, 'corpusName') <- corpusName
   attr(censusTable, 'dataTypes')  <- paste(dataTypes, collapse = '')
@@ -239,7 +241,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   
   censusTable <- data.table::copy(popclass(censusTable))
   ngroups <- nrow(censusTable)
-  nfiles <- length(unique(unlist(censusTable$Files)))
+  nfiles <- length(unique(unlist(censusTable$Pieces)))
   
   by <- attr(censusTable, 'by')
   by <- if (grepl('[^a-zA-Z0-9]', by)) paste0(num2print(ngroups), " unique results of ", by) else num2print(ngroups, by)
@@ -250,7 +252,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   
   if (showEach) corpusMessage <- paste0(corpusMessage, 
                                         ' in humdrumR corpus "',  attr(censusTable, 'corpusName'), '" ',
-                                        '(', num2print(nfiles, 'file'), '):\n')
+                                        '(', num2print(nfiles, 'piece'), '):\n')
   
   
   
@@ -260,9 +262,14 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
   }
   
   ##
-  partition <- censusTable[ , paste0(trimTokens(as.character(partition), 70L), ' [', num2str(seq_along(partition), pad = TRUE), ']')]
+  filenames <- if (all(lengths(censusTable$Filenames) == 1L)) paste0(unlist(censusTable$Filenames), ' ')
+  partition <- censusTable[ , paste0(trimTokens(paste0(filenames, format(partition, justify = 'right')), 70L), 
+                                     ' [', 
+                                     num2str(seq_along(partition), pad = TRUE), 
+                                     ']')]
   censusTable[ , partition := NULL] # in place!
-  censusTable[ , Files := NULL] # in place!
+  censusTable[ , Pieces := NULL] # in place!
+  censusTable[ , Filenames := NULL] # in place!
   
   #
   sums <- censusTable[, lapply(.SD,
@@ -364,23 +371,23 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' Since reference records can be too long to print on one screen,
 #' and humdrum files can have multiple of the same type of reference code,
 #' a `humReference` table normally prints only the number of each type of 
-#' reference record to appear in each file.
+#' reference record to appear in each piece.
 #' However, if only one type of reference code is present in a
 #' `humReference` table, the complete reference records for that code
-#' *will* be printed for each file. Likewise, if only one file is present
-#' in the table, all of that file's complete reference records are printed.
+#' *will* be printed for each piece. Likewise, if only one piece is present
+#' in the table, all of that piece's complete reference records are printed.
 #' Thus, if you want to see actual reference records, try indexing the
 #' `humReference` table down to one column or row (see below).
 #' 
-#' A `humReference` table has one row for each file in the corpus.
-#' Rows are labeled with each file name.
+#' A `humReference` table has one row for each piece in the corpus.
+#' Rows are labeled with each file name and piece number index.
 #' In addition, when a `humReference` object is printed,
 #' three different summary totals are printed for each reference code:
 #' 
-#' + **Any** indicates how many files in the corpus contain at least
+#' + **Any** indicates how many pieces in the corpus contain at least
 #'    one example of each code.
 #' + **Sum** indicates the total number of each reference code to appear
-#'    in the corpus, including multiple appearances in one file (like multiple `"!!!COM"`
+#'    in the corpus, including multiple appearances in one piece (like multiple `"!!!COM"`
 #' records).
 #' + **Unique** tabulates the number of unique token in the corpus, for each code. 
 #'    If your corpus only has two unique composers (encoded in "!!!COM"),
@@ -485,11 +492,10 @@ reference.humdrumR <- function(humdrumR, drop = FALSE) {
   humtab <- getHumtab(humdrumR)
   fieldtable <- fields(humdrumR, fieldTypes = 'Reference')
   
-  refTable <- humtab[ , c('File', 'Filename', fieldtable$Name), with = FALSE]
+  refTable <- humtab[ , c('Piece', 'Filename', fieldtable$Name), with = FALSE]
   # 
   
-  refTable <- refTable[!duplicated(Filename)]
-  
+  refTable <- refTable[!duplicated(Piece)]
   attr(refTable, 'corpusName') <- corpusName
   if (drop) refTable else refTable %class% 'humReference'
 }
@@ -503,7 +509,7 @@ reference.humdrumR <- function(humdrumR, drop = FALSE) {
   corpusName <- attr(refTable, 'corpusName')          
   
   
-  # The first two columns of the refTable are the file number name,
+  # The first two columns of the refTable are the piece number and file name,
   # but for users we want them to be treated like rownames...
   # Thus j is +- 2 
   
@@ -541,11 +547,11 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
   nfiles <- nrow(refTable)
   
   ### 
-  corpusMessage <- paste0('\n###### Reference records', if (!showEach) ':\n')
+  corpusMessage <- paste0('\n###### Reference records ', if (!showEach) ':\n')
   
   if (showEach) corpusMessage <- paste0(corpusMessage, 'in humdrumR corpus "',
                                         attr(refTable, 'corpusName'),
-                                        '" (', num2print(nfiles, 'file'), "):\n")
+                                        '" (', num2print(nfiles, 'piece'), "):\n")
   
   if (nfiles < 1L) {
     cat('Empty humdrumR object.\n') 
@@ -553,13 +559,13 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
   }
   
   ##
-  files <- paste0(refTable$Filename, " [", num2str(refTable$File, pad = TRUE), "]")
-  refTable[ , c('File', 'Filename') := NULL] # in place!
+  files <- paste0(refTable$Filename, " [", num2str(refTable$Piece, pad = TRUE), "]")
+  refTable[ , c('Piece', 'Filename') := NULL] # in place!
   
   
   
-  # If only one file, show actual reference records,
-  # as they appear in the file
+  # If only one piece, show actual reference records,
+  # as they appear in the piece
   # and then return invisible
   if (nrow(refTable) == 1L) {
     cat(corpusMessage)
@@ -582,8 +588,8 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
     return(invisible(NULL))
   } 
   
-  # If more than one file, print the number of reference records (by code)
-  # in each file
+  # If more than one piece, print the number of reference records (by code)
+  # in each piece
   codeCounts <- refTable[ , lapply(.SD, 
                                    \(col) {
                                      col <- if (is.list(col)) lengths(col) else ifelse(is.na(col), 0, 1)
@@ -623,7 +629,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
   ## PRINTING BEGINS:
   cat(corpusMessage)
   if (showEach) {
-    cat("###### By file:\n")
+    cat("###### By piece:\n")
     cat(colNames_str, stars, '\n', sep = '')
     
     tab <- cbind(files, if (oneColumn) refTable else codeCounts)[, screen, with = FALSE]
@@ -672,7 +678,7 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' @details 
 #'
 #' `spines` returns a special `data.frame` called a `humSpines` table.
-#' A `humSpines` table has five columns of information about each file:
+#' A `humSpines` table has five columns of information about each piece:
 #' 
 #' 1. Spines
 #'     + The number of spines.
@@ -722,7 +728,7 @@ spines  <- function(humdrumR, drop = FALSE) {
   humtab$Column <- getColumn(humtab, 'piece')
   
   spines <- humtab[Global == FALSE , 
-                   .(File             = unique(File),
+                   .(Piece             = unique(Piece),
                      Spines           = length(unique(Spine)),
                      Columns          = length(unique(Column)),
                      Splits           = sum(grepl('\\*\\^', Token)),
@@ -730,7 +736,7 @@ spines  <- function(humdrumR, drop = FALSE) {
                      Where            = list(.SD[ , length(unique(Path)) - 1, by = Spine]$V1)),
                    by = Filename]
   
-  setcolorder(spines, c('File', 'Filename', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
+  setcolorder(spines, c('Piece', 'Filename', 'Spines', 'Columns', 'Splits', 'Splices', 'Where'))
   
   
   attr(spines, 'corpusName') <- corpusName
@@ -767,12 +773,12 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
   corpusMessage <- paste0('\n###### Spine structure', if (!showEach) ':\n')
   
   if (showEach) corpusMessage <- paste0(corpusMessage,
-                                        ' in in humdrumR corpus "',
+                                        ' in humdrumR corpus "',
                                         attr(spineTable, 'corpusName'),
-                                        '" (', num2print(nfiles, 'file'), "):\n")
+                                        '" (', num2print(nfiles, 'pieces'), "):\n")
   
   spineTable <- popclass(spineTable)
-  spineTable$File <- paste0(num2str(spineTable$File), ":")
+  spineTable$Piece <- paste0(num2str(spineTable$Piece), ":")
   spineTable[ , In := sapply(Where, \(x) sum(x > 0))]
   where <- spineTable$Where
   spineTable[ , 'Where' := NULL]
@@ -792,11 +798,11 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
     
   } else {
     setcolorder(spineTable,
-                c('File', 'Filename', 'Spines',
+                c('Piece', 'Filename', 'Spines',
                   'Columns', 'In', 'Splits', 'Splices'))
     
     spineTable[ , Filename := paste0(trimTokens(Filename, 70L), ' [', num2str(seq_along(Filename), pad = TRUE), ']')]
-    spineTable[ , File := NULL]
+    spineTable[ , Piece := NULL]
     
     cols <- 1:6
     colNames <- c('', 'Spines', '+ Paths', 'In', '*^', '*v')[cols]
@@ -864,7 +870,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #' `interpretations` returns a special `data.frame` called a `humInterpretations` table.
 #' Each row in the table represents a single piece in the corpus.
 #' The first column (`{X}`) is a variable indicating a unique "exclusive pattern" associated with
-#' each file---the exclusive patterns are tallied at the bottom of the printout.
+#' each piece---the exclusive patterns are tallied at the bottom of the printout.
 #' The remaining columns indicate how many of each interpretation (indicated by column name)
 #' appear in each piece.
 #' 
@@ -875,7 +881,7 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #' + `Spines`: The number of spines that this interpretation appears in.
 #'     
 #'     
-#'  For example, consider the following file:
+#'  For example, consider the following piece:
 #'  
 #'  ```
 #'  **kern   **kern   **silbe
@@ -893,10 +899,10 @@ print.humSpines <- function(spineTable, showEach = TRUE) {
 #'      *-       *-        *-
 #'  ```
 #'  
-#'  In this file, there is several tandem key interpretations,
+#'  In this piece, there is several tandem key interpretations,
 #'  which `humdrumR` will call `Key`.
 #'  The tabulation by `interpretations` will return a `Key` column with the value
-#'  `6.3.2` for this file:
+#'  `6.3.2` for this piece:
 #'  
 #'  + `6` because there are six key interpretations in total.
 #'  + `3` because there are three unique keys: `*C:`, `*e:` and `*G:`.
@@ -933,24 +939,24 @@ interpretations <- function(humdrumR) {
                      !Token %in% c('*', '*-', '*v', '*^') &
                      !grepl('\\*>.*', Token)]
   tandem[ , ID := factor(idTandem(Token))]
-  tandemN  <- do.call('rbind', tandem[, .(list(table(ID))), by = File]$V1)
+  tandemN  <- do.call('rbind', tandem[, .(list(table(ID))), by = Piece]$V1)
   
-  tandemUN <- do.call('rbind', tandem[, .(list(tapply(Token, ID, \(x) length(unique(x))))), by = File]$V1)
+  tandemUN <- do.call('rbind', tandem[, .(list(tapply(Token, ID, \(x) length(unique(x))))), by = Piece]$V1)
   tandemUN[is.na(tandemUN)] <- 0L
   
   tandIDs  <- levels(tandem$ID)
-  tandemIn <- do.call('rbind', tandem[, .(list(colSums(tapply(ID, list(Spine,ID), length), na.rm = TRUE))), by = File]$V1)
+  tandemIn <- do.call('rbind', tandem[, .(list(colSums(tapply(ID, list(Spine,ID), length), na.rm = TRUE))), by = Piece]$V1)
   
   
   # Exclusive
   exclusive <- humtab[grepl('^\\*\\*', Token)]
   exclusive$Token <- factor(exclusive$Token)
-  exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = File]$V1)
-  rownames(exclusiveN) <- unique(humtab$Filename)
+  exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = Piece]$V1)
+  rownames(exclusiveN) <- humtab[, unique(Filename), by = Piece]
   
-  exclusivePats <- exclusive[, harvard(Token), by = File]$V1
+  exclusivePats <- exclusive[, harvard(Token), by = Piece]$V1
   output <- list(Filename = unique(humtab$Filename),
-                 File = unique(humtab$File),
+                 Piece = unique(humtab$Piece),
                  Exclusive = exclusiveN, 
                  ExclusivePat = exclusivePats,
                  Tandem    = list(Number    = tandemN, 
@@ -992,7 +998,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   
   tallies <- sort(table(interps$ExclusivePat), decreasing = TRUE)
   
-  interpmat <- data.table(File = paste0(trimTokens(interps$Filename, 70L), ' [', num2str(seq_along(interps$Filename), pad = TRUE), ']'), 
+  interpmat <- data.table(Piece = paste0(trimTokens(interps$Filename, 70L), ' [', num2str(seq_along(interps$Filename), pad = TRUE), ']'), 
                           "{X}" = paste0('{', LETTERS[match(interps$ExclusivePat, names(tallies))], '}'), 
                           interps$Exclusive,
                           tandems)
@@ -1003,7 +1009,7 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   if (showEach) corpusMessage <- paste0(corpusMessage,
                                         ' in humdrumR corpus "',
                                         attr(interps, 'corpusName'), 
-                                        '" (', num2print(nfiles, 'file'), "):\n")
+                                        '" (', num2print(nfiles, 'piece'), "):\n")
                                         
                        
   

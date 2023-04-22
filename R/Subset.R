@@ -36,21 +36,21 @@
 #' 
 #' In some cases you might filter out large parts of your data, which will leave a bunch of empty null
 #' data points (`"."`).
-#' If you *want* to remove these filtered data points, you can call `removeEmptyFiles`, `removeEmptySpines`, 
-#' `removeEmptyPaths`, `removeEmptyRecords`, or `removeEmptyStops`.
+#' If you *want* to remove these filtered data points, you can call `removeEmptyFiles`, `removeEmptyPieces`,
+#' `removeEmptySpines`,  `removeEmptyPaths`, `removeEmptyRecords`, or `removeEmptyStops`.
 #' These functions go through each piece/spine/path/record and check if *all* the data in that region
 #' is null or filtered (i.e., `Null == TRUE | Filter == TRUE`); if so, that data will be removed.
 #' You can only remove the data if *all* of it is null (within a region) because otherwise the humdrum syntax is broken.
 #' 
-#' By default, `subset.humdrumR` automatically calls `removeEmptyFiles` at the end.
-#' However, you can stop this by specifying  `removeEmptyFiles = FALSE`.
+#' By default, `subset.humdrumR` automatically calls `removeEmptyPieces` at the end.
+#' However, you can stop this by specifying  `removeEmptyPieces = FALSE`.
 #' 
 #' @section Renumbering:
 #'
 #' If filtered files are removed from a corpus (using `removeEmptyFiles` or `removeEmptySpines`, in combination with `subset`)
-#' the `File` and/or `Spine` fields are renumbered to represented the remaining regions,
+#' the `Piece` and/or `Spine` fields are renumbered to represented the remaining regions,
 #' starting from `1`.
-#' For example, if you have a corpus of 10 files and remove the first file (`File == 1`),
+#' For example, if you have a corpus of 10 files and remove the first file (`Piece == 1`),
 #' the remaining files are renumbered from `2:10` to `1:9`.
 #' Spine renumbering works the same, except it is done independently *within* each file.
 #' 
@@ -65,7 +65,7 @@
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
 #' @aliases subset
-subset.humdrumR <- function(x, ...) {
+subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
   
   
   oldActive <- getActive(x)
@@ -80,9 +80,10 @@ subset.humdrumR <- function(x, ...) {
   # NA values come in from record types we didn't use, which should NOT be filtered
   humtab[ , Filter := Filter | !.TmpFilter.]
   humtab[ , .TmpFilter. := NULL]
-  
   humtab <- update_Null.data.table(humtab, oldActiveFields)
-  putHumtab(x) <- removeNull(humtab, 'File', 'GLIMd')
+  
+  if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMDd')
+  putHumtab(x) <- humtab
   
   removeFields(x) <- '.TmpFilter.'
   x@Active <- oldActive
@@ -113,7 +114,7 @@ clearFilter <- function(humdrumR) {
 removeNull <- function(hum, by, nulltypes, ...) {
   UseMethod("removeNull")
 }
-removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', ...) {
+removeNull.humdrumR <- function(hum, by = 'Piece', nullTypes = 'd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
   humtab <- getHumtab(hum)
@@ -122,7 +123,7 @@ removeNull.humdrumR <- function(hum, by = 'File', nullTypes = 'd', ...) {
   hum
  
 }
-removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
+removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
   targets <- hum[ , by, with = FALSE]
@@ -130,7 +131,7 @@ removeNull.data.table <- function(hum, by = 'File', nullTypes = 'GLIMd', ...) {
   
   hum <- hum[targets, on = by]
   
-  if ('File' %in% by) hum <- renumberFiles.data.table(hum)
+  if ('Piece' %in% by) hum <- renumberFiles.data.table(hum)
   if ('Spine' %in% by) hum <- renumberSpines(hum)
   hum
 }
@@ -145,29 +146,35 @@ removeEmptyFiles <- function(humdrumR) {
 }
 #' @export
 #' @rdname subset.humdrumR
+removeEmptyPieces <- function(humdrumR) {
+  checks(humdrumR, xclass('humdrumR'))
+  removeNull(humdrumR, 'Piece', 'GLIMd')
+}
+#' @export
+#' @rdname subset.humdrumR
 removeEmptySpines <- function(humdrumR) {
   checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR,  c('File', 'Spine'), 'LIMd')
+  removeNull(humdrumR,  c('Piece', 'Spine'), 'LIMd')
 }
 
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyPaths <- function(humdrumR) {
   checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR,  c('File', 'Spine', 'Path'), 'LIMd')
+  removeNull(humdrumR,  c('Piece', 'Spine', 'Path'), 'LIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyRecords <- function(humdrumR) {
   checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR, c('File', 'Record'), 'd')
+  removeNull(humdrumR, c('Piece', 'Record'), 'd')
 }
 
 #' @export
 #' @rdname subset.humdrumR
 removeEmptyStops <- function(humdrumR) {
   checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR, c('File', 'Stop'), 'd')
+  removeNull(humdrumR, c('Piece', 'Stop'), 'd')
 }
 
 
@@ -368,13 +375,13 @@ setMethod('[',
               if (removeEmpty) {
                 humtab <- getHumtab(x)
                 
-                targets <- humtab[ , sort(unique(File))[i]]
-                humtab <- humtab[File %in% targets]
+                targets <- humtab[ , sort(unique(Piece))[i]]
+                humtab <- humtab[Piece %in% targets]
                
                 
                 putHumtab(x) <- humtab
               } else {
-                x <- subset(x, File %in% sort(unique(File))[!!i])
+                x <- subset(x, Piece %in% sort(unique(Piece))[!!i])
               }
              
               
@@ -392,7 +399,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i, removeEmpty = TRUE) {
-            x <- subset(x, fill = any(. %~l% !!i),  by = File)
+            x <- subset(x, fill = any(. %~l% !!i),  by = Piece)
             
             if (removeEmpty) x <- removeEmptyFiles(x)
             
@@ -476,7 +483,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'),
 function(x, i, removeEmpty = FALSE) {
     # gets any record which contains match
   
-    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), by = File, dataTypes = "D")
+    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), by = Piece, dataTypes = "D")
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
@@ -494,7 +501,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
             if (removeEmpty && all(grepl('^\\*\\*', j))) {
               humtab <- getHumtab(x)
               j <- gsub('^\\*\\**', '', j)
-              hits <- humtab[ , Spine %in% unique(Spine[Exclusive %in% j]) | is.na(Spine), by = File]$V1
+              hits <- humtab[ , Spine %in% unique(Spine[Exclusive %in% j]) | is.na(Spine), by = Piece]$V1
               humtab <- humtab[hits == TRUE]
               putHumtab(x) <- renumberSpines.data.table(humtab)
               
@@ -508,7 +515,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
                 
               } 
               
-              x <- subset(x, form, by = File, dataTypes = "D")
+              x <- subset(x, form, by = Piece, dataTypes = "D")
               
               if (removeEmpty) x <- removeEmptySpines(x)
             }

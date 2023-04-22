@@ -1493,20 +1493,20 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' specially optimized for this functions.
 #' 
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
-#' For this, we want `groupby = list(File, Spine, Path)`.
+#' For this, we want `groupby = list(Piece, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
 #' three fields as `groupby` arguments to certain functions: `r harvard(byTable[byTable$Type == 'melodic', ]$Function, 'or')`.
 #' So any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
-#' in a "melodic" way, within each spine path of each file.
+#' in a "melodic" way, within each spine path of each piece.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-#' you could manually set `groupby = list(File, Record)`.
+#' you could manually set `groupby = list(Piece, Record)`.
 #' 
 #' @section Order:
 #' 
 #' When performing lagged calculations, we typically assume that the order of the values in the input vector
 #' (`x`) is the order we want to "lag" across.
 #' E.g., the first element is "before" the second element, which is "before" the third element, etc.
-#' [Humdrum tables][humTable] are always ordered `File > Piece > Spine > Path > Record > Stop`.
+#' [Humdrum tables][humTable] are always ordered `Piece > Piece > Spine > Path > Record > Stop`.
 #' Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 #' the *next* element is the next element in the spine path.
 #' For example, consider this data:
@@ -1521,7 +1521,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' 
 #' The default order of these tokens (in the `Token` field) would be `a b c d e f`.
 #' If we wanted to instead lag across our tokens *harmonically* (across records) we'd need to specifiy a different order
-#' For example, we could say `orderby = list(File, Record, Spine)`---the lagged function
+#' For example, we could say `orderby = list(Pice, Record, Spine)`---the lagged function
 #' would interpret the `Token` field above as `a d b e c f`.
 #' 
 #' For another example, note `Stop` comes last in the order.
@@ -1535,9 +1535,9 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' *-      *-
 #' ```
 #' 
-#' The default ordering here (`File > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
+#' The default ordering here (`Piece > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
 #' That may or may not be what you want!
-#' If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+#' If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(Piece, Spine, Stop, Record)`.
 #' The resulting order would be `a b c d e f D G g a`.
 #' 
 #'    
@@ -2288,7 +2288,7 @@ wrapInCall <- function(call, x, ...) {
 
 
 getStructure <- function(...) {
-  getArgs(c('File', 'Spine', 'Patch'), ...)
+  getArgs(c('Piece', 'Spine', 'Patch'), ...)
 }
 
 getArgs <- function(args, ...) {
@@ -2664,6 +2664,15 @@ num2print <- function(n, label = NULL, capitalize = FALSE) {
           n_str
 }
 
+num2order <- function(num, minwidth = 1L) {
+  #pads zeros to make numbers sort properly
+  
+  maxwidth <- max(floor(log10(abs(num)))) + 1L
+  width <- max(minwidth, maxwidth)
+  
+  paste0(ifelse(num < 0, '-', if (any(num < 0)) '+' else ''), 
+         stringr::str_pad(abs(num), width = width, pad = '0', side = 'left'))
+}
 
 num2word <- function(num, capitalize = FALSE) {
   words = c('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',

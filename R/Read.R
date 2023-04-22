@@ -916,8 +916,8 @@ separatePieces <- function(fileFrame) {
     filelines[containmultiple] <-
         lapply(filelines[containmultiple], 
            \(lines) {
-               open  <- stringi::stri_count_regex(lines,'\\*\\*')
-               close <- stringi::stri_count_regex(lines,'\\*-')
+               open  <- stringi::stri_count_regex(lines,'^\\*\\*|\t\\*\\*')
+               close <- stringi::stri_count_regex(lines,'^\\*-|\t\\*-')
                nspines <- open - close
                
                newpiece <- head(nspines, -1) > 0L & tail(nspines, -1) == 0L

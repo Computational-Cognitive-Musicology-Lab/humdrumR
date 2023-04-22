@@ -1586,7 +1586,7 @@ setMethod('LO5th', 'tertianSet',
 #' those notes as a tertian sonority.
 #' Chords are output using the representation indicated by the `deparser` argument.
 #' By default, [with/within.humdrumR][withinHumdrum] will automatically pass
-#' `sonority` the `groupby` argument `groupby = list(File, Record)`,
+#' `sonority` the `groupby` argument `groupby = list(Piece, Record)`,
 #' so chords are estimated for each record in the dataset.
 #'
 #' @details 

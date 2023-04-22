@@ -23,6 +23,7 @@ Minor:
 	hop()
 		add hop.matrix and hop.data.frame
 		add support for negative indexing.
+	Make is to validateHumdrum returns useful data.table.
 
 
 Bugs:
