@@ -28,24 +28,30 @@ findFiles <- function(..., recursive = FALSE) {
     dirpaths  <- dirname(patterns)
     filepaths <- basename(patterns)
     
-    #### find matches
-    ## dirs
-    matchingdirs <- lapply(dirpaths, matchDirs)
-    
-    ## full paths (incl file)
-    matchingpaths <- if (sum(lengths(matchingdirs)) == 0L) {
-        replicate(length(matchingdirs), character(0), simplify = FALSE)
-        
+    if (isUrl(patterns)) {
+        data.table(Filepath    = patterns,
+                   Directories = dirpaths,
+                   Pattern     = patterns,
+                   Label       = names(patterns))
     } else {
-        Map(matchFiles, filepaths, matchingdirs,
-            recursive    = recursive)
+        #### find matches
+        ## dirs
+        matchingdirs <- lapply(dirpaths, matchDirs)
+        
+        ## full paths (incl file)
+        matchingpaths <- if (sum(lengths(matchingdirs)) == 0L) {
+            replicate(length(matchingdirs), character(0), simplify = FALSE)
+            
+        } else {
+            Map(matchFiles, filepaths, matchingdirs,
+                recursive    = recursive)
+        }
+        
+        data.table(Filepath    = matchingpaths,
+                   Directories = matchingdirs,
+                   Pattern     = patterns,
+                   Label       = names(patterns))
     }
-    
-    data.table(Filepath    = matchingpaths,
-               Directories = matchingdirs,
-               Pattern     = patterns,
-               Label       = names(patterns))
-    
 }
 
 assemblePatterns <- function(patternargs) {
@@ -60,7 +66,7 @@ assemblePatterns <- function(patternargs) {
     # Cartesian product patterns
     patgrid  <- do.call('expand.grid', c(patternargs, stringsAsFactors = FALSE))
     patterns <- apply(patgrid, 1, paste, collapse = .Platform$file.sep)
-    patterns <- gsub(paste0(strrep(.Platform$file.sep, 3), '*'), .Platform$file.sep, patterns)
+    patterns[!isUrl(patterns)] <- gsub(paste0(strrep(.Platform$file.sep, 3), '*'), .Platform$file.sep, patterns[!isUrl(patterns)])
     
     ## pattern labels
     patlabs <- if (length(unlist(lapply(patternargs, names))) > 0L) {
@@ -87,6 +93,7 @@ matchDirs <- function(dirpattern) {
     # This function does work for findFiles.
     # Given directory-path regular expressions (dirpattern) it finds matching directories on the system.
     # See the findHumdrum documentation for more explanation.
+    
     dirpattern <- strsplit(dirpattern, split = .Platform$file.sep)[[1]]
     
     dirpattern <- dirpattern[dirpattern != "."]

@@ -2774,4 +2774,9 @@ strPartition <- function(str, split = '/') {
 }
 
 
+isUrl <- function(str) {
+    grepl('http:|https:|ftp:|www.', str)
+}
+
+
 
