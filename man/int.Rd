@@ -156,8 +156,8 @@ C5 is a perfect fourth above G4.
 
 \code{mint()} and \code{hint()} work by passing \link[=lag]{lagged} and/or \link[=ditto]{dittoed}
 versions of \code{x} as the \code{from} argument to \code{int()}.
-Basically, \code{mint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)}
-and \code{hint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)}.
+Basically, \code{mint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(Piece, Spine, Path)), ...)}
+and \code{hint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(Piece, Record), orderby = list(Piece, Record, Spine, Path)), ...)}.
 In either case, the parsed pitch vector is copied and lagged using \code{\link[=lag]{lag()}}, with pairs crossing outside \code{groupby} groups ignored.
 The \code{lag} argument controls how far apart in the melody intervals are calculated.
 For instance, a lag of \code{2} will calculate intervals between \emph{every other} note in the vector.
@@ -277,13 +277,13 @@ However, using a \code{groupby} argument directly is usually much faster, as the
 specially optimized for this functions.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path)}.
+For this, we want \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{groupby = list(File, Record)}.
+you could manually set \code{groupby = list(Piece, Record)}.
 }
 
 \examples{

@@ -12,7 +12,7 @@ while employing split/apply/combine, windowing, and other analysis options."><!-
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -189,7 +189,7 @@ We will refer to these as "within-expressions."
 These expressions are passed to <code>with</code>/<code>within.humdrumR</code> as unnamed arguments: for example,
 <code>with(humData, myExpressionHere)</code>.</p>
 <p>Within expressions are evaluated within the <code>humdrumR</code> object's humdrum table,
-which means the expression can refer fields in the humdrumR object by name (<code>Record</code>, <code>Token</code>, <code>File</code>, etc.)
+which means the expression can refer fields in the humdrumR object by name (<code>Record</code>, <code>Token</code>, <code>Piece</code>, etc.)
 just like any other variables.
 Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
 (and generally should be) vectorized.
@@ -286,15 +286,15 @@ with(humData, table(lag(Token, 1), lag(Token, 2))
 </code></pre></div>
 
 <p><code><a href="lag.html">lag()</a></code> is a function with a <code>groupby</code> argument, which <code>with</code>/<code>within.humdrumR</code>
-will automatically feed the fields <code>list(File, Spine, Path)</code>.
+will automatically feed the fields <code>list(Piece, Spine, Path)</code>.
 This is the default "melodic" behavior in most music.
 If you'd like to turn this off, you need to override it by adding your own
 <code>groupby</code> argument to the lagged index, like <code>Token[lag = 1, groupby = list(...)]</code>.</p>
 <p>Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
 For example, if you want to create character-string 5-grams of your data, you could call:</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Token</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">'-'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
-<p>Note that, since <code>with</code>/<code>within.humdrumR</code> passes <code>groupby = list(File, Spine, Path)</code>
-to <code><a href="lag.html">lag()</a></code>, these are true "melodic" n-grams, only created within spine-paths within each file.</p>
+<p>Note that, since <code>with</code>/<code>within.humdrumR</code> passes <code>groupby = list(Piece, Spine, Path)</code>
+to <code><a href="lag.html">lag()</a></code>, these are true "melodic" n-grams, only created within spine-paths within each piece.</p>
 </div>
 
     </div>
@@ -423,10 +423,10 @@ Each unique combination of values across these vectors becomes one group.</p>
 <p>Most commonly, the <code>groupby</code> expression(s) are simply field(s) in the data:
 for instance,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humdata</span>,
      <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
-     by <span class="op">=</span> <span class="va">File</span><span class="op">)</span></code></pre></div>
+     by <span class="op">=</span> <span class="va">Piece</span><span class="op">)</span></code></pre></div>
 
 <p>will apply the function <code>[base][table]</code> to the <code>Token</code> field
-<em>separately</em> for each file in the <code>humdrumR</code> data.
+<em>separately</em> for each piece in the <code>humdrumR</code> data.
 However, we can also use more complex expressions like</p><div class="sourceCode"><pre><code>with(humdata,
      table(Token), 
      by = Spine &gt; 3 | Record \%\% 2 == 0)
@@ -438,9 +438,9 @@ three or less <em>or</em> the record number is even, and another group where the
 the within expressions are evaluated across every combination of categories across all the vectors.
 Thus,</p><div class="sourceCode"><pre><code><span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humdata</span>, 
      <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,
-     by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">File</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+     by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Piece</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 
-<p>will apply <code>table</code> to <code>Token</code> across each spine <em>in</em> each file.</p>
+<p>will apply <code>table</code> to <code>Token</code> across each spine <em>in</em> each piece.</p>
 </div>
 
 <div class="section">
@@ -453,11 +453,11 @@ If <code>subset</code> is specified after <code>groupby</code>, the <code>subset
 If <code>groupby</code> is specified after <code>subset</code>, the grouping <code>by</code> expression is evaluated only where <code>subset == TRUE</code>.
 Thus, if you specify</p><div class="sourceCode"><pre><code>within(humdata,
          sd(Semits),
-         by = File, 
+         by = Piece, 
          subset = Semits &gt; mean(Semits))
 ```
 
-the standard deviation of the `semits` field will be calculated in each file,
+the standard deviation of the `semits` field will be calculated in each piece,
 but only where the `semits` field is greater than the mean `semits` value
 *within that file*. Contrast this with this call:
 
@@ -465,10 +465,10 @@ but only where the `semits` field is greater than the mean `semits` value
 within(humdata,
          sd(Semits)
          subset = Semits &gt; mean(Semits), 
-         by = File) 
+         by = Piece) 
 ```
 
-wherein the standard deviation of `semits` is, again, calculated for each file,
+wherein the standard deviation of `semits` is, again, calculated for each piece,
 but this time wherever the `semits` field is greater than the mean value *across all the data*.
 
 
@@ -499,7 +499,7 @@ just as they are in a separate call to <code><a href="context.html">context()</a
 Do not give the <code><a href="context.html">context()</a></code> command inside a <code>with</code>/<code>within.humdrumR</code> call a <code>x</code> or <code>reference</code> argument:
 The <a href="humActive.html">active field</a> is used as the <code>reference</code> vector for <code><a href="context.html">context()</a></code> --- e.g., if <code>open</code>
 or <code>close</code> is a <code>character</code> string, they are matched as regular expressions against the <a href="humActive.html">active field</a>.
-<code>list(File, Spine, Path)</code> is also automatically passed as the <code>groupby</code> argument to <code><a href="context.html">context()</a></code>.</p>
+<code>list(Piece, Spine, Path)</code> is also automatically passed as the <code>groupby</code> argument to <code><a href="context.html">context()</a></code>.</p>
 <p>When using <code><a href="context.html">context()</a></code> inside <code>with</code>/<code>within.humdrumR</code>, the <code>alignToOpen</code> argument will have no effect.
 If you want output to align with the right side of each window, use <code>alignLeft = FALSE</code> as an argument to
 <strong>with</strong>/<strong>within</strong>, not as an argument to <code><a href="context.html">context()</a></code>.
@@ -581,7 +581,7 @@ allowing us to do things like:</p><div class="sourceCode"><pre><code><span class
 
 <span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="va">tabler</span>, <span class="va">byspine</span><span class="op">)</span></code></pre></div>
 
-<p>We can even make lists and loop through them:</p><div class="sourceCode"><pre><code><span class="va">bys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Spine</span>, <span class="op">~</span> <span class="va">File</span>, <span class="op">~</span> <span class="va">COM</span><span class="op">)</span>
+<p>We can even make lists and loop through them:</p><div class="sourceCode"><pre><code><span class="va">bys</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">~</span> <span class="va">Spine</span>, <span class="op">~</span> <span class="va">Piece</span>, <span class="op">~</span> <span class="va">COM</span><span class="op">)</span>
 
 <span class="kw">for</span> <span class="op">(</span><span class="va">b</span> <span class="kw">in</span> <span class="va">bys</span><span class="op">)</span> <span class="fu"><a href="../reference/withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span>, by <span class="op">=</span> <span class="va">b</span><span class="op">)</span></code></pre></div>
 <div class="section">

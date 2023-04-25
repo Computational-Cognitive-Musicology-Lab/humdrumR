@@ -22,7 +22,7 @@ We "fold" the data from one structural location over "on top" of other data usin
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ We "fold" the data from one structural location over "on top" of other data usin
   <span class="va">fold</span>,
   <span class="va">onto</span>,
   what <span class="op">=</span> <span class="st">"Spine"</span>,
-  File <span class="op">=</span> <span class="cn">NULL</span>,
+  Piece <span class="op">=</span> <span class="cn">NULL</span>,
   fromField <span class="op">=</span> <span class="fu"><a href="humActive.html">getActiveFields</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   fillFromField <span class="op">=</span> <span class="cn">FALSE</span>,
   newFieldNames <span class="op">=</span> <span class="cn">NULL</span>
@@ -132,8 +132,8 @@ We "fold" the data from one structural location over "on top" of other data usin
 <dd><p><em><strong>The structural (spine, path, etc.) which is folded across.</strong></em></p>
 <p>Defaults to <code>"Spine"</code>.</p>
 <p>Must be a single <code>character</code> string. Valid options are <code>"Spine"</code>, <code>"Path"</code>, <code>"Stop"</code>, <code>"Record"</code>,and <code>"NData"</code>.</p></dd>
-<dt>File</dt>
-<dd><p><em><strong>Which files in the corpus shoul be folded (see "File-Specific Folding" section, below).</strong></em></p>
+<dt>Piece</dt>
+<dd><p><em><strong>Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).</strong></em></p>
 <p>Defaults to <code>NULL</code>.</p>
 <p>Must be natural numbers; must be length <code>length(onto)</code>.</p></dd>
 <dt>fromField</dt>
@@ -206,21 +206,21 @@ If you specify too few <code>newFieldNames</code>, the later names will be given
 consistent with the default behavior.</p>
     </div>
     <div class="section level2">
-    <h2 id="file-specific-folding">File-Specific Folding<a class="anchor" aria-label="anchor" href="#file-specific-folding"></a></h2>
+    <h2 id="piece-specific-folding">Piece-Specific Folding<a class="anchor" aria-label="anchor" href="#piece-specific-folding"></a></h2>
     
 
 
-<p>By default, the same "fold" is carried out in each file of the input corpus
+<p>By default, the same "fold" is carried out in each piece in the input corpus
 (<code>humdrumR</code> argument).
-If you need to specify different folds in different files, you have to specify the <code>File</code>
+If you need to specify different folds in different pieces, you have to specify the <code>Piece</code>
 argument (<code>numeric</code>, whole number).
-For <em>every</em> file in the corpus you want to apply folds to, you must specify all the <code>fold</code>
-and <code>onto</code> arguments in parallel vectors with the <code>File</code> argument (even if this is reduendant
+For <em>every</em> piece in the corpus you want to apply folds to, you must specify all the <code>fold</code>
+and <code>onto</code> arguments in parallel vectors with the <code>Piece</code> argument (even if this is reduendant
 for some files).
-For example, if we specify the combinations,</p><table class="table table"><tr><td><code>fold</code></td><td><code>onto</code></td><td><code>File</code></td></tr><tr><td><code>1</code></td><td><code>2</code></td><td><code>1</code></td></tr><tr><td><code>3</code></td><td><code>4</code></td><td><code>1</code></td></tr><tr><td><code>1</code></td><td><code>2</code></td><td><code>2</code></td></tr><tr><td><code>4</code></td><td><code>3</code></td><td><code>2</code></td></tr></table><p>then</p><ul><li><p>In <code>File</code> one:</p><ul><li><p>the first spine is mapped to the second spine</p></li>
+For example, if we specify the combinations,</p><table class="table table"><tr><td><code>fold</code></td><td><code>onto</code></td><td><code>Piece</code></td></tr><tr><td><code>1</code></td><td><code>2</code></td><td><code>1</code></td></tr><tr><td><code>3</code></td><td><code>4</code></td><td><code>1</code></td></tr><tr><td><code>1</code></td><td><code>2</code></td><td><code>2</code></td></tr><tr><td><code>4</code></td><td><code>3</code></td><td><code>2</code></td></tr></table><p>then</p><ul><li><p>In <code>Piece</code> one:</p><ul><li><p>the first spine is mapped to the second spine</p></li>
 <li><p>the third spine is mapped to the fourth spine</p></li>
 </ul></li>
-<li><p>In <code>File</code> two:</p><ul><li><p>the first spine is mapped to the second spine</p></li>
+<li><p>In <code>Piece</code> two:</p><ul><li><p>the first spine is mapped to the second spine</p></li>
 <li><p>the fourth spine is mapped to the third spine</p></li>
 </ul></li>
 </ul><p>If any files in the corpus are not included, they will not be affected at all!</p>

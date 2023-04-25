@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,7 +138,7 @@ based on the order of <code>orderby</code> vector(s), as determined by <code><a 
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><code>sigma</code> is very similar base-<code>R</code> <code><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum()</a></code>.
 However, <code>sigma</code> should be favored in <a href="humdrumR.html">humdrumR</a> use because:</p><ol><li><p>It has a <code>groupby</code> argument, which is <em>automatically</em> used by <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a>
-commands to constrain the differences within files/spines/paths of <code>humdrum</code> data.
+commands to constrain the differences within pieces/spines/paths of <code>humdrum</code> data.
 Using the <code>groupby</code> argument to a function (details below) is generally faster than using a <code>groupby</code> argument to <code><a href="withinHumdrum.html">withinHumdrum()</a></code>.</p></li>
 <li><p>They (can) automatically skip <code>NA</code> (or other) values.</p></li>
 <li><p><code>sigma</code> also has a <code>init</code> argument which can be used to ensure full invertability with <code><a href="delta.html">delta()</a></code>. See the "Invertability"
@@ -218,13 +218,13 @@ expession in a call to <a href="withinHumdrum.html">with(in).humdrumR</a>.
 However, using a <code>groupby</code> argument directly is usually much faster, as they have been
 specially optimized for this functions.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want <code>groupby = list(File, Spine, Path)</code>.
+For this, we want <code>groupby = list(Piece, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
 three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set <code>groupby = list(File, Record)</code>.</p>
+you could manually set <code>groupby = list(Piece, Record)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="order">Order<a class="anchor" aria-label="anchor" href="#order"></a></h2>
@@ -234,7 +234,7 @@ you could manually set <code>groupby = list(File, Record)</code>.</p>
 <p>When performing lagged calculations, we typically assume that the order of the values in the input vector
 (<code>x</code>) is the order we want to "lag" across.
 E.g., the first element is "before" the second element, which is "before" the third element, etc.
-[Humdrum tables][humTable] are always ordered <code>File &gt; Piece &gt; Spine &gt; Path &gt; Record &gt; Stop</code>.
+[Humdrum tables][humTable] are always ordered <code>Piece &gt; Piece &gt; Spine &gt; Path &gt; Record &gt; Stop</code>.
 Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 the <em>next</em> element is the next element in the spine path.
 For example, consider this data:</p><div class="sourceCode"><pre><code>**kern  **kern
@@ -246,7 +246,7 @@ c       f
 
 <p>The default order of these tokens (in the <code>Token</code> field) would be <code>a b c d e f</code>.
 If we wanted to instead lag across our tokens <em>harmonically</em> (across records) we'd need to specifiy a different order
-For example, we could say <code>orderby = list(File, Record, Spine)</code>---the lagged function
+For example, we could say <code>orderby = list(Pice, Record, Spine)</code>---the lagged function
 would interpret the <code>Token</code> field above as <code>a d b e c f</code>.</p>
 <p>For another example, note <code>Stop</code> comes last in the order.
 Let's consider what happens then if here are stops in our data:</p><div class="sourceCode"><pre><code>**kern  **kern
@@ -256,9 +256,9 @@ c A     f a
 *-      *-
 ```
 
-The default ordering here (`File &gt; Spine &gt; Record &gt; Stop`) "sees" this in the order `a b D c A d e g f a`.
+The default ordering here (`Piece &gt; Spine &gt; Record &gt; Stop`) "sees" this in the order `a b D c A d e g f a`.
 That may or may not be what you want!
-If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(Piece, Spine, Stop, Record)`.
 The resulting order would be `a b c d e f D G g a`.
 
    

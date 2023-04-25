@@ -10,6 +10,7 @@ writeHumdrum(
   renamer = force,
   affix = "",
   extension = NULL,
+  separatePieces = FALSE,
   directory = NULL,
   overwrite = FALSE,
   verbose = FALSE,
@@ -41,6 +42,12 @@ Defaults to \code{""}.
 Must be a single \code{character} string.
 
 Affix is appended at end of filename, but before the extension.}
+
+\item{extension}{\emph{\strong{What extension to use for new files.}}
+
+Defaults to \code{NULL}, which means the file extension of the original files is used.
+
+Must be \code{NULL}, or a single, non-empty \code{character} string.}
 
 \item{directory}{\emph{\strong{A directory to write the files into.}}
 
@@ -99,6 +106,11 @@ After running \code{renamer}, the \code{character}-string \code{affix} and \code
 are appended/prepended to the renamed names.
 (The \code{affix} is affixed \emph{before} the extension.)
 Finally, the \code{extension} argument can be used to specify a different file extension.
+
+If any files in your data set contain multiple pieces, you can either write these
+pieces into the same files (\code{seperateFiles = FALSE}), as they were originally, or write each piece into its
+own new file (\code{separateFiles = TRUE}); if writing pieces into separate files,
+each piece's file name is appended with \verb{_pieceN}, where \code{N} is the number of the piece within the file.
 
 The \code{directory} argument indicates a file path where to write the files.
 If the \code{directory} doesn't exist, it is created.

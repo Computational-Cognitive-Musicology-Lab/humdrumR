@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-04-21</h4>
+            <h4 data-toc-skip class="date">2023-04-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/PitchAndTonality.Rmd" class="external-link"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
       <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
@@ -390,7 +390,7 @@ we’d like to convert the <code>**kern</code> to semitones:</p>
 <span id="cb7-90"><a href="#cb7-90" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb7-91"><a href="#cb7-91" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb7-92"><a href="#cb7-92" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb7-93"><a href="#cb7-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb7-93"><a href="#cb7-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb7-94"><a href="#cb7-94" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb7-95"><a href="#cb7-95" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb7-96"><a href="#cb7-96" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">integer</span> (<span class="sc">**</span>semits tokens)</span></code></pre></div>
@@ -503,7 +503,7 @@ keys in the data:</p>
 <span id="cb9-91"><a href="#cb9-91" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb9-92"><a href="#cb9-92" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb9-93"><a href="#cb9-93" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb9-94"><a href="#cb9-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb9-94"><a href="#cb9-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb9-95"><a href="#cb9-95" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb9-96"><a href="#cb9-96" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb9-97"><a href="#cb9-97" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>solfa tokens)</span></code></pre></div>
@@ -834,7 +834,7 @@ argument to <code><a href="../reference/int.html">mint()</a></code>):</p>
 <span id="cb22-93"><a href="#cb22-93" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb22-94"><a href="#cb22-94" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb22-95"><a href="#cb22-95" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb22-96"><a href="#cb22-96" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb22-96"><a href="#cb22-96" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb22-97"><a href="#cb22-97" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb22-98"><a href="#cb22-98" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb22-99"><a href="#cb22-99" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>interval tokens)</span></code></pre></div>
@@ -935,7 +935,7 @@ used to classify output intervals as either <code>Unison</code>,
 <span id="cb23-90"><a href="#cb23-90" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb23-91"><a href="#cb23-91" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb23-92"><a href="#cb23-92" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb23-93"><a href="#cb23-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb23-93"><a href="#cb23-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb23-94"><a href="#cb23-94" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb23-95"><a href="#cb23-95" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb23-96"><a href="#cb23-96" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> character</span></code></pre></div>
@@ -1040,7 +1040,7 @@ each record of a file:</p>
 <span id="cb24-91"><a href="#cb24-91" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb24-92"><a href="#cb24-92" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb24-93"><a href="#cb24-93" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb24-94"><a href="#cb24-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb24-94"><a href="#cb24-94" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb24-95"><a href="#cb24-95" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb24-96"><a href="#cb24-96" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb24-97"><a href="#cb24-97" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>interval tokens)</span></code></pre></div>
@@ -1140,7 +1140,7 @@ like so:</p>
 <span id="cb25-90"><a href="#cb25-90" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb25-91"><a href="#cb25-91" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb25-92"><a href="#cb25-92" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb25-93"><a href="#cb25-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb25-93"><a href="#cb25-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb25-94"><a href="#cb25-94" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb25-95"><a href="#cb25-95" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb25-96"><a href="#cb25-96" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>interval tokens)</span></code></pre></div>
@@ -1237,7 +1237,7 @@ like so:</p>
 <span id="cb26-90"><a href="#cb26-90" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">############################# ^^^ chor010.krn ^^^ #############################</span></span>
 <span id="cb26-91"><a href="#cb26-91" tabindex="-1"></a><span class="er">&gt;</span>                           (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
 <span id="cb26-92"><a href="#cb26-92" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb26-93"><a href="#cb26-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten files.</span>
+<span id="cb26-93"><a href="#cb26-93" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of ten pieces.</span>
 <span id="cb26-94"><a href="#cb26-94" tabindex="-1"></a><span class="sc">&gt;</span>        Data fields<span class="sc">:</span> </span>
 <span id="cb26-95"><a href="#cb26-95" tabindex="-1"></a><span class="er">&gt;</span>                Token   <span class="sc">::</span> character</span>
 <span id="cb26-96"><a href="#cb26-96" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="er">*</span>Result1 <span class="sc">::</span> <span class="fu">character</span> (<span class="sc">**</span>interval tokens)</span></code></pre></div>

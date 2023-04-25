@@ -39,7 +39,7 @@ basic \link[=humSummary]{corpus summary functions}.
 }
 \details{
 \code{spines} returns a special \code{data.frame} called a \code{humSpines} table.
-A \code{humSpines} table has five columns of information about each file:
+A \code{humSpines} table has five columns of information about each piece:
 \enumerate{
 \item Spines
 \itemize{

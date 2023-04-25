@@ -88,7 +88,7 @@ summary.humdrumR <- function(object) {
 #' 
 #' By default, `census` tabulates data within pieces in the corpus,
 #' with each piece tabulated in a row of the `humCensus` table.
-#' Rows are labeled with each filename.
+#' Rows are labeled with each file name.
 #' When a `humCensus` object is printed,
 #' the totals across all pieces are printed as well---(unique) and (per token)
 #' values are calculated across all pieces as well, not summed.
@@ -952,7 +952,7 @@ interpretations <- function(humdrumR) {
   exclusive <- humtab[grepl('^\\*\\*', Token)]
   exclusive$Token <- factor(exclusive$Token)
   exclusiveN <- do.call('rbind', exclusive[ , .(list(table(Token))), by = Piece]$V1)
-  rownames(exclusiveN) <- humtab[, unique(Filename), by = Piece]
+  rownames(exclusiveN) <- humtab[, unique(Filename), by = Piece]$V1
   
   exclusivePats <- exclusive[, harvard(Token), by = Piece]$V1
   output <- list(Filename = unique(humtab$Filename),

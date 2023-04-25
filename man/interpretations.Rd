@@ -32,7 +32,7 @@ basic \link[=humSummary]{corpus summary functions}.
 \code{interpretations} returns a special \code{data.frame} called a \code{humInterpretations} table.
 Each row in the table represents a single piece in the corpus.
 The first column (\code{{X}}) is a variable indicating a unique "exclusive pattern" associated with
-each file---the exclusive patterns are tallied at the bottom of the printout.
+each piece---the exclusive patterns are tallied at the bottom of the printout.
 The remaining columns indicate how many of each interpretation (indicated by column name)
 appear in each piece.
 
@@ -43,7 +43,7 @@ For tandem interpretations, counts are returned in the format \code{Total.Unique
 \item \code{Spines}: The number of spines that this interpretation appears in.
 }
 
-For example, consider the following file:\preformatted{**kern   **kern   **silbe
+For example, consider the following piece:\preformatted{**kern   **kern   **silbe
    *C:      *C:         *
      c        e        La
      d        f        la
@@ -58,10 +58,10 @@ For example, consider the following file:\preformatted{**kern   **kern   **silbe
     *-       *-        *-
 }
 
-In this file, there is several tandem key interpretations,
+In this piece, there is several tandem key interpretations,
 which \code{humdrumR} will call \code{Key}.
 The tabulation by \code{interpretations} will return a \code{Key} column with the value
-\verb{6.3.2} for this file:
+\verb{6.3.2} for this piece:
 \itemize{
 \item \code{6} because there are six key interpretations in total.
 \item \code{3} because there are three unique keys: \verb{*C:}, \verb{*e:} and \verb{*G:}.

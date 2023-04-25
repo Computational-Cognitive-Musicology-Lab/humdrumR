@@ -95,12 +95,12 @@ Note that \code{as.matrix(humdrumR)} places the \emph{entire} corpus object into
 In contrast, the plural \code{as.matrices} and \code{as.data.frames} call their respective singular versions
 separately on each individual file in a \link[=humdrumRclass]{humdrumR corpus} and return them all in a list.
 The \link[base:colnames]{row names}  of the \code{matrix}/\code{data.frame}(s) consist of two integer values,
-separated by a \code{.}, representing: \code{File.Record}.
+separated by a \code{.}, representing: \code{Piece.Record}.
 
 The \code{as.lines} function converts a \link[=humdrumRclass]{humdrumR object} into a \code{character} vector of text lines,
 with columns separated by the \code{sep} argument (defaults to \code{"\\t"}), just as you'd see in a humdrum-syntax file.
 Each line is a single row from a \code{as.matrix.humdrumR}, with padded values at the right side removed.
-The matrix's \code{File.Record} \link[base:colnames]{row names} are preserved as the lines' \link[base:names]{names}.
+The matrix's \code{Piece.Record} \link[base:colnames]{row names} are preserved as the lines' \link[base:names]{names}.
 
 Note that multiple-stop token (where \code{Stop > 1L}) cannot by incorporated into the two
 dimensional \code{matrix}/\code{data.frame}. Thus, \code{as.matrix(humdrumR)} calls

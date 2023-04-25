@@ -11,7 +11,7 @@ foldHumdrum(
   fold,
   onto,
   what = "Spine",
-  File = NULL,
+  Piece = NULL,
   fromField = getActiveFields(humdrumR)[1],
   fillFromField = FALSE,
   newFieldNames = NULL
@@ -48,7 +48,7 @@ Defaults to \code{"Spine"}.
 
 Must be a single \code{character} string. Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"NData"}.}
 
-\item{File}{\emph{\strong{Which files in the corpus shoul be folded (see "File-Specific Folding" section, below).}}
+\item{Piece}{\emph{\strong{Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).}}
 
 Defaults to \code{NULL}.
 
@@ -140,18 +140,18 @@ If you specify too few \code{newFieldNames}, the later names will be given resul
 consistent with the default behavior.
 }
 
-\section{File-Specific Folding}{
+\section{Piece-Specific Folding}{
 
 
-By default, the same "fold" is carried out in each file of the input corpus
+By default, the same "fold" is carried out in each piece in the input corpus
 (\code{humdrumR} argument).
-If you need to specify different folds in different files, you have to specify the \code{File}
+If you need to specify different folds in different pieces, you have to specify the \code{Piece}
 argument (\code{numeric}, whole number).
-For \emph{every} file in the corpus you want to apply folds to, you must specify all the \code{fold}
-and \code{onto} arguments in parallel vectors with the \code{File} argument (even if this is reduendant
+For \emph{every} piece in the corpus you want to apply folds to, you must specify all the \code{fold}
+and \code{onto} arguments in parallel vectors with the \code{Piece} argument (even if this is reduendant
 for some files).
 For example, if we specify the combinations,\tabular{ccc}{
-   \code{fold} \tab \code{onto} \tab \code{File} \cr
+   \code{fold} \tab \code{onto} \tab \code{Piece} \cr
    \code{1} \tab \code{2} \tab \code{1} \cr
    \code{3} \tab \code{4} \tab \code{1} \cr
    \code{1} \tab \code{2} \tab \code{2} \cr
@@ -161,12 +161,12 @@ For example, if we specify the combinations,\tabular{ccc}{
 
 then
 \itemize{
-\item In \code{File} one:
+\item In \code{Piece} one:
 \itemize{
 \item the first spine is mapped to the second spine
 \item the third spine is mapped to the fourth spine
 }
-\item In \code{File} two:
+\item In \code{Piece} two:
 \itemize{
 \item the first spine is mapped to the second spine
 \item the fourth spine is mapped to the third spine

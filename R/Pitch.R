@@ -4045,8 +4045,8 @@ invert.factor <- invert.token
 #' 
 #' `mint()` and `hint()` work by passing [lagged][lag()] and/or [dittoed][ditto()]
 #' versions of `x` as the `from` argument to `int()`.
-#' Basically, `mint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)`
-#' and `hint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)`.
+#' Basically, `mint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(Piece, Spine, Path)), ...)`
+#' and `hint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(Piece, Record), orderby = list(Piece, Record, Spine, Path)), ...)`.
 #' In either case, the parsed pitch vector is copied and lagged using [lag()], with pairs crossing outside `groupby` groups ignored.
 #' The `lag` argument controls how far apart in the melody intervals are calculated.
 #' For instance, a lag of `2` will calculate intervals between *every other* note in the vector.

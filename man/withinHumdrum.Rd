@@ -134,7 +134,7 @@ These expressions are passed to \code{with}/\code{within.humdrumR} as unnamed ar
 \code{with(humData, myExpressionHere)}.
 
 Within expressions are evaluated within the \code{humdrumR} object's humdrum table,
-which means the expression can refer fields in the humdrumR object by name (\code{Record}, \code{Token}, \code{File}, etc.)
+which means the expression can refer fields in the humdrumR object by name (\code{Record}, \code{Token}, \code{Piece}, etc.)
 just like any other variables.
 Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
 (and generally should be) vectorized.
@@ -236,7 +236,7 @@ with(humData, table(lag(Token, 1), lag(Token, 2))
 }
 
 \code{\link[=lag]{lag()}} is a function with a \code{groupby} argument, which \code{with}/\code{within.humdrumR}
-will automatically feed the fields \code{list(File, Spine, Path)}.
+will automatically feed the fields \code{list(Piece, Spine, Path)}.
 This is the default "melodic" behavior in most music.
 If you'd like to turn this off, you need to override it by adding your own
 \code{groupby} argument to the lagged index, like \code{Token[lag = 1, groupby = list(...)]}.
@@ -245,8 +245,8 @@ Using lagged vectors, since they are vectorized, is the fastest (computationally
 For example, if you want to create character-string 5-grams of your data, you could call:\preformatted{with(humData, paste(Token[lag = 0:5], sep = '-'))
 }
 
-Note that, since \code{with}/\code{within.humdrumR} passes \code{groupby = list(File, Spine, Path)}
-to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each file.
+Note that, since \code{with}/\code{within.humdrumR} passes \code{groupby = list(Piece, Spine, Path)}
+to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each piece.
 }
 }
 
@@ -373,11 +373,11 @@ Each unique combination of values across these vectors becomes one group.
 Most commonly, the \code{groupby} expression(s) are simply field(s) in the data:
 for instance,\preformatted{with(humdata,
      table(Token),
-     by = File)
+     by = Piece)
 }
 
 will apply the function \verb{[base][table]} to the \code{Token} field
-\emph{separately} for each file in the \code{humdrumR} data.
+\emph{separately} for each piece in the \code{humdrumR} data.
 However, we can also use more complex expressions like\preformatted{with(humdata,
      table(Token), 
      by = Spine > 3 | Record \\\%\\\% 2 == 0)
@@ -390,10 +390,10 @@ If the \code{groupby} expression evaluates to a list of grouping vectors,
 the within expressions are evaluated across every combination of categories across all the vectors.
 Thus,\preformatted{with(humdata, 
      table(Token),
-     by = list(File, Spine))
+     by = list(Piece, Spine))
 }
 
-will apply \code{table} to \code{Token} across each spine \emph{in} each file.
+will apply \code{table} to \code{Token} across each spine \emph{in} each piece.
 }
 
 \subsection{Advanced partitioning:}{
@@ -404,11 +404,11 @@ If \code{subset} is specified after \code{groupby}, the \code{subset} expression
 If \code{groupby} is specified after \code{subset}, the grouping \code{by} expression is evaluated only where \code{subset == TRUE}.
 Thus, if you specify\preformatted{within(humdata,
          sd(Semits),
-         by = File, 
+         by = Piece, 
          subset = Semits > mean(Semits))
 ```
 
-the standard deviation of the `semits` field will be calculated in each file,
+the standard deviation of the `semits` field will be calculated in each piece,
 but only where the `semits` field is greater than the mean `semits` value
 *within that file*. Contrast this with this call:
 
@@ -416,10 +416,10 @@ but only where the `semits` field is greater than the mean `semits` value
 within(humdata,
          sd(Semits)
          subset = Semits > mean(Semits), 
-         by = File) 
+         by = Piece) 
 ```
 
-wherein the standard deviation of `semits` is, again, calculated for each file,
+wherein the standard deviation of `semits` is, again, calculated for each piece,
 but this time wherever the `semits` field is greater than the mean value *across all the data*.
 
 
@@ -447,7 +447,7 @@ just as they are in a separate call to \code{context()} --- see the \code{contex
 Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} call a \code{x} or \code{reference} argument:
 The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()} --- e.g., if \code{open}
 or \code{close} is a \code{character} string, they are matched as regular expressions against the \link[=humActive]{active field}.
-\code{list(File, Spine, Path)} is also automatically passed as the \code{groupby} argument to \code{context()}.
+\code{list(Piece, Spine, Path)} is also automatically passed as the \code{groupby} argument to \code{context()}.
 
 When using \code{context()} inside \code{with}/\code{within.humdrumR}, the \code{alignToOpen} argument will have no effect.
 If you want output to align with the right side of each window, use \code{alignLeft = FALSE} as an argument to
@@ -540,7 +540,7 @@ with(humData, tabler, byspine)
 
 }
 
-We can even make lists and loop through them:\preformatted{bys <- list(~ Spine, ~ File, ~ COM)
+We can even make lists and loop through them:\preformatted{bys <- list(~ Spine, ~ Piece, ~ COM)
 
 for (b in bys) with(humData, table(.), by = b)
 

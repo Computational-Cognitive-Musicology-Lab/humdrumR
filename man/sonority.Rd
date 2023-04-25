@@ -77,7 +77,7 @@ grouped into multiple chords by a \code{groupby} argument, and interprets
 those notes as a tertian sonority.
 Chords are output using the representation indicated by the \code{deparser} argument.
 By default, \link[=withinHumdrum]{with/within.humdrumR} will automatically pass
-\code{sonority} the \code{groupby} argument \code{groupby = list(File, Record)},
+\code{sonority} the \code{groupby} argument \code{groupby = list(Piece, Record)},
 so chords are estimated for each record in the dataset.
 }
 \details{

@@ -18,7 +18,7 @@ basic R data types."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -160,11 +160,11 @@ Note that <code>as.matrix(humdrumR)</code> places the <em>entire</em> corpus obj
 In contrast, the plural <code>as.matrices</code> and <code>as.data.frames</code> call their respective singular versions
 separately on each individual file in a <a href="humdrumRclass.html">humdrumR corpus</a> and return them all in a list.
 The <a href="https://rdrr.io/r/base/colnames.html" class="external-link">row names</a>  of the <code>matrix</code>/<code>data.frame</code>(s) consist of two integer values,
-separated by a <code>.</code>, representing: <code>File.Record</code>.</p>
+separated by a <code>.</code>, representing: <code>Piece.Record</code>.</p>
 <p>The <code>as.lines</code> function converts a <a href="humdrumRclass.html">humdrumR object</a> into a <code>character</code> vector of text lines,
 with columns separated by the <code>sep</code> argument (defaults to <code>"\t"</code>), just as you'd see in a humdrum-syntax file.
 Each line is a single row from a <code>as.matrix.humdrumR</code>, with padded values at the right side removed.
-The matrix's <code>File.Record</code> <a href="https://rdrr.io/r/base/colnames.html" class="external-link">row names</a> are preserved as the lines' <a href="https://rdrr.io/r/base/names.html" class="external-link">names</a>.</p>
+The matrix's <code>Piece.Record</code> <a href="https://rdrr.io/r/base/colnames.html" class="external-link">row names</a> are preserved as the lines' <a href="https://rdrr.io/r/base/names.html" class="external-link">names</a>.</p>
 <p>Note that multiple-stop token (where <code>Stop &gt; 1L</code>) cannot by incorporated into the two
 dimensional <code>matrix</code>/<code>data.frame</code>. Thus, <code>as.matrix(humdrumR)</code> calls
 collapseStops(collapseAtomic = TRUE, sep = " ")

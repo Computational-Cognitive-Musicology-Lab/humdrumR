@@ -22,7 +22,7 @@ defined by hop()'s by argument."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +139,7 @@ The index of the last <code>TRUE</code> is used.</p></dd>
 <dd><p><em><strong>Optional vectors to group hop sequences within.</strong></em></p>
 <p>Defaults to empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
 <p>Must be a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, which is either empty or contains vectors which are all the same length as <code>along.with</code>.
-In calls to <a href="withinHumdrum.html">with/within.humdrumR</a>, <code>groupby</code> is passed <code>list(File, Spine, Path)</code> by default.</p></dd>
+In calls to <a href="withinHumdrum.html">with/within.humdrumR</a>, <code>groupby</code> is passed <code>list(Piece, Spine, Path)</code> by default.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -202,11 +202,11 @@ Each grouped segement of <code>along.with</code> is treated just like a separate
 for example, if <code>from = 2</code>, the hop sequence will start on the second index of <em>each</em> group.
 However, the output indices still represent the original <code>along.with</code> indices.</p>
 <p>Since <code>hop()</code> is usually used with <code><a href="context.html">context()</a></code> to create rolling windows within musical parts,
-we want typically want to apply <code>hop()</code> using using <code>groupby = list(File, Spine, Path)</code>.
+we want typically want to apply <code>hop()</code> using <code>groupby = list(Piece, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
 three fields as <code>groupby</code> arguments to <code>hop()</code>.
 So any use of <code>hop()</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically generate the hop sequence
-in a "melodic" way, within each spine path of each file.</p>
+in a "melodic" way, within each spine path of each piece.</p>
     </div>
 
     <div class="section level2">

@@ -22,11 +22,11 @@ aspects of \link[=humdrumRclass]{humdrumR data objects}:
 }
 \item \code{\link[=reference]{reference()}}
 \itemize{
-\item Tabulates reference records (metadata) for each file.
+\item Tabulates reference records (metadata) for each piece.
 }
 \item \code{\link[=spines]{spines()}}
 \itemize{
-\item Tabulates the number of spines and spine paths in files in the corpus.
+\item Tabulates the number of spines and spine paths in pieces in the corpus.
 }
 \item \code{\link[=interpretations]{interpretations()}}
 \itemize{

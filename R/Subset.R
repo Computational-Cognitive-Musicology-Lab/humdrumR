@@ -47,12 +47,12 @@
 #' 
 #' @section Renumbering:
 #'
-#' If filtered files are removed from a corpus (using `removeEmptyFiles` or `removeEmptySpines`, in combination with `subset`)
-#' the `Piece` and/or `Spine` fields are renumbered to represented the remaining regions,
+#' If filtered pieces are removed from a corpus (using `removeEmptyPieces` or `removeEmptySpines`, in combination with `subset`)
+#' the `File`, `Piece`, and/or `Spine` fields are renumbered to represented the remaining regions,
 #' starting from `1`.
-#' For example, if you have a corpus of 10 files and remove the first file (`Piece == 1`),
-#' the remaining files are renumbered from `2:10` to `1:9`.
-#' Spine renumbering works the same, except it is done independently *within* each file.
+#' For example, if you have a corpus of 10 pieces and remove the first piece (`Piece == 1`),
+#' the remaining pieces are renumbered from `2:10` to `1:9`.
+#' Spine renumbering works the same, except it is done independently *within* each piece.
 #' 
 #' @param x ***HumdrumR data.***
 #' 
@@ -82,7 +82,7 @@ subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
   humtab[ , .TmpFilter. := NULL]
   humtab <- update_Null.data.table(humtab, oldActiveFields)
   
-  if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMDd')
+  if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
   putHumtab(x) <- humtab
   
   removeFields(x) <- '.TmpFilter.'
@@ -184,7 +184,7 @@ removeEmptyStops <- function(humdrumR) {
 #'
 #' R's built-in indexing operators, `[]` (single brakcets) and `[[]]` (double brackets) can
 #' be used as shortcuts for common calls to [subset.humdrumR()],
-#' allowing you to filter out specific files, spines, or records.
+#' allowing you to filter out specific pieces, spines, or records.
 #' 
 #' @details 
 #'  
@@ -225,16 +225,16 @@ removeEmptyStops <- function(humdrumR) {
 #' (If `j` is used in isolation, it must be named or placed after a comma, as in `humdata[[ , j ]]`.)
 #' 
 #' + `i` is used to index data records (i.e., based on the humtable `Record` field).
-#'   Thus, `humdata[[1:20]]` indexes the first twenty records *from each file*
-#'   in the corpus, and `humdata[[42]]` extracts the 42nd record *from each file*.
+#'   Thus, `humdata[[1:20]]` indexes the first twenty records *from each piece*
+#'   in the corpus, and `humdata[[42]]` extracts the 42nd record *from each piece*.
 #' + `j` is used to index spines  (i.e., based on the `Spine` field).
 #'   Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
-#'   file in the corpus.
+#'   piece in the corpus.
 #' 
 #' When indexing [humdrumR corpora][humdrumR::humdrumRclass] with numbers,
 #' all `numeric` (double) inputs are converted to integers.
 #' 
-#' Since [subset][subset.humdrumR] always renumbers files/spines that remain after filtering/indexing,
+#' Since [subset][subset.humdrumR] always renumbers pieces/spines that remain after filtering/indexing,
 #' `humdrumR` indexing is entirely **ordinal**.
 #' For example,
 #' 
@@ -264,7 +264,7 @@ removeEmptyStops <- function(humdrumR) {
 #' 
 #' 
 #' In all cases, indices outside of range (or of value `0`) are ignored.
-#' E.g., if you have a corpus of twenty files and you call `corpus[21]`, there is no 21st piece, so `21` is "out of range".
+#' E.g., if you have a corpus of twenty pieces and you call `corpus[21]`, there is no 21st piece, so `21` is "out of range".
 #' If all your input indices are `0` and error will result.
 #' If all your input indices are out of range then 
 #' an empty `humdrumR` object is returned.
@@ -401,7 +401,7 @@ setMethod('[',
           function(x, i, removeEmpty = TRUE) {
             x <- subset(x, fill = any(. %~l% !!i),  by = Piece)
             
-            if (removeEmpty) x <- removeEmptyFiles(x)
+            if (removeEmpty) x <- removeEmptyPieces(x)
             
             x
           })
@@ -441,7 +441,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
           
             }
             
-            removeEmptyFiles(x)
+            removeEmptyPieces(x)
 
           })
 
@@ -465,7 +465,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
                 x <- subset(x, Spine %in% sort(unique(Spine))[!!j] | is.na(Spine), dataTypes = "D")
               }
               
-              removeEmptyFiles(x)
+              removeEmptyPieces(x)
               
               
           })
@@ -487,7 +487,7 @@ function(x, i, removeEmpty = FALSE) {
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
-    removeEmptyFiles(x)
+    removeEmptyPieces(x)
 })
 
 
@@ -522,7 +522,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
            
             
             
-            removeEmptyFiles(x)
+            removeEmptyPieces(x)
 
           })
 

@@ -234,3 +234,4 @@ test_that('Context vignette examples work',
             expect_equal(unname(c(result)), c("9,46", "9,47", "9,48", "9,49", "9,50", "9,52", "9,53", "9,54", "9,55", "9,56", "9,57", "9,58", "9,59"))
             
           })
+

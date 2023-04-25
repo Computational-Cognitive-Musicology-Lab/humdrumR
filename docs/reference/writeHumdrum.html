@@ -16,7 +16,7 @@ The written output should match the printout if printing the data in the R termi
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,6 +90,7 @@ The written output should match the printout if printing the data in the <code>R
   renamer <span class="op">=</span> <span class="va">force</span>,
   affix <span class="op">=</span> <span class="st">""</span>,
   extension <span class="op">=</span> <span class="cn">NULL</span>,
+  separatePieces <span class="op">=</span> <span class="cn">FALSE</span>,
   directory <span class="op">=</span> <span class="cn">NULL</span>,
   overwrite <span class="op">=</span> <span class="cn">FALSE</span>,
   verbose <span class="op">=</span> <span class="cn">FALSE</span>,
@@ -116,6 +117,10 @@ of the same length.</p></dd>
 <p>Defaults to <code>""</code>.</p>
 <p>Must be a single <code>character</code> string.</p>
 <p>Affix is appended at end of filename, but before the extension.</p></dd>
+<dt>extension</dt>
+<dd><p><em><strong>What extension to use for new files.</strong></em></p>
+<p>Defaults to <code>NULL</code>, which means the file extension of the original files is used.</p>
+<p>Must be <code>NULL</code>, or a single, non-empty <code>character</code> string.</p></dd>
 <dt>directory</dt>
 <dd><p><em><strong>A directory to write the files into.</strong></em></p>
 <p>Defaults to <code>NULL</code>.</p>
@@ -157,6 +162,10 @@ After running <code>renamer</code>, the <code>character</code>-string <code>affi
 are appended/prepended to the renamed names.
 (The <code>affix</code> is affixed <em>before</em> the extension.)
 Finally, the <code>extension</code> argument can be used to specify a different file extension.</p>
+<p>If any files in your data set contain multiple pieces, you can either write these
+pieces into the same files (<code>seperateFiles = FALSE</code>), as they were originally, or write each piece into its
+own new file (<code>separateFiles = TRUE</code>); if writing pieces into separate files,
+each piece's file name is appended with <code>_pieceN</code>, where <code>N</code> is the number of the piece within the file.</p>
 <p>The <code>directory</code> argument indicates a file path where to write the files.
 If the <code>directory</code> doesn't exist, it is created.
 If <code>directory</code> is <code>NULL</code>, files are written to their original input directory (or directories).</p>

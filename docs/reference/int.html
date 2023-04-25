@@ -14,7 +14,7 @@ mint() and hint() are special forms for calculating intervals "melodically" or "
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -207,8 +207,8 @@ So the record <code>C3  G4  C5</code> will return values <code>[CC]  +P12  +P4</
 C5 is a perfect fourth above G4.</p>
 <p><code>mint()</code> and <code>hint()</code> work by passing <a href="lag.html">lagged</a> and/or <a href="ditto.html">dittoed</a>
 versions of <code>x</code> as the <code>from</code> argument to <code>int()</code>.
-Basically, <code>mint()</code> is equivalent to <code>int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)</code>
-and <code>hint()</code> is equivalent to <code>int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)</code>.
+Basically, <code>mint()</code> is equivalent to <code>int(x, lag(x, lag = lag, groupby = list(Piece, Spine, Path)), ...)</code>
+and <code>hint()</code> is equivalent to <code>int(x, lag(x, lag = lag, groupby = list(Piece, Record), orderby = list(Piece, Record, Spine, Path)), ...)</code>.
 In either case, the parsed pitch vector is copied and lagged using <code><a href="lag.html">lag()</a></code>, with pairs crossing outside <code>groupby</code> groups ignored.
 The <code>lag</code> argument controls how far apart in the melody intervals are calculated.
 For instance, a lag of <code>2</code> will calculate intervals between <em>every other</em> note in the vector.
@@ -325,13 +325,13 @@ expession in a call to <a href="withinHumdrum.html">with(in).humdrumR</a>.
 However, using a <code>groupby</code> argument directly is usually much faster, as they have been
 specially optimized for this functions.</p>
 <p>The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want <code>groupby = list(File, Spine, Path)</code>.
+For this, we want <code>groupby = list(Piece, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
 three fields as <code>groupby</code> arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of <code>delta</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically calculate the <code>delta</code>
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set <code>groupby = list(File, Record)</code>.</p>
+you could manually set <code>groupby = list(Piece, Record)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -362,7 +362,7 @@ you could manually set <code>groupby = list(File, Record)</code>.</p>
 <span class="r-in"></span>
 <span class="r-in"><span class="va">exampleHumdrum</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpsKx1J7/temp_libpath26e71aef3b9a/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpMFySHk/temp_libpath34ca1103c344/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

@@ -1388,7 +1388,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' However, `sigma` should be favored in [humdrumR] use because:
 #' 
 #' 1. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
-#'    commands to constrain the differences within files/spines/paths of `humdrum` data.
+#'    commands to constrain the differences within pieces/spines/paths of `humdrum` data.
 #'    Using the `groupby` argument to a function (details below) is generally faster than using a `groupby` argument to [withinHumdrum()].
 #' 2. They (can) automatically skip `NA` (or other) values.
 #' 3. `sigma` also has a `init` argument which can be used to ensure full invertability with [delta()]. See the "Invertability"
@@ -1678,7 +1678,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' 1. Its output is *always* the same length as its  input.
 #'    This is achieved by padding the beginning or end of the output with1 `NA` values (or other options).
 #' 2. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
-#'    commands to constrain the differences within files/spines/paths of `humdrum` data.
+#'    commands to constrain the differences within pieces/spines/paths of `humdrum` data.
 #'    The `groupby` approach (details below) is generally faster than applying the commands within `groupby` groups.
 #' 3. They (can) automatically skip `NA` (or other) values.
 #' 

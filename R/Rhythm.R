@@ -1424,7 +1424,7 @@ untie <- function(x, open = '[', close = ']', ...,
 # The `choose` argument can be set to another function, if desired.
 # For example, you could use `localDuration(x, choose = max)` to find the *maximum* duration in each group.
 # If the `groupby` argument is empty (the default) the durations are returned unchanged, except that `NA` durations are set to `0`.
-# Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(File, Record)` is *automatically*
+# Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(Piece, Record)` is *automatically*
 # passed (this can be overridden by explicitely setting the argument).
 # This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
 # 

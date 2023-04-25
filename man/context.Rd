@@ -124,7 +124,7 @@ Must be a singleton \code{logical} value: an on/off switch.}
 Defaults to empty \code{list()}.
 
 Must be a \code{\link[=list]{list()}}, which is either empty or contains vectors which are all the same length as \code{x}.
-In calls to \link[=withinHumdrum]{with/within.humdrumR}, \code{groupby} is passed \code{list(File, Spine, Path)} by default.
+In calls to \link[=withinHumdrum]{with/within.humdrumR}, \code{groupby} is passed \code{list(Piece, Spine, Path)} by default.
 
 Windows cannot cross group boundaries.}
 }

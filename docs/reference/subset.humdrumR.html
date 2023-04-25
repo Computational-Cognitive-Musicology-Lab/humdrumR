@@ -18,7 +18,7 @@ methods."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/ma
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,11 +88,13 @@ methods.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for humdrumR</span>
-<span class="fu">subset</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span>
+<span class="fu">subset</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, removeEmptyPieces <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
 <span class="fu">clearFilter</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span>
 
 <span class="fu">removeEmptyFiles</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span>
+
+<span class="fu">removeEmptyPieces</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span>
 
 <span class="fu">removeEmptySpines</span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span>
 
@@ -141,25 +143,25 @@ any calls to withinHumdrum will ignore the filtered data.
 This means that you can, recover the filtered data by calling <code>clearFilter</code> on your dataset.</p>
 <p>In some cases you might filter out large parts of your data, which will leave a bunch of empty null
 data points (<code>"."</code>).
-If you <em>want</em> to remove these filtered data points, you can call <code>removeEmptyFiles</code>, <code>removeEmptySpines</code>,
-<code>removeEmptyPaths</code>, <code>removeEmptyRecords</code>, or <code>removeEmptyStops</code>.
+If you <em>want</em> to remove these filtered data points, you can call <code>removeEmptyFiles</code>, <code>removeEmptyPieces</code>,
+<code>removeEmptySpines</code>,  <code>removeEmptyPaths</code>, <code>removeEmptyRecords</code>, or <code>removeEmptyStops</code>.
 These functions go through each piece/spine/path/record and check if <em>all</em> the data in that region
 is null or filtered (i.e., <code>Null == TRUE | Filter == TRUE</code>); if so, that data will be removed.
 You can only remove the data if <em>all</em> of it is null (within a region) because otherwise the humdrum syntax is broken.</p>
-<p>By default, <code>subset.humdrumR</code> automatically calls <code>removeEmptyFiles</code> at the end.
-However, you can stop this by specifying  <code>removeEmptyFiles = FALSE</code>.</p>
+<p>By default, <code>subset.humdrumR</code> automatically calls <code>removeEmptyPieces</code> at the end.
+However, you can stop this by specifying  <code>removeEmptyPieces = FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="renumbering">Renumbering<a class="anchor" aria-label="anchor" href="#renumbering"></a></h2>
     
 
 
-<p>If filtered files are removed from a corpus (using <code>removeEmptyFiles</code> or <code>removeEmptySpines</code>, in combination with <code>subset</code>)
-the <code>File</code> and/or <code>Spine</code> fields are renumbered to represented the remaining regions,
+<p>If filtered pieces are removed from a corpus (using <code>removeEmptyPieces</code> or <code>removeEmptySpines</code>, in combination with <code>subset</code>)
+the <code>File</code>, <code>Piece</code>, and/or <code>Spine</code> fields are renumbered to represented the remaining regions,
 starting from <code>1</code>.
-For example, if you have a corpus of 10 files and remove the first file (<code>File == 1</code>),
-the remaining files are renumbered from <code>2:10</code> to <code>1:9</code>.
-Spine renumbering works the same, except it is done independently <em>within</em> each file.</p>
+For example, if you have a corpus of 10 pieces and remove the first piece (<code>Piece == 1</code>),
+the remaining pieces are renumbered from <code>2:10</code> to <code>1:9</code>.
+Spine renumbering works the same, except it is done independently <em>within</em> each piece.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

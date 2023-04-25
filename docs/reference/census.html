@@ -16,7 +16,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,7 @@ basic <a href="humSummary.html">corpus summary functions</a>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">census</span><span class="op">(</span>
   <span class="va">humdrumR</span>,
   dataTypes <span class="op">=</span> <span class="st">"GLIMDd"</span>,
-  by <span class="op">=</span> <span class="va">Filename</span>,
+  by <span class="op">=</span> <span class="va">Piece</span>,
   removeEmpty <span class="op">=</span> <span class="cn">FALSE</span>,
   drop <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span>
@@ -111,7 +111,7 @@ or any combination of these (e.g., <code>"LIM"</code>).
 (see the <a href="humTable.html">humdrum table</a> documentation <strong>Fields</strong> section for explanation.).</p></dd>
 <dt>by</dt>
 <dd><p><em><strong>An arbitrary expression which indicates how to group the data.</strong></em></p>
-<p>Defaults to <code>Filename</code> (a humdrumR <a href="humTable.html">data field</a>).</p></dd>
+<p>Defaults to <code>Piece</code> (a humdrumR <a href="humTable.html">data field</a>).</p></dd>
 <dt>removeEmpty</dt>
 <dd><p><em><strong>Whether to include zero tokens.</strong></em></p>
 <p>Defaults to <code>FALSE</code></p>
@@ -142,12 +142,12 @@ A <code>humCensus</code> table has five columns of information:</p><ol><li><p>Re
 </ul></li>
 <li><p>(per token)</p><ul><li><p>This is simply <code>Characters / Tokens</code>, indicating the mean length of each token.</p></li>
 </ul></li>
-</ol><p>By default, <code>census</code> tabulates data within files in the corpus,
-with each file tabulated in a row of the <code>humCensus</code> table.
-Rows are labeled with each filename.
+</ol><p>By default, <code>census</code> tabulates data within pieces in the corpus,
+with each piece tabulated in a row of the <code>humCensus</code> table.
+Rows are labeled with each file name.
 When a <code>humCensus</code> object is printed,
-the totals across all files are printed as well---(unique) and (per token)
-values are calculated across all files as well, not summed.
+the totals across all pieces are printed as well---(unique) and (per token)
+values are calculated across all pieces as well, not summed.
 The <code>by</code> argument can be used to tabulate data across other divisions in the data (see next section).</p>
     </div>
     <div class="section level2">
@@ -156,7 +156,7 @@ The <code>by</code> argument can be used to tabulate data across other divisions
 
 
 <p>The <code>by</code> argument to <code>census</code> indicates groupings in the data to tabulate within, grouping
-across filenames in the corpus by default.
+across pieces in the corpus by default.
 <code>by</code> can be an arbitrary expression which is evaluated inside the <a href="humTable.html">humdrum table</a>,
 like the <code>groupby</code> argument to a with/within call.
 The by expression must be the full length of the humdrum table.</p>
@@ -174,7 +174,7 @@ The by expression must be the full length of the humdrum table.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/*.krn"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpsKx1J7/temp_libpath26e71aef3b9a/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpMFySHk/temp_libpath34ca1103c344/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Ten files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating ten files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -183,22 +183,24 @@ The by expression must be the full length of the humdrum table.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span class="fu">census</span><span class="op">(</span><span class="va">chorales</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Census of GLIMDd records in humdrumR corpus "chorales" (ten files):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Grouped by ten Filenames:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    Records   Tokens (unique)   Characters (per token)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor001.krn [ 1]       133      484    (148)         1910      (3.95)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor002.krn [ 2]       124      451    (148)         1897      (4.21)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor003.krn [ 3]       110      386    (132)         1867      (4.84)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor004.krn [ 4]       103      367    (129)         1711      (4.66)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor005.krn [ 5]       172      643    (159)         2233      (3.47)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor006.krn [ 6]        77      263    (125)         1313      (4.99)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor007.krn [ 7]       179      671    (168)         2415       (3.6)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor008.krn [ 8]       171      639    (165)         2298       (3.6)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor009.krn [ 9]       131      479    (167)         1923      (4.01)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> chor010.krn [10]       100      355    (133)         1599       (4.5)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Census of GLIMDd records in humdrumR corpus "chorales" (ten pieces):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Grouped by ten Pieces:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       Records   Tokens (unique)   Characters    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor001.krn  1 [ 1]       133      484    (148)         1910    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor002.krn  2 [ 2]       124      451    (148)         1897    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor003.krn  3 [ 3]       110      386    (132)         1867    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor004.krn  4 [ 4]       103      367    (129)         1711    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor005.krn  5 [ 5]       172      643    (159)         2233    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor006.krn  6 [ 6]        77      263    (125)         1313    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor007.krn  7 [ 7]       179      671    (168)         2415    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor008.krn  8 [ 8]       171      639    (165)         2298    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor009.krn  9 [ 9]       131      479    (167)         1923    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> chor010.krn 10 [10]       100      355    (133)         1599    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ###### Totals:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      1,300    4,738    (503)       19,166      (4.05)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                         1,300    4,738    (503)       19,166    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   (***one column not displayed due to screensize***)</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>

@@ -16,7 +16,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,13 +108,13 @@ as a regular expression against the filenames in the corpus.</p></dd>
     <p><code>interpretations</code> returns a special <code>data.frame</code> called a <code>humInterpretations</code> table.
 Each row in the table represents a single piece in the corpus.
 The first column (<code>{X}</code>) is a variable indicating a unique "exclusive pattern" associated with
-each file---the exclusive patterns are tallied at the bottom of the printout.
+each piece---the exclusive patterns are tallied at the bottom of the printout.
 The remaining columns indicate how many of each interpretation (indicated by column name)
 appear in each piece.</p>
 <p>For tandem interpretations, counts are returned in the format <code>Total.Unique.Spines</code>:</p><ul><li><p><code>Total</code>: The total instances of this interpretation, across all spines.</p></li>
 <li><p><code>Unique</code>: The number of unique versions of this interpretation.</p></li>
 <li><p><code>Spines</code>: The number of spines that this interpretation appears in.</p></li>
-</ul><p>For example, consider the following file:</p><div class="sourceCode"><pre><code>**kern   **kern   **silbe
+</ul><p>For example, consider the following piece:</p><div class="sourceCode"><pre><code>**kern   **kern   **silbe
    *C:      *C:         *
      c        e        La
      d        f        la
@@ -129,10 +129,10 @@ appear in each piece.</p>
     *-       *-        *-
 </code></pre></div>
 
-<p>In this file, there is several tandem key interpretations,
+<p>In this piece, there is several tandem key interpretations,
 which <code>humdrumR</code> will call <code>Key</code>.
 The tabulation by <code>interpretations</code> will return a <code>Key</code> column with the value
-<code>6.3.2</code> for this file:</p><ul><li><p><code>6</code> because there are six key interpretations in total.</p></li>
+<code>6.3.2</code> for this piece:</p><ul><li><p><code>6</code> because there are six key interpretations in total.</p></li>
 <li><p><code>3</code> because there are three unique keys: <code>*C:</code>, <code>*e:</code> and <code>*G:</code>.</p></li>
 <li><p><code>2</code> because the key interpretations only occur in two spines.</p></li>
 </ul></div>
@@ -149,7 +149,7 @@ The tabulation by <code>interpretations</code> will return a <code>Key</code> co
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/*.krn"</span><span class="op">)</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpsKx1J7/temp_libpath26e71aef3b9a/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpMFySHk/temp_libpath34ca1103c344/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Ten files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating ten files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -158,7 +158,7 @@ The tabulation by <code>interpretations</code> will return a <code>Key</code> co
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span class="fu">interpretations</span><span class="op">(</span><span class="va">chorales</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Interpretation content in humdrumR corpus "chorales" (ten files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Interpretation content in humdrumR corpus "chorales" (ten pieces):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     {X}  **kern    BPM   Clef  Instrument    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                     (Total.Unique.Spines)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   chor001.krn [ 1]  {A}       4  4.1.4  4.3.4       8.8.8    ***</span>

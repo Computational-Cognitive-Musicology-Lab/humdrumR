@@ -5,17 +5,20 @@
 \alias{subset}
 \alias{clearFilter}
 \alias{removeEmptyFiles}
+\alias{removeEmptyPieces}
 \alias{removeEmptySpines}
 \alias{removeEmptyPaths}
 \alias{removeEmptyRecords}
 \alias{removeEmptyStops}
 \title{Filter humdrum data}
 \usage{
-\method{subset}{humdrumR}(x, ...)
+\method{subset}{humdrumR}(x, ..., removeEmptyPieces = TRUE)
 
 clearFilter(humdrumR)
 
 removeEmptyFiles(humdrumR)
+
+removeEmptyPieces(humdrumR)
 
 removeEmptySpines(humdrumR)
 
@@ -68,25 +71,25 @@ This means that you can, recover the filtered data by calling \code{clearFilter}
 
 In some cases you might filter out large parts of your data, which will leave a bunch of empty null
 data points (\code{"."}).
-If you \emph{want} to remove these filtered data points, you can call \code{removeEmptyFiles}, \code{removeEmptySpines},
-\code{removeEmptyPaths}, \code{removeEmptyRecords}, or \code{removeEmptyStops}.
+If you \emph{want} to remove these filtered data points, you can call \code{removeEmptyFiles}, \code{removeEmptyPieces},
+\code{removeEmptySpines},  \code{removeEmptyPaths}, \code{removeEmptyRecords}, or \code{removeEmptyStops}.
 These functions go through each piece/spine/path/record and check if \emph{all} the data in that region
 is null or filtered (i.e., \code{Null == TRUE | Filter == TRUE}); if so, that data will be removed.
 You can only remove the data if \emph{all} of it is null (within a region) because otherwise the humdrum syntax is broken.
 
-By default, \code{subset.humdrumR} automatically calls \code{removeEmptyFiles} at the end.
-However, you can stop this by specifying  \code{removeEmptyFiles = FALSE}.
+By default, \code{subset.humdrumR} automatically calls \code{removeEmptyPieces} at the end.
+However, you can stop this by specifying  \code{removeEmptyPieces = FALSE}.
 }
 
 \section{Renumbering}{
 
 
-If filtered files are removed from a corpus (using \code{removeEmptyFiles} or \code{removeEmptySpines}, in combination with \code{subset})
-the \code{File} and/or \code{Spine} fields are renumbered to represented the remaining regions,
+If filtered pieces are removed from a corpus (using \code{removeEmptyPieces} or \code{removeEmptySpines}, in combination with \code{subset})
+the \code{File}, \code{Piece}, and/or \code{Spine} fields are renumbered to represented the remaining regions,
 starting from \code{1}.
-For example, if you have a corpus of 10 files and remove the first file (\code{File == 1}),
-the remaining files are renumbered from \code{2:10} to \code{1:9}.
-Spine renumbering works the same, except it is done independently \emph{within} each file.
+For example, if you have a corpus of 10 pieces and remove the first piece (\code{Piece == 1}),
+the remaining pieces are renumbered from \code{2:10} to \code{1:9}.
+Spine renumbering works the same, except it is done independently \emph{within} each piece.
 }
 
 \seealso{

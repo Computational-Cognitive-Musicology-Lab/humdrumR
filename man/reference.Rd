@@ -62,23 +62,23 @@ each reference code that appears in the corpus.
 Since reference records can be too long to print on one screen,
 and humdrum files can have multiple of the same type of reference code,
 a \code{humReference} table normally prints only the number of each type of
-reference record to appear in each file.
+reference record to appear in each piece.
 However, if only one type of reference code is present in a
 \code{humReference} table, the complete reference records for that code
-\emph{will} be printed for each file. Likewise, if only one file is present
-in the table, all of that file's complete reference records are printed.
+\emph{will} be printed for each piece. Likewise, if only one piece is present
+in the table, all of that piece's complete reference records are printed.
 Thus, if you want to see actual reference records, try indexing the
 \code{humReference} table down to one column or row (see below).
 
-A \code{humReference} table has one row for each file in the corpus.
-Rows are labeled with each file name.
+A \code{humReference} table has one row for each piece in the corpus.
+Rows are labeled with each file name and piece number index.
 In addition, when a \code{humReference} object is printed,
 three different summary totals are printed for each reference code:
 \itemize{
-\item \strong{Any} indicates how many files in the corpus contain at least
+\item \strong{Any} indicates how many pieces in the corpus contain at least
 one example of each code.
 \item \strong{Sum} indicates the total number of each reference code to appear
-in the corpus, including multiple appearances in one file (like multiple \code{"!!!COM"}
+in the corpus, including multiple appearances in one piece (like multiple \code{"!!!COM"}
 records).
 \item \strong{Unique} tabulates the number of unique token in the corpus, for each code.
 If your corpus only has two unique composers (encoded in "!!!COM"),
