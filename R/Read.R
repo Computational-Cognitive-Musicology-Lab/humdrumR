@@ -287,7 +287,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
     fileFrame[ , File := match(Filepath, unique(Filepath))]
     
     # return
-    message(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)), capitalize = TRUE)} files read from disk."))
+    message(glue::glue("{num2print(sum(lengths(fileFrame$Filepath)), capitalize = TRUE, label = 'file')} read from disk."))
     
     fileFrame
 }
@@ -593,6 +593,14 @@ shortFilenames <- function(fileFrame) {
 #' either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two 
 #' or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
 #' 
+#' If your humdrum data includes files containing multiple pieces, special consideration is 
+#' needed to determine (or guess) which reference records (or other global comments) "go with" which piece.
+#' Obviously, reference records at the beginning and end of each file are grouped with the first
+#' and last pieces respectively.
+#' However, reference records that are between pieces in any multi-piece file require some guess work.
+#' `readHumdrum()` will look at reference codes and attempt to group in-between reference records
+#' into pieces in a logical way by avoiding duplicated reference codes.
+#' 
 #' 
 #' @section Spines and Paths:
 #' 
@@ -667,9 +675,8 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     if (nrow(fileFrame) == 0L) return(NULL)
     
     #
-    message(glue::glue("Parsing {num2print(nrow(fileFrame))} files..."), appendLF = FALSE)
-    
-    # if (verbose) cat ('\n')
+    message(glue::glue("Parsing {num2print(nrow(fileFrame), label = 'file')}..."), appendLF = FALSE)
+    if (verbose) message()
     
     
     ## Divide out any pieces within files
@@ -677,12 +684,12 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     
     ## Parse records
     humtabs <- Map(
-        function(file, piece) { 
+        function(file, filename, piece) { 
             humtab <- parseRecords(file, piece, reference)
-            if (verbose) message(filename, '\n') 
+            if (verbose) message(strrep(' ', 17L), '...', filename) 
             humtab
         }, 
-        fileFrame$FileLines, fileFrame$Piece) 
+        fileFrame$FileLines, fileFrame$Filepath, fileFrame$Piece) 
     
     ##########-
     ### Assembling local record information with corpus metadata (filenames, reference records, etc.)
@@ -916,16 +923,55 @@ separatePieces <- function(fileFrame) {
     filelines[containmultiple] <-
         lapply(filelines[containmultiple], 
            \(lines) {
-               open  <- stringi::stri_count_regex(lines,'^\\*\\*|\t\\*\\*')
-               close <- stringi::stri_count_regex(lines,'^\\*-|\t\\*-')
-               nspines <- open - close
+               starts <- which(stringi::stri_detect_regex(lines, '^\\*\\*'))
                
-               newpiece <- head(nspines, -1) > 0L & tail(nspines, -1) == 0L
-               if (nspines[1] == 0L) {
-                   newpiece[which(newpiece)[1]] <- FALSE
-                   newpiece[1] <- TRUE
+               # find global comments which are "OUTSIDE" of pieces.
+               nopen  <- stringi::stri_count_regex(lines,'^\\*\\*|\t\\*\\*')
+               nclose <- stringi::stri_count_regex(lines,'^\\*-|\t\\*-')
+               nspines <- cumsum(nopen - c(0L, head(nclose, -1L)))
+               global <- which(nspines == 0L) 
+               # we can't just grep for ^!! because that would also capture global comments
+               # which are mid-piece
+               
+               #
+               codes <- stringi::stri_extract_first_regex(lines[global], '!!![^:]+:')
+               groups <-  findInterval(global, starts)
+               
+               
+               # At blocks of global records between pieces and see if we can improve alignment
+               # by shifting some reference records between adjacent blocks.
+               blocks <- table(groups = factor(groups, levels = 0L:length(starts)), codes)
+               
+               blocks[2L, ] <- blocks[2L, ] + blocks[1L, ]
+               blocks[length(starts), ] <- blocks[length(starts), ] + blocks[nrow(blocks), ]
+               blocks <- head(tail(blocks, -1L), -1L)
+               
+               shift <- which(blocks > 1L & rbind(blocks[-1 , , drop = FALSE], FALSE) == 0L, arr.ind = TRUE)
+               if (nrow(shift)) {
+                 shift <- Map(shift[ , 'groups'], shift[ , 'codes'],
+                              f = \(group, code) groups == rownames(blocks)[group] & codes == colnames(blocks)[code])
+                 shift <- Reduce('|', shift)
+                 shift <- tapply_inplace(shift, 
+                                         groups, 
+                                         \(s) {
+                                           not <- which(!s)
+                                           if (any(not)) seq_along(s) > max(which(!s)) else !logical(length(s))
+                                           }) # makes sure only block of TRUE on right edge are shifted
+                 groups <- ifelse(shift, groups + 1L, groups)
+                 
                }
-               pieces <- cumsum(c(newpiece, FALSE))
+               
+               # get records
+               groups[groups == 0L] <- 1L
+               records <- tapply(global[groups <= length(starts)], 
+                                 factor(groups[groups <= length(starts)], levels = 1L:(length(starts))),
+                                 min)
+               
+               starts <- pmin(records,starts, na.rm = TRUE)
+               
+               # divide into pieces
+               pieces <- cumsum(seq_along(lines) %in% starts)
+               
                split(lines, f = pieces) 
            })
     

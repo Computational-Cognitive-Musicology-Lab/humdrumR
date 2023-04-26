@@ -2573,7 +2573,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   if (Nmorefiles > 0L) {
    
    message <- c('',
-                paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more files...)")),
+                paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more pieces...)")),
                 '')
    lines <- append(lines, message, after = tail(firsts, 1) - 1L)
   }

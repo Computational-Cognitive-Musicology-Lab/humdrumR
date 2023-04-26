@@ -101,7 +101,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     filepaths <- fileFrame$Filepath
     
     
-    message(glue::glue("Validating {if (any(emptyFiles)) 'remaining ' else ''}{num2print(sum(!emptyFiles))} files..."), appendLF = FALSE)
+    message(glue::glue("Validating {if (any(emptyFiles)) 'remaining ' else ''}{num2print(sum(!emptyFiles), label = 'file')}..."), appendLF = FALSE)
     # If files are empty everything gets thrown off...this is a hacky fix
     # Just pad empty files with a single empty record
     
