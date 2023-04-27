@@ -263,7 +263,7 @@ readFiles <- function(..., contains = NULL, recursive = FALSE, allowDuplicates =
                             " matches {lengths(Filepath)} text files",
                             contains,
                             " in {lengths(Directories)} {plural(lengths(Directories), 'directories', 'directory')}",
-                            if (verbose) ":\n" else ".",
+                            if (verbose) ":\n" else ".\n",
                             "{filepaths}",
                             .trim = FALSE ))
          })
