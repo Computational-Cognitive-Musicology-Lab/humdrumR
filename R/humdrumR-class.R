@@ -2460,6 +2460,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     
     field <- evalActive(humdrumR, 'GLIMDd', sep = ', ', nullChar = TRUE)
     
+    if (is.character(field) && any(field == "")) field[field == ""]  <- "''"
     if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
     if (is.factor(field)) field <- as.character(field)
     

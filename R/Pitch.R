@@ -2861,6 +2861,10 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' To read the details of the "deparsing" step, read [this][pitchDeparsing].
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?kern`.
+#'
+#' The "partial" pitch functions [octave()], [step()], [accidental()], and [quality()] are so-called
+#' because they each only return one part/aspect of pitch information, and only that part.
+#' For example, `accidental()` only returns he accidentals (if any) of pitches.
 #'     
 #' @param x ***Input data to parse as pitch information.***
 #' 
@@ -2977,7 +2981,8 @@ pitchArgCheck <- function(args,  callname) {
 makePitchTransformer <- function(deparser, callname, 
                                  outputClass = 'character', 
                                  keyed = TRUE,
-                                 removeArgs = NULL, extraArgs = alist()) {
+                                 # removeArgs = NULL, 
+                                 extraArgs = alist()) {
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
   withinFields$Key        <<- c(withinFields$Key, callname)
   
@@ -2994,8 +2999,8 @@ makePitchTransformer <- function(deparser, callname,
                   gamutArgs = list(),
                   inPlace = FALSE))
 
-  if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
-  
+  # if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
+
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
@@ -3546,43 +3551,93 @@ bhatk <- makePitchTransformer(tint2bhatk, 'bhatk', keyed = FALSE)
 
 #### Partial pitch extractors ----
 
-#' Extract scale step
+#' Extract scale step.
+#' 
+#' This is equivalent to using any [pitch function][pitchFunctions] with the
+#' arguments `generic = TRUE`, `simple = TRUE`, and `step.labels = NULL`.
+#' By default, `step()` will returns steps relative to the key---set `Key = NULL` if you don't want this.
+#' 
+#' @examples 
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, step(Token))
+#'
+#' within(chorales, step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+#' }
 #' 
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
-step <- makePitchTransformer(partialApply(tint2step, step.labels = NULL), 'step', 'integer', 
-                             removeArgs = c('generic', 'octave.relative', 'transposeArgs'))
+step <- makePitchTransformer(partialApply(tint2step, step.labels = NULL), 'step', 'integer')
 
-#' Extract accidental from pitch
+#' Extract accidental from pitch.
 #' 
+#' Use this if you want to extract *only* the accidentals from pitch data,
+#' discarding octave and step information.
+#' Set `explicitNaturals = FALSE` if you don't want explicit naturals.
+#' 
+#' @examples 
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, accidentals(Token))
+#'
+#' }
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
 accidental <- makePitchTransformer(partialApply(tint2specifier, flat = 'b', qualities = FALSE, explicitNaturals = TRUE), 
-                                   'accidental', 'character', 
-                                   removeArgs = c('generic', 'simple', 'octave.relative', 'transposeArgs'))
+                                   'accidental', 'character')
 
 #' Extract quality from pitch
 #' 
+#' Use this if you want to extract *only* the tonal qualities from pitch data,
+#' discarding octave and step information.
+#' 
+#' @examples 
+#'
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, quality(Token))
+#' 
+#' # Harmonic interval qualities:
+#' 
+#' within(chorales, hint(Token, deparser = quality))
+#' with(chorales, hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
+#' 
+#' }
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
-quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE), 
-                                'quality', 'character', 
-                                removeArgs = c('generic', 'simple', 'octave.relative', 'transposeArgs'))
+quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, explicitNaturals = TRUE), 
+                                'quality', 'character')
 
 
-#' Extract octave
+#' Extract octave.
 #' 
+#' Returns which octave each pitch falls in.
+#' By default, middle-C is the bottom of the zeroth-octave, but this can be changed with the `octave.offset`
+#' argument.
+#' Other octave labels (like [lilypond()]-style marks) can be used if you set `octave.integer = FALSE`.
+#' 
+#' 
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, octave(Token))
+#' within(chorales, octave(Token, octave.offset = 4)) # traditional octaves
+#' 
+#' within(chorales, octave(Token, octave.integer = FALSE))
+#' }
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
 octave <- makePitchTransformer(tint2octave, 'octave', 'integer')
-                               # removeArgs = c('generic', 'simple'))
 
 
 
