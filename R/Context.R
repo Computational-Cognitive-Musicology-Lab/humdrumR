@@ -555,7 +555,7 @@ align <- function(open, close, fullLength, groupby = list(),
   
   if (overlap == 'paired' && 
       (length(open) == length(close)) && 
-      all((close - open) >= min_length && (close- open) <= max_length, na.rm = TRUE)) {
+      all((close - open + 1L) >= min_length & (close - open + 1L) <= max_length, na.rm = TRUE)) {
     
     windowFrame <- data.table(Open = open, Close = close) 
     windowFrame <- windowFrame[!is.na(Open) & !is.na(Close) & Open > 0L & Close > 0L]

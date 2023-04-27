@@ -352,11 +352,10 @@ timesignature2meter <- function(x, ..., sep = '/', compound = TRUE) {
     
     
     tactus <- if (length(bts) > 1)  bts  else den
-    
     if (compound && 
-        as.integer64(3L) %divides% bts@Numerator && 
-        (den@Numerator == as.integer64(1L) && 
-         as.integer64(8L) %divides% den@Denominator)) {
+        all(as.integer64(3L) %divides% bts@Numerator) && 
+        all(den@Numerator == as.integer64(1L)) && 
+        all(as.integer64(8L) %divides% den@Denominator)) {
       # compound meters
       tactus <- tactus * 3L
     } 

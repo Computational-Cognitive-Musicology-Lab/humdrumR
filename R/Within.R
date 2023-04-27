@@ -1193,7 +1193,7 @@ laggedQuo <- function(funcQuosure) {
     
     names(args)[tolower(names(args)) == 'lag'] <- 'n'
     n <- rlang::eval_tidy(args$n)
-    if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
+    if (!is.numeric(n) || any((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
     args$n <- NULL
     
     lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
@@ -1722,7 +1722,7 @@ parseResult <- function(results, alignLeft = TRUE) {
                         
                         result <- Map(aligner, result, pmin(lengths(result), resultLengths))
                         
-                        result <- unlist(result, recursive = FALSE)
+                        result <- .unlist(result, recursive = FALSE)
                       }
                       
                       

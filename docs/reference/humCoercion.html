@@ -3,7 +3,7 @@
 without having to rely on humdrumR's with(in).humdrumR functionality.
 Rather, you'd like to just get &quot;normal&quot; R objects out of your humdrum data.
 humdrumR defines a number of functions/methods for &quot;coercing&quot; humdrum data into
-basic R data types."><title>humdrumR coercion — humCoercion • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="humdrumR coercion — humCoercion"><meta property="og:description" content="Many users may wish to work with humdrum data,
+basic R data types."><title>humdrumR coercion — humCoercion • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="humdrumR coercion — humCoercion"><meta property="og:description" content="Many users may wish to work with humdrum data,
 without having to rely on humdrumR's with(in).humdrumR functionality.
 Rather, you'd like to just get &quot;normal&quot; R objects out of your humdrum data.
 humdrumR defines a number of functions/methods for &quot;coercing&quot; humdrum data into
@@ -18,7 +18,7 @@ basic R data types."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,29 +87,29 @@ basic <code>R</code> data types.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S4 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">x</span>, mode <span class="op">=</span> <span class="st">"any"</span><span class="op">)</span>
-
-<span class="fu">as.lines</span><span class="op">(</span>
-  <span class="va">humdrumR</span>,
-  dataTypes <span class="op">=</span> <span class="st">"GLIMDd"</span>,
-  padPaths <span class="op">=</span> <span class="st">"dont"</span>,
-  padder <span class="op">=</span> <span class="st">""</span>,
-  sep <span class="op">=</span> <span class="st">"\t"</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for humdrumR</span>
-<span class="fu">as.matrix</span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"GLIMDd"</span>, padPaths <span class="op">=</span> <span class="st">"corpus"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
-
-<span class="co"># S4 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, padPaths <span class="op">=</span> <span class="st">"corpus"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
-
-<span class="co"># S4 method for humdrumR</span>
-<span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, padPaths <span class="op">=</span> <span class="st">"corpus"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
-
-<span class="fu">as.matrices</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"LIMDd"</span>, padPaths <span class="op">=</span> <span class="st">"piece"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>
-
-<span class="fu">as.data.frames</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"LIMDd"</span>, padPaths <span class="op">=</span> <span class="st">"piece"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for humdrumR</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">x</span>, mode <span class="op">=</span> <span class="st">"any"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">as.lines</span><span class="op">(</span></span>
+<span>  <span class="va">humdrumR</span>,</span>
+<span>  dataTypes <span class="op">=</span> <span class="st">"GLIMDd"</span>,</span>
+<span>  padPaths <span class="op">=</span> <span class="st">"dont"</span>,</span>
+<span>  padder <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  sep <span class="op">=</span> <span class="st">"\t"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for humdrumR</span></span>
+<span><span class="fu">as.matrix</span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"GLIMDd"</span>, padPaths <span class="op">=</span> <span class="st">"corpus"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for humdrumR</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, padPaths <span class="op">=</span> <span class="st">"corpus"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for humdrumR</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">x</span>, dataTypes <span class="op">=</span> <span class="st">"Dd"</span>, padPaths <span class="op">=</span> <span class="st">"corpus"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">as.matrices</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"LIMDd"</span>, padPaths <span class="op">=</span> <span class="st">"piece"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">as.data.frames</span><span class="op">(</span><span class="va">humdrumR</span>, dataTypes <span class="op">=</span> <span class="st">"LIMDd"</span>, padPaths <span class="op">=</span> <span class="st">"piece"</span>, padder <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -119,9 +119,13 @@ basic <code>R</code> data types.</p>
 <p>Defaults to <code>"any"</code>.</p>
 <p>Must be a single <code>character</code> string naming an <a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic vector type</a> to coerce the output to (i.e., <code>logical</code> or <code>numeric</code>).</p>
 <p>If set to <code>"any"</code>, the output type is simply whatever comes out of <code><a href="humActive.html">evalActive()</a></code>, which depends on the class of the underlying <a href="humTable.html">fields</a>.</p></dd>
+
+
 <dt>humdrumR</dt>
 <dd><p><em><strong>HumdrumR data.</strong></em></p>
 <p>Must be a <a href="humdrumRclass.html">humdrumR data object</a>.</p></dd>
+
+
 <dt>dataTypes</dt>
 <dd><p><em><strong>Which types of humdrum record(s) to include.</strong></em></p>
 <p>Defaults to <code>"GLIMDd"</code> for <code>as.lines()</code> and <code>as.matrix()</code>; <code>"Dd"</code> for <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>;
@@ -129,20 +133,27 @@ basic <code>R</code> data types.</p>
 <p>Must be a single <code>character</code> string. Legal values are <code>'G', 'L', 'I', 'M', 'D', 'd'</code>
 or any combination of these (e.g., <code>"LIM"</code>).
 (See the <a href="humTable.html">humdrum table</a> documentation for explanation.)</p></dd>
+
+
 <dt>padPaths</dt>
 <dd><p><em><strong>Determines how spine-paths are aligned in the output.</strong></em></p>
 <p>Defaults to <code>"dont"</code> for <code>as.lines()</code>; <code>"corpus"</code> for <code>as.matrix()</code> and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>;
 <code>"piece"</code> for <code>as.matrices()</code> and <code>as.data.frames()</code></p>
 <p>Must be a single <code>character</code> string, <code>"corpus"</code>, <code>"piece"</code>, or <code>"dont"</code>.</p>
 <p>See the details for an explanation.</p></dd>
+
+
 <dt>padder</dt>
 <dd><p><em><strong>Used to fill in differences in the number of columns between files and/or spine paths.</strong></em></p>
 <p>Defaults to <code>NA</code>.</p>
 <p>Must be a single <code>atomic</code> value.</p></dd>
+
+
 <dt>sep</dt>
 <dd><p><em><strong>Separator to place between columns in collapsed lines.</strong></em></p>
 <p>Defaults to <code>"\t"</code> (tab).</p>
 <p>Must be a single <code>character</code> string.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -181,29 +192,27 @@ To squish them into a two dimensional object (<code>matrix</code> or <code>data.
 (Global comments---which actually have <code>NA</code> spines---are also padded, placing the record in column 1.)
 The <code>pad</code> argument is a single atomic value which is used to pad the matrix.</p>
 <p>Another consideration is the behavior of spine paths.
-In the humdrum syntax, a spine path in a leftward spine "bumps" data in higher spines into new columns, as in this example:</p><div class="sourceCode"><pre><code>**kern  **kern
-A       E
-*^      *
-A       C       E
-G       B       D
-*v      *v      *
-A       C        
-*-      *-
-</code></pre></div>
-
+In the humdrum syntax, a spine path in a leftward spine "bumps" data in higher spines into new columns, as in this example:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="sc">**</span>kern  <span class="sc">**</span>kern</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>A       E</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="sc">*</span><span class="er">^</span>      <span class="er">*</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>A       C       E</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>G       B       D</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="sc">*</span>v      <span class="sc">*</span>v      <span class="sc">*</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>A       C        </span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="sc">*-</span>      <span class="er">*</span><span class="sc">-</span></span></code></pre><p></p></div>
 <p>At the beginning and end of the file, the second column holds data for the second spine.
 However, in the middle of the file, the second column holds data from the second spine path of the first spine.
 To make the spine structure clearer, <code>as.matrix(humdrumR)</code> has the option to pad spine paths.
-For example, using <code>"_"</code> as our <code>pad</code> argument:</p><div class="sourceCode"><pre><code>**kern   _        **kern
-A        _        E
-*^       _        *
-A        C        E
-G        B        D
-*v       *v       *
-A        _        C        
-*-       _        *-
-</code></pre></div>
-
+For example, using <code>"_"</code> as our <code>pad</code> argument:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="sc">**</span>kern   _        <span class="sc">**</span>kern</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>A        _        E</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="sc">*</span><span class="er">^</span>       _        <span class="sc">*</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>A        C        E</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>G        B        D</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="sc">*</span>v       <span class="sc">*</span>v       <span class="sc">*</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>A        _        C        </span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="sc">*-</span>       _        <span class="sc">*-</span></span></code></pre><p></p></div>
 <p>This aspect of the matrix padding behavior can be controlled with the <code>padPaths</code> argument, with three possible values/behaviors:</p><ul><li><p><code>"corpus"</code>: Paths are padded such that spine-paths across all pieces in the corpus all align in the same columns.
 If even one file has a spine path, all the other files are padded so their spines stay aligned.
 This is the default behavior for <code>as.matrix(humdrumR)</code>.</p></li>
@@ -220,8 +229,7 @@ This is the default behavior for <code>as.matrix(humdrumR)</code>.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer></div>

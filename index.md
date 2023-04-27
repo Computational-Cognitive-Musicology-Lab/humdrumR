@@ -170,10 +170,10 @@ devtools::install()
 ```
 
 
-> If you downloaded RStudio, you can make `r hm` a RStudio "Project" on your local computer, which 
+> If you downloaded RStudio, you can make humdrum$_{\mathbb{R}}$ a RStudio "Project" on your local computer, which 
 > enables some useful features.
 > To do this in RStudio, click the "New Project > Existing Directory" option and select the directory where you downloaded the repository.
-> Once the project is created, you can install your local copy of `r hm` by clicking "Install and Restart" in RStudio's "Build" pane.
+> Once the project is created, you can install your local copy of humdrum$_{\mathbb{R}}$ by clicking "Install and Restart" in RStudio's "Build" pane.
 
 ---
 

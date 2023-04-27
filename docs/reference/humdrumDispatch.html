@@ -4,7 +4,7 @@ is a simple system for making new functions which can by smartly
 applied to a variety of character strings.
 Humdrum dispatch works like normal R method dispatch, but instead of dispatching specific methods
 based on their class (integer, character, etc.) it dispatches based on regular expressions.
-In addition, exclusive interpretations can be used to guide dispatch."><title>Regular expression method dispatch and function application — humdrumDispatch • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Regular expression method dispatch and function application — humdrumDispatch"><meta property="og:description" content="The humdrumR regular-expression method dispatch system
+In addition, exclusive interpretations can be used to guide dispatch."><title>Regular expression method dispatch and function application — humdrumDispatch • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Regular expression method dispatch and function application — humdrumDispatch"><meta property="og:description" content="The humdrumR regular-expression method dispatch system
 is a simple system for making new functions which can by smartly
 applied to a variety of character strings.
 Humdrum dispatch works like normal R method dispatch, but instead of dispatching specific methods
@@ -20,7 +20,7 @@ In addition, exclusive interpretations can be used to guide dispatch."><!-- math
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,38 +90,38 @@ In addition, exclusive interpretations can be used to guide dispatch.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">humdrumDispatch</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">dispatchDF</span>,
-  Exclusive <span class="op">=</span> <span class="cn">NULL</span>,
-  funcName <span class="op">=</span> <span class="cn">NULL</span>,
-  regexApply <span class="op">=</span> <span class="cn">TRUE</span>,
-  multiDispatch <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>,
-  outputClass <span class="op">=</span> <span class="st">"character"</span>
-<span class="op">)</span>
-
-<span class="fu">exclusiveDispatch</span><span class="op">(</span>
-  <span class="va">x</span>,
-  <span class="va">dispatchDF</span>,
-  <span class="va">Exclusive</span>,
-  regexApply <span class="op">=</span> <span class="cn">TRUE</span>,
-  outputClass <span class="op">=</span> <span class="st">"character"</span>,
-  inPlace <span class="op">=</span> <span class="cn">FALSE</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">makeDispatchDF</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
-
-<span class="fu">makeHumdrumDispatcher</span><span class="op">(</span>
-  <span class="va">...</span>,
-  funcName <span class="op">=</span> <span class="st">"humdrum-dispatch"</span>,
-  outputClass <span class="op">=</span> <span class="st">"character"</span>,
-  args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">alist</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="co"># S3 method for humdrumDispatch</span>
-<span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">humdrumDispatch</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">dispatchDF</span>,</span>
+<span>  Exclusive <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  funcName <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  regexApply <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  multiDispatch <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  outputClass <span class="op">=</span> <span class="st">"character"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">exclusiveDispatch</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">dispatchDF</span>,</span>
+<span>  <span class="va">Exclusive</span>,</span>
+<span>  regexApply <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  outputClass <span class="op">=</span> <span class="st">"character"</span>,</span>
+<span>  inPlace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">makeDispatchDF</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">makeHumdrumDispatcher</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  funcName <span class="op">=</span> <span class="st">"humdrum-dispatch"</span>,</span>
+<span>  outputClass <span class="op">=</span> <span class="st">"character"</span>,</span>
+<span>  args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">alist</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for humdrumDispatch</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -129,10 +129,14 @@ In addition, exclusive interpretations can be used to guide dispatch.</p>
     <dl><dt>dispatchDF</dt>
 <dd><p><em><strong>A data.frame which describes what function should be called for which regex input. (See details).</strong></em></p>
 <p>Must be a <code>data.frame</code>.</p></dd>
+
+
 <dt>Exclusive</dt>
 <dd><p><em><strong>Exclusive interpretations to dispatch.</strong></em></p>
 <p>Defaults to <code>NULL</code>.</p>
 <p>If <code>NULL</code>, only the regexes are used for dispatch.</p></dd>
+
+
 <dt>multiDispatch</dt>
 <dd><p><em><strong>Whether to use multiple dispatch function for each interpretation.</strong></em></p>
 <p>Defaults to <code>FALSE</code>.</p>
@@ -140,8 +144,12 @@ In addition, exclusive interpretations can be used to guide dispatch.</p>
 <p>If <code>FALSE</code> the "best" regex/exclusive match is dispatched for each Exclusive segment.
 If <code>TRUE</code>, differenet functions can be dispatched
 within the same input vector.</p></dd>
+
+
 <dt>...</dt>
 <dd><p><em><strong>Arguments to pass to dispatch functions.</strong></em></p></dd>
+
+
 <dt>outputClass</dt>
 <dd><p><em><strong>The default output class which the function should return.</strong></em></p>
 <p>Defaults to <code>"character"</code>.</p>
@@ -149,9 +157,12 @@ within the same input vector.</p></dd>
 <p>Generally, to make sense, all dispatched functions should return the same type, which you should explicitly
 indicate with the <code>outputClass</code> argument.
 Dispatch functions should also be <a href="https://rdrr.io/r/base/Vectorize.html" class="external-link">vectorized</a>.</p></dd>
+
+
 <dt>str</dt>
 <dd><p><em><strong>The input strings, on which dispatch is called.</strong></em></p>
 <p>Must be <code>character</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -185,15 +196,15 @@ A number of important <code>humdrumR</code> functions are created with <code>mak
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'A'</span>, <span class="st">'B'</span>, <span class="st">'CD'</span>, <span class="st">'E'</span>, <span class="st">'F'</span>, <span class="st">'gh'</span>, <span class="st">'L'</span>, <span class="st">'KX'</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'cd'</span>, <span class="st">'e'</span>, <span class="st">'f'</span>, <span class="st">'gh'</span>, <span class="st">'l'</span>, <span class="st">'kx'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">lowercasefunc</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">5L</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">humdrumDispatch</span><span class="op">(</span><span class="va">l</span>, outputClass <span class="op">=</span> <span class="st">'integer'</span>,</span>
-<span class="r-in">                <span class="fu">makeDispatchDF</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'any'</span>, <span class="st">'[a-z]+'</span>,  <span class="va">lowercasefunc</span><span class="op">)</span>,</span>
-<span class="r-in">                               <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'any'</span>, <span class="st">'[A-Z]+'</span>,  <span class="va">nchar</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">u</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'A'</span>, <span class="st">'B'</span>, <span class="st">'CD'</span>, <span class="st">'E'</span>, <span class="st">'F'</span>, <span class="st">'gh'</span>, <span class="st">'L'</span>, <span class="st">'KX'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">l</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'cd'</span>, <span class="st">'e'</span>, <span class="st">'f'</span>, <span class="st">'gh'</span>, <span class="st">'l'</span>, <span class="st">'kx'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">lowercasefunc</span> <span class="op">&lt;-</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fl">5L</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">humdrumDispatch</span><span class="op">(</span><span class="va">l</span>, outputClass <span class="op">=</span> <span class="st">'integer'</span>,</span></span>
+<span class="r-in"><span>                <span class="fu">makeDispatchDF</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'any'</span>, <span class="st">'[a-z]+'</span>,  <span class="va">lowercasefunc</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                               <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">'any'</span>, <span class="st">'[A-Z]+'</span>,  <span class="va">nchar</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 4 3 4 4 3 4 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"dispatch")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"dispatch")$Original</span>
@@ -209,8 +220,8 @@ A number of important <code>humdrumR</code> functions are created with <code>mak
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"dispatch")$Exclusives</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "any"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"> <span class="co"># lowercasefunc will be called on l, nchar on u</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span> <span class="co"># lowercasefunc will be called on l, nchar on u</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -222,8 +233,7 @@ A number of important <code>humdrumR</code> functions are created with <code>mak
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer></div>

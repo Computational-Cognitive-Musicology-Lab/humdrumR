@@ -485,11 +485,35 @@ squashGroupby <- function(groupby = list()) {
 `%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
 
 
-take <- function(x, n = 10L) x[seq_len(max(n, 0L))] 
+take <- function(x, n = 10L) {
+  if (hasdim(x)) {
+    x[seq_len(min(nrow(x), max(n, 0L))), , drop = FALSE ] 
+  } else {
+    x[seq_len(min(length(x), max(n, 0L))) ] 
+  }
+  
+}
 
 end <- function(x, n = 10L) {
-  l <- length(x)
-  if (n > 0) x[(l - n + 1):l] else x[0]
+  if (n <= 0) return(if (hasdim(x)) x[0L, , drop = FALSE] else x[0L])
+  
+  
+  if (hasdim(x)) {
+    l <- nrow(x)
+    ind <- (l - n + 1) : l
+    ind <- ind[ind > 0]
+    
+    x[ind, , drop = FALSE] 
+      
+  }  else {
+    l <- length(x)
+    
+    ind <- (l - n + 1) : l
+    ind <- ind[ind > 0]
+    
+    x[ind] 
+  }
+  
 }
 
 # positivediffs <- function(x, y) {
@@ -1273,7 +1297,7 @@ gcd <- function(...) {
 }
 
 .gcd <- function(x, y) {
-  if (is.na(x) || is.na(y)) return(as(NA, class(x)))
+  if (all(is.na(x) | is.na(y))) return(as(rep(NA, length(x)), class(x)))
     r <- x %% y
     
     notyet <- r > 0

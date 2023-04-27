@@ -1,6 +1,5 @@
 
 Nat's ToDo:
-	Rethink relationship beween Piece and File field.
 
 	Add grace slot to rhythmInterval?
 
@@ -14,6 +13,8 @@ Major:
 	humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = ...] is slow
 
 Minor:
+	Make it so with/within can handle matrices.
+
 	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?
 
 	Add ordering options to gamut(), so you could order by LO5th, for example.
@@ -23,7 +24,6 @@ Minor:
 	hop()
 		add hop.matrix and hop.data.frame
 		add support for negative indexing.
-	Make is to validateHumdrum returns useful data.table.
 
 
 Bugs:
