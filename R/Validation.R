@@ -20,22 +20,23 @@
 #' When called, `validateHumdrum` prints basic messages informing you about the result of
 #' the file matching and validity testing.
 #'
-#' The function also returns ([invisibly][base::invisible()]) the [findHumdrum()] "file info"
-#' `data.table`, with additional `Valid` and `Errors` columns:
-#' The `Valid` column is `logical`, with `TRUE` for all valid humdrum files.
-#' The `Error` column is a list of `data.table`s, describing syntax errors in the files
-#' if any.
-#' The `Error` `data.table`s have one row for each error in a file (if any), and three columns:
+#' @returns 
+#'
+#' `validateHumdrum()` returns a "error frame" data.table object, [invisibly][base::invisible()]
+#' (to "see" the output, you must save it to a variable, *then* look at it).
+#' The error frame is a `data.table` with three columns:
 #' 
 #' + `Filepath`: The file name.
 #' + `Record`: Which record contains the error.
 #' + `Message`: A description of the error.
 #' 
+#' Valid files will have no rows in the error frame.
+#' 
 #' 
 #' @section Error reports:
 #' 
-#' If desired, the contents of the `validateHumdrum` can be written files.
-#' This is most useful, as we can print the errors tagged right alongside the original raw data.
+#' If desired, the contents of the `validateHumdrum` "error frame" can be written into text files.
+#' This allows us to print the errors tagged right alongside the original raw data.
 #' To write an error report, set the `errorReport.path` argument to a non-`NULL` string,
 #' pointing to a directory path on your machine.
 #' If the directory doesn't exist, `R` will (attempt to) create it.
@@ -50,11 +51,15 @@
 #' The output looks like this:
 #' 
 #' ```
+#'                                              | **whatever
+#'                                              | =
 #'                                              | The original records from the input file
 #'                                              | appear on the right side.
-#' Error message for record three printed here. | Exactly as they did
+#'                                              | =
+#' Error message for record six printed here.   | Exactly as they did
 #'                                              | in the input file.
-#' ````
+#'                                              | *-
+#' ```
 #' 
 #' @param ... ***Arguments passed to [findHumdrum()].*** 
 #'
@@ -71,7 +76,12 @@
 #' If `NULL` (the default), no error report files are written.
 #'
 #' @examples 
-#' validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+#' 
+#' validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B.*.krn")
+#' 
+#' errorFrame <- validateHumdrum(humdrumRroot, "HumdrumData/InvalidFile.krn")
+#' errorFrame
+#' 
 #' @export
 validateHumdrum <- function(..., errorReport.path = NULL) {
 
@@ -79,7 +89,9 @@ validateHumdrum <- function(..., errorReport.path = NULL) {
   
   fileFrame <- isValidHumdrum(fileFrame, errorReport.path = errorReport.path)
   
-  invisible(fileFrame)
+  errorFrame <- fileFrame[Valid == FALSE, rbindlist(Errors)]
+  
+  invisible(errorFrame)
 }
 
 
