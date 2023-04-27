@@ -117,7 +117,7 @@ In contrast, the \href{https://en.wikipedia.org/wiki/MIDI}{MIDI pitch values} ou
 
 By default, the output of \code{cents} is simply the same as \code{semits(x) * 100}.
 However, the \code{tonalHarmonic} value can be modified for \code{cents} to produce cent-values for alternate tunings.
-For example, \code{cents('g', tonalHarmonic = 3)} returns 701.955000865387, because the
+For example, \code{cents('g', tonalHarmonic = 3)} returns 701.9550009, because the
 "pure" third harmonic (\code{3}) is \code{1.955} sharper than equal-temperment.
 Thus, whereas \code{midi} and \code{semits} return \link[base:integer]{integers}, \code{cents} always returns real-number (\link[base:double]{double}) values.
 

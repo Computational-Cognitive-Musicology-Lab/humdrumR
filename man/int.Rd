@@ -220,22 +220,26 @@ a \code{logical} \code{lag} argument "lags" each pitch back to the previous valu
 This means that more than one interval can be calculated from those same \code{TRUE} indices.
 
 The canonic use of this "logical lag" feature is to calculate harmonic intervals relative to the same voice, like the bass voice.
-For example, consider this file:\preformatted{ **kern        **kern        **kern        **kern
+For example, consider this file:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ **kern        **kern        **kern        **kern
 *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
       C             e             g            cc
       G             d             f             b
       C             c             e            cc             
      *-            *-            *-            *-
-}
+}\if{html}{\out{</div>}}
 
 If we \link[=readHumdrum]{read} this file and applied \code{hint()} to the \code{Token} field (with default arguments)
-the result would be:\preformatted{ **kern        **kern        **kern        **kern
+the result would be:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ **kern        **kern        **kern        **kern
 *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
     [C]          +M10           +m3           +P4
     [G]           +P5           +m3           +A4
     [C]           +P8           +M3           +m6             
      *-            *-            *-            *-
-}
+}\if{html}{\out{</div>}}
 
 In each record, we see the intervals as lagged (\code{lag == 1}) from left right:
 we see the intervals between the bass and the tenoir, the tenor and the alto, and the alto
@@ -244,13 +248,15 @@ What if we wanted to see all the intervals with the bass?
 Well, we can use a \code{logical} \code{lag} argument, where we would specify that \code{Spine == 1}:
 \verb{with(humData, hint(Token, lag = Spine == 1)}.
 This means that all \code{from} values are "lagged" back to the previous value where \code{Spine == 1}.
-The result would be:\preformatted{ **kern        **kern        **kern        **kern
+The result would be:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ **kern        **kern        **kern        **kern
 *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
     [C]          +M10          +P12          +P14
     [G]           +P5           +m7          +M10
     [C]           +P8          +M10          +P14             
      *-            *-            *-            *-
-}
+}\if{html}{\out{</div>}}
 
 Now we see all the intervals relative to the bass.
 

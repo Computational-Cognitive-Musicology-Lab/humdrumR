@@ -94,17 +94,21 @@ all \code{numeric} (double) inputs are converted to integers.
 
 Since \link[=subset.humdrumR]{subset} always renumbers pieces/spines that remain after filtering/indexing,
 \code{humdrumR} indexing is entirely \strong{ordinal}.
-For example,\preformatted{humsubset <- humdata[11:20]
+For example,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset <- humdata[11:20]
 humsubset[2]
-}
+}\if{html}{\out{</div>}}
 
 will return the 12th piece from the original \code{humdata} object.
 This is because the first call to \verb{[]} returns the 11th through 20th pieces, which
 are renumbered \code{1:10} and the second index call returns the \emph{new} 2nd index, which was the 12th
 originally.
-Similarly,\preformatted{humsubset2 <- humdata[[ , 2:4]]
+Similarly,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset2 <- humdata[[ , 2:4]]
 humsubset2[[ , 2]]
-}
+}\if{html}{\out{</div>}}
 
 will return the third spine from the original data.
 

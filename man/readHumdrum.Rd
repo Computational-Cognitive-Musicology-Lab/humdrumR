@@ -7,7 +7,7 @@
 \alias{findHumdrum}
 \title{Find and read humdrum files into R}
 \format{
-
+An object of class \code{data.table} (inherits from \code{data.frame}) with 24 rows and 5 columns.
 }
 \usage{
 knownInterpretations

@@ -55,7 +55,9 @@ Must be a single \code{character} string.
 
 Only used if \code{forceAtomic == TRUE}, wherein lists of vectors are pasted together.}
 
-\item{nullChar}{Defaults to \code{FALSE}.
+\item{nullChar}{\emph{\strong{Should null tokens be returned as characters or \code{NA}?}}
+
+Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch
 
@@ -102,12 +104,14 @@ can be extracted with \code{getActiveFields(humData)}.
 The active expression can be changed in several ways.
 The simplest and most common is using the \link{$ operator}, which takes a field name
 (\link[=partialMatching]{partially matched}) and sets the active expression to simply call that field.
-This is a handy way to quickly look at different fields in your data:\preformatted{humData$Token
+This is a handy way to quickly look at different fields in your data:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData$Token
 
 humData$Spine
 humData$Sp # same as last one, because it partially matches Spine
 
-}
+}\if{html}{\out{</div>}}
 
 More complex active expressions can be set using \code{setActive}, specified directly as the second argument:
 e.g., \code{setActive(humData, paste(Token, Record))}.
@@ -137,24 +141,28 @@ Null data is updated whenever the active field is changed or reset, including by
 
 As you work, there will often be data tokens which are null in one field, but not in another field.
 For example, if you load \verb{**kern} data, a token like \code{"4r"} (quarter-note rest) token will be \code{NA} if you call \code{pitch}, but
-not \code{NA} if you call \code{recip} (rhythm).\preformatted{
+not \code{NA} if you call \code{recip} (rhythm).
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
 kerndata <- readHumdrum(...)
 
 within(kerndata$Token,
        Pitch  <- pitch(.),
        Rhythm <- recip(.)) -> kerndata
 
-}
+}\if{html}{\out{</div>}}
 
 Now, if you change the active field between \code{Pitch} and \code{Rhythm} (using \code{$}) you'll see that there
 are different numbers of (non-null) data tokens: \code{ntoken(kerndata$Pitch ,'D')} vs \verb{ntoken(kerndata$Rhythm, 'D)} will
 return different numbers!
 (The difference would be the number of rest tokens.)
 Similarly, if you apply functions/expressions to this data (using \code{\link[=withinHumdrum]{withinHumdrum()}} for example), the result will depend on
-what the active field is:\preformatted{
+what the active field is:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
 with(kerndata$Pitch, length(.))
 with(kerndata$Rhythm, length(.))
-}
+}\if{html}{\out{</div>}}
 
 Once again, we'll get different numbers here! (Assuming there are rests in the data.)
 This is the case even though the do-expression isn't actually using the \code{Pitch} or \code{Rhythm} fields!

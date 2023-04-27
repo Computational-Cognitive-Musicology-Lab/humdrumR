@@ -167,17 +167,21 @@ you indicate this using the \code{open} and \code{close} arguments.
 These arguments simple indicate indices in the input vector;
 For example, if we want a window to open at the 4th and 11th indices,
 and close at the 15th and 24th index,
-we can write (using the built-in \code{letters} vector for practice):\preformatted{context(letters, open = c(4, 11), close = c(15, 24))
+we can write (using the built-in \code{letters} vector for practice):
 
-}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = c(4, 11), close = c(15, 24))
+
+}\if{html}{\out{</div>}}
 
 This is quite trivial.
 However, the \code{open} and \code{close} arguments can actually be arbitary expressions
 which do a number of special tricks, including refering to each other.
 For example, if either argument includes a call to \code{\link[=hop]{hop()}},
 \code{hop()} will automatically be applied along the input vector.
-Consider this example:\preformatted{context(letters, open = hop(2), close = open + 3)
-}
+Consider this example:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = hop(2), close = open + 3)
+}\if{html}{\out{</div>}}
 
 In this example, the \code{hop()} command generates \code{open} indices for every odd
 number from \code{1} to \code{25}.
@@ -192,19 +196,23 @@ We can also indicate open/closes by providing \code{logical} vectors (the same l
 
 As mentioned above, if \code{reference} is a named \code{list()} or \code{data.frame()}, \code{open} and
 \code{close} and refer to the elements of \code{reference}.
-This is useful if you want to open/close windows in reference to multiple vectors:\preformatted{context(letters, 
+This is useful if you want to open/close windows in reference to multiple vectors:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, 
         reference = data.frame(Threes = rep(1:3, length.out = 26), 
                                Fours = rep(4:1, length.out = 26)),
         open = Threes == Fours, close = Fours == 1)
-}
+}\if{html}{\out{</div>}}
 \subsection{Regular Expressions}{
 
 If either \code{open} or \code{close} are provided a \code{character} string, this string is treated
 as a regular expression and is matched against the \code{reference} vector.
-For exaple, we could make windows in the alphabet starting or ending on each vowel:\preformatted{context(letters, open = '[aeiou]', close = open + 4)
+For exaple, we could make windows in the alphabet starting or ending on each vowel:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = open + 4)
 context(letters, open = close - 4, close = '[aeiou]', alignToOpen = FALSE)
 
-}
+}\if{html}{\out{</div>}}
 
 (Notice that we can use the \code{alignToOpen} argument to change how the output is aligned.)
 
@@ -219,22 +227,30 @@ once windowing is done.
 The \code{open} and \code{close} arguments have a few more special behaviors.
 What if we'd like each of our windows to close right before the next window opens?
 We can do this by making the \code{close} argument to refer to the \emph{next} \code{open}, by
-referring to \code{nextopen} object:\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L)
-}
+referring to \code{nextopen} object:
 
-Conversely, \code{open} can refer to the \code{prevclose} close:\preformatted{context(letters, open = prevclose + 1, close = '[aeiou]', alignToOpen = FALSE)
-}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L)
+}\if{html}{\out{</div>}}
+
+Conversely, \code{open} can refer to the \code{prevclose} close:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = prevclose + 1, close = '[aeiou]', alignToOpen = FALSE)
+}\if{html}{\out{</div>}}
 
 Notice that when we called \code{context(letters, open = '[aeiou]', close = nextopen - 1L)},
 the window opening on \code{"u"} is not returned.
 This is because there is no "\code{nextopen}" open to close on.
-We can instead provide an \code{context()} alternative, using \code{|} (or):\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | 26)
+We can instead provide an \code{context()} alternative, using \code{|} (or):
 
-}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | 26)
+
+}\if{html}{\out{</div>}}
 
 What if we don't know exactly how long our input vector is?
-Refer to the \code{end} object:\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | end)
-}
+Refer to the \code{end} object:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | end)
+}\if{html}{\out{</div>}}
 }
 }
 
@@ -244,34 +260,44 @@ Refer to the \code{end} object:\preformatted{context(letters, open = '[aeiou]', 
 A common use case for \code{context()} is analyzing phrases indicated in music.
 In \verb{**kern}, phrases are indicated with opening (\code{(}) and close (\verb{)}) parentheses,
 which we can capture with regular expressions for \code{open} and \code{close}.
-Here is an example:\preformatted{nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
+Here is an example:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
 
 context(nesting1, open = '(', close = ')')
-}
+}\if{html}{\out{</div>}}
 
 Perfect.
-However, what if there are nested phrasing indicators?\preformatted{nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
+However, what if there are nested phrasing indicators?
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
 
 context(nesting2, open = '(', close = ')')
-}
+}\if{html}{\out{</div>}}
 
 That's not what we want!
 By default, \code{context()} "pairs" each \code{open} with the next \code{close}, which often makes the most sense.
 But in this case, we want different behavior.
-We can get what we want by specifying \code{overlap = 'nested'}:\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested')
-}
+We can get what we want by specifying \code{overlap = 'nested'}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested')
+}\if{html}{\out{</div>}}
 
 Now context aligns each \code{open} with the corresponding \code{close} at the same \emph{nesting level}.
 What if we are only interested in the highest (or lowest) level of nesting?
 Use the \code{depth} argument, which can be non-zero integers: the highest level is \code{1},
-with "deeper" levels incrementing up.\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
+with "deeper" levels incrementing up.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
 context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2)
 context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3)
-}
+}\if{html}{\out{</div>}}
 
 You can also use negative \code{depth} to specify from the deepest levels outward.
-For example, in this case  \code{depth == -1} should get us that deepest level:\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
-}
+For example, in this case  \code{depth == -1} should get us that deepest level:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
+}\if{html}{\out{</div>}}
 
 I \code{depth} is \code{NULL} (the default), all depths are returned.
 }
@@ -280,17 +306,21 @@ I \code{depth} is \code{NULL} (the default), all depths are returned.
 
 
 There are some other options for controlling how windows can, or cannot, overlap.
-Perhaps we'd like to look at every melodic phrase moving from so (dominant) to do (tonic).\preformatted{melody <- c('so', 'la', 'ti', 'do', 'so', 'fi', 'so', 'la', 'ti', 're', 'do', 'so', 'la', 're', 'do')
+Perhaps we'd like to look at every melodic phrase moving from so (dominant) to do (tonic).
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{melody <- c('so', 'la', 'ti', 'do', 'so', 'fi', 'so', 'la', 'ti', 're', 'do', 'so', 'la', 're', 'do')
 
 context(melody, open = 'so', close = 'do')
 
-}
+}\if{html}{\out{</div>}}
 
 This output is probably not what we want.
 Again, \code{context()} (by default) pairs each opening with the next close \emph{which hasn't already been paird}.
 In this case, that means the third so is getting pairs with the third do,
 even though there is another do in between!
-We might want to try either the \code{"edge"} or \code{"none"} options for the \code{overlap} argument:\preformatted{context(melody, open = 'so', close = 'do', overlap = 'edge')
+We might want to try either the \code{"edge"} or \code{"none"} options for the \code{overlap} argument:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{context(melody, open = 'so', close = 'do', overlap = 'edge')
 context(melody, open = 'so', close = 'do', overlap = 'none')
 ```
 
@@ -304,7 +334,7 @@ If you specify `rightward = FALSE`, the overlap argument works backwards (right-
 the input vector, starting on each `close` and ending on each `open`.
 By combining `righward = FALSE` with various `overlap` options, you can achieve a lot of windowing 
 options you might need.
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Repeated Indices}{
@@ -312,11 +342,13 @@ options you might need.
 
 Note that if \code{duplicates_indices = TRUE} (the default) the \code{open} and \code{close} arguments can
 incorporate repeated indices, including multiple matches to a regular expression in the same index.
-This is useful with, for example, nested phrases:\preformatted{nesting3 <- c('(a', 'b)', '((c', 'd', 'e)',  '(d', 'e', 'f))', '(e', 'f', '((f#', 'g)', 'g#)', 'a)')
+This is useful with, for example, nested phrases:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{nesting3 <- c('(a', 'b)', '((c', 'd', 'e)',  '(d', 'e', 'f))', '(e', 'f', '((f#', 'g)', 'g#)', 'a)')
 
 context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 1)
 context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 2)
-}
+}\if{html}{\out{</div>}}
 
 In some cases, you might want to turn \code{duplicate_indices = FALSE}.
 }

@@ -10,7 +10,9 @@ This is achieved using the base-\code{R} function \code{\link[=pmatch]{pmatch()}
 as do \emph{many} \code{humdrumR} functions.
 }
 \details{
-For example, let's say we have a \code{data.frame} (let's call it \code{df}) with three columns: \code{"Number"}, \code{"Letter"}, and \code{"Date"}:\if{html}{\out{<div class="sourceCode r">}}\preformatted{df <- data.frame(Number = 1:2, Letter = c('A', 'B'), Date = c("January", "February"))
+For example, let's say we have a \code{data.frame} (let's call it \code{df}) with three columns: \code{"Number"}, \code{"Letter"}, and \code{"Date"}:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{df <- data.frame(Number = 1:2, Letter = c('A', 'B'), Date = c("January", "February"))
 }\if{html}{\out{</div>}}
 
 If I want to access the \code{Number} column, most programming languages would require I write at very least \code{df$Number}.

@@ -221,12 +221,14 @@ E.g., the first element is "before" the second element, which is "before" the th
 [Humdrum tables][humTable] are always ordered \verb{Piece > Piece > Spine > Path > Record > Stop}.
 Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 the \emph{next} element is the next element in the spine path.
-For example, consider this data:\preformatted{**kern  **kern
+For example, consider this data:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern  **kern
 a       d
 b       e
 c       f
 *-      *-
-}
+}\if{html}{\out{</div>}}
 
 The default order of these tokens (in the \code{Token} field) would be \verb{a b c d e f}.
 If we wanted to instead lag across our tokens \emph{harmonically} (across records) we'd need to specifiy a different order
@@ -234,7 +236,9 @@ For example, we could say \code{orderby = list(Pice, Record, Spine)}---the lagge
 would interpret the \code{Token} field above as \verb{a d b e c f}.
 
 For another example, note \code{Stop} comes last in the order.
-Let's consider what happens then if here are stops in our data:\preformatted{**kern  **kern
+Let's consider what happens then if here are stops in our data:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern  **kern
 a       d
 b D     e g
 c A     f a
@@ -249,7 +253,7 @@ The resulting order would be `a b c d e f D G g a`.
    
 
 [humTable]: R:humTable
-}
+}\if{html}{\out{</div>}}
 }
 
 \seealso{

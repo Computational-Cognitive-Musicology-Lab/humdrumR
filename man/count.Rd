@@ -135,7 +135,9 @@ Some musical meters consist of a pattern of irregular beats.
 For example, the meter \code{M7/8} is often realized as two "short" beats (two eigth-notes each) and one "long" beat (three eigth-notes), forming a 2 + 2 + 3 pattern.
 If we want to count each eighth-note, we can simply specify \code{beat = '8'} and get the \code{M7/8} beats counted as c(\code{1}, \code{3}, \code{5}).
 However, if we want to count each short \emph{or} long beat as a single unit, we must specify the desired pattern as a \code{list} of beat durations: for example, \code{beat = list(c("4", "4", "4."))}.
-Let's see what these two cases look like, applied to two \code{M7/8} measures of straight eighth-notes:\preformatted{rhythm <- rep('8', 14)
+Let's see what these two cases look like, applied to two \code{M7/8} measures of straight eighth-notes:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{rhythm <- rep('8', 14)
 
 count(rhythm, beat = '8'),
 
@@ -144,7 +146,7 @@ count(rhythm, beat = '8'),
 count(rhythm, beat = list(c('4', '4', '4.')))
 
 # output is: 1 1 2 2 3 3 3 4 4 5 5 6 6 6
-}
+}\if{html}{\out{</div>}}
 
 To accommodate changing meters, the \code{beat} argument can still accept \code{list} of such patterns, so long as the list is the same length as \code{dur}.
 }

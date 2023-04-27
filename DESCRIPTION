@@ -35,7 +35,7 @@ Collate: humdrumR-package.R
          Metric.R
 	 Lyrics.R
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

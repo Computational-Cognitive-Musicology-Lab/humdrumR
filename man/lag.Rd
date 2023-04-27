@@ -67,27 +67,9 @@ moving each value to a lower index (if \code{n > 0}).
 Values near the end/beginning are either "wrapped" to the opposite end of the
 vector, or replaced/padded with the value of the \code{fill} argument.
 
-The vector a
-b
-c
-d
-e
-f
-g can be lagged by \code{n==1} is NA
-a
-b
-c
-d
-e
-f.
+The vector a, b, c, d, e, f, g can be lagged by \code{n==1} is NA, a, b, c, d, e, f.
 If we set \code{wrap == TRUE}, the \code{"g"} moved to the beginning of the output:
-is g
-a
-b
-c
-d
-e
-f.
+is g, a, b, c, d, e, f.
 }
 \section{Grouping}{
 

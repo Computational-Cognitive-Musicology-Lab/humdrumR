@@ -66,7 +66,9 @@ the files (same as in the returned "fileFrame", see above) are written into a si
 \code{'humdrumR_syntaxErrorReport_DATE.txt'} (with the \code{date} coming from \link[base:Sys.time]{Sys.Date}\verb{).  In addition, a sub directory called }AnnotatedFiles\verb{is created. In this directory, copies of all the files which contain errors are written, with}_errorAnnotations` appended
 to their names.
 In each file, individual errors are directly indicated in the record where they occur.
-The output looks like this:\preformatted{                                             | **whatever
+The output looks like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{                                             | **whatever
                                              | =
                                              | The original records from the input file
                                              | appear on the right side.
@@ -74,7 +76,7 @@ The output looks like this:\preformatted{                                       
 Error message for record six printed here.   | Exactly as they did
                                              | in the input file.
                                              | *-
-}
+}\if{html}{\out{</div>}}
 }
 
 \examples{

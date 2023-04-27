@@ -88,10 +88,10 @@
 #' 
 #' ## Relational Operators
 #' 
-#' `tonalInterval`s can be compared using the standard [relational operations][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
+#' `tonalInterval`s can be compared using the standard [relational operations][base::Comparison], like `==`, `!=`, `>`, and `>=`.
 #' Two `tonalInterval`s are equal (according to `==`) only if all their slots (`Octave`, `Fifth`, and `Cent`)
 #' are exactly identical. 
-#' Thus, enharmonic notes (like C# and Db) are *not* equal.
+#' Thus, enharmonic notes (like C and Db) are *not* equal.
 #' In contrast, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
 #' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
 #' 
@@ -742,7 +742,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' If `step.labels` is `NULL`, steps are assumed printed as integers, including negative integers representing downward steps.
 #' 
-#' ----
+#' 
 #' 
 #' There is also a `step.signed` (`logical`, `length == 1`) argument: if `step.signed = TRUE`, lowercase versions of `step.labels` are interpreted as negative (downward) steps and
 #' uppercase versions of `step.labels` are interpreted as positive (upwards) steps.
@@ -772,7 +772,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' + `(flat = "-", sharp = "+")` -> [degree()]
 #' 
 #' 
-#' ----
+#' 
 #' 
 #' The `doubleflat`, and `doublesharp` (`character`, `length == 1`) arguments are `NULL` by default, but can be set if a special symbol is wanted
 #' to represent two sharps or flats. For example, you could modify [pitch()] to use a special double sharp symbol:
@@ -934,7 +934,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' Notice that, if `octave.floor` is being used, all simple intervals are represented as ascending.
 #' 
-#' ----
+#' 
 #' 
 #' When parsing ["absolute" pitch][pitch()] representations, the `octave.round` option allows you to control which octave notes are associated with.
 #' The following table illustrates:
@@ -998,7 +998,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' quality appears *after* the step---e.g., `2M` and `5P`.
 #' We could call `interval(c("2M", "5P"), parse(parts = c("step", "species")))` and sure enough we'd get the correct parse!
 #' 
-#' ----
+#' 
 #' 
 #' One final string-parsing argument is `sep`, which indicates if there is a character string separating the pitch information components:
 #' The most common case would be a comma or space.
@@ -1748,7 +1748,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' If `step.labels` is `NULL`, steps are assumed to be represented by integers, including negative integers representing downward steps.
 #' 
-#' ----
+#' 
 #' 
 #' There is also a `step.signed` (`logical`, `length == 1`) argument: if `step.signed = TRUE`, lowercase versions of `step.labels` are interpreted as negative (downward) steps and
 #' uppercase versions of `step.labels` are interpreted as positive (upwards) steps.
@@ -1776,7 +1776,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' + `parse(flat = "-", sharp = "+")` -> `**degree`
 #' 
 #' 
-#' ----
+#' 
 #' 
 #' The `doubleflat`, and `doublesharp` (`character`, `length == 1`) arguments are `NULL` by default, but can be set if a special symbol is used 
 #' to represent two sharps or flats. For example, you might have an input which represents double sharps as `"x"`.
@@ -1930,7 +1930,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' Notice that, if `octave.floor` is being used, all simple intervals are represented as ascending.
 #' 
-#' ----
+#' 
 #' 
 #' When parsing ["absolute" pitch][pitch()] representations, the `octave.round` option allows you to control which octave notes are associated with.
 #' The following table illustrates:
@@ -1994,7 +1994,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' quality appears *after* the step---e.g., `2M` and `5P`.
 #' We could call `interval(c("2M", "5P"), parse(parts = c("step", "species")))` and sure enough we'd get the correct parse!
 #' 
-#' ----
+#' 
 #' 
 #' One final string-parsing argument is `sep`, which indicates if there is a character string separating the pitch information components:
 #' The most common case would be a comma or space.
@@ -3304,7 +3304,6 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' Like all `humdrumR` pitch functions, the ways that `kern` [parses][pitchParsing] and [deparses][pitchDeparsing] tokens
 #' can be modified to accomodate variations of the standard `**kern` pitch representation.
 #' 
-#' ---
 #' 
 #' @examples
 #' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
@@ -4472,18 +4471,14 @@ hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
 ###################################################################### ### 
 # Predefined tonalIntervals ##############################################
 ###################################################################### ### 
-#' 
-#' # Predefined intervals:
-#' 
-#' @rdname tonalIntervalS4
+#' @name tonalIntervalS4
 #' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 dd9 A9 P10 d11 d12 d13 AA13 M14 P15
 #' @export d1 d2 AA2 M3 P4 P5 m6 dd7 A7 P8 d9 AA9 M10 P11 P12 m13 dd14 A14 A15
 #' @export P1 m2 dd3 A3 A4 A5 P6 d7 AA7 m9 dd10 A10 A11 A12 P13 d14 AA14 AA15
 #' @export A1 P2 d3 AA3 AA4 AA5 M6 m7 dd8 A8 P9 d10 AA10 AA11 AA12 M13 m14 dd15
 #' @export AA1 M2 m3 dd4 dd5 dd6 A6 P7 d8 AA8 M9 m10 dd11 dd12 dd13 A13 P14 d15
 #' @export unison pythagorean.comma octave
-NULL
-# 
+
 allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
 allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
 allints <- c(allints)

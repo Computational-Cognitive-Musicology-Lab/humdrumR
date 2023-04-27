@@ -1117,13 +1117,12 @@ notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' `minutes = TRUE`, the output will be `:1:30` (one minute and thirty seconds).
 #' 
 #' 
-#
 #' 
-#' @par minutes (`logical`, T/F) Should the `dur` output include minutes?
-#' @par hours (`logical`, T/F) Should the `dur` output include hours?
-#' @par days (`logical`, T/F) Should the `dur` output include days?
-#' @par months (`logical`, T/F) Should the `dur` output include months?
-#' @par years (`logical`, T/F) Should the `dur` output include years?
+#' @param minutes (`logical`, T/F) Should the `dur` output include minutes?
+#' @param hours (`logical`, T/F) Should the `dur` output include hours?
+#' @param days (`logical`, T/F) Should the `dur` output include days?
+#' @param months (`logical`, T/F) Should the `dur` output include months?
+#' @param years (`logical`, T/F) Should the `dur` output include years?
 #' 
 #' @examples
 #' 

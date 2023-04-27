@@ -43,7 +43,9 @@ For tandem interpretations, counts are returned in the format \code{Total.Unique
 \item \code{Spines}: The number of spines that this interpretation appears in.
 }
 
-For example, consider the following piece:\preformatted{**kern   **kern   **silbe
+For example, consider the following piece:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern   **kern   **silbe
    *C:      *C:         *
      c        e        La
      d        f        la
@@ -56,7 +58,7 @@ For example, consider the following piece:\preformatted{**kern   **kern   **silb
     f#        a       doo
      g        b       wop
     *-       *-        *-
-}
+}\if{html}{\out{</div>}}
 
 In this piece, there is several tandem key interpretations,
 which \code{humdrumR} will call \code{Key}.

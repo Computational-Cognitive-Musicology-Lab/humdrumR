@@ -1986,7 +1986,7 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #'
 #' Only used if `forceAtomic == TRUE`, wherein lists of vectors are pasted together.
 #'
-#' @param nullChar ***
+#' @param nullChar ***Should null tokens be returned as characters or `NA`?***
 #' 
 #' Defaults to `FALSE`.	
 #' 
