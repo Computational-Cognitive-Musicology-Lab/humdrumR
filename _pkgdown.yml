@@ -193,12 +193,15 @@ reference:
   - struct
 - title: "Other Functions"
   desc: "Other useful tools"
+- contents: 
+  - draw
+  - tally
 - subtitle: "Information theory"
   contents:
+  - p
   - entropy
   - crossentropy
   - mutualInfo
-  - ptable
 - subtitle: "Numeric values"
   contents:
   - rational

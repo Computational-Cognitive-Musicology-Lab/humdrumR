@@ -69,7 +69,7 @@ byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                   data.table(Argument = 'groupby', Type = 'harmonic',
                              Function = c('hint', 'sonority'),
                              Expression = list(quote(list(Piece = Piece, Record = Record)))),
-                           data.table(Argument = 'groupby', Type = 'structure',       
+                  data.table(Argument = 'groupby', Type = 'structure',       
                              Function = c('timeline', 'timestamp', 'count', 'onbeat', 'subpos', 'metlev', 'metcount'),
                              Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, ParentPath = ParentPath, Record = Record, Stop = Stop)))),
                   data.table(Argument = 'orderby', Type = 'harmonic',
@@ -181,10 +181,11 @@ humdrumR_version <- as.character(packageVersion('humdrumR'))
 
 flatly <- c('#18BC9C', '#F39C12', '#3498DB', '#E74C3C', '#2C3E50',
             palette.colors(9))
-setHook('plot.new', function() {
-  par(family = 'Lato', col.main = flatly[5], col.axis = flatly[5], col.sub = flatly[5],
-      col.lab = flatly[5])
-  })
+flatlyramp <- function(n, alpha = 1) rgb(colorRamp(flatly[c(2, 3)])(n), alpha = alpha * 255, maxColorValue = 255)
+# setHook('plot.new', function() {
+#   par(family = 'Lato', col.main = flatly[5], col.axis = flatly[5], col.sub = flatly[5],
+#       col.lab = flatly[5])
+#   })
 
 
 

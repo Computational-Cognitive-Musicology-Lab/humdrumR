@@ -536,7 +536,7 @@ end <- function(x, n = 10L) {
 # }
 
 
-closest <- function(x, where, direction = 'either', diff_func = `-`) {
+closest <- function(x, where, direction = 'either', diff_func = `-`, value = TRUE) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
           
           
@@ -551,7 +551,8 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
                          } else {
                                    if (direction %in% c(3, 5))  intervals + 1  else intervals
                          })
-          sortedwhere[hits]
+          
+          if (value)  sortedwhere[hits] else match(sortedwhere[hits], where)
           
 }
 
@@ -2040,6 +2041,37 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 # Metaprogramming ----
 
+deparse.unique <- function(exprs) {
+  
+  exprs <- rapply(lapply(exprs, as.list), rlang::expr_name, how = 'list')
+  exprs <- lapply(exprs, unlist, recursive = FALSE)
+  exprs <- lapply(exprs, 
+                  \(args) {
+                    names <- .names(args)
+                    args <- ifelse(names == '', args, paste0(names, ' = ', args))
+                    unname(args)
+                  })
+  
+  extraArgs <- lapply(exprs, '[', i = -1:-2)
+  tab <- table(rep(seq_along(extraArgs), lengths(extraArgs)), 
+               unlist(extraArgs))
+  redundant <- colnames(tab)[colSums(tab) == nrow(tab)]
+  exprs <- lapply(exprs, setdiff, y = redundant)
+  
+  exprs <- lapply(exprs, \(args) if (length(args) > 3) c(args, '...') else args)
+  labels <- sapply(exprs, 
+                   \(args) {
+                     if (length(args) == 1L) {
+                       args
+                     } else {
+                       paste0(args[1], 
+                              '(', 
+                              paste(args[-1], collapse = ', ' ), ')')
+                     }
+                   })
+  
+  make.unique(labels)
+}
 
 visible <- function(withV) {
   if (is.null(withV$value)) return(NULL)
@@ -2677,7 +2709,7 @@ object2str <- function(object) {
         
 }
 
-num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
+num2str <- function(n, pad = FALSE) if (!is.null(n)) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
 
 num2print <- function(n, label = NULL, capitalize = FALSE) {

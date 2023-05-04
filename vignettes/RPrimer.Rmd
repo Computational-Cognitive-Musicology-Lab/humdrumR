@@ -530,6 +530,7 @@ it makes sure that we *keep track* of what data is missing, while keeping our ve
 + `sort()` --- Put values of a vector into ascending order.
   + set `decreasing = TRUE` for decreasing order.
 + `rev()` --- Reverse the order of a vector.
++ `rep()` --- Repeat a vector.
 + `unique()` --- Returns only the unique values of a vector.
 + `x %in% y` --- Which elements of the vector `x` appear in the vector `y`?
 + `length()` --- How long is the vector (or `list()`)?
@@ -537,11 +538,22 @@ it makes sure that we *keep track* of what data is missing, while keeping our ve
   + Provide the `n` argument a natural number to control $N$.
 
 
+### Sequences and Indices
+
++ `x:y` --- Create a sequence of integers from `x` to `y`.
+  + For example, `1:10` makes a vector of integers from one to ten.
++ `seq()` --- Create arbitrary sequences of numbers.
++ `which()` --- Which indices in a logical vector are true?
+  + For example, `which(c(TRUE, FALSE, TRUE))` returns `c(1,3)`.
+
 ## String functions
 
 + `paste()` --- Paste together multiple `character` strings.
++ `nchar()` --- Counts how many characters there are in each string of a character vector.
 
-## Arithmetic
+## Math
+
+### Arithmetic
 
 + `x + y` --- Addition; $x + y$.
 + `x - y` --- Subtraction; $x - y$.
@@ -554,13 +566,30 @@ it makes sure that we *keep track* of what data is missing, while keeping our ve
   + E.g., whole-number division with remainder.
 + `x %% y` --- `x` modulo `y`; $x \mod y$.
   + E.g., remainder after whole-number division.
++ `diff(x)` --- This function calculates the differences between consecutive values in a numeric vector.
+  + `diff(c(5, 3))` is the same as `3 - 5`.
 
 
-## Other Math functions
+### Other Math functions
 
-+ `sqrt()` --- Square-root of numbers; $\sqrt{x}$.
-+ `abs()` --- Absolute value of numbers; $|x|$
-+ `round()` --- Round number to nearest integer; $\lfloor x \rceil$
++ `sqrt(x)` --- Square-root of numbers; $\sqrt{x}$.
++ `abs(x)` --- Absolute value of numbers; $|x|$
++ `round(x)` --- Round number to nearest integer; $\lfloor x \rceil$
++ `log(x)` --- Log of number (natural log by default); $\log(x)$
++ `sign(x)` --- Sign (1, -1, or 0) of x; $\text{sgn}\ x$
+
+### Distribution and Tendency Functions
+
++ `sum(x)` --- The sum of a numeric vector.
++ `max(x)` --- The maximum value in a numeric vector.
++ `min(x)` --- The minimum value in a numeric vector.
++ `range(x)` --- The minimum *and* maximum values of a numeric vector.
+  + To get the size of the range, use `diff(range(x))`.
++ `mean(x)` --- The arithmetic mean of numeric vector.
++ `median(x)` --- The median of numeric vector.
++ `quantile(x)` --- Other distribution [quantiles](https://en.wikipedia.org/wiki/Quantile) of numeric vector.
+
+
 
 ## Randomization functions
 
@@ -569,6 +598,17 @@ it makes sure that we *keep track* of what data is missing, while keeping our ve
 ## Analysis Functions
 
 + `table()` --- Tabulate all unique values in vector, or cross-tabulate across multiple vectors.
+  + When using `r hm`, you should use the similar [tally()] instead!
+
+# Useful tricks
+
++ Would you like to know how many elements in a vector match a logical criteria? Take the sum of the logic:
+  + `sum((1:100) > 55)`
+  + `sum(letters %in% c('a', 'e', 'i', 'o', 'u'))`
++ Would you like to know what *proportion* of values match your logical criteria? Take the *mean* of the logic:
+  + `mean((1:100) > 55)`
+  + `sum(letters %iN% c('a', 'e', 'i', 'o', 'u'))`
+
 
 # Making your own functions
 

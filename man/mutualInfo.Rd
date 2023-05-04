@@ -2,18 +2,18 @@
 % Please edit documentation in R/Analysis.R
 \name{mutualInfo}
 \alias{mutualInfo}
-\alias{mutualInfo.table}
-\alias{mutualInfo.default}
-\alias{pmutualInfo}
+\alias{mutualInfo,probabilityDistribution-method}
+\alias{mutualInfo,table-method}
+\alias{mutualInfo,discrete-method}
 \title{Calculate Mutual Information of variables}
 \usage{
-mutualInfo(x, ..., base = 2)
+mutualInfo(x, ...)
 
-\method{mutualInfo}{table}(x, base = 2)
+\S4method{mutualInfo}{probabilityDistribution}(x, ..., base = 2)
 
-\method{mutualInfo}{default}(..., base = 2)
+\S4method{mutualInfo}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
 
-pmutualInfo(..., base = base)
+\S4method{mutualInfo}{discrete}(x, ..., base = 2, na.rm = FALSE)
 }
 \description{
 Calculate Mutual Information of variables
