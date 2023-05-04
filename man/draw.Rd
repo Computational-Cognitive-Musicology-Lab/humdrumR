@@ -7,6 +7,8 @@
 \alias{draw,missing,numeric-method}
 \alias{draw,table,ANY-method}
 \alias{draw,probabilityDistribution,ANY-method}
+\alias{draw,discrete,numeric-method}
+\alias{draw,list,numeric-method}
 \title{Visualize data}
 \usage{
 draw(
@@ -38,6 +40,10 @@ draw(
 \S4method{draw}{table,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
 
 \S4method{draw}{probabilityDistribution,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
+
+\S4method{draw}{discrete,numeric}(x, y, col = 3, log = "", breaks = 20, ..., yat = NULL)
+
+\S4method{draw}{list,numeric}(x, y, col = 3, log = "", breaks = 20, ..., yat = NULL)
 }
 \description{
 The \code{draw()} function is humdrumR's goto plotting function.

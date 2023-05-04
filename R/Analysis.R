@@ -565,90 +565,10 @@ crossentropy.default <- function(..., distribution, base = 2) {
 
 
 
-## Plotting helpers ----
-# 
-# fill10s <- function(x) {
-#   
-#   filler <- new <- x
-#   if (any(x > 0)) filler <- head(filler, -1L)
-#   if (any(x < 0)) filler <- tail(filler, -1L)
-#   
-#   i <- 1
-#   ns <- c(3, 5, 2, 7)
-#   while(length(new) < 10 & i < 5) {
-#     new <- sort(c(new, filler * ns[i]))
-#     i <- i + 1L
-#   }
-#   
-#   new
-# }
-
-
-smartjitter <- function(x) {
-  .x <- x[!is.na(x)]
-  
-  sorted <- sort(.x)
-  
-  range <- if (length(unique(.x)) == 1) 1 else diff(range(.x))
-  diff <- c(range, diff(.x))
-  
-  close <- diff < (range / 100)
-  if (!any(close)) return(x)
-  smallest <- min(diff[!close], range / 10)
-  
-  shift <- (rbeta(sum(close), 3, 3) - .5) * smallest * .5
-  
-  
-  .x[close] <- .x[close] + shift
-  .x <- .x[rank(x[!is.na(x)], ties.method = 'first')] # back to original order
-  
-  x[!is.na(x)] <- .x
-  x
-}
-
-prep_col <- function(col, alpha = 1) {
-  if (is.logical(col)) col <- ifelse(col, flatly[2], flatly[5])
-  if (is.factor(col)) col <- as.integer(col)
-  
-  if (is.numeric(col) && length(unique(col)) > 10) {
-    col <- col - min(col, na.rm = TRUE)
-    col <- col / max(col, na.rm = TRUE)
-    col <- flatlyramp(col, alpha = alpha)
-    
-  }
-  col
-  
-}
-
-prep_ticks <- function(x, log = TRUE, at = NULL) {
-  if (is.null(x)) x <- seq(0, 1, .1)
-  
-  if (log && is.null(at)) {
-    if (any(x <= 0)) .stop("You can't draw a variable on a logarithmic scale",
-                              "if it includes negative numbers or zeros.")
-    
-    ticks <- pretty(log10(x), n = 10L, min.n = 5L) 
-    labels <- 10^ticks
-    scale <- floor(ticks)
-    scale <- ifelse(scale >= 2, scale - 1, scale)
-    scale <- 10^scale
-    ticks <- unique(round(labels / scale) * scale)
-    
-    
-  } else {
-    ticks <- at %||% pretty(x, n = 10L, min.n = 5L)
-  }
-}
-
-setalpha <- function(col, alpha = 1) {
-  rgba <- col2rgb(col, alpha = TRUE) / 255
-  
-  rgb(rgba['red', ], rgba['green', ], rgba['blue', ], alpha)
-}
-
 
 ## Plotting functions ----
 
+### draw() ----
 
 #' Visualize data
 #' 
@@ -692,9 +612,15 @@ setGeneric('draw', \(x, y,
   
   
   output <- standardGeneric('draw')
+  plot.window(c(0,1), c(0, 1))
   title(main = main, sub = sub)
-  mtext(xlab %||% (output$xlab %||% xexpr), 1, line = 2.5)
-  mtext(ylab %||% (output$ylab %||% yexpr), 2, line = 2.5)
+  
+  outer <- output$outer %||% FALSE
+  xlab <- xlab %||% (output$xlab %||% xexpr)
+  ylab <- ylab %||% (output$ylab %||% yexpr)
+  
+  mtext(xlab, 1, line = 2.5, outer = outer)
+  mtext(ylab, 2, line = 3, outer = outer, las = if (nchar(ylab) > 3) 3 else 1)
 })
 
 #' @rdname draw
@@ -718,9 +644,8 @@ setMethod('draw', c('numeric', 'missing'),
             
             xat <- breaks$breaks
             while(length(xat) > 20) {xat <- xat[seq(1, length(xat), by = 2)]}
-            
             canvas(log = '', xlim = range(breaks$breaks), ylim = c(0, 1), xat = xat,
-                   yat = seq(0, 1, .05), ylabels = c('  0%', paste0(' ', seq(10, 90, 10), '%'), '100%'))
+                   yat = seq(0, 1, .1), ylabels = c('  0%', paste0(' ', seq(10, 90, 10), '%'), '100%'))
             
             
             countaxis <- unique(round(pretty(c(0, sum(breaks$counts)), n = 10L, min.n = 5L)))
@@ -738,6 +663,8 @@ setMethod('draw', c('numeric', 'missing'),
             
             graphics::segments(breaks$breaks, 0, breaks$breaks, pmax(c(prob, 0), c(0, prob)), 
                                col = setalpha(col, .4))
+            
+            points(x, rnorm(length(x), -.10, .015), cex = .25 , col = rgb(1,0,0, .2), pch = 16, xpd = TRUE)
             
             
             list(ylab = 'Proportion')
@@ -758,6 +685,9 @@ setMethod('draw', c('missing', 'numeric'),
             
             list(xlab = 'Quantile')
           })
+
+
+
 
 #' @rdname draw
 #' @export
@@ -804,20 +734,155 @@ setMethod('draw', 'probabilityDistribution',
           })
 
 
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('discrete', 'numeric'),
+          function(x, y, col = 3, log = '', breaks = 20, ..., yat = NULL) {
+            draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('list', 'numeric'),
+          function(x, y, col = 3, log = '', breaks = 20, ..., yat = NULL) {
+            
+            layout <- prep_layout(x)
+            oldpar <- par(oma = par('mar'), mar = c(0, 0, 0, 0))
+            on.exit({
+              layout(cbind(1)) 
+              par(oldpar)
+              
+            })
+            
+            yticks <- prep_ticks(y, log = grepl('y', log), at = yat)
+            ylim <- range(yticks)
+            
+            groups <- squashGroupby(x)
+            y <- split(y, f = groups)
+            
+            xticks <- seq(0, 1, .1)
+            xlabels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
+            
+            grouplabels <- unique(groups)
+            for (k in c(layout)) {
+              ytick <- if (k %in% layout[, 1]) yticks 
+              if (k %in% layout[nrow(layout), ]) {
+                xtick <- xticks 
+                xlabel <- xlabels
+              } else {
+                xtick <- xlabel <- NULL
+              }
+              
+              canvas(log = gsub('x', '', log), 
+                     xlim = c(0, 1), xat = xtick, xlabels = xlabel,
+                     ylim = ylim, yat = ytick)
+              
+              if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
+              draw_violin(y[[k]], breaks = breaks)
+            }
+            
+            
+            list(oma = TRUE, xlab = if (length(layout) > 1L) 'Proportion')
+          })
+
+## draw()'s helpers ----
+
+
+
+smartjitter <- function(x) {
+  .x <- x[!is.na(x)]
+  
+  sorted <- sort(.x)
+  
+  range <- if (length(unique(.x)) == 1) 1 else diff(range(.x))
+  diff <- c(range, diff(.x))
+  
+  close <- diff < (range / 100)
+  if (!any(close)) return(x)
+  smallest <- min(diff[!close], range / 10)
+  
+  shift <- (rbeta(sum(close), 3, 3) - .5) * smallest * .5
+  
+  
+  .x[close] <- .x[close] + shift
+  .x <- .x[rank(x[!is.na(x)], ties.method = 'first')] # back to original order
+  
+  x[!is.na(x)] <- .x
+  x
+}
+
+prep_col <- function(col, alpha = 1) {
+  if (is.logical(col)) col <- ifelse(col, flatly[2], flatly[5])
+  if (is.factor(col)) col <- as.integer(col)
+  
+  if (is.numeric(col) && length(unique(col)) > 10) {
+    col <- col - min(col, na.rm = TRUE)
+    col <- col / max(col, na.rm = TRUE)
+    col <- flatlyramp(col, alpha = alpha)
+    
+  }
+  col
+  
+}
+
+prep_layout <- function(facets) {
+  
+  if (length(facets) > 2) {
+    facets[[2]] <- squashGroupby(facets[-1])
+    facets <- facets[1:2]
+  }
+  facets <- unique(as.data.frame(facets))
+  
+  
+  mat <- matrix(1:nrow(facets), nrow = length(unique(facets[[1]])))
+  
+  layout(mat)
+  
+  mat
+}
+
+prep_ticks <- function(x, log = TRUE, at = NULL) {
+  if (is.null(x)) x <- seq(0, 1, .1)
+  
+  if (log && is.null(at)) {
+    if (any(x <= 0)) .stop("You can't draw a variable on a logarithmic scale",
+                           "if it includes negative numbers or zeros.")
+    
+    ticks <- pretty(log10(x), n = 10L, min.n = 5L) 
+    labels <- 10^ticks
+    scale <- floor(ticks)
+    scale <- ifelse(scale >= 2, scale - 1, scale)
+    scale <- 10^scale
+    ticks <- unique(round(labels / scale) * scale)
+    
+    
+  } else {
+    ticks <- at %||% pretty(x, n = 10L, min.n = 5L)
+  }
+}
+
+setalpha <- function(col, alpha = 1) {
+  rgba <- col2rgb(col, alpha = TRUE) / 255
+  
+  rgb(rgba['red', ], rgba['green', ], rgba['blue', ], alpha)
+}
+
+
 humaxis <- function(side, tick = FALSE, las = 1, ...) axis(side, tick = FALSE, las = 1, ...)
 
-canvas <- function(log = '', xlim = NULL, ylim = NULL, xat, yat,
+canvas <- function(log = '', xlim = NULL, ylim = NULL, xat = NULL, yat = NULL,
                    xlabels = num2str(xat), ylabels = num2str(yat),
                    ...) {
   plot.new()
   plot.window(xlim = xlim %||% range(xat), 
               ylim = ylim %||% range(yat), log = log)
   
-  humaxis(1, at = xat, labels = xlabels, line = -2)
-  humaxis(2, at = yat, labels = ylabels)
+  if (!is.null(xat)) humaxis(1, at = xat, labels = xlabels, line = -2)
+  if (!is.null(yat)) humaxis(2, at = yat, labels = ylabels)
 }
 
-
+### draw_x ----
 
 draw_quantile <- function(var, ymin, col = 1,
                           quantiles = c(.025, .25, .5, .75, .975), na.rm = FALSE, ...) {
@@ -848,16 +913,25 @@ draw_quantile <- function(var, ymin, col = 1,
   points(x = othercoor, y = coor, col = col, ...)
 }
 
-draw_violin <- function(var, axis = 1, breaks = 'Sturges', col = 1, ...) {
-  hist <- hist.default(var, breaks = breaks, plot = FALSE)
+draw_violin <- function(var, breaks = 40, col = 1, ...) {
+  breaks <- hist.default(var, breaks = breaks, plot = FALSE)
   
-  dens <- hist$density / (max(hist$density) * 4) 
   
-  Map(head(hist$breaks, -1), tail(hist$breaks, -1), dens, 
+  prob <- breaks$density
+  prob <- .5 * prob / sum(prob)
+  
+  Map(head(breaks$breaks, -1), tail(breaks$breaks, -1), prob, 
       f = \(y0, y1, d) {
-        apply.axis(polygon, axis, list(list(x = .5 + c(-d, -d , d, d), y = c(y0, y1, y1, y0))), border = NA, col = col, ...)
+        polygon(x = .5 + c(-d, -d , d, d),
+                y = c(y0, y1, y1, y0),
+                border = NA, col = setalpha(col, ), ...)
       } 
   )
+  
+  othercoor <- runif(length(var), .5 - prob, prob + .5)
+  points(x = othercoor, y = var,  cex = .25, col = rgb(1,0,0, .2), pch = 16)
+  
+  list(xlab = 'Proportion')
 }
 
 
@@ -868,9 +942,7 @@ draw_violin2 <- function(var, axis = 1, breaks = 100, col = 1, ...) {
   dens <- hist$density[findInterval(var, hist$breaks)]
   dens <- dens / (max(dens) * 4) 
   
-  othercoor <- runif(length(var), .5 - dens, dens + .5)
-  
-  apply.axis(points, axis, list(list(x = othercoor, y = var)), col = col, ...)
+
   
 }
 
