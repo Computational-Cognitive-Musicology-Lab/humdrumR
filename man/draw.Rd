@@ -5,6 +5,9 @@
 \alias{draw,numeric,numeric-method}
 \alias{draw,numeric,missing-method}
 \alias{draw,missing,numeric-method}
+\alias{draw,discrete,discrete-method}
+\alias{draw,discrete,missing-method}
+\alias{draw,missing,discrete-method}
 \alias{draw,table,ANY-method}
 \alias{draw,probabilityDistribution,ANY-method}
 \alias{draw,discrete,numeric-method}
@@ -35,6 +38,42 @@ draw(
   ...,
   yat = NULL,
   quantiles = c(0.025, 0.25, 0.5, 0.75, 0.975)
+)
+
+\S4method{draw}{discrete,discrete}(
+  x,
+  y,
+  col = 2,
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  log = "",
+  ...
+)
+
+\S4method{draw}{discrete,missing}(
+  x,
+  y,
+  col = 2,
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  log = "",
+  ...
+)
+
+\S4method{draw}{missing,discrete}(
+  x,
+  y,
+  col = 2,
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  log = "",
+  ...
 )
 
 \S4method{draw}{table,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)

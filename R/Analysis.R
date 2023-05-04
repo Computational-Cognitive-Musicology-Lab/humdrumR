@@ -687,7 +687,26 @@ setMethod('draw', c('missing', 'numeric'),
           })
 
 
+#' @rdname draw
+#' @export
+setMethod('draw', c('discrete', 'discrete'),
+          function(x, y, ...){ 
+            draw(tally(x, y), ...)
+            })
 
+#' @rdname draw
+#' @export
+setMethod('draw', c('discrete', 'missing'),
+          function(x, y, ...){ 
+            draw(tally(x), ...)
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('missing', 'discrete'),
+          function(x, y, ...){ 
+            draw(tally(y), ...)
+          })
 
 #' @rdname draw
 #' @export
@@ -703,7 +722,7 @@ setMethod('draw', 'table',
             humaxis(2, at = yticks)
             
             if (length(dim(x)) > 1) {
-              legend(x = max(barx), y = max(yticks), legend = colnames(x), fill = col, 
+              legend(x = max(barx), y = max(yticks), legend = rownames(x), fill = col, 
                      border = NA, bty='n', xpd = TRUE, cex = .6)
             }
             
