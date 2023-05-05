@@ -2840,3 +2840,12 @@ strPartition <- function(str, split = '/') {
 
 
 
+
+isColor <- function(x) {
+  if (!is.character(x)) return(logical(length(x)))
+  
+  x %in% colors() |
+    stringr::str_detect(x, '^#([0-9a-f]{6}|[0-9a-f]{8})$') |
+    is.na(x) |
+    x == 'transparent'
+}

@@ -600,7 +600,7 @@ setGeneric('draw', \(x, y,
                      xlab = NULL, ylab = NULL, log = '', ...) {
   oldpalette <- palette(flatly)
   oldpar <- par(family = 'Lato', col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
-                mar = c(5,5, 5, 5), cex.axis = .7)
+                mar = c(5,5, 5, 5), cex.axis = .7, pch = 16)
   
   on.exit({par(oldpar) ; palette(oldpalette)})
   
@@ -610,6 +610,7 @@ setGeneric('draw', \(x, y,
   if (xexpr == 'NULL') xexpr <- 'x'
   if (yexpr == 'NULL') yexpr <- 'y'
   
+  col <- prep_col(col)
   
   output <- standardGeneric('draw')
   plot.window(c(0,1), c(0, 1))
@@ -621,24 +622,35 @@ setGeneric('draw', \(x, y,
   
   mtext(xlab, 1, line = 2.5, outer = outer)
   mtext(ylab, 2, line = 3, outer = outer, las = if (nchar(ylab) > 3) 3 else 1)
+  
+  
+  if (!is.null(attr(col, 'levels'))) legend(0, 1.1, horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
+                                            col = unique(col), legend = attr(col, 'levels'))
 })
 
 #' @rdname draw
 #' @export
 setMethod('draw', c('numeric', 'numeric'), 
-          \(x, y, col = 2, log = '', xat = NULL, yat = NULL, ...) {
+          \(x, y, col = 3, log = '', jitter = 'xy', xat = NULL, yat = NULL, cex = prep_cex(x),  ...) {
+            
+            
+            if (grepl('x', jitter)) x <- smartjitter(x)
+            if (grepl('y', jitter)) y <- smartjitter(y)
+            
             xat <- prep_ticks(x, log = grepl('x', log), at = xat)
             yat <- prep_ticks(y, log = grepl('y', log), at = yat)
             
             canvas(log = log, xat = xat, yat = yat, ...)
-            points(x, y, col = prep_col(col), ...)
+            points(x, y, col = col, cex = cex, ...)
             
           })
 
 #' @rdname draw
 #' @export
 setMethod('draw', c('numeric', 'missing'), 
-          \(x, y, col = 3, breaks = 20, ...) {
+          \(x, y, col = 3, breaks = 'Sturges', jitter = '', ...) {
+            
+            
             
             breaks <- hist.default(x, breaks = breaks, plot = FALSE)
             
@@ -664,6 +676,7 @@ setMethod('draw', c('numeric', 'missing'),
             graphics::segments(breaks$breaks, 0, breaks$breaks, pmax(c(prob, 0), c(0, prob)), 
                                col = setalpha(col, .4))
             
+            if (grepl('x', jitter)) x <- smartjitter(x)
             points(x, rnorm(length(x), -.10, .015), cex = .25 , col = rgb(1,0,0, .2), pch = 16, xpd = TRUE)
             
             
@@ -673,7 +686,8 @@ setMethod('draw', c('numeric', 'missing'),
 #' @rdname draw
 #' @export
 setMethod('draw', c('missing', 'numeric'),
-          function(x, y, col = 3, log = '', ..., yat = NULL, quantiles = c(.025, .25, .5, .75, .975)) {
+          function(x, y, col = 3, log = '', jitter = '', ..., yat = NULL, quantiles = c(.025, .25, .5, .75, .975)) {
+            
             
             yat <- prep_ticks(y, log = grepl('y', log), at = yat)
             
@@ -681,7 +695,9 @@ setMethod('draw', c('missing', 'numeric'),
                    xat = seq(0, 1, .1), xlabels = c(('0.0'), seq(.1, .9, .1), '1.0'),
                    yat = yat)
             
-            draw_quantile(y, ymin = min(yat), quantiles = quantiles, ..., col = col)
+            
+            
+            draw_quantile(y, ymin = min(yat), jitter = grepl('y', jitter), quantiles = quantiles, ..., col = col)
             
             list(xlab = 'Quantile')
           })
@@ -757,14 +773,15 @@ setMethod('draw', 'probabilityDistribution',
 #' @rdname draw
 #' @export
 setMethod('draw', c('discrete', 'numeric'),
-          function(x, y, col = 3, log = '', breaks = 20, ..., yat = NULL) {
+          function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
             draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
+            list(xlab = NULL, ylab = NULL)
           })
 
 #' @rdname draw
 #' @export
 setMethod('draw', c('list', 'numeric'),
-          function(x, y, col = 3, log = '', breaks = 20, ..., yat = NULL) {
+          function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
             
             layout <- prep_layout(x)
             oldpar <- par(oma = par('mar'), mar = c(0, 0, 0, 0))
@@ -776,14 +793,14 @@ setMethod('draw', c('list', 'numeric'),
             
             yticks <- prep_ticks(y, log = grepl('y', log), at = yat)
             ylim <- range(yticks)
-            
-            groups <- squashGroupby(x)
-            y <- split(y, f = groups)
+            y <- split(y, f = x)
             
             xticks <- seq(0, 1, .1)
             xlabels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
             
-            grouplabels <- unique(groups)
+            xuniq <- unique(as.data.frame(x))
+            xuniq <- xuniq[sapply(xuniq, \(val) length(unique(val)) > 1L)]
+            grouplabels <- do.call('paste', xuniq)
             for (k in c(layout)) {
               ytick <- if (k %in% layout[, 1]) yticks 
               if (k %in% layout[nrow(layout), ]) {
@@ -802,8 +819,35 @@ setMethod('draw', c('list', 'numeric'),
             }
             
             
-            list(oma = TRUE, xlab = if (length(layout) > 1L) 'Proportion')
+            list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
           })
+
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('formula'),
+          function(x, y, data = NULL, xlab = NULL, ylab = NULL, ...) {
+            
+            vars <- model.frame(x, data = data)
+            
+            if (ncol(vars) == 1L) {
+              draw(vars[[1]], ..., xlab = xlab %||% names(vars), ylab = ylab)
+            } else {
+              
+              if (ncol(vars) > 2) {
+                
+              }
+              
+              draw(vars[[2]], vars[[1]], ...,
+                   xlab = xlab %||% names(vars)[2],
+                   ylab = ylab %||% names(vars)[1])
+            } 
+            
+            
+            list(xlab = '')
+            
+          })
+
 
 ## draw()'s helpers ----
 
@@ -812,35 +856,66 @@ setMethod('draw', c('list', 'numeric'),
 smartjitter <- function(x) {
   .x <- x[!is.na(x)]
   
-  sorted <- sort(.x)
+  ord <- order(.x)
+  sorted <- .x[ord]
   
-  range <- if (length(unique(.x)) == 1) 1 else diff(range(.x))
-  diff <- c(range, diff(.x))
+  range <- if (length(unique(sorted)) == 1) 1 else diff(range(sorted))
+  diff <- c(range, diff(sorted))
   
-  close <- diff < (range / 100)
+  close <- diff == 0 
   if (!any(close)) return(x)
   smallest <- min(diff[!close], range / 10)
   
   shift <- (rbeta(sum(close), 3, 3) - .5) * smallest * .5
   
   
-  .x[close] <- .x[close] + shift
-  .x <- .x[rank(x[!is.na(x)], ties.method = 'first')] # back to original order
+  sorted[close] <- sorted[close] + shift
+  
+  .x <- sorted[match(seq_along(sorted), ord)] # back to original order
   
   x[!is.na(x)] <- .x
   x
 }
 
-prep_col <- function(col, alpha = 1) {
-  if (is.logical(col)) col <- ifelse(col, flatly[2], flatly[5])
-  if (is.factor(col)) col <- as.integer(col)
+prep_cex <- function(x) {
+  l <- length(x)
   
-  if (is.numeric(col) && length(unique(col)) > 10) {
-    col <- col - min(col, na.rm = TRUE)
-    col <- col / max(col, na.rm = TRUE)
-    col <- flatlyramp(col, alpha = alpha)
+  pmax(1 - log(l, 100000), .2)
+}
+
+prep_col <- function(col, alpha = 1) {
+  if (is.numeric(col)) {
+    if ( length(unique(col)) > 10) {
+      col <- col - min(col, na.rm = TRUE)
+      col <- col / max(col, na.rm = TRUE)
+      col <- flatlyramp(col, alpha = alpha)
+    } else {
+      col <- match(col, unique(col))
+    }
+  } else {
+    if (is.logical(col)) {
+      col <- ifelse(col, 2, 5)
+      attr(col, 'levels') <- c('TRUE', 'FALSE')
+    }
     
+    if (is.character(col) && !any(isColor(col))) {
+      col <- factor(col)
+    }
+    
+    if (is.factor(col)) {
+      levels <- levels(col)
+      col <- as.integer(col)
+      attr(col, 'levels') <- levels
+      
+    } 
   }
+  
+  col
+  
+  
+  
+  
+ 
   col
   
 }
@@ -903,9 +978,13 @@ canvas <- function(log = '', xlim = NULL, ylim = NULL, xat = NULL, yat = NULL,
 
 ### draw_x ----
 
-draw_quantile <- function(var, ymin, col = 1,
+draw_quantile <- function(var, ymin, col = 1, jitter = FALSE,
                           quantiles = c(.025, .25, .5, .75, .975), na.rm = FALSE, ...) {
+  if (length(col) == length(var)) col <- col[order(var)]
+  
   coor <- sort(var)
+  
+  if (jitter) coor <- smartjitter(coor)
   othercoor <- seq(0, 1, length.out = length(coor))
   
   
@@ -932,7 +1011,8 @@ draw_quantile <- function(var, ymin, col = 1,
   points(x = othercoor, y = coor, col = col, ...)
 }
 
-draw_violin <- function(var, breaks = 40, col = 1, ...) {
+draw_violin <- function(var, breaks = 'Sturges', col = 1, ...) {
+  var <- var[!is.na(var)]
   breaks <- hist.default(var, breaks = breaks, plot = FALSE)
   
   
@@ -943,25 +1023,15 @@ draw_violin <- function(var, breaks = 40, col = 1, ...) {
       f = \(y0, y1, d) {
         polygon(x = .5 + c(-d, -d , d, d),
                 y = c(y0, y1, y1, y0),
-                border = NA, col = setalpha(col, ), ...)
+                border = NA, col = setalpha(col, .8), ...)
       } 
   )
   
-  othercoor <- runif(length(var), .5 - prob, prob + .5)
-  points(x = othercoor, y = var,  cex = .25, col = rgb(1,0,0, .2), pch = 16)
+  p <- prob[findInterval(var, breaks$breaks, rightmost.closed = TRUE)]
+  othercoor <- runif(length(var), .5 - p, .5 + p)
+  points(x = othercoor, y = smartjitter(var),  cex = .25, col = rgb(1,0,0, .1), pch = 16)
   
   list(xlab = 'Proportion')
 }
 
-
-
-draw_violin2 <- function(var, axis = 1, breaks = 100, col = 1, ...) {
-  hist <- hist.default(var, breaks = breaks, plot = FALSE)
-  
-  dens <- hist$density[findInterval(var, hist$breaks)]
-  dens <- dens / (max(dens) * 4) 
-  
-
-  
-}
 
