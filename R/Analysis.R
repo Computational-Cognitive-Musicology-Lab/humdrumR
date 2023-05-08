@@ -529,35 +529,23 @@ setMethod('mutualInfo', 'discrete',
 #' TBA
 #' @family {Information theory functions}
 #' @export
-crossentropy <- function(..., distribution, base) UseMethod('crossentropy')
+setGeneric('crossEntropy', function(distribution1, distribution2, ...) standardGeneric('crossEntropy'))
 
-#' @rdname crossentropy
+#' @rdname crossEntropy
 #' @export
-crossentropy.table <- function(tab, distribution, base = 2){
-  if (!all(dim(tab) == dim(distribution))) .stop("The number of observation vectors must match dimensions of the distribution.")
-  
-  info <- information(proportions(tab), base = base)
-  
-  if (!is.table(distribution)) {
-    distribution <- if (is.list(distribution)) do.call('table', distribution) else table(distribution)
-  }
-  frequency <- proportions(distribution, margin = NULL) 
-  
-  info <- info[tab > 0]
-  frequency <- frequency[tab > 0]
-  
-  
-  sum(info * frequency)
-  
-}
-#' @rdname crossentropy
-#' @export
-crossentropy.default <- function(..., distribution, base = 2) {
-  tab <- table(...)
- 
-  
-  crossentropy.table(tab, distribution, base = base)
-}
+setMethod('crossEntropy', c('probabilityDistribution', 'probabilityDistribution'),
+          function(distribution1, distribution2, base = 2) {
+            
+            distribution2 <- ifelse(distribution2 == 0L, 0, log(distribution2, base = base))
+            
+            
+            equation <- paste0('H(', 
+                               pdist.name(distribution1, func = ''), ', ',
+                               pdist.name(distribution2, func = ''))
+            setNames(-sum(distribution1 * distribution2), equation)
+            
+          })
+
 
 
 

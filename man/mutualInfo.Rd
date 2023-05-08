@@ -20,7 +20,7 @@ Calculate Mutual Information of variables
 }
 \seealso{
 Other {Information theory functions}: 
-\code{\link{crossentropy}()},
+\code{\link{crossEntropy}()},
 \code{\link{entropy}()}
 }
 \concept{{Information theory functions}}
