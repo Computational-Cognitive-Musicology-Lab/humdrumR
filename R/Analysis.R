@@ -125,6 +125,10 @@ rbind.humdrum.table <- function(...) {
 }
 
 alignTables <- function(tables, funcname = '') {
+  tables <- lapply(tables, 
+                   \(tab) {
+                     dimnames(tab) <- lapply(dimnames(tab), \(names)ifelse(is.na(names), '_<NA>_', names) ) 
+                     tab})
   dimnames <- lapply(tables, dimnames)
   dimensions <- Filter(\(dn) any(dn != ''), lapply(dimnames, names))
   
@@ -138,7 +142,6 @@ alignTables <- function(tables, funcname = '') {
   
   empty <- do.call('table', allindices) - 1L
   
-  
   dimensions <- Reduce(\(a, b) paste(a, b, sep = '/'), dimensions)
   names(dimnames(empty)) <- dimensions
   
@@ -147,8 +150,11 @@ alignTables <- function(tables, funcname = '') {
            
            indices <- as.matrix(allindices[Reduce('&', Map(`%in%`, allindices, dimnames(tab))), ])
            empty[indices] <- tab[indices]
+           
+           dimnames(empty) <- lapply(dimnames(empty), \(names) ifelse(names == '_<NA>_', NA_character_, names))
            empty
          })
+  
   
   
   

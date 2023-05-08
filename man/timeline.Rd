@@ -11,6 +11,7 @@ timeline(
   pickup = NULL,
   ...,
   Exclusive = NULL,
+  threadNA = TRUE,
   parseArgs = list(),
   groupby = list()
 )
@@ -23,6 +24,7 @@ timestamp(
   minutes = TRUE,
   ...,
   Exclusive = NULL,
+  threadNA = TRUE,
   parseArgs = list(),
   groupby = list()
 )
@@ -46,6 +48,12 @@ Defaults to \code{NULL}
 
 Must be \code{logical} of same \code{length(x)}, Or \code{NULL}.
 See "Pickups" section below.}
+
+\item{threadNA}{\emph{\strong{Should rhythm-less tokens return \code{NA}?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
@@ -110,7 +118,12 @@ Thus, a call like \code{within(humData, timeline(Token))} will compute the corre
 tokens across all spines/paths/stops---all values in the same record will be the same.
 
 Note that, \code{timeline()} and \code{timestamp()} follow the default behavior of \code{\link[=duration]{duration()}} by treating grace-notes as duration \code{0}.
-If you want to use the duration(s) of grace notes, specify \code{grace = TRUE}.
+This means that their position on the timeline is simply inherited from the previous event on the timeline, as if they occur
+at the same time.
+If you want to use the specified duration(s) of grace notes, specify \code{grace = TRUE}.
+By default, any \emph{other} tokens without (parsable) rhythm information are returned a \code{NA}.
+However, if \code{threadNA = FALSE}, rhythm-less tokens will be treated as if they have a duration of \code{0} as well, and thus
+have a (shared) position on the timeline.
 }
 \section{Pickups}{
 

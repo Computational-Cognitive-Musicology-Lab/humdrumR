@@ -262,7 +262,7 @@ rint2recip <- function(x, sep = '%', ...) {
 }
 
 
-rint2grid <- function(x, tick = min(rational(1, 16), tatum.rational(x)), sep = '', 
+rint2grid <- function(x, tick = '16', sep = '', 
                       on = 'X', off = 'O', offbeat = TRUE) {
   
   
@@ -270,10 +270,11 @@ rint2grid <- function(x, tick = min(rational(1, 16), tatum.rational(x)), sep = '
   
   ontick <- x == round(x)
   
-  n <- numerator(round(x))
+  num <- numerator(round(x))
   
   
-  grid <- paste0(ifelse(ontick, on, off), strrep(off, n - 1L))
+  grid <- paste0(ifelse(ontick, on, off), strrep(off, pmax(as.integer64(0), num - 1L)))
+  grid[num == 0] <- NA_character_
   
   if (!offbeat) grid[!ontick] <- NA_character_
   
@@ -1702,8 +1703,28 @@ recordDuration <- function(humdrumR) {
 
 ## Timebase
 
+#' Represent time on a regular grid
+#' 
+#' The `timebase()` function takes a [humdrumR][humdrumRclass] dataset
+#' and converts rhythmic information in the data into a step-sequencer like
+#' representation, with each humdrum data record representing one step.
+#' The duration of each step is the the "timebase", which can be controlled with the `tb` argument.
+#' The `timebase()` function is currently in a beta-draft, so may not work well.
+#' 
+#' @param humdrumR ***HumdrumR data.***
+#' 
+#' This data must have at least one spine with rhythmic ([duration][rhythmFunctions]) encoded.
+#' 
+#' @param timebase ***The duration of each step in the output sequence.***
+#' 
+#' Defaults to a sixteenth-note.
+#' 
+#' Must be a single atomic value, which can be [parsed as a duration][rhythmFunctions].
+#' 
+#' @export
 timebase <- function(humdrumR, tb = '16') {
   checks(humdrumR, xhumdrumR)
+  message('This is an early draft of timebase()...you might encounter errors.')
   
   oldActive <- getActive(humdrumR)
   

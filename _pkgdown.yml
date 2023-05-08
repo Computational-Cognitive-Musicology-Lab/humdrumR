@@ -149,7 +149,6 @@ reference:
   desc: "These functions translate between rhythm representations:"
   contents:
   - bpm2sec
-  - timeline
   - recip
   - duration
   - grid
@@ -157,6 +156,8 @@ reference:
   - seconds
   - ioi
   - untie
+  - timeline
+  - timebase
 - subtitle: "Beats and Meter"
   desc: "Rhythm and meter analysis functions."
   contents:
