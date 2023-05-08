@@ -61,7 +61,7 @@ Must be a singleton \code{logical} value; an on/off switch.}
 Defaults to empty \code{list()}.
 
 Must be a \code{\link[=list]{list()}}, which is either empty or contains vectors which are all the same length as \code{along.with}.
-In calls to \link[=withinHumdrum]{with/within.humdrumR}, \code{groupby} is passed \code{list(File, Spine, Path)} by default.}
+In calls to \link[=withinHumdrum]{with/within.humdrumR}, \code{groupby} is passed \code{list(Piece, Spine, Path)} by default.}
 }
 \value{
 By default, \code{hop()} returns an \code{integer} vector, appropriates indices for the \code{along.with} vector.
@@ -135,11 +135,11 @@ for example, if \code{from = 2}, the hop sequence will start on the second index
 However, the output indices still represent the original \code{along.with} indices.
 
 Since \code{hop()} is usually used with \code{\link[=context]{context()}} to create rolling windows within musical parts,
-we want typically want to apply \code{hop()} using using \code{groupby = list(File, Spine, Path)}.
+we want typically want to apply \code{hop()} using \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to \code{hop()}.
 So any use of \code{hop()} in a call to \link[=withinHumdrum]{with(in)}, will automatically generate the hop sequence
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 }
 
 \examples{

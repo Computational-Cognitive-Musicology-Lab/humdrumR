@@ -2,13 +2,16 @@
 % Please edit documentation in R/Pitch.R
 \name{step}
 \alias{step}
-\title{Extract scale step}
+\title{Extract scale step.}
 \usage{
 step(
   x,
   ...,
+  generic = FALSE,
   simple = FALSE,
+  octave.relative = FALSE,
   Key = NULL,
+  transposeArgs = list(),
   parseArgs = list(),
   gamutArgs = list(),
   inPlace = FALSE
@@ -23,6 +26,12 @@ The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link
 
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
+\item{generic}{\emph{\strong{Should "specific" pitch information (accidentals and qualites) be discarded?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{simple}{\emph{\strong{Should "compound" pitch information (octave/contour) be discarded?}}
 
 Defaults to \code{FALSE}.
@@ -34,6 +43,12 @@ Must be a singleton \code{logical} value: an on/off switch.}
 Defaults to \code{NULL}.
 
 Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a special \code{\link[=transpose]{transpose()}} call.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
 
 \item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=pitchParsing]{pitch parser}.}}
 
@@ -53,7 +68,19 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-Extract scale step
+This is equivalent to using any \link[=pitchFunctions]{pitch function} with the
+arguments \code{generic = TRUE}, \code{simple = TRUE}, and \code{step.labels = NULL}.
+By default, \code{step()} will returns steps relative to the key---set \code{Key = NULL} if you don't want this.
+}
+\examples{
+\dontrun{
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+within(chorales, step(Token))
+
+within(chorales, step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+}
+
 }
 \seealso{
 Other {pitch functions}: 

@@ -33,3 +33,47 @@ test_that('Examples used in Chords.R mans work', {
   
 })
 
+
+test_that("sonority() works properly", {
+  
+  expect_equal(sonority(c('G','b','d')), 'G')
+  expect_equal(sonority(c('E','BB','G#')), 'E/B')
+  expect_equal(sonority(c('E-','g','b-', 'DD-')), 'Eb7/Db')
+  expect_equal(sonority(c('b-','dd','ff','C')), 'Bbadd2/C')
+  
+  expect_equal(sonority(c('BB-','E--','f' ), enharmonic = TRUE), 'Bb')
+  expect_equal(sonority(c('BB-','d','f', 'b' ), enharmonic = FALSE), 'Bb')
+  expect_equal(sonority(c('BB-','d','f', 'b' ), enharmonic = TRUE), 'Bbaddb2')
+  
+  expect_equal(sonority(c('B','e-','f#','E-','g','a#','EE','g','cc','b','f#','e-','b-','B-','e-','f#'), 
+               groupby=list(c(1,1,1,2,2,2,3,3,3,4,4,4,4,5,5,5)), enharmonic = TRUE),
+               c("B", "B", "B", "Eb", "Eb", "Eb", "C/E", "C/E", "C/E", "Ebmin", "Ebmin", "Ebmin", "Ebmin", "Ebmin/Bb", "Ebmin/Bb", "Ebmin/Bb"))
+           
+  
+  expect_equal(sonority(c('B','e-','f#','E-','g','a#','EE','g','cc','b','f#','e-','b-','B-','e-','f#'), 
+                        groupby=list(c(1,1,1,2,2,2,3,3,3,4,4,4,4,5,5,5)), enharmonic = TRUE, fill = FALSE),
+               c("B", NA, NA, "Eb", NA, NA, "C/E", NA, NA, "Ebmin", NA, NA, NA, "Ebmin/Bb", NA, NA))
+  
+  expect_equal(sonority(c('B','e-','f#','E-','g','a#','EE','g','cc','b','f#','e-','b-','B-','e-','f#'), 
+                        groupby=list(c(1,1,1,2,2,2,3,3,3,4,4,4,4,5,5,5)), enharmonic = TRUE, inPlace = FALSE),
+               c("B", "Eb", "C/E", "Ebmin", "Ebmin/Bb"))
+  
+  expect_equal(sonority(c('x','y','a','c','e'), groupby =list(c(1,1,2,2,2))),
+               c(NA, NA, "Amin/C", "Amin/C", "Amin/C"))
+
+  expect_equal(sonority(c('c','e',NA,'g#'), groupby=list(c(1,1,1,1))), c("C+", "C+", "C+", "C+"))
+  
+  expect_equal(sonority(c('c','f','g','A','b','e', 'G','b','d'), groupby=list(c(1,1,1,2,2,2,3,3,3)), inversions = FALSE, inPlace = FALSE),
+               c("Csus4", "Asus2", "G"))
+  
+  
+  expect_equal(sonority(c('D#','FF#','a','c#')), 'D#dim7/F#')
+  expect_equal(sonority(c('c','e','g#','b-', 'd')), 'C+9')
+  expect_equal(sonority(c('c','e','g', 'd','f#','b-')), 'C#11')
+  expect_equal(sonority(c('c','e-','g','b-','d','a-'), inversions = FALSE), 'Cminb13')
+  expect_equal(sonority(c('c','e-','g','b-','d','a-')), 'Abmaj7#11/C')
+  expect_equal(sonority(c('c','g','b-')), 'C57')
+
+  
+})
+

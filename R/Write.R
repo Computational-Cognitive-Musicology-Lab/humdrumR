@@ -23,6 +23,11 @@
 #' (The `affix` is affixed *before* the extension.)
 #' Finally, the `extension` argument can be used to specify a different file extension.
 #' 
+#' If any files in your data set contain multiple pieces, you can either write these
+#' pieces into the same files (`seperateFiles = FALSE`), as they were originally, or write each piece into its 
+#' own new file (`separateFiles = TRUE`); if writing pieces into separate files,
+#' each piece's file name is appended with `_pieceN`, where `N` is the number of the piece within the file.
+#' 
 #' The `directory` argument indicates a file path where to write the files.
 #' If the `directory` doesn't exist, it is created.
 #' If `directory` is `NULL`, files are written to their original input directory (or directories).
@@ -57,7 +62,13 @@
 #' Must be a single `character` string.
 #'
 #' Affix is appended at end of filename, but before the extension.
+#'
+#' @param extension ***What extension to use for new files.***
 #' 
+#' Defaults to `NULL`, which means the file extension of the original files is used.
+#'
+#' Must be `NULL`, or a single, non-empty `character` string.
+#'  
 #' @param directory ***A directory to write the files into.***
 #' 
 #' Defaults to `NULL`.
@@ -97,6 +108,7 @@
 #' @export
 writeHumdrum <- function(humdrumR, 
                          prefix = "humdrumR_", renamer = force, affix = "", extension = NULL, 
+                         separatePieces = FALSE,
                          directory = NULL, 
                          overwrite = FALSE, verbose = FALSE,
                          EMD = paste0("Edited in humdrumR ", packageVersion('humdrumR'), ' on ', Sys.Date())
@@ -107,7 +119,8 @@ writeHumdrum <- function(humdrumR,
 
     checks(affix,  xcharacter & xlen1)
     checks(prefix, xcharacter & xlen1)
-    checks(EMD,    xcharacter & xlen1)
+    checks(extension, xnull | (xcharacter & xlen1 & xcharnotempty))
+    checks(EMD,    xnull | (xcharacter & xlen1 & xcharnotempty))
 
     checks(directory, xnull | (xcharacter & xlen1))
     checks(extension, xnull | (xcharacter & xlen1))
@@ -119,10 +132,16 @@ writeHumdrum <- function(humdrumR,
     cat('Writing humdrum data...\n')
     cat('Determining validity of new filenames...')
     #
-    filenameTable <- getFields(humdrumR, c('File', 'Filepath'), dataTypes = 'GLIMDd')[ , .SD[1], by = File]
+    filenameTable <- getFields(humdrumR, c('File', 'Piece', 'Filepath'), dataTypes = 'GLIMDd')
+    filenameTable <- if (separatePieces) {
+        filenameTable[ , .SD[1], by = Piece] 
+    } else {
+        filenameTable[ , list(File = File[1], Filepath = Filepath[1], Piece = list(unique(Piece))), by = File]
+    }
+    
+    # parse filenames and paths
     filenameTable[ , Directory := if (is.null(directory)) dirname(Filepath) else directory]
     filenameTable[ , Filename  := basename(Filepath)]
-    
     ## File extensions
     re.ext <- '\\.[A-Za-z0-9]{1,4}$'
     filenameTable[ , Extension := if (is.null(extension)) stringi::stri_extract_last_regex(Filename, re.ext) else extension]
@@ -133,15 +152,17 @@ writeHumdrum <- function(humdrumR,
     ### POTENTIAL SPEED UPS HERE< IF PROCESSING IS ONLY APPLIED TO UNIQUE VALUES
     # Right now, one method of processFixer replies on withHumdrum, and thus can't be a reduced version of the table.
     filenameTable[ , Filename := renamer(Filename)]
+    filenameTable[ , PieceLabel := if (length(unique(Piece)) > 1L) paste0('_piece', num2order(Piece)) else '', by = Filename]
     
     filenameTable[ , NewFile := paste0(Directory, .Platform$file.sep, 
                                        prefix, 
                                        Filename,
+                                       PieceLabel,
                                        affix, 
                                        Extension)]
     
     
-    if (any(duplicated(filenameTable$NewFile))) {
+    if (any(duplicated(cbind(filenameTable$NewFile, filenameTable$Piece)))) {
         warning(call. = FALSE, noBreaks. = FALSE, immediate. = FALSE,
                 "In your call to writeHumdrum, your arguments are resulting in non-unique names ",
                 "for the output files. This is only possible through (mis)use of the rename argument. ",
@@ -200,18 +221,22 @@ writeHumdrum <- function(humdrumR,
                                                                     '^[1-9][0-9]*')), 
                        paste, collapse = '\n')
     
+    if (!separatePieces) filestrs <- lapply(filenameTable$Piece, \(i) paste(filestrs[i], collapse = '\n'))
+    
     if (!is.null(EMD)) {
         filestrs <- paste0(filestrs, '\n!!!EMD: ', EMD)
     }
     ### Write~
     cat(sep = '', 'Writing ', nrow(filenameTable), ' files...')
-    Map(\(str, path) {
+    Map(filestrs, 
+        filenameTable$NewFile,
+        f = \(str, path) {
         if (verbose) {
             cat('\n\t\t', path, sep = '')
             
         }
         writeLines(str, con = path)
-        }, filestrs, filenameTable$NewFile)
+        })
     
     if (verbose) cat('\n')
     

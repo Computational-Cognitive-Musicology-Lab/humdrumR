@@ -30,7 +30,9 @@ tandem interpretations in each Spine.
 At each record, all the previous tandems that occured in each spine
 are listed (comma separated), with the most recent appearing first.
 
-For example, consider this file:\preformatted{**kern **kern
+For example, consider this file:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern **kern
 *C:    *C:
 *Ibass *Isoprn
 2G     4g
@@ -40,9 +42,11 @@ For example, consider this file:\preformatted{**kern **kern
 2D     2f#
 2G     2g
 *-     *-
-}
+}\if{html}{\out{</div>}}
 
-The \code{Tandem} field for these two spines would look like this:\preformatted{""
+The \code{Tandem} field for these two spines would look like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{""
 "C:"                 "C:"
 "Ibass,C:"           "Isoprn,C:"
 "Ibass,C:"           "Isoprn,C:"
@@ -52,7 +56,7 @@ The \code{Tandem} field for these two spines would look like this:\preformatted{
 "G:,Ibass,C:"        "G:,Isoprn,C:"
 "G:,Ibass,C:"        "G:,Isoprn,C:"
 "G:,Ibass,C:"        "G:,Isoprn,C:"
-}
+}\if{html}{\out{</div>}}
 
 Notice that the \code{"C:"} isn't erased by the appearance of \code{"G:"}---this is a naive parser
 that doesn't "know" that \code{"C:"} and \code{"G:"} are related.

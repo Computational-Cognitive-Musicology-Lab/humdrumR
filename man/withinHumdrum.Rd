@@ -134,7 +134,7 @@ These expressions are passed to \code{with}/\code{within.humdrumR} as unnamed ar
 \code{with(humData, myExpressionHere)}.
 
 Within expressions are evaluated within the \code{humdrumR} object's humdrum table,
-which means the expression can refer fields in the humdrumR object by name (\code{Record}, \code{Token}, \code{File}, etc.)
+which means the expression can refer fields in the humdrumR object by name (\code{Record}, \code{Token}, \code{Piece}, etc.)
 just like any other variables.
 Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
 (and generally should be) vectorized.
@@ -164,12 +164,16 @@ In the first within expression, \code{.} is interpreted as the humdrumR object's
 current \link[=humActive]{active expression}.
 If multiple within expressions are given, beyond the first expression,  \code{.} refers to result of
 the \emph{previous} expression.
-For example, if \code{Token} is the \link[=humActive]{active expression}, then:\preformatted{with(humData, nchar(.), mean(.), .^2)
+For example, if \code{Token} is the \link[=humActive]{active expression}, then:
 
-}
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, nchar(.), mean(.), .^2)
 
-would return the same result as:\preformatted{with(humData, mean(nchar(Token))^2)
-}
+}\if{html}{\out{</div>}}
+
+would return the same result as:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, mean(nchar(Token))^2)
+}\if{html}{\out{</div>}}
 }
 
 \subsection{Side effects:}{
@@ -190,8 +194,10 @@ but the result (\code{newData}) is identical to \code{humData}.
 
 Side-effects can also be used in combination with other within expressions.
 Their result is ignored, and \emph{not} fed to the next expression as \code{.}.
-For example the command\preformatted{with(humData, nchar(Token), side = hist(.), mean(.))
-}
+For example the command
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, nchar(Token), side = hist(.), mean(.))
+}\if{html}{\out{</div>}}
 
 creates a histogram of \code{nchar(Token)} and also returns the mean of \code{nchar(Token)}.
 (Note that variables explicitly assigned in a \code{side} call \emph{are} visible in later calls,
@@ -224,29 +230,35 @@ always keeping them the same length so vectorization is never hindered.
 In a within-expression, any vector can be indexed with an \code{integer} argument named \code{lag} (case insensitive),
 causing it to be lagged by that integer.
 (A vector indexed with \code{lag = 0} returns the unchanged vector.)
-For example, the following two calls are the same:\preformatted{with(humData, Token[lag = 1])
+For example, the following two calls are the same:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, Token[lag = 1])
 with(humData, lag(Token, 1))
-}
+}\if{html}{\out{</div>}}
 
 If the \code{lag} index has \emph{multiple} values and the indexed object appears within a higher function call,
 each lag is inserted as a \emph{separate} argument to that call.
-Thus, \emph{these} two calls are also the same:\preformatted{with(humData, table(Token[lag = 1:2])
+Thus, \emph{these} two calls are also the same:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, table(Token[lag = 1:2])
 
 with(humData, table(lag(Token, 1), lag(Token, 2))
-}
+}\if{html}{\out{</div>}}
 
 \code{\link[=lag]{lag()}} is a function with a \code{groupby} argument, which \code{with}/\code{within.humdrumR}
-will automatically feed the fields \code{list(File, Spine, Path)}.
+will automatically feed the fields \code{list(Piece, Spine, Path)}.
 This is the default "melodic" behavior in most music.
 If you'd like to turn this off, you need to override it by adding your own
 \code{groupby} argument to the lagged index, like \code{Token[lag = 1, groupby = list(...)]}.
 
 Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
-For example, if you want to create character-string 5-grams of your data, you could call:\preformatted{with(humData, paste(Token[lag = 0:5], sep = '-'))
-}
+For example, if you want to create character-string 5-grams of your data, you could call:
 
-Note that, since \code{with}/\code{within.humdrumR} passes \code{groupby = list(File, Spine, Path)}
-to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each file.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, paste(Token[lag = 0:5], sep = '-'))
+}\if{html}{\out{</div>}}
+
+Note that, since \code{with}/\code{within.humdrumR} passes \code{groupby = list(Piece, Spine, Path)}
+to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each piece.
 }
 }
 
@@ -274,10 +286,12 @@ For example, \code{within(data, Semits <- semits(Token))} will put the result of
 In fact, if you assign the results of multiple within-expressions,
 each result that is the same length as the last result will be put into a new field.
 Thus, you can create multiple new fields in a single call:
-for example,\preformatted{within(humData, 
+for example,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, 
        Semits <- semits(Token),
        Recip <- recip(Token))
-}
+}\if{html}{\out{</div>}}
 
 creates \emph{two} new fields, \code{Semits} \emph{and} \code{Recip}.
 (As explained above, the second within-expression could also refer to the \code{Semits} variable
@@ -371,29 +385,35 @@ of equal length) to group the data by.
 Each unique combination of values across these vectors becomes one group.
 
 Most commonly, the \code{groupby} expression(s) are simply field(s) in the data:
-for instance,\preformatted{with(humdata,
+for instance,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humdata,
      table(Token),
-     by = File)
-}
+     by = Piece)
+}\if{html}{\out{</div>}}
 
 will apply the function \verb{[base][table]} to the \code{Token} field
-\emph{separately} for each file in the \code{humdrumR} data.
-However, we can also use more complex expressions like\preformatted{with(humdata,
+\emph{separately} for each piece in the \code{humdrumR} data.
+However, we can also use more complex expressions like
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humdata,
      table(Token), 
      by = Spine > 3 | Record \\\%\\\% 2 == 0)
-}
+}\if{html}{\out{</div>}}
 
 which will evaluate the do expression in two groups, one where either the spine number is
 three or less \emph{or} the record number is even, and another group where the opposite is true.
 
 If the \code{groupby} expression evaluates to a list of grouping vectors,
 the within expressions are evaluated across every combination of categories across all the vectors.
-Thus,\preformatted{with(humdata, 
-     table(Token),
-     by = list(File, Spine))
-}
+Thus,
 
-will apply \code{table} to \code{Token} across each spine \emph{in} each file.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humdata, 
+     table(Token),
+     by = list(Piece, Spine))
+}\if{html}{\out{</div>}}
+
+will apply \code{table} to \code{Token} across each spine \emph{in} each piece.
 }
 
 \subsection{Advanced partitioning:}{
@@ -402,13 +422,15 @@ If multiple \code{groupby} or \code{subset} expressions, or combinations of the 
 each is evaluated recursively, in order from left to right.
 If \code{subset} is specified after \code{groupby}, the \code{subset} expression is evaluated within each \code{groupby} group
 If \code{groupby} is specified after \code{subset}, the grouping \code{by} expression is evaluated only where \code{subset == TRUE}.
-Thus, if you specify\preformatted{within(humdata,
+Thus, if you specify
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humdata,
          sd(Semits),
-         by = File, 
+         by = Piece, 
          subset = Semits > mean(Semits))
 ```
 
-the standard deviation of the `semits` field will be calculated in each file,
+the standard deviation of the `semits` field will be calculated in each piece,
 but only where the `semits` field is greater than the mean `semits` value
 *within that file*. Contrast this with this call:
 
@@ -416,10 +438,10 @@ but only where the `semits` field is greater than the mean `semits` value
 within(humdata,
          sd(Semits)
          subset = Semits > mean(Semits), 
-         by = File) 
+         by = Piece) 
 ```
 
-wherein the standard deviation of `semits` is, again, calculated for each file,
+wherein the standard deviation of `semits` is, again, calculated for each piece,
 but this time wherever the `semits` field is greater than the mean value *across all the data*.
 
 
@@ -431,7 +453,7 @@ but this time wherever the `semits` field is greater than the mean value *across
 [tapply]: R:tapply
 [by]: R:by
 [table]: R:table
-}
+}\if{html}{\out{</div>}}
 }
 }
 
@@ -443,11 +465,11 @@ within arbitrary contextual windows.
 To do so, simply place a call to \code{context()} in an unnamed argument to \code{with}/\code{within.humdrumR()};
 you must provide \code{open} and \code{close} arguments.
 The \code{overlap}, \code{depth}, \code{rightward}, \code{duplicate_indices}, \code{min_length}, and \code{max_length} arguments can be used here,
-just as they are in a separate call to \code{context()}---the see the \code{context()} man page.
-Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} a \code{x} or \code{reference} argument:
-The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()}---e.g., if \code{open}
+just as they are in a separate call to \code{context()} --- see the \code{context()} man page.
+Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} call a \code{x} or \code{reference} argument:
+The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()} --- e.g., if \code{open}
 or \code{close} is a \code{character} string, they are matched as regular expressions against the \link[=humActive]{active field}.
-\code{list(File, Record, Spine)} is also automatically passed as the \code{groupby} argument to \code{context()}.
+\code{list(Piece, Spine, Path)} is also automatically passed as the \code{groupby} argument to \code{context()}.
 
 When using \code{context()} inside \code{with}/\code{within.humdrumR}, the \code{alignToOpen} argument will have no effect.
 If you want output to align with the right side of each window, use \code{alignLeft = FALSE} as an argument to
@@ -459,7 +481,7 @@ As with a \code{subset} expression, you can provide a \code{complement} expressi
 (Note that the \code{complement} argument to \code{context()} itself is ignored.)
 The \code{complement} expression will be evaluated on any data points that aren't captured within \emph{any} contextual windows.
 
-Any \code{by} or \code{subset} expressions placed before a \code{contest()} expression are evaluated first, in order from left to right.
+Any \code{by} or \code{subset} expressions placed before a \code{context()} expression are evaluated first, in order from left to right.
 This means you can \emph{first} run subset or \code{groupby}, then calculate context within the subset/partition.
 However, any \code{subset} or \code{groupby} expressions that are passed in an argument \emph{after} \code{context()} are ignored.
 }
@@ -471,18 +493,22 @@ As mentioned above, plots in within-expressions should (often) be called using t
 When plotting, \code{with}/\code{within.humdrumR} also allows you to specify plotting options inline,
 without having to make a separate call
 to \code{\link[=par]{par()}}. Any \code{\link[=par]{par()}} argument can be specified by providing a named list to the \code{graphics} keyword.
-For example, we can set the plot margins with the \code{mar} argument:\preformatted{within(data, 
+For example, we can set the plot margins with the \code{mar} argument:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(data, 
        side = plot(sort(table(Token))), 
        graphics = list(mar = c(4, 4, 4, 4)))
 
-}
+}\if{html}{\out{</div>}}
 
 The best part is \code{with}/\code{within.humdrumR} will reset \code{par} to it's previous state after its done.
 
-You can also use the syntactic sugar, \code{graphics(parargs = ...)}:\preformatted{within(data,
+You can also use the syntactic sugar, \code{graphics(parargs = ...)}:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(data,
        side = plot(sort(nchar(Token))),
        graphics(mar = c(4, 4, 4, 4)))
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Splatting}{
@@ -496,21 +522,19 @@ In \code{with}/\code{within.humdrumR} you can use some
 \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
 to do just this.
 We can index any field in our call with a \code{splat} argument, which must be a \code{Field \%in\% x}.
-For example,\preformatted{within(humdata, list(Token[splat = Spine \%in\% 1:2])) 
-}
+For example,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humdata, list(Token[splat = Spine \%in\% 1:2])) 
+}\if{html}{\out{</div>}}
 
 In this call, the \code{Token} field will be divided into two groups, one where \code{Spine == 1} and the other where
 \code{Spine == 2}; the first group (\code{Spine == 1}) will be used as the first argument to \code{list}, and the second group
 (\code{Spine == 2}) as the second argument.
-Thus, \code{within} translates the previous expression to this:\preformatted{within(humdata,
+Thus, \code{within} translates the previous expression to this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humdata,
        list(Token[Spine == 1], Token[Spine == 2]))
-}
-}
-
-\section{N grams}{
-
-
-XXXX
+}\if{html}{\out{</div>}}
 }
 
 \section{Advanced scripting}{
@@ -531,26 +555,32 @@ Basically, the right-hand side of any formula is interpreted as an
 expression to evaluate.
 If a formula is passed as a unnamed argument to \code{with}/\code{within}, the left-hand side
 of the formula (if any) is treated as the argument name.
-If you name a formula argument that has a left-hand side, the left-hand side is ignored.\preformatted{
+If you name a formula argument that has a left-hand side, the left-hand side is ignored.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
 with(humdrumR, table(Token), by = Spine)
 with(humdrumR, ~table(Token), by ~ Spine)
 
-}
+}\if{html}{\out{</div>}}
 
 This approach would allows us to, same \code{~table(Token)} or \code{by ~ Spine} as variables,
-allowing us to do things like:\preformatted{
+allowing us to do things like:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
 tabler <- ~table(.)
 byspine <- by ~ Spine
 
 with(humData, tabler, byspine)
 
-}
+}\if{html}{\out{</div>}}
 
-We can even make lists and loop through them:\preformatted{bys <- list(~ Spine, ~ File, ~ COM)
+We can even make lists and loop through them:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{bys <- list(~ Spine, ~ Piece, ~ COM)
 
 for (b in bys) with(humData, table(.), by = b)
 
-}
+}\if{html}{\out{</div>}}
 \subsection{Variables}{
 
 Another useful scripting option is to include free variables in your
@@ -558,12 +588,14 @@ within-expressions, which can then be fed in using the \code{variables} argument
 \code{variables} must be a named list.
 Variables in the within-expression which match a name of from the \code{variables}
 list have that value interpolated.
-This allows us, for example, to run commands like:\preformatted{nums <- c(2, 3, 4, 5)
+This allows us, for example, to run commands like:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{nums <- c(2, 3, 4, 5)
 expression <- ~.^N
 
 for (n in nums) with(humData, expression, variables = list(N = n))
 
-}
+}\if{html}{\out{</div>}}
 
 Each time \code{with} is called, the \code{N} in \code{.^N} is replaced by the current value of \code{n}.
 }

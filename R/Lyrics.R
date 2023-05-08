@@ -28,105 +28,105 @@
 #' 
 #' @export
 #' 
-#' @example Spine of syllabic form transformed into word form with nullTokens = TRUE
-#'  # lyrics
-#'  #   Now
-#'  #   let
-#'  #    me
-#'  #  wel-
-#'  # -come
-#'  #    e-
-#'  # -very-
-#'  #   -bo-
-#'  #    -dy
-#'  #     to
-#'  #    the
-#'  #   wild
-#'  #   wild
-#'  #  west.
+# @examples Spine of syllabic form transformed into word form with nullTokens = TRUE
+#  # lyrics
+#  #   Now
+#  #   let
+#  #    me
+#  #  wel-
+#  # -come
+#  #    e-
+#  # -very-
+#  #   -bo-
+#  #    -dy
+#  #     to
+#  #    the
+#  #   wild
+#  #   wild
+#  #  west.
+# 
+# wort(silbe)
+# 
+#  # lyrics
+#  #       Now
+#  #       let
+#  #        me
+#  #   welcome
+#  #         .
+#  # everybody
+#  #         .
+#  #         .
+#  #         .
+#  #        to
+#  #       the
+#  #      wild
+#  #      wild
+#  #     west.
+#  #Spine of syllabic form transformed into word form with nullTokens = FALSE
+#  Same input as above.
+#  
+#  wort(silbe, nullTokens = FALSE)
+#  
+#  # lyrics
+#  #       Now
+#  #       let
+#  #        me
+#  #   welcome 
+#  # everybody 
+#  #        to
+#  #       the
+#  #      wild
+#  #      wild
+#  #     west. 
+#  @examples Spine of syllabic form transformed into word with nullTokens = FALSE and keepSilbe = TRUE
+#  
+#  # lyrics
+#  #   Now
+#  #   let
+#  #    me
+#  #  wel-
+#  # -come
+#  #    e-
+#  # -very-
+#  #   -bo-
+#  #    -dy
+#  #     to
+#  #    the
+#  #   wild
+#  #   wild
+#  #  west.
+#  
+#  wort(silbe, nullTokens = FALSE, keepSilbe = TRUE)
+#  
+# # [[1]]
+# # [1] "Now"       "let"       "me"        "welcome"   "everybody" "to"        "the"       "wild"     
+# # [9] "wild"      "west."    
+# 
+# # [[2]]
+# # [1] 15 21 25 27
 #' 
-#' wort(silbe)
-#' 
-#'  # lyrics
-#'  #       Now
-#'  #       let
-#'  #        me
-#'  #   welcome
-#'  #         .
-#'  # everybody
-#'  #         .
-#'  #         .
-#'  #         .
-#'  #        to
-#'  #       the
-#'  #      wild
-#'  #      wild
-#'  #     west.
-#'  @example Spine of syllabic form transformed into word form with nullTokens = FALSE
-#'  Same input as above.
-#'  
-#'  wort(silbe, nullTokens = FALSE)
-#'  
-#'  # lyrics
-#'  #       Now
-#'  #       let
-#'  #        me
-#'  #   welcome 
-#'  # everybody 
-#'  #        to
-#'  #       the
-#'  #      wild
-#'  #      wild
-#'  #     west. 
-#'  @example Spine of syllabic form transformed into word with nullTokens = FALSE and keepSilbe = TRUE
-#'  
-#'  # lyrics
-#'  #   Now
-#'  #   let
-#'  #    me
-#'  #  wel-
-#'  # -come
-#'  #    e-
-#'  # -very-
-#'  #   -bo-
-#'  #    -dy
-#'  #     to
-#'  #    the
-#'  #   wild
-#'  #   wild
-#'  #  west.
-#'  
-#'  wort(silbe, nullTokens = FALSE, keepSilbe = TRUE)
-#'  
-#' # [[1]]
-#' # [1] "Now"       "let"       "me"        "welcome"   "everybody" "to"        "the"       "wild"     
-#' # [9] "wild"      "west."    
-#' 
-#' # [[2]]
-#' # [1] 15 21 25 27
-#' 
-#' @example Spine of syllabic form transformed into word with nullTokens = FALSE and indices = TRUE
-#' 
-#' #  lyrics
-#' #     op-
-#' #      _
-#' #   -por-
-#' #    -tu-
-#' #    -ni-
-#' #     -ty
-#' #  knocks
-#' #    once
-#' #       _
-#' #      in
-#' #       a
-#' #   life-
-#' #   -time
-#'    
-#' wort(silbe, nullTokens = FALSE, indices = TRUE) 
-#' 
-#' # [1] "opportunity[1]" "_"              "opportunity[2]" "opportunity[3]" "opportunity[4]"
-#' # [6] "opportunity[5]" "knocks"         "once"           "_"              "in"            
-#' # [11] "a"              "lifetime[1]"    "lifetime[2]" 
+# @example Spine of syllabic form transformed into word with nullTokens = FALSE and indices = TRUE
+# 
+# #  lyrics
+# #     op-
+# #      _
+# #   -por-
+# #    -tu-
+# #    -ni-
+# #     -ty
+# #  knocks
+# #    once
+# #       _
+# #      in
+# #       a
+# #   life-
+# #   -time
+#    
+# wort(silbe, nullTokens = FALSE, indices = TRUE) 
+# 
+# # [1] "opportunity[1]" "_"              "opportunity[2]" "opportunity[3]" "opportunity[4]"
+# # [6] "opportunity[5]" "knocks"         "once"           "_"              "in"            
+# # [11] "a"              "lifetime[1]"    "lifetime[2]" 
 #' 
 #' 
 #' 
@@ -388,30 +388,30 @@ wort <- function(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE){
 #' 
 #' @export
 #' 
-#' @example Spine with syllable labelling errors, with resulting error message
-#' # lyrics
-#' #  ya'll
-#' #    act
-#' #   like
-#' # you've
-#' #    ne-
-#' #    ver
-#' #   seen
-#' #      a
-#' #  white
-#' #   per-
-#' #    son
-#' #    be-
-#' #  fore
-#' 
-#' silbeFormat(cVector)
-#' 
-#' error: ver should be -ver. index 
-#' 6 
-#' error: son should be -son. index 
-#' 11 
-#' error: fore should be -fore. index 
-#' 13
+# @example Spine with syllable labelling errors, with resulting error message
+# # lyrics
+# #  ya'll
+# #    act
+# #   like
+# # you've
+# #    ne-
+# #    ver
+# #   seen
+# #      a
+# #  white
+# #   per-
+# #    son
+# #    be-
+# #  fore
+# 
+# silbeFormat(cVector)
+# 
+# error: ver should be -ver. index 
+# 6 
+# error: son should be -son. index 
+# 11 
+# error: fore should be -fore. index 
+# 13
 #' 
 silbeFormat <- function(cVector){
   index <- 1:length(cVector)

@@ -236,10 +236,10 @@ getColumn <- function(humtab, pad = 'corpus') {
     
     switch(pad,
            corpus = humtab[  , frank(list(Spine, Path), ties.method = 'dense', na.last = 'keep')],
-           piece  = humtab[  , frank(x = list(Spine, Path), ties.method = 'dense', na.last = 'keep'), by = File]$V1,
+           piece  = humtab[  , frank(x = list(Spine, Path), ties.method = 'dense', na.last = 'keep'), by = Piece]$V1,
            dont   = {
                humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
-               column <- humtab[  , list(Column = cumsum(Stop == 1L), `_rowKey_` = `_rowKey_`), by = .(File, Record)]
+               column <- humtab[  , list(Column = cumsum(Stop == 1L), `_rowKey_` = `_rowKey_`), by = .(Piece, Record)]
                setorder(column, `_rowKey_`)
                
                column$Column
@@ -406,12 +406,12 @@ is.humdrumR <- function(x){
 #' In contrast, the plural `as.matrices` and `as.data.frames` call their respective singular versions 
 #' separately on each individual file in a [humdrumR corpus][humdrumRclass] and return them all in a list.
 #' The [row names][base::rownames()]  of the `matrix`/`data.frame`(s) consist of two integer values, 
-#' separated by a `.`, representing: `File.Record`.
+#' separated by a `.`, representing: `Piece.Record`.
 #'
 #' The `as.lines` function converts a [humdrumR object][humdrumRclass] into a `character` vector of text lines,
 #' with columns separated by the `sep` argument (defaults to `"\t"`), just as you'd see in a humdrum-syntax file.
 #' Each line is a single row from a `as.matrix.humdrumR`, with padded values at the right side removed.
-#' The matrix's `File.Record` [row names][base::rownames()] are preserved as the lines' [names][base::names()].
+#' The matrix's `Piece.Record` [row names][base::rownames()] are preserved as the lines' [names][base::names()].
 #'  
 #' Note that multiple-stop token (where `Stop > 1L`) cannot by incorporated into the two 
 #' dimensional `matrix`/`data.frame`. Thus, `as.matrix(humdrumR)` calls 
@@ -566,7 +566,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     humtab <- getHumtab(x, dataTypes)
     
     
-    i <- data.table::frank(humtab[ , list(File, Record)], ties.method = 'dense')
+    i <- data.table::frank(humtab[ , list(Piece, Record)], ties.method = 'dense')
     j <- getColumn(humtab, padPaths)
     j[is.na(j)] <- 1L
     
@@ -578,7 +578,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     output <- matrix(padder, nrow = max(i), ncol = max(j))
     
     output[cbind(i, j)] <- field
-    rownames(output) <- unique(humtab[,c('File', 'Record')])[order(File,Record), paste0(File, '.', Record)]
+    rownames(output) <- unique(humtab[,c('Piece', 'Record')])[order(Piece, Record), paste0(Piece, '.', Record)]
     
     output
     
@@ -624,10 +624,10 @@ as.matrices <- function(humdrumR, dataTypes = 'LIMDd', padPaths = 'piece', padde
     mat <- as.matrix.humdrumR(humdrumR, dataTypes = dataTypes, padPaths = padPaths, padder = padder)
     dontpad <- padPaths != 'corpus'
     
-    file <- as.integer(gsub('\\..*', '', rownames(mat)))
-    lapply(unique(file),
-           \(f) {
-               submat <- mat[file == f, , drop = FALSE] 
+    piece <- as.integer(gsub('\\..*', '', rownames(mat)))
+    lapply(unique(piece),
+           \(p) {
+               submat <- mat[piece == p, , drop = FALSE] 
                if (dontpad) {
                    submat <- submat[ , colSums(!is.na(submat)) > 0L, drop = FALSE]
                }
@@ -717,7 +717,7 @@ nrecord <- function(humdrumR, dataTypes = 'GLIMDd') {
           dataTypes <- checkTypes(dataTypes, 'dataTypes', 'nrecord')
           humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
 
-          nrow(unique(humtab[ , list(File, Record)]))
+          nrow(unique(humtab[ , list(Piece, Record)]))
           
 }
 
@@ -739,7 +739,7 @@ ntoken <- function(humdrumR, dataTypes = 'GLIMDd') {
 
 #' @name humSize
 #' @export
-npiece <- function(humdrumR) {
+npieces <- function(humdrumR) {
           checks(humdrumR, xhumdrumR)
           
           length(unique(getHumtab(humdrumR)$Piece))
@@ -747,7 +747,7 @@ npiece <- function(humdrumR) {
 
 #' @name humSize
 #' @export
-nfile <- function(humdrumR) {
+nfiles <- function(humdrumR) {
     checks(humdrumR, xhumdrumR)
     
     length(unique(getHumtab(humdrumR)$File))
@@ -755,7 +755,7 @@ nfile <- function(humdrumR) {
 
 #' @name humSize
 #' @export
-setMethod('length', signature = c(x = 'humdrumR'), \(x) nfile(x))
+setMethod('length', signature = c(x = 'humdrumR'), \(x) npieces(x))
 
 
 #' @name humSize
@@ -784,7 +784,7 @@ is.empty <- function(humdrumR){
 #' @export
 anyMultiPieceFiles <- function(humdrumR) {
     checks(humdrumR, xhumdrumR)
-    nfile(humdrumR) != npiece(humdrumR)
+    nfiles(humdrumR) != npiece(humdrumR)
 }
 
 #' @rdname humSize
@@ -1119,7 +1119,7 @@ collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
     
     
     humtab <- getHumtab(humdrumR, 'D')
-    humtab <- collapseHumtab(humtab, by = c('File', 'Spine', 'Path', 'Record'),
+    humtab <- collapseHumtab(humtab, by = c('Piece', 'Spine', 'Path', 'Record'),
                              target = humtab[Stop > 1L & !is.na(Stop)],
                              collapseField = collapseField,
                              collapseAtomic = collapseAtomic, sep = sep)
@@ -1140,7 +1140,7 @@ collapsePaths <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
     checks(sep, xcharacter & xlen1)
     
     humtab <- getHumtab(humdrumR)
-    humtab <- collapseHumtab(humtab, by = c('File', 'Spine', 'Record'),
+    humtab <- collapseHumtab(humtab, by = c('Piece', 'Spine', 'Record'),
                              target = humtab[Path > 0L & !is.na(Path)],
                              collapseField = collapseField,
                              collapseAtomic = collapseAtomic, sep = sep)
@@ -1159,7 +1159,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
     checks(sep, xcharacter & xlen1)
     
     collapseHumdrum(humdrumR, dataTypes = 'GLIMDd', 
-                    by = c('File', 'Record'),
+                    by = c('Piece', 'Record'),
                     collapseField = collapseField,
                     collapseAtomic = collapseAtomic, sep = sep)
 
@@ -1233,18 +1233,18 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' consistent with the default behavior.
 #' 
 #' 
-#' @section File-Specific Folding:
+#' @section Piece-Specific Folding:
 #' 
-#' By default, the same "fold" is carried out in each file of the input corpus 
+#' By default, the same "fold" is carried out in each piece in the input corpus 
 #' (`humdrumR` argument).
-#' If you need to specify different folds in different files, you have to specify the `File`
+#' If you need to specify different folds in different pieces, you have to specify the `Piece`
 #' argument (`numeric`, whole number).
-#' For *every* file in the corpus you want to apply folds to, you must specify all the `fold`
-#' and `onto` arguments in parallel vectors with the `File` argument (even if this is reduendant 
+#' For *every* piece in the corpus you want to apply folds to, you must specify all the `fold`
+#' and `onto` arguments in parallel vectors with the `Piece` argument (even if this is reduendant 
 #' for some files).
 #' For example, if we specify the combinations,
 #' 
-#' |  `fold`  |  `onto`  | `File` |
+#' |  `fold`  |  `onto`  | `Piece` |
 #' |:--------:|:--------:|:------:|
 #' | `1`      | `2`      | `1`    |
 #' | `3`      | `4`      | `1`    |
@@ -1253,10 +1253,10 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' 
 #' then
 #' 
-#' + In `File` one: 
+#' + In `Piece` one: 
 #'   + the first spine is mapped to the second spine
 #'   + the third spine is mapped to the fourth spine
-#' + In `File` two: 
+#' + In `Piece` two: 
 #'   + the first spine is mapped to the second spine
 #'   + the fourth spine is mapped to the third spine
 #' 
@@ -1287,7 +1287,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' 
 #' Must be a single `character` string. Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"NData"`.
 #'
-#' @param File ***Which files in the corpus shoul be folded (see "File-Specific Folding" section, below).***
+#' @param Piece ***Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).***
 #' 
 #' Defaults to `NULL`.
 #' 
@@ -1320,7 +1320,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' @family {Folding functions}
 #' @family {Humdrum data reshaping functions}
 #' @export
-foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL, 
+foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL, 
                         fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE,
                         newFieldNames = NULL) {
     # argument checks
@@ -1336,10 +1336,10 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     humdrumR <- setActiveFields(humdrumR, fromField)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
-    moves <- foldMoves(humtab, fold, onto, what, File, newFieldNames)
+    moves <- foldMoves(humtab, fold, onto, what, Piece, newFieldNames)
 
     # 
-    fromHits <- humtab[ , list(File, get(what)) %ins% moves[, c('File', 'From'), with = FALSE]]
+    fromHits <- humtab[ , list(Piece, get(what)) %ins% moves[, c('Piece', 'From'), with = FALSE]]
     fromTable <- humtab[fromHits == TRUE, c(fromField, fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
     
     if (all(is.na(fromTable[[fromField]]))) {
@@ -1350,7 +1350,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     
     humtab[[fromField]][fromHits & humtab$Type == 'D'] <- NA
     #
-    whichMatch <- fromTable[ ,  matches(list(File, get(what)), moves[ , c('File', 'From'), with = FALSE], multi = TRUE)]
+    whichMatch <- fromTable[ ,  matches(list(Piece, get(what)), moves[ , c('Piece', 'From'), with = FALSE], multi = TRUE)]
     
     #
     fromTable <- do.call('rbind', lapply(1:ncol(whichMatch),
@@ -1407,7 +1407,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
  
     
     humtab <- update_humdrumR(humtab, field = c(newfields, fields(humdrumR, 'D')$Name))
-    humtab <- removeNull(humtab, by = c('File', what), nullTypes = 'LIMd')
+    humtab <- removeNull(humtab, by = c('Piece', what), nullTypes = 'LIMd')
     humtab <- update_Null(humtab, field = newfields)
     
     putHumtab(humdrumR, overwriteEmpty = c()) <- orderHumtab(humtab)
@@ -1423,31 +1423,31 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', File = NULL,
     
 }
 
-foldMoves <- function(humtab, fold, onto, what, File = NULL, newFieldNames = NULL) {
+foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NULL) {
     checks(fold, xwholenum)
     
     
-    if (!is.null(File)) {
-        if (length(unique(lengths(list(fold, onto, File)))) > 1){
+    if (!is.null(Piece)) {
+        if (length(unique(lengths(list(fold, onto, Piece)))) > 1){
             .stop("In your call to foldHumdrum, ",
-                  "if the 'File' argument is not NULL,",
-                  "the 'File', 'fold', and 'onto' arguments must all be the same length.")
+                  "if the 'Piece' argument is not NULL,",
+                  "the 'Piece', 'fold', and 'onto' arguments must all be the same length.")
         }
     } else {
-        File <- rep(unique(humtab$File), each = max(length(fold), length(onto)))
+        Piece <- rep(unique(humtab$Piece), each = max(length(fold), length(onto)))
         
-        match_size(File = File, fold = fold, onto = onto, toEnv = TRUE)
+        match_size(Piece = Piece, fold = fold, onto = onto, toEnv = TRUE)
     }    
     
-    moves <- unique(data.table(File = File, From = fold, To = onto))
+    moves <- unique(data.table(Piece = Piece, From = fold, To = onto))
     moves[] <- lapply(moves, as.integer)
     
     # Check for errors
-    moves[ ,  if (any(To %in% From)) .stop("In your call to foldHumdrum, the 'fold' and 'onto' {what}s can't overlap within any 'File'.") , by = File]
+    moves[ ,  if (any(To %in% From)) .stop("In your call to foldHumdrum, the 'fold' and 'onto' {what}s can't overlap within any 'Piece'.") , by = Piece]
     
     
     # name fields
-    moves[ , NewField := seq_along(From), by = .(File, To)]
+    moves[ , NewField := seq_along(From), by = .(Piece, To)]
     NnewFields <- length(unique(moves$NewField))
 
     
@@ -1544,7 +1544,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
             }
             moves
         }
-    }, by = File]
+    }, by = Piece]
     
     if (nrow(moves) == 0L) {
         .warn("foldExclusive found no matching files with both '{fold}' and '{onto}'",
@@ -1553,7 +1553,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
         return(humdrumR)
     }
     
-    moves <- moves[, list(From, N = seq_along(From)), by = .(File, To, Exclusive)]
+    moves <- moves[, list(From, N = seq_along(From)), by = .(Piece, To, Exclusive)]
     moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
     
     newexclusives <- unique(moves$Group)
@@ -1562,7 +1562,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
     humdrumR <- foldHumdrum(humdrumR, 
                             fold = moves$From, 
                             onto = moves$To, 
-                            File = moves$File, what = 'Spine',
+                            Piece = moves$Piece, what = 'Spine',
                             fromField = fromField,
                             newFieldNames = newFieldNames)
     
@@ -1640,14 +1640,14 @@ unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
     #
     humtab <- getHumtab(humdrumR, 'D')
     
-    multistopRecords <- humtab[ , list(Record = unique(Record)[rowSums(table(Record,Stop)) > 1]), by = File]
-    multiHumtab <- humtab[multistopRecords, on = c('Record', 'File')]
+    multistopRecords <- humtab[ , list(Record = unique(Record)[rowSums(table(Record,Stop)) > 1]), by = Piece]
+    multiHumtab <- humtab[multistopRecords, on = c('Record', 'Piece')]
     fromFields <- fromFields[multiHumtab[, sapply(fromFields, \(field) any(is.na(get(field))))]]
     for (field in fromFields) {
         
-        multiHumtab[, eval(field) := rep_len(get(field)[!is.na(get(field))], length(Token)), by = list(File, Record)]   
+        multiHumtab[, eval(field) := rep_len(get(field)[!is.na(get(field))], length(Token)), by = list(Piece, Record)]   
     }
-    humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'File')]))
+    humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'Piece')]))
     humtab <- update_Null(humtab, field = fromFields)
     putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
     humdrumR
@@ -1986,7 +1986,7 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #'
 #' Only used if `forceAtomic == TRUE`, wherein lists of vectors are pasted together.
 #'
-#' @param nullChar ***
+#' @param nullChar ***Should null tokens be returned as characters or `NA`?***
 #' 
 #' Defaults to `FALSE`.	
 #' 
@@ -2398,15 +2398,19 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 
 setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
-                    len  <- length(object)
-                    trim <- if (len == 1L) 800L else 40L
+                    npieces  <- npieces(object)
+                    nfiles <- nfiles(object)
+                    trim <- if (npieces == 1L) 800L else 40L
                     print_humtab(object, firstAndLast = TRUE, max.records.file = trim)
                     
-                    if (len > 1L) {
+                    if (npieces > 1L) {
                               cat('\n')
                               cat('\thumdrumR corpus of', 
-                                  ifelse(len <= 100L, num2word(len), num2str(len)), 
-                                  'files') 
+                                  ifelse(npieces <= 100L, num2word(npieces), num2str(npieces)), 
+                                  'pieces',
+                                  if (nfiles != npieces) c('(in', num2word(nfiles), plural(nfiles, 'files)', 'file)')))
+                              
+                              
                               if (anySubcorpora(object)) {
                                   subnames <- namesSubcorpora(object)
                                   cat(' (', num2word(length(subnames)), 
@@ -2456,6 +2460,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
     
     field <- evalActive(humdrumR, 'GLIMDd', sep = ', ', nullChar = TRUE)
     
+    if (is.character(field) && any(field == "")) field[field == ""]  <- "''"
     if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
     if (is.factor(field)) field <- as.character(field)
     
@@ -2500,7 +2505,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
   
   Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
-  File   <- gsub('\\..*$', '', rownames(tokmat))
+  Piece   <- gsub('\\..*$', '', rownames(tokmat))
   NRecord <- gsub('^[0-9]*\\.', '', rownames(tokmat))
   
   #
@@ -2509,8 +2514,8 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   
   
   ## censor lines beyond max.records.file
-  filei <- tapply_inplace(File, File, seq_along)
-  i <- ifelse(length(unique(File)) == 1L | File != max(File), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
+  filei <- tapply_inplace(Piece, Piece, seq_along)
+  i <- ifelse(length(unique(Piece)) == 1L | Piece != max(Piece), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
   tokmat <- tokmat[i, , drop = FALSE]
   global <- global[i]
   
@@ -2523,12 +2528,12 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   lines[global] <- gsub('\t', ' ', lines[global])
   
   # records of first and last non-censored lines of each file
-  firsts <- tapply(seq_along(lines), File[i], min)
-  lasts <- tapply(seq_along(lines), File[i], max)
+  firsts <- tapply(seq_along(lines), Piece[i], min)
+  lasts <- tapply(seq_along(lines), Piece[i], max)
 
   
   #  censored ranges (if any)
-  ranges <- tapply(NRecord[!i], factor(File)[!i], 
+  ranges <- tapply(NRecord[!i], factor(Piece)[!i], 
                    \(nr) {
                        if (length(nr) > 1L) paste0(nr[1], '-', nr[length(nr)], ':') else paste0(nr[1], ':')
                    })
@@ -2552,7 +2557,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   lines[lasts[-length(lasts)]] <- paste0(lines[lasts[-length(lasts)]], ranges[-length(ranges)])
   
   
-  if (length(unique(File)) > 1L && tail(ranges, 1) != '') {
+  if (length(unique(Piece)) > 1L && tail(ranges, 1) != '') {
       lines[tail(firsts, 1)] <- paste0(gsub('^\n', '', tail(ranges, 1)), '\n', lines[tail(firsts, 1)])
   }
   
@@ -2569,7 +2574,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   if (Nmorefiles > 0L) {
    
    message <- c('',
-                paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more files...)")),
+                paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more pieces...)")),
                 '')
    lines <- append(lines, message, after = tail(firsts, 1) - 1L)
   }

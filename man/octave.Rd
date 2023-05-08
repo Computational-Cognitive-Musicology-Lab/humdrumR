@@ -2,7 +2,7 @@
 % Please edit documentation in R/Pitch.R
 \name{octave}
 \alias{octave}
-\title{Extract octave}
+\title{Extract octave.}
 \usage{
 octave(
   x,
@@ -68,7 +68,20 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-Extract octave
+Returns which octave each pitch falls in.
+By default, middle-C is the bottom of the zeroth-octave, but this can be changed with the \code{octave.offset}
+argument.
+Other octave labels (like \code{\link[=lilypond]{lilypond()}}-style marks) can be used if you set \code{octave.integer = FALSE}.
+}
+\details{
+\dontrun{
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+within(chorales, octave(Token))
+within(chorales, octave(Token, octave.offset = 4)) # traditional octaves
+
+within(chorales, octave(Token, octave.integer = FALSE))
+}
 }
 \seealso{
 Other {pitch functions}: 

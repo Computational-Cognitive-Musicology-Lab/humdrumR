@@ -418,13 +418,13 @@ setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
                 return(x)
             }
             
-            if (all(i < 0)) i <- (1L:length(x))[i] # flip negative indices (only if ALL negative)
+            if (!any(is.na(i)) && all(i < 0)) i <- (1L:length(x))[i] # flip negative indices (only if ALL negative)
             
             # Check for problems with i 
-            if (any(i < 0))  .stop("When indexing a {class(x)}, you can't mix negative and positive numbers in the index.")
-            if (any(i > length(x))) .stop(ifelse = !hasdim(x),
-                                          "The i-index is greater than the <length|nrow> of the {class(x)} object you are trying to index.",
-                                          "<Normal R vectors don't throw an error for this, but we do.|>")
+            if (any(i < 0, na.rm = TRUE))  .stop("When indexing a {class(x)}, you can't mix negative and positive numbers in the index.")
+            if (any(i > length(x), na.rm = TRUE)) .stop(ifelse = !hasdim(x),
+                                                        "The i-index is greater than the <length|nrow> of the {class(x)} object you are trying to index.",
+                                                        "<Normal R vectors don't throw an error for this, but we do.|>")
             
             ### translate by-row i to actual i of internal vectors
             i.internal <- if (hasdim(x) && ncol(x) > 1) humvectorI(i, x) else i
@@ -1085,7 +1085,15 @@ setMethod('as.data.frame', 'struct',
 
 .unlist <- function(x, recursive = TRUE, use.names = TRUE) {
   if (!is.list(x)) return(x)
-  if (is.struct(x[[1]])) do.call('c', unname(x)) else unlist(x, recursive, use.names)
+  if (!recursive && all(sapply(x, hasdim)) && length(unique(sapply(x, ncol))) == 1L) {
+    output <- do.call('rbind', x)
+    if (!use.names) dimnames(output) <- NULL
+    output
+    
+  } else {
+    if (is.struct(x[[1]])) do.call('c', unname(x)) else unlist(x, recursive, use.names)
+    
+  }
   
 }
 .data.frame <- function(...) {

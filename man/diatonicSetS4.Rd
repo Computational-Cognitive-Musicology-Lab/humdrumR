@@ -58,9 +58,7 @@ you'll see the \link[=diatonicRepresentations]{key interpretation} representatio
 \describe{
 \item{\code{Root}}{integers representing the root of the key on the line-of-fifths}
 
-\item{\code{Signature}}{integers representing the signature (number of accidentals) of the key.}
-
-\item{\code{Alteration}}{integers representing alterations of the diatonic set
+\item{\code{Signature}}{integers representing the signature (number of accidentals) of the key.
 
 A key is represented by two integers, \code{Root} and \code{Signature}.
 Root is simply the tonic note of the key on the circle of fifths.
@@ -81,6 +79,8 @@ The \href{https://en.wikipedia.org/wiki/Mode_(music)}{traditional diatonic modes
 }
 
 \emph{Note that you can make diatonicSets where the \code{Root} is outside the \code{Key}. This is unusual, and may result in sets you wouldn't predict.}}
+
+\item{\code{Alteration}}{integers representing alterations of the diatonic set (details below).}
 }}
 
 \section{Alterations}{

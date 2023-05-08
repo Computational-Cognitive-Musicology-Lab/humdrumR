@@ -77,6 +77,16 @@ Defaults to \code{FALSE}.
 A singleton \code{logical} value, or \code{NA}.
 
 See "Grace notes" section below.}
+
+\item{minutes}{(\code{logical}, T/F) Should the \code{dur} output include minutes?}
+
+\item{hours}{(\code{logical}, T/F) Should the \code{dur} output include hours?}
+
+\item{days}{(\code{logical}, T/F) Should the \code{dur} output include days?}
+
+\item{months}{(\code{logical}, T/F) Should the \code{dur} output include months?}
+
+\item{years}{(\code{logical}, T/F) Should the \code{dur} output include years?}
 }
 \description{
 These functions convert duration values to clock-time representations.

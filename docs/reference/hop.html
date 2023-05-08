@@ -5,7 +5,7 @@ hop() is used to create customizable sequences of indices for a vector;
 for example, if you want to index every third value from a vector.
 This is useful for, as when used with context(), defining the start points of &quot;rolling-window&quot;
 analyses along a vector; the &quot;hop size&quot; is the gap between the start of each window,
-defined by hop()'s by argument."><title>Generate regular sequence "along" input — hop • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Generate regular sequence " along input hop><meta property="og:description" content="hop() is similar to base R's seq(), but with some additional features, including
+defined by hop()'s by argument."><title>Generate regular sequence "along" input — hop • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Generate regular sequence " along input hop><meta property="og:description" content="hop() is similar to base R's seq(), but with some additional features, including
 special sugar when used with humdrumR's context() command.
 hop() is used to create customizable sequences of indices for a vector;
 for example, if you want to index every third value from a vector.
@@ -22,7 +22,7 @@ defined by hop()'s by argument."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,15 +93,15 @@ defined by <code>hop()</code>'s <code>by</code> argument.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">hop</span><span class="op">(</span>
-  <span class="va">along.with</span>,
-  by <span class="op">=</span> <span class="fl">1</span>,
-  from <span class="op">=</span> <span class="fl">1L</span>,
-  to <span class="op">=</span> <span class="cn">NULL</span>,
-  value <span class="op">=</span> <span class="cn">FALSE</span>,
-  logical <span class="op">=</span> <span class="cn">FALSE</span>,
-  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">hop</span><span class="op">(</span></span>
+<span>  <span class="va">along.with</span>,</span>
+<span>  by <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  from <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  to <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  logical <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -109,11 +109,15 @@ defined by <code>hop()</code>'s <code>by</code> argument.</p>
     <dl><dt>along.with</dt>
 <dd><p><em><strong>The vector you want indices to "hop" along.</strong></em></p>
 <p>Must be a vector (either atomic, or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>).</p></dd>
+
+
 <dt>by</dt>
 <dd><p><em><strong>The pattern of "hops" to to use.</strong></em></p>
 <p>Defaults to <code>1</code>: returning all indices <code>from:to</code>.</p>
 <p>Must be one or more whole numbers.</p>
 <p><code>sum(by)</code> must non-zero.</p></dd>
+
+
 <dt>from</dt>
 <dd><p><em><strong>Where to start the sequence.</strong></em></p>
 <p>Defaults to <code>1</code>: starting from the first index.</p>
@@ -122,6 +126,8 @@ a <code>logical</code> vector the same length as <code>along.with</code>.</p>
 <p>A <code>character</code>-string input is treated as a regular expression,
 which is matched against <code>along.with</code> using <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> to generate a <code>logical</code> vector.
 The index of the first <code>TRUE</code> is used.</p></dd>
+
+
 <dt>to</dt>
 <dd><p><em><strong>Where to end the sequence.</strong></em></p>
 <p>Defaults to <code>NULL</code>.</p>
@@ -131,19 +137,26 @@ a <code>logical</code> vector the same length as <code>along.with</code>.</p>
 A <code>character</code>-string input is treated as a regular expression,
 which is matched against <code>along.with</code> using <code><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl()</a></code> to generate a <code>logical</code> vector.
 The index of the last <code>TRUE</code> is used.</p></dd>
+
+
 <dt>value</dt>
 <dd><p><em><strong>Should indices be returned as logical <code>TRUE</code>s?</strong></em></p>
 <p>Defaults to <code>FALSE</code>.</p>
 <p>Must be a singleton <code>logical</code> value; an on/off switch.</p></dd>
+
+
 <dt>groupby</dt>
 <dd><p><em><strong>Optional vectors to group hop sequences within.</strong></em></p>
 <p>Defaults to empty <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>.</p>
 <p>Must be a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, which is either empty or contains vectors which are all the same length as <code>along.with</code>.
-In calls to <a href="withinHumdrum.html">with/within.humdrumR</a>, <code>groupby</code> is passed <code>list(File, Spine, Path)</code> by default.</p></dd>
+In calls to <a href="withinHumdrum.html">with/within.humdrumR</a>, <code>groupby</code> is passed <code>list(Piece, Spine, Path)</code> by default.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>By default, <code>hop()</code> returns an <code>integer</code> vector, appropriates indices for the <code>along.with</code> vector.
+    
+
+<p>By default, <code>hop()</code> returns an <code>integer</code> vector, appropriates indices for the <code>along.with</code> vector.
 However, there are two other options:</p><ul><li><p>If <code>logical = TRUE</code>, the indices are returned as a logical vector, the same length as <code>along.with</code>,
 with <code>TRUE</code> values indicating indices. Note that any ordering in the output (due to a mix of positive and negative
 values in the <code>by</code> argument) is lost.</p></li>
@@ -202,37 +215,37 @@ Each grouped segement of <code>along.with</code> is treated just like a separate
 for example, if <code>from = 2</code>, the hop sequence will start on the second index of <em>each</em> group.
 However, the output indices still represent the original <code>along.with</code> indices.</p>
 <p>Since <code>hop()</code> is usually used with <code><a href="context.html">context()</a></code> to create rolling windows within musical parts,
-we want typically want to apply <code>hop()</code> using using <code>groupby = list(File, Spine, Path)</code>.
+we want typically want to apply <code>hop()</code> using <code>groupby = list(Piece, Spine, Path)</code>.
 In fact, <code>humdrumR</code> <a href="withinHumdrum.html">with(in)</a> calls will <em>automatically</em> feed these
 three fields as <code>groupby</code> arguments to <code>hop()</code>.
 So any use of <code>hop()</code> in a call to <a href="withinHumdrum.html">with(in)</a>, will automatically generate the hop sequence
-in a "melodic" way, within each spine path of each file.</p>
+in a "melodic" way, within each spine path of each piece.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># use the built-in 'letters' vector</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># use the built-in 'letters' vector</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [26] 26</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1  4  7 10 13 16 19 22 25</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fl">2</span>, from <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fl">2</span>, from <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  4  6  8 10 12 14 16 18 20 22 24 26</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fl">2</span>, from <span class="op">=</span> <span class="st">'e'</span>, to <span class="op">=</span> <span class="st">'x'</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fl">2</span>, from <span class="op">=</span> <span class="st">'e'</span>, to <span class="op">=</span> <span class="st">'x'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  5  7  9 11 13 15 17 19 21 23</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, from <span class="op">=</span> <span class="st">'e'</span>, to <span class="op">=</span> <span class="st">'w'</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, from <span class="op">=</span> <span class="st">'e'</span>, to <span class="op">=</span> <span class="st">'w'</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "e" "d" "f" "e" "g" "f" "h" "g" "i" "h" "j" "i" "k" "j" "l" "k" "m" "l" "n"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [20] "m" "o" "n" "p" "o" "q" "p" "r" "q" "s" "r" "t" "s" "u" "t" "v" "u" "w"</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, from <span class="op">=</span> <span class="st">'z'</span>, to <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">hop</span><span class="op">(</span><span class="va">letters</span>, by <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, from <span class="op">=</span> <span class="st">'z'</span>, to <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3</span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -244,8 +257,7 @@ in a "melodic" way, within each spine path of each file.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer></div>

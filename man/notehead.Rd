@@ -54,10 +54,12 @@ In fact, the symbols always print a bit strangely (out of alignment) and can be 
 like "normal" \code{character} strings.
 
 The note-value symbols are most useful for making the labels of plots.
-For example, if you tabulate note values and use \code{\link[=barplot]{barplot()}}, you get nice bar labels:\preformatted{chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
+For example, if you tabulate note values and use \code{\link[=barplot]{barplot()}}, you get nice bar labels:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/.*krn')
 with(chorales, barplot(table(notehead(Token)), cex.names = 2))
 
-}
+}\if{html}{\out{</div>}}
 }
 \examples{
 

@@ -1117,13 +1117,12 @@ notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' `minutes = TRUE`, the output will be `:1:30` (one minute and thirty seconds).
 #' 
 #' 
-#
 #' 
-#' @par minutes (`logical`, T/F) Should the `dur` output include minutes?
-#' @par hours (`logical`, T/F) Should the `dur` output include hours?
-#' @par days (`logical`, T/F) Should the `dur` output include days?
-#' @par months (`logical`, T/F) Should the `dur` output include months?
-#' @par years (`logical`, T/F) Should the `dur` output include years?
+#' @param minutes (`logical`, T/F) Should the `dur` output include minutes?
+#' @param hours (`logical`, T/F) Should the `dur` output include hours?
+#' @param days (`logical`, T/F) Should the `dur` output include days?
+#' @param months (`logical`, T/F) Should the `dur` output include months?
+#' @param years (`logical`, T/F) Should the `dur` output include years?
 #' 
 #' @examples
 #' 
@@ -1424,7 +1423,7 @@ untie <- function(x, open = '[', close = ']', ...,
 # The `choose` argument can be set to another function, if desired.
 # For example, you could use `localDuration(x, choose = max)` to find the *maximum* duration in each group.
 # If the `groupby` argument is empty (the default) the durations are returned unchanged, except that `NA` durations are set to `0`.
-# Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(File, Record)` is *automatically*
+# Luckily, if `localDuration()` is used inside a [with(in).humdrumR][withinHumdrum] expression, the `groupby = list(Piece, Record)` is *automatically*
 # passed (this can be overridden by explicitely setting the argument).
 # This means that `with(humData, localDuration(Token))` will automatically calculate the minimum duration of each record.
 # 
@@ -1638,7 +1637,11 @@ pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) 
   
   .SD[ , Time := Time + start]
   
+  # make empty events fill from PREVIOUS event
+  .SD$Time[.SD$Numerator == 0L] <- ditto(.SD$Time, null = .SD$Numerator == 0L)[.SD$Numerator == 0L]
+  
   .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
+  
   
   if (!is.null(pickup)) {
     .SD$Pickup <- pickup

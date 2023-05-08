@@ -7,7 +7,7 @@
 \alias{findHumdrum}
 \title{Find and read humdrum files into R}
 \format{
-
+An object of class \code{data.table} (inherits from \code{data.frame}) with 24 rows and 5 columns.
 }
 \usage{
 knownInterpretations
@@ -211,6 +211,14 @@ a field called "Title".
 If there are more than one reference records with the same reference code,
 either explicitely numbered (e.g., "!!!COM1:", "!!!COM2:") all are read and rather than making two
 or more fields, a single field is created ("COM" in this) with the multiple values separated by ";".
+
+If your humdrum data includes files containing multiple pieces, special consideration is
+needed to determine (or guess) which reference records (or other global comments) "go with" which piece.
+Obviously, reference records at the beginning and end of each file are grouped with the first
+and last pieces respectively.
+However, reference records that are between pieces in any multi-piece file require some guess work.
+\code{readHumdrum()} will look at reference codes and attempt to group in-between reference records
+into pieces in a logical way by avoiding duplicated reference codes.
 }
 
 \section{Spines and Paths}{

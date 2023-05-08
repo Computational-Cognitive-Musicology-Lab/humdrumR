@@ -44,7 +44,7 @@ A numeric vector or a \code{character} string treated as a regular expression.}
 \description{
 R's built-in indexing operators, \verb{[]} (single brakcets) and \verb{[[]]} (double brackets) can
 be used as shortcuts for common calls to \code{\link[=subset.humdrumR]{subset.humdrumR()}},
-allowing you to filter out specific files, spines, or records.
+allowing you to filter out specific pieces, spines, or records.
 }
 \details{
 In \code{R}, the basic \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
@@ -82,29 +82,33 @@ be used in isolation or in combination.
 (If \code{j} is used in isolation, it must be named or placed after a comma, as in \code{humdata[[ , j ]]}.)
 \itemize{
 \item \code{i} is used to index data records (i.e., based on the humtable \code{Record} field).
-Thus, \code{humdata[[1:20]]} indexes the first twenty records \emph{from each file}
-in the corpus, and \code{humdata[[42]]} extracts the 42nd record \emph{from each file}.
+Thus, \code{humdata[[1:20]]} indexes the first twenty records \emph{from each piece}
+in the corpus, and \code{humdata[[42]]} extracts the 42nd record \emph{from each piece}.
 \item \code{j} is used to index spines  (i.e., based on the \code{Spine} field).
 Thus, \code{humdata[[ , 3:4]]} returns the third and fourth spines \emph{from each}
-file in the corpus.
+piece in the corpus.
 }
 
 When indexing \link[=humdrumRclass]{humdrumR corpora} with numbers,
 all \code{numeric} (double) inputs are converted to integers.
 
-Since \link[=subset.humdrumR]{subset} always renumbers files/spines that remain after filtering/indexing,
+Since \link[=subset.humdrumR]{subset} always renumbers pieces/spines that remain after filtering/indexing,
 \code{humdrumR} indexing is entirely \strong{ordinal}.
-For example,\preformatted{humsubset <- humdata[11:20]
+For example,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset <- humdata[11:20]
 humsubset[2]
-}
+}\if{html}{\out{</div>}}
 
 will return the 12th piece from the original \code{humdata} object.
 This is because the first call to \verb{[]} returns the 11th through 20th pieces, which
 are renumbered \code{1:10} and the second index call returns the \emph{new} 2nd index, which was the 12th
 originally.
-Similarly,\preformatted{humsubset2 <- humdata[[ , 2:4]]
+Similarly,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset2 <- humdata[[ , 2:4]]
 humsubset2[[ , 2]]
-}
+}\if{html}{\out{</div>}}
 
 will return the third spine from the original data.
 
@@ -114,7 +118,7 @@ while \code{humdata[[ , -3:-5]]} will remove the third, fourth, and fifth spines
 Positive and negative indices cannot be mixed in a single argument.
 
 In all cases, indices outside of range (or of value \code{0}) are ignored.
-E.g., if you have a corpus of twenty files and you call \code{corpus[21]}, there is no 21st piece, so \code{21} is "out of range".
+E.g., if you have a corpus of twenty pieces and you call \code{corpus[21]}, there is no 21st piece, so \code{21} is "out of range".
 If all your input indices are \code{0} and error will result.
 If all your input indices are out of range then
 an empty \code{humdrumR} object is returned.

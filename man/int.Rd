@@ -156,8 +156,8 @@ C5 is a perfect fourth above G4.
 
 \code{mint()} and \code{hint()} work by passing \link[=lag]{lagged} and/or \link[=ditto]{dittoed}
 versions of \code{x} as the \code{from} argument to \code{int()}.
-Basically, \code{mint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)}
-and \code{hint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)}.
+Basically, \code{mint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(Piece, Spine, Path)), ...)}
+and \code{hint()} is equivalent to \code{int(x, lag(x, lag = lag, groupby = list(Piece, Record), orderby = list(Piece, Record, Spine, Path)), ...)}.
 In either case, the parsed pitch vector is copied and lagged using \code{\link[=lag]{lag()}}, with pairs crossing outside \code{groupby} groups ignored.
 The \code{lag} argument controls how far apart in the melody intervals are calculated.
 For instance, a lag of \code{2} will calculate intervals between \emph{every other} note in the vector.
@@ -220,22 +220,26 @@ a \code{logical} \code{lag} argument "lags" each pitch back to the previous valu
 This means that more than one interval can be calculated from those same \code{TRUE} indices.
 
 The canonic use of this "logical lag" feature is to calculate harmonic intervals relative to the same voice, like the bass voice.
-For example, consider this file:\preformatted{ **kern        **kern        **kern        **kern
+For example, consider this file:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ **kern        **kern        **kern        **kern
 *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
       C             e             g            cc
       G             d             f             b
       C             c             e            cc             
      *-            *-            *-            *-
-}
+}\if{html}{\out{</div>}}
 
 If we \link[=readHumdrum]{read} this file and applied \code{hint()} to the \code{Token} field (with default arguments)
-the result would be:\preformatted{ **kern        **kern        **kern        **kern
+the result would be:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ **kern        **kern        **kern        **kern
 *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
     [C]          +M10           +m3           +P4
     [G]           +P5           +m3           +A4
     [C]           +P8           +M3           +m6             
      *-            *-            *-            *-
-}
+}\if{html}{\out{</div>}}
 
 In each record, we see the intervals as lagged (\code{lag == 1}) from left right:
 we see the intervals between the bass and the tenoir, the tenor and the alto, and the alto
@@ -244,13 +248,15 @@ What if we wanted to see all the intervals with the bass?
 Well, we can use a \code{logical} \code{lag} argument, where we would specify that \code{Spine == 1}:
 \verb{with(humData, hint(Token, lag = Spine == 1)}.
 This means that all \code{from} values are "lagged" back to the previous value where \code{Spine == 1}.
-The result would be:\preformatted{ **kern        **kern        **kern        **kern
+The result would be:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{ **kern        **kern        **kern        **kern
 *I"Bass      *I"Tenor       *I"Alto    *I"Soprano
     [C]          +M10          +P12          +P14
     [G]           +P5           +m7          +M10
     [C]           +P8          +M10          +P14             
      *-            *-            *-            *-
-}
+}\if{html}{\out{</div>}}
 
 Now we see all the intervals relative to the bass.
 
@@ -277,13 +283,13 @@ However, using a \code{groupby} argument directly is usually much faster, as the
 specially optimized for this functions.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path)}.
+For this, we want \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{groupby = list(File, Record)}.
+you could manually set \code{groupby = list(Piece, Record)}.
 }
 
 \examples{

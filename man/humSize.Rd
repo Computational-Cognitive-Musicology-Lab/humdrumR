@@ -4,8 +4,8 @@
 \alias{humSize}
 \alias{nrecord}
 \alias{ntoken}
-\alias{npiece}
-\alias{nfile}
+\alias{npieces}
+\alias{nfiles}
 \alias{is.empty}
 \alias{anyMultiPieceFiles}
 \alias{anyPaths}
@@ -20,9 +20,9 @@ nrecord(humdrumR, dataTypes = "GLIMDd")
 
 ntoken(humdrumR, dataTypes = "GLIMDd")
 
-npiece(humdrumR)
+npieces(humdrumR)
 
-nfile(humdrumR)
+nfiles(humdrumR)
 
 \S4method{length}{humdrumR}(x)
 

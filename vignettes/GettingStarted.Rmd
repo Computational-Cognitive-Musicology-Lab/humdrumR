@@ -409,7 +409,7 @@ Each expression is evaluated, and the result is put back in the same place in th
 You'll also notice that in the printout, there is a new Data field, called `Result1`---this is the default name `r hm` assigns to new fields that you create.
 
 If you want, you can pick your own names by using `<-` within the `within` call.
-For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](Pitch.html) vignette) to calculate the semitone value for each pitch in the chorales:
+For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](PitchAndTonality.html) vignette) to calculate the semitone value for each pitch in the chorales:
 
 ```{r}
 

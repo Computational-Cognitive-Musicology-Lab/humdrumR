@@ -131,6 +131,10 @@ To read the details of the parsing step, read \link[=pitchParsing]{this}.
 To read the details of the "deparsing" step, read \link[=pitchDeparsing]{this}.
 To read more details about each specific function, click on the links in the list above,
 or type \code{?func} in the R command line: for example, \code{?kern}.
+
+The "partial" pitch functions \code{\link[=octave]{octave()}}, \code{\link[=step]{step()}}, \code{\link[=accidental]{accidental()}}, and \code{\link[=quality]{quality()}} are so-called
+because they each only return one part/aspect of pitch information, and only that part.
+For example, \code{accidental()} only returns he accidentals (if any) of pitches.
 }
 \seealso{
 To better understand how these functions work, read about

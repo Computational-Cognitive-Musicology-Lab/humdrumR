@@ -170,8 +170,10 @@ devtools::install()
 ```
 
 
-> If you downloaded RStudio, you can use the "Open Project" option and select the file `humdrumR.Rproj` from the repository.
-> Once you've done this you can just click "Install and Restart" in the "Build" pane.
+> If you downloaded RStudio, you can make humdrum$_{\mathbb{R}}$ a RStudio "Project" on your local computer, which 
+> enables some useful features.
+> To do this in RStudio, click the "New Project > Existing Directory" option and select the directory where you downloaded the repository.
+> Once the project is created, you can install your local copy of humdrum$_{\mathbb{R}}$ by clicking "Install and Restart" in RStudio's "Build" pane.
 
 ---
 

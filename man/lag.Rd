@@ -67,27 +67,9 @@ moving each value to a lower index (if \code{n > 0}).
 Values near the end/beginning are either "wrapped" to the opposite end of the
 vector, or replaced/padded with the value of the \code{fill} argument.
 
-The vector a
-b
-c
-d
-e
-f
-g can be lagged by \code{n==1} is NA
-a
-b
-c
-d
-e
-f.
+The vector a, b, c, d, e, f, g can be lagged by \code{n==1} is NA, a, b, c, d, e, f.
 If we set \code{wrap == TRUE}, the \code{"g"} moved to the beginning of the output:
-is g
-a
-b
-c
-d
-e
-f.
+is g, a, b, c, d, e, f.
 }
 \section{Grouping}{
 
@@ -107,13 +89,13 @@ However, using a \code{groupby} argument directly is usually much faster, as the
 specially optimized for this functions.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path)}.
+For this, we want \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{groupby = list(File, Record)}.
+you could manually set \code{groupby = list(Piece, Record)}.
 }
 
 \seealso{

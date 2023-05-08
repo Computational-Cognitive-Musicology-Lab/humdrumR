@@ -124,7 +124,7 @@ test_that('context() man examples work', {
    nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
    
    expect_equal(humdrumR::context(nesting2, open = '(', close = ')'),
-                c("(a,b)", "(c,(d,e)", "(d,e),(d,e)", "(e,(f,(f#,g)"))
+                c("(a,b)", "(c,(d,e)", "(d,e),(d,e)", "(d,e),f)",  "(e,(f,(f#,g)", "(f,(f#,g),g#)", "(f#,g),g#),a)"))
    
    expect_equal(humdrumR::context(nesting2, open = '(', close = ')', overlap = 'nested'),
                 c("(a,b)", "(c,(d,e),(d,e),f)", "(d,e)", "(d,e)", 
@@ -234,3 +234,4 @@ test_that('Context vignette examples work',
             expect_equal(unname(c(result)), c("9,46", "9,47", "9,48", "9,49", "9,50", "9,52", "9,53", "9,54", "9,55", "9,56", "9,57", "9,58", "9,59"))
             
           })
+

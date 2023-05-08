@@ -385,7 +385,7 @@ parseContextExpression <- function(expr, other, groupby) {
 #' Defaults to empty `list()`.
 #' 
 #' Must be a [list()], which is either empty or contains vectors which are all the same length as `x`.
-#' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(File, Spine, Path)` by default.
+#' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(Piece, Spine, Path)` by default.
 #' 
 #' Windows cannot cross group boundaries.
 #' 
@@ -555,7 +555,7 @@ align <- function(open, close, fullLength, groupby = list(),
   
   if (overlap == 'paired' && 
       (length(open) == length(close)) && 
-      all((close - open) >= min_length && (close- open) <= max_length, na.rm = TRUE)) {
+      all((close - open + 1L) >= min_length & (close - open + 1L) <= max_length, na.rm = TRUE)) {
     
     windowFrame <- data.table(Open = open, Close = close) 
     windowFrame <- windowFrame[!is.na(Open) & !is.na(Close) & Open > 0L & Close > 0L]
@@ -927,11 +927,11 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
 #' However, the output indices still represent the original `along.with` indices.
 #' 
 #' Since `hop()` is usually used with [context()] to create rolling windows within musical parts,
-#' we want typically want to apply `hop()` using using `groupby = list(File, Spine, Path)`.
+#' we want typically want to apply `hop()` using `groupby = list(Piece, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
 #' three fields as `groupby` arguments to `hop()`.
 #' So any use of `hop()` in a call to [with(in)][withinHumdrum], will automatically generate the hop sequence
-#' in a "melodic" way, within each spine path of each file.
+#' in a "melodic" way, within each spine path of each piece.
 #'
 #' @param along.with ***The vector you want indices to "hop" along.***
 #' 
@@ -985,7 +985,7 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
 #' Defaults to empty `list()`.
 #'
 #' Must be a [list()], which is either empty or contains vectors which are all the same length as `along.with`.
-#' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(File, Spine, Path)` by default.
+#' In calls to [with/within.humdrumR][withinHumdrum], `groupby` is passed `list(Piece, Spine, Path)` by default.
 #'
 #' @examples 
 #' # use the built-in 'letters' vector

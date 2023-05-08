@@ -43,7 +43,7 @@ REparse <- function(str, res, parse.strict = TRUE, parse.exhaust = TRUE,
     for (re in names(res)) {
          rest <- stringr::str_remove(rest, pattern = paste0('^', sep[re]))
         
-        locs <- stringr::str_locate(rest, res[[re]])
+         locs <- stringr::str_locate(rest, res[[re]])
         
         
         
@@ -681,6 +681,14 @@ makeRE.chord <-  function(..., major = '[Mm]aj', minor = 'min', augment = 'aug',
   
   if (collapse) setNames(cREs(REs), 'chord') else REs
   
+}
+
+makeRE.figuredBass <- function(..., bass.sep = ' ', collapse = TRUE) {
+  REs <- c(bass = unname(makeRE.kern(..., collapse = TRUE)),
+           bass.sep = paste0(bass.sep, '?'),
+           figurations = makeRE.alterations(...))
+  
+  if (collapse) setNames(cREs(REs), 'figuredBass') else REs
 }
 
 makeRE.roman <- function(..., diminish = 'o', augment = '+', sep = '/', collapse = TRUE) {

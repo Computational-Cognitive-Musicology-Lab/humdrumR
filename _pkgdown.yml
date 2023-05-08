@@ -137,6 +137,7 @@ reference:
   - figuredBass
   - is.major
   - is.minor
+  - sonority
 - subtitle: "Rhythm overviews"
   desc: "These pages overview general concepts in humdrumR pitch:"
   contents:
@@ -192,12 +193,15 @@ reference:
   - struct
 - title: "Other Functions"
   desc: "Other useful tools"
+- contents: 
+  - draw
+  - tally
 - subtitle: "Information theory"
   contents:
+  - p
   - entropy
-  - crossentropy
+  - crossEntropy
   - mutualInfo
-  - ptable
 - subtitle: "Numeric values"
   contents:
   - rational

@@ -3,7 +3,7 @@
 tabulate the reference records
 present in a humdrumR corpus.
 reference is one of humdrumR's
-basic corpus summary functions."><title>Summarize reference records in a humdrumR corpus — reference • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Summarize reference records in a humdrumR corpus — reference"><meta property="og:description" content="reference is used to
+basic corpus summary functions."><title>Summarize reference records in a humdrumR corpus — reference • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Summarize reference records in a humdrumR corpus — reference"><meta property="og:description" content="reference is used to
 tabulate the reference records
 present in a humdrumR corpus.
 reference is one of humdrumR's
@@ -18,7 +18,7 @@ basic corpus summary functions."><!-- mathjax --><script src="https://cdnjs.clou
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,20 +102,27 @@ reference(humdata)
     <dl><dt>x</dt>
 <dd><p><em><strong>Input for extracting reference information.</strong></em></p>
 <p>Must be a <code>character</code> string (to look up a reference code) or a <a href="humdrumRclass.html">humdrumR</a>.</p></dd>
+
+
 <dt>drop</dt>
 <dd><p><em><strong>Whether to return normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humCensus</code> table.</strong></em></p>
 <p>Defaults to <code>FALSE</code>.</p>
 <p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
 <p>If <code>drop = TRUE</code>, a normal <a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
 a <code>humCensus</code> table.</p></dd>
+
+
 <dt>i</dt>
 <dd><p><em><strong>Index for rows.</strong></em></p>
 <p>If <code>numeric</code>, selects rows by index.
 If <code>character</code>, the string is matched as a regular expression against filenames in the corpus.</p></dd>
+
+
 <dt>j</dt>
 <dd><p><em><strong>Index for columns.</strong></em></p>
 <p>If <code>numeric</code>, selects columns by index.
 If <code>character</code>, <a href="partialMatching.html">partially matched</a> against column names (reference codes).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -132,20 +139,20 @@ each reference code that appears in the corpus.
 Since reference records can be too long to print on one screen,
 and humdrum files can have multiple of the same type of reference code,
 a <code>humReference</code> table normally prints only the number of each type of
-reference record to appear in each file.
+reference record to appear in each piece.
 However, if only one type of reference code is present in a
 <code>humReference</code> table, the complete reference records for that code
-<em>will</em> be printed for each file. Likewise, if only one file is present
-in the table, all of that file's complete reference records are printed.
+<em>will</em> be printed for each piece. Likewise, if only one piece is present
+in the table, all of that piece's complete reference records are printed.
 Thus, if you want to see actual reference records, try indexing the
 <code>humReference</code> table down to one column or row (see below).</p>
-<p>A <code>humReference</code> table has one row for each file in the corpus.
-Rows are labeled with each file name.
+<p>A <code>humReference</code> table has one row for each piece in the corpus.
+Rows are labeled with each file name and piece number index.
 In addition, when a <code>humReference</code> object is printed,
-three different summary totals are printed for each reference code:</p><ul><li><p><strong>Any</strong> indicates how many files in the corpus contain at least
+three different summary totals are printed for each reference code:</p><ul><li><p><strong>Any</strong> indicates how many pieces in the corpus contain at least
 one example of each code.</p></li>
 <li><p><strong>Sum</strong> indicates the total number of each reference code to appear
-in the corpus, including multiple appearances in one file (like multiple <code>"!!!COM"</code>
+in the corpus, including multiple appearances in one piece (like multiple <code>"!!!COM"</code>
 records).</p></li>
 <li><p><strong>Unique</strong> tabulates the number of unique token in the corpus, for each code.
 If your corpus only has two unique composers (encoded in "!!!COM"),
@@ -165,8 +172,8 @@ unique reference records.</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="st">'COM'</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="st">'COM'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Authorship Information)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -177,25 +184,25 @@ unique reference records.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM1: Composer, A. </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM2: Composer, B.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="st">'OTL'</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="st">'OTL'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Work Identification Information)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!OTL  =  Title</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/RollingStone/.*hum"</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/RollingStone/.*hum"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmppPLRKT/temp_libpath45da68f4ffb3/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpd2iJ9Q/temp_libpath6e5a625b4fe3b/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Thirteen files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating thirteen files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing thirteen files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs" (thirteen files):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### By file:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference records in humdrumR corpus "rs" (thirteen pieces):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### By piece:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                               Rolling Stone List Rank  OTL  COC  RRD    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       all_apologies.hum [ 1]                        1    1    1    1    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       back_in_black.hum [ 2]                        1    1    1    1    ***</span>
@@ -217,19 +224,19 @@ unique reference records.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         Sum:                       13   13   13   13    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      Unique:                       13   13   13    9    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs" (thirteen files):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference records in humdrumR corpus "rs" (thirteen pieces):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                            (five columns not displayed due to screensize***)</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="st">'COC'</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="st">'COC'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> (Authorship Information)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!COC  =  Composer(s) corporate name</span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span> , <span class="st">'COC'</span><span class="op">]</span></span>
+<span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span> , <span class="st">'COC'</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs[, j]" (thirteen files):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### By file:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference records in humdrumR corpus "rs[, j]" (thirteen pieces):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### By piece:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              COC</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      all_apologies.hum [ 1]  Nirvana</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      back_in_black.hum [ 2]  AC/DC</span>
@@ -251,11 +258,11 @@ unique reference records.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        Sum:  13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     Unique:  13</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs[, j]" (thirteen files):</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span>, <span class="op">]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference records in humdrumR corpus "rs[, j]" (thirteen pieces):</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span>, <span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference recordsin humdrumR corpus "rs[i]" (one file):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference records in humdrumR corpus "rs[i]" (one piece):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> blue_suede_shoes.hum [3]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	    Rolling Stone List Rank: 95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	                        OTL: Blue Suede Shoes</span>
@@ -266,7 +273,7 @@ unique reference records.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	                        YOE: David Temperley, Trevor de Clercq</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	                        EED: Nathaniel Condit-Schultz (fathermckenzie.net)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	                        ENC: Nathaniel Condit-Schultz (fathermckenzie.net), automated</span>
-<span class="r-in">       </span>
+<span class="r-in"><span>       </span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -278,8 +285,7 @@ unique reference records.</p></li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a>
-2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer></div>

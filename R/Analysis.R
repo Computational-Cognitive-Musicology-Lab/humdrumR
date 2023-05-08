@@ -1,88 +1,335 @@
+# Tallies ----
+
+setClass('text', contains = 'character')
+
+setClass('humdrum.table', contains = 'table')
+
+#' Tabulate and/or cross-tabulate data
+#' 
+#' The `tally()` function is exactly like R's fundamental [table()][base::table] function,
+#' except that 1) will give special treatment to humdrumR [token()] data 2)
+#' has more intuitive/simple argument names 3) makes it easier to combine/manipulate
+#' disparate output tables.
+#' 
+#' @details
+#' 
+#' The `tally()` function is essentially a wrapper
+#' around [base::table()][base::table] function.
+#' However, any [token()] class arguments are treated like [factors()],
+#' calling generating their own levels.
+#' This assures that, for example, pitch data is tabulated in order of pitch height,
+#' and "missing" pitches are counted as zero.
+#' 
+#' `tally()` will, by default, count `NA` values if they are present---if you don't want
+#' to count `NA`s, specify `na.rm = TRUE`.
+#' You can also tell `tally()` to exclude (not count) any other arbitrary values you
+#' provide as a vector to the `exclude` argument.
+#' 
+#' 
+#' `tally()` will always give names to the dimensions of the table it creates.
+#' You can specify these names directly as argument names, like `tally(Kern = kern(Token))`;
+#' if you don't specify a name, `tally()` will make up a name(s) based on expression(s) it is tallying.
+#' (Note that `tally()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
+
+#' @section Manipulating humdrum tables:
+#' 
+#' The output of `tally()` is a special form of R `table`, a `humdrum.table`.
+#' Given two or more `humdrum.table`s, if you apply basic R operators 
+#' (e.g., arithmetic, comparisons) or row/column binding (`cbind`/`rbind`) 
+#' `humdrumR` will align the tables by their dimension-names before
+#' doing the operation.
+#' This means, that if you have two tables of pitch data, but one table includes specific pitch and other doesn't,
+#' you can still add them together or bind them into a matrix.
+#'  See the examples!
+#'
+#' @examples 
+#' 
+#' generic <- c('c', 'c', 'e', 'g', 'a', 'b', 'b', 'b')
+#' complex <- c('c', 'c#', 'e', 'f', 'g','g#', 'g#', 'a')
+#' 
+#' genericTable   <- tally(generic)
+#' complexTable <- tally(complex)
+#' 
+#' genericTable
+#' complexTable
+#' 
+#' genericTable + complexTable
+#' 
+#' cbind(genericTable, complexTable)
+#' 
+#' @export
+tally <- function(..., 
+                  na.rm = FALSE,
+                  exclude = NULL) {
+  
+  # exprs <- rlang::enexprs(...)
+  exprs <- as.list(substitute(list(...)))[-1L]
+  
+  args <- list(...)
+  dimnames <- .names(args)
+  if (any(dimnames == '')) dimnames[dimnames == ''] <- deparse.unique(exprs[dimnames == ''])
+  
+  
+  args <- lapply(args,
+                 \(arg) {
+                   if (inherits(arg, 'token')) factorize(arg) else arg
+                 })
+  tab <- do.call(base::table,
+                 c(args, list(exclude = if (na.rm) c(NA, NaN), 
+                              useNA = if (na.rm) 'no' else 'ifany', 
+                              deparse.level = 0)))
+  
+  # dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), 'NA', dn))
+  names(dimnames(tab)) <- dimnames
+  
+  
+  new('humdrum.table', tab)
+  
+  
+}
+
+#' @rdname tally
+#' @export
+setMethod('Ops', c('humdrum.table', 'humdrum.table'),
+          \(e1, e2) {
+            
+            tables <- alignTables(list(e1, e2))
+            e3 <- callNextMethod(tables[[1]], tables[[2]])
+            
+            if (inherits(e3, 'table')) new('humdrum.table',  e3) else e3
+            
+          })
+
+#' @rdname tally
+#' @export
+cbind.humdrum.table <- function(...) {
+  tables <- list(...)
+  tables <- Filter(Negate(is.null), tables)
+  
+  tables <- alignTables(tables, 'cbind') 
+  
+  do.call('cbind', tables)
+  
+}
+
+#' @rdname tally
+#' @export
+rbind.humdrum.table <- function(...) {
+  tables <- list(...)
+  tables <- Filter(Negate(is.null), tables)
+  
+  tables <- alignTables(tables, 'rbind') 
+  
+  do.call('rbind', tables)
+  
+}
+
+alignTables <- function(tables, funcname = '') {
+  dimnames <- lapply(tables, dimnames)
+  dimensions <- Filter(\(dn) any(dn != ''), lapply(dimnames, names))
+  
+  if (length(unique(lengths(dimnames))) > 1L) .stop("If using {funcname} on humdrum.tables, they must all have the same number of dimensions.")
+  
+  dimnames <- as.data.frame(do.call('rbind', dimnames))
+  dimnames <- lapply(dimnames, \(dim) Reduce('union', dim))
+  
+  
+  allindices <- as.data.frame(do.call('expand.grid', dimnames))
+  
+  empty <- do.call('table', allindices) - 1L
+  
+  
+  dimensions <- Reduce(\(a, b) paste(a, b, sep = '/'), dimensions)
+  names(dimnames(empty)) <- dimensions
+  
+  lapply(tables, 
+         \(tab) {
+           
+           indices <- as.matrix(allindices[Reduce('&', Map(`%in%`, allindices, dimnames(tab))), ])
+           empty[indices] <- tab[indices]
+           empty
+         })
+  
+  
+  
+}
+
+factorize <- function(token) {
+  factorizer <- token@Attributes$factorizer
+  if (is.null(factorizer)) return(factor(token@.Data))
+  
+  factorizer(token)
+  
+}
+
 # Probabilities ----
+
+## probabilityDistribution ----
+
+
+
+setClass('probabilityDistribution', contains = 'humdrum.table', slots = c(N = 'integer', margin = 'integer'))
+
+#' @rdname p
+#' @export
+setMethod('%*%', c('probabilityDistribution', 'probabilityDistribution'),
+         function(x, y) {
+           new('probabilityDistribution', as.table(outer(S3Part(x), S3Part(y), '*')), N = x@N, margin = integer(0L))
+         })
+
+
+unmargin <- function(pd) {
+  if (length(pd@margin) == 0L) return(pd)
+ 
+  marginal <- proportions(pd@N)
+  
+  pd <- sweep(pd, pd@margin, marginal, '*')
+  pd@margin <- integer(0L)
+  pd@N <- sum(pd@N)
+  pd
+  
+}
+#' @rdname p
+#' @export
+setMethod('show', 'probabilityDistribution',
+          function(object) {
+            digits <- 4L
+            x <- S3Part(object, strictS3 = TRUE)
+            zeros <- x == 0
+            
+            x[] <- format(x, scientific = FALSE)
+            n <- nchar(x) - 2
+            long <- n > digits & !is.na(x)
+            x[long] <- paste0(substr(x[long], start = 1, stop = digits + 2), '_')
+            
+            # dimension names
+            header <- pdist.name(x, object@margin)
+            
+            # names(dimnames(x)) <- NULL
+            x[zeros] <- '.'
+            x[] <- gsub('^0', '', x)
+            cat('\t\t', header, '\n', sep = '')
+            print(x, quote = FALSE, na.print = '.NA')
+          })
+
+
+pdist.name <- function(ptab, margin = NULL, func = 'P') {
+  dimnames <- names(dimnames(ptab))
+  
+  args <- if (length(margin)) {
+    independent <- dimnames[margin]
+    dependent <- dimnames[-margin]
+    
+    paste0(paste(dependent, collapse = ', '), 
+           ' | ', 
+           paste(independent, collapse = ', '))
+    
+    
+  } else {
+    paste(dimnames, collapse = ', ') 
+  }
+  
+  paste0(func, '(', args, ')')
+  
+}
+
+## p() -----
 
 #' Tabulate and cross proportions
 #' 
 #' 
 #' @export
-ptable <- function(...) UseMethod('ptable')
+setGeneric('p', function(x, ...) standardGeneric('p'))
 
-#' @rdname ptable
+
+
+#' @rdname p
 #' @export
-ptable.default <- function(..., margin = NULL) ptable.table(table(...), margin = margin)
+setMethod('p', c('table'),
+          function(x, margin = NULL, na.rm = FALSE) {
+            
+            
+            if (length(dim(x)) == 1L) margin <- NULL
+            
+            if (na.rm) {
+              notna <- unname(lapply(dimnames(x), \(dim) !is.na(dim)))
+              x <- do.call('[', c(list(x), notna))
+            }
+            
+            ptab <- proportions(x, margin = margin) 
+            
+            
+            n <- marginSums(x, margin = margin)
+            
+            new('probabilityDistribution', ptab, N = as.integer(n), margin =  as.integer(margin))
+          })
 
 
-#' @rdname ptable
+
+setClassUnion("discrete", members = c('character', 'integer', 'logical', 'token', 'factor'))
+
+#' @rdname p
 #' @export
-ptable.table <- function(tab, margin = NULL, na.rm = TRUE) {
-  na <- is.na(tab)
-  tab[na] <- 0
-  ptab <- proportions(tab, margin = margin) 
-  
-  if (na.rm) ptab[na] <- NA
-  
-  attr(ptab, 'margin') <- margin
-  
-  dimnames <- names(dimnames(tab))
-  names(dimnames(ptab)) <- ifelse(dimnames == '', 
-                                  make.unique(rep(c('X', 'Y', 'Z', LETTERS[9:23], letters[c(24:26, 9:23)]), length.out = length(dimnames))), 
-                                  dimnames)
-  
-  ptab %class% 'ptable'
-}
+setMethod('p', 'discrete',
+          function(x, ..., distribution = NULL, margin = NULL, na.rm = TRUE) {
+            checks(distribution, xnull | xclass('probabilityDistribution'))
+            
+            if (is.null(distribution)) distribution <- p(tally(x, ..., na.rm = FALSE), margin = margin, na.rm = na.rm)
+                
+            
+            
+            ind <- if (na.rm) {
+              cbind(x, ...)
+            } else {
+              dimnames(distribution) <- lapply(dimnames(distribution), \(dim) ifelse(is.na(dim), '<NA>', dim))
+              ind <- cbind(x, ...)
+              ind[is.na(ind)] <- '<NA>'
+              ind
+            }
+            c(unclass(distribution)[ind])
+          })
 
 
-
-
-#' @rdname ptable
+#' @rdname p
 #' @export
-`[.ptable` <- function(ptab, i, j, ..., drop = FALSE) {
-  
-  new <- unclass(ptab)[i, j, ..., drop = drop]
-  
-  
-  class(new) <- class(ptab)
-  attr(new, 'margin') <- attr(new, 'margin')
-  new
-  
-}
+setMethod('p', 'numeric',
+          function(x, density = NULL, na.rm = FALSE, ..., bw = 'SJ', adjust = 1.5) {
+            checks(density, xnull | xclass('density'))
+            
+            if (!na.rm && any(is.na(x)))  {
+              return(rep_len(NA_real_, length(x)))
+            } else {
+              .x <- x[!is.na(x)]
+            }
+            
+            nuniq <- length(unique(.x))
+            if ((all(is.whole(.x)) && nuniq < 50L)) return(p(as.character(x), margin = margin, na.rm = na.rm))
+            
+            if (is.null(density)) density <- density(.x, ..., bw = bw, adjust = adjust)
+            
+            
+            x[!is.na(x)] <- density$y[closest(.x, density$x, value = FALSE)]
+            
+            x
+            
+          })
 
-#' @rdname ptable
+#' @rdname p
 #' @export
-print.ptable <- function(x, digits = 4) {
-  x <- unclass(x)
-  zeros <- x == 0
-  x[] <- as.character(x)
-  n <- nchar(x) - 2
-  long <- n > digits & !is.na(x)
-  x[long] <- paste0(substr(x[long], start = 1, stop = digits + 2), '*')
-  
-  # dimension names
-  header <- pdist.name(x)
-  attr(x, 'margin') <- NULL
-  
-  x[zeros] <- '.'
-  x[] <- gsub('^0', '', x)
-  print(x, quote = FALSE, na.print = '.NA')
-  cat('\t\tP(', header, ')\n', sep = '')
-}
+setMethod('p', 'missing',
+          function(x, ..., margin = NULL, na.rm = TRUE) {
+            args <- list(..., margin = margin, na.rm = na.rm)
+            origname <- names(args)[1]
+            names(args)[1] <- 'x'
+            
+            result <- do.call('p', args)
+            
+            if (is.table(result)) names(dimnames(result))[1] <- origname
+            result
+          })
 
-pdist.name <- function(ptab) {
-  dimnames <- names(dimnames(ptab))
-  
-  if (length(attr(ptab, 'margin'))) {
-    independent <- dimnames[attr(ptab, 'margin')]
-    dependent <- setdiff(dimnames, independent)
-    
-    paste0(paste(dependent, collapse = ','), 
-           '|', 
-           paste(independent, collapse = ','))
-    
-    
-  } else {
-    paste(dimnames, collapse = ',') 
-  }
-  
-}
+
+
 
 
 # Information theory ----
@@ -122,112 +369,159 @@ pdist.name <- function(ptab) {
 #' 
 #' @family {Information theory functions} 
 #' @export
-entropy <- function(..., base) UseMethod('entropy')
+setGeneric('entropy', function(x, base = 2, ...) standardGeneric('entropy'))
 #' @rdname entropy
 #' @export
-entropy.default <- function(..., base = 2, margin = NULL) {
-  entropy.table(table(...), base = base, margin = margin)
-}
+setMethod('entropy', 'table',
+          function(x, base = 2, margin = NULL, na.rm = FALSE) {
+            
+            joint <- p(x, margin = NULL, na.rm = na.rm)
+            
+            other <- p(x, margin = margin, na.rm = na.rm)
+            other <- ifelse(x == 0L, 0, log(other, base = base)) 
+            
+            equation <- pdist.name(joint, margin, 'H')
+            setNames(-sum(joint * other), equation)
+          })
+
+  
+#' @rdname entropy
+#' @export
+setMethod('entropy', 'probabilityDistribution',
+          function(x, base = 2) {
+            
+            joint <- unmargin(x)
+            
+            other <- x
+            other <- ifelse(x == 0L, 0, log(other, base = base)) 
+            
+            equation <- pdist.name(joint, x@margin, 'H')
+            
+            setNames(-sum(joint * other), equation)
+          })
+
+
+
+  
+#' @rdname entropy
+#' @export
+setMethod('entropy', 'density',
+          function(x, base = 2, na.rm = TRUE) {
+            label <- rlang::expr_name(rlang::enexpr(x))
+            if (any(is.na(x))) return(NA_real_)
+            
+            dx <- diff(x$x[1:2])
+            
+            equation <- paste0('H(', label, ')')
+            
+            setNames(-sum(log(x$y, base = base) * x$y * dx), equation)
+            
+            
+          })
 
 #' @rdname entropy
 #' @export
-entropy.table <- function(tab, base = 2, margin = NULL, ...) {
-  info <- information(ptable(tab, margin = margin), base = base)
-  frequency <- proportions(tab, margin = NULL) 
-  
-  name <- paste0('H(', pdist.name(info), ')')
-  
-  setNames(sum(info * frequency, na.rm = TRUE), name)
-  
-}
+setGeneric('ic', function(x, ...) standardGeneric('ic'))
 #' @rdname entropy
 #' @export
-entropy.density <- function(x, base = 2) {
-  dx <- diff(x$x[1:2])
-  -sum(log(x$y, base = base) * x$y * dx)
-}
-#' @rdname entropy
-#' @export
-entropy.numeric <- function(x, base = 2, ...) entropy.density(density(x, ...), base = base)
+setMethod('ic', 'discrete',
+          function(x, ..., base = 2, distribution = NULL, margin = NULL, na.rm = TRUE) {
+            
+            p <- p(x, distribution = distribution, ..., margin = margin, na.rm = na.rm)
+            
+            -ifelse(p == 0, NA, log(p, base = base))
+
+            
+          })
 
 #' @rdname entropy
 #' @export
-ic <- function(..., distribution, base) UseMethod('ic')
-#' @rdname entropy
-#' @export
-ic.numeric <-function(x, distribution = density(x), base = 2) {
-  
-  dx <- diff(distribution$x[1:2])
-  pmass <- -(log(distribution$y, base = base))
-  
-  pmass[findInterval(x, distribution$x)]
-  
-}
-#' @rdname entropy
-#' @export
-ic.default <- function(..., distribution = ptable(...), base = 2) {
-  checks(distribution, xclass('table'))
-  
-  observations <- lapply(list(...), as.character)
-  
-  if (length(observations) != length(dim(distribution))) .stop("The number of observation vectors must match dimensions of the distribution.")
-  
-  distribution <- information(distribution, base = base)
-  
-  distribution[do.call('cbind', observations)]
-  
-}
+setMethod('ic', 'numeric',
+          function(x, base = 2, density = NULL, ..., na.rm = TRUE) {
+            
+            p <- p(x, density = density, ..., na.rm = na.rm)
+            
+            -ifelse(p == 0, NA, log(p, base = base))
+            
+            
+          })
 
-information <- function(ps, base = 2) {
-  lps <- -(log(ps, base = base))
-  lps[ps == 0] <- NA
-  lps
-}
+#' @rdname entropy
+#' @export
+setMethod('ic', 'missing',
+          function(x, base = 2, ..., margin = NULL, na.rm = TRUE) {
+            args <- list(..., base = base, margin = margin, na.rm = na.rm)
+            names(args)[1] <- 'x'
+            do.call('ic', args)
+            
+            
+          })
+
+
+
 
 
 #' Calculate Mutual Information of variables
 #' 
 #' @family {Information theory functions} 
 #' @export
-mutualInfo <- function(x, ..., base = 2) UseMethod('mutualInfo') 
+setGeneric('mutualInfo', function(x, ...) standardGeneric('mutualInfo'))
+
 
 #' @rdname mutualInfo
 #' @export
-mutualInfo.table <- function(x, base = 2) {
-  sum(.mutualinfo(x, base = base) * proportions(x), na.rm = TRUE)
-}
+setMethod('mutualInfo', 'probabilityDistribution',
+          function(x, ..., base = 2) {
+            if (length(dim(x)) < 2L) return(entropy(x, base = base))
+            
+            joint <- S3Part(unmargin(x))
+            
+            independentJoint <- outer(rowSums(x), colSums(x), '*')
+            
+            logjoint <- ifelse(joint == 0, 0, log(joint, base))
+            logindependent <- ifelse(independentJoint == 0, 0, log(independentJoint, base))
+            
+            ratio <- logjoint - logindependent
+            
+            equation <- pdist.name(joint, x@margin, 'I')
+            setNames(sum(joint * ratio), equation)
+            
+          })
 
-.mutualinfo <- function(tab, base = 2){
-  joint <- proportions(tab)
-  
-  marginals <- lapply(seq_along(dim(tab)), \(m) apply(joint, m ,sum))
-  ind.joint <- Reduce('*', do.call(expand.grid, marginals))
-  dim(ind.joint) <- dim(tab)
-  dimnames(ind.joint) <- dimnames(tab)
-  # ind.joint <- outer(rowSums(joint), colSums(joint), '*')
-  
-  joint[tab == 0] <- ind.joint[tab == 0] <- NA
-  
-  log(joint / ind.joint, base = base) 
-}
+
+#' @rdname mutualInfo
+#' @export
+setMethod('mutualInfo', 'table',
+          function(x, base = 2, margin = NULL, na.rm = FALSE) {
+            
+            ptab <- p(x, margin = margin, na.rm = na.rm)
+            mutualInfo(ptab, base = base)
+            
+          })
+
    
 #' @rdname mutualInfo
 #' @export
-mutualInfo.default <- function(..., base = 2) {
-  mutualInfo.table(table(...), base = base)
-}
+setMethod('mutualInfo', 'discrete',
+          function(x, ..., base = 2, na.rm = FALSE) {
+            args <- list(x, ...)
+            marginals <- lapply(args, \(arg) p(tally(arg)))
+            
+            joint <- Reduce('%*%', marginals)
+            
+            p_observed <- p(x, ..., margin = NULL, na.rm = na.rm)
+            p_joint <- p(x, ..., distribution = joint, margin = NULL, na.rm = na.rm)
+            
+            p_observed <- ifelse(p_observed == 0, NA_real_, log(p_observed, base = base))
+            p_joint <- ifelse(p_joint == 0, NA_real_, log(p_joint, base = base))
+            
+            p_observed - p_joint
+            
+            
+          
+            
+          })
   
-#' @rdname mutualInfo
-#' @export 
-pmutualInfo <- function(..., base = base) {
-  
-  
-  info <- .mutualinfo(table(...), base = base)
-  
-  observations <- lapply(list(...), as.character)
-  
-  info[do.call('cbind', observations)]
-}
 
 
 #' Calculate cross entropy between two distributions
@@ -235,171 +529,592 @@ pmutualInfo <- function(..., base = base) {
 #' TBA
 #' @family {Information theory functions}
 #' @export
-crossentropy <- function(..., distribution, base) UseMethod('crossentropy')
+setGeneric('crossEntropy', function(distribution1, distribution2, ...) standardGeneric('crossEntropy'))
 
-#' @rdname crossentropy
+#' @rdname crossEntropy
 #' @export
-crossentropy.table <- function(tab, distribution, base = 2){
-  if (!all(dim(tab) == dim(distribution))) .stop("The number of observation vectors must match dimensions of the distribution.")
+setMethod('crossEntropy', c('probabilityDistribution', 'probabilityDistribution'),
+          function(distribution1, distribution2, base = 2) {
+            
+            distribution2 <- ifelse(distribution2 == 0L, 0, log(distribution2, base = base))
+            
+            
+            equation <- paste0('H(', 
+                               pdist.name(distribution1, func = ''), ', ',
+                               pdist.name(distribution2, func = ''))
+            setNames(-sum(distribution1 * distribution2), equation)
+            
+          })
+
+
+
+
+# Plotting ----
+
+
+
+
+## Plotting functions ----
+
+### draw() ----
+
+#' Visualize data
+#' 
+#' The `draw()` function is humdrumR's goto plotting function.
+#' `draw()` can make a variety of graphs, depending on the type of data you give it.
+#' For the most part, `draw()` is simply a stylish, easy to use wrapper around
+#' the base-R graphics functions [plot()], [barplot()], and [hist()].
+#' 
+#' 
+#' @details
+#' 
+#' `draw()` is a generic function, which does different plots depending on the data you pass to its
+#' `x` and `y` arguments.
+#' 
+#' + `x` and `y` both numeric: scatter plot.
+#' + `x` numeric by itself: histogram.
+#' + `y` numeric by itself: quantile plot.
+#' + `x` is a [table][tally()]: barplot.
+#' + `y` is numeric, `x` is `character` or `factor`: a violin plot.
+#' 
+#' All the standard arguments to base-R plots can be used to customize plots.
+#' See [par()] for a full list.
+#' 
+#' 
+#' @export
+setGeneric('draw', \(x, y, 
+                     col = 2, facet = list(), 
+                     main = '', sub = '',
+                     xlab = NULL, ylab = NULL, ...) {
+  oldpalette <- palette(flatly)
+  oldpar <- par(family = 'Lato', col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
+                cex.axis = .7, pch = 16)
   
-  info <- information(proportions(tab), base = base)
+  on.exit({par(oldpar) ; palette(oldpalette)})
   
-  if (!is.table(distribution)) {
-    distribution <- if (is.list(distribution)) do.call('table', distribution) else table(distribution)
+  # xlab and ylab
+  xexpr <- deparse1(substitute(x)) 
+  yexpr <- deparse1(substitute(y)) 
+  if (xexpr == 'missing') xexpr <- 'x'
+  if (yexpr == 'missing') yexpr <- 'y'
+  
+  col <- prep_col(col)
+  if (length(facet)) {
+    if (!is.list(facet)) facet <- list(facet)
+    par(mar = c(1, 1, 1, 1), oma = c(5, 5, 5, 5))
+    draw_facets(facet, x = if (!missing(x)) x, y = if (!missing(y)) y, col = col, xlab = '', ylab = '', ...)
+  } else {
+    output <- standardGeneric('draw')
+    # plot.window(c(0,1), c(0, 1))
+    title(main = main, sub = sub)
+    
+    outer <- output$outer %||% FALSE
+    xlab <- xlab %||% (output$xlab %||% xexpr)
+    ylab <- ylab %||% (output$ylab %||% yexpr)
+    
+    mtext(xlab, 1, line = 2.5, outer = outer)
+    mtext(ylab, 2, line = 3, outer = outer, las = if (nchar(ylab) > 3) 3 else 1)
+    
+    if (!is.null(attr(col, 'levels'))) legend('topleft', horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
+                                              col = sort(unique(col)), legend = attr(col, 'levels'))
   }
-  frequency <- proportions(distribution, margin = NULL) 
-  
-  info <- info[tab > 0]
-  frequency <- frequency[tab > 0]
-  
-  
-  sum(info * frequency)
-  
-}
-#' @rdname crossentropy
-#' @export
-crossentropy.default <- function(..., distribution, base = 2) {
-  tab <- table(...)
  
+})
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('numeric', 'numeric'), 
+          \(x, y, col = 3, log = '', jitter = 'xy', 
+            xlim = NULL, ylim = NULL, xat = NULL, yat = NULL, cex = prep_cex(x),  ...) {
+            
+            
+            if (grepl('x', jitter)) x <- smartjitter(x)
+            if (grepl('y', jitter)) y <- smartjitter(y)
+            
+            xat <- prep_ticks(xlim %||% x, log = grepl('x', log), at = xat)
+            yat <- prep_ticks(ylim %||% y, log = grepl('y', log), at = yat)
+            
+            canvas(log = log, 
+                   xlim = xlim %||% range(x),
+                   ylim = ylim %||% range(y),
+                   xat = xat, yat = yat, ...)
+            points(x, y, col = col, cex = cex, ...)
+            
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('numeric', 'missing'), 
+          \(x, y, col = 3, breaks = 'Sturges', jitter = '', ..., cex = prep_cex(x) * .75, xlim = NULL, ylim = NULL) {
+            
+            
+            
+            breaks <- hist.default(x, breaks = breaks, plot = FALSE)
+            
+            xat <- breaks$breaks
+            while(length(xat) > 20) {xat <- xat[seq(1, length(xat), by = 2)]}
+            
+            ylim <- ylim %||%  c(0, 1)
+            yat <- pretty(ylim)
+            canvas(log = '', 
+                   xlim = xlim %||% range(breaks$breaks), 
+                   ylim = ylim, xat = xat,
+                   yat = yat, ylabels = format(paste(yat * 100, '%')))
+            
+            
+            countaxis <- unique(round(pretty(c(0, sum(breaks$counts) * max(ylim)), n = 10L, min.n = 5L)))
+            # humaxis(4, at = countaxis / sum(breaks$counts), labels = num2str(countaxis))
+            # mtext('Counts', 4, las = 3, line = 2)
+            
+            prob <- breaks$density
+            prob <- prob / sum(prob)
+            Map(head(breaks$breaks, -1), tail(breaks$breaks, -1), prob,
+                f = \(x0, x1, p) {
+                  polygon(c(x0, x0, x1, x1), c(0, p, p, 0), col = setalpha(col, .2), border = NA)
+                  
+                  graphics::segments(x0, p, x1, p, col = col)
+                })
+            
+            graphics::segments(breaks$breaks, 0, breaks$breaks, pmax(c(prob, 0), c(0, prob)), 
+                               col = setalpha(col, .4))
+            
+            
+            if (length(x) > 1e5) x <- sample(x, 1e5)
+            if (grepl('x', jitter)) x <- smartjitter(x)
+            points(x, rnorm(length(x), mean(ylim), diff(range(ylim)) / 20), 
+                   cex = cex , col = rgb(1,0,0, .1), pch = 16, xpd = TRUE)
+            
+            
+            list(ylab = 'Proportion')
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('missing', 'numeric'),
+          function(x, y, col = 3, log = '', jitter = '', ..., cex = prep_cex(y), yat = NULL, quantiles = c(.025, .25, .5, .75, .975)) {
+            
+            
+            yat <- prep_ticks(y, log = grepl('y', log), at = yat)
+            
+            canvas(log = gsub('x', '', log), xlim = c(0, 1), ylim = range(yat), 
+                   xat = seq(0, 1, .1), xlabels = c(('0.0'), seq(.1, .9, .1), '1.0'),
+                   yat = yat)
+            
+            
+            
+            draw_quantile(y, ymin = min(yat), jitter = grepl('y', jitter), quantiles = quantiles,
+                          ..., col = col, cex = cex)
+            
+            list(xlab = 'Quantile')
+          })
+
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('discrete', 'discrete'),
+          function(x, y, ...){ 
+            draw(tally(x, y), ...)
+            })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('discrete', 'missing'),
+          function(x, y, ...){ 
+            draw(tally(x), ..., xlab = '')
+          })
+
+# #' @rdname draw
+# #' @export
+#setMethod('draw', c('missing', 'discrete'),
+#          function(x, y, ...){ 
+#            output <- draw(tally(y), ...)
+#          }) ################ THis can work except the labels are reversed...need to figure that your
+
+#' @rdname draw
+#' @export
+setMethod('draw', 'table',
+          function(x, y, col = 1:nrow(x), log = '', ..., ylim = NULL, yat = NULL, beside = TRUE) {
+            yticks <- sort(unique(prep_ticks(ylim %||% c(0, x), log = grepl('y', log), at = yat)))
+            if (grepl('y', log)) yticks <- yticks[yticks > 0]
+            if (inherits(x, 'humdrum.table')) x <- S3Part(x)
+            names(x)[is.na(names(x))] <- 'NA'
+            
+            barx <- barplot(x, col = col, log = gsub('x', '', log), beside = beside, axes = FALSE, 
+                            ylim = ylim %||% range(yticks),
+                            border = NA, ...)
+            
+            humaxis(2, at = yticks)
+            
+            if (length(dim(x)) > 1) {
+              legend(x = max(barx), y = max(yticks), legend = rownames(x), fill = col, 
+                     border = NA, bty='n', xpd = TRUE, cex = .6)
+            }
+            
+            list(ylab = if (is.integer(x)) 'Counts' else 'N')
+          })
+
+
+#' @rdname draw
+#' @export
+setMethod('draw', 'probabilityDistribution',
+          function(x, y, col = 1:nrow(x), log = '', ..., yat = NULL, beside = TRUE) {
+            yticks <- sort(unique(c(0, prep_ticks(c(x), log = grepl('y', log), at = yat))))
+            if (grepl('y', log)) yticks <- yticks[yticks > 0]
+            if (inherits(x, 'humdrum.table')) x <- S3Part(x)
+            names(x)[is.na(names(x))] <- 'NA'
+          
+            barx <- barplot(x, col = col, beside = beside, axes = FALSE, 
+                            ylim = c(0, 1),
+                            border = NA, ...)
+            
+            yticks <- seq(0, 1, .1)
+            humaxis(2, at = yticks, labels = c('0.0', seq(.1, .9, .1), '1.0'))
+            
+            if (length(dim(x)) > 1) {
+              legend(x = max(barx), y = max(yticks), legend = colnames(x), fill = col, 
+                     border = NA, bty='n', xpd = TRUE, cex = .6)
+            }
+            
+            list(ylab = 'Probability')
+          })
+
+
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('discrete', 'numeric'),
+          function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
+            draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
+            list(xlab = NULL, ylab = NULL)
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('list', 'numeric'),
+          function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
+            
+            layout <- prep_layout(x)
+            oldpar <- par(oma = par('mar'), mar = c(0, 0, 0, 0))
+            on.exit({
+              layout(cbind(1)) 
+              par(oldpar)
+              
+            })
+            
+            yticks <- prep_ticks(y, log = grepl('y', log), at = yat)
+            ylim <- range(yticks)
+            y <- split(y, f = x)
+            
+            xticks <- seq(0, 1, .1)
+            xlabels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
+            
+            xuniq <- unique(as.data.frame(x))
+            xuniq <- xuniq[sapply(xuniq, \(val) length(unique(val)) > 1L)]
+            grouplabels <- do.call('paste', xuniq)
+            for (k in c(layout)) {
+              ytick <- if (k %in% layout[, 1]) yticks 
+              if (k %in% layout[nrow(layout), ]) {
+                xtick <- xticks 
+                xlabel <- xlabels
+              } else {
+                xtick <- xlabel <- NULL
+              }
+              
+              canvas(log = gsub('x', '', log), 
+                     xlim = c(0, 1), xat = xtick, xlabels = xlabel,
+                     ylim = ylim, yat = ytick)
+              
+              if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
+              draw_violin(y[[k]], breaks = breaks)
+            }
+            
+            
+            list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
+          })
+
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('formula'),
+          function(x, y, col = 2, xlab = NULL, ylab = NULL, data = NULL, ...) {
+            
+            vars <- model.frame(x, data = data)
+            
+            if (ncol(vars) == 1L) {
+              draw(vars[[1]], col = col, ..., xlab = xlab %||% names(vars), ylab = ylab)
+            } else {
+              
+              if (ncol(vars) > 2) {
+                
+              }
+              
+              draw(vars[[2]], vars[[1]], col = col, ...,
+                   xlab = xlab %||% names(vars)[2],
+                   ylab = ylab %||% names(vars)[1])
+            } 
+            
+            
+            list(xlab = '')
+            
+          })
+
+
+
+## draw()'s helpers ----
+
+
+
+smartjitter <- function(x) {
+  .x <- x[!is.na(x)]
   
-  crossentropy.table(tab, distribution, base = base)
+  ord <- order(.x)
+  sorted <- .x[ord]
+  
+  range <- if (length(unique(sorted)) == 1) 1 else diff(range(sorted))
+  diff <- c(range, diff(sorted))
+  
+  close <- diff == 0 
+  if (!any(close)) return(x)
+  smallest <- min(diff[!close], range / 10)
+  
+  shift <- (rbeta(sum(close), 3, 3) - .5) * smallest * .5
+  
+  
+  sorted[close] <- sorted[close] + shift
+  
+  .x <- sorted[match(seq_along(sorted), ord)] # back to original order
+  
+  x[!is.na(x)] <- .x
+  x
 }
 
-# table ----
+
+prep_cex <- function(x) {
+  l <- length(x)
+  
+  pmax(1 - log(l, 1000000), .1 )
+}
+
+prep_col <- function(col, alpha = 1) {
+  if ('prepped' %in% class(col)) return(col)
+  
+  if (is.numeric(col)) {
+    if ( length(unique(col)) > 10) {
+      col <- col - min(col, na.rm = TRUE)
+      col <- col / max(col, na.rm = TRUE)
+      col <- flatlyramp(col, alpha = alpha)
+    } else {
+      col <- match(col, unique(col))
+    }
+  } else {
+    if (is.logical(col)) {
+      col <- ifelse(col, 2, 5)
+      attr(col, 'levels') <- c('TRUE', 'FALSE')
+    }
+    
+    if (is.character(col) && !any(isColor(col))) {
+      col <- factor(col)
+    }
+    
+    if (is.factor(col)) {
+      levels <- levels(col)
+      col <- as.integer(col)
+      attr(col, 'levels') <- levels
+      
+    } 
+  }
+  
+  
+  col %class% 'prepped'
+  
+}
+
+prep_layout <- function(facets) {
+  
+  if (length(facets) > 2) {
+    facets[[2]] <- squashGroupby(facets[-1])
+    facets <- facets[1:2]
+  }
+  facets <- unique(as.data.frame(facets))
+  
+  
+  mat <- matrix(1:nrow(facets), nrow = length(unique(facets[[1]])))
+  
+  layout(mat)
+  
+  mat
+}
+
+prep_ticks <- function(x, log = TRUE, at = NULL) {
+  if (any(is.na(at))) return(NULL)
+  if (is.null(x)) x <- seq(0, 1, .1)
+  
+  if (log && is.null(at)) {
+    if (any(x <= 0)) .stop("You can't draw a variable on a logarithmic scale",
+                           "if it includes negative numbers or zeros.")
+    
+    ticks <- pretty(log10(x), n = 10L, min.n = 5L) 
+    labels <- 10^ticks
+    scale <- floor(ticks)
+    scale <- ifelse(scale >= 2, scale - 1, scale)
+    scale <- 10^scale
+    ticks <- unique(round(labels / scale) * scale)
+    
+    
+  } else {
+    ticks <- at %||% pretty(x, n = 10L, min.n = 5L)
+  }
+}
+
+setalpha <- function(col, alpha = 1) {
+  rgba <- col2rgb(col, alpha = TRUE) / 255
+  
+  rgb(rgba['red', ], rgba['green', ], rgba['blue', ], alpha)
+}
 
 
-#' @export
-table <- function(..., 
-                  exclude = if (useNA == 'no') c(NA, NaN),
-                  useNA = 'ifany',
-                  dnn = NULL,
-                  deparse.level = 1) {
+humaxis <- function(side, tick = FALSE, las = 1, ...) axis(side, tick = FALSE, las = 1, ...)
+
+canvas <- function(log = '', xlim = NULL, ylim = NULL, xat = NULL, yat = NULL,
+                   xlabels = num2str(xat), ylabels = num2str(yat),
+                   ...) {
+  plot.new()
+  plot.window(xlim = xlim %||% (xat %||% c(0, 1)), 
+              ylim = ylim %||% (yat %||% c(0, 1)), log = log)
   
-  # exprs <- rlang::enexprs(...)
-  exprs <- as.list(substitute(list(...)))[-1L]
-  
+  if (!is.null(xat)) humaxis(1, at = xat, labels = xlabels, line = -1)
+  if (!is.null(yat)) humaxis(2, at = yat, labels = ylabels)
+}
+
+### draw_x ----
+
+
+draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xat = NULL, yat = NULL, log = '') {
+  layout <- prep_layout(facets)
+  on.exit(layout(1))
+  # 
+  # prep_ticks()
   args <- list(...)
-  dimnames <- .names(args)
-  if (is.null(dnn) && deparse.level > 0 && any(dimnames == '')) {
-    
-    symbols <- sapply(exprs, rlang::is_symbol)
-    labels <- sapply(exprs, rlang::expr_name)
-    
-    deparse <- switch(deparse.level,
-                      dimnames == '' & symbols,
-                      dimnames == '')
-    dimnames[deparse] <- labels[deparse]
-  }
+  if (is.null(args$x)) args$x <- NULL
+  if (is.null(args$y)) args$y <- NULL
   
+  args$xlim <- xlim %||% if (!is.null(xticks)) range(xticks)
   
-  args <- lapply(args,
-                 \(arg) {
-                   if (inherits(arg, 'token')) factorize(arg) else arg
-                 })
-  tab <- do.call(base::table,
-                 c(args, list(exclude = exclude, useNA = useNA, deparse.level = 0)))
+  xticks <- if (is.numeric(args$x)) prep_ticks(args$x, log = grepl('x', log), at = xat)
+  yticks <- if (is.numeric(args$y)) prep_ticks(args$y, log = grepl('y', log), at = yat)
+  args$ylim <- ylim %||% if (!is.null(yticks)) range(yticks)
   
-  dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), '.', dn))
-  names(dimnames(tab)) <- dimnames
+  args$xat <- args$yat <- NA
   
-  tab
+  facetLabels <- unique(as.data.frame(facets))
+  facetLabels <- facetLabels[sapply(facetLabels, \(val) length(unique(val)) > 1L)]
+  facetLabels <- do.call('paste', facetLabels)
+  
+  facets <- squashGroupby(facets)
+  args <- lapply(args, \(x) if (length(x) == length(facets)) split(x, f = facets) else rep(list(x), length(layout)))
+  args <- lapply(1:length(layout), \(i) lapply(args, '[[', i = i))
+  
 
+  # yticks <- prep_ticks(y, 
+  # ylim <- range(yticks)
+  # y <- split(y, f = x)
+  # 
+  # xticks <- seq(0, 1, .1)
+  # xlabels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
+  # 
+
+  
+  for (k in c(layout)) {
+   
+    # if (k %in% layout[nrow(layout), ]) {
+    # xtick <- xticks
+    # xlabel <- xlabels
+    # } else {
+    # xtick <- xlabel <- NULL
+    # }
+    
+    # canvas(log = gsub('x', '', log), 
+    #        xlim = c(0, 1), xat = xtick, xlabels = xlabel,
+    #        ylim = ylim, yat = ytick)
+    do.call('draw', args[[k]])
+    if (k %in% layout[, 1]) {
+      if (!is.null(yticks)) humaxis(2, at = yticks)
+    }
+    if (k %in% layout[nrow(layout), ]) {
+      if (!is.null(xticks)) humaxis(1, at = xticks)
+    }
+    
+    if (length(layout) > 1L) mtext(facetLabels[k], 3, line = -1)
+    # draw_violin(y[[k]], breaks = breaks)
+  }
+  layout(1)
+  plot.window(c(0, 1), c(0, 1))
+  par(oma = c(0,0,0,0))
+  if (nrow(layout) > 1) {
+    abline(h = head(seq(0, 1, length.out = nrow(layout) + 1)[-1], -1),
+           lty = 'dashed', col = setalpha(flatly[5], .3))
+  }
+  if (ncol(layout) > 1) {
+    abline(v = head(seq(0, 1, length.out = ncol(layout) + 1)[-1], -1),
+           lty = 'dashed', col = setalpha(flatly[5], .3))
+  }
+  # list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
 }
 
-factorize <- function(token) {
-  factorizer <- token@Attributes$factorizer
-  if (is.null(factorizer)) return(factor(token@.Data))
+draw_quantile <- function(var, ymin, col = 1, jitter = FALSE,
+                          quantiles = c(.025, .25, .5, .75, .975), na.rm = FALSE, ...) {
+  if (length(col) == length(var)) col <- col[order(var)]
   
-  factorizer(token)
+  coor <- sort(var)
   
+  if (jitter) coor <- smartjitter(coor)
+  othercoor <- seq(0, 1, length.out = length(coor))
+  
+  
+  quants <- quantile(coor, prob = quantiles)
+  
+  mean <- mean(var)
+  polygon(x = c(0, 0, 1, 1), y = c(ymin,  mean, mean, ymin), col = setalpha(col, alpha = .2), border = NA)
+  
+  graphics::segments(x0 = 0, y0 = quants, x1 = quantiles, y1 = quants, lty = 'dashed', lwd = .5)
+  
+  annotes <- lapply(quantiles * 100, 
+                    \(q) {
+                      if (q > 50) {
+                        q <- 100 - q
+                        bquote({frac(.(q), 100)} %up% "")
+                      } else {
+                        bquote({frac(.(q), 100)} %down% "" )
+                        
+                      }})
+                          
+                          
+  text(x = 0.02, y = quants, labels = as.expression(annotes), #paste0(quantiles*100, '%'), 
+       cex = .4, pos = 2, xpd = TRUE)
+  points(x = othercoor, y = coor, col = col, ...)
 }
 
-
-## Plotting defaults stuff ----
-
-#' @export
-plot <- function(x, y = NULL, ..., type = 'p', recycle = TRUE, add = FALSE, 
-                 col = flatly[1], pch = 16, 
-                 cex = seq(.7, .2, length.out = 8)[findInterval(ceiling(log10(length(x))), 1:8)],
-                 log = "", 
-                 xlab = NULL, ylab = NULL, xlim = NULL, ylim = NULL,
-                 col.axis = par('col.axis')) {
+draw_violin <- function(var, breaks = 'Sturges', col = 1, ...) {
+  var <- var[!is.na(var)]
+  breaks <- hist.default(var, breaks = breaks, plot = FALSE)
   
-  if (is.logical(log)) log <- if (log[1]) 'y' else ''
   
-  xlabel <- if (!missing(x)) deparse1(substitute(x))
-  ylabel <- if (!missing(y)) deparse1(substitute(y))
+  prob <- breaks$density
+  prob <- .5 * prob / sum(prob)
   
-  xy <- xy.coords(x = x, y = y, xlab = xlabel, ylab = ylabel, log = log, recycle = recycle)
+  Map(head(breaks$breaks, -1), tail(breaks$breaks, -1), prob, 
+      f = \(y0, y1, d) {
+        polygon(x = .5 + c(-d, -d , d, d),
+                y = c(y0, y1, y1, y0),
+                border = NA, col = setalpha(col, .8), ...)
+      } 
+  )
   
-  xlim <- xlim %||% range(xy$x)
-  ylim <- ylim %||% range(xy$y)
-  if (!add) {
-    plot.new()
-    plot.window(xlim = xlim, ylim = ylim, log = log, ...)
-    
-    title(...)
-    axis(1, pretty(xlim, n = 10L, min.n = 5L), las = 1, tick = FALSE, xpd = TRUE)
-    axis(2, pretty(ylim, n = 10L, min.n = 5L), las = 1, tick = FALSE)
-    mtext(xlab %||% xy$xlab, 1, line = 2.5, col = col.axis)
-    ylab <- ylab %||% xy$ylab 
-    mtext(ylab, 2, line = 2.5, las = if (nchar(ylab) <= 3) 1 else 3, col = col.axis)
-  }
-  plot.xy(xy, type = type, ..., col = col, pch = pch, cex = cex)
-    
-    
+  p <- prob[findInterval(var, breaks$breaks, rightmost.closed = TRUE)]
+  othercoor <- runif(length(var), .5 - p, .5 + p)
+  points(x = othercoor, y = smartjitter(var),  cex = .25, col = rgb(1,0,0, .1), pch = 16)
   
+  list(xlab = 'Proportion')
 }
 
-#' @export
-hist <- function(x, ..., col = flatly[1],
-                 log = '', 
-                 xlim = range(x, na.rm = TRUE), ylim = NULL,
-                 freq = TRUE) {
-  
-  # if (log == 'x') x <- log(x)
-  
-  y <- graphics::hist(x, ..., xlim = xlim, ylim = ylim,
-                      col = col, border = flatly[5],
-                      axes = FALSE, freq = freq)
-  
-  axis(1, pretty(xlim, n = 10L, min.n = 5L), las = 1, tick = FALSE)
-  
-  yrange <- pretty(if (freq) y$counts else y$density, n = 10L, min.n = 5L)
-  axis(2, yrange, tick = FALSE, las = 1)
-  invisible(y)
-}
-
-#' @export
-barplot <- function(height,  ..., 
-                    beside = TRUE, col = NULL,
-                    ylim = NULL, log = '', border = NA, yaxis, 
-                    freq = TRUE, probability = !freq) {
-  if (!freq) {
-    height <- height / sum(height)
-    if (is.null(ylim)) ylim <- c(0, 1)
-    yaxis <- pretty(ylim, n = 10L, min.n = 5L)
-  }
-  
-  twoD <- hasdim(height) && length(dim(height)) > 1L
-  
-  if (is.null(col)) {
-    col <- flatly[if (twoD) 1:nrow(height) else 1]
-  }
-  
-  if (is.logical(log)) log <- if (log[1]) 'y' else ''
-  
-  plot <- graphics::barplot(height, ..., beside = beside, legend.text = twoD, 
-                            col = col, ylim = ylim, border = border, axes = FALSE, log = log)
-  
-  
-  if (missing(yaxis)) {
-    yran <- if (log == 'y') log10(c(min(10, height), max(height))) else c(0L, max(height))
-    yaxis <- axisTicks(yran, log = log == 'y', nint = 12)
-    
-  }
-  axis(2, yaxis, las = 1, tick = FALSE)
- 
-  invisible(plot)
-}
 

@@ -76,7 +76,7 @@
 #' `with(humData, myExpressionHere)`.
 #' 
 #' Within expressions are evaluated within the `humdrumR` object's humdrum table,
-#' which means the expression can refer fields in the humdrumR object by name (`Record`, `Token`, `File`, etc.)
+#' which means the expression can refer fields in the humdrumR object by name (`Record`, `Token`, `Piece`, etc.)
 #' just like any other variables.
 #' Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
 #' (and generally should be) vectorized.
@@ -194,7 +194,7 @@
 #' ```
 #' 
 #' [lag()] is a function with a `groupby` argument, which `with`/`within.humdrumR`
-#' will automatically feed the fields `list(File, Spine, Path)`.
+#' will automatically feed the fields `list(Piece, Spine, Path)`.
 #' This is the default "melodic" behavior in most music.
 #' If you'd like to turn this off, you need to override it by adding your own
 #' `groupby` argument to the lagged index, like `Token[lag = 1, groupby = list(...)]`.
@@ -207,8 +207,8 @@
 #' with(humData, paste(Token[lag = 0:5], sep = '-'))
 #' ```
 #' 
-#' Note that, since `with`/`within.humdrumR` passes `groupby = list(File, Spine, Path)`
-#' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each file.
+#' Note that, since `with`/`within.humdrumR` passes `groupby = list(Piece, Spine, Path)`
+#' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each piece.
 #' 
 #' 
 #' @section Results:
@@ -344,11 +344,11 @@
 #' ```
 #' with(humdata,
 #'      table(Token),
-#'      by = File)
+#'      by = Piece)
 #' ```
 #'
 #' will apply the function `[base][table]` to the `Token` field
-#' *separately* for each file in the `humdrumR` data. 
+#' *separately* for each piece in the `humdrumR` data. 
 #' However, we can also use more complex expressions like
 #' 
 #' ```
@@ -367,10 +367,10 @@
 #' ```
 #' with(humdata, 
 #'      table(Token),
-#'      by = list(File, Spine))
+#'      by = list(Piece, Spine))
 #' ````
 #'
-#' will apply `table` to `Token` across each spine *in* each file.
+#' will apply `table` to `Token` across each spine *in* each piece.
 #'
 #'
 #' 
@@ -385,11 +385,11 @@
 #' ````
 #' within(humdata,
 #'          sd(Semits),
-#'          by = File, 
+#'          by = Piece, 
 #'          subset = Semits > mean(Semits))
 #' ```
 #' 
-#' the standard deviation of the `semits` field will be calculated in each file,
+#' the standard deviation of the `semits` field will be calculated in each piece,
 #' but only where the `semits` field is greater than the mean `semits` value
 #' *within that file*. Contrast this with this call:
 #' 
@@ -397,10 +397,10 @@
 #' within(humdata,
 #'          sd(Semits)
 #'          subset = Semits > mean(Semits), 
-#'          by = File) 
+#'          by = Piece) 
 #' ```
 #' 
-#' wherein the standard deviation of `semits` is, again, calculated for each file,
+#' wherein the standard deviation of `semits` is, again, calculated for each piece,
 #' but this time wherever the `semits` field is greater than the mean value *across all the data*.
 #' 
 #' @section Windowing data:
@@ -410,11 +410,11 @@
 #' To do so, simply place a call to `context()` in an unnamed argument to `with`/`within.humdrumR()`;
 #' you must provide `open` and `close` arguments.
 #' The `overlap`, `depth`, `rightward`, `duplicate_indices`, `min_length`, and `max_length` arguments can be used here,
-#' just as they are in a separate call to `context()`---the see the `context()` man page.
-#' Do not give the `context()` command inside a `with`/`within.humdrumR` a `x` or `reference` argument:
-#' The [active field][humActive] is used as the `reference` vector for `context()`---e.g., if `open`
+#' just as they are in a separate call to `context()` --- see the `context()` man page.
+#' Do not give the `context()` command inside a `with`/`within.humdrumR` call a `x` or `reference` argument:
+#' The [active field][humActive] is used as the `reference` vector for `context()` --- e.g., if `open`
 #' or `close` is a `character` string, they are matched as regular expressions against the [active field][humActive].
-#' `list(File, Record, Spine)` is also automatically passed as the `groupby` argument to `context()`.
+#' `list(Piece, Spine, Path)` is also automatically passed as the `groupby` argument to `context()`.
 #' 
 #' 
 #' When using `context()` inside `with`/`within.humdrumR`, the `alignToOpen` argument will have no effect.
@@ -429,7 +429,7 @@
 #' The `complement` expression will be evaluated on any data points that aren't captured within *any* contextual windows.
 #' 
 #' 
-#' Any `by` or `subset` expressions placed before a `contest()` expression are evaluated first, in order from left to right.
+#' Any `by` or `subset` expressions placed before a `context()` expression are evaluated first, in order from left to right.
 #' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
 #' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
 
@@ -485,11 +485,6 @@
 #'        list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
 #' 
-#' @section N grams:
-#' 
-#' XXXX
-#' 
-#' 
 #' 
 #' @section Advanced scripting:
 #' 
@@ -532,7 +527,7 @@
 #' We can even make lists and loop through them:
 #' 
 #' ```
-#' bys <- list(~ Spine, ~ File, ~ COM)
+#' bys <- list(~ Spine, ~ Piece, ~ COM)
 #' 
 #' for (b in bys) with(humData, table(.), by = b)
 #' 
@@ -1194,11 +1189,11 @@ laggedQuo <- function(funcQuosure) {
   do <- \(exprA) {
     
     args <- exprA$Args
-    if (!'groupby' %in% .names(args)) args$groupby <- expr(list(File, Spine, Path))
+    if (!'groupby' %in% .names(args)) args$groupby <- expr(list(Piece, Spine, Path))
     
     names(args)[tolower(names(args)) == 'lag'] <- 'n'
     n <- rlang::eval_tidy(args$n)
-    if (!is.numeric(n) || ((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
+    if (!is.numeric(n) || any((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
     args$n <- NULL
     
     lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
@@ -1383,7 +1378,7 @@ ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
 windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
   
-  if (!'groupby' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['groupby']] <- quote(list(File,Spine))
+  if (!'groupby' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['groupby']] <- quote(list(Piece, Spine))
   if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
   
   applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild', 'passOutside')])
@@ -1505,7 +1500,7 @@ prepareContextQuo <- function(contextQuo, active) {
   passAsExprs <- .names(exprA$Args) %in% c('open', 'close', '')
   exprA$Args[passAsExprs] <- lapply(exprA$Args[passAsExprs], \(expr) call('quote', expr))
   
-  if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(File, Spine, Path)) 
+  if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(Piece, Spine, Path)) 
   exprA$Args$x <- quote(humtab)
   
   unanalyzeExpr(exprA)
@@ -1727,7 +1722,7 @@ parseResult <- function(results, alignLeft = TRUE) {
                         
                         result <- Map(aligner, result, pmin(lengths(result), resultLengths))
                         
-                        result <- unlist(result, recursive = FALSE)
+                        result <- .unlist(result, recursive = FALSE)
                       }
                       
                       

@@ -1,8 +1,9 @@
 
 Nat's ToDo:
-	Rethink relationship beween Piece and File field.
 
 	Add grace slot to rhythmInterval?
+
+	Add "skip" functionality to mint() and hint()
 
 
 Major:
@@ -12,6 +13,8 @@ Major:
 	humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = ...] is slow
 
 Minor:
+	Make it so with/within can handle matrices.
+
 	Make time signatures using "0" and "00" as denominators work? Maybe some other way of reading mensuration?
 
 	Add ordering options to gamut(), so you could order by LO5th, for example.
@@ -27,6 +30,7 @@ Bugs:
 	Figured bass not working with keys?
 	key('k[f#]') not working
 	key('I', Key = 'A:') not working?
+
 
 
 Questions:

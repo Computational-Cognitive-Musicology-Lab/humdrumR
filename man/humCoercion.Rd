@@ -95,12 +95,12 @@ Note that \code{as.matrix(humdrumR)} places the \emph{entire} corpus object into
 In contrast, the plural \code{as.matrices} and \code{as.data.frames} call their respective singular versions
 separately on each individual file in a \link[=humdrumRclass]{humdrumR corpus} and return them all in a list.
 The \link[base:colnames]{row names}  of the \code{matrix}/\code{data.frame}(s) consist of two integer values,
-separated by a \code{.}, representing: \code{File.Record}.
+separated by a \code{.}, representing: \code{Piece.Record}.
 
 The \code{as.lines} function converts a \link[=humdrumRclass]{humdrumR object} into a \code{character} vector of text lines,
 with columns separated by the \code{sep} argument (defaults to \code{"\\t"}), just as you'd see in a humdrum-syntax file.
 Each line is a single row from a \code{as.matrix.humdrumR}, with padded values at the right side removed.
-The matrix's \code{File.Record} \link[base:colnames]{row names} are preserved as the lines' \link[base:names]{names}.
+The matrix's \code{Piece.Record} \link[base:colnames]{row names} are preserved as the lines' \link[base:names]{names}.
 
 Note that multiple-stop token (where \code{Stop > 1L}) cannot by incorporated into the two
 dimensional \code{matrix}/\code{data.frame}. Thus, \code{as.matrix(humdrumR)} calls
@@ -117,7 +117,9 @@ To squish them into a two dimensional object (\code{matrix} or \code{data.frame}
 The \code{pad} argument is a single atomic value which is used to pad the matrix.
 
 Another consideration is the behavior of spine paths.
-In the humdrum syntax, a spine path in a leftward spine "bumps" data in higher spines into new columns, as in this example:\preformatted{**kern  **kern
+In the humdrum syntax, a spine path in a leftward spine "bumps" data in higher spines into new columns, as in this example:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern  **kern
 A       E
 *^      *
 A       C       E
@@ -125,12 +127,14 @@ G       B       D
 *v      *v      *
 A       C        
 *-      *-
-}
+}\if{html}{\out{</div>}}
 
 At the beginning and end of the file, the second column holds data for the second spine.
 However, in the middle of the file, the second column holds data from the second spine path of the first spine.
 To make the spine structure clearer, \code{as.matrix(humdrumR)} has the option to pad spine paths.
-For example, using \code{"_"} as our \code{pad} argument:\preformatted{**kern   _        **kern
+For example, using \code{"_"} as our \code{pad} argument:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern   _        **kern
 A        _        E
 *^       _        *
 A        C        E
@@ -138,7 +142,7 @@ G        B        D
 *v       *v       *
 A        _        C        
 *-       _        *-
-}
+}\if{html}{\out{</div>}}
 
 This aspect of the matrix padding behavior can be controlled with the \code{padPaths} argument, with three possible values/behaviors:
 \itemize{

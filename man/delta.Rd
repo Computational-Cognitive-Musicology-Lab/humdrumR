@@ -90,7 +90,7 @@ However, \code{delta} should be favored in \link{humdrumR} use because:
 \item Its output is \emph{always} the same length as its  input.
 This is achieved by padding the beginning or end of the output with1 \code{NA} values (or other options).
 \item It has a \code{groupby} argument, which is \emph{automatically} used by \code{humdrumR} \link[=withinHumdrum]{with(in)}
-commands to constrain the differences within files/spines/paths of \code{humdrum} data.
+commands to constrain the differences within pieces/spines/paths of \code{humdrum} data.
 The \code{groupby} approach (details below) is generally faster than applying the commands within \code{groupby} groups.
 \item They (can) automatically skip \code{NA} (or other) values.
 }
@@ -191,13 +191,13 @@ However, using a \code{groupby} argument directly is usually much faster, as the
 specially optimized for this functions.
 
 The most common use case in humdrum data, is looking at "melodies" within spines.
-For this, we want \code{groupby = list(File, Spine, Path)}.
+For this, we want \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
 three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
-in a "melodic" way, within each spine path of each file.
+in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-you could manually set \code{groupby = list(File, Record)}.
+you could manually set \code{groupby = list(Piece, Record)}.
 }
 
 \section{Order}{
@@ -206,38 +206,42 @@ you could manually set \code{groupby = list(File, Record)}.
 When performing lagged calculations, we typically assume that the order of the values in the input vector
 (\code{x}) is the order we want to "lag" across.
 E.g., the first element is "before" the second element, which is "before" the third element, etc.
-[Humdrum tables][humTable] are always ordered \verb{File > Piece > Spine > Path > Record > Stop}.
+[Humdrum tables][humTable] are always ordered \verb{Piece > Piece > Spine > Path > Record > Stop}.
 Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 the \emph{next} element is the next element in the spine path.
-For example, consider this data:\preformatted{**kern  **kern
+For example, consider this data:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern  **kern
 a       d
 b       e
 c       f
 *-      *-
-}
+}\if{html}{\out{</div>}}
 
 The default order of these tokens (in the \code{Token} field) would be \verb{a b c d e f}.
 If we wanted to instead lag across our tokens \emph{harmonically} (across records) we'd need to specifiy a different order
-For example, we could say \code{orderby = list(File, Record, Spine)}---the lagged function
+For example, we could say \code{orderby = list(Pice, Record, Spine)}---the lagged function
 would interpret the \code{Token} field above as \verb{a d b e c f}.
 
 For another example, note \code{Stop} comes last in the order.
-Let's consider what happens then if here are stops in our data:\preformatted{**kern  **kern
+Let's consider what happens then if here are stops in our data:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{**kern  **kern
 a       d
 b D     e g
 c A     f a
 *-      *-
 ```
 
-The default ordering here (`File > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
+The default ordering here (`Piece > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
 That may or may not be what you want!
-If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(Piece, Spine, Stop, Record)`.
 The resulting order would be `a b c d e f D G g a`.
 
    
 
 [humTable]: R:humTable
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Invertability}{

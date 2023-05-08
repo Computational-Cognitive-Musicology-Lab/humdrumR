@@ -88,10 +88,10 @@
 #' 
 #' ## Relational Operators
 #' 
-#' `tonalInterval`s can be compared using the standard [relational operations][base::Comparison]---`==`, `!=`, `>`, `>=`, etc.
+#' `tonalInterval`s can be compared using the standard [relational operations][base::Comparison], like `==`, `!=`, `>`, and `>=`.
 #' Two `tonalInterval`s are equal (according to `==`) only if all their slots (`Octave`, `Fifth`, and `Cent`)
 #' are exactly identical. 
-#' Thus, enharmonic notes (like C# and Db) are *not* equal.
+#' Thus, enharmonic notes (like C and Db) are *not* equal.
 #' In contrast, ordinal comparisons (e.g., `>`, `<=`) between `tonalInterval`s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
 #' Thus, `m3 >= A2` and `A2 >= m3` are both `TRUE`, even though `m3 == A2` is not.
 #' 
@@ -742,7 +742,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' If `step.labels` is `NULL`, steps are assumed printed as integers, including negative integers representing downward steps.
 #' 
-#' ----
+#' 
 #' 
 #' There is also a `step.signed` (`logical`, `length == 1`) argument: if `step.signed = TRUE`, lowercase versions of `step.labels` are interpreted as negative (downward) steps and
 #' uppercase versions of `step.labels` are interpreted as positive (upwards) steps.
@@ -772,7 +772,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' + `(flat = "-", sharp = "+")` -> [degree()]
 #' 
 #' 
-#' ----
+#' 
 #' 
 #' The `doubleflat`, and `doublesharp` (`character`, `length == 1`) arguments are `NULL` by default, but can be set if a special symbol is wanted
 #' to represent two sharps or flats. For example, you could modify [pitch()] to use a special double sharp symbol:
@@ -934,7 +934,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' Notice that, if `octave.floor` is being used, all simple intervals are represented as ascending.
 #' 
-#' ----
+#' 
 #' 
 #' When parsing ["absolute" pitch][pitch()] representations, the `octave.round` option allows you to control which octave notes are associated with.
 #' The following table illustrates:
@@ -998,7 +998,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' quality appears *after* the step---e.g., `2M` and `5P`.
 #' We could call `interval(c("2M", "5P"), parse(parts = c("step", "species")))` and sure enough we'd get the correct parse!
 #' 
-#' ----
+#' 
 #' 
 #' One final string-parsing argument is `sep`, which indicates if there is a character string separating the pitch information components:
 #' The most common case would be a comma or space.
@@ -1171,13 +1171,20 @@ tint2pc <- function(x, ten = 'A', eleven = 'B', ...) {
 
 ### Tonal ####
 
-tint2step  <- function(x, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
+tint2step  <- function(tint, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B'), ...) {
   
-  stepint <- c(1L, 5L, 2L, 6L, 3L, 7L, 4L)[1 + (LO5th(x) %% 7L)]
+  stepint <- 1L + (LO5th(tint) * 4L) %% 7L
+  # stepint <- c(1L, 5L, 2L, 6L, 3L, 7L, 4L)[1 + (LO5th(x) %% 7L)]
   
   if (is.null(step.labels))  stepint else step.labels[stepint]
 
 }
+
+
+tint2third <- function(tint) LO5th2third(LO5th(tint))
+
+LO5th2third <- function(lof) (lof * 2L) %% 7L
+  
 
 ###### Alteration stuff ###
 
@@ -1741,7 +1748,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' If `step.labels` is `NULL`, steps are assumed to be represented by integers, including negative integers representing downward steps.
 #' 
-#' ----
+#' 
 #' 
 #' There is also a `step.signed` (`logical`, `length == 1`) argument: if `step.signed = TRUE`, lowercase versions of `step.labels` are interpreted as negative (downward) steps and
 #' uppercase versions of `step.labels` are interpreted as positive (upwards) steps.
@@ -1769,7 +1776,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' + `parse(flat = "-", sharp = "+")` -> `**degree`
 #' 
 #' 
-#' ----
+#' 
 #' 
 #' The `doubleflat`, and `doublesharp` (`character`, `length == 1`) arguments are `NULL` by default, but can be set if a special symbol is used 
 #' to represent two sharps or flats. For example, you might have an input which represents double sharps as `"x"`.
@@ -1923,7 +1930,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' Notice that, if `octave.floor` is being used, all simple intervals are represented as ascending.
 #' 
-#' ----
+#' 
 #' 
 #' When parsing ["absolute" pitch][pitch()] representations, the `octave.round` option allows you to control which octave notes are associated with.
 #' The following table illustrates:
@@ -1987,7 +1994,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' quality appears *after* the step---e.g., `2M` and `5P`.
 #' We could call `interval(c("2M", "5P"), parse(parts = c("step", "species")))` and sure enough we'd get the correct parse!
 #' 
-#' ----
+#' 
 #' 
 #' One final string-parsing argument is `sep`, which indicates if there is a character string separating the pitch information components:
 #' The most common case would be a comma or space.
@@ -2854,6 +2861,10 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' To read the details of the "deparsing" step, read [this][pitchDeparsing].
 #' To read more details about each specific function, click on the links in the list above, 
 #' or type `?func` in the R command line: for example, `?kern`.
+#'
+#' The "partial" pitch functions [octave()], [step()], [accidental()], and [quality()] are so-called
+#' because they each only return one part/aspect of pitch information, and only that part.
+#' For example, `accidental()` only returns he accidentals (if any) of pitches.
 #'     
 #' @param x ***Input data to parse as pitch information.***
 #' 
@@ -2970,7 +2981,8 @@ pitchArgCheck <- function(args,  callname) {
 makePitchTransformer <- function(deparser, callname, 
                                  outputClass = 'character', 
                                  keyed = TRUE,
-                                 removeArgs = NULL, extraArgs = alist()) {
+                                 # removeArgs = NULL, 
+                                 extraArgs = alist()) {
   withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
   withinFields$Key        <<- c(withinFields$Key, callname)
   
@@ -2987,8 +2999,8 @@ makePitchTransformer <- function(deparser, callname,
                   gamutArgs = list(),
                   inPlace = FALSE))
 
-  if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
-  
+  # if (!is.null(removeArgs)) args <- args[!names(args) %in% removeArgs]
+
   fargcall <- setNames(rlang::syms(names(args[-1:-2])), names(args[-1:-2]))
   
   rlang::new_function(args, rlang::expr( {
@@ -3292,7 +3304,6 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' Like all `humdrumR` pitch functions, the ways that `kern` [parses][pitchParsing] and [deparses][pitchDeparsing] tokens
 #' can be modified to accomodate variations of the standard `**kern` pitch representation.
 #' 
-#' ---
 #' 
 #' @examples
 #' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
@@ -3539,43 +3550,93 @@ bhatk <- makePitchTransformer(tint2bhatk, 'bhatk', keyed = FALSE)
 
 #### Partial pitch extractors ----
 
-#' Extract scale step
+#' Extract scale step.
+#' 
+#' This is equivalent to using any [pitch function][pitchFunctions] with the
+#' arguments `generic = TRUE`, `simple = TRUE`, and `step.labels = NULL`.
+#' By default, `step()` will returns steps relative to the key---set `Key = NULL` if you don't want this.
+#' 
+#' @examples 
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, step(Token))
+#'
+#' within(chorales, step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
+#' }
 #' 
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
-step <- makePitchTransformer(partialApply(tint2step, step.labels = NULL), 'step', 'integer', 
-                             removeArgs = c('generic', 'octave.relative', 'transposeArgs'))
+step <- makePitchTransformer(partialApply(tint2step, step.labels = NULL), 'step', 'integer')
 
-#' Extract accidental from pitch
+#' Extract accidental from pitch.
 #' 
+#' Use this if you want to extract *only* the accidentals from pitch data,
+#' discarding octave and step information.
+#' Set `explicitNaturals = FALSE` if you don't want explicit naturals.
+#' 
+#' @examples 
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, accidentals(Token))
+#'
+#' }
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
 accidental <- makePitchTransformer(partialApply(tint2specifier, flat = 'b', qualities = FALSE, explicitNaturals = TRUE), 
-                                   'accidental', 'character', 
-                                   removeArgs = c('generic', 'simple', 'octave.relative', 'transposeArgs'))
+                                   'accidental', 'character')
 
 #' Extract quality from pitch
 #' 
+#' Use this if you want to extract *only* the tonal qualities from pitch data,
+#' discarding octave and step information.
+#' 
+#' @examples 
+#'
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, quality(Token))
+#' 
+#' # Harmonic interval qualities:
+#' 
+#' within(chorales, hint(Token, deparser = quality))
+#' with(chorales, hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
+#' 
+#' }
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
-quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE), 
-                                'quality', 'character', 
-                                removeArgs = c('generic', 'simple', 'octave.relative', 'transposeArgs'))
+quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, explicitNaturals = TRUE), 
+                                'quality', 'character')
 
 
-#' Extract octave
+#' Extract octave.
 #' 
+#' Returns which octave each pitch falls in.
+#' By default, middle-C is the bottom of the zeroth-octave, but this can be changed with the `octave.offset`
+#' argument.
+#' Other octave labels (like [lilypond()]-style marks) can be used if you set `octave.integer = FALSE`.
+#' 
+#' 
+#' \dontrun{
+#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' 
+#' within(chorales, octave(Token))
+#' within(chorales, octave(Token, octave.offset = 4)) # traditional octaves
+#' 
+#' within(chorales, octave(Token, octave.integer = FALSE))
+#' }
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
 #' @export 
 octave <- makePitchTransformer(tint2octave, 'octave', 'integer')
-                               # removeArgs = c('generic', 'simple'))
 
 
 
@@ -4038,8 +4099,8 @@ invert.factor <- invert.token
 #' 
 #' `mint()` and `hint()` work by passing [lagged][lag()] and/or [dittoed][ditto()]
 #' versions of `x` as the `from` argument to `int()`.
-#' Basically, `mint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Spine, Path)), ...)`
-#' and `hint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(File, Record), orderby = list(File, Record, Spine, Path)), ...)`.
+#' Basically, `mint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(Piece, Spine, Path)), ...)`
+#' and `hint()` is equivalent to `int(x, lag(x, lag = lag, groupby = list(Piece, Record), orderby = list(Piece, Record, Spine, Path)), ...)`.
 #' In either case, the parsed pitch vector is copied and lagged using [lag()], with pairs crossing outside `groupby` groups ignored.
 #' The `lag` argument controls how far apart in the melody intervals are calculated.
 #' For instance, a lag of `2` will calculate intervals between *every other* note in the vector.
@@ -4410,18 +4471,14 @@ hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = T
 ###################################################################### ### 
 # Predefined tonalIntervals ##############################################
 ###################################################################### ### 
-#' 
-#' # Predefined intervals:
-#' 
-#' @rdname tonalIntervalS4
+#' @name tonalIntervalS4
 #' @export dd1 dd2 A2 P3 d4 d5 d6 AA6 M7 dd9 A9 P10 d11 d12 d13 AA13 M14 P15
 #' @export d1 d2 AA2 M3 P4 P5 m6 dd7 A7 P8 d9 AA9 M10 P11 P12 m13 dd14 A14 A15
 #' @export P1 m2 dd3 A3 A4 A5 P6 d7 AA7 m9 dd10 A10 A11 A12 P13 d14 AA14 AA15
 #' @export A1 P2 d3 AA3 AA4 AA5 M6 m7 dd8 A8 P9 d10 AA10 AA11 AA12 M13 m14 dd15
 #' @export AA1 M2 m3 dd4 dd5 dd6 A6 P7 d8 AA8 M9 m10 dd11 dd12 dd13 A13 P14 d15
 #' @export unison pythagorean.comma octave
-NULL
-# 
+
 allints <- outer(c('dd', 'd', 'm', 'P', 'M', 'A', 'AA'), 1:15, paste0)
 allints[as.matrix(expand.grid(c(3,5), c(1,4,5,8, 11,12,15)))] <- NA
 allints <- c(allints)

@@ -2,30 +2,30 @@
 % Please edit documentation in R/Analysis.R
 \name{entropy}
 \alias{entropy}
-\alias{entropy.default}
-\alias{entropy.table}
-\alias{entropy.density}
-\alias{entropy.numeric}
+\alias{entropy,table-method}
+\alias{entropy,probabilityDistribution-method}
+\alias{entropy,density-method}
 \alias{ic}
-\alias{ic.numeric}
-\alias{ic.default}
+\alias{ic,discrete-method}
+\alias{ic,numeric-method}
+\alias{ic,missing-method}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
-entropy(..., base)
+entropy(x, base = 2, ...)
 
-\method{entropy}{default}(..., base = 2, margin = NULL)
+\S4method{entropy}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
 
-\method{entropy}{table}(tab, base = 2, margin = NULL, ...)
+\S4method{entropy}{probabilityDistribution}(x, base = 2)
 
-\method{entropy}{density}(x, base = 2)
+\S4method{entropy}{density}(x, base = 2, na.rm = TRUE)
 
-\method{entropy}{numeric}(x, base = 2, ...)
+ic(x, ...)
 
-ic(..., distribution, base)
+\S4method{ic}{discrete}(x, ..., base = 2, distribution = NULL, margin = NULL, na.rm = TRUE)
 
-\method{ic}{numeric}(x, distribution = density(x), base = 2)
+\S4method{ic}{numeric}(x, base = 2, density = NULL, ..., na.rm = TRUE)
 
-\method{ic}{default}(..., distribution = ptable(...), base = 2)
+\S4method{ic}{missing}(x, base = 2, ..., margin = NULL, na.rm = TRUE)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},
@@ -57,7 +57,7 @@ By default, the \code{distribution} argument is estimated using \code{\link[=den
 }
 \seealso{
 Other {Information theory functions}: 
-\code{\link{crossentropy}()},
+\code{\link{crossEntropy}()},
 \code{\link{mutualInfo}()}
 }
 \concept{{Information theory functions}}

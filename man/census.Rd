@@ -9,7 +9,7 @@
 census(
   humdrumR,
   dataTypes = "GLIMDd",
-  by = Filename,
+  by = Piece,
   removeEmpty = FALSE,
   drop = FALSE
 )
@@ -33,7 +33,7 @@ or any combination of these (e.g., \code{"LIM"}).
 
 \item{by}{\emph{\strong{An arbitrary expression which indicates how to group the data.}}
 
-Defaults to \code{Filename} (a humdrumR \link[=humTable]{data field}).}
+Defaults to \code{Piece} (a humdrumR \link[=humTable]{data field}).}
 
 \item{removeEmpty}{\emph{\strong{Whether to include zero tokens.}}
 
@@ -90,19 +90,19 @@ A \code{humCensus} table has five columns of information:
 }
 }
 
-By default, \code{census} tabulates data within files in the corpus,
-with each file tabulated in a row of the \code{humCensus} table.
-Rows are labeled with each filename.
+By default, \code{census} tabulates data within pieces in the corpus,
+with each piece tabulated in a row of the \code{humCensus} table.
+Rows are labeled with each file name.
 When a \code{humCensus} object is printed,
-the totals across all files are printed as well---(unique) and (per token)
-values are calculated across all files as well, not summed.
+the totals across all pieces are printed as well---(unique) and (per token)
+values are calculated across all pieces as well, not summed.
 The \code{by} argument can be used to tabulate data across other divisions in the data (see next section).
 }
 \section{Tabulate "by" other groups}{
 
 
 The \code{by} argument to \code{census} indicates groupings in the data to tabulate within, grouping
-across filenames in the corpus by default.
+across pieces in the corpus by default.
 \code{by} can be an arbitrary expression which is evaluated inside the \link[=humTable]{humdrum table},
 like the \code{groupby} argument to a \link[=withHumdrum]{with/within} call.
 The by expression must be the full length of the humdrum table.

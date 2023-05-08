@@ -113,10 +113,10 @@ For example, \verb{M3 + 4.ee-} will return \verb{4.gg}.
 
 \subsection{Relational Operators}{
 
-\code{tonalInterval}s can be compared using the standard \link[base:Comparison]{relational operations}---\code{==}, \code{!=}, \code{>}, \code{>=}, etc.
+\code{tonalInterval}s can be compared using the standard \link[base:Comparison]{relational operations}, like \code{==}, \code{!=}, \code{>}, and \code{>=}.
 Two \code{tonalInterval}s are equal (according to \code{==}) only if all their slots (\code{Octave}, \code{Fifth}, and \code{Cent})
 are exactly identical.
-Thus, enharmonic notes (like C# and Db) are \emph{not} equal.
+Thus, enharmonic notes (like C and Db) are \emph{not} equal.
 In contrast, ordinal comparisons (e.g., \code{>}, \code{<=}) between \code{tonalInterval}s are based on their semitone (equal temperament) size, so enharmonicity is irrelevant.
 Thus, \code{m3 >= A2} and \code{A2 >= m3} are both \code{TRUE}, even though \code{m3 == A2} is not.
 }

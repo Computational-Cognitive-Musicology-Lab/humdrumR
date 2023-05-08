@@ -2,12 +2,16 @@
 % Please edit documentation in R/Pitch.R
 \name{accidental}
 \alias{accidental}
-\title{Extract accidental from pitch}
+\title{Extract accidental from pitch.}
 \usage{
 accidental(
   x,
   ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
   Key = NULL,
+  transposeArgs = list(),
   parseArgs = list(),
   gamutArgs = list(),
   inPlace = FALSE
@@ -22,11 +26,29 @@ The \code{x} argument can be any (\link[base:vector]{atomic}) vector, or a \link
 
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
+\item{generic}{\emph{\strong{Should "specific" pitch information (accidentals and qualites) be discarded?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{simple}{\emph{\strong{Should "compound" pitch information (octave/contour) be discarded?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{Key}{\emph{\strong{The input \code{Key} used by the parser, deparser, and transposer.}}
 
 Defaults to \code{NULL}.
 
 Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}}
+
+\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a special \code{\link[=transpose]{transpose()}} call.}}
+
+Defaults to an empty \code{list()}.
+
+Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
 
 \item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=pitchParsing]{pitch parser}.}}
 
@@ -46,7 +68,17 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-Extract accidental from pitch
+Use this if you want to extract \emph{only} the accidentals from pitch data,
+discarding octave and step information.
+Set \code{explicitNaturals = FALSE} if you don't want explicit naturals.
+}
+\examples{
+\dontrun{
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+within(chorales, accidentals(Token))
+
+}
 }
 \seealso{
 Other {pitch functions}: 

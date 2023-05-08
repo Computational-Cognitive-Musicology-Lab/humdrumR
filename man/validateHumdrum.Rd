@@ -21,6 +21,18 @@ Must be a single \code{character} string.
 
 If \code{NULL} (the default), no error report files are written.}
 }
+\value{
+\code{validateHumdrum()} returns a "error frame" data.table object, \link[base:invisible]{invisibly}
+(to "see" the output, you must save it to a variable, \emph{then} look at it).
+The error frame is a \code{data.table} with three columns:
+\itemize{
+\item \code{Filepath}: The file name.
+\item \code{Record}: Which record contains the error.
+\item \code{Message}: A description of the error.
+}
+
+Valid files will have no rows in the error frame.
+}
 \description{
 This function checks files on your local machine for violations of the
 \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}.
@@ -39,24 +51,12 @@ one or more regex search patterns to match files on your machine.
 (The \code{...}, \code{recursive}, and \code{contains} arguments are all simply passed to \code{\link[=findHumdrum]{findHumdrum()}}.)
 When called, \code{validateHumdrum} prints basic messages informing you about the result of
 the file matching and validity testing.
-
-The function also returns (\link[base:invisible]{invisibly}) the \code{\link[=findHumdrum]{findHumdrum()}} "file info"
-\code{data.table}, with additional \code{Valid} and \code{Errors} columns:
-The \code{Valid} column is \code{logical}, with \code{TRUE} for all valid humdrum files.
-The \code{Error} column is a list of \code{data.table}s, describing syntax errors in the files
-if any.
-The \code{Error} \code{data.table}s have one row for each error in a file (if any), and three columns:
-\itemize{
-\item \code{Filepath}: The file name.
-\item \code{Record}: Which record contains the error.
-\item \code{Message}: A description of the error.
-}
 }
 \section{Error reports}{
 
 
-If desired, the contents of the \code{validateHumdrum} can be written files.
-This is most useful, as we can print the errors tagged right alongside the original raw data.
+If desired, the contents of the \code{validateHumdrum} "error frame" can be written into text files.
+This allows us to print the errors tagged right alongside the original raw data.
 To write an error report, set the \code{errorReport.path} argument to a non-\code{NULL} string,
 pointing to a directory path on your machine.
 If the directory doesn't exist, \code{R} will (attempt to) create it.
@@ -66,13 +66,24 @@ the files (same as in the returned "fileFrame", see above) are written into a si
 \code{'humdrumR_syntaxErrorReport_DATE.txt'} (with the \code{date} coming from \link[base:Sys.time]{Sys.Date}\verb{).  In addition, a sub directory called }AnnotatedFiles\verb{is created. In this directory, copies of all the files which contain errors are written, with}_errorAnnotations` appended
 to their names.
 In each file, individual errors are directly indicated in the record where they occur.
-The output looks like this:\preformatted{                                             | The original records from the input file
+The output looks like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{                                             | **whatever
+                                             | =
+                                             | The original records from the input file
                                              | appear on the right side.
-Error message for record three printed here. | Exactly as they did
+                                             | =
+Error message for record six printed here.   | Exactly as they did
                                              | in the input file.
-}
+                                             | *-
+}\if{html}{\out{</div>}}
 }
 
 \examples{
-validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
+
+validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B.*.krn")
+
+errorFrame <- validateHumdrum(humdrumRroot, "HumdrumData/InvalidFile.krn")
+errorFrame
+
 }

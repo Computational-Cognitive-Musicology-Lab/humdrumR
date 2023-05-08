@@ -472,7 +472,8 @@ multimatch <- function(x, table, ...) {
 }
 
 squashGroupby <- function(groupby = list()) {
-  do.call('paste', groupby) # seems to be fastest option
+  groups <- do.call('paste', groupby) # seems to be fastest option
+  match(groups, unique(groups))
   # groupby <- as.data.table(groupby)
   # matches(groupby, unique(groupby))
 
@@ -484,11 +485,35 @@ squashGroupby <- function(groupby = list()) {
 `%pin%` <- function(x, table) pmatch(x, table, nomatch = 0L, duplicates.ok = TRUE) > 0L
 
 
-take <- function(x, n = 10L) x[seq_len(max(n, 0L))] 
+take <- function(x, n = 10L) {
+  if (hasdim(x)) {
+    x[seq_len(min(nrow(x), max(n, 0L))), , drop = FALSE ] 
+  } else {
+    x[seq_len(min(length(x), max(n, 0L))) ] 
+  }
+  
+}
 
 end <- function(x, n = 10L) {
-  l <- length(x)
-  if (n > 0) x[(l - n + 1):l] else x[0]
+  if (n <= 0) return(if (hasdim(x)) x[0L, , drop = FALSE] else x[0L])
+  
+  
+  if (hasdim(x)) {
+    l <- nrow(x)
+    ind <- (l - n + 1) : l
+    ind <- ind[ind > 0]
+    
+    x[ind, , drop = FALSE] 
+      
+  }  else {
+    l <- length(x)
+    
+    ind <- (l - n + 1) : l
+    ind <- ind[ind > 0]
+    
+    x[ind] 
+  }
+  
 }
 
 # positivediffs <- function(x, y) {
@@ -511,7 +536,7 @@ end <- function(x, n = 10L) {
 # }
 
 
-closest <- function(x, where, direction = 'either', diff_func = `-`) {
+closest <- function(x, where, direction = 'either', diff_func = `-`, value = TRUE) {
           direction <- pmatch(direction, c('either', 'below', 'above', 'lessthan', 'morethan'))
           
           
@@ -526,7 +551,8 @@ closest <- function(x, where, direction = 'either', diff_func = `-`) {
                          } else {
                                    if (direction %in% c(3, 5))  intervals + 1  else intervals
                          })
-          sortedwhere[hits]
+          
+          if (value)  sortedwhere[hits] else match(sortedwhere[hits], where)
           
 }
 
@@ -1272,7 +1298,7 @@ gcd <- function(...) {
 }
 
 .gcd <- function(x, y) {
-  if (is.na(x) || is.na(y)) return(as(NA, class(x)))
+  if (all(is.na(x) | is.na(y))) return(as(rep(NA, length(x)), class(x)))
     r <- x %% y
     
     notyet <- r > 0
@@ -1387,7 +1413,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' However, `sigma` should be favored in [humdrumR] use because:
 #' 
 #' 1. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
-#'    commands to constrain the differences within files/spines/paths of `humdrum` data.
+#'    commands to constrain the differences within pieces/spines/paths of `humdrum` data.
 #'    Using the `groupby` argument to a function (details below) is generally faster than using a `groupby` argument to [withinHumdrum()].
 #' 2. They (can) automatically skip `NA` (or other) values.
 #' 3. `sigma` also has a `init` argument which can be used to ensure full invertability with [delta()]. See the "Invertability"
@@ -1492,20 +1518,20 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' specially optimized for this functions.
 #' 
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
-#' For this, we want `groupby = list(File, Spine, Path)`.
+#' For this, we want `groupby = list(Piece, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
 #' three fields as `groupby` arguments to certain functions: `r harvard(byTable[byTable$Type == 'melodic', ]$Function, 'or')`.
 #' So any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
-#' in a "melodic" way, within each spine path of each file.
+#' in a "melodic" way, within each spine path of each piece.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
-#' you could manually set `groupby = list(File, Record)`.
+#' you could manually set `groupby = list(Piece, Record)`.
 #' 
 #' @section Order:
 #' 
 #' When performing lagged calculations, we typically assume that the order of the values in the input vector
 #' (`x`) is the order we want to "lag" across.
 #' E.g., the first element is "before" the second element, which is "before" the third element, etc.
-#' [Humdrum tables][humTable] are always ordered `File > Piece > Spine > Path > Record > Stop`.
+#' [Humdrum tables][humTable] are always ordered `Piece > Piece > Spine > Path > Record > Stop`.
 #' Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 #' the *next* element is the next element in the spine path.
 #' For example, consider this data:
@@ -1520,7 +1546,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' 
 #' The default order of these tokens (in the `Token` field) would be `a b c d e f`.
 #' If we wanted to instead lag across our tokens *harmonically* (across records) we'd need to specifiy a different order
-#' For example, we could say `orderby = list(File, Record, Spine)`---the lagged function
+#' For example, we could say `orderby = list(Pice, Record, Spine)`---the lagged function
 #' would interpret the `Token` field above as `a d b e c f`.
 #' 
 #' For another example, note `Stop` comes last in the order.
@@ -1534,9 +1560,9 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' *-      *-
 #' ```
 #' 
-#' The default ordering here (`File > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
+#' The default ordering here (`Piece > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
 #' That may or may not be what you want!
-#' If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(File, Spine, Stop, Record)`.
+#' If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(Piece, Spine, Stop, Record)`.
 #' The resulting order would be `a b c d e f D G g a`.
 #' 
 #'    
@@ -1677,7 +1703,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' 1. Its output is *always* the same length as its  input.
 #'    This is achieved by padding the beginning or end of the output with1 `NA` values (or other options).
 #' 2. It has a `groupby` argument, which is *automatically* used by `humdrumR` [with(in)][withinHumdrum]
-#'    commands to constrain the differences within files/spines/paths of `humdrum` data.
+#'    commands to constrain the differences within pieces/spines/paths of `humdrum` data.
 #'    The `groupby` approach (details below) is generally faster than applying the commands within `groupby` groups.
 #' 3. They (can) automatically skip `NA` (or other) values.
 #' 
@@ -1901,6 +1927,11 @@ locate <- function(x, table) {
 
 # bitwise tools
 
+set2int <- function(set, groupby = integer(length(set))) {
+  set <- as.integer(2L ^ set)
+  c(tapply(set, groupby, sum))
+}
+
 ints2bits <- function(n, nbits = 8) {
     mat <- t(sapply(n, \(x) as.integer(intToBits(x))))[ , 1:nbits, drop = FALSE]
     
@@ -1941,7 +1972,9 @@ ints2nits <- function(n, it = 2, nits = 8) {
 
 ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
-    tern <- ints2nits(abs(n), it = 3L, ntrits)
+    tern <- ints2nits(abs(n), it = 3L, nits = ntrits)
+    
+    if (any(abs(n) > (3L ^ ntrits))) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to reprsent in {ntrits} trits.")
     
     while(any(tern == 2L, na.rm = TRUE)) {
         twos <- which(tern == 2L, arr.ind = TRUE)
@@ -1961,7 +1994,7 @@ ints2baltern <- function(n, ntrits = 8L) {
     # tern[firstnotzero] <- tern[firstnotzero] * sign(n[n != 0])
     
     ## incorporate sign
-    sweep(tern, c(1, if (length(dim(n))>1) 3), as.integer(sign(n)), '*')
+    sweep(tern, c(1, if (length(dim(n)) > 1) 3), as.integer(sign(n)), '*')
     
 }
 
@@ -2008,6 +2041,37 @@ bitwRotateR <- function(a, n, nbits = 8L) {
 
 # Metaprogramming ----
 
+deparse.unique <- function(exprs) {
+  
+  exprs <- rapply(lapply(exprs, as.list), rlang::expr_name, how = 'list')
+  exprs <- lapply(exprs, unlist, recursive = FALSE)
+  exprs <- lapply(exprs, 
+                  \(args) {
+                    names <- .names(args)
+                    args <- ifelse(names == '', args, paste0(names, ' = ', args))
+                    unname(args)
+                  })
+  
+  extraArgs <- lapply(exprs, '[', i = -1:-2)
+  tab <- table(rep(seq_along(extraArgs), lengths(extraArgs)), 
+               unlist(extraArgs))
+  redundant <- colnames(tab)[colSums(tab) == nrow(tab)]
+  exprs <- lapply(exprs, setdiff, y = redundant)
+  
+  exprs <- lapply(exprs, \(args) if (length(args) > 3) c(args, '...') else args)
+  labels <- sapply(exprs, 
+                   \(args) {
+                     if (length(args) == 1L) {
+                       args
+                     } else {
+                       paste0(args[1], 
+                              '(', 
+                              paste(args[-1], collapse = ', ' ), ')')
+                     }
+                   })
+  
+  make.unique(labels)
+}
 
 visible <- function(withV) {
   if (is.null(withV$value)) return(NULL)
@@ -2280,7 +2344,7 @@ wrapInCall <- function(call, x, ...) {
 
 
 getStructure <- function(...) {
-  getArgs(c('File', 'Spine', 'Patch'), ...)
+  getArgs(c('Piece', 'Spine', 'Patch'), ...)
 }
 
 getArgs <- function(args, ...) {
@@ -2645,7 +2709,7 @@ object2str <- function(object) {
         
 }
 
-num2str <- function(n, pad = FALSE) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
+num2str <- function(n, pad = FALSE) if (!is.null(n)) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
 
 num2print <- function(n, label = NULL, capitalize = FALSE) {
@@ -2656,6 +2720,15 @@ num2print <- function(n, label = NULL, capitalize = FALSE) {
           n_str
 }
 
+num2order <- function(num, minwidth = 1L) {
+  #pads zeros to make numbers sort properly
+  
+  maxwidth <- max(floor(log10(abs(num)))) + 1L
+  width <- max(minwidth, maxwidth)
+  
+  paste0(ifelse(num < 0, '-', if (any(num < 0)) '+' else ''), 
+         stringr::str_pad(abs(num), width = width, pad = '0', side = 'left'))
+}
 
 num2word <- function(num, capitalize = FALSE) {
   words = c('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
@@ -2767,3 +2840,12 @@ strPartition <- function(str, split = '/') {
 
 
 
+
+isColor <- function(x) {
+  if (!is.character(x)) return(logical(length(x)))
+  
+  x %in% colors() |
+    stringr::str_detect(x, '^#([0-9a-f]{6}|[0-9a-f]{8})$') |
+    is.na(x) |
+    x == 'transparent'
+}
