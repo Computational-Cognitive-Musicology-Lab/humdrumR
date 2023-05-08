@@ -158,6 +158,7 @@ reference:
   - untie
   - timeline
   - timebase
+  - recordDuration
 - subtitle: "Beats and Meter"
   desc: "Rhythm and meter analysis functions."
   contents:

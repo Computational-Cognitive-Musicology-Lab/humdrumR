@@ -18,7 +18,7 @@ to the beginning (attack) and end (release) of rhythmic events.'><!-- mathjax --
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,6 +93,7 @@ to the beginning (attack) and end (release) of rhythmic events.</p>
 <span>  pickup <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  Exclusive <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  threadNA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -105,6 +106,7 @@ to the beginning (attack) and end (release) of rhythmic events.</p>
 <span>  minutes <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  Exclusive <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  threadNA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -129,6 +131,12 @@ to the beginning (attack) and end (release) of rhythmic events.</p>
 <p>Defaults to <code>NULL</code></p>
 <p>Must be <code>logical</code> of same <code>length(x)</code>, Or <code>NULL</code>.
 See "Pickups" section below.</p></dd>
+
+
+<dt>threadNA</dt>
+<dd><p><em><strong>Should rhythm-less tokens return <code>NA</code>?</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 
 
 <dt>parseArgs</dt>
@@ -182,7 +190,12 @@ into calls to <code>timeline()</code> or <code>timestamp()</code>.
 Thus, a call like <code>within(humData, timeline(Token))</code> will compute the correct timeline position for <em>all</em>
 tokens across all spines/paths/stops---all values in the same record will be the same.</p>
 <p>Note that, <code>timeline()</code> and <code>timestamp()</code> follow the default behavior of <code><a href="duration.html">duration()</a></code> by treating grace-notes as duration <code>0</code>.
-If you want to use the duration(s) of grace notes, specify <code>grace = TRUE</code>.</p>
+This means that their position on the timeline is simply inherited from the previous event on the timeline, as if they occur
+at the same time.
+If you want to use the specified duration(s) of grace notes, specify <code>grace = TRUE</code>.
+By default, any <em>other</em> tokens without (parsable) rhythm information are returned a <code>NA</code>.
+However, if <code>threadNA = FALSE</code>, rhythm-less tokens will be treated as if they have a duration of <code>0</code> as well, and thus
+have a (shared) position on the timeline.</p>
     </div>
     <div class="section level2">
     <h2 id="pickups">Pickups<a class="anchor" aria-label="anchor" href="#pickups"></a></h2>
