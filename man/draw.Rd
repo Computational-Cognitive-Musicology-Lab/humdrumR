@@ -7,35 +7,59 @@
 \alias{draw,missing,numeric-method}
 \alias{draw,discrete,discrete-method}
 \alias{draw,discrete,missing-method}
-\alias{draw,missing,discrete-method}
 \alias{draw,table,ANY-method}
 \alias{draw,probabilityDistribution,ANY-method}
 \alias{draw,discrete,numeric-method}
 \alias{draw,list,numeric-method}
+\alias{draw,formula,ANY-method}
 \title{Visualize data}
 \usage{
 draw(
   x,
   y,
   col = 2,
+  facet = list(),
   main = "",
   sub = "",
   xlab = NULL,
   ylab = NULL,
-  log = "",
   ...
 )
 
-\S4method{draw}{numeric,numeric}(x, y, col = 2, log = "", xat = NULL, yat = NULL, ...)
+\S4method{draw}{numeric,numeric}(
+  x,
+  y,
+  col = 3,
+  log = "",
+  jitter = "xy",
+  xlim = NULL,
+  ylim = NULL,
+  xat = NULL,
+  yat = NULL,
+  cex = prep_cex(x),
+  ...
+)
 
-\S4method{draw}{numeric,missing}(x, y, col = 3, breaks = 20, ...)
+\S4method{draw}{numeric,missing}(
+  x,
+  y,
+  col = 3,
+  breaks = "Sturges",
+  jitter = "",
+  ...,
+  cex = prep_cex(x) * 0.75,
+  xlim = NULL,
+  ylim = NULL
+)
 
 \S4method{draw}{missing,numeric}(
   x,
   y,
   col = 3,
   log = "",
+  jitter = "",
   ...,
+  cex = prep_cex(y),
   yat = NULL,
   quantiles = c(0.025, 0.25, 0.5, 0.75, 0.975)
 )
@@ -44,11 +68,11 @@ draw(
   x,
   y,
   col = 2,
+  facet = list(),
   main = "",
   sub = "",
   xlab = NULL,
   ylab = NULL,
-  log = "",
   ...
 )
 
@@ -56,33 +80,32 @@ draw(
   x,
   y,
   col = 2,
+  facet = list(),
   main = "",
   sub = "",
   xlab = NULL,
   ylab = NULL,
-  log = "",
   ...
 )
 
-\S4method{draw}{missing,discrete}(
+\S4method{draw}{table,ANY}(
   x,
   y,
-  col = 2,
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
+  col = 1:nrow(x),
   log = "",
-  ...
+  ...,
+  ylim = NULL,
+  yat = NULL,
+  beside = TRUE
 )
-
-\S4method{draw}{table,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
 
 \S4method{draw}{probabilityDistribution,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
 
-\S4method{draw}{discrete,numeric}(x, y, col = 3, log = "", breaks = 20, ..., yat = NULL)
+\S4method{draw}{discrete,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
 
-\S4method{draw}{list,numeric}(x, y, col = 3, log = "", breaks = 20, ..., yat = NULL)
+\S4method{draw}{list,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
+
+\S4method{draw}{formula,ANY}(x, y, col = 2, xlab = NULL, ylab = NULL, data = NULL, ...)
 }
 \description{
 The \code{draw()} function is humdrumR's goto plotting function.
