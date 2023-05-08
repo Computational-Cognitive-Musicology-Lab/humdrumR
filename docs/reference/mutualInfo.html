@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,21 +75,22 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for table</span></span>
-<span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for probabilityDistribution</span></span>
+<span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for default</span></span>
-<span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for table</span></span>
+<span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, margin <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">pmutualInfo</span><span class="op">(</span><span class="va">...</span>, base <span class="op">=</span> <span class="va">base</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for discrete</span></span>
+<span><span class="fu">mutualInfo</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other Information theory functions: 
-<code><a href="crossentropy.html">crossentropy</a>()</code>,
+<code><a href="crossEntropy.html">crossEntropy</a>()</code>,
 <code><a href="entropy.html">entropy</a>()</code></p></div>
     </div>
 

@@ -200,7 +200,7 @@ reference:
   contents:
   - p
   - entropy
-  - crossentropy
+  - crossEntropy
   - mutualInfo
 - subtitle: "Numeric values"
   contents:

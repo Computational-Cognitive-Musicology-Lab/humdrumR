@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,7 +146,7 @@ or more input arguments:</p>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-04-27 14:38:37 EDT"</span></span></code></pre></div>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2023-05-08 11:10:41 EDT"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -417,8 +417,8 @@ sample a handful letters and table the result?</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a></span>
 <span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">sample</span>(letters, <span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
 <span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="er">&gt;</span>    a b e j l m n o p r s t </span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="er">&gt;</span>    b c e g i k m n q r y z </span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
 <p>Notice that not all the letters from table appear in the output.
 E.g., if a letter never appears in the sample, it doesn’t get
 counted.</p>
@@ -428,7 +428,7 @@ counted.</p>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">factor</span>(letters) <span class="sc">|&gt;</span> <span class="fu">sample</span>(<span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="er">&gt;</span>    a b c d e f g h i j k l m n o p q r s t u v w x y z </span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">1</span> <span class="dv">4</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span></span></code></pre></div>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">4</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span></span></code></pre></div>
 <p>Ah! Now our table includes all possible letters, even though many of
 them appear <code>0</code> times.</p>
 <hr>
@@ -456,7 +456,7 @@ the letters, but put the vowels first:</p>
 <span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>  <span class="fu">table</span>()</span>
 <span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="er">&gt;</span>    a e i o u b c d f g h j k l m n p q r s t v w x y z </span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span></span></code></pre></div>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">1</span></span></code></pre></div>
 <p>Note that if a <code>character</code> string contains values that you
 don’t include in your <code>levels</code>, the value will show up
 <code>NA</code> in the resulting factor, and you may see warnigns like
@@ -619,6 +619,8 @@ our vectors all their original lengths.</p>
 <li>
 <code><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev()</a></code> — Reverse the order of a vector.</li>
 <li>
+<code><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep()</a></code> — Repeat a vector.</li>
+<li>
 <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> — Returns only the unique values of a
 vector.</li>
 <li>
@@ -636,6 +638,29 @@ last <span class="math inline">\(N\)</span> elements of a vector.
 </ul>
 </li>
 </ul>
+<div class="section level4">
+<h4 id="sequences-and-indices">Sequences and Indices<a class="anchor" aria-label="anchor" href="#sequences-and-indices"></a>
+</h4>
+<ul>
+<li>
+<code>x:y</code> — Create a sequence of integers from <code>x</code>
+to <code>y</code>.
+<ul>
+<li>For example, <code>1:10</code> makes a vector of integers from one
+to ten.</li>
+</ul>
+</li>
+<li>
+<code><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq()</a></code> — Create arbitrary sequences of numbers.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/which.html" class="external-link">which()</a></code> — Which indices in a logical vector are true?
+<ul>
+<li>For example, <code>which(c(TRUE, FALSE, TRUE))</code> returns
+<code>c(1,3)</code>.</li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div class="section level3">
 <h3 id="string-functions">String functions<a class="anchor" aria-label="anchor" href="#string-functions"></a>
@@ -644,11 +669,17 @@ last <span class="math inline">\(N\)</span> elements of a vector.
 <li>
 <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code> — Paste together multiple
 <code>character</code> strings.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nchar()</a></code> — Counts how many characters there are in each
+string of a character vector.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a>
+<h3 id="math">Math<a class="anchor" aria-label="anchor" href="#math"></a>
 </h3>
+<div class="section level4">
+<h4 id="arithmetic">Arithmetic<a class="anchor" aria-label="anchor" href="#arithmetic"></a>
+</h4>
 <ul>
 <li>
 <code>x + y</code> — Addition; <span class="math inline">\(x +
@@ -683,21 +714,62 @@ division</a>; <span class="math inline">\(\lfloor \frac{x}{y}
 <li>E.g., remainder after whole-number division.</li>
 </ul>
 </li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="other-math-functions">Other Math functions<a class="anchor" aria-label="anchor" href="#other-math-functions"></a>
-</h3>
+<li>
+<code>diff(x)</code> — This function calculates the differences
+between consecutive values in a numeric vector.
 <ul>
 <li>
-<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt()</a></code> — Square-root of numbers; <span class="math inline">\(\sqrt{x}\)</span>.</li>
-<li>
-<code><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs()</a></code> — Absolute value of numbers; <span class="math inline">\(|x|\)</span>
-</li>
-<li>
-<code><a href="https://rdrr.io/r/base/Round.html" class="external-link">round()</a></code> — Round number to nearest integer; <span class="math inline">\(\lfloor x \rceil\)</span>
+<code>diff(c(5, 3))</code> is the same as <code>3 - 5</code>.</li>
+</ul>
 </li>
 </ul>
+</div>
+<div class="section level4">
+<h4 id="other-math-functions">Other Math functions<a class="anchor" aria-label="anchor" href="#other-math-functions"></a>
+</h4>
+<ul>
+<li>
+<code>sqrt(x)</code> — Square-root of numbers; <span class="math inline">\(\sqrt{x}\)</span>.</li>
+<li>
+<code>abs(x)</code> — Absolute value of numbers; <span class="math inline">\(|x|\)</span>
+</li>
+<li>
+<code>round(x)</code> — Round number to nearest integer; <span class="math inline">\(\lfloor x \rceil\)</span>
+</li>
+<li>
+<code>log(x)</code> — Log of number (natural log by default); <span class="math inline">\(\log(x)\)</span>
+</li>
+<li>
+<code>sign(x)</code> — Sign (1, -1, or 0) of x; <span class="math inline">\(\text{sgn}\ x\)</span>
+</li>
+</ul>
+</div>
+<div class="section level4">
+<h4 id="distribution-and-tendency-functions">Distribution and Tendency Functions<a class="anchor" aria-label="anchor" href="#distribution-and-tendency-functions"></a>
+</h4>
+<ul>
+<li>
+<code>sum(x)</code> — The sum of a numeric vector.</li>
+<li>
+<code>max(x)</code> — The maximum value in a numeric vector.</li>
+<li>
+<code>min(x)</code> — The minimum value in a numeric vector.</li>
+<li>
+<code>range(x)</code> — The minimum <em>and</em> maximum values of a
+numeric vector.
+<ul>
+<li>To get the size of the range, use <code>diff(range(x))</code>.</li>
+</ul>
+</li>
+<li>
+<code>mean(x)</code> — The arithmetic mean of numeric vector.</li>
+<li>
+<code>median(x)</code> — The median of numeric vector.</li>
+<li>
+<code>quantile(x)</code> — Other distribution <a href="https://en.wikipedia.org/wiki/Quantile" class="external-link">quantiles</a> of numeric
+vector.</li>
+</ul>
+</div>
 </div>
 <div class="section level3">
 <h3 id="randomization-functions">Randomization functions<a class="anchor" aria-label="anchor" href="#randomization-functions"></a>
@@ -714,9 +786,34 @@ also be used to randomize the order of a vector.</li>
 <ul>
 <li>
 <code><a href="https://rdrr.io/r/base/table.html" class="external-link">table()</a></code> — Tabulate all unique values in vector, or
-cross-tabulate across multiple vectors.</li>
+cross-tabulate across multiple vectors.
+<ul>
+<li>When using humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>, you should use the similar
+[tally()] instead!</li>
+</ul>
+</li>
 </ul>
 </div>
+</div>
+<div class="section level2">
+<h2 id="useful-tricks">Useful tricks<a class="anchor" aria-label="anchor" href="#useful-tricks"></a>
+</h2>
+<ul>
+<li>Would you like to know how many elements in a vector match a logical
+criteria? Take the sum of the logic:
+<ul>
+<li><code>sum((1:100) &gt; 55)</code></li>
+<li><code>sum(letters %in% c('a', 'e', 'i', 'o', 'u'))</code></li>
+</ul>
+</li>
+<li>Would you like to know what <em>proportion</em> of values match your
+logical criteria? Take the <em>mean</em> of the logic:
+<ul>
+<li><code>mean((1:100) &gt; 55)</code></li>
+<li><code>sum(letters %iN% c('a', 'e', 'i', 'o', 'u'))</code></li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="making-your-own-functions">Making your own functions<a class="anchor" aria-label="anchor" href="#making-your-own-functions"></a>

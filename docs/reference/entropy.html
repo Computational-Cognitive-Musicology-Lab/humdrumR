@@ -22,7 +22,7 @@ and humdrumR defines methods for calculating both.'><!-- mathjax --><script src=
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,27 +93,27 @@ and humdrumR defines methods for calculating both.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">entropy</span><span class="op">(</span><span class="va">...</span>, <span class="va">base</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for default</span></span>
-<span><span class="fu">entropy</span><span class="op">(</span><span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span>, margin <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for table</span></span>
+<span><span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, margin <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for table</span></span>
-<span><span class="fu">entropy</span><span class="op">(</span><span class="va">tab</span>, base <span class="op">=</span> <span class="fl">2</span>, margin <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for density</span></span>
+<span><span class="co"># S4 method for probabilityDistribution</span></span>
 <span><span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for numeric</span></span>
-<span><span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for density</span></span>
+<span><span class="fu">entropy</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ic</span><span class="op">(</span><span class="va">...</span>, <span class="va">distribution</span>, <span class="va">base</span><span class="op">)</span></span>
+<span><span class="fu">ic</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for numeric</span></span>
-<span><span class="fu">ic</span><span class="op">(</span><span class="va">x</span>, distribution <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for discrete</span></span>
+<span><span class="fu">ic</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span>, distribution <span class="op">=</span> <span class="cn">NULL</span>, margin <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S3 method for default</span></span>
-<span><span class="fu">ic</span><span class="op">(</span><span class="va">...</span>, distribution <span class="op">=</span> <span class="fu"><a href="ptable.html">ptable</a></span><span class="op">(</span><span class="va">...</span><span class="op">)</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># S4 method for numeric</span></span>
+<span><span class="fu">ic</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, density <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for missing</span></span>
+<span><span class="fu">ic</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span>, <span class="va">...</span>, margin <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -137,7 +137,7 @@ By default, the <code>distribution</code> argument is estimated using <code><a h
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other Information theory functions: 
-<code><a href="crossentropy.html">crossentropy</a>()</code>,
+<code><a href="crossEntropy.html">crossEntropy</a>()</code>,
 <code><a href="mutualInfo.html">mutualInfo</a>()</code></p></div>
     </div>
 

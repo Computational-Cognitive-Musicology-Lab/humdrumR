@@ -302,8 +302,8 @@ test_that("int, mint, and hint work", {
     
     expect_true(with(chorale, subset = Spine < 3, all(as.character(Bass) == as.character(Lag))))
     
-    expect_equal(with(chorale, table(mint(Token))['+M2']), 45)
-    expect_equal(with(chorale, table(hint(Token, lag = Spine == 4))['-M17']), 7)
+    expect_equal(with(chorale, tally(mint(Token))['+M2']), 45)
+    expect_equal(with(chorale, tally(hint(Token, lag = Spine == 4))['-M17']), 7)
     
 })
 
@@ -335,10 +335,10 @@ test_that("transpose and invert work", {
     
     chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
     
-    with(chorales, kern(Token, simple = TRUE, transposeArgs = list(to = 'C:'))) |> table() -> kerntab
-    with(chorales, solfa(Token, simple = TRUE)) |> table() -> solfatab
+    with(chorales, kern(Token, simple = TRUE, transposeArgs = list(to = 'C:'))) |> tally() -> kerntab
+    with(chorales, solfa(Token, simple = TRUE)) |> tally() -> solfatab
     
-    expect_true(all(kerntab == solfatab))
+    expect_true(all(S3Part(kerntab) == S3Part(solfatab)))
     
 })
 
@@ -352,25 +352,26 @@ test_that('Factors constructed correctly', {
         simple <- args$simple[i]
         min.lof <- args$min.lof[i]
         
-        kerntab <- with(chorales, table(kern(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
-        pitchtab <- with(chorales, table(pitch(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
-        lilytab <- with(chorales, table(lilypond(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
+        kerntab <- with(chorales, tally(kern(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
+        pitchtab <- with(chorales, tally(pitch(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
+        lilytab <- with(chorales, tally(lilypond(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
         
-        expect_true(all(kerntab == pitchtab))
-        expect_true(all(kerntab == lilytab))
+        expect_true(all(S3Part(kerntab) == S3Part(pitchtab)))
+        expect_true(all(S3Part(kerntab) == S3Part(lilytab)))
         
-        solfatab <- with(chorales, table(solfa(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
-        degreetab <- with(chorales, table(degree(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
+        solfatab <- with(chorales, tally(solfa(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
+        degreetab <- with(chorales, tally(degree(Token, generic = generic, simple = simple, gamutArgs = list(min.lof = min.lof))))
         
-        expect_true(all(solfatab == degreetab))
+        expect_true(all(S3Part(solfatab) == S3Part(degreetab)))
         
     }
     
-    kerntab <- with(chorales, table(kern(Token, generic = TRUE, simple = TRUE)))
-    lilytab <- with(chorales, table(lilypond(Token, generic = TRUE, simple = TRUE)))
+    kerntab <- with(chorales, tally(kern(Token, generic = TRUE, simple = TRUE))) |> S3Part()
+    lilytab <- with(chorales, tally(lilypond(Token, generic = TRUE, simple = TRUE))) |> S3Part()
+    
+    names(dimnames(kerntab)) <- names(dimnames(lilytab)) <- NULL
     
     expect_identical(kerntab, lilytab)
-    
     
     
 })

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-04-27</h4>
+            <h4 data-toc-skip class="date">2023-05-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/GettingStarted.Rmd" class="external-link"><code>vignettes/GettingStarted.Rmd</code></a></small>
       <div class="d-none name"><code>GettingStarted.Rmd</code></div>
@@ -2243,8 +2243,8 @@ instead:</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a></span>
 <span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="fu">with</span>(chorales, <span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>())</span>
 <span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a><span class="er">&gt;</span>      c  c<span class="co">#  d-   d  d#  e-   e  e#   f  f#  g-   g  g#  a-   a  a#  b-   b </span></span>
-<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">232</span> <span class="dv">115</span>  <span class="dv">35</span> <span class="dv">253</span>  <span class="dv">37</span>  <span class="dv">34</span> <span class="dv">334</span>   <span class="dv">8</span> <span class="dv">121</span> <span class="dv">182</span>   <span class="dv">1</span> <span class="dv">237</span> <span class="dv">109</span>  <span class="dv">45</span> <span class="dv">318</span>  <span class="dv">11</span>  <span class="dv">60</span> <span class="dv">297</span></span></code></pre></div>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a><span class="er">&gt;</span>      a  a<span class="sc">-</span>  a<span class="co">#   b  b-   c  c#   d  d-  d#   e  e-  e#   f  f#   g  g-  g# </span></span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">318</span>  <span class="dv">45</span>  <span class="dv">11</span> <span class="dv">297</span>  <span class="dv">60</span> <span class="dv">232</span> <span class="dv">115</span> <span class="dv">253</span>  <span class="dv">35</span>  <span class="dv">37</span> <span class="dv">334</span>  <span class="dv">34</span>   <span class="dv">8</span> <span class="dv">121</span> <span class="dv">182</span> <span class="dv">237</span>   <span class="dv">1</span> <span class="dv">109</span></span></code></pre></div>
 <p>Much easier to read…but a plot would be even better. R has a good
 basic function called <code><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot()</a></code>:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
