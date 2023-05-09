@@ -422,8 +422,8 @@ makeRE.accidentals <- function(sharp = '#', flat = '-', natural = 'n', doublesha
   paste0(natural, '?', captureUniq(c(sharp, flat, doublesharp, doubleflat)))
 }
 
-makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', ...) {
-    paste0('(', captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment)), ')')
+makeRE.qualities <- function(major = 'M', minor = 'm', perfect = 'P', augment = 'A', diminish = 'd', quality.required = TRUE, ...) {
+    paste0('(', captureRE(c(perfect, major, minor), ''), '|', captureUniq(c(diminish, augment), zero = !quality.required), ')')
 }
 
 makeRE.contours <- function(octave.integer = TRUE, up = '\\^', down = 'v', ...) {
@@ -490,7 +490,7 @@ makeRE.interval <- function(parts = c("direction", "species", "step"), step.labe
     if ('direction' %in% parts) REs$direction <- '[+-]?'
     REs <- REs[parts]
     
-    if (collapse) setNames(cREs(REs), 'solfa') else REs
+    if (collapse) setNames(cREs(REs), 'interval') else REs
 }
 
 
@@ -553,7 +553,7 @@ makeRE.alterations <- function(..., qualities = FALSE) {
                            step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
                            regexname = 'alterations')
     
-    paste0('(', makeRE(..., qualities = qualities), ')*')
+    paste0('(', makeRE(..., qualities = qualities, quality.required = FALSE), ')*')
 }
 
 makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),

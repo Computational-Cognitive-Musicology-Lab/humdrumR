@@ -497,7 +497,6 @@ setMethod('%%', signature = c('tonalInterval', 'tonalInterval'),
               
               f1 <- e1@Fifth
               f2 <- e2@Fifth
-              
               LO5thDivs <- .ifelse(f2 == 0L, 0L, f1 %/% f2)
               LO5thMods <- .ifelse(f2 == 0L, f1, f1 %%  f2)
               
@@ -2592,7 +2591,7 @@ tonalInterval.character <- makeHumdrumDispatcher(list('kern',                   
                                                  list('solfg',                  makeRE.solfg,       solfg2tint),
                                                  list('bhatk',                  makeRE.bhatk,       bhatk2tint),
                                                  list('Tonh',                   makeRE.tonh,        tonh2tint),
-                                                 list('pc',                     makeRE.pc,          pc2tint),
+                                                 list(nore = 'pc',                     makeRE.pc,          pc2tint),
                                                  funcName = 'tonalInterval.character',
                                                  outputClass = 'tonalInterval')
 

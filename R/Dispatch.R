@@ -428,7 +428,10 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
   
   Lmatches <- nchar(matches) %|% 0L
   
-  if (!multiDispatch) Lmatches <- rbind(colMeans(Lmatches))
+  if (!multiDispatch) {
+    Lmatches <- rbind(colMeans(Lmatches))
+    Lmatches <- sweep(Lmatches, 2, !dispatchDF$ExclusiveOnly, '*')
+  }
   
   matches <- cbind(matches, NA_character_)
   j <- ncol(matches)
@@ -602,8 +605,13 @@ makeDispatchDF <- function(...) {
   if (length(quoted) == 0L) .stop("You can't make a dispatchDF with zero dispatch options!")
   
   
-  dispatchDF <- data.table::as.data.table(do.call('rbind', list(...)))
+  args <- list(...)
+  exclusiveOnly <- lengths(lapply(args, names) ) > 0
+  args <- lapply(args, `names<-`, value = NULL) 
+  
+  dispatchDF <- data.table::as.data.table(do.call('rbind', args))
   colnames(dispatchDF) <- c('Exclusives', 'regex', 'method')
+  dispatchDF$ExclusiveOnly <- exclusiveOnly
   
   dispatchDF$regexPrint <- sapply(quoted, \(row) as.character(row[[3]])[1])
   dispatchDF$regexPrint <-  unlist(Map(\(regex, print) if (rlang::is_function(regex)) paste0(print, '(...)') else print, dispatchDF$regex, dispatchDF$regexPrint))

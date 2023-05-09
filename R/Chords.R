@@ -874,9 +874,9 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
                          parts = c('species', 'step'),
                          collapse = TRUE)
   
-  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat, qualities = qualities)[[1]], simplify = FALSE)
+  figures <- stringr::str_extract_all(str, makeRE(..., collapse = TRUE, flat = flat, qualities = qualities, quality.required = FALSE)[[1]], simplify = FALSE)
  
-  figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE, flat = flat, qualities = qualities))
+  figures <- lapply(figures, REparse, res = makeRE(..., collapse = FALSE, flat = flat, qualities = qualities, quality.required = FALSE))
   
   lapply(figures, 
          \(parsedfig) {
