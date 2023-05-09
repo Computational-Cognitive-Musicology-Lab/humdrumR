@@ -1318,10 +1318,12 @@ tint2tonalChroma <- function(x,
                              qualities = FALSE, collapse = TRUE, ...) {
   
   
-  if (keyed && !is.null(Key)) {
+  if ((compound || keyed) && !is.null(Key)) {
     Key <- rep(Key, length.out = length(x))
-    x[!is.na(Key)] <- x[!is.na(Key)] + diatonicSet(Key[!is.na(Key)])
+    Key <- diatonicSet(Key[!is.na(Key)])
   }
+  
+  if (keyed && !is.null(Key))  x[!is.na(Key)] <- x[!is.na(Key)] + Key
   
   parts <- matched(parts, c( "species", "step", "octave"))
   
@@ -1334,6 +1336,8 @@ tint2tonalChroma <- function(x,
   
   # compound part
   octave  <- if (compound) {
+    if (!keyed && !is.null(Key)) x[!is.na(Key)] <- x[!is.na(Key)] + Key
+    
     octave <- tint2octave(x, ...)
     if (is.integer(octave) && is.integer(step) && step.compound) {
       step <- step + octave * 7L
@@ -1536,7 +1540,7 @@ tint2solfa <- function(x, Key = NULL,  parts = c("octave", "step", 'species'),
                        step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't'), 
                        qualities = FALSE, accidental.integer = TRUE)
   
-  solfa_parts <- t2tC(x, specific = specific, ..., collapse = FALSE) #
+  solfa_parts <- t2tC(x, keyed = FALSE, specific = specific, Key = Key, ..., collapse = FALSE) #
   
   # change species to syllable "tails"
   solfa_parts$tail <- if (specific) {
