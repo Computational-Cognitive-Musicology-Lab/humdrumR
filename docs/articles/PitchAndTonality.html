@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-05-08</h4>
+            <h4 data-toc-skip class="date">2023-05-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/PitchAndTonality.Rmd" class="external-link"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
       <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
@@ -172,7 +172,7 @@ other function’s output. So you can do things like:</p>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a></span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="fu">kern</span>(<span class="st">'-4'</span>)</span>
 <span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">kern</span> (character)</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] G</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] f</span>
 <span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
 <span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="fu">solfa</span>(<span class="st">'A#6'</span>)</span>
 <span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">solfa</span> (character)</span>
@@ -272,7 +272,7 @@ control how our pitch functions interpet key—either translating
 <span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] do ra me so le</span>
 <span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">solfa</span>(absoluteInput, <span class="at">Key =</span> <span class="st">'A-:'</span>)</span>
 <span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">solfa</span> (character)</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] vmi vfa vso vti do</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] mi fa so ti do</span>
 <span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
 <span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>degreeInput <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'do'</span>, <span class="st">'re'</span>, <span class="st">'mi'</span>, <span class="st">'fi'</span>, <span class="st">'so'</span>)</span>
 <span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
@@ -432,26 +432,26 @@ keys in the data:</p>
 <span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">17</span><span class="sc">:</span>             <span class="er">*</span>G<span class="sc">:</span>           <span class="er">*</span>G<span class="sc">:</span>           <span class="er">*</span>G<span class="sc">:</span>           <span class="er">*</span>G<span class="sc">:</span></span>
 <span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="er">&gt;</span>        <span class="dv">18</span><span class="sc">:</span>           <span class="er">*</span>M3<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M3<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M3<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M3<span class="sc">/</span><span class="dv">4</span></span>
 <span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">19</span><span class="sc">:</span>          <span class="er">*</span>MM100        <span class="sc">*</span>MM100        <span class="sc">*</span>MM100        <span class="sc">*</span>MM100</span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">20</span><span class="sc">:</span>            vvdo           vmi           vso            do</span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">20</span><span class="sc">:</span>            vvdo           vmi            so            do</span>
 <span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">21</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">1</span>            <span class="ot">=</span><span class="dv">1</span>            <span class="ot">=</span><span class="dv">1</span>            <span class="ot">=</span><span class="dv">1</span></span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">22</span><span class="sc">:</span>             vdo           vmi           vso            do</span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">23</span><span class="sc">:</span>            vvla           vfa           vla             .</span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">22</span><span class="sc">:</span>             vdo           vmi            so            do</span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">23</span><span class="sc">:</span>             vla            fa            la             .</span>
 <span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">24</span><span class="sc">:</span>               .           vmi             .             .</span>
-<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">25</span><span class="sc">:</span>            vvti           vre           vso            so</span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">25</span><span class="sc">:</span>             vti           vre            so           <span class="sc">^</span>so</span>
 <span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">26</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">2</span>            <span class="ot">=</span><span class="dv">2</span>            <span class="ot">=</span><span class="dv">2</span>            <span class="ot">=</span><span class="dv">2</span></span>
-<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">27</span><span class="sc">:</span>             vdo           vdo           vso            mi</span>
-<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">28</span><span class="sc">:</span>            vvso          vvti             .             .</span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">27</span><span class="sc">:</span>             vdo           vdo            so            mi</span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">28</span><span class="sc">:</span>             vso           vti             .             .</span>
 <span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">29</span><span class="sc">:</span>               .             .             .            re</span>
-<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">30</span><span class="sc">:</span>            vvla           vdo           vmi            do</span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">30</span><span class="sc">:</span>             vla           vdo           vmi            do</span>
 <span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">31</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">3</span>            <span class="ot">=</span><span class="dv">3</span>            <span class="ot">=</span><span class="dv">3</span>            <span class="ot">=</span><span class="dv">3</span></span>
-<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">32</span><span class="sc">:</span>            vvfa           vfa           vla            do</span>
-<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">33</span><span class="sc">:</span>               .           vmi           vso             .</span>
-<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">34</span><span class="sc">:</span>            vvmi           vfa           vla             .</span>
-<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">35</span><span class="sc">:</span>            vvre             .           vti            re</span>
-<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">36</span><span class="sc">:</span>            vvdo           vso            do            mi</span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">32</span><span class="sc">:</span>             vfa            fa            la            do</span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">33</span><span class="sc">:</span>               .           vmi            so             .</span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">34</span><span class="sc">:</span>            vvmi            fa            la             .</span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">35</span><span class="sc">:</span>            vvre             .            ti            re</span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">36</span><span class="sc">:</span>            vvdo            so            do            mi</span>
 <span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">37</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">4</span>            <span class="ot">=</span><span class="dv">4</span>            <span class="ot">=</span><span class="dv">4</span>            <span class="ot">=</span><span class="dv">4</span></span>
-<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">38</span><span class="sc">:</span>            vvso           vso           vti            re</span>
-<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">39</span><span class="sc">:</span>            vvdo           vso            do            mi</span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">38</span><span class="sc">:</span>             vso            so            ti            re</span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">39</span><span class="sc">:</span>            vvdo            so            do            mi</span>
 <span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">40</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span></span>
 <span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">41-133</span><span class="sc">:::</span><span class="er">::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
 <span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">############################# ^^^ chor001.krn ^^^ #############################</span></span>
@@ -460,35 +460,35 @@ keys in the data:</p>
 <span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">############################# vvv chor010.krn vvv #############################</span></span>
 <span id="cb9-50"><a href="#cb9-50" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">1-60</span><span class="sc">:::</span><span class="er">::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a><span class="er">&gt;</span>        <span class="dv">61</span><span class="sc">:</span>            vvdo           vme           vso            do</span>
-<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">62</span><span class="sc">:</span>             vdo           vso            do            me</span>
+<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a><span class="er">&gt;</span>        <span class="dv">61</span><span class="sc">:</span>            vvdo            me            so            do</span>
+<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">62</span><span class="sc">:</span>             vdo            so            do           <span class="sc">^</span>me</span>
 <span id="cb9-53"><a href="#cb9-53" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">63</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">9</span>            <span class="ot">=</span><span class="dv">9</span>            <span class="ot">=</span><span class="dv">9</span>            <span class="ot">=</span><span class="dv">9</span></span>
-<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">64</span><span class="sc">:</span>            vvso           vso           vte            re</span>
-<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">65</span><span class="sc">:</span>            vvfa           vso           vte            me</span>
-<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">66</span><span class="sc">:</span>            vvme             .             .             .</span>
-<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">67</span><span class="sc">:</span>            vvre           vfa           vte            fa</span>
-<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">68</span><span class="sc">:</span>               .             .           vle             .</span>
-<span id="cb9-59"><a href="#cb9-59" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">69</span><span class="sc">:</span>            vvme           vme           vso           vte</span>
+<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">64</span><span class="sc">:</span>             vso            so            te            re</span>
+<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">65</span><span class="sc">:</span>             vfa            so            te           <span class="sc">^</span>me</span>
+<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">66</span><span class="sc">:</span>             vme             .             .             .</span>
+<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">67</span><span class="sc">:</span>            vvre            fa            te           <span class="sc">^</span>fa</span>
+<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">68</span><span class="sc">:</span>               .             .            le             .</span>
+<span id="cb9-59"><a href="#cb9-59" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">69</span><span class="sc">:</span>             vme            me            so            te</span>
 <span id="cb9-60"><a href="#cb9-60" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">70</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">10</span>           <span class="ot">=</span><span class="dv">10</span>           <span class="ot">=</span><span class="dv">10</span>           <span class="ot">=</span><span class="dv">10</span></span>
-<span id="cb9-61"><a href="#cb9-61" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">71</span><span class="sc">:</span>            vvfa          vvla           vfa            re</span>
-<span id="cb9-62"><a href="#cb9-62" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">72</span><span class="sc">:</span>               .          vvte             .             .</span>
-<span id="cb9-63"><a href="#cb9-63" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">73</span><span class="sc">:</span>            vvfa             .           vme            do</span>
-<span id="cb9-64"><a href="#cb9-64" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">74</span><span class="sc">:</span>               .          vvla             .             .</span>
-<span id="cb9-65"><a href="#cb9-65" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">75</span><span class="sc">:</span>           vvvte          vvte           vre           vte</span>
+<span id="cb9-61"><a href="#cb9-61" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">71</span><span class="sc">:</span>             vfa           vla            fa            re</span>
+<span id="cb9-62"><a href="#cb9-62" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">72</span><span class="sc">:</span>               .           vte             .             .</span>
+<span id="cb9-63"><a href="#cb9-63" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">73</span><span class="sc">:</span>             vfa             .            me            do</span>
+<span id="cb9-64"><a href="#cb9-64" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">74</span><span class="sc">:</span>               .           vla             .             .</span>
+<span id="cb9-65"><a href="#cb9-65" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">75</span><span class="sc">:</span>            vvte           vte           vre            te</span>
 <span id="cb9-66"><a href="#cb9-66" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">76</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">11</span>           <span class="ot">=</span><span class="dv">11</span>           <span class="ot">=</span><span class="dv">11</span>           <span class="ot">=</span><span class="dv">11</span></span>
-<span id="cb9-67"><a href="#cb9-67" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">77</span><span class="sc">:</span>            vvme          vvte           vso           vte</span>
-<span id="cb9-68"><a href="#cb9-68" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">78</span><span class="sc">:</span>            vvdo           vdo           vso            me</span>
-<span id="cb9-69"><a href="#cb9-69" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">79</span><span class="sc">:</span>            vvso          vvti           vso            re</span>
-<span id="cb9-70"><a href="#cb9-70" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">80</span><span class="sc">:</span>               .             .           vfa             .</span>
+<span id="cb9-67"><a href="#cb9-67" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">77</span><span class="sc">:</span>             vme           vte            so            te</span>
+<span id="cb9-68"><a href="#cb9-68" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">78</span><span class="sc">:</span>            vvdo           vdo            so           <span class="sc">^</span>me</span>
+<span id="cb9-69"><a href="#cb9-69" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">79</span><span class="sc">:</span>             vso           vti            so            re</span>
+<span id="cb9-70"><a href="#cb9-70" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">80</span><span class="sc">:</span>               .             .            fa             .</span>
 <span id="cb9-71"><a href="#cb9-71" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">81</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">12</span>           <span class="ot">=</span><span class="dv">12</span>           <span class="ot">=</span><span class="dv">12</span>           <span class="ot">=</span><span class="dv">12</span></span>
-<span id="cb9-72"><a href="#cb9-72" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">82</span><span class="sc">:</span>            vvle           vdo           vme            do</span>
-<span id="cb9-73"><a href="#cb9-73" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">83</span><span class="sc">:</span>            vvme          vvte           vme           vso</span>
-<span id="cb9-74"><a href="#cb9-74" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">84</span><span class="sc">:</span>            vvra          vvte           vfa           vte</span>
-<span id="cb9-75"><a href="#cb9-75" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">85</span><span class="sc">:</span>            vvdo           vdo             .           vle</span>
+<span id="cb9-72"><a href="#cb9-72" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">82</span><span class="sc">:</span>             vle           vdo            me            do</span>
+<span id="cb9-73"><a href="#cb9-73" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">83</span><span class="sc">:</span>             vme           vte            me            so</span>
+<span id="cb9-74"><a href="#cb9-74" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">84</span><span class="sc">:</span>            vvra           vte            fa            te</span>
+<span id="cb9-75"><a href="#cb9-75" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">85</span><span class="sc">:</span>            vvdo           vdo             .            le</span>
 <span id="cb9-76"><a href="#cb9-76" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">86</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span></span>
-<span id="cb9-77"><a href="#cb9-77" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">87</span><span class="sc">:</span>           vvvti           vre           vfa           vso</span>
-<span id="cb9-78"><a href="#cb9-78" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">88</span><span class="sc">:</span>            vvdo           vdo           vme             .</span>
-<span id="cb9-79"><a href="#cb9-79" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">89</span><span class="sc">:</span>           vvvso          vvti           vre             .</span>
+<span id="cb9-77"><a href="#cb9-77" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">87</span><span class="sc">:</span>            vvti           vre            fa            so</span>
+<span id="cb9-78"><a href="#cb9-78" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">88</span><span class="sc">:</span>            vvdo           vdo            me             .</span>
+<span id="cb9-79"><a href="#cb9-79" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">89</span><span class="sc">:</span>            vvso           vti           vre             .</span>
 <span id="cb9-80"><a href="#cb9-80" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="dv">90</span><span class="sc">:</span>              <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span></span>
 <span id="cb9-81"><a href="#cb9-81" tabindex="-1"></a><span class="er">&gt;</span>        <span class="dv">91</span><span class="sc">:</span>              <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span></span>
 <span id="cb9-82"><a href="#cb9-82" tabindex="-1"></a><span class="er">&gt;</span>        <span class="dv">92</span><span class="sc">:</span>  <span class="sc">!!!</span>hum2abc<span class="sc">:</span> <span class="sc">-</span>Q <span class="st">''</span></span>

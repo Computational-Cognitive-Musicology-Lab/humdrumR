@@ -1214,6 +1214,23 @@ tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,     harm
                                               outputClass = 'tertianSet')
   
 
+#' @rdname chordParsing
+#' @export
+tertianSet.factor <- function(x, Exclusive = NULL, ...) {
+  levels <- levels(x)
+  
+  tints <- tertianSet.character(levels, Exclusive = Exclusive, ...)
+  
+  c(tset(NA), tints)[ifelse(is.na(x), 1L, 1L + as.integer(x))]
+}
+
+#' @rdname chordParsing
+#' @export
+tertianSet.token <- function(x, Exclusive = NULL, ...) {
+  tertianSet.character(as.character(x@.Data), Exclusive = Exclusive, ...) # %||% getExclusive(x), ...)
+}
+
+
 #' @export
 setMethod('as.character', signature = c('tertianSet'), function(x) tset2tertian(x))
 

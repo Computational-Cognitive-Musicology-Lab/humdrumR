@@ -502,9 +502,14 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
 
 
   # 
-  windowFrame <- align(open_indices, close_indices, fullLength = nrow(x),
+  windowFrame <- if (length(open_indices) && length(close_indices)) {
+   align(open_indices, close_indices, fullLength = nrow(x),
                        overlap = overlap, rightward = rightward, depth = depth, groupby = groupby,
                        min_length = min_length, max_length = max_length)
+  } else {
+    data.table(Open = integer(0L), Close = integer(0L), Length = integer(0L), 
+               Depth = integer(0L), RevDepth = integer(0L))
+  }
   
   #                      
   windowFrame <- windowFrame[Open >= 1L & Open <= nrow(x) & Close >= 1L & Close <= nrow(x)]

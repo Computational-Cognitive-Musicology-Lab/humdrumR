@@ -24,7 +24,7 @@ the previous pitch.'><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -378,7 +378,7 @@ or how pitches are <a href="pitchParsing.html">parsed</a> and <a href="pitchDepa
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">exampleHumdrum</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpieaHY5/temp_libpath71c91d4f7792/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpkg5xpb/temp_libpath7fa2c46a8176/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -388,9 +388,9 @@ or how pitches are <a href="pitchParsing.html">parsed</a> and <a href="pitchDepa
 <span class="r-in"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">exampleHumdrum</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">degree</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">results</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> **degree (character)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] .   1/3 5/3 7/2 5/3 1/3 5/3 4/2 4/3 4/2 4/3 5/2 3/3 5/2 2/3 1/3 .   3/4 5/4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20] 1/4 3/4 5/3 1/4 1/4 3/4 3/4 5/4 3/4 5/4 2/4 4/4 1/4 3/4 1/4 6/4 1/4 6/4 1/4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [39] 5/4 4/3 7/3 3/3 1/4 .  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] .   1/3 5/4 7/3 5/4 1/3 5/4 4/2 4/3 4/2 4/3 5/3 3/3 5/3 2/3 1/3 .   3/4 5/5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20] 1/4 3/4 5/4 1/4 1/4 3/4 3/4 5/5 3/4 5/5 2/4 4/4 1/4 3/4 1/4 6/5 1/4 6/5 1/4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [39] 5/5 4/3 7/4 3/3 1/4 .  </span>
 <span class="r-in"><span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">exampleHumdrum</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">deg</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">results</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> **deg (character)</span>

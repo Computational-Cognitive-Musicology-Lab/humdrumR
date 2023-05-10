@@ -9,6 +9,8 @@
 \alias{tertianSet.numeric}
 \alias{tertianSet.integer}
 \alias{tertianSet.character}
+\alias{tertianSet.factor}
+\alias{tertianSet.token}
 \title{Parsing chord information}
 \usage{
 tertianSet(...)
@@ -24,6 +26,10 @@ tertianSet(...)
 \method{tertianSet}{integer}(x)
 
 \method{tertianSet}{character}(x, ..., Exclusive = NULL, multiDispatch = FALSE)
+
+\method{tertianSet}{factor}(x, Exclusive = NULL, ...)
+
+\method{tertianSet}{token}(x, Exclusive = NULL, ...)
 }
 \description{
 \link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} tertian harmony information:
