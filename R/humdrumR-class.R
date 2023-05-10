@@ -353,6 +353,9 @@ setMethod('initialize', 'humdrumR',
             .Object
           })
 
+#' @export
+names.humdrumR <- function(x) fields(x)$Name
+
 
 structureTab <- function(..., groupby = list()) {
     
