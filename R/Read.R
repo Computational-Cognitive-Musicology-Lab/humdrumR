@@ -313,7 +313,7 @@ readTextFiles <- function(fpaths) {
     raw <- lapply(fpaths, stringi::stri_read_raw)
     enc <- data.table::rbindlist(lapply(stringi::stri_enc_detect2(raw), head, n = 1))
     
-    text <- !is.na(enc$Encoding) & enc$Confidence > 0.8
+    text <- !is.na(enc$Encoding) & enc$Confidence >= 0.75
     
     files <- unlist(Map(stringi::stri_encode, raw[text], enc$Encoding[text]))
     
