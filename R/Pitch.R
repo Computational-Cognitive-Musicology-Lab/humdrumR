@@ -1320,10 +1320,10 @@ tint2tonalChroma <- function(x,
   
   if ((compound || keyed) && !is.null(Key)) {
     Key <- rep(Key, length.out = length(x))
-    Key <- diatonicSet(Key[!is.na(Key)])
+    Key <- diatonicSet(Key)
   }
   
-  if (keyed && !is.null(Key))  x[!is.na(Key)] <- x[!is.na(Key)] + Key
+  if (keyed && !is.null(Key))  x[!is.na(Key)] <- x[!is.na(Key)] + Key[!is.na(Key)]
   
   parts <- matched(parts, c( "species", "step", "octave"))
   
@@ -1336,7 +1336,7 @@ tint2tonalChroma <- function(x,
   
   # compound part
   octave  <- if (compound) {
-    if (!keyed && !is.null(Key)) x[!is.na(Key)] <- x[!is.na(Key)] + Key
+    if (!keyed && !is.null(Key)) x[!is.na(Key)] <- x[!is.na(Key)] + Key[!is.na(Key)]
     
     octave <- tint2octave(x, ...)
     if (is.integer(octave) && is.integer(step) && step.compound) {
