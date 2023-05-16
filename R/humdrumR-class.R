@@ -322,7 +322,7 @@ setClass('humdrumR',
                    Fields = 'list',
                    Active = 'quosure',
                    LoadTime = 'POSIXct',
-                   Groupby = 'list'
+                   Groupby = 'quosures'
                    )) -> makeHumdrumR
 
 setMethod('initialize', 'humdrumR',
@@ -351,7 +351,7 @@ setMethod('initialize', 'humdrumR',
             .Object@Active    <- rlang::quo(Token)
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
             .Object@LoadTime  <- Sys.time()
-            .Object@Groupby   <- list()
+            .Object@Groupby   <- quos()
             .Object
           })
 

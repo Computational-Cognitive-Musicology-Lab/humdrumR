@@ -82,6 +82,7 @@ byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                   )
 
 setOldClass('quosure')
+setOldClass('quosures')
 
 
 ####### Pitch  ----
@@ -180,13 +181,19 @@ humdrumR_version <- as.character(packageVersion('humdrumR'))
 
 ## Bootswatch flatly in plots ----
 
-flatly <- c('#18BC9C', '#F39C12', '#3498DB', '#E74C3C', '#2C3E50',
-            palette.colors(9))
-flatlyramp <- function(n, alpha = 1) rgb(colorRamp(flatly[c(2, 3)])(n), alpha = alpha * 255, maxColorValue = 255)
+flatly <- c('#18BC9C', '#F39C12', '#3498DB', '#E74C3C', '#2C3E50')
+flatly_continuous <- function(n, k = 2, alpha = 1) {
+  structure(setalpha(colorRampPalette(flatly[k + 0:1])(n), alpha = alpha),
+            name = 'flatly_continuous', class = 'palette')
+}
+flatly_discrete <- function(n, alpha = 1) {
+  structure(setalpha(colorRampPalette(flatly)(n), alpha = alpha), name = 'flatly_discrete', class = 'palette')
+}
 # setHook('plot.new', function() {
 #   par(family = 'Lato', col.main = flatly[5], col.axis = flatly[5], col.sub = flatly[5],
 #       col.lab = flatly[5])
 #   })
+
 
 
 
