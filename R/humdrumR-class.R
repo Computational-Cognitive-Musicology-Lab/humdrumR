@@ -264,7 +264,7 @@ orderHumtab <- function(humtab) {
 }
 
 #######################################################-
-#################################### humdrumR S4 class-
+#################################### humdrumR S4 class ----
 ######################################################-
 
 #' `humdrumR` class
@@ -321,7 +321,8 @@ setClass('humdrumR',
                    Files = 'list',
                    Fields = 'list',
                    Active = 'quosure',
-                   LoadTime = 'POSIXct'
+                   LoadTime = 'POSIXct',
+                   Groupby = 'quosures'
                    )) -> makeHumdrumR
 
 setMethod('initialize', 'humdrumR',
@@ -350,6 +351,7 @@ setMethod('initialize', 'humdrumR',
             .Object@Active    <- rlang::quo(Token)
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
             .Object@LoadTime  <- Sys.time()
+            .Object@Groupby   <- list()
             .Object
           })
 
