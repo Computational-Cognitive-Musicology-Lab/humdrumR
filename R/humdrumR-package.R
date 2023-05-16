@@ -42,6 +42,7 @@
 #' @importFrom bit64 as.integer64 is.integer64
 #' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom numbers primeFactors
+#' @importFrom dplyr summarize filter mutate pull group_by
 NULL
 
 
