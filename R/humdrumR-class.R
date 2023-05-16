@@ -322,7 +322,7 @@ setClass('humdrumR',
                    Fields = 'list',
                    Active = 'quosure',
                    LoadTime = 'POSIXct',
-                   Groupby = 'quosures'
+                   Groupby = 'list'
                    )) -> makeHumdrumR
 
 setMethod('initialize', 'humdrumR',

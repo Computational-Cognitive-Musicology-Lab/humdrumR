@@ -96,7 +96,7 @@ filter.humdrumR <- function(.data, ...) {
 #' @export
 group_by.humdrumR <- function(.data, ..., .add = FALSE) {
   
-  exprs <- rlang::enquos(...)
+  exprs <- as.list(rlang::enquos(...))
   names(exprs) <- 'by'
   
   .data@Groupby <- if (.add) {
@@ -115,3 +115,20 @@ ungroup.humdrumR <- function(x, ...) {
   x@Groupby <- list()
   x
 }
+
+#############################################################
+##### Methods for ggplot2 #####################-----
+##############################################################
+
+
+#' @rdname tidyHumdrum
+#' @export
+ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
+  humtab <- getHumtab(data, dataTypes = dataTypes)
+  
+  ggplot(humtab, mapping = mapping, ...)
+}
+
+## Theme
+
+

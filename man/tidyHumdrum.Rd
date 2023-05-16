@@ -8,6 +8,7 @@
 \alias{filter.humdrumR}
 \alias{group_by.humdrumR}
 \alias{ungroup.humdrumR}
+\alias{ggplot.humdrumR}
 \title{HumdrumR using Tidyverse "verbs"}
 \usage{
 \method{mutate}{humdrumR}(.data, ..., dataTypes = "D", alignLeft = TRUE, expandPaths = FALSE)
@@ -21,6 +22,8 @@
 \method{group_by}{humdrumR}(.data, ..., .add = FALSE)
 
 \method{ungroup}{humdrumR}(x, ...)
+
+\method{ggplot}{humdrumR}(data = NULL, mappig = aes(), ..., dataTypes = "D")
 }
 \description{
 These methods for \link{dplyr} verbs are all shorthand calls for \link[=withHumdrum]{with/within/subset.humdrumR()}.

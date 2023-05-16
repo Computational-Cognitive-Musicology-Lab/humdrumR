@@ -43,6 +43,7 @@
 #' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom numbers primeFactors
 #' @importFrom dplyr summarize filter mutate pull group_by ungroup
+#' @importFrom ggplot2 ggplot aes
 NULL
 
 
