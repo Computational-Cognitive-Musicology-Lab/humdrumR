@@ -394,7 +394,7 @@ xlegal <- function(values) {
 }
 
 xplegal <- function(values) {
-  xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values)}"),
+  xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values, conj = 'or')}"),
                      \(arg) .show_values(arg[is.na(pmatch(arg, values))]))
 }
 

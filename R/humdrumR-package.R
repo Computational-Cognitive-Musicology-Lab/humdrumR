@@ -154,6 +154,45 @@ NULL
 NULL
 
 
+
+
+# Options -----
+
+humdrumR_defaults <- list(
+  print = 'humdrum',
+  maxRecordsPerFile = 40L,
+  maxMaxTokenLength = 12L
+  
+)
+
+humdrumRoptions <- function() options('humdrumR_options')[[1]]
+humdrumRoption <- function(name) {
+  opts <- humdrumRoptions()
+  opts[[pmatch(name[1], names(opts))]]
+}
+
+set_humdrumRoptions <- function(print, maxRecordsPerFile, maxTokenLength) {
+  curOptions <- oldOptions <- humdrumRoptions()
+  if (!missing(print)) {
+    checks(print, xplegal(c('score', 'table')))
+    curOptions$print <- match.arg(print, c('score', 'table'))
+  }
+  if (!missing(maxRecordsPerFile)) {
+    checks(maxRecordsPerFile, xwholenum & xpositive)
+    curOptions$maxRecordsPerFile <- maxRecordsPerFile
+  }
+  if (!missing(maxTokenLength)) {
+    checks(maxTokenLength, xwholenum & xpositive)
+    curOptions$maxTokenLength <- maxTokenLength
+  }
+  
+  options(humdrumR_options = curOptions)
+  
+  invisible(oldOptions)
+}
+
+
+
 # Default settings ----
 
 oldoptions <- options()
@@ -163,7 +202,7 @@ oldoptions <- options()
 .onLoad <- function(libname, pkgname) {
   oldoptions <<- options()
   options(#prompt = 'humdrumℝ> ', continue = 'humdrumℝ... ', 
-          scipen = 4, digits = 7)
+          scipen = 4, digits = 7, humdrumR_options = humdrumR_defaults)
 }
 
 .onAttach <- function(libname, pkgname) {

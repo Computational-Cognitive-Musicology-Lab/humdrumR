@@ -342,9 +342,7 @@ setMethod('initialize', 'humdrumR',
                                                   'Bar', 'DoubleBar', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
          
-            .Object@.Data <- function(..., within = TRUE) {
-                if (within) within(.Object, ...) else (with(.Object, ...))
-            }
+            .Object@.Data <- set_humdrumRoptions
             
             .Object@Humtable  <- humtab    
             .Object@Fields    <- fieldcategories
@@ -2287,7 +2285,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
 showFields <-  function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) {
           # This function is used to produce the human readable 
-          # list fields used by print_humtab
+          # list fields used by print_humdrumR
           fields <- fields(humdrumR, fieldTypes)
 
           activefield <- fields$Name %in% getActiveFields(humdrumR)
@@ -2402,8 +2400,8 @@ setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
                     npieces  <- npieces(object)
                     nfiles <- nfiles(object)
-                    trim <- if (npieces == 1L) 800L else 40L
-                    print_humtab(object, firstAndLast = TRUE, max.records.file = trim)
+                    trim <- if (npieces == 1L) 800L else humdrumRoption('maxRecordsPerFile')
+                    print_humdrumR(object, firstAndLast = TRUE, maxRecordsPerFile = trim)
                     
                     if (npieces > 1L) {
                               cat('\n')
@@ -2429,12 +2427,14 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
           })
 
-print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
-                         max.records.file = 40L, max.token.length = 30L, collapseNull = 30L) {
+print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes = if (style == 'score') "GLIMDd" else 'D', 
+                           firstAndLast = TRUE,
+                           maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
+                           maxTokenLength = humdrumRoption('maxTokenLength'), collapseNull = 30L) {
     
   checks(humdrumR, xhumdrumR)
     
-  dataTypes <- checkTypes(dataTypes, "print_humtab")
+  dataTypes <- checkTypes(dataTypes, "print_humdrumR")
   
   
   if (is.empty(humdrumR)) {
@@ -2447,8 +2447,13 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   
   humdrumR <- printableActiveField(humdrumR)
   
-  .print_humdrum(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
-                max.records.file, max.token.length, collapseNull)
+  if (style == 'score') {
+      .print_humdrum(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
+                     maxRecordsPerFile, maxTokenLength, collapseNull)
+  } else {
+      .print_humtable(humdrumR, dataTypes)
+  }
+ 
 
   invisible(NULL)
   
@@ -2495,13 +2500,23 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
 
 
 .print_humtable <- function(humdrumR, dataTypes = 'D', screenWidth = getOption('width') - 10L) {
+    humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     
+    dataFields <- fields(humdrumR, c('Data'))$Name
+    structureFields <- c('Piece', 'Spine', 'Path', 'Record', 'Stop')
+    
+    humtab <- humtab[ , c(structureFields, dataFields), with = FALSE]
+    
+    print(humtab)
+   
 }
 
 
 .print_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                          max.records.file = 40L, max.token.length = 12L, collapseNull = Inf,
-                          screenWidth = getOption('width') - 10L) {
+                           maxRecordsPerFile, 
+                           maxTokenLength, 
+                           collapseNull = Inf,
+                           screenWidth = getOption('width') - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, padPaths = 'corpus', padder = '')
   
   # removes "hanging stops" like "a . ." -> "a"
@@ -2518,16 +2533,16 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
   tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
   
   
-  ## censor lines beyond max.records.file
+  ## censor lines beyond maxRecordsPerFile
   filei <- tapply_inplace(Piece, Piece, seq_along)
-  i <- ifelse(length(unique(Piece)) == 1L | Piece != max(Piece), filei <= max.records.file, filei > (tail(filei, 1) - max.records.file))
+  i <- ifelse(length(unique(Piece)) == 1L | Piece != max(Piece), filei <= maxRecordsPerFile, filei > (tail(filei, 1) - maxRecordsPerFile))
   tokmat <- tokmat[i, , drop = FALSE]
   global <- global[i]
   
 
   
   ## Trim and align columns, and collopse to lines
-  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = max.token.length)
+  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = maxTokenLength)
   lines <- padColumns(tokmat, global, screenWidth)
   starMessage <- attr(lines, 'message')
   lines[global] <- gsub('\t', ' ', lines[global])

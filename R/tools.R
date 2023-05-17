@@ -2895,20 +2895,20 @@ textstyle <- function(text, fg = "black", bg = NULL, style = 'normal') {
   "light gray" = "47"
 )
 
-syntaxHighlight <- function(token, dataType) {
+syntaxHighlight <- function(token, dataTypes) {
   # E for exclusive
   # N for none
   colors <- c(D = 'yellow', d = 'yellow', E = 'red', N = 'white', E = 'red',
               I = 'purple', M = 'green', G = 'cyan', L = 'cyan')
   
   style <- rep('normal', length(token))
-  style[dataType == 'N'] <- 'italic'
-  style[dataType == 'M'] <- 'underline'
-  style[dataType == 'd'] <- 'blur'
-  style[dataType == 'L'] <- 'blur'
+  style[dataTypes == 'N'] <- 'italic'
+  style[dataTypes == 'M'] <- 'underline'
+  style[dataTypes == 'd'] <- 'blur'
+  style[dataTypes == 'L'] <- 'blur'
   
   textstyle(token, 
-            colors[dataType],
+            colors[dataTypes],
             NULL, #ifelse(dataType == 'M', 'light gray', ''),
             style)
 }
