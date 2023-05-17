@@ -159,7 +159,7 @@ NULL
 # Options -----
 
 humdrumR_defaults <- list(
-  print = 'humdrum',
+  print = 'score',
   maxRecordsPerFile = 40L,
   maxTokenLength = 12L
   

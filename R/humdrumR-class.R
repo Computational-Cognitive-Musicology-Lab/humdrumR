@@ -342,7 +342,7 @@ setMethod('initialize', 'humdrumR',
                                                   'Bar', 'DoubleBar', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
          
-            .Object@.Data <- set_humdrumRoptions
+            .Object@.Data <- function(print, maxRecordsPerFile, maxTokenLength) {set_humdrumRoptions(print, maxRecordsPerFile, maxTokenLength); .Object}
             
             .Object@Humtable  <- humtab    
             .Object@Fields    <- fieldcategories
@@ -2428,7 +2428,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
           })
 
 print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes = if (style == 'score') "GLIMDd" else 'D', 
-                           firstAndLast = TRUE,
+                           firstAndLast = TRUE, screenWidth = options('width')$width - 10L,
                            maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
                            maxTokenLength = humdrumRoption('maxTokenLength'), collapseNull = 30L) {
     
@@ -2447,66 +2447,60 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
   
   humdrumR <- printableActiveField(humdrumR)
   
-  if (style == 'score') {
-      .print_humdrum(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
-                     maxRecordsPerFile, maxTokenLength, collapseNull)
+  tokmat <- if (style == 'score') {
+      tokmat_humdrum(humdrumR, dataTypes, collapseNull)
   } else {
-      .print_humtable(humdrumR, dataTypes, maxRecordsPerFile = maxRecordsPerFile, maxTokenLength = maxTokenLength)
+      tokmat_humtable(humdrumR, dataTypes)
   }
- 
+  
+  print_tokmat(tokmat, Nmorefiles = Nfiles - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
+               screenWidth = screenWidth, showCensorship = style == 'score')
 
   invisible(NULL)
   
 }
 
 
-
-
-.print_humtable <- function(humdrumR, dataTypes = 'D', 
-                            maxRecordsPerFile, maxTokenLength, 
-                            screenWidth = getOption('width') - 10L) {
+tokmat_humtable <- function(humdrumR, dataTypes = 'D') {
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     
     dataFields <- fields(humdrumR, c('Data'))$Name
     structureFields <- c('Piece', 'Spine', 'Path', 'Record', 'Stop')
     
-    humtab <- humtab[ , c(structureFields, dataFields, 'Type'), with = FALSE]
+    Filenames <- humtab[ , unique(Filename)]
+    humtab <- humtab[ , c(structureFields, dataFields), with = FALSE]
     lastPiece <- max(humtab$Piece)
     if (all(humtab$Path == 0, na.rm = TRUE)) humtab[, Path := NULL]
     if (all(humtab$Stop == 1, na.rm = TRUE)) humtab[, Stop := NULL]
     
-    humtab <- humtab[ , if (Piece[1] == lastPiece) tail(.SD, maxRecordsPerFile) else head(.SD, maxRecordsPerFile), by = Piece]
-    
-    Types <- humtab$Type
-    humtab[ , Type := NULL]
+    # humtab <- humtab[ , if (Piece[1] == lastPiece) tail(.SD, maxRecordsPerFile) else head(.SD, maxRecordsPerFile), by = Piece]
+
     
     structure <- names(humtab) %in% structureFields
-    
-    humtab <- lapply(as.list(humtab), 
+    columns <- lapply(as.list(humtab), 
                      \(col) {
                          col <- as.character(col)
                          col[is.na(col)] <- '.'
                          col
                          })
     
-    humtab[!structure] <- lapply(humtab[!structure], trimTokens, maxTokenLength = maxTokenLength)
-    # humtab[!structure] <- lapply(humtab[!structure], syntaxHighlight, dataTypes = Types)
     
+    tokmat <- do.call('cbind', columns)
+    tokmat <- rbind(names(humtab), tokmat, names(humtab))
     
+    list(Tokmat = tokmat,  
+         Piece = c('0', columns$Piece, '0'), 
+         Record = c('0', columns$Record, '0'), 
+         Filesnames = Filenames,
+         Global = logical(nrow(tokmat)), 
+         DontStyle = which(structure))
     
-    tokmat <- do.call('cbind', humtab)
-    tokmat <- rbind(names(humtab), tokmat)
-    lines <- padColumns(tokmat, global = logical(nrow(tokmat)), screenWidth = screenWidth, dontstyle = which(structure))
+
     
-    cat(lines, sep = '\n')
 }
 
+tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf) {
 
-.print_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
-                           maxRecordsPerFile, 
-                           maxTokenLength, 
-                           collapseNull = Inf,
-                           screenWidth = getOption('width') - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, padPaths = 'corpus', padder = '')
   
   # removes "hanging stops" like "a . ." -> "a"
@@ -2518,79 +2512,108 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
   Piece   <- gsub('\\..*$', '', rownames(tokmat))
   NRecord <- gsub('^[0-9]*\\.', '', rownames(tokmat))
   
-  #
   global <- stringr::str_detect(tokmat[ , 1], '^!!')
+  
   tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
+  list(Tokmat = tokmat, 
+       Piece = Piece, 
+       Record = NRecord, 
+       Filenames = Filenames, 
+       Global = global, 
+       DontStyle = 1)
   
-  
-  ## censor lines beyond maxRecordsPerFile
-  filei <- tapply_inplace(Piece, Piece, seq_along)
-  i <- ifelse(length(unique(Piece)) == 1L | Piece != max(Piece), filei <= maxRecordsPerFile, filei > (tail(filei, 1) - maxRecordsPerFile))
-  tokmat <- tokmat[i, , drop = FALSE]
-  global <- global[i]
-  
+}
 
-  
-  ## Trim and align columns, and collopse to lines
-  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], maxTokenLength = maxTokenLength)
-  lines <- padColumns(tokmat, global, screenWidth)
-  starMessage <- attr(lines, 'message')
-  lines[global] <- gsub('\t', ' ', lines[global])
-  
-  # records of first and last non-censored lines of each file
-  firsts <- tapply(seq_along(lines), Piece[i], min)
-  lasts <- tapply(seq_along(lines), Piece[i], max)
-
-  
-  #  censored ranges (if any)
-  ranges <- tapply(NRecord[!i], factor(Piece)[!i], 
-                   \(nr) {
-                       if (length(nr) > 1L) paste0(nr[1], '-', nr[length(nr)], ':') else paste0(nr[1], ':')
-                   })
-  ranges[is.na(ranges)] <- ":"
-  
-  # align : (colon)
-  if (any(ranges != '')) {
-      line_colon <- stringr::str_locate(lines, ':')[ , 'start']
-      range_colon <- stringr::str_locate(ranges, ':')[ , 'start']
-      largest_colon <- max(line_colon, range_colon)
-      lines <- paste0(strrep(' ', largest_colon - line_colon), lines)
-      ranges <- paste0(strrep(' ', largest_colon - range_colon), ranges)
-  }
-
-  # 
-  # 
-  maxwidth <- max(nchar(lines))
-  
-  ranges[ranges != ''] <- stringr::str_pad(paste0('\n', ranges[ranges != '']), width = maxwidth, pad = ':', side = 'right')
-  
-  lines[lasts[-length(lasts)]] <- paste0(lines[lasts[-length(lasts)]], ranges[-length(ranges)])
-  
-  
-  if (length(unique(Piece)) > 1L && tail(ranges, 1) != '') {
-      lines[tail(firsts, 1)] <- paste0(gsub('^\n', '', tail(ranges, 1)), '\n', lines[tail(firsts, 1)])
-  }
-  
-  # put filenames in
-  lines[firsts] <- paste0(stringr::str_pad(paste0(' vvv ', Filenames, ' vvv '), width = maxwidth, pad = '#', side = 'both'), '\n', lines[firsts])
-  lines[lasts] <- paste0(lines[lasts], '\n', stringr::str_pad(paste0(' ^^^ ', Filenames, ' ^^^ '), width = maxwidth, pad = '#', side = 'both'))
-  
-  # if any lines have been censored due to screen size, put message at the end
-  if (!is.null(starMessage)) {
-      lines[length(lines)] <- paste0(lines[length(lines)], '\n', smartPadWrap(starMessage, maxwidth + 1L))
-  }
-  
-  ##
-  if (Nmorefiles > 0L) {
+print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLength,
+                         screenWidth = options('width')$width - 10, showCensorship = TRUE) {
    
-   message <- c('',
-                paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more pieces...)")),
-                '')
-   lines <- append(lines, message, after = tail(firsts, 1) - 1L)
-  }
+    tokmat <- parsed$Tokmat
+    Record <- as.numeric(parsed$Record)
+    Piece <- parsed$Piece
+    global <- parsed$Global
+    Filenames <- parsed$Filenames
+    
+    ## censor lines beyond maxRecordsPerFile
+
   
-  cat(lines, sep = '\n')
+    # 
+    uniqRec <- tapply_inplace(Record, Piece, seq_along)
+    censored <- ifelse(length(unique(Piece)) == 1L | Piece != max(Piece),
+                       uniqRec >  maxRecordsPerFile,
+                       uniqRec <= (max(uniqRec[Piece == max(Piece)]) - maxRecordsPerFile))
+    tokmat <- tokmat[!censored, , drop = FALSE]
+    global <- global[!censored]
+    
+    
+    
+    ## Trim and align columns, and collopse to lines
+    tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], maxTokenLength = maxTokenLength)
+    
+    lines <- padColumns(tokmat, global, screenWidth, parsed$DontStyle)
+    
+    starMessage <- attr(lines, 'message')
   
+    firsts <- tapply(seq_along(lines), Piece[!censored], min)
+    lasts <- tapply(seq_along(lines), Piece[!censored], max)
+    if (showCensorship) {
+        # records of first and last non-censored lines of each file
+        
+        
+        
+        #  censored ranges (if any)
+        ranges <- tapply(Record[censored], factor(Piece)[censored], 
+                         \(nr) {
+                             if (length(nr) > 1L) paste0(nr[1], '-', nr[length(nr)], ':') else paste0(nr[1], ':')
+                         })
+        anycensored <- !is.na(ranges)
+        ranges <- ranges[anycensored]
+        # ranges[is.na(ranges)] <- ":"
+        # align : (colon)
+        if (length(ranges)) {
+            line_colon <- stringr::str_locate(lines, ':')[ , 'start'] - 7L
+            range_colon <- stringr::str_locate(ranges, ':')[ , 'start']
+            largest_colon <- max(line_colon, range_colon)
+            lines <- paste0(strrep(' ', largest_colon - line_colon), lines)
+            ranges <- paste0(strrep(' ', largest_colon - range_colon), ranges)
+        }
+        
+        # 
+        # 
+        maxwidth <- max(nchar(lines))
+        
+        ranges <- stringr::str_pad(ranges, width = maxwidth, pad = ':', side = 'right')
+        ranges <- textstyle(ranges, style = 'italic')
+        ranges <- paste0('\n', ranges)
+        
+        if (any(anycensored)) lines[lasts[-length(lasts[anycensored])]] <- paste0(lines[lasts[-length(lasts[anycensored])]], ranges[-length(ranges)])
+        
+        
+        if (length(unique(Piece)) > 1L && tail(ranges, 1) != '') {
+            lines[tail(firsts, 1)] <- paste0(gsub('^\n', '', tail(ranges, 1)), '\n', lines[tail(firsts, 1)])
+        }
+        
+        # put filenames in
+        lines[firsts] <- paste0(stringr::str_pad(paste0(' vvv ', Filenames, ' vvv '), width = maxwidth, pad = '#', side = 'both'), '\n', lines[firsts])
+        lines[lasts] <- paste0(lines[lasts], '\n', stringr::str_pad(paste0(' ^^^ ', Filenames, ' ^^^ '), width = maxwidth, pad = '#', side = 'both'))
+    }
+    
+    
+    # if any lines have been censored due to screen size, put message at the end
+    if (!is.null(starMessage)) {
+        lines[length(lines)] <- paste0(lines[length(lines)], '\n', smartPadWrap(starMessage, maxwidth + 1L))
+    }
+    
+    ##
+    if (Nmorefiles > 0L) {
+        
+        message <- c('',
+                     paste0('\t\t', glue::glue("({num2str(Nmorefiles)} more pieces...)")),
+                     '')
+        lines <- append(lines, message, after = tail(firsts, 1) - 1L)
+    }
+    
+    cat(lines, sep = '\n')
+    
 }
 
 
@@ -2714,10 +2737,12 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     # collapse to lines
     tokmat[global, -1:-2L] <- ''
     lines <- do.call('paste0', as.data.frame(tokmat))
-    
+    lines[global] <- gsub('\t', ' ', lines[global])
 
     longGlobal <- global & nchar(lines) > screenWidth
     longColumn <- !screen
+    
+
     if (any(longColumn) || any(longGlobal)) {
         message <- if (any(!screen)) {
             lines[!global] <- paste0(lines[!global], '    ***')
@@ -2733,8 +2758,6 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
         # lines[length(lines)] <- paste0(lines[length(lines)], '\n', message)
     } 
     
-    
-                                           
     lines
     
 }

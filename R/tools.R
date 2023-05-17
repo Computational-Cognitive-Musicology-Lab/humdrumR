@@ -2901,7 +2901,7 @@ syntaxHighlight <- function(token, dataTypes) {
   
   dataTypes <- rep(dataTypes, length.out = length(token))
   
-  colors <- c(D = 'yellow', d = 'yellow', E = 'red', N = 'white', E = 'red',
+  colors <- c(D = 'yellow', d = 'yellow', E = 'red', N = 'black', E = 'red',
               I = 'purple', M = 'green', G = 'cyan', L = 'cyan')
   
   style <- rep('normal', length(token))
