@@ -161,7 +161,7 @@ NULL
 humdrumR_defaults <- list(
   print = 'humdrum',
   maxRecordsPerFile = 40L,
-  maxMaxTokenLength = 12L
+  maxTokenLength = 12L
   
 )
 

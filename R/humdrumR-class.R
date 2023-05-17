@@ -2451,7 +2451,7 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
       .print_humdrum(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                      maxRecordsPerFile, maxTokenLength, collapseNull)
   } else {
-      .print_humtable(humdrumR, dataTypes)
+      .print_humtable(humdrumR, dataTypes, maxRecordsPerFile = maxRecordsPerFile, maxTokenLength = maxTokenLength)
   }
  
 
@@ -2460,55 +2460,45 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
 }
 
 
-printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
-    # evaluates the active expression into something printable, and puts it in a 
-    # field called "Print"
-    humtab <- data.table::copy(getHumtab(humdrumR, 'GLIMDd') )
-    
-    field <- evalActive(humdrumR, 'GLIMDd', sep = ', ', nullChar = TRUE)
-    
-    if (is.character(field) && any(field == "")) field[field == ""]  <- "''"
-    if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
-    if (is.factor(field)) field <- as.character(field)
-    
 
 
-    ## fill from token field
-    tokenFill <- if (useTokenNull) {
-        # humtab[, !Type %in% c('D', 'd')]
-        humtab[ , !Type %in% c('D', 'd') & Null]
-    } else {
-        # always get ** exclusive
-        humtab[ , (is.na(field) | field == '*') & grepl('\\*\\*', Token)]
-    }
-    
-    field[tokenFill] <- humtab[tokenFill == TRUE, Token]
-    
-    field <- gsub('\\.(, )+\\.', '.', field)
-
-    if (any(is.na(field))) .stop('Print field has NA values')
-    
-    humtab[ , Print := field]
-    humtab$Type[humtab$Type == 'd'] <- 'D'
-    # humtab$Type[humtab$Type == 'P'] <- 'D'
-    
-    putHumtab(humdrumR, overwriteEmpty = 'd') <- humtab
-    
-    addFields(humdrumR) <- 'Print'
-    setActive(humdrumR, Print)
-}
-
-
-.print_humtable <- function(humdrumR, dataTypes = 'D', screenWidth = getOption('width') - 10L) {
+.print_humtable <- function(humdrumR, dataTypes = 'D', 
+                            maxRecordsPerFile, maxTokenLength, 
+                            screenWidth = getOption('width') - 10L) {
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     
     dataFields <- fields(humdrumR, c('Data'))$Name
     structureFields <- c('Piece', 'Spine', 'Path', 'Record', 'Stop')
     
-    humtab <- humtab[ , c(structureFields, dataFields), with = FALSE]
+    humtab <- humtab[ , c(structureFields, dataFields, 'Type'), with = FALSE]
+    lastPiece <- max(humtab$Piece)
+    if (all(humtab$Path == 0, na.rm = TRUE)) humtab[, Path := NULL]
+    if (all(humtab$Stop == 1, na.rm = TRUE)) humtab[, Stop := NULL]
     
-    print(humtab)
-   
+    humtab <- humtab[ , if (Piece[1] == lastPiece) tail(.SD, maxRecordsPerFile) else head(.SD, maxRecordsPerFile), by = Piece]
+    
+    Types <- humtab$Type
+    humtab[ , Type := NULL]
+    
+    structure <- names(humtab) %in% structureFields
+    
+    humtab <- lapply(as.list(humtab), 
+                     \(col) {
+                         col <- as.character(col)
+                         col[is.na(col)] <- '.'
+                         col
+                         })
+    
+    humtab[!structure] <- lapply(humtab[!structure], trimTokens, maxTokenLength = maxTokenLength)
+    # humtab[!structure] <- lapply(humtab[!structure], syntaxHighlight, dataTypes = Types)
+    
+    
+    
+    tokmat <- do.call('cbind', humtab)
+    tokmat <- rbind(names(humtab), tokmat)
+    lines <- padColumns(tokmat, global = logical(nrow(tokmat)), screenWidth = screenWidth, dontstyle = which(structure))
+    
+    cat(lines, sep = '\n')
 }
 
 
@@ -2542,7 +2532,7 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
 
   
   ## Trim and align columns, and collopse to lines
-  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], max.token.length = maxTokenLength)
+  tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], maxTokenLength = maxTokenLength)
   lines <- padColumns(tokmat, global, screenWidth)
   starMessage <- attr(lines, 'message')
   lines[global] <- gsub('\t', ' ', lines[global])
@@ -2604,6 +2594,45 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
 }
 
 
+
+printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
+    # evaluates the active expression into something printable, and puts it in a 
+    # field called "Print"
+    humtab <- data.table::copy(getHumtab(humdrumR, 'GLIMDd') )
+    
+    field <- evalActive(humdrumR, 'GLIMDd', sep = ', ', nullChar = TRUE)
+    
+    if (is.character(field) && any(field == "")) field[field == ""]  <- "''"
+    if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
+    if (is.factor(field)) field <- as.character(field)
+    
+    
+    
+    ## fill from token field
+    tokenFill <- if (useTokenNull) {
+        # humtab[, !Type %in% c('D', 'd')]
+        humtab[ , !Type %in% c('D', 'd') & Null]
+    } else {
+        # always get ** exclusive
+        humtab[ , (is.na(field) | field == '*') & grepl('\\*\\*', Token)]
+    }
+    
+    field[tokenFill] <- humtab[tokenFill == TRUE, Token]
+    
+    field <- gsub('\\.(, )+\\.', '.', field)
+    
+    if (any(is.na(field))) .stop('Print field has NA values')
+    
+    humtab[ , Print := field]
+    humtab$Type[humtab$Type == 'd'] <- 'D'
+    # humtab$Type[humtab$Type == 'P'] <- 'D'
+    
+    putHumtab(humdrumR, overwriteEmpty = 'd') <- humtab
+    
+    addFields(humdrumR) <- 'Print'
+    setActive(humdrumR, Print)
+}
+
 censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     if (nrow(tokmat) < 50) return(tokmat)
     null <- apply(matrix(grepl('^\\.( \\.)*$', tokmat) | grepl('^=', tokmat), nrow = nrow(tokmat)), 1, all, na.rm = TRUE)
@@ -2652,7 +2681,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     tokmat
 }
 
-padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L) {
+padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L, dontstyle = 1) {
     # This function takes a token matrix
     # and pads each token with the appropriate number of spaces
     # such that the lines will print as nicely aligned columns.
@@ -2671,7 +2700,7 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     # Get data Types
     dataTypes <- matrix('D', nrow = nrow(tokmat), ncol = ncol(tokmat))
     dataTypes[] <- parseTokenType(tokmat, E = TRUE)
-    dataTypes[ , 1] <- 'N' # for "none"
+    dataTypes[ , dontstyle] <- 'N' # for "none"
     
     # do padding
     tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], lenCol)

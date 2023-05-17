@@ -2766,7 +2766,7 @@ padder <- function(strs, sizes = max(nchar(strs)) + 1) {
 
 
 
-trimTokens <- function(tokmat, max.token.length) {
+trimTokens <- function(tokmat, maxTokenLength) {
     # This function  trims strings that are too long, replacing the last
     # three characters before the cuttoff with "..."
     
@@ -2774,8 +2774,8 @@ trimTokens <- function(tokmat, max.token.length) {
     
     toklen[is.na(toklen)] <- 0L
     
-    toolong <- toklen > max.token.length
-    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
+    toolong <- toklen > maxTokenLength
+    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, maxTokenLength)
     tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
     tokmat[is.na(tokmat)] <- ''
     
@@ -2898,6 +2898,9 @@ textstyle <- function(text, fg = "black", bg = NULL, style = 'normal') {
 syntaxHighlight <- function(token, dataTypes) {
   # E for exclusive
   # N for none
+  
+  dataTypes <- rep(dataTypes, length.out = length(token))
+  
   colors <- c(D = 'yellow', d = 'yellow', E = 'red', N = 'white', E = 'red',
               I = 'purple', M = 'green', G = 'cyan', L = 'cyan')
   
