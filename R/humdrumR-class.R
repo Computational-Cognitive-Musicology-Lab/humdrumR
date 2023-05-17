@@ -2447,7 +2447,7 @@ print_humtab <- function(humdrumR, dataTypes = "GLIMDd", firstAndLast = TRUE,
   
   humdrumR <- printableActiveField(humdrumR)
   
-  .print_humtab(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
+  .print_humdrum(humdrumR, dataTypes, Nmorefiles = Nfiles - length(humdrumR),
                 max.records.file, max.token.length, collapseNull)
 
   invisible(NULL)
@@ -2494,11 +2494,14 @@ printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
 }
 
 
+.print_humtable <- function(humdrumR, dataTypes = 'D', screenWidth = getOption('width') - 10L) {
+    
+}
 
 
-.print_humtab <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
+.print_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', Nmorefiles = 0L,
                           max.records.file = 40L, max.token.length = 12L, collapseNull = Inf,
-                          screenWidth = options('width')$width - 10L) {
+                          screenWidth = getOption('width') - 10L) {
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, padPaths = 'corpus', padder = '')
   
   # removes "hanging stops" like "a . ." -> "a"
@@ -2650,10 +2653,18 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     lenCol <- lenCol[screen]
     tokmat <- tokmat[ , screen, drop = FALSE]
 
+    # Get data Types
+    dataTypes <- matrix('D', nrow = nrow(tokmat), ncol = ncol(tokmat))
+    dataTypes[] <- parseTokenType(tokmat, E = TRUE)
+    dataTypes[ , 1] <- 'N' # for "none"
     
+    # do padding
     tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], lenCol)
     tokmat[global, 1L] <- padder(tokmat[global, 1L], lenCol[1]) # column 1 is record number!
     
+    # colorize
+   
+    tokmat[] <- syntaxHighlight(tokmat, dataTypes)
 
     
     # collapse to lines
@@ -2683,4 +2694,3 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     lines
     
 }
-

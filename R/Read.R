@@ -1004,7 +1004,7 @@ separatePieces <- function(fileFrame) {
 #   type
 # }
 
-parseTokenType <- function(spine) {
+parseTokenType <- function(spine, E = FALSE) {
     # This is called by parseRecords
     # simply categories records by spine type,
     # to create the humdrum tables Type field.
@@ -1017,6 +1017,9 @@ parseTokenType <- function(spine) {
     out[stringi::stri_detect_regex(spine, '^=')] <- 'M'
     out[stringi::stri_detect_regex(spine, '^!')] <- 'L'
     out[stringi::stri_detect_regex(spine, '^!!')] <- 'G'
+    
+    if (E) out[stringi::stri_detect_regex(spine, '^\\*\\*')] <- 'E'
+    
     out
 }
 

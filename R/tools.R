@@ -2849,3 +2849,66 @@ isColor <- function(x) {
     is.na(x) |
     x == 'transparent'
 }
+
+
+
+textstyle <- function(text, fg = "black", bg = NULL, style = 'normal') {
+  # copied from https://github.com/r-lib/testthat/blob/717b02164def5c1f027d3a20b889dae35428b6d7/R/colour-text.r
+  term <- Sys.getenv()["TERM"]
+  colour_terms <- c("xterm-color","xterm-256color", "screen", "screen-256color")
+  
+  if(!any(term %in% colour_terms, na.rm = TRUE)) {
+    return(text)
+  }
+  
+  
+  code <- .fg_colors[tolower(fg)]
+  
+  code[style != 'normal'] <- paste0(.style[style[style != 'normal']], ';', code[style != 'normal'])
+  
+  if (!is.null(bg)) code[bg != ''] <- paste0(code[bg != ''], ';', .bg_colors[tolower(bg[bg != ''])])
+  
+  paste0('\033[', code, 'm', text, '\033[0m')
+}
+
+.style <- c(normal = '0', bold = '1', blur = '2', italic = '3', underline = '4')
+
+.fg_colors <- c(
+  "black" = "30",
+  "blue" = "34",
+  "green" = "32",
+  "cyan" = "36",
+  "red" = "31",
+  "purple" = "35",
+  "yellow" = "33",
+  "white" = "37"
+)
+
+.bg_colors <- c(
+  "black" = "40",
+  "red" = "41",
+  "green" = "42",
+  "brown" = "43",
+  "blue" = "44",
+  "purple" = "45",
+  "cyan" = "46",
+  "light gray" = "47"
+)
+
+syntaxHighlight <- function(token, dataType) {
+  # E for exclusive
+  # N for none
+  colors <- c(D = 'yellow', d = 'yellow', E = 'red', N = 'white', E = 'red',
+              I = 'purple', M = 'green', G = 'cyan', L = 'cyan')
+  
+  style <- rep('normal', length(token))
+  style[dataType == 'N'] <- 'italic'
+  style[dataType == 'M'] <- 'underline'
+  style[dataType == 'd'] <- 'blur'
+  style[dataType == 'L'] <- 'blur'
+  
+  textstyle(token, 
+            colors[dataType],
+            NULL, #ifelse(dataType == 'M', 'light gray', ''),
+            style)
+}
