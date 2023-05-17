@@ -342,7 +342,10 @@ setMethod('initialize', 'humdrumR',
                                                   'Bar', 'DoubleBar', 'BarLabel'))
             fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
          
-            .Object@.Data <- function(print, maxRecordsPerFile, maxTokenLength) {set_humdrumRoptions(print, maxRecordsPerFile, maxTokenLength); .Object}
+            .Object@.Data <- function(print, maxRecordsPerFile, maxTokenLength) {
+                set_humdrumRoptions(print, maxRecordsPerFile, maxTokenLength)
+                sys.function()
+                }
             
             .Object@Humtable  <- humtab    
             .Object@Fields    <- fieldcategories
@@ -2401,6 +2404,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     npieces  <- npieces(object)
                     nfiles <- nfiles(object)
                     trim <- if (npieces == 1L) 800L else humdrumRoption('maxRecordsPerFile')
+                    
                     print_humdrumR(object, firstAndLast = TRUE, maxRecordsPerFile = trim)
                     
                     if (npieces > 1L) {
@@ -2579,7 +2583,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
         
         # 
         # 
-        maxwidth <- max(nchar(lines))
+        maxwidth <- min(screenWidth, max(nchar(lines)))
         
         ranges <- stringr::str_pad(ranges, width = maxwidth, pad = ':', side = 'right')
         ranges <- textstyle(ranges, style = 'italic')
