@@ -124,6 +124,14 @@ rbind.humdrum.table <- function(...) {
   
 }
 
+#' @rdname tally
+#' @export
+as.data.frame.humdrum.table <- function(x, ...) {
+  tab <- as.data.frame(S3Part(x), ...)
+  names(tab)[names(tab) == 'Freq'] <- 'Tally'
+  tab
+}
+
 alignTables <- function(tables, funcname = '') {
   tables <- lapply(tables, 
                    \(tab) {
@@ -160,13 +168,6 @@ alignTables <- function(tables, funcname = '') {
   
 }
 
-factorize <- function(token) {
-  factorizer <- token@Attributes$factorizer
-  if (is.null(factorizer)) return(factor(token@.Data))
-  
-  factorizer(token)
-  
-}
 
 # Probabilities ----
 
@@ -237,6 +238,14 @@ pdist.name <- function(ptab, margin = NULL, func = 'P') {
   
   paste0(func, '(', args, ')')
   
+}
+
+#' @rdname tally
+#' @export
+as.data.frame.probabilityDistribution <- function(x, ...) {
+  tab <- as.data.frame(S3Part(x), ...)
+  names(tab)[names(tab) == 'Freq'] <- 'p'
+  tab
 }
 
 ## p() -----

@@ -161,6 +161,23 @@ format.token <- function(x, ...) {
   x
 }
 
+factorize <- function(token) {
+  factorizer <- token@Attributes$factorizer
+  if (is.null(factorizer)) return(factor(token@.Data))
+  
+  factorizer(token)
+  
+}
+
+
+#' @export
+setMethod('as.factor', 'token', function(x) factorize(x))
+
+
+# #' @export
+#tapply <- rlang::new_function(formals(base::tapply), body = body(base::tapply))
+
+
 ## Logic methods ####
 
 ### is.methods ####

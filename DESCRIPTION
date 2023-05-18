@@ -4,8 +4,8 @@ Version: 0.6.5.3
 Authors@R: c(person("Nathaniel", "Condit-Schultz", email = "natcs@gatech.edu", role = c("aut", "cre")),
              person("Claire", "Arthur", email = "claire.arthur@gatech.edu", role = "aut"))
 Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 
-Depends: R(>= 4.1), dplyr, ggplot2, rlang, bit64
-Imports: MASS, combinat, stringr, glue(>= 1.3.0), data.table, abind, stringi, lubridate, numbers
+Depends: R(>= 4.1), bit64, rlang
+Imports: ggplot2, dplyr, MASS, combinat, stringr, glue(>= 1.3.0), data.table, abind, stringi, lubridate, numbers, scales
 License: GPL-3
 LazyData: TRUE
 Encoding: UTF-8

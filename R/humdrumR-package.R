@@ -39,11 +39,12 @@
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
 #' @importFrom rlang %|% %||% 
-#' @importFrom bit64 as.integer64 is.integer64
+#' @importFrom bit64 as.integer64 is.integer64 as.integer64 as.integer64.integer
 #' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom numbers primeFactors
 #' @importFrom dplyr summarize filter mutate pull group_by ungroup
-#' @importFrom ggplot2 ggplot aes
+#' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type
+#' @importFrom scales ContinuousRange
 NULL
 
 

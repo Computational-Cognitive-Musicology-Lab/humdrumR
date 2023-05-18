@@ -1064,7 +1064,7 @@ collapseHumdrum <- function(humdrumR, by,
     checks(humdrumR, xhumdrumR)
     by <- fieldMatch(humdrumR, by, 'collapseHumdrum', 'by')
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'collapseField')
-    dataTypes <- checkTypes(dataTypes, ,'collapseHumdrum', argname = 'dataTypes')
+    dataTypes <- checkTypes(dataTypes, 'collapseHumdrum', argname = 'dataTypes')
     checks(collapseAtomic, xTF)
     checks(sep, xcharacter & xlen1)
     

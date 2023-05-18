@@ -116,9 +116,9 @@ ungroup.humdrumR <- function(x, ...) {
   x
 }
 
-#############################################################
+#############################################################-
 ##### Methods for ggplot2 #####################-----
-##############################################################
+##############################################################-
 
 
 #' @rdname tidyHumdrum
@@ -129,20 +129,33 @@ ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') 
   ggplot(humtab, mapping = mapping, ...) + theme_humdrum()
 }
 
+#' @rdname tidyHumdrum
+#' @export
+ggplot.humdrum.table <- function(data = NULL, mapping = aes(), ...) {
+  
+  ggplot(as.data.frame(tab), mapping = mapping, ...) + theme_humdrum()
+}
+
+
+
 ## Theme
 
 ### Colors ----
-scale_color_humdrum <- scale_fill_manual(values = flatly)
+scale_color_humdrum <- ggplot2::scale_fill_manual(values = flatly)
 # scale_color_continuous(type = colorRamp(flatly[2:3]))
 
-options(ggplot2.continuous.fill = scale_color_gradientn(colors = flatly_continuous(100)))
-options(ggplot2.continuous.color = scale_color_gradientn(colours = flatly_continuous(100)))
-options(ggplot2.continuous.colour = scale_color_gradientn(colours = flatly_continuous(100)))
+options(ggplot2.continuous.fill = ggplot2::scale_color_gradientn(colors = flatly_continuous(100)))
+options(ggplot2.continuous.color = ggplot2::scale_color_gradientn(colours = flatly_continuous(100)))
+options(ggplot2.continuous.colour = ggplot2::scale_color_gradientn(colours = flatly_continuous(100)))
 
 # options(ggplot2.continuous.colour = 'humdrum')
 
 ### theme ----
 theme_humdrum <- function() {
+  ggplot2::update_geom_defaults("point", list(size = .5, color = flatly[1], fill = flatly[2]))
+  ggplot2::update_geom_defaults("line", list(size = .5, color = flatly[4], fill = flatly[3]))
+  ggplot2::update_geom_defaults("rect", list(fill = flatly[1]))
+  
   theme(panel.background = element_blank(), axis.ticks = element_blank(),
         strip.background = element_blank(), 
         # panel.border = element_rect(linetype = 'dashed', fill = NA),
@@ -157,7 +170,25 @@ theme_humdrum <- function() {
         )
 }
 
-update_geom_defaults("point", list(size = .5, color = flatly[1], fill = flatly[2]))
-update_geom_defaults("line", list(size = .5, color = flatly[4], fill = flatly[3]))
-update_geom_defaults("rect", list(fill = flatly[1]))
+
+## Treatment of token ----
+
+#' @export
+scale_type.token <- function(x) if (class(x@.Data) %in% c('integer', 'numeric', 'integer64')) 'continuous' else 'discrete'
+
+
+#' @export
+scale_x_token <- function(..., expand = waiver(), guide = waiver(), position = "bottom") {
+  sc <- ggplot2::discrete_scale(c("x", "xmin", "xmax", "xend"), "position_d", identity, ...,
+                                # limits = c("c", "c#", "d-", "d", "d#", "e-", "e", "e#", "f", "f#", "f##", "g-", "g", "g#", "a-", "a", "a#", "b-", "b", "b#"),
+                       expand = expand, guide = guide, position = position, super = ScaleDiscretePosition)
+  
+  sc$range_c <- scales::ContinuousRange$new()
+  sc
+}
+
+
+
+
+
 
