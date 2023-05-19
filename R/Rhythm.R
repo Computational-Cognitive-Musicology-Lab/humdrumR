@@ -1673,7 +1673,7 @@ recordDuration <- function(humdrumR) {
   humdrumR <- .recordDuration(humdrumR)
   
   humdrumR@Humtable[ , ..Timeline.. := NULL]
-  removeFields(humdrumR) <- '..Timeline..'
+  humdrumR <- updateFields(humdrumR)
   
   humdrumR 
 }
@@ -1765,9 +1765,9 @@ timebase <- function(humdrumR, tb = '16') {
   
   # humtab <- update_Null.data.table(humtab, oldActiveFields)
   putHumtab(humdrumR) <- humtab
-  
-  removeFields(humdrumR) <- c('..Timeline..', 'RecordDuration')
   humdrumR@Humtable[ , c('..Timeline..', 'RecordDuration') := NULL]
+  humdrumR <- updateFields(humdrumR)
+  
   humdrumR@Active <- oldActive
   humdrumR
 }

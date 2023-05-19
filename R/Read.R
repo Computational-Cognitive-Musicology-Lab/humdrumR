@@ -722,8 +722,9 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     #
     message('Done!\n')
     
-    makeHumdrumR(humtab, pattern = setNames(unique(fileFrame$Pattern), unique(fileFrame$Label)), 
-                 tandemcol = colnames(humtab) %in% colnames(tandemTab))
+    makeHumdrumR(humtab, 
+                 pattern = setNames(unique(fileFrame$Pattern), unique(fileFrame$Label)), 
+                 tandemFields = colnames(tandemTab))
     
     
 }

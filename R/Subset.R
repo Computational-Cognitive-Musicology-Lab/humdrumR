@@ -84,8 +84,8 @@ subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
   
   if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
   putHumtab(x) <- humtab
+  x <- updateFields(x)
   
-  removeFields(x) <- '.TmpFilter.'
   x@Active <- oldActive
   
   

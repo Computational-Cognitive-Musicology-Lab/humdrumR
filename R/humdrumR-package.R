@@ -162,7 +162,8 @@ NULL
 humdrumR_defaults <- list(
   print = 'score',
   maxRecordsPerFile = 40L,
-  maxTokenLength = 12L
+  maxTokenLength = 12L,
+  nullPrint = 'NA2dot'
   
 )
 
@@ -172,7 +173,7 @@ humdrumRoption <- function(name) {
   opts[[pmatch(name[1], names(opts))]]
 }
 
-set_humdrumRoptions <- function(print, maxRecordsPerFile, maxTokenLength) {
+set_humdrumRoptions <- function(print, maxRecordsPerFile, maxTokenLength, nullPrint) {
   curOptions <- oldOptions <- humdrumRoptions()
   if (!missing(print)) {
     checks(print, xplegal(c('score', 'table')))
@@ -185,6 +186,10 @@ set_humdrumRoptions <- function(print, maxRecordsPerFile, maxTokenLength) {
   if (!missing(maxTokenLength)) {
     checks(maxTokenLength, xwholenum & xpositive)
     curOptions$maxTokenLength <- maxTokenLength
+  }
+  if (!missing(nullPrint)) {
+    checks(nullPrint, xcharacter & xlen1 & xvalues('NA2dot', 'charNA2dot', 'asis', 'dot2NA'))
+    curOptions$nullPrint <- nullPrint
   }
   
   options(humdrumR_options = curOptions)

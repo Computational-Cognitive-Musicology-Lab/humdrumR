@@ -3,13 +3,19 @@
 \name{humTable}
 \alias{humTable}
 \alias{getHumtab}
-\alias{getFields}
+\alias{pullFields}
 \alias{fields}
 \title{Humdrum tables (and their Fields)}
 \usage{
 getHumtab(humdrumR, dataTypes = "GLIMDd")
 
-getFields(humdrumR, fields = getActiveFields(humdrumR), dataTypes = "D")
+pullFields(
+  humdrumR,
+  fields = selectedFields(humdrumR),
+  dataTypes = "D",
+  null = c("charNA2dot", "NA2dot", "dotToNA", "asis"),
+  drop = FALSE
+)
 
 fields(
   humdrumR,

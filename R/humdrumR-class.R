@@ -319,37 +319,26 @@ setClass('humdrumR',
          contains = 'function',
          slots = c(Humtable = 'data.table',
                    Files = 'list',
-                   Fields = 'list',
-                   Active = 'quosure',
+                   Fields = 'data.frame',
                    LoadTime = 'POSIXct',
                    Groupby = 'quosures'
                    )) -> makeHumdrumR
 
 setMethod('initialize', 'humdrumR',
-          function(.Object, humtab, pattern, tandemcol) {
+          function(.Object, humtab, pattern, tandemFields) {
             # humtab = a humdrum table
             # pattern = the original file search pattern (string)
             # tandem col a logical vector indicating which columns are tandem fields
 
-            fields <- colnames(humtab)
-            fieldcategories <- list(Data = 'Token',
-                                    Structure = c('Filename', 'Filepath', 'File', 'Label', 'Piece',
-                                                  'Spine', 'Path', 'ParentPath', 'Stop',
-                                                  'Record', 'NData', 'Global', 'Null', 'Filter', 'Type'),
-                                    Interpretation   = c('Exclusive', 'Tandem',
-                                                         fields[tandemcol]),
-                                    Formal    = c(grep('^Formal', fields, value = TRUE),
-                                                  'Bar', 'DoubleBar', 'BarLabel'))
-            fieldcategories$Reference <- fields[!fields %in% unlist(fieldcategories)]
+            
          
-            .Object@.Data <- function(print, maxRecordsPerFile, maxTokenLength) {
-                set_humdrumRoptions(print, maxRecordsPerFile, maxTokenLength)
+            .Object@.Data <- function(print, maxRecordsPerFile, maxTokenLength, nullPrint) {
+                set_humdrumRoptions(print, maxRecordsPerFile, maxTokenLength, nullPrint)
                 sys.function()
                 }
             
             .Object@Humtable  <- humtab    
-            .Object@Fields    <- fieldcategories
-            .Object@Active    <- rlang::quo(Token)
+            .Object@Fields    <- initFields(humtab, tandemFields)
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
             .Object@LoadTime  <- Sys.time()
             .Object@Groupby   <- quos()
@@ -374,6 +363,53 @@ structureTab <- function(..., groupby = list()) {
 
 # humdrumR core methods ####
 
+
+## $ methods ----
+
+#' @export
+setMethod('$', signature = c(x = 'humdrumR'),
+          function(x, name) {
+              name <- as.character(name)
+              
+              match <- fieldMatch(x, name, callfun = '$', argname = 'name')
+              
+              
+              getHumtab(x, 'D')[[match[1]]]
+              
+              
+          })
+
+#' @export
+setMethod('$<-', signature = c(x = 'humdrumR'),
+          function(x, name, value) {
+              checks(value, (xvector | xinherits('token')) & xlen)
+              
+              humtab <- getHumtab(x, 'D')
+              if (!(length(value) == 1L | length(value) == nrow(humtab))) .stop("When using humdrumR$<- value, the value must either be length 1",
+                                                                                "or exactly the same length as the number of non-null data tokens in the",
+                                                                                "humdrumR object's active field.")
+              name <- as.character(name)
+              
+              if (name == 'Token') .stop("In your use of humdrumR$<-, you are trying to overwrite the 'Token' field, which is not allowed.",
+                                         "This field should always keep the original humdrum data you imported.")
+              
+              structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+              
+              if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
+                                              "For a complete list of structural fields, use the command fields(mydata, 'S').")
+              
+              isnew <- !name %in% colnames(humtab)
+              humtab[[name]] <- value
+              
+              putHumtab(x, overwriteEmpty = c('D')) <- humtab
+              humdrumR <- updateFields(humdrumR)
+              
+              x
+              
+          })
+
+
 ## As/Is ####
 
 #' @rdname humdrumRclass
@@ -381,7 +417,6 @@ structureTab <- function(..., groupby = list()) {
 is.humdrumR <- function(x){
     inherits(x, 'humdrumR')  
 } 
-
 
 
 #' humdrumR coercion
@@ -522,7 +557,7 @@ setMethod('as.vector',
 
                     if (is.empty(x)) return(vector(mode, 0L))
                     
-                    vec <- evalActive(x, 'D')
+                    vec <- pullSelectedField(x, 'D')
                     if (mode != 'any') vec <- as(vec, mode)
                     vec
                     
@@ -574,7 +609,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     j[is.na(j)] <- 1L
     
     
-    field <- evalActive(x, dataTypes = dataTypes, nullChar = TRUE)
+    field <- pullSelectedField(x, dataTypes = dataTypes)
     if (is.factor(field)) field <- as.character(field) # R does't allow factors in matrices
     # padder <- as(padder, class(field))
     
@@ -1024,7 +1059,7 @@ contractPaths <- function(humtab) {
 #' 
 #' @param collapseField ***The target field in the `humdrumR` data to collapse.***
 #' 
-#' Defaults to `getActiveFields(humdrumR)[1]`.
+#' Defaults to `selectedFields(humdrumR)[1]`.
 #' 
 #' Must be a single `character` string.
 #' 
@@ -1057,7 +1092,7 @@ contractPaths <- function(humtab) {
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
 collapseHumdrum <- function(humdrumR, by,
-                            collapseField = getActiveFields(humdrumR)[1], 
+                            collapseField = selectedFields(humdrumR)[1], 
                             dataTypes = 'GLIMDd', 
                             collapseAtomic = TRUE, sep = ' ') {
  
@@ -1114,7 +1149,7 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
 
 #' @rdname collapseHumdrum
 #' @export 
-collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapseStops <- function(humdrumR, collapseField = selectedFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checks(humdrumR, xhumdrumR)
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseStops', 'collapseStops')
     checks(collapseAtomic, xTF)
@@ -1136,7 +1171,7 @@ collapseStops <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
 
 #' @rdname collapseHumdrum
 #' @export
-collapsePaths <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapsePaths <- function(humdrumR, collapseField = selectedFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checks(humdrumR, xhumdrumR)
     checks(collapseAtomic, xTF)
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapsePaths', 'collapseField')
@@ -1155,7 +1190,7 @@ collapsePaths <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1]
 
 #' @rdname collapseHumdrum
 #' @export
-collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
     checks(humdrumR, xhumdrumR)
     checks(collapseAtomic, xTF)
     collapseField <- fieldMatch(humdrumR, collapseField, 'collapseRecords', 'collapseField')
@@ -1298,7 +1333,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' 
 #' @param fromField ***Which field to "fold."***
 #' 
-#' Defaults to `getActiveFields(humdrumR)[1]`.
+#' Defaults to `selectedFields(humdrumR)[1]`.
 #' 
 #' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
 #' For example, `"Tok"` would match the `Token` field.
@@ -1324,7 +1359,7 @@ collapseRecords <- function(humdrumR, collapseField = getActiveFields(humdrumR)[
 #' @family {Humdrum data reshaping functions}
 #' @export
 foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL, 
-                        fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE,
+                        fromField = selectedFields(humdrumR)[1], fillFromField = FALSE,
                         newFieldNames = NULL) {
     # argument checks
     checks(humdrumR, xhumdrumR)
@@ -1415,7 +1450,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     putHumtab(humdrumR, overwriteEmpty = c()) <- orderHumtab(humtab)
     
-    addFields(humdrumR) <- newfields
+    humdrumR <- updateFields(humdrumR) 
     
     humdrumR <- setActiveFields(humdrumR, newfields)
     
@@ -1508,7 +1543,7 @@ foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NU
 #' 
 #' @family {Folding functions}
 #' @export
-foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humdrumR)[1]) {
+foldExclusive <- function(humdrumR, fold, onto, fromField = selectedFields(humdrumR)[1]) {
     checks(humdrumR, xhumdrumR)
     checks(fold, xcharnotempty)
     checks(onto, xcharnotempty & xlen1)
@@ -1583,7 +1618,7 @@ foldExclusive <- function(humdrumR, fold, onto, fromField = getActiveFields(humd
 
 #' @rdname foldHumdrum
 #' @export
-foldPaths <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFromField = TRUE) {
+foldPaths <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFromField = TRUE) {
     checks(humdrumR, xhumdrumR)
     
     paths <- unique(getHumtab(humdrumR)$Path)
@@ -1606,7 +1641,7 @@ foldPaths <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFr
 
 #' @rdname foldHumdrum
 #' @export
-foldStops <- function(humdrumR, fromField = getActiveFields(humdrumR)[1], fillFromField = FALSE) {
+foldStops <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFromField = FALSE) {
     checks(humdrumR, xhumdrumR)
            
    stops <- unique(getHumtab(humdrumR)$Stop)
@@ -1697,7 +1732,6 @@ foldGraceNotes <- function(humdrumR) {
 getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
           humtab <- humdrumR@Humtable
           
-           
           checks(humdrumR, xhumdrumR)
           dataTypes <- checkTypes(dataTypes, 'getHumtab')
           
@@ -1769,7 +1803,7 @@ update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
 update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
-    field <- getActiveFields(hum)[1]
+    field <- selectedFields(hum)[1]
     putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, field)
     
     hum
@@ -1796,7 +1830,7 @@ update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
 
 #
 update_Null <- function(hum, field, ...) UseMethod('update_Null')
-update_Null.humdrumR <- function(hum, field = getActiveFields(hum),  allFields = FALSE, ...) {
+update_Null.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FALSE, ...) {
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
@@ -1818,384 +1852,107 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 
 
 
-# Active slot ----
-##### Manipulating the Active slot
+####################################################-
+# Fields ----
+####################################################-
 
-#' The "Active expression" of a [humdrumR object][humdrumRclass]
-#' 
-#' [humdrumR objects][humdrumRclass] contain many fields of data stored in their underlying
-#' [humdrum table][humTable];
-#' You can *explicitly* access any of these fields using [with(in)Humdrum][withinHumdrum].
-#' When you don't explicitly indicate a field, `humdrumR` will generally default to showing/using
-#' an the objects "*Active expression*".
-#' 
-#' @details 
-#'
-#' Most of the time, the active expression just points to a single field: when first [read in][readHumdrum()],
-#' the active expression/field is `Token`.
-#' However, the active expression can be any arbitrary `R` expression involving fields of the [humdrum table][humTable].
-#' When called for, the expression is evaluated within the object's [humdrum table][humTable] 
-#' (similar to a "[within][withinHumdrum] expression," without any extra evaluation options).
-#' For instance, the active expression could be:
-#' `paste(Token, Record)`, which would print each `Token` with its record number pasted to it.
-#' Any fields referenced in the active expression are called "active fields."
-#' 
-#' Common commands which evaluate the active expression include:
-#' 
-#' + When is printing a `humdrumR` object in the terminal, the active expression is shown.
-#'   (`evalActive` is used to evaluate the expression as a `character` string, if needed.)
-#'   When a [humdrumR object][humdrumRclass] prints, the active fields are marked with `"*"`
-#'   by their name(s).
-#' + When [writing to files][writeHumdrum()], the active expression is written.
-#' + In a  "[within expression][withinHumdrum()]," the variable `.` is automatically replaced with the active expression.
-#' 
-#' Functions like [collapseHumdrum]()], [foldHumdrum()], and [fields()], use the active field(s) for default arguments.
-#' 
-#' The current active field can be seen by calling `getActive(humData)`.
-#' A `character` vector of all fields being used by the active expression
-#' can be extracted with `getActiveFields(humData)`.
-#' 
-#' @section Setting the active expression:
-#' 
-#' The active expression can be changed in several ways.
-#' The most fundamental is using the  `setActive()` function, with the active expression specified directly as the second argument:
-#' e.g., `setActive(humData, paste(Token, Record))`.
-#' Notice that the active field *must* 
-#' 
-#' 1. Refer to at least one field in the [humdrum table][humTable].
-#' 2. Evaluate to an vector that is same length as the humdrum table (given the target `dataTypes`),
-#'    or a *list* of vectors of that length.
-#'    
-#' 
-#' For programmatic work, `setActiveFields()` accepts a `character` vector of [partially matched][partialMatching]
-#' field names;
-#' If one field name is given, the active field just calls that field.
-#' If two or more field names are given, the active expression is set to an expression of the form
-#' `list(Field1, Field2, Field3, ...)`.
-#' This is the easiest way to quickly see two or three fields side by side.
-#' 
-#' A final option is to use the tidyverse [select()][dplyr::select()] function.
-#' Select will accept arbitrary expressions, like `setActive()`, *or* `character` strings like `setActiveFields`,
-#' putting multiple arguments into a `list`.
-#' In addition, [select()][dplyr::select()]'s normal "selection features work" as well!
-#' 
-#' Note that setting active fields with multiple columns quickly gets hard to read in the score view.
-#' If you want to look at many columns at once, use the table view.
-#' 
-#'
-#' @section Null data:
-#' 
-#' `humdrumR`` identifies "null data" based on the active field---it might not be obvious, but this 
-#' is one of the most important jobs of the active field!
-#' Anywhere the current active field evaluates to `"."` or `NA` (or `NULL` for [lists][base::list()]) is considered null data;
-#' in the internal [humdrum table][humTable] these data points are set to `TRUE` in the `Null` field
-#' and assigned the type `"d"` in the `Type` field.
-#' Null data is updated whenever the active field is changed or reset, including by functions which create new fields, like
-#' [foldHumdrum()] and [within.humdrumR()].
-#' 
-#' As you work, there will often be data tokens which are null in one field, but not in another field.
-#' For example, if you load `**kern` data, a token like `"4r"` (quarter-note rest) token will be `NA` if you call `pitch`, but 
-#' not `NA` if you call `recip` (rhythm).
-#' 
-#' ```
-#' 
-#' kerndata <- readHumdrum(...)
-#' 
-#' within(kerndata$Token,
-#'        Pitch  <- pitch(.),
-#'        Rhythm <- recip(.)) -> kerndata
-#' 
-#' ```
-#' 
-#' Now, if you change the active field between `Pitch` and `Rhythm` (using `$`) you'll see that there
-#' are different numbers of (non-null) data tokens: `ntoken(kerndata$Pitch ,'D')` vs `ntoken(kerndata$Rhythm, 'D)` will 
-#' return different numbers!
-#' (The difference would be the number of rest tokens.)
-#' Similarly, if you apply functions/expressions to this data (using [withinHumdrum()] for example), the result will depend on 
-#' what the active field is:
-#' 
-#' ```
-#' 
-#' with(kerndata$Pitch, length(.))
-#' with(kerndata$Rhythm, length(.))
-#' ```
-#' 
-#' Once again, we'll get different numbers here! (Assuming there are rests in the data.)
-#' This is the case even though the do-expression isn't actually using the `Pitch` or `Rhythm` fields!
-#' If `Pitch` is the active field, the rest tokens are null-data and will be ignored!
-#' 
-#' @section Evaluating the active expression:
-#' 
-#' Evaluation of the active expression is usually something done automatically by `humdrumR` functions, 
-#' especially for printing data at the console.
-#' However, you can also do it manually using the `evalActive` command.
-#' The "raw" result of evaluating the active expression can be returned by specifying `forceAtomic == FALSE`.
-#' However, by default `forceAtomic == TRUE` which causes `evalActive` to coerce the evaluated results
-#' into an atomic vector.
-#' Obviously, the evaluated active result is an atomic vector, no coercion is needed.
-#' 
-#' If the evaluated active result is a [list][base::list()], it must be either the full length of the [humdrum table][humTable],
-#' or a list of vectors/lists of that length.
-#' In other words, the result must be one or more "full length" vector/lists.
-#' For each full length `list`, each element of the list is coerced to a single atomic value and then
-#' [unlisted][base::unlist()] to create an atomic vector.
-#' If the elements of the list are not themselves atomic, they are converted to various `character` representations.
-#' 
-#' + [tables][base::table()] are coerced to the string `"<table: k=x, n=y>"`, where `x` is the number of categories in the table
-#' and `y` is the total number of values in the table (`sum(table(...))`).
-#' + [lists][base::list()] of `length < 5` are coerced to `"list(a, b, c, d, e)"`, where `a-e` are the elements of the list.
-#'   Longer lists are coerced to `"list[n]:`, where `n` is the length of the list.
-#' + All other `R` objects are coerced to `<class>`, where `class` is the [class][base::class()] of the object.
-#' 
-#' Finally, all the thus-generated full-length vectors (if there are more than one) are pasted together, separated
-#' by `sep` (default = `", "`).
-#' A common practical illustration/application of this last is to specify active fields that are
-#' lists of fields---for example, `list(Token, Spine, Record)`.
-#' Following the algorithm above, the evaluated result is would be `character` vector looking
-#' like `"Token, Spine, Record"`.
-#' This is exactly what `setActiveFields` does when fed multiple `fieldNames`, as well as the 
-#' special call `humData$All`.
-#' 
-#' @param humdrumR ***HumdrumR data.***
-#' 
-#' Must be a [humdrumR data object][humdrumRclass].
-#' 
-#' @param dataTypes ***Which types of humdrum records to include in the census.***
-#' 
-#' Defaults to `"d"`.
-#' 
-#' Must be `character`. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#' or any combination of these (e.g., `"LIM"`).
-#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
-#'    
-#' @param forceAtomic ***Whether he evaluated active field is forced/coerced into a atomic vector.***
-#' 
-#' Defaults to `TRUE`.
-#' 
-#' Must be a singleton `logical` value: an on/off switch
-#' 
-#' @param sep ***Separator to paste between collapsed strings.***
-#'
-#' Defaults to `", "`.
-#' 
-#' Must be a single `character` string.
-#'
-#' Only used if `forceAtomic == TRUE`, wherein lists of vectors are pasted together.
-#'
-#' @param nullChar ***Should null tokens be returned as characters or `NA`?***
-#' 
-#' Defaults to `FALSE`.	
-#' 
-#' Must be a singleton `logical` value: an on/off switch
-#'
-#' If `nullChar == TRUE` and the output is `character`, `NA`s in the output vector are replaced with humdrum 
-#' null character tokens: `"."`, `"!"`, `"="`, or `"*"`.
-#' If `forceAtomic` is `FALSE`, `nullChar` is ignored.
-#' 
-#' @name humActive 
-#' @export
-evalActive <- function(humdrumR, dataTypes = 'D', forceAtomic = TRUE, sep = ', ', nullChar = FALSE)  {
-    checks(humdrumR, xhumdrumR)
-    dataTypes <- checkTypes(dataTypes, 'evalActive')
-    checks(forceAtomic, xTF)
-    checks(sep, xcharacter & xlen1)
-    checks(nullChar, xTF)
+
+## Manipulating the @Fields slot ----
+
+checkFieldTypes <- function(types, argname, callname) {
+    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'selected')
+    types <- matched(types, valid, nomatch = types)
+    checks(types, xcharacter & xmaxlength(6) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'selected')))
+}
+
+initFields <- function(humtab, tandemFields) {
+    fields <- colnames(humtab)
     
-    humtab <- getHumtab(humdrumR, dataTypes)
+    fieldTable <- data.table(Name = fields, Class = sapply(humtab, class), Type = 'Reference')
     
-    values <- rlang::eval_tidy(humdrumR@Active, data = humtab)
+    fieldTable[ , Type := {
+        Type <- Type
+        Type[Name == 'Token'] <- 'Data'
+        Type[Name %in% c('Filename', 'Filepath', 'File', 'Label', 'Piece',
+                         'Spine', 'Path', 'ParentPath', 'Stop',
+                         'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')] <- 'Structure'
+        Type[Name %in% c('Exclusive', 'Tandem', tandemFields)] <- 'Interpretation'
+        Type[grepl('^Formal', Name) | Name %in% c('Bar', 'DoubleBar', 'BarLabel')] <- 'Formal'
+        Type                 
+    }]
     
-    if (!forceAtomic) return(values)
+    setorder(fieldTable, Type, Class)
+    fieldTable[ , Selected := Name == 'Token']
+    fieldTable
+}
+
+
+
+
+fieldClass <- function(x) {
+    class <- class(x)
     
-    
-    if (length(values) == nrow(humtab)) values <- list(values)
-    lists <- sapply(values, is.list)
-    values[lists] <- lapply(values[lists],
-                            \(l) {
-                                lens <- lengths(l)
-                                
-                                output <- rep(NA, length = length(lens))
-                                
-                                atomic <- sapply(l, is.atomic) 
-                                l[atomic & lens > 0L] <- lapply(l[atomic & lens > 0L], list)
-                                
-                                # output[atomic & lens > 1L] <- paste0('list(', sapply(l[atomic & lens > 1L], paste, collapse = ', ')
-                                # output[atomic & lens == 1L] <- unlist(l[atomic & lens == 1L])
-                                
-                                output[lens > 0L] <- sapply(l[lens > 0L], object2str)
-                                output
-                            })
-    
-    
-    
-    
-    
-    nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')[humtab$Type]
-    null <- humtab[ , Null | Filter]
-    values <- lapply(values,
-                     \(val) {
-                         null <- null | (!is.na(nulltypes) & is.na(val))
-                         if (nullChar) {
-                             if (is.factor(val)) {
-                                 levels <- levels(val)
-                                 val <- as.character(val)
-                                 val[null] <- nulltypes[null]
-                                 val <- factor(val, levels = union(levels, unique(nulltypes)))
-                             } else {
-                                 val[null] <- nulltypes[null]   
-                             }
-                         }  else {
-                             val[null] <-  NA
-                         }
-                         
-                         val
-                     })
-    
-    if (length(values) == 1L) {
-        values[[1]]
-    } else {
-        values <- lapply(values, as.character)
-        do.call('.paste', c(values, list(sep = sep, na.if = all)))
+    if (class == 'token') {
+        class <-paste0(class(x@.Data), 
+                       ' (', if (!is.null(x@Exclusive)) paste0('**', x@Exclusive, ' '), 
+                       'tokens)')
+    }
+    if (class == 'list') {
+        classes <- unique(sapply(x, class))
+        class <-  paste0('list (of ',  harvard(paste0(setdiff(classes, 'NULL'), "s"), 'and'), ')')
     }
     
+    class
 }
 
-
-
-
-#' @rdname humActive
-#' @export
-getActive <- function(humdrumR){
-    checks(humdrumR, xhumdrumR)
-    humdrumR@Active 
-} 
-
-#' @rdname humActive
-#' @export
-getActiveFields <- function(humdrumR) {
-    # Identifies which fields are used in
-    # the current `Active` expression.
-    fieldsInExpr(getHumtab(humdrumR, 'D'), getActive(humdrumR))
-}
-
-
-#' @rdname humActive
-#' @export
-setActive <- function(humdrumR, expr) {
-  checks(humdrumR, xhumdrumR)
-  putActive(humdrumR, rlang::enquo(expr))
-}
-
-
-
-#' `setActiveFields` takes a character vector of strings representing current
-#' [field][humTable] names
-#' and sets the [humdrumRclass] object's active expression
-#' to simply return those fields (as a list, if there are more than one).
-#' @rdname humActive
-#' @export
-setActiveFields <- function(humdrumR, fieldnames) {
-  checks(humdrumR, xhumdrumR)
-  fieldnames <- fieldMatch(humdrumR, fieldnames, callfun = 'setActiveFields', argname = 'fieldnames')
-  actquo <- if (length(fieldnames) > 1L) {
-            rlang::quo(list(!!!lapply(fieldnames, as.symbol)))
-            } else {
-            rlang::new_quosure(as.symbol(fieldnames), env = rlang::get_env(humdrumR@Active))
-            }
-  putActive(humdrumR, actquo)
-}
-
-putActive <- function(humdrumR, actquo) {
-    # This does the dirty work for 
-    # setActive and setActiveFields.
-    humtab <- getHumtab(humdrumR, 'D')
-    usedInExpr <- fieldsInExpr(humtab, actquo)
+updateFields <- function(humdrumR, selectNew = TRUE) {
+    humtab <- getHumtab(humdrumR)
+    fieldTable <- humdrumR@Fields
+    fieldTable <- fieldTable[Name %in% colnames(humtab)]
     
-    
-    if (length(usedInExpr) == 0L) .stop("The 'active'-field formula for a humdrumR object must refer to a field in the data.",
-                                        "Add a reference to a field, for instance 'Token'.")
-    
-    humdrumR <- update_Null(humdrumR, field = usedInExpr)
-    humdrumR@Active <- actquo
-    humdrumR <- update_Exclusive.humdrumR(humdrumR)
-    
-    act <- rlang::eval_tidy(actquo, data = humtab)
-    
-    nrows <- nrow(humtab)
-    if (!(length(act) == nrows || all(lengths(act) == nrows))) {
-        .stop("The active-field for a humdrumR object must either be the same length as",
-              "the full humdrum table, or a list where each element is the right length.")
+    new <- setdiff(colnames(humtab), fieldTable$Name)
+    if (length(new)) {
+        fieldTable <- rbind(fieldTable, 
+                            data.table(Name = new, Type = 'Data', 
+                                       Class = '_tmp_', Selected = selectNew))
     }
-   
+    
+    fieldTable$Class <- sapply(humtab, fieldClass)[fieldTable$Name]
+    
+    setorder(fieldTable, Type, Class)
+    if (selectNew) fieldTable[ , Selected := Name %in% new]
+    humdrumR@Fields <- fieldTable
     
     humdrumR
+    
 }
 
 
+## Querying fields ----
 
 
-# Fields ----
+
+naDots <- function(field, null, Type) {
+    if (null == 'asis') return(field)
+    na <- is.na(field)
+    
+    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=')[Type]
+    
+    
+    if (null == 'dot2NA') {
+        na <- na | field == nulltoken
+        field[na] <- NA
+    } else {
+        if (null == 'charNA2dot') na <- is.character(field) & na
+        field[na] <- nulltoken[na]
+    }
+    
+    field   
+}
+
 
 #' @export
 names.humdrumR <- function(humdrumR) names(getHumtab(humdrumR))
-
-checkFieldTypes <- function(types, argname, callname) {
-    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
-    types <- matched(types, valid, nomatch = types)
-    checks(types, xcharacter & xmaxlength(5) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')))
-}
-
-#' @export
-setMethod('$', signature = c(x = 'humdrumR'),
-          function(x, name) {
-            name <- as.character(name)
-            
-            match <- fieldMatch(x, name, callfun = '$', argname = 'name')
-            
-            
-            getHumtab(x, 'D')[[match[1]]]
-            
-            
-          })
-
-#' @export
-setMethod('$<-', signature = c(x = 'humdrumR'),
-          function(x, name, value) {
-              checks(value, (xvector | xinherits('token')) & xlen)
-              
-              humtab <- getHumtab(x, 'D')
-              
-              if (!(length(value) == 1L | length(value) == nrow(humtab))) .stop("When using humdrumR$<- value, the value must either be length 1",
-                                                                                 "or exactly the same length as the number of non-null data tokens in the",
-                                                                                 "humdrumR object's active field.")
-              name <- as.character(name)
-              
-              if (name == 'Token') .stop("In your use of humdrumR$<-, you are trying to overwrite the 'Token' field, which is not allowed.",
-                                          "This field should always keep the original humdrum data you imported.")
-              
-              structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                                  'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
-              
-              if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
-                                             "For a complete list of structural fields, use the command fields(mydata, 'S').")
-              
-              isnew <- !name %in% colnames(humtab)
-              humtab[[name]] <- value
-              
-              putHumtab(x, overwriteEmpty = c()) <- humtab
-              if (isnew) addFields(x) <- name
-              
-              x
-              
-              
-              
-              
-              
-              
-          })
-
-
-
 
 fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
           fields <- fields(humdrumR)$Name
@@ -2236,25 +1993,26 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 #' 
 #' @param fields ***Which fields to output.***
 #' 
-#' Defaults to `getActiveFields(humdrumR)`.
+#' Defaults to `selectedFields(humdrumR)`.
 #' 
 #' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
 #' For example, `"Tok"` would match the `Token` field.
 #'   
 #' @rdname humTable
 #' @export
-getFields <- function(humdrumR, fields = getActiveFields(humdrumR), dataTypes = 'D') {
-    
+pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis'), drop = FALSE) {
     checks(humdrumR, xhumdrumR)
+    dataTypes <- checkTypes(dataTypes, 'pullFields')
     
-    dataTypes <- checkTypes(dataTypes, 'getFields')
+    null <- match.arg(null)
     
+    humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+
+    selectedTable <- humtab[ , fields, with = FALSE]
     
-    fields <- fieldMatch(humdrumR, fields, callfun = 'getFields', argname = 'fields')
+    selectedTable[] <- lapply(selectedTable, naDots, null = null, Type = humtab$Type)
     
-    humtab <- getHumtab(humdrumR, dataTypes)
-    
-    humtab[ , fields, with = FALSE]
+    if (length(fields) == 1L && drop) selectedTable[[1]] else selectedTable
     
 }
 
@@ -2277,53 +2035,26 @@ getFields <- function(humdrumR, fields = getActiveFields(humdrumR), dataTypes = 
 #'   
 #' @rdname humTable
 #' @export
-fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) { 
+fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'selected')) { 
   #
 
   checks(humdrumR, xhumdrumR)
   fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', 'fields')
             
-  fields <- unlist(humdrumR@Fields[fieldTypes])
-  
-  humtab <- getHumtab(humdrumR)[ , fields, with = FALSE]
-  
-  classes <- sapply(humtab, 
-                    \(field) {
-                        if (inherits(field, 'token')) {
-                            paste0(class(field@.Data), 
-                                   ' (', if (!is.null(field@Exclusive)) paste0('**', field@Exclusive, ' '), 
-                                   'tokens)')
-                        } else {
-                            class(field)
-                        }
-                        
-                        })
-  lists <- classes == 'list'
-  if (any(lists)) {
-    classes[lists] <- paste0('list (of ',
-                             sapply(humtab[ , lists, with = FALSE],
-                                                \(field) {
-                                                  classes <- unique(sapply(unique(field), class))
-                                                  harvard(paste0(setdiff(classes, 'NULL'), "s"), 'and')
-                                                }),
-                             ")")
-  }
-  
-  output <- data.table(Name = fields, Class = classes, Type = gsub('[0-9]*$', '', names(fields)))
-  
-  output
+  humdrumR@Fields[Type %in% fieldTypes | ('selected' %in% fieldTypes & Selected == TRUE)]
+
 }
 
 
 showFields <-  function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) {
           # This function is used to produce the human readable 
           # list fields used by print_humdrumR
-          fields <- fields(humdrumR, fieldTypes)
+          fields <- fields(humdrumR, c(fieldTypes, 'selected'))
 
-          activefield <- fields$Name %in% getActiveFields(humdrumR)
-          fields$Name <- paste0(' ', fields$Name)
-          fields$Name[activefield] <- gsub('^ ', '*', fields$Name[activefield])
-          fields$Name <- stringr::str_pad(fields$Name, width = max(nchar(fields$Name)), side = 'right')
+          selected <- fields$Selected
+          
+          fields[ , Name := paste0(ifelse(Selected, '*', ' '), Name)]
+          fields[ , Name := stringr::str_pad(Name, width = max(nchar(Name)), side = 'right')]
 
           fields$Class <- sapply(fields$Class,  
                                  \(classes) paste(setdiff(classes, 'token'), collapse = ','))
@@ -2363,7 +2094,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
  
  nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')
  
- active <- getActiveFields(humdrumR)
+ active <- selectedFields(humdrumR)
  humtab <- humtab[ , 
                    Map(\(field, act) {
                              if (!act) return(field)
@@ -2380,23 +2111,7 @@ fields.as.character <- function(humdrumR, useToken = TRUE) {
 }
 
 
-`addFields<-` <- function(object, value) {
- ## This function simply adds field names to
- ## the Fields slot in a humdrumR object. 
- ## It DOESN'T actually do the job of adding fields
- ## (column) of data to a humdrum table.
- object@Fields$Data <- unique(c(object@Fields$Data, value))
- object
-}
 
-`removeFields<-` <- function(object, value) {
-  ## This function removes field names from 
-  ## the Fields slot in a humdrumR object. 
-  ## It DOESN'T actually do the job of removing fields
-  ## (columns) of data from a humdrum table.
-  object@Fields$Data <- object@Fields$Data[!object@Fields$Data %in% value]
-  object
-}
 
 
 fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
@@ -2419,6 +2134,163 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
     update_Null(humdrumR)
     
 }
+
+
+
+
+
+####################################################-
+# Selected fields ----
+####################################################-
+
+##### Manipulating the Active slot
+
+#' The "selected" fields of a [humdrumR object][humdrumRclass]
+#' 
+#
+# evalActive <- function(humdrumR, dataTypes = 'D', forceAtomic = TRUE, sep = ', ', nullChar = FALSE)  {
+#     checks(humdrumR, xhumdrumR)
+#     dataTypes <- checkTypes(dataTypes, 'evalActive')
+#     checks(forceAtomic, xTF)
+#     checks(sep, xcharacter & xlen1)
+#     checks(nullChar, xTF)
+#     
+#     humtab <- getHumtab(humdrumR, dataTypes)
+#     
+#     values <- rlang::eval_tidy(humdrumR@Active, data = humtab)
+#     
+#     if (!forceAtomic) return(values)
+#     
+#     
+#     if (length(values) == nrow(humtab)) values <- list(values)
+#     lists <- sapply(values, is.list)
+#     values[lists] <- lapply(values[lists],
+#                             \(l) {
+#                                 lens <- lengths(l)
+#                                 
+#                                 output <- rep(NA, length = length(lens))
+#                                 
+#                                 atomic <- sapply(l, is.atomic) 
+#                                 l[atomic & lens > 0L] <- lapply(l[atomic & lens > 0L], list)
+#                                 
+#                                 # output[atomic & lens > 1L] <- paste0('list(', sapply(l[atomic & lens > 1L], paste, collapse = ', ')
+#                                 # output[atomic & lens == 1L] <- unlist(l[atomic & lens == 1L])
+#                                 
+#                                 output[lens > 0L] <- sapply(l[lens > 0L], object2str)
+#                                 output
+#                             })
+#     
+#     
+#     
+#     
+#     
+#     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')[humtab$Type]
+#     null <- humtab[ , Null | Filter]
+#     values <- lapply(values,
+#                      \(val) {
+#                          null <- null | (!is.na(nulltypes) & is.na(val))
+#                          if (nullChar) {
+#                              if (is.factor(val)) {
+#                                  levels <- levels(val)
+#                                  val <- as.character(val)
+#                                  val[null] <- nulltypes[null]
+#                                  val <- factor(val, levels = union(levels, unique(nulltypes)))
+#                              } else {
+#                                  val[null] <- nulltypes[null]   
+#                              }
+#                          }  else {
+#                              val[null] <-  NA
+#                          }
+#                          
+#                          val
+#                      })
+#     
+#     if (length(values) == 1L) {
+#         values[[1]]
+#     } else {
+#         values <- lapply(values, as.character)
+#         do.call('.paste', c(values, list(sep = sep, na.if = all)))
+#     }
+#     
+# }
+
+
+
+selectedFields <- function(humdrumR) fields(humdrumR)[Selected == TRUE]$Name
+
+pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
+    fieldInTable <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)[ , 1L, with = FALSE]
+    
+    if (drop) fieldInTable[[1]] else fieldInTable
+    
+}
+
+pullSelectedFields <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
+
+    pullFields(humdrumR, selectedFields(humdrumR), dataTypes = dataTypes, null = null)
+    
+}
+
+selectFields <- function(humdrumR, fields) {
+    checks(humdrumR, xhumdrumR)
+    
+    fields <- fieldMatch(humdrumR, fields, 'selectFields', 'fields')
+    
+    fieldTable <- humdrumR@Fields
+    
+    fieldTable[ , Selected := Name %in% fields]
+    humdrumR@Fields <- fieldTable
+    
+    humdrumR
+}
+
+
+
+selectPrintable <- function(humdrumR, dataTypes = 'D', null = c('NA2dot', 'dotToNA'), useTokenGLIM = TRUE, collapse = TRUE){
+    
+    checks(humdrumR, xhumdrumR)
+    
+    null <- match.arg(null)
+    
+    selectedFields <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)
+    
+    selectedFields[] <- lapply(selectedFields, 
+                               \(field) {
+                                   if (is.list(field)) return(list2str(field))
+                                   field[] <- as.character(field)
+                                   if (is.matrix(field)) {
+                                       matrix[] <- str_pad(c(matrix), width = max(nchar(matrix)))
+                                       field <- paste0('[', do.call('paste', as.data.frame(matrix)),  ']')
+                                   }
+                                   field
+                                   
+                               }) # need[] in case there are matrices
+    if (!collapse) return(selectedFields)                  
+      
+    field <- do.call('paste', c(selectedFields, list(sep = ', ')))
+    ## fill from token field
+    TokenType <- pullFields(humdrumR, c('Token', 'Type'), dataTypes = dataTypes, null = 'NA2dot')
+    if (useTokenGLIM && any(grepl('[GLIM]', dataTypes))) {
+        # humtab[, !Type %in% c('D', 'd')]
+        field[TokenType$Type %in% c('G', 'L', 'I', 'M')] <- TokenType[Type %in% c('G', 'L', 'I', 'M'), Token]
+        
+    } else {
+        # always get ** exclusive
+        field[grepl('\\*\\*', TokenType$Token)] <- TokenType[grepl('\\*\\*', Token), Token]
+    }
+    
+    field <- gsub('\\.(, )+\\.', '.', field)
+    field[field == ''] <- "'"
+    
+    if (any(is.na(field))) .stop('Print field has NA values')
+    
+    data.table(Printable = field)
+   
+}
+
+
+
+
 
 
 
@@ -2462,6 +2334,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
 
 print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes = if (style == 'score') "GLIMDd" else 'D', 
                            firstAndLast = TRUE, screenWidth = options('width')$width - 10L,
+                           null = humdrumRoption('nullPrint'),
                            maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
                            maxTokenLength = humdrumRoption('maxTokenLength'), collapseNull = 30L) {
     
@@ -2478,12 +2351,11 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
   Nfiles <- length(humdrumR)          
   if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
   
-  humdrumR <- printableActiveField(humdrumR)
   
   tokmat <- if (style == 'score') {
-      tokmat_humdrum(humdrumR, dataTypes, collapseNull)
+      tokmat_humdrum(humdrumR, dataTypes, collapseNull, null = null)
   } else {
-      tokmat_humtable(humdrumR, dataTypes)
+      tokmat_humtable(humdrumR, dataTypes, null = null)
   }
   
   print_tokmat(tokmat, Nmorefiles = Nfiles - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
@@ -2494,46 +2366,59 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
 }
 
 
-tokmat_humtable <- function(humdrumR, dataTypes = 'D') {
-    humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
     
-    dataFields <- fields(humdrumR, c('Data'))$Name
-    structureFields <- c('Piece', 'Spine', 'Path', 'Record', 'Stop')
+    structureFields <- c('Piece', 'Filename', 'Spine', 'Path', 'Record', 'Stop')
+    selectedFields <- selectedFields(humdrumR)
+    humdrumR <- selectFields(humdrumR, unique(c(structureFields, selectedFields)))
     
-    Filenames <- humtab[ , unique(Filename)]
-    humtab <- humtab[ , c(structureFields, dataFields), with = FALSE]
-    lastPiece <- max(humtab$Piece)
-    if (all(humtab$Path == 0, na.rm = TRUE)) humtab[, Path := NULL]
-    if (all(humtab$Stop == 1, na.rm = TRUE)) humtab[, Stop := NULL]
+    tokenTable <- selectPrintable(humdrumR, dataTypes = dataTypes, null = null, useTokenGLIM = FALSE, collapse = FALSE) 
+    selectFields(humdrumR, selectedFields)
+    setcolorder(tokenTable, unique(c(structureFields, selectedFields)))
     
-    # humtab <- humtab[ , if (Piece[1] == lastPiece) tail(.SD, maxRecordsPerFile) else head(.SD, maxRecordsPerFile), by = Piece]
+    lastPiece <- max(tokenTable$Piece)
+    Filenames <- tokenTable[ , unique(Filename)]
+    tokenTable[ , Filename := NULL]
+    if (all(tokenTable$Path == 0, na.rm = TRUE)) tokenTable[, Path := NULL]
+    if (all(tokenTable$Stop == 1, na.rm = TRUE)) tokenTable[, Stop := NULL]
+    
+    
 
+    tokmat <- do.call('cbind', as.list(tokenTable))
     
-    structure <- names(humtab) %in% structureFields
-    columns <- lapply(as.list(humtab), 
-                     \(col) {
-                         col <- as.character(col)
-                         col[is.na(col)] <- '.'
-                         col
-                         })
+    # syntax highlighting prep
+    types <- fields(humdrumR)[, setNames(Type, Name)[colnames(tokenTable)]]
+    types <- c(Data = 'D', Interpretation = 'I', Structure = 'N', 'Reference' = 'G', Formal = 'I')[types]
+    syntax <- col(tokenTable)
+    syntax[] <- types[syntax]
+    syntax[tokenTable == '.' | is.na(tokenTable)] <- 'd'
     
     
-    tokmat <- do.call('cbind', columns)
-    tokmat <- rbind(names(humtab), tokmat, names(humtab))
+    # add header/footer
+    tokmat <- rbind(names(tokenTable), tokmat, names(tokenTable))
+    syntax <- rbind(syntax[1, ], syntax, syntax[1, ])
     
+    # output
     list(Tokmat = tokmat,  
-         Piece = c('0', columns$Piece, '0'), 
-         Record = c('0', columns$Record, '0'), 
-         Filesnames = Filenames,
+         Piece = c('0', tokenTable$Piece, '0'), 
+         Record = c('0', tokenTable$Record, '0'), 
+         Filenames = Filenames,
          Global = logical(nrow(tokmat)), 
-         DontStyle = which(structure))
+         Syntax = syntax)
     
 
     
 }
 
-tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf) {
+tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
 
+  printableField <- selectPrintable(humdrumR, dataTypes = dataTypes, null = null, useTokenGLIM = TRUE, collapse = TRUE)
+  
+  humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+  humtab$.Printable <- printableField[[1]]
+  putHumtab(humdrumR) <- humtab
+  humdrumR <- updateFields(humdrumR)
+    
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, padPaths = 'corpus', padder = '')
   
   # removes "hanging stops" like "a . ." -> "a"
@@ -2547,13 +2432,21 @@ tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf) {
   
   global <- stringr::str_detect(tokmat[ , 1], '^!!')
   
+  
+  # syntax highlighting
+  syntax <- array(parseTokenType(tokmat, E = TRUE), dim = dim(tokmat))
+  
+  # add rownames (records)
   tokmat <- cbind(paste0(NRecord, ':  '), tokmat)
+  syntax <- cbind('N', syntax)
+  
+  #output
   list(Tokmat = tokmat, 
        Piece = Piece, 
        Record = NRecord, 
        Filenames = Filenames, 
        Global = global, 
-       DontStyle = 1)
+       Syntax = syntax)
   
 }
 
@@ -2565,6 +2458,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
     Piece <- parsed$Piece
     global <- parsed$Global
     Filenames <- parsed$Filenames
+    syntax <- parsed$Syntax
     
     ## censor lines beyond maxRecordsPerFile
 
@@ -2575,6 +2469,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
                        uniqRec >  maxRecordsPerFile,
                        uniqRec <= (max(uniqRec[Piece == max(Piece)]) - maxRecordsPerFile))
     tokmat <- tokmat[!censored, , drop = FALSE]
+    syntax <- syntax[!censored, , drop = FALSE]
     global <- global[!censored]
     
     
@@ -2582,7 +2477,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
     ## Trim and align columns, and collopse to lines
     tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], maxTokenLength = maxTokenLength)
     
-    lines <- padColumns(tokmat, global, screenWidth, parsed$DontStyle)
+    lines <- padColumns(tokmat, global, screenWidth, syntax)
     
     starMessage <- attr(lines, 'message')
   
@@ -2651,43 +2546,6 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 
 
 
-printableActiveField <- function(humdrumR, useTokenNull = TRUE, sep = ', '){
-    # evaluates the active expression into something printable, and puts it in a 
-    # field called "Print"
-    humtab <- data.table::copy(getHumtab(humdrumR, 'GLIMDd') )
-    
-    field <- evalActive(humdrumR, 'GLIMDd', sep = ', ', nullChar = TRUE)
-    
-    if (is.character(field) && any(field == "")) field[field == ""]  <- "''"
-    if (is.matrix(field)) field <- paste0('[', applyrows(field, paste, collapse = sep), ']')
-    if (is.factor(field)) field <- as.character(field)
-    
-    
-    
-    ## fill from token field
-    tokenFill <- if (useTokenNull) {
-        # humtab[, !Type %in% c('D', 'd')]
-        humtab[ , !Type %in% c('D', 'd') & Null]
-    } else {
-        # always get ** exclusive
-        humtab[ , (is.na(field) | field == '*') & grepl('\\*\\*', Token)]
-    }
-    
-    field[tokenFill] <- humtab[tokenFill == TRUE, Token]
-    
-    field <- gsub('\\.(, )+\\.', '.', field)
-    
-    if (any(is.na(field))) .stop('Print field has NA values')
-    
-    humtab[ , Print := field]
-    humtab$Type[humtab$Type == 'd'] <- 'D'
-    # humtab$Type[humtab$Type == 'P'] <- 'D'
-    
-    putHumtab(humdrumR, overwriteEmpty = 'd') <- humtab
-    
-    addFields(humdrumR) <- 'Print'
-    setActive(humdrumR, Print)
-}
 
 censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     if (nrow(tokmat) < 50) return(tokmat)
@@ -2737,7 +2595,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     tokmat
 }
 
-padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L, dontstyle = 1) {
+padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L, syntax) {
     # This function takes a token matrix
     # and pads each token with the appropriate number of spaces
     # such that the lines will print as nicely aligned columns.
@@ -2753,18 +2611,13 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     lenCol <- lenCol[screen]
     tokmat <- tokmat[ , screen, drop = FALSE]
 
-    # Get data Types
-    dataTypes <- matrix('D', nrow = nrow(tokmat), ncol = ncol(tokmat))
-    dataTypes[] <- parseTokenType(tokmat, E = TRUE)
-    dataTypes[ , dontstyle] <- 'N' # for "none"
-    
     # do padding
     tokmat[!global,  ] <- padder(tokmat[!global, , drop = FALSE], lenCol)
     tokmat[global, 1L] <- padder(tokmat[global, 1L], lenCol[1]) # column 1 is record number!
     
     # colorize
    
-    tokmat[] <- syntaxHighlight(tokmat, dataTypes)
+    tokmat[] <- syntaxHighlight(tokmat, syntax)
 
     
     # collapse to lines

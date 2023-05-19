@@ -2686,28 +2686,54 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     
 }
 
-
-
-object2str <- function(object) {
-  object <- object[[1]]
-    class <- if (is.atomic(object) && !is.table(object)) 'list' else class(object)
-    switch(class,
-           table = {
-             glue::glue("<table: k={length(object)}, n={num2str(sum(object))}>")
-           },
-           list = {
-             if (length(object) < 5) {
-               glue::glue('list({harvard(unlist(object), quote = is.character(unlist(object)))})')
-             } else {
-               glue::glue('list[{num2str(length(object))}]')
-             }
-             
-           },
-           paste0('<', class, '>')
-            )
-
-        
+list2str <- function(list, null = '.') {
+  
+  output <- rep(null, length(list))
+  isNull <- lapply(list, is.null)
+  output[!isNull] <- sapply(list[!isNull], printable)
+  output
 }
+
+setClassUnion('atomic', c('character', 'factor', 'integer', 'numeric', 'logical'))
+setGeneric('printable', function(x) standardGeneric('printable'))
+setMethod('printable', 'list',
+          function(x) {
+            if (length(x) >= 5 || any(lengths(x) > 1L) || any(sapply(x, Negate(is.vector)))) {
+              paste0('list[', num2str(length(x)), ']')
+            } else {
+              classes <- sapply(x, class)
+              x <- sapply(x, as.character)
+              x[classes %in% c('character', 'factor')] <- quotemark(x[classes %in% c('character', 'factor')])
+              
+              paste0('list(', harvard(x, quote = FALSE), ')')
+            }
+          })
+setMethod('printable', 'atomic',
+          function(x) {
+            
+            if (is.character(x)) x <- quotemark(x)
+            vals <-  if (length(x) < 5) {
+              harvard(x, quote = FALSE)
+            } else {
+              paste0(x[1], ', ..., ', x[length(x)])
+            }
+            paste0(if (length(x)) 'c' else class(x), '(', vals, ')')
+          })
+setMethod('printable', 'array',
+          function(x) {
+            paste0(class(x)[1], '[', paste(dim(x), collapse = ', '), ']')
+          } )
+setMethod('printable', 'table',
+          function(x) {
+            paste0(class(x)[1], '[', paste(dim(x), collapse = ', '), ']')
+          } )
+setMethod('printable', signature = c(),
+          function(x) paste0('<', paste(class(x), collapse = '/'), '>'))
+
+
+
+
+
 
 num2str <- function(n, pad = FALSE) if (!is.null(n)) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 

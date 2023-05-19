@@ -697,7 +697,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expand
   
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
-    addFields(humdrumR) <- newfields
+    humdrumR <- updateFields(humdrumR)
     humdrumR@Active <- if (length(newfields) == 1L) rlang::quo(!!rlang::sym(newfields)) else rlang::quo(list(!!!(rlang::syms(newfields))))
   }
   humdrumR
@@ -1781,12 +1781,10 @@ curResultN <- function(humtab) {
   
   for (i in seq_along(value)) {
     colnames(humtab)[colnames(humtab) == results[i]] <- value[i]
-    removeFields(object) <- results[i]
   }
   
   putHumtab(object) <- humtab
-  
-  addFields(object) <- value
+  object <- updateFields(object)
   object
 }
 
