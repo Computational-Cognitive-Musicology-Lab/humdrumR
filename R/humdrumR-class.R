@@ -2136,6 +2136,8 @@ putActive <- function(humdrumR, actquo) {
 
 # Fields ----
 
+#' @export
+names.humdrumR <- function(humdrumR) names(getHumtab(humdrumR))
 
 checkFieldTypes <- function(types, argname, callname) {
     valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')

@@ -9,6 +9,7 @@
 \alias{filter.humdrumR}
 \alias{group_by.humdrumR}
 \alias{ungroup.humdrumR}
+\alias{select.humdrumR}
 \alias{ggplot.humdrumR}
 \alias{ggplot.humdrum.table}
 \title{HumdrumR using Tidyverse "verbs"}
@@ -33,6 +34,8 @@
 \method{group_by}{humdrumR}(.data, ..., .add = FALSE)
 
 \method{ungroup}{humdrumR}(x, ...)
+
+\method{select}{humdrumR}(.data, ...)
 
 \method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
 

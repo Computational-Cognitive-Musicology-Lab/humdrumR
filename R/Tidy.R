@@ -1,6 +1,6 @@
-#############################################################
-##### Methods for dplyr "verbs" #####################-----
-##############################################################
+#############################################################-
+# Methods for dplyr "verbs" #####################-----
+##############################################################-
 
 
 
@@ -95,6 +95,8 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE) {
 #' @rdname tidyHumdrum
 #' @export
 pull.humdrumR <- function(.data, var, ..., dataTypes = 'D') {
+  if (missing(var)) return(evalActive(.data, dataTypes = dataTypes, ...))
+  
   field <- rlang::enquo(var)
   
   
@@ -151,10 +153,28 @@ ungroup.humdrumR <- function(x, ...) {
   x
 }
 
+
+### select ----
+
+#' @rdname tidyHumdrum
+#' @export
+select.humdrumR <- function(.data, ...) {
+    fields <- rlang::ensyms(...)
+    
+    fields <- fieldMatch(.data, sapply(fields, as.character), callfun = 'select')
+    
+    active <- if (length(fields) == 1L) rlang::quo(!!(rlang::sym(fields))) else rlang::quo(list(!!!(rlang::syms(fields))))
+    
+    .data@Active <- active
+    .data
+  
+}
+
 #############################################################-
-##### Methods for ggplot2 #####################-----
+# ggplot2 stuff #############################################-----
 ##############################################################-
 
+## Methods ----
 
 #' @rdname tidyHumdrum
 #' @export
@@ -172,10 +192,30 @@ ggplot.humdrum.table <- function(data = NULL, mapping = aes(), ...) {
 }
 
 
+### Treatment of token ----
 
-## Theme
+#' @export
+scale_type.token <- function(x) if (class(x@.Data) %in% c('integer', 'numeric', 'integer64')) 'continuous' else 'discrete'
 
-### Colors ----
+
+#' @export
+scale_x_token <- function(..., expand = waiver(), guide = waiver(), position = "bottom") {
+  sc <- ggplot2::discrete_scale(c("x", "xmin", "xmax", "xend"), "position_d", identity, ...,
+                                # limits = c("c", "c#", "d-", "d", "d#", "e-", "e", "e#", "f", "f#", "f##", "g-", "g", "g#", "a-", "a", "a#", "b-", "b", "b#"),
+                                expand = expand, guide = guide, position = position, super = ScaleDiscretePosition)
+  
+  sc$range_c <- scales::ContinuousRange$new()
+  sc
+}
+
+
+
+
+
+
+
+## Colors ----
+
 scale_color_humdrum <- ggplot2::scale_fill_manual(values = flatly)
 # scale_color_continuous(type = colorRamp(flatly[2:3]))
 
@@ -185,7 +225,8 @@ options(ggplot2.continuous.colour = ggplot2::scale_color_gradientn(colours = fla
 
 # options(ggplot2.continuous.colour = 'humdrum')
 
-### theme ----
+## Theme ----
+
 theme_humdrum <- function() {
   ggplot2::update_geom_defaults("point", list(size = .5, color = flatly[1], fill = flatly[2]))
   ggplot2::update_geom_defaults("line", list(size = .5, color = flatly[4], fill = flatly[3]))
@@ -204,26 +245,6 @@ theme_humdrum <- function() {
         axis.title = element_text(color = flatly[4], size = 11)
         )
 }
-
-
-## Treatment of token ----
-
-#' @export
-scale_type.token <- function(x) if (class(x@.Data) %in% c('integer', 'numeric', 'integer64')) 'continuous' else 'discrete'
-
-
-#' @export
-scale_x_token <- function(..., expand = waiver(), guide = waiver(), position = "bottom") {
-  sc <- ggplot2::discrete_scale(c("x", "xmin", "xmax", "xend"), "position_d", identity, ...,
-                                # limits = c("c", "c#", "d-", "d", "d#", "e-", "e", "e#", "f", "f#", "f##", "g-", "g", "g#", "a-", "a", "a#", "b-", "b", "b#"),
-                       expand = expand, guide = guide, position = position, super = ScaleDiscretePosition)
-  
-  sc$range_c <- scales::ContinuousRange$new()
-  sc
-}
-
-
-
 
 
 
