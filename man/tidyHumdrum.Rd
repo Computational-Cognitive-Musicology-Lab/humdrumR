@@ -3,7 +3,8 @@
 \name{tidyHumdrum}
 \alias{tidyHumdrum}
 \alias{mutate.humdrumR}
-\alias{summarize.humdrumR}
+\alias{summarise.humdrumR}
+\alias{reframe.humdrumR}
 \alias{pull.humdrumR}
 \alias{filter.humdrumR}
 \alias{group_by.humdrumR}
@@ -12,9 +13,18 @@
 \alias{ggplot.humdrum.table}
 \title{HumdrumR using Tidyverse "verbs"}
 \usage{
-\method{mutate}{humdrumR}(.data, ..., dataTypes = "D", alignLeft = TRUE, expandPaths = FALSE)
+\method{mutate}{humdrumR}(
+  .data,
+  ...,
+  dataTypes = "D",
+  fill = TRUE,
+  alignLeft = TRUE,
+  expandPaths = FALSE
+)
 
-\method{summarize}{humdrumR}(.data, ..., dataTypes = "D", expandPaths = FALSE, drop = FALSE)
+\method{summarise}{humdrumR}(.data, ..., dataTypes = "D", expandPaths = FALSE, drop = FALSE)
+
+\method{reframe}{humdrumR}(.data, ..., dataTypes = "D", expandPaths = FALSE)
 
 \method{pull}{humdrumR}(.data, var, ..., dataTypes = "D")
 

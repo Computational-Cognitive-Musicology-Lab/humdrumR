@@ -12,7 +12,7 @@
 #' 
 #' @name tidyHumdrum
 #' @export
-mutate.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE) {
+mutate.humdrumR <- function(.data, ..., dataTypes = 'D', fill = TRUE, alignLeft = TRUE, expandPaths = FALSE) {
   exprs <- rlang::enquos(...)
   
   names <- .names(exprs)
@@ -22,8 +22,7 @@ mutate.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expan
                               
                               rlang::quo(!!name <- !!expr)
                             })
-  names(exprs) <- NULL
-  
+  names(exprs) <- if (fill) 'fill' else NULL
   exprs <- c(exprs, .data@Groupby)
   
   rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!exprs, 
@@ -37,15 +36,26 @@ mutate.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expan
 
 #' @rdname tidyHumdrum
 #' @export
-summarize.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE, drop = FALSE) {
+summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE, drop = FALSE) {
   exprs <- rlang::enquos(...)
   
   names <- .names(exprs)
-  exprs[names != ''] <- Map(exprs[names != ''], names[names != ''],
+  exprs <- Map(exprs, names,
                             f = \(expr, name) {
-                              name <- rlang::sym(name)
+                              expr <- rlang::quo({
+                                result <- {!!expr}
+                                if (length(result) != 1) .stop("The summarize() function only works when the computed values are length 1 (per group).",
+                                                               "In your case, we've found (at least one) result which is length {length(result)}.",
+                                                               "\nTry using reframe() or within() instead, as these functions allow results of any length.")
+                                result
+                              })
                               
-                              rlang::quo(!!name <- !!expr)
+                              if (name != '') {
+                                name <- rlang::sym(name)
+                                expr <-  rlang::quo(!!name <- !!expr)
+                              }
+                              expr
+                              
                             })
   names(exprs) <- NULL
   exprs <- c(exprs, .data@Groupby)
@@ -55,6 +65,30 @@ summarize.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE,
                                             drop = !!drop)))
   
 }
+
+
+### summarize ----
+
+#' @rdname tidyHumdrum
+#' @export
+reframe.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE) {
+  exprs <- rlang::enquos(...)
+  
+  names <- .names(exprs)
+  exprs[names != ''] <- Map(exprs[names != ''], names[names != ''],
+               f = \(expr, name) {
+                 
+                   name <- rlang::sym(name)
+                   expr <-  rlang::quo(!!name <- !!expr)
+               })
+  names(exprs) <- NULL
+  exprs <- c(exprs, .data@Groupby)
+  
+  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!exprs, 
+                                              dataTypes = !!dataTypes)))
+  
+}
+
 
 ### pull ----
 
@@ -97,8 +131,9 @@ filter.humdrumR <- function(.data, ...) {
 group_by.humdrumR <- function(.data, ..., .add = FALSE) {
   
   exprs <- rlang::enquos(...)
-  names(exprs) <- 'by'
   
+  # if (all(sapply(exprs, rlang::quo_is_symbol))) exprs <- rlang::quos(list(!!!exprs))
+  names(exprs) <- rep('by', length(exprs))
   .data@Groupby <- if (.add) {
     c(.data@Groupby, exprs)
   } else {
