@@ -7,7 +7,6 @@
 \alias{getActiveFields}
 \alias{setActive}
 \alias{setActiveFields}
-\alias{$,humdrumR-method}
 \title{The "Active expression" of a \link[=humdrumRclass]{humdrumR object}}
 \usage{
 evalActive(
@@ -25,8 +24,6 @@ getActiveFields(humdrumR)
 setActive(humdrumR, expr)
 
 setActiveFields(humdrumR, fieldnames)
-
-\S4method{$}{humdrumR}(x, name)
 }
 \arguments{
 \item{humdrumR}{\emph{\strong{HumdrumR data.}}
@@ -102,18 +99,7 @@ can be extracted with \code{getActiveFields(humData)}.
 
 
 The active expression can be changed in several ways.
-The simplest and most common is using the \link{$ operator}, which takes a field name
-(\link[=partialMatching]{partially matched}) and sets the active expression to simply call that field.
-This is a handy way to quickly look at different fields in your data:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{humData$Token
-
-humData$Spine
-humData$Sp # same as last one, because it partially matches Spine
-
-}\if{html}{\out{</div>}}
-
-More complex active expressions can be set using \code{setActive}, specified directly as the second argument:
+The most fundamental is using the  \code{setActive()} function, with the active expression specified directly as the second argument:
 e.g., \code{setActive(humData, paste(Token, Record))}.
 Notice that the active field \emph{must}
 \enumerate{
@@ -122,14 +108,20 @@ Notice that the active field \emph{must}
 or a \emph{list} of vectors of that length.
 }
 
-For programmatic work, \code{setActiveFields} accepts a \code{character} vector of \link[=partialMatching]{partially matched}
+For programmatic work, \code{setActiveFields()} accepts a \code{character} vector of \link[=partialMatching]{partially matched}
 field names;
 If one field name is given, the active field just calls that field.
 If two or more field names are given, the active expression is set to an expression of the form
 \code{list(Field1, Field2, Field3, ...)}.
 This is the easiest way to quickly see two or three fields side by side.
-As special syntactic sugar, if you call \code{humData$All}, a liit of \emph{all} the data fields is set to the active field.
-This is a useful way to look at all your data fields.
+
+A final option is to use the tidyverse \link[dplyr:select]{select()} function.
+Select will accept arbitrary expressions, like \code{setActive()}, \emph{or} \code{character} strings like \code{setActiveFields},
+putting multiple arguments into a \code{list}.
+In addition, \link[dplyr:select]{select()}'s normal "selection features work" as well!
+
+Note that setting active fields with multiple columns quickly gets hard to read in the score view.
+If you want to look at many columns at once, use the table view.
 }
 
 \section{Null data}{

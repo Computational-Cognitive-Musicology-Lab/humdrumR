@@ -1858,20 +1858,7 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #' @section Setting the active expression:
 #' 
 #' The active expression can be changed in several ways.
-#' The simplest and most common is using the [$ operator], which takes a field name
-#' ([partially matched][partialMatching]) and sets the active expression to simply call that field.
-#' This is a handy way to quickly look at different fields in your data:
-#' 
-#' ```
-#' humData$Token
-#'
-#' humData$Spine
-#' humData$Sp # same as last one, because it partially matches Spine
-#' 
-#' ```
-#' 
-#' 
-#' More complex active expressions can be set using `setActive`, specified directly as the second argument:
+#' The most fundamental is using the  `setActive()` function, with the active expression specified directly as the second argument:
 #' e.g., `setActive(humData, paste(Token, Record))`.
 #' Notice that the active field *must* 
 #' 
@@ -1880,14 +1867,20 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 #'    or a *list* of vectors of that length.
 #'    
 #' 
-#' For programmatic work, `setActiveFields` accepts a `character` vector of [partially matched][partialMatching]
+#' For programmatic work, `setActiveFields()` accepts a `character` vector of [partially matched][partialMatching]
 #' field names;
 #' If one field name is given, the active field just calls that field.
 #' If two or more field names are given, the active expression is set to an expression of the form
 #' `list(Field1, Field2, Field3, ...)`.
 #' This is the easiest way to quickly see two or three fields side by side.
-#' As special syntactic sugar, if you call `humData$All`, a liit of *all* the data fields is set to the active field.
-#' This is a useful way to look at all your data fields. 
+#' 
+#' A final option is to use the tidyverse [select()][dplyr::select()] function.
+#' Select will accept arbitrary expressions, like `setActive()`, *or* `character` strings like `setActiveFields`,
+#' putting multiple arguments into a `list`.
+#' In addition, [select()][dplyr::select()]'s normal "selection features work" as well!
+#' 
+#' Note that setting active fields with multiple columns quickly gets hard to read in the score view.
+#' If you want to look at many columns at once, use the table view.
 #' 
 #'
 #' @section Null data:
@@ -2150,23 +2143,57 @@ checkFieldTypes <- function(types, argname, callname) {
     checks(types, xcharacter & xmaxlength(5) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')))
 }
 
-#' The `$` operator controls which humdrumR data are printed and default target for result.
-#' @rdname humActive
 #' @export
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {
             name <- as.character(name)
-            matches <-  if (name == 'All') {
-                fields(x, 'D')$Name
-            } else {
-                fieldMatch(x, name, callfun = '$', argname = 'name')
-            }
+            
+            match <- fieldMatch(x, name, callfun = '$', argname = 'name')
             
             
+            getHumtab(x, 'D')[[match[1]]]
             
             
-            setActiveFields(x, matches)
           })
+
+#' @export
+setMethod('$<-', signature = c(x = 'humdrumR'),
+          function(x, name, value) {
+              checks(value, (xvector | xinherits('token')) & xlen)
+              
+              humtab <- getHumtab(x, 'D')
+              
+              if (!(length(value) == 1L | length(value) == nrow(humtab))) .stop("When using humdrumR$<- value, the value must either be length 1",
+                                                                                 "or exactly the same length as the number of non-null data tokens in the",
+                                                                                 "humdrumR object's active field.")
+              name <- as.character(name)
+              
+              if (name == 'Token') .stop("In your use of humdrumR$<-, you are trying to overwrite the 'Token' field, which is not allowed.",
+                                          "This field should always keep the original humdrum data you imported.")
+              
+              structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                                  'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+              
+              if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
+                                             "For a complete list of structural fields, use the command fields(mydata, 'S').")
+              
+              isnew <- !name %in% colnames(humtab)
+              humtab[[name]] <- value
+              
+              putHumtab(x, overwriteEmpty = c()) <- humtab
+              if (isnew) addFields(x) <- name
+              
+              x
+              
+              
+              
+              
+              
+              
+          })
+
+
+
 
 fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
           fields <- fields(humdrumR)$Name

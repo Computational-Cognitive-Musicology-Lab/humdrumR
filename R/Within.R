@@ -667,7 +667,7 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expand
       .stop("In your call to withinHumdrum, you can't overwrite the 'Token' field.",
             "This field should always keep the original humdrum data you imported.")
     }
-    .stop("In your call to withinHumdrum, you can't overwrite 'structural' fields.",
+    .stop("In your call to withinHumdrum, you can't overwrite structural fields.",
           ifelse = sum(bad) > 1L, 
           "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
           "For a complete list of structural fields, use the command fields(mydata, 'S').")

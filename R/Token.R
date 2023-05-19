@@ -187,6 +187,7 @@ setMethod('as.factor', 'token', function(x) factorize(x))
 is.token <- function(x) inherits(x, 'token')
 
 
+
 ## Order/relations methods ####
 
 
