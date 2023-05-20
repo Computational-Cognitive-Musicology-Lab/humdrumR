@@ -398,12 +398,11 @@ setMethod('$<-', signature = c(x = 'humdrumR'),
               
               if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
                                               "For a complete list of structural fields, use the command fields(mydata, 'S').")
-              
               isnew <- !name %in% colnames(humtab)
               humtab[[name]] <- value
               
-              putHumtab(x, overwriteEmpty = c('D')) <- humtab
-              humdrumR <- updateFields(humdrumR)
+              putHumtab(x, overwriteEmpty = c()) <- humtab
+              x <- updateFields(x)
               
               x
               
@@ -1764,9 +1763,27 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
           
           overwriteTypes <- unique(value$Type)
           overwriteTypes <- union(overwriteTypes, overwriteEmpty)
-    
-          humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], 
-                          value, fill = TRUE)
+          
+          # result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
+          # humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], 
+          # value, fill = TRUE)
+          
+          
+          oldhumtab <- humdrumR@Humtable[!Type %in% overwriteTypes]
+          
+          newcol <- setdiff(colnames(value), colnames(oldhumtab))
+          for(col in newcol) {
+              class <- class(value[[col]])
+              insert <- if (class == 'token') {
+                 token(as(NA, class(value[[col]]@.Data)), Exclusive = getExclusive(value[[col]]))
+              } else {
+                  as(NA, class)
+              }
+              oldhumtab <- cbind(oldhumtab, setNames(as.data.frame(insert), col))
+          }
+          
+          
+          humtab <- rbind(oldhumtab, value)
           humtab <- orderHumtab(humtab)
           humdrumR@Humtable <- humtab
           
@@ -1890,19 +1907,19 @@ initFields <- function(humtab, tandemFields) {
 
 
 fieldClass <- function(x) {
-    class <- class(x)
+    xclass <- class(x)
     
-    if (class == 'token') {
-        class <-paste0(class(x@.Data), 
-                       ' (', if (!is.null(x@Exclusive)) paste0('**', x@Exclusive, ' '), 
-                       'tokens)')
+    if (xclass == 'token') {
+        xclass <- paste0(class(x@.Data), 
+                        ' (', if (!is.null(x@Exclusive)) paste0('**', x@Exclusive, ' '), 
+                        'tokens)')
     }
-    if (class == 'list') {
+    if (xclass == 'list') {
         classes <- unique(sapply(x, class))
-        class <-  paste0('list (of ',  harvard(paste0(setdiff(classes, 'NULL'), "s"), 'and'), ')')
+        xclass <-  paste0('list (of ',  harvard(paste0(setdiff(classes, 'NULL'), "s"), 'and'), ')')
     }
     
-    class
+    xclass
 }
 
 updateFields <- function(humdrumR, selectNew = TRUE) {
@@ -1932,11 +1949,11 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
 
 
 
-naDots <- function(field, null, Type) {
+naDots <- function(field, null, types) {
     if (null == 'asis') return(field)
     na <- is.na(field)
     
-    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=')[Type]
+    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=')[types]
     
     
     if (null == 'dot2NA') {
@@ -2010,7 +2027,13 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
 
     selectedTable <- humtab[ , fields, with = FALSE]
     
-    selectedTable[] <- lapply(selectedTable, naDots, null = null, Type = humtab$Type)
+    fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]
+    fieldTypes <- lapply(as.list(fieldTypes), 
+                         \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
+                                                                                      Structure = 'D',Reference = 'G')[fieldType],
+                                                                                      fieldType, length = nrow(selectedTable)))
+    
+    selectedTable[] <- Map(naDots, selectedTable, types = fieldTypes, null = null)
     
     if (length(fields) == 1L && drop) selectedTable[[1]] else selectedTable
     
@@ -2239,24 +2262,21 @@ selectFields <- function(humdrumR, fields) {
     fieldTable <- humdrumR@Fields
     
     fieldTable[ , Selected := Name %in% fields]
-    humdrumR@Fields <- fieldTable
+    humdrumR@Fields <- fieldTable #data.table::copy(fieldTable)
     
     humdrumR
 }
 
 
 
-selectPrintable <- function(humdrumR, dataTypes = 'D', null = c('NA2dot', 'dotToNA'), useTokenGLIM = TRUE, collapse = TRUE){
+pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('NA2dot', 'dotToNA'), useTokenGLIM = TRUE, collapse = TRUE){
     
-    checks(humdrumR, xhumdrumR)
+    fields <- pullFields(humdrumR, fields, dataTypes = dataTypes, null = null)
     
-    null <- match.arg(null)
-    
-    selectedFields <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)
-    
-    selectedFields[] <- lapply(selectedFields, 
+    fields[] <- lapply(fields, 
                                \(field) {
                                    if (is.list(field)) return(list2str(field))
+                                   if (is.token(field)) field <- field@.Data
                                    field[] <- as.character(field)
                                    if (is.matrix(field)) {
                                        matrix[] <- str_pad(c(matrix), width = max(nchar(matrix)))
@@ -2265,9 +2285,9 @@ selectPrintable <- function(humdrumR, dataTypes = 'D', null = c('NA2dot', 'dotTo
                                    field
                                    
                                }) # need[] in case there are matrices
-    if (!collapse) return(selectedFields)                  
+    if (!collapse) return(fields)                  
       
-    field <- do.call('paste', c(selectedFields, list(sep = ', ')))
+    field <- do.call('paste', c(fields, list(sep = ', ')))
     ## fill from token field
     TokenType <- pullFields(humdrumR, c('Token', 'Type'), dataTypes = dataTypes, null = 'NA2dot')
     if (useTokenGLIM && any(grepl('[GLIM]', dataTypes))) {
@@ -2279,7 +2299,7 @@ selectPrintable <- function(humdrumR, dataTypes = 'D', null = c('NA2dot', 'dotTo
         field[grepl('\\*\\*', TokenType$Token)] <- TokenType[grepl('\\*\\*', Token), Token]
     }
     
-    field <- gsub('\\.(, )+\\.', '.', field)
+    field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
     field[field == ''] <- "'"
     
     if (any(is.na(field))) .stop('Print field has NA values')
@@ -2370,10 +2390,10 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     
     structureFields <- c('Piece', 'Filename', 'Spine', 'Path', 'Record', 'Stop')
     selectedFields <- selectedFields(humdrumR)
-    humdrumR <- selectFields(humdrumR, unique(c(structureFields, selectedFields)))
+    tokenTable <- pullPrintable(humdrumR, unique(c(structureFields, selectedFields)),
+                                null = null, useTokenGLIM = FALSE, collapse = FALSE) 
+   
     
-    tokenTable <- selectPrintable(humdrumR, dataTypes = dataTypes, null = null, useTokenGLIM = FALSE, collapse = FALSE) 
-    selectFields(humdrumR, selectedFields)
     setcolorder(tokenTable, unique(c(structureFields, selectedFields)))
     
     lastPiece <- max(tokenTable$Piece)
@@ -2381,7 +2401,6 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     tokenTable[ , Filename := NULL]
     if (all(tokenTable$Path == 0, na.rm = TRUE)) tokenTable[, Path := NULL]
     if (all(tokenTable$Stop == 1, na.rm = TRUE)) tokenTable[, Stop := NULL]
-    
     
 
     tokmat <- do.call('cbind', as.list(tokenTable))
@@ -2391,12 +2410,13 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     types <- c(Data = 'D', Interpretation = 'I', Structure = 'N', 'Reference' = 'G', Formal = 'I')[types]
     syntax <- col(tokenTable)
     syntax[] <- types[syntax]
-    syntax[tokenTable == '.' | is.na(tokenTable)] <- 'd'
+    syntax[tokmat == '.' | is.na(tokmat)] <- 'd'
     
     
     # add header/footer
     tokmat <- rbind(names(tokenTable), tokmat, names(tokenTable))
-    syntax <- rbind(syntax[1, ], syntax, syntax[1, ])
+    # syntax <- rbind(syntax[1, ], syntax, syntax[1, ])
+    syntax <- rbind('N', syntax, 'N')
     
     # output
     list(Tokmat = tokmat,  
@@ -2412,10 +2432,11 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
 
 tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
 
-  printableField <- selectPrintable(humdrumR, dataTypes = dataTypes, null = null, useTokenGLIM = TRUE, collapse = TRUE)
+  fields <- pullPrintable(humdrumR, selectedFields(humdrumR), dataTypes = dataTypes, 
+                          null = null, useTokenGLIM = TRUE, collapse = TRUE)
   
   humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
-  humtab$.Printable <- printableField[[1]]
+  humtab$.Printable <- fields[[1]]
   putHumtab(humdrumR) <- humtab
   humdrumR <- updateFields(humdrumR)
     

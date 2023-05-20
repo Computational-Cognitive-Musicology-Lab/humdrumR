@@ -10,7 +10,7 @@
 collapseHumdrum(
   humdrumR,
   by,
-  collapseField = getActiveFields(humdrumR)[1],
+  collapseField = selectedFields(humdrumR)[1],
   dataTypes = "GLIMDd",
   collapseAtomic = TRUE,
   sep = " "
@@ -18,21 +18,21 @@ collapseHumdrum(
 
 collapseStops(
   humdrumR,
-  collapseField = getActiveFields(humdrumR)[1],
+  collapseField = selectedFields(humdrumR)[1],
   collapseAtomic = TRUE,
   sep = " "
 )
 
 collapsePaths(
   humdrumR,
-  collapseField = getActiveFields(humdrumR)[1],
+  collapseField = selectedFields(humdrumR)[1],
   collapseAtomic = TRUE,
   sep = " "
 )
 
 collapseRecords(
   humdrumR,
-  collapseField = getActiveFields(humdrumR)[1],
+  collapseField = selectedFields(humdrumR)[1],
   collapseAtomic = TRUE,
   sep = " "
 )
@@ -52,7 +52,7 @@ Data in the \code{collapseField} will be collapsed within these fields.}
 
 \item{collapseField}{\emph{\strong{The target field in the \code{humdrumR} data to collapse.}}
 
-Defaults to \code{getActiveFields(humdrumR)[1]}.
+Defaults to \code{selectedFields(humdrumR)[1]}.
 
 Must be a single \code{character} string.}
 

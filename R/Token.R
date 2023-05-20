@@ -37,7 +37,6 @@ token <- function(x, Exclusive = NULL, ...) {
 }
 
 
-
 ## Accessors ####
 
 getExclusive <- function(x) if (inherits(x, 'token')) x@Exclusive

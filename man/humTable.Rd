@@ -19,7 +19,8 @@ pullFields(
 
 fields(
   humdrumR,
-  fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference")
+  fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference",
+    "selected")
 )
 }
 \arguments{
@@ -38,7 +39,7 @@ Multiple types can be specified in a single string: e.g., \code{"GLIMD"}.}
 
 \item{fields}{\emph{\strong{Which fields to output.}}
 
-Defaults to \code{getActiveFields(humdrumR)}.
+Defaults to \code{selectedFields(humdrumR)}.
 
 Must be a \code{character} string \link[=partialMatching]{partially} matching the name of a data field in the \code{humdrumR} input.
 For example, \code{"Tok"} would match the \code{Token} field.}

@@ -4,7 +4,7 @@
 \alias{foldExclusive}
 \title{"Fold" exclusive interpretations into new fields}
 \usage{
-foldExclusive(humdrumR, fold, onto, fromField = getActiveFields(humdrumR)[1])
+foldExclusive(humdrumR, fold, onto, fromField = selectedFields(humdrumR)[1])
 }
 \arguments{
 \item{humdrumR}{\emph{\strong{HumdrumR data.}}

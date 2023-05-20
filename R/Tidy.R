@@ -159,15 +159,19 @@ ungroup.humdrumR <- function(x, ...) {
 #' @rdname tidyHumdrum
 #' @export
 select.humdrumR <- function(.data, ...) {
-    fields <- rlang::ensyms(...)
+    fields <- sapply(rlang::ensyms(...), as.character)
+    if (length(fields) == 0L) fields <- 'Token'
     
-    fields <- fieldMatch(.data, sapply(fields, as.character), callfun = 'select')
+    fieldTypes <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
+    if (any(fields %in% fieldTypes)) {
+     fields <- unique(c(fields, fields(.data)[Type %in% fields]$Name))
+     fields <- setdiff(fields, fieldTypes)
+    }
     
-    active <- if (length(fields) == 1L) rlang::quo(!!(rlang::sym(fields))) else rlang::quo(list(!!!(rlang::syms(fields))))
+    fields <- fieldMatch(.data, fields, callfun = 'select')
     
-    .data@Active <- active
-    .data
-  
+    selectFields(.data, fields)
+    
 }
 
 #############################################################-

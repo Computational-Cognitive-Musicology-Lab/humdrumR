@@ -2689,7 +2689,7 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
 list2str <- function(list, null = '.') {
   
   output <- rep(null, length(list))
-  isNull <- lapply(list, is.null)
+  isNull <- sapply(list, is.null)
   output[!isNull] <- sapply(list[!isNull], printable)
   output
 }
@@ -2710,7 +2710,6 @@ setMethod('printable', 'list',
           })
 setMethod('printable', 'atomic',
           function(x) {
-            
             if (is.character(x)) x <- quotemark(x)
             vals <-  if (length(x) < 5) {
               harvard(x, quote = FALSE)
@@ -2802,7 +2801,7 @@ trimTokens <- function(tokmat, maxTokenLength) {
     
     toolong <- toklen > maxTokenLength
     tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, maxTokenLength)
-    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
+    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '___') # these two ... are not the same! one is RE other is literal
     tokmat[is.na(tokmat)] <- ''
     
     tokmat

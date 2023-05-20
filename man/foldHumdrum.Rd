@@ -12,20 +12,20 @@ foldHumdrum(
   onto,
   what = "Spine",
   Piece = NULL,
-  fromField = getActiveFields(humdrumR)[1],
+  fromField = selectedFields(humdrumR)[1],
   fillFromField = FALSE,
   newFieldNames = NULL
 )
 
 foldPaths(
   humdrumR,
-  fromField = getActiveFields(humdrumR)[1],
+  fromField = selectedFields(humdrumR)[1],
   fillFromField = TRUE
 )
 
 foldStops(
   humdrumR,
-  fromField = getActiveFields(humdrumR)[1],
+  fromField = selectedFields(humdrumR)[1],
   fillFromField = FALSE
 )
 }
@@ -56,7 +56,7 @@ Must be natural numbers; must be length \code{length(onto)}.}
 
 \item{fromField}{\emph{\strong{Which field to "fold."}}
 
-Defaults to \code{getActiveFields(humdrumR)[1]}.
+Defaults to \code{selectedFields(humdrumR)[1]}.
 
 Must be a \code{character} string \link[=partialMatching]{partially} matching the name of a data field in the \code{humdrumR} input.
 For example, \code{"Tok"} would match the \code{Token} field.
