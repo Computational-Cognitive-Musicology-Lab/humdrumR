@@ -67,9 +67,7 @@
 #' @aliases subset
 subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
   
-  
-  oldActive <- getActive(x)
-  oldActiveFields <- getActiveFields(x)
+  selectedFields <- selectedFields(x)
   x <- within.humdrumR(x, ...)
   resultFields(x) <- '.TmpFilter.'
   
@@ -80,16 +78,14 @@ subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
   # NA values come in from record types we didn't use, which should NOT be filtered
   humtab[ , Filter := Filter | !.TmpFilter.]
   humtab[ , .TmpFilter. := NULL]
-  humtab <- update_Null.data.table(humtab, oldActiveFields)
+  humtab <- update_Null.data.table(humtab, selectedFields)
   
   if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
   putHumtab(x) <- humtab
-  x <- updateFields(x)
-  
-  x@Active <- oldActive
-  
-  
+  x <- updateFields(x, selectNew = FALSE)
+
   x
+  
   
 }
 

@@ -698,7 +698,6 @@ within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expand
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newfields)) {
     humdrumR <- updateFields(humdrumR)
-    humdrumR@Active <- if (length(newfields) == 1L) rlang::quo(!!rlang::sym(newfields)) else rlang::quo(list(!!!(rlang::syms(newfields))))
   }
   humdrumR
   # update_humdrumR(humdrumR, field = c(newfields, overWrote))
@@ -727,10 +726,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', alignLeft = TRUE, expand
                       
   
   ### Preparing the "do" expression
-  do   <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = FALSE)
-  ordo <- prepareDoQuo(humtab, quoTab, humdrumR@Active, ordo = TRUE)
+  dotField <- selectedFields(humdrumR)[1]
+  do   <- prepareDoQuo(humtab, quoTab, dotField, ordo = FALSE)
+  ordo <- prepareDoQuo(humtab, quoTab, dotField, ordo = TRUE)
   
-  quoTab$Quo[quoTab$Keyword == 'context'] <- lapply(quoTab$Quo[quoTab$Keyword == 'context'], prepareContextQuo, active = humdrumR@Active)
+  quoTab$Quo[quoTab$Keyword == 'context'] <- lapply(quoTab$Quo[quoTab$Keyword == 'context'], prepareContextQuo, dotField = dotField)
   # 
 
   #evaluate "do" expression! 
@@ -941,7 +941,7 @@ splitFormula <- function(form) {
 
 ## Preparing doQuo ----
 
-prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
+prepareDoQuo <- function(humtab, quoTab, dotField, ordo = FALSE) {
   # This is the main function used by [.withinmHumdrum] to prepare the current
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   
@@ -968,7 +968,7 @@ prepareDoQuo <- function(humtab, quoTab, active, ordo = FALSE) {
   doQuo <- concatDoQuos(doQuoTab)
 
   # turn . to active formula
-  doQuo <- activateQuo(doQuo, active)
+  doQuo <- activateQuo(doQuo, dotField)
   
   # lagged vectors
   doQuo <- laggedQuo(doQuo)
@@ -1110,14 +1110,14 @@ concatDoQuos <- function(quoTab) {
 
 ####################### Functions used inside prepareQuo
 
-activateQuo <- function(funcQuosure, active) {
+activateQuo <- function(funcQuosure, dotField) {
   # This function takes the `expression` argument
   # from the parent [withinHumdrum] call and 
   # inserts the `Active` expression from the 
   # target [humdrumRclass] object in place 
   # of any `.` subexpressions.
-  active <- rlang::f_rhs(active)
-  substituteName(funcQuosure, list(. = active))
+  dotField <- rlang::sym(dotField)
+  substituteName(funcQuosure, list(. = dotField))
 }
 
 #### nested formulae in expressions
@@ -1491,11 +1491,11 @@ interpolateArguments <- function(quo, namedArgs) {
 }
 
 
-prepareContextQuo <- function(contextQuo, active) {
+prepareContextQuo <- function(contextQuo, dotField) {
   exprA <- analyzeExpr(contextQuo)
   
   exprA$Head <- 'findWindows'
-  exprA$Args$activeField <- rlang::quo_squash(active)
+  exprA$Args$field <- dotField
   
   passAsExprs <- .names(exprA$Args) %in% c('open', 'close', '')
   exprA$Args[passAsExprs] <- lapply(exprA$Args[passAsExprs], \(expr) call('quote', expr))

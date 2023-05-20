@@ -214,7 +214,7 @@ writeHumdrum <- function(humdrumR,
     cat(sep = '', '\nPreparing text...')
     
     # humdrumR <- indexGLIM(humdrumR)
-    humdrumR <- printableActiveField(humdrumR)
+    humdrumR <- printableSelectedField(humdrumR, 'GLIMDd', 'NA2dot')
     lines <- as.lines(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont')
     filestrs <- tapply(lines, # collapse across files (using names())
                        as.numeric(stringi::stri_extract_first_regex(names(lines), # as.numeric makes them sort numerically

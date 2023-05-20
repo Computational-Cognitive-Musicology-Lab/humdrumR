@@ -905,7 +905,7 @@ ditto.matrix <- function(x, margin = 2, ...) {
 
 #' @rdname ditto
 #' @export
-ditto.humdrumR <- function(x, field = getActiveFields(x)[1], ..., newField = paste0(field, '_ditto')) {
+ditto.humdrumR <- function(x, field = selectedFields(x)[1], ..., newField = paste0(field, '_ditto')) {
   checks(newField, xcharacter & xlen1)
   field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
   newField <- rlang::sym(newField)

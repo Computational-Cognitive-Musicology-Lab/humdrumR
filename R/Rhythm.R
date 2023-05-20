@@ -1680,11 +1680,11 @@ recordDuration <- function(humdrumR) {
 
 .recordDuration <- function(humdrumR) {
   
-  oldActive <- getActive(humdrumR)
+  selectedFields <- selectedFields(humdrumR)
   humtab <- getHumtab(humdrumR, 'LIMDd')
   
   humdrumR <- within(humdrumR, ..Timeline.. <- timeline(.))
-  humdrumR@Active <- oldActive
+  humdrumR <- selectFields(humdrumR, selectedFields)
   
   humdrumR <- within(humdrumR, dataTypes = c('Dd'),
                      fill = ..Timeline.. <- max(c(-1, ..Timeline..), na.rm = TRUE), by = list(File, Record))
@@ -1726,7 +1726,7 @@ timebase <- function(humdrumR, tb = '16') {
   checks(humdrumR, xhumdrumR)
   message('This is an early draft of timebase()...you might encounter errors.')
   
-  oldActive <- getActive(humdrumR)
+  selectedFields <- selectedFields(humdruamR)
   
   tb <- if (is.null(tb)) with(humdrumR, tatum(., deparser = duration)) else duration(tb)
   
@@ -1763,13 +1763,12 @@ timebase <- function(humdrumR, tb = '16') {
   humtab$Type[humtab$Duplicated] <- 'd'
   humtab$Null[humtab$Duplicated] <- TRUE
   
-  # humtab <- update_Null.data.table(humtab, oldActiveFields)
   putHumtab(humdrumR) <- humtab
   humdrumR@Humtable[ , c('..Timeline..', 'RecordDuration') := NULL]
   humdrumR <- updateFields(humdrumR)
   
-  humdrumR@Active <- oldActive
-  humdrumR
+  selectFields(humdrumR, selectedFields)
+ 
 }
 
 ## Find lag ----

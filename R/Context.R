@@ -451,7 +451,7 @@ context <- function(x, open, close, reference = x,
   
   expr <- if (collapse) rlang::expr(paste(.x., collapse = !!sep)) else rlang::expr(list(.x.))
   
-  .applyWindows(data.table(.x. = x), windowFrame, expr, activeField = '.x.',
+  .applyWindows(data.table(.x. = x), windowFrame, expr, field = '.x.',
                 inPlace = inPlace, complement = complement, alignToOpen = alignToOpen)
   
   
@@ -463,20 +463,20 @@ context <- function(x, open, close, reference = x,
 
 
 findWindows <- function(x, open, close = quote(nextopen - 1), ..., 
-                        activeField = quote(Token),
+                        field = 'Token',
                         overlap = 'paired', depth = NULL,  rightward = TRUE, duplicate_indices = TRUE,
                         groupby = list(),
                         min_length = 2L, max_length = Inf) {
   
   
-  if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), rlang::expr_text(activeField) %||% '.')
+  if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), field %||% '.')
   
   open <- parseContextExpression(open, other = quote(close), groupby = rlang::enexpr(groupby))
   close <- parseContextExpression(close, other = quote(open), groupby = rlang::enexpr(groupby))
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
-  if (!is.null(activeField)) {
-    open  <- substituteName(open, list('.' = activeField))
-    close <- substituteName(close, list('.' = activeField))
+  if (!is.null(field)) {
+    open  <- substituteName(open, list('.' = field))
+    close <- substituteName(close, list('.' = field))
   }
   
   # do the expressions reference each other?
@@ -715,7 +715,7 @@ windows2groups <- function(dt, windowFrame) {
   dt_extended
 }
 
-.applyWindows <- function(dt, windowFrame, expr, activeField = 'Token', ..., 
+.applyWindows <- function(dt, windowFrame, expr, field = 'Token', ..., 
                           inPlace = TRUE, complement = TRUE, alignToOpen = TRUE) {
   indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
   
@@ -733,7 +733,7 @@ windows2groups <- function(dt, windowFrame) {
   edgeindices <- Map(indices, result_lengths, f = \(i, l) edge(i, n = l))
   
   
-  output <- if (complement) dt[[activeField]] else rep(NA, nrow(dt))
+  output <- if (complement) dt[[field]] else rep(NA, nrow(dt))
   output[.unlist(edgeindices)] <- .unlist(results, recursive = FALSE)
   
   
@@ -848,7 +848,7 @@ windowsSum <- function(x, windowFrame, na.rm = FALSE, cuttoff = 10) {
   }
   
 
-  if (nrow(windowFrame)) x <- .applyWindows(data.table(.x. = x), activeField = '.x.', 
+  if (nrow(windowFrame)) x <- .applyWindows(data.table(.x. = x), field = '.x.', 
                                             windowFrame,
                                             expr = rlang::expr(sum(.x., na.rm = !!na.rm)),
                                             inPlace = TRUE, complement = TRUE)

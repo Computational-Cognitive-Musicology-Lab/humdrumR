@@ -23,12 +23,7 @@ ditto(x, ...)
 
 \method{ditto}{matrix}(x, margin = 2, ...)
 
-\method{ditto}{humdrumR}(
-  x,
-  field = getActiveFields(x)[1],
-  ...,
-  newField = paste0(field, "_ditto")
-)
+\method{ditto}{humdrumR}(x, field = selectedFields(x)[1], ..., newField = paste0(field, "_ditto"))
 }
 \arguments{
 \item{x}{\emph{\strong{A vector.}}

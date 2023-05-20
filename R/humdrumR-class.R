@@ -337,8 +337,11 @@ setMethod('initialize', 'humdrumR',
                 sys.function()
                 }
             
+            fieldTable <- initFields(humtab, tandemFields)
+            setcolorder(humtab, fieldTable$Name)
+            
             .Object@Humtable  <- humtab    
-            .Object@Fields    <- initFields(humtab, tandemFields)
+            .Object@Fields    <- fieldTable
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
             .Object@LoadTime  <- Sys.time()
             .Object@Groupby   <- quos()
@@ -387,7 +390,7 @@ setMethod('$<-', signature = c(x = 'humdrumR'),
               humtab <- getHumtab(x, 'D')
               if (!(length(value) == 1L | length(value) == nrow(humtab))) .stop("When using humdrumR$<- value, the value must either be length 1",
                                                                                 "or exactly the same length as the number of non-null data tokens in the",
-                                                                                "humdrumR object's active field.")
+                                                                                "humdrumR object's selected fields.")
               name <- as.character(name)
               
               if (name == 'Token') .stop("In your use of humdrumR$<-, you are trying to overwrite the 'Token' field, which is not allowed.",
@@ -686,14 +689,7 @@ as.data.frames <- function(humdrumR, dataTypes = 'LIMDd', padPaths = 'piece', pa
            as.data.frame, stringsAsFactors = FALSE)
 }
 
-# A humdrumR object is treated differently depending on whether its
-# active columns contain atomic data ("isActiveAtomic") or not (tables, lists, matrices, etc.).
-# this function tests if the active column is a vector or not
-isActiveAtomic <- function(humdrumR) {
-          checks(humdrumR, xhumdrumR)
-          act <- rlang::eval_tidy(x@Active, x@Humtable)
-          is.atomic(act) || (!is.object(act) && !is.list(act))
-}
+
 
 
 
@@ -1370,7 +1366,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'NData')))
     
     # start work
-    humdrumR <- setActiveFields(humdrumR, fromField)
+    humdrumR <- selectFields(humdrumR, fromField)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
     moves <- foldMoves(humtab, fold, onto, what, Piece, newFieldNames)
@@ -1451,13 +1447,9 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     humdrumR <- updateFields(humdrumR) 
     
-    humdrumR <- setActiveFields(humdrumR, newfields)
-    
     
     humdrumR
 
-    
-    
 }
 
 foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NULL) {
@@ -1923,7 +1915,7 @@ fieldClass <- function(x) {
 }
 
 updateFields <- function(humdrumR, selectNew = TRUE) {
-    humtab <- getHumtab(humdrumR)
+    humtab <- humdrumR@Humtable
     fieldTable <- humdrumR@Fields
     fieldTable <- fieldTable[Name %in% colnames(humtab)]
     
@@ -1934,10 +1926,12 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
                                        Class = '_tmp_', Selected = selectNew))
     }
     
-    fieldTable$Class <- sapply(humtab, fieldClass)[fieldTable$Name]
-    
     setorder(fieldTable, Type, Class)
-    if (selectNew) fieldTable[ , Selected := Name %in% new]
+    setcolorder(humtab, fieldTable$Name)
+    
+    fieldTable$Class <- sapply(humtab, fieldClass)
+    
+    if (length(new) && selectNew) fieldTable[ , Selected := Name %in% new]
     humdrumR@Fields <- fieldTable
     
     humdrumR
@@ -2105,38 +2099,6 @@ fieldsInExpr <- function(humtab, expr) {
 
 
 
-
-
-
-fields.as.character <- function(humdrumR, useToken = TRUE) {
-# This takes the active humdrumR fields (any field used in the Active expression)
-# and coerceds them to characters, filling in null tokens (! * = .) where there are 
-# NAs.
-# is useToken is true, the Token field is used to fill-in (instead of null tokens).
- humtab <- getHumtab(humdrumR, 'GLIMDd') 
- 
- nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')
- 
- active <- selectedFields(humdrumR)
- humtab <- humtab[ , 
-                   Map(\(field, act) {
-                             if (!act) return(field)
-                             field <- as.character(field)
-                             na <- is.na(field)
-                             field[na] <- if (useToken) Token[na] else nulltypes[Type[na]]
-                             field
-                   }, 
-                   .SD, colnames(humtab) %in% active)]
-         
- 
- putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
- humdrumR
-}
-
-
-
-
-
 fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
     humtab <- getHumtab(humdrumR, 'GLIMDd')
     
@@ -2171,74 +2133,6 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' The "selected" fields of a [humdrumR object][humdrumRclass]
 #' 
 #
-# evalActive <- function(humdrumR, dataTypes = 'D', forceAtomic = TRUE, sep = ', ', nullChar = FALSE)  {
-#     checks(humdrumR, xhumdrumR)
-#     dataTypes <- checkTypes(dataTypes, 'evalActive')
-#     checks(forceAtomic, xTF)
-#     checks(sep, xcharacter & xlen1)
-#     checks(nullChar, xTF)
-#     
-#     humtab <- getHumtab(humdrumR, dataTypes)
-#     
-#     values <- rlang::eval_tidy(humdrumR@Active, data = humtab)
-#     
-#     if (!forceAtomic) return(values)
-#     
-#     
-#     if (length(values) == nrow(humtab)) values <- list(values)
-#     lists <- sapply(values, is.list)
-#     values[lists] <- lapply(values[lists],
-#                             \(l) {
-#                                 lens <- lengths(l)
-#                                 
-#                                 output <- rep(NA, length = length(lens))
-#                                 
-#                                 atomic <- sapply(l, is.atomic) 
-#                                 l[atomic & lens > 0L] <- lapply(l[atomic & lens > 0L], list)
-#                                 
-#                                 # output[atomic & lens > 1L] <- paste0('list(', sapply(l[atomic & lens > 1L], paste, collapse = ', ')
-#                                 # output[atomic & lens == 1L] <- unlist(l[atomic & lens == 1L])
-#                                 
-#                                 output[lens > 0L] <- sapply(l[lens > 0L], object2str)
-#                                 output
-#                             })
-#     
-#     
-#     
-#     
-#     
-#     nulltypes <- c(G = '!!', I = '*', L = '!', d = '.', D = NA_character_, M = '=')[humtab$Type]
-#     null <- humtab[ , Null | Filter]
-#     values <- lapply(values,
-#                      \(val) {
-#                          null <- null | (!is.na(nulltypes) & is.na(val))
-#                          if (nullChar) {
-#                              if (is.factor(val)) {
-#                                  levels <- levels(val)
-#                                  val <- as.character(val)
-#                                  val[null] <- nulltypes[null]
-#                                  val <- factor(val, levels = union(levels, unique(nulltypes)))
-#                              } else {
-#                                  val[null] <- nulltypes[null]   
-#                              }
-#                          }  else {
-#                              val[null] <-  NA
-#                          }
-#                          
-#                          val
-#                      })
-#     
-#     if (length(values) == 1L) {
-#         values[[1]]
-#     } else {
-#         values <- lapply(values, as.character)
-#         do.call('.paste', c(values, list(sep = sep, na.if = all)))
-#     }
-#     
-# }
-
-
-
 selectedFields <- function(humdrumR) fields(humdrumR)[Selected == TRUE]$Name
 
 pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
@@ -2269,7 +2163,7 @@ selectFields <- function(humdrumR, fields) {
 
 
 
-pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('NA2dot', 'dotToNA'), useTokenGLIM = TRUE, collapse = TRUE){
+pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis'), useTokenGLIM = TRUE, collapse = TRUE){
     
     fields <- pullFields(humdrumR, fields, dataTypes = dataTypes, null = null)
     
@@ -2310,6 +2204,19 @@ pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('NA2dot', 
 
 
 
+printableSelectedField <- function(humdrumR, dataTypes = 'D', null =  c('charNA2dot', 'NA2dot', 'dotToNA', 'asis'), useTokenGLIM = TRUE) {
+    printableField <- pullPrintable(humdrumR, fields = selectedFields(humdrumR), dataTypes = dataTypes, 
+                                    null = null, useTokenGLIM = useTokenGLIM, collapse = TRUE)
+    
+    humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+    humtab$Printable <- printableField[[1]]
+    putHumtab(humdrumR) <- humtab
+    
+    updateFields(humdrumR)
+    
+    
+    
+}
 
 
 
@@ -2432,13 +2339,7 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
 
 tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
 
-  fields <- pullPrintable(humdrumR, selectedFields(humdrumR), dataTypes = dataTypes, 
-                          null = null, useTokenGLIM = TRUE, collapse = TRUE)
-  
-  humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
-  humtab$.Printable <- fields[[1]]
-  putHumtab(humdrumR) <- humtab
-  humdrumR <- updateFields(humdrumR)
+  humdrumR <- printableSelectedField(humdrumR, dataTypes = dataTypes, null = null)
     
   tokmat <- as.matrix(humdrumR, dataTypes = dataTypes, padPaths = 'corpus', padder = '')
   
