@@ -42,7 +42,7 @@ test_that("ioi and untie work correctly", {
   mc <- foldHumdrum(mc[[ , c(1, 6)]], 2, 1, newFieldNames = 'IPA')
   mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
   
-  pairs <- with(mc$IOI,  data.frame(IOI, Token))
+  pairs <- with(humdrumR:::selectFields(mc, 'IOI'),  data.frame(IOI, Token))
   expect_true(all(Reduce('>=', lapply(pairs, duration))))
   
   # untie()

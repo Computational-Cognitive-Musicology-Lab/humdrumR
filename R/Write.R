@@ -132,7 +132,7 @@ writeHumdrum <- function(humdrumR,
     cat('Writing humdrum data...\n')
     cat('Determining validity of new filenames...')
     #
-    filenameTable <- getFields(humdrumR, c('File', 'Piece', 'Filepath'), dataTypes = 'GLIMDd')
+    filenameTable <- pullFields(humdrumR, c('File', 'Piece', 'Filepath'), dataTypes = 'GLIMDd')
     filenameTable <- if (separatePieces) {
         filenameTable[ , .SD[1], by = Piece] 
     } else {

@@ -115,8 +115,8 @@ test_that('Stop folding works properly', {
 test_that('Stop and path folding work together', {
   path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
   
-  foldedPS <- getHumtab(foldStops(foldPaths(path), fromField = 'Token')$Token, 'D')
-  foldedSP <- getHumtab(foldPaths(foldStops(path), fromField = 'Token')$Token, 'D')
+  foldedPS <- getHumtab(humdrumR:::selectFields(foldStops(foldPaths(path), fromField = 'Token'), 'Token'), 'D')
+  foldedSP <- getHumtab(humdrumR:::selectFields(foldPaths(foldStops(path), fromField = 'Token'), 'Token'), 'D')
   
   expect_equal(foldedPS[, table(Token, Token_Path1)], 
                foldedSP[, table(Token, Token_Path1)])
@@ -187,11 +187,11 @@ test_that("Exclusive is updated by update_Exclusive", {
                      Pitch <- pitch(Token),
                      Nchar <- nchar(Token))
   
-  expect_equal(with(chorales$Semits, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**semits')
-  expect_equal(with(chorales$Nchar, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
+  expect_equal(with(humdrumR:::selectFields(chorales, "Semits"), Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**semits')
+  expect_equal(with(humdrumR:::selectFields(chorales, "Nchar"), Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
   # (semits and Nchar update Token because they are not character)
-  expect_equal(with(chorales$Pitch, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**pitch')
-  expect_equal(with(chorales$Token, Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
+  expect_equal(with(humdrumR:::selectFields(chorales, "Pitch"), Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**pitch')
+  expect_equal(with(humdrumR:::selectFields(chorales, "Token"), Token[Token %~% '\\*\\*'], dataTypes = 'I')[1], '**kern')
   
   })
 

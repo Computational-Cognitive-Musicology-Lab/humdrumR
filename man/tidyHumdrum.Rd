@@ -27,13 +27,7 @@
 
 \method{reframe}{humdrumR}(.data, ..., dataTypes = "D", expandPaths = FALSE)
 
-\method{pull}{humdrumR}(
-  .data,
-  var,
-  ...,
-  dataTypes = "D",
-  null = c("asis", "charNA2dot", "NA2dot", "dotToNA")
-)
+\method{pull}{humdrumR}(.data, var, ..., dataTypes = "D", null = "asis")
 
 \method{filter}{humdrumR}(.data, ...)
 

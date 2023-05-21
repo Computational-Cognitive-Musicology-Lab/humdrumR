@@ -94,7 +94,7 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE) {
 
 #' @rdname tidyHumdrum
 #' @export
-pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = c('asis', 'charNA2dot', 'NA2dot', 'dotToNA')) {
+pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = 'asis') {
   if (missing(var)) return(pullSelectedField(.data, dataTypes = dataTypes, null = null))
   
   field <- rlang::enquo(var)

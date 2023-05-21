@@ -82,8 +82,9 @@ subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
   
   if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
   putHumtab(x) <- humtab
-  x <- updateFields(x, selectNew = FALSE)
-
+  x <- updateFields(x, selectNew = FALSE) 
+  x <- selectFields(x, selectedFields) # this is still needed
+  
   x
   
   

@@ -475,8 +475,8 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
   close <- parseContextExpression(close, other = quote(open), groupby = rlang::enexpr(groupby))
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
   if (!is.null(field)) {
-    open  <- substituteName(open, list('.' = field))
-    close <- substituteName(close, list('.' = field))
+    open  <- substituteName(open, list('.' = rlang::sym(field)))
+    close <- substituteName(close, list('.' = rlang::sym(field)))
   }
   
   # do the expressions reference each other?

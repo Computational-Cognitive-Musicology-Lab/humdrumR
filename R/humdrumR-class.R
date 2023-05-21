@@ -1407,7 +1407,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     fromTable[ , Null := NULL]
     fromTable[ , Filter := NULL]
     fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
-    dataFields <- fields(humdrumR, 'D')$Name
     fromTables <- Map(\(ftab, fname) {
                              colnames(ftab)[colnames(ftab) == fromField] <- fname
                              ftab
@@ -1756,9 +1755,8 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
           overwriteTypes <- unique(value$Type)
           overwriteTypes <- union(overwriteTypes, overwriteEmpty)
           
-          # result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
-          # humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], 
-          # value, fill = TRUE)
+          # humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], value, fill = TRUE) 
+          # This works the same as the whole forloop bs bellow, but it breaks with token...which only matters for $<-
           
           
           oldhumtab <- humdrumR@Humtable[!Type %in% overwriteTypes]
@@ -1771,11 +1769,12 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
               } else {
                   as(NA, class)
               }
+              if (nrow(oldhumtab) == 0L) insert <- insert[0]
               oldhumtab <- cbind(oldhumtab, setNames(as.data.frame(insert), col))
           }
-          
-          
           humtab <- rbind(oldhumtab, value)
+          #
+          
           humtab <- orderHumtab(humtab)
           humdrumR@Humtable <- humtab
           
@@ -1795,7 +1794,7 @@ update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) 
     humtab <- getHumtab(hum, 'GLIMDd')
     
     humtab <- update_humdrumR.data.table(humtab, Exclusive, Null, ...)
-    putHumtab(hum, overwriteEmpty = c()) <- humtab
+    putHumtab(hum, overwriteEmpty = c('d')) <- humtab
     hum
 }
 update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Null = TRUE, ...) {
@@ -2017,10 +2016,16 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
     
     null <- match.arg(null)
     
+    humdrumR <- update_Null(humdrumR, field = fields)
+    
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
-
     selectedTable <- humtab[ , fields, with = FALSE]
     
+    # filter (subsetting)
+    filter <- humtab$Filter
+    selectedTable[] <- selectedTable[ , lapply(.SD, ifelse, test = filter, yes = NA)]
+    
+    # decide how NA/null values are shown
     fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]
     fieldTypes <- lapply(as.list(fieldTypes), 
                          \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
@@ -2029,6 +2034,7 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
     
     selectedTable[] <- Map(naDots, selectedTable, types = fieldTypes, null = null)
     
+    # return
     if (length(fields) == 1L && drop) selectedTable[[1]] else selectedTable
     
 }
@@ -2125,7 +2131,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 
 
 ####################################################-
-# Selected fields ----
+## Selected fields ----
 ####################################################-
 
 ##### Manipulating the Active slot
@@ -2156,8 +2162,10 @@ selectFields <- function(humdrumR, fields) {
     fieldTable <- humdrumR@Fields
     
     fieldTable[ , Selected := Name %in% fields]
+    
     humdrumR@Fields <- fieldTable #data.table::copy(fieldTable)
     
+    humdrumR <- update_humdrumR.humdrumR(humdrumR, field = fields)
     humdrumR
 }
 
@@ -2305,9 +2313,9 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     
     lastPiece <- max(tokenTable$Piece)
     Filenames <- tokenTable[ , unique(Filename)]
-    tokenTable[ , Filename := NULL]
-    if (all(tokenTable$Path == 0, na.rm = TRUE)) tokenTable[, Path := NULL]
-    if (all(tokenTable$Stop == 1, na.rm = TRUE)) tokenTable[, Stop := NULL]
+    if (!'Filename' %in% selectedFields) tokenTable[ , Filename := NULL]
+    if (!'Path' %in% selectedFields && all(tokenTable$Path == 0, na.rm = TRUE)) tokenTable[, Path := NULL]
+    if (!'Stop' %in% selectedFields && all(tokenTable$Stop == 1, na.rm = TRUE)) tokenTable[, Stop := NULL]
     
 
     tokmat <- do.call('cbind', as.list(tokenTable))

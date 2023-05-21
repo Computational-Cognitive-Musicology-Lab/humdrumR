@@ -136,7 +136,7 @@ test_that('Examples from Working With Data vignette work', {
   chorales <- within(chorales, Pitch <- pitch(Token))
   
   if (expect_true(class(chorales) == 'humdrumR')) {
-    expect_equal(fields(chorales, 'D')$Name, c('Token', 'Pitch'))
+    expect_equal(fields(chorales, 'D')$Name, c('Pitch', 'Token'))
     expect_equal(with(chorales, sum(Token == '4dd-' & Pitch == 'Db5')), 7)
     
   }
