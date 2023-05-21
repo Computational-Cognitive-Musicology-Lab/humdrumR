@@ -316,7 +316,6 @@ orderHumtab <- function(humtab) {
 #' @aliases humdrumRS4
 #' @export
 setClass('humdrumR', 
-         contains = 'function',
          slots = c(Humtable = 'data.table',
                    Files = 'list',
                    Fields = 'data.frame',
@@ -330,13 +329,6 @@ setMethod('initialize', 'humdrumR',
             # pattern = the original file search pattern (string)
             # tandem col a logical vector indicating which columns are tandem fields
 
-            
-         
-            .Object@.Data <- function(print, maxRecordsPerFile, maxTokenLength, nullPrint) {
-                set_humdrumRoptions(print, maxRecordsPerFile, maxTokenLength, nullPrint)
-                sys.function()
-                }
-            
             fieldTable <- initFields(humtab, tandemFields)
             setcolorder(humtab, fieldTable$Name)
             
@@ -1891,6 +1883,7 @@ initFields <- function(humtab, tandemFields) {
     
     setorder(fieldTable, Type, Class)
     fieldTable[ , Selected := Name == 'Token']
+    fieldTable[ , GroupedBy := 0L]
     fieldTable
 }
 
@@ -1922,7 +1915,7 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
     if (length(new)) {
         fieldTable <- rbind(fieldTable, 
                             data.table(Name = new, Type = 'Data', 
-                                       Class = '_tmp_', Selected = selectNew))
+                                       Class = '_tmp_', Selected = selectNew, GroupedBy = 0L))
     }
     
     setorder(fieldTable, Type, Class)
@@ -2267,7 +2260,8 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     
           })
 
-print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes = if (style == 'score') "GLIMDd" else 'D', 
+print_humdrumR <- function(humdrumR, view = humdrumRoption('view'), 
+                           dataTypes = if (view %in% c('score', 'humdrum')) "GLIMDd" else 'D', 
                            firstAndLast = TRUE, screenWidth = options('width')$width - 10L,
                            null = humdrumRoption('nullPrint'),
                            maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
@@ -2287,14 +2281,14 @@ print_humdrumR <- function(humdrumR, style = humdrumRoption('print'), dataTypes 
   if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
   
   
-  tokmat <- if (style == 'score') {
+  tokmat <- if (view %in% c('score', 'humdrum')) {
       tokmat_humdrum(humdrumR, dataTypes, collapseNull, null = null)
   } else {
       tokmat_humtable(humdrumR, dataTypes, null = null)
   }
   
   print_tokmat(tokmat, Nmorefiles = Nfiles - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
-               screenWidth = screenWidth, showCensorship = style == 'score')
+               screenWidth = screenWidth, showCensorship = view == 'score')
 
   invisible(NULL)
   

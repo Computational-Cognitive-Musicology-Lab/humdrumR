@@ -1217,7 +1217,7 @@ parseTandem <- function(tandems, known) {
 #' [humdrum table docs][humTable]. [readHumdrum()] also preprocesses
 #'  some "known" tandem interpretations. }
 #' @export
-extractTandem <- function(Tandem, regex) {
+tandem <- function(regex, Tandem) {
   
   
   checks(regex, xcharacter & xlen1)

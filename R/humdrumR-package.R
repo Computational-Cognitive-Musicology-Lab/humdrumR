@@ -58,7 +58,8 @@ humdrumRroot <- system.file(package = 'humdrumR')
 
 withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
                      Key = c('mint', 'hint', 'int', 'sonority'),
-                     BPM = c('timestamp'))
+                     BPM = c('timestamp'),
+                     Tandem = c('tandem'))
 
 # Package global data ----
 
@@ -160,7 +161,7 @@ NULL
 # Options -----
 
 humdrumR_defaults <- list(
-  print = 'score',
+  view = 'score',
   maxRecordsPerFile = 40L,
   maxTokenLength = 16L,
   nullPrint = 'NA2dot'
@@ -173,11 +174,16 @@ humdrumRoption <- function(name) {
   opts[[pmatch(name[1], names(opts))]]
 }
 
-set_humdrumRoptions <- function(print, maxRecordsPerFile, maxTokenLength, nullPrint) {
+#' Set options for humdrumR!
+#' 
+#' @export
+humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint) {
   curOptions <- oldOptions <- humdrumRoptions()
-  if (!missing(print)) {
-    checks(print, xplegal(c('score', 'table')))
-    curOptions$print <- match.arg(print, c('score', 'table'))
+  
+
+  if (!missing(view)) {
+    view <- checks(view, xplegal(c('score', 'table', 'tibble', 'humdrum', 'data.frame')))
+    curOptions$view <- match.arg(view, c('score', 'table', 'tibble', 'humdrum', 'data.frame'))
   }
   if (!missing(maxRecordsPerFile)) {
     checks(maxRecordsPerFile, xwholenum & xpositive)
