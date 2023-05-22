@@ -1085,14 +1085,14 @@ setMethod('as.data.frame', 'struct',
 
 .unlist <- function(x, recursive = TRUE, use.names = TRUE) {
   if (!is.list(x)) return(x)
+  
   if (!recursive && all(sapply(x, hasdim)) && length(unique(sapply(x, ncol))) == 1L) {
     output <- do.call('rbind', x)
     if (!use.names) dimnames(output) <- NULL
     output
     
   } else {
-    if (is.struct(x[[1]])) do.call('c', unname(x)) else unlist(x, recursive, use.names)
-    
+    if (is.struct(x[[1]]) || is.token(x[[1]])) do.call('c', unname(x)) else unlist(x, recursive, use.names)
   }
   
 }

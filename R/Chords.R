@@ -486,7 +486,7 @@ tset2tonalHarmony <- function(x,
   root      <- if (root) root_func(getRootTint(x), Key = Key, ...) 
   
   quality   <- if (quality) {
-    {quality; root} %<-% tset2triadLabel(x, root, root.case, ...)
+    c("quality", "root") %<-% tset2triadLabel(x, root, root.case, ...)
     quality
   }
  

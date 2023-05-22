@@ -4,6 +4,9 @@
 \name{humdrumR}
 \alias{humdrumR}
 \title{humdrumR}
+\usage{
+humdrumR(view, maxRecordsPerFile, maxTokenLength, nullPrint)
+}
 \description{
 \code{humdrumR} is a toolkit for the analysis of data encoded in the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}.
 The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.

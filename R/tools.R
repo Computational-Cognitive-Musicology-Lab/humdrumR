@@ -71,7 +71,7 @@ fargs <- function(func) formals(args(func))
 
 
 `%<-%` <- function(names, values) {
-    names <- as.character(rlang::enexpr(names))[-1]
+    names <- as.character(names)
     if (length(names) > 0L && length(names) != length(values)) stop(call. = FALSE,
                                               "Left side of multiassign (%<-%) operator must be the same length as the right side.")
     
