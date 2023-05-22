@@ -1706,17 +1706,16 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
     # indices and reconstructs the output object.
   # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
   
-  
-  grouping <- results[names(results) %in% c(groupFields, '_rowKey_')]
+  grouping <- results[ , c(groupFields, '_rowKey_'), with = FALSE]
   grouping[['_rowKey_']] <- unlist( grouping[['_rowKey_']], recursive = FALSE)
-  results <- results[!names(results) %in% c(groupFields, '_rowKey_')]
-  results <- unlist(results, recursive = FALSE)
+  results <- results[ , !names(results) %in% c(groupFields, '_rowKey_'), with = FALSE]
+  results[] <- lapply(results, unlist, recursive = FALSE)
   
   visibleResult <- attr(results[[length(results)]], 'visible') %||% TRUE
   
   
-  
-  results <- do.call('cbind', results)
+  results <- as.matrix(results) # allows me to lapply across all all at once
+  # results <- do.call('cbind', results)
   
   # "objects" are treated like length 1, and not vectorized
   objects <- array(FALSE, dim(results), dimnames(results))
