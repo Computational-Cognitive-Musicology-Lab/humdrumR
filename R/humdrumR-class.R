@@ -1860,9 +1860,9 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 ## Manipulating the @Fields slot ----
 
 checkFieldTypes <- function(types, argname, callname) {
-    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'selected')
+    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')
     types <- matched(types, valid, nomatch = types)
-    checks(types, xcharacter & xmaxlength(6) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'selected')))
+    checks(types, xcharacter & xmaxlength(7) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')))
 }
 
 initFields <- function(humtab, tandemFields) {
@@ -1883,7 +1883,7 @@ initFields <- function(humtab, tandemFields) {
     
     setorder(fieldTable, Type, Class)
     fieldTable[ , Selected := Name == 'Token']
-    fieldTable[ , GroupedBy := 0L]
+    fieldTable[ , GroupedBy := FALSE]
     fieldTable
 }
 
@@ -1915,7 +1915,7 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
     if (length(new)) {
         fieldTable <- rbind(fieldTable, 
                             data.table(Name = new, Type = 'Data', 
-                                       Class = '_tmp_', Selected = selectNew, GroupedBy = 0L))
+                                       Class = '_tmp_', Selected = selectNew, GroupedBy = FALSE))
     }
     
     setorder(fieldTable, Type, Class)
@@ -2051,7 +2051,7 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
 #'   
 #' @rdname humTable
 #' @export
-fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'selected')) { 
+fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')) { 
   #
 
   checks(humdrumR, xhumdrumR)
@@ -2062,29 +2062,44 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 }
 
 
-showFields <-  function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')) {
+showFields <-  function(humdrumR) {
           # This function is used to produce the human readable 
           # list fields used by print_humdrumR
-          fields <- fields(humdrumR, c(fieldTypes, 'selected'))
+          fields <- fields(humdrumR)[Type == 'Data' | Selected == TRUE | GroupedBy == TRUE]
 
+          ## prep for printing
           selected <- fields$Selected
           
           fields[ , Name := paste0(ifelse(Selected, '*', ' '), Name)]
           fields[ , Name := stringr::str_pad(Name, width = max(nchar(Name)), side = 'right')]
+          
+          fields[ , Print := paste0(Name, ' :: ', Class)]
 
-          fields$Class <- sapply(fields$Class,  
-                                 \(classes) paste(setdiff(classes, 'token'), collapse = ','))
-          fields$Print <- paste0(fields$Name, ' :: ', fields$Class)
-
-          fields[ ,
-                  { cat('\t', Type[1], 'fields:', '\n\t        ')
+          
+          ## Print fields
+          fields[Type == 'Data' | Selected == TRUE,
+                  { cat('  ', Type[1], 'fields:', '\n\t        ')
                     cat(Print, sep = '\n\t        ')
                     cat('\n')
                             }, 
                   by = Type]
 
           
+          # grouping fields
+          groupFields <- fields[GroupedBy == TRUE]
+          
+          if (nrow(groupFields)) {
+              ngroups <- nrow(unique(getHumtab(humdrumR, 'D')[ , gsub('[ *]*', '', groupFields$Name), with = FALSE]))
+              
+              groupFields[ ,
+                           { cat('   Grouping fields: (', num2print(ngroups), plural(ngroups, ' groups', ' only one "group"...'), ')\n\t        ', sep = '')
+                               cat(Print, sep = '\n\t        ')
+                               cat('\n')
+                           }]
+          }
+          
           # cat('\t\tFields: ', paste(fieldprint, collapse = '\n\t\t        '), '\n', sep = '')
+          
           invisible(fields)
 }
 
@@ -2256,8 +2271,9 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     }
                     
                     ## Fields
-                    showFields(object, 'Data')
+                    showFields(object)
                     
+                    invisible(NULL)
           })
 
 print_humdrumR <- function(humdrumR, view = humdrumRoption('view'), 
@@ -2386,7 +2402,6 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
     
     ## censor lines beyond maxRecordsPerFile
 
-  
     # 
     uniqRec <- tapply_inplace(Record, Piece, seq_along)
     censored <- ifelse(length(unique(Piece)) == 1L | Piece != max(Piece),
@@ -2571,3 +2586,4 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     lines
     
 }
+

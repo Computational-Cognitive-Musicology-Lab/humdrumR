@@ -611,10 +611,11 @@ NULL
 with.humdrumR <- function(data, ..., 
                           dataTypes = 'D',
                           expandPaths = FALSE,
+                          recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
                           drop = TRUE,
                           variables = list()) {
   checks(data, xclass('humdrumR'))
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, variables = variables, withFunc = 'with.humdrumR'), 
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, variables = variables, withFunc = 'with.humdrumR'), 
            envir = environment())
   
 
@@ -647,10 +648,15 @@ with.humdrumR <- function(data, ...,
 
 #' @rdname withinHumdrum
 #' @export
-within.humdrumR <- function(data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, variables = list()) {
+within.humdrumR <- function(data, ..., 
+                            dataTypes = 'D', 
+                            alignLeft = TRUE,
+                            expandPaths = FALSE, 
+                            recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
+                            variables = list()) {
   checks(data, xclass('humdrumR'))
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
-                       expandPaths = expandPaths, variables = variables, 
+                       expandPaths = expandPaths, recycle = recycle, variables = variables, 
                        withFunc = 'within.humdrumR'), 
            envir = environment())
   
@@ -1533,9 +1539,10 @@ prepareContextQuo <- function(contextQuo, dotField) {
 
 evaluateDoQuo <- function(doQuo, humtab, groupFields) {
   if (length(groupFields)) {
-    humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = groupFields]
+    humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = groupFields, .SDcols = colnames(humtab)]
   } else {
-    rlang::eval_tidy(doQuo, data = humtab)
+    humtab[ ,  rlang::eval_tidy(doQuo, data = .SD) ] # outputs a data.table this way
+   
   }
   
 }

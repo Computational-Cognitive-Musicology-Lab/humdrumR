@@ -128,30 +128,60 @@ filter.humdrumR <- function(.data, ...) {
 
 ### group_by ----
 
+
 #' @rdname tidyHumdrum
 #' @export
 group_by.humdrumR <- function(.data, ..., .add = FALSE) {
+  if (!.add) .data <- ungroup(.data)
   
   exprs <- rlang::enquos(...)
+  calls <- sapply(exprs, rlang::quo_is_call)
   
-  # if (all(sapply(exprs, rlang::quo_is_symbol))) exprs <- rlang::quos(list(!!!exprs))
-  names(exprs) <- rep('by', length(exprs))
-  .data@Groupby <- if (.add) {
-    c(.data@Groupby, exprs)
-  } else {
-    exprs
+  groupFields <- sapply(exprs[!calls], rlang::as_name)
+  if (length(groupFields)) groupFields <- fieldMatch(.data, groupFields, 'group_by')
+  
+  
+  fields <- fields(.data)
+  groupn <- max(fields$GroupedBy)
+  
+  if (any(calls)) {
+    oldfields <- fields$Name
+    
+    .data <- rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!(exprs[calls]))))
+    fields <- fields(.data)
+    
+    newfields <- fields[ , !Name %in% oldfields]
+    fields$Type[newfields] <- 'Grouping'
+    groupFields <- c(fields$Name[newfields], groupFields)
   }
   
+  fields[ , GroupedBy := Name %in% groupFields | GroupedBy]
+  .data@Fields <- fields
+  
   .data
+  
+  
   
 }
 
 #' @rdname tidyHumdrum
 #' @export
 ungroup.humdrumR <- function(x, ...) {
-  x@Groupby <- list()
+  fields <- fields(x)
+  fields[ , GroupedBy := FALSE]
+  
+  remove <- fields[Type == 'Grouping', Name]
+  if (length(remove)) {
+    fields <- fields[Type != 'Grouping']
+    x@Fields <- fields
+    
+    x@Humtable[, remove := NULL]
+  }
+  
   x
+  
 }
+
 
 
 ### select ----
