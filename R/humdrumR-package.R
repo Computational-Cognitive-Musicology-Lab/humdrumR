@@ -164,7 +164,8 @@ humdrumR_defaults <- list(
   view = 'score',
   maxRecordsPerFile = 40L,
   maxTokenLength = 16L,
-  nullPrint = 'NA2dot'
+  nullPrint = 'NA2dot',
+  syntaxHighlight = TRUE
   
 )
 
@@ -177,7 +178,7 @@ humdrumRoption <- function(name) {
 #' Set options for humdrumR!
 #' 
 #' @export
-humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint) {
+humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight) {
   curOptions <- oldOptions <- humdrumRoptions()
   
 
@@ -196,6 +197,10 @@ humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint) {
   if (!missing(nullPrint)) {
     checks(nullPrint, xcharacter & xlen1 & xvalues('NA2dot', 'charNA2dot', 'asis', 'dot2NA'))
     curOptions$nullPrint <- nullPrint
+  }
+  if (!missing(syntaxHighlight)) {
+    checks(syntaxHighlight, xTF)
+    curOptions$syntaxHighlight <- syntaxHighlight
   }
   
   options(humdrumR_options = curOptions)

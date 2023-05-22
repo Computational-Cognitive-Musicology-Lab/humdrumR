@@ -2263,7 +2263,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
 print_humdrumR <- function(humdrumR, view = humdrumRoption('view'), 
                            dataTypes = if (view %in% c('score', 'humdrum')) "GLIMDd" else 'D', 
                            firstAndLast = TRUE, screenWidth = options('width')$width - 10L,
-                           null = humdrumRoption('nullPrint'),
+                           null = humdrumRoption('nullPrint'), syntaxHighlight = humdrumRoption('syntaxHighlight'),
                            maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
                            maxTokenLength = humdrumRoption('maxTokenLength'), collapseNull = 30L) {
     
@@ -2288,7 +2288,7 @@ print_humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   }
   
   print_tokmat(tokmat, Nmorefiles = Nfiles - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
-               screenWidth = screenWidth, showCensorship = view == 'score')
+               screenWidth = screenWidth, showCensorship = view == 'score', syntaxHighlight = syntaxHighlight)
 
   invisible(NULL)
   
@@ -2375,7 +2375,7 @@ tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf, n
 }
 
 print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLength,
-                         screenWidth = options('width')$width - 10, showCensorship = TRUE) {
+                         screenWidth = options('width')$width - 10, showCensorship = TRUE, syntaxHighlight = TRUE) {
    
     tokmat <- parsed$Tokmat
     Record <- as.numeric(parsed$Record)
@@ -2401,7 +2401,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
     ## Trim and align columns, and collopse to lines
     tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], maxTokenLength = maxTokenLength)
     
-    lines <- padColumns(tokmat, global, screenWidth, syntax)
+    lines <- padColumns(tokmat, global, screenWidth, if (syntaxHighlight) syntax)
     
     starMessage <- attr(lines, 'message')
   
@@ -2434,7 +2434,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
         maxwidth <- min(screenWidth, max(nchar(lines)))
         
         ranges <- stringr::str_pad(ranges, width = maxwidth, pad = ':', side = 'right')
-        ranges <- textstyle(ranges, style = 'italic')
+        if (syntaxHighlight) ranges <- textstyle(ranges, style = 'italic')
         ranges <- paste0('\n', ranges)
         
         if (any(anycensored)) lines[lasts[-length(lasts[anycensored])]] <- paste0(lines[lasts[-length(lasts[anycensored])]], ranges[-length(ranges)])
@@ -2541,7 +2541,7 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     
     # colorize
    
-    tokmat[] <- syntaxHighlight(tokmat, syntax)
+    if (!is.null(syntax)) tokmat[] <- syntaxHighlight(tokmat, syntax)
 
     
     # collapse to lines
