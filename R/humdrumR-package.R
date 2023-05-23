@@ -42,7 +42,7 @@
 #' @importFrom bit64 as.integer64 is.integer64 as.integer64 as.integer64.integer
 #' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom numbers primeFactors
-#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup
+#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize
 #' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type
 #' @importFrom scales ContinuousRange
 NULL

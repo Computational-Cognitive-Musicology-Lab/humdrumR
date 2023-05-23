@@ -12,20 +12,18 @@
 #' 
 #' @name tidyHumdrum
 #' @export
-mutate.humdrumR <- function(.data, ..., dataTypes = 'D', fill = TRUE, alignLeft = TRUE, expandPaths = FALSE) {
-  exprs <- rlang::enquos(...)
+mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', 'never'), alignLeft = TRUE, expandPaths = FALSE) {
+  quosures <- rlang::enquos(...)
   
-  names <- .names(exprs)
-  exprs[names != ''] <- Map(exprs[names != ''], names[names != ''],
-                            f = \(expr, name) {
-                              name <- rlang::sym(name)
-                              
-                              rlang::quo(!!name <- !!expr)
-                            })
-  names(exprs) <- if (fill) 'fill' else NULL
-  exprs <- c(exprs, .data@Groupby)
+  recycle <- match.arg(recycle)
   
-  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!exprs, 
+  names <- unlist(Map(quosures, .names(quosures), f = \(quo, name) if (name == '')  rlang::as_label(quo) else name))
+  if (any(duplicated(names))) .stop("You can't run mutate.humdrumR() and give {num2word(max(table(names)))} new fields the same name!")
+  
+  quosures <- Map(quosures, names, f = \(quo, name) rlang::quo(!!name <- !!quo))
+  
+  
+  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = !!recycle,
                                               dataTypes = !!dataTypes,
                                               alignLeft = !!alignLeft,
                                               expandPaths = !!expandPaths)))
@@ -37,30 +35,15 @@ mutate.humdrumR <- function(.data, ..., dataTypes = 'D', fill = TRUE, alignLeft 
 #' @rdname tidyHumdrum
 #' @export
 summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE, drop = FALSE) {
-  exprs <- rlang::enquos(...)
+  quosures <- rlang::enquos(...)
   
-  names <- .names(exprs)
-  exprs <- Map(exprs, names,
-                            f = \(expr, name) {
-                              expr <- rlang::quo({
-                                result <- {!!expr}
-                                if (length(result) != 1) .stop("The summarize() function only works when the computed values are length 1 (per group).",
-                                                               "In your case, we've found (at least one) result which is length {length(result)}.",
-                                                               "\nTry using reframe() or within() instead, as these functions allow results of any length.")
-                                result
-                              })
-                              
-                              if (name != '') {
-                                name <- rlang::sym(name)
-                                expr <-  rlang::quo(!!name <- !!expr)
-                              }
-                              expr
-                              
-                            })
-  names(exprs) <- NULL
-  exprs <- c(exprs, .data@Groupby)
   
-  rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!exprs, 
+  names <- unlist(Map(quosures, .names(quosures), f = \(quo, name) if (name == '')  rlang::as_label(quo) else name))
+  if (any(duplicated(names))) .stop("You can't run summarize.humdrumR() and give {num2word(max(table(names)))} columns the same name!")
+  quosures <- Map(quosures, names, f = \(quo, name) rlang::quo(!!name <- !!quo))
+  
+  
+  rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!quosures, recycle = 'summarize',
                                             dataTypes = !!dataTypes,
                                             drop = !!drop)))
   
@@ -71,21 +54,19 @@ summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE,
 
 #' @rdname tidyHumdrum
 #' @export
-reframe.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE) {
-  exprs <- rlang::enquos(...)
+reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE) {
+  quosures <- rlang::enquos(...)
   
-  names <- .names(exprs)
-  exprs[names != ''] <- Map(exprs[names != ''], names[names != ''],
-               f = \(expr, name) {
-                 
-                   name <- rlang::sym(name)
-                   expr <-  rlang::quo(!!name <- !!expr)
-               })
-  names(exprs) <- NULL
-  exprs <- c(exprs, .data@Groupby)
+  names <- unlist(Map(quosures, .names(quosures), f = \(quo, name) if (name == '')  rlang::as_label(quo) else name))
+  if (any(duplicated(names))) .stop("You can't run mutate.humdrumR() and give {num2word(max(table(names)))} new fields the same name!")
   
-  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!exprs, 
-                                              dataTypes = !!dataTypes)))
+  quosures <- Map(quosures, names, f = \(quo, name) rlang::quo(!!name <- !!quo))
+  
+  
+  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = 'pad',
+                                              dataTypes = !!dataTypes,
+                                              alignLeft = !!alignLeft,
+                                              expandPaths = !!expandPaths)))
   
 }
 
@@ -94,13 +75,16 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE) {
 
 #' @rdname tidyHumdrum
 #' @export
-pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = 'asis') {
-  if (missing(var)) return(pullSelectedField(.data, dataTypes = dataTypes, null = null))
+pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = 'asis', drop = TRUE) {
+  if (missing(var)) {
+    pulled <- pullSelectedFields(.data, dataTypes = dataTypes, null = null)
+  } else {
+    fields <- rlang::enquos(var, ...)
+    pulled <- rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!fields, dataTypes = !!dataTypes, drop = FALSE)))
+    
+  }
   
-  field <- rlang::enquo(var)
-  
-  
-  rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!field, dataTypes = !!dataTypes)))
+  if (drop) pulled[[1]] else pulled
   
 }
 

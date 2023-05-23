@@ -614,8 +614,10 @@ with.humdrumR <- function(data, ...,
                           recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
                           drop = TRUE,
                           variables = list()) {
-  checks(data, xclass('humdrumR'))
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, variables = variables, withFunc = 'with.humdrumR'), 
+  withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('summarize', 'pull'))  as.character(sys.call(1)[[1]]) else 'with', '.humdrumR')
+  
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, 
+                       variables = variables, withFunc = withFunc), 
            envir = environment())
   
 
@@ -654,12 +656,14 @@ within.humdrumR <- function(data, ...,
                             expandPaths = FALSE, 
                             recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
                             variables = list()) {
-  checks(data, xclass('humdrumR'))
+  withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe'))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
+  
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
                        expandPaths = expandPaths, recycle = recycle, variables = variables, 
-                       withFunc = 'within.humdrumR'), 
+                       withFunc = withFunc), 
            envir = environment())
   
+  result <- result[ , !names(result) %in% groupFields, with = FALSE]
   
   # any fields getting overwritten
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
@@ -745,11 +749,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   attr(result, 'visible') <- NULL
   if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
   
-  #### number the unnamed new results
+  #### rename unnamed results
   ## This is done here because if we call `with.humdrumR(drop = FALSE)`
   ## we want the same colnames as the new fields we would get.
-  unnamedresult <- colnames(result) == 'Result'
-  if (sum(unnamedresult)) colnames(result)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_len(sum(unnamedresult)))
+  result <- renameResults(result, quosures, groupFields, colnames(humtab))
+
   
   # "post" stuff
   # curmfg <- par('mfg')
@@ -765,6 +769,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
        humtab = humtab,
        dataTypes = dataTypes,
        visible = visible,
+       groupFields = groupFields,
        result = result)
 }
 
@@ -1109,7 +1114,7 @@ concatDoQuos <- function(quosures) {
    
     
     assignOut <- list()
-    resultName <- "Result"
+    resultName <- "_Result_"
     varname <- quote(.)
     
     whichResult <- length(quosures)
@@ -1713,10 +1718,11 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
     # indices and reconstructs the output object.
   # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
   
-  grouping <- results[ , c(groupFields, '_rowKey_'), with = FALSE]
-  grouping[['_rowKey_']] <- unlist( grouping[['_rowKey_']], recursive = FALSE)
-  results <- results[ , !names(results) %in% c(groupFields, '_rowKey_'), with = FALSE]
+  grouping <- results[ , groupFields, with = FALSE]
+  rowKey <- unlist(results[['_rowKey_']], recursive = FALSE)
+  results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
   results[] <- lapply(results, unlist, recursive = FALSE)
+  
   
   visibleResult <- attr(results[[length(results)]], 'visible') %||% TRUE
   
@@ -1729,7 +1735,7 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   objects[] <- sapply(results, \(resultGroup) length(resultGroup) &&  (is.table(resultGroup) || (is.object(resultGroup) && !is.atomic(resultGroup))))
   
   # pad results and/or trim rowKey to make them match in size
-  c('results', 'rowKey') %<-% recycleResults(results, objects, grouping[['_rowKey_']], recycle, alignLeft, withFunc)
+  c('results', 'rowKey') %<-% recycleResults(results, objects, rowKey, recycle, alignLeft, withFunc)
   
   # need to rbind result groups
   results <- as.list(as.data.frame(results))
@@ -1755,7 +1761,7 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
                      }
                      result <- .unlist(group, recursive = FALSE) 
                    }
-                   
+                   attr(result, 'visible') <- NULL
                    result
                    
                  })
@@ -1764,12 +1770,10 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   result <- as.data.table(results[!arrays])
   for (array in names(results)[arrays]) result[[array]] <- results[[array]]
   
-  colnames(result)[colnames(result) == ""] <- "Result"
-  colnames(result) <- gsub('^V{1}[0-9]+', "Result", colnames(result))
-    
+  result <- cbind(`_rowKey_` = unlist(rowKey), as.data.table(lapply(grouping, rep, lengths(rowKey))), result)
   
-  result[['_rowKey_']] <- unlist(rowKey)
   attr(result, 'visible') <- visibleResult 
+  
   result
     
 }
@@ -1787,7 +1791,7 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
   
   diff <- resultLengths - keyLengths
   
-  if (any(diff > 0L)) .stop("Sorry, {withFunc}.humdrumR doesn't currently support expressions",
+  if (any(diff > 0L)) .stop("Sorry, {withFunc}() doesn't currently support expressions",
                             "which return values that are longer than their input field(s).",
                             "Your expression has returned results of lengths {harvard(head(resultLengths[diff > 0L], 5), 'and')} evaluated from",
                             "inputs of length {harvard(head(keyLengths[diff > 0L], 5), 'and')}<, respectively|>.",
@@ -1797,9 +1801,9 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
   match  <- diff == 0L
   scalar <- resultLengths == 1L
   
-  if (recycle == 'summarize' && !(all(scalar))) .stop("When using {withFunc} on humdrumR data, the result of each expression must be a scalar (length 1).")
+  if (recycle == 'summarize' && !(all(scalar))) .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
   
-  if (recycle != 'pad' && any(!match & !objects)) {
+  if (!recycle %in% c('pad', 'summarize') && any(!match & !objects)) {
     bad <- !match & switch(recycle,
                            scalar    = resultLengths != 1L,
                            even      = keyLengths %% resultLengths != 0L,
@@ -1886,3 +1890,11 @@ curResultN <- function(humtab) {
 
 }
 
+renameResults <- function(result, quosures, groupFields, allFields) {
+  
+  if (any(names(result) == "_Result_")) {
+    names(result)[names(result) == '_Result_'] <- rlang::as_label(quosures[[length(quosures)]])
+  }
+
+  result
+}
