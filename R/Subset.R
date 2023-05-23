@@ -65,19 +65,33 @@
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
 #' @aliases subset
-subset.humdrumR <- function(x, ..., removeEmptyPieces = TRUE) {
+subset.humdrumR <- function(x, ..., dataTypes = 'D', any = FALSE, .by = NULL, removeEmptyPieces = TRUE) {
+  checks(any, xTF)
+  checks(removeEmptyPieces, xTF)
+  dataTypes <- checkTypes(dataTypes, 'subset.humdrumR')
+  
+  quosures <- rlang::enquos(...)
+  recycle <- if (any) 'scalar' else 'never'
   
   selectedFields <- selectedFields(x)
-  x <- within.humdrumR(x, ...)
-  resultFields(x) <- '.TmpFilter.'
+  
+  # tmp names
+  subsetFields <- tempfile(rep('subset', length(quosures)), '', '')
+  quosures <- Map(quosures, subsetFields, f = \(quo, name) rlang::quo(!!(rlang::sym(name)) <- !!quo))
+  x <- rlang::eval_tidy(rlang::quo(within.humdrumR(x, !!!quosures, recycle = !!recycle,
+                                                   dataTypes = !!dataTypes,
+                                                   .by = !!.by)))
   
   humtab <- getHumtab(x)
-  if (humtab[ , class(.TmpFilter.)] != 'logical') .stop('In call to subset.humdrumR, the within-expression must evaluate to a logical (TRUE/FALSE) vector.')
- 
+  if (any(unlist(lapply(humtab[ , subsetFields, with = FALSE], class)) != 'logical')) .stop('In call to subset.humdrumR/filter.humdrumR, the subsetting expression must evaluate to a logical (TRUE/FALSE) vector.')
+  
+  humtab[['.TmpFilter.']] <- Reduce('&', humtab[ , subsetFields, with = FALSE])
   humtab[ , .TmpFilter. := .TmpFilter. | is.na(.TmpFilter.)] 
   # NA values come in from record types we didn't use, which should NOT be filtered
+  
   humtab[ , Filter := Filter | !.TmpFilter.]
   humtab[ , .TmpFilter. := NULL]
+  humtab[ , (subsetFields) := NULL]
   humtab <- update_Null.data.table(humtab, selectedFields)
   
   if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')

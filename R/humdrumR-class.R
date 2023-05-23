@@ -1438,8 +1438,9 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     humdrumR <- updateFields(humdrumR) 
     
+    selectFields(humdrumR, c(fromField, newfields))
     
-    humdrumR
+    
 
 }
 
@@ -1472,7 +1473,9 @@ foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NU
 
     
     newFieldNames <- if (is.null(newFieldNames)) {
-        paste0('Result', seq_len(NnewFields) +  curResultN(humtab))
+        newFieldNames <- moves[ , paste0('Fold{', what, paste(unique(From), collapse = ','), '->', what, paste(unique(To), collapse = ','), '}'), by = NewField]$V1
+        tail(n = length(newFieldNames), make.unique(c(colnames(humtab), newFieldNames), sep = '.'))
+        
     } else {
         if (length(newFieldNames) < NnewFields) {
             newFieldNames <- c(head(newFieldNames, -1L),
@@ -1909,7 +1912,7 @@ fieldClass <- function(x) {
 updateFields <- function(humdrumR, selectNew = TRUE) {
     humtab <- humdrumR@Humtable
     fieldTable <- humdrumR@Fields
-    fieldTable <- fieldTable[Name %in% colnames(humtab)]
+    fieldTable <- fieldTable[Name %in% colnames(humtab)] # removes fields that don't exist in humtab
     
     new <- setdiff(colnames(humtab), fieldTable$Name)
     if (length(new)) {

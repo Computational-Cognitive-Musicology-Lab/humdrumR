@@ -689,7 +689,6 @@ within.humdrumR <- function(data, ...,
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
   humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
-  newhumtab <- newhumtab[ , !grep('_by=..*_$|_subset=..*_|contextWindow', colnames(newhumtab)), with = FALSE]
   
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -781,239 +780,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
        result = result)
 }
 
-withHumdrumOld <- function(humdrumR, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, variables = list(), withFunc) {
-  # this function does most of the behind-the-scences work for both 
-  # with.humdrumR and within.humdrumR.
-  
-  if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
-  
-  humtab <- getHumtab(humdrumR)
-  humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
-  
-  # interpret ... arguments
-  quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
-  
-  # "pre" stuff
-  oldpar <- par(no.readonly = TRUE) 
- 
-  
-  # Getting the humtab with the right record types.
-  dataTypes <- checkTypes(dataTypes, withFunc)
-                      
-  
-  ### Preparing the "do" expression
-  dotField <- selectedFields(humdrumR)[1]
-  do   <- prepareDoQuo(humtab, quoTab, dotField, ordo = FALSE)
-  ordo <- prepareDoQuo(humtab, quoTab, dotField, ordo = TRUE)
-  
-  quoTab$Quo[quoTab$Keyword == 'context'] <- lapply(quoTab$Quo[quoTab$Keyword == 'context'], prepareContextQuo, dotField = dotField)
-  # 
 
-  #evaluate "do" expression! 
-  result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo, alignLeft = alignLeft)
-  
-  visible <- attr(result, 'visible')
-  attr(result, 'visible') <- NULL
-  if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
-  
-  #### number the unnamed new results
-  ## This is done here because if we call `with.humdrumR(drop = FALSE)`
-  ## we want the same colnames as the new fields we would get.
-  unnamedresult <- colnames(result) == 'Result'
-  if (sum(unnamedresult)) colnames(result)[unnamedresult] <- paste0('Result', curResultN(humtab) + seq_len(sum(unnamedresult)))
-  
-  # "post" stuff
-  curmfg <- par('mfg')
-  par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt', 'pty', 'new')])
-  par(mfg = curmfg, new = FALSE)
-  
-  if (expandPaths) {
-    result <- result[!humtab[is.na(ParentPath)], on = '_rowKey_']
-    humtab <- humtab[!is.na(ParentPath)]
-  }
-  
-  list(humdrumR = humdrumR, 
-       humtab = humtab,
-       quoTab = quoTab,
-       dataTypes = dataTypes,
-       visible = visible,
-       result = result)
-}
-
-
-## Parsing Args ----
-
-parseArgs <- function(..., variables = list(), withFunc) {
-  quos <- rlang::enquos(...)
-  if (length(quos) == 0L) .stop("You called {withFunc}, but gave it no commands to execute.")
-  argnames <- .names(quos)
-  
-  quos <- lapply(quos, \(quo) {
-    quoA <- analyzeExpr(quo, stripBrackets = TRUE)
-    if (quoA$Head == '{' && length(quoA$Args) == 1L) {
-      quo <- quoA$Args[[1]]
-      quoA <- analyzeExpr(quo, stripBrackets = TRUE)
-    }
-    
-    keyword <- 'do'
-    assign <- NA
-    
-    if (quoA$Type == 'symbol' ) {
-      evaled <- try(rlang::eval_tidy(quo), silent = TRUE)
-      
-      if (class(evaled) == 'function') {
-        quoA$Args[[1]] <- quote(.)
-        quoA$Type <- 'call'
-        quo <- unanalyzeExpr(quoA)
-      }
-      if (class(evaled) == 'formula') {
-        if (!is.null(rlang::f_lhs(evaled))) keyword <- as.character(rlang::f_lhs(evaled))
-        quo <- rlang::new_quosure(rlang::f_rhs(evaled), rlang::f_env(evaled))
-        quoA <- analyzeExpr(quo, stripBrackets = TRUE)
-      }
-    } 
-    
-    if (quoA$Type == 'call') {
-      if (quoA$Head == '<-') { # this block needs to happen first
-        # quo <- rlang::new_quosure(quoA$Args[[2]], env = quoA$Environment)
-        assign <- deparse(quoA$Args[[1]])
-        # quoA <- analyzeExpr(quo)
-        if (as.character(assign)[1] == '~') {
-          assign <- assign[[3]]
-        }
-      }
-      
-      if (quoA$Head == '~') {
-        quo <- rlang::new_quosure(quoA$Args[[length(quoA$Args)]], env = quoA$Environment)
-        if (length(quoA$Args) > 1L) keyword <- as.character(quoA$Args[[1]])
-      }
-      
-      if (quoA$Head == 'function') {
-        argname <- quoA$Args[[1]][1]
-        argname[[1]] <- quote(.)
-        quo <- rlang::new_quosure(substituteName(quoA$Args[[2]], argname), quoA$Environment)
-        
-      }
-      
-      if (pmatch(quoA$Head, c('graphics'), nomatch = 0)) {
-        quoA$Head <- 'par'
-        quo <- unanalyzeExpr(quoA)
-        keyword <- 'pre'
-      }
-      
-      if (pmatch(quoA$Head, c('context'), nomatch = 0)) {
-        keyword <- 'context'
-      }
-    }
-    
-    if (length(variables)) quo <- interpolateArguments(quo, variables)
-    
-    quoenv <- rlang::quo_get_env(quo)
-    for (name in names(variables)) assign(name, variables[[name]], envir = quoenv)
-    
-    list(Quo = quo, Keyword = keyword, AssignTo = assign, Environment = quoA$Environment)
-  })
-  
-  quoTab <- as.data.table(do.call('rbind', quos))
-  quoTab$Keyword[argnames != ""] <- argnames[argnames != ""]
-  
-  quoTab$AssignTo[!quoTab$Keyword %in% c('do', 'dofill')] <- NA
-  
-  quoTab <- parseKeywords(quoTab, withFunc)
-  
-  quoTab
-  
-}
 
  
 
           
-
-
-parseKeywords <- function(quoTab, withFunc) {
-  
-  keywords <- quoTab[ , partialMatchKeywords(Keyword)]
-  
-  if (any(is.na(keywords))) {
-    badwords <- harvard(quoTab$Keyword[is.na(keywords)], "and", quote = TRUE)
-    .stop('In your call to {withFunc},',
-          "{badwords} <are|is> not <|a> legal keyword<s|>.",
-          "See ?withHumdrum for help.",
-          ifelse = sum(is.na(keywords)) > 1L)
-  }
-  
-  quoTab$Keyword <- keywords
-  
-  # classify keywords
-  knownKeywords <- list(do              = c('do', 'fx', 'fill', 'ordo'), #, 'ordofill'),
-                        partitions      = c('by', 'subset', 'context'),
-                        ngram           = 'ngram')
-  quoTab[ , KeywordType := rep(names(knownKeywords), lengths(knownKeywords))[match(Keyword, unlist(knownKeywords))]]
-  
-  # check for validity
-  if (!any(quoTab[ , KeywordType == 'do'])) {
-    .stop("Your call to {withFunc} doesn't include any unnamed expressions to evaluate,",
-          "so we don't know what you want to do to your data.")
-  }
-  
-  if (any(quoTab[, KeywordType == 'or']) && !any(quoTab[, Keyword == 'subset'])) {
-    .stop("In your call to {withFunc} you've included an 'complement' expression improperly.", 
-          "An 'complement' expression can only be used in combination with BOTH a subset expression AND a normal within expression.",
-          "See ?withinHumdrum for help.")
-  }
-  
-  if (any(quoTab[ , Keyword == 'ngram'])) {
-    i <- which(quoTab$Keyword == 'ngram')
-    if (length(i) > 1L) .stop("In a call to {withFunc},",
-                              "you can't have multiple 'ngram'-keyword arguments.")
-    
-    ngram <- rlang::eval_tidy(quoTab$Quo[[i]])
-    checks(ngram, xpnatural)
-    quoTab$Quo[[i]] <- ngram
-  }
-  
-  
-  quoTab
-}
-
-partialMatchKeywords <- function(keys) {
-    # this function matches partial matches off keywords
-    # to the master standard
-    keys <- gsub('_', '', tolower(keys))
-    
-    # define standard keys and alternatives
-    standardkeys <- list(do        = c('do', 'eval', 'apply'),
-                         fill      = c('fill', 'recycle'),
-                         fx        = c('fxs', 'sidefxs'),
-                         by        = c('by', 'groupby'),
-                         subset     = c('subset', 'where'),
-                         ordo        = c('complement', 'rest', 'otherwise'),
-                         # ordofill    = c('compfill', 'restfill', 'otherfill'),
-                         ngram     = c('ngrams'),
-                         context   = c('windows', 'context'))
-    
-    matches <- pmatch(keys, unlist(standardkeys), duplicates.ok = TRUE)
-    
-    rep(names(standardkeys), lengths(standardkeys))[matches]
-    
-    
-}
-
-
-
-splitFormula <- function(form) {
-          # Takes a formula which contains one or more formula,
-          # and separates each expression, as if the ~ symbol is a boundary.
-          if (length(form) == 1 || deparse(form[[1]]) != '~') return(form)      
-          
-          if (!rlang::is_formula(form)) form <- eval(form)
-          
-          lhs <- Recall(rlang::f_lhs(form))
-          rhs <- Recall(rlang::f_rhs(form))
-          
-          c(unlist(lhs), unlist(rhs))
-}
-
 
 ## Preparing doQuo ----
 
@@ -1731,7 +1502,6 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
   results[] <- lapply(results, unlist, recursive = FALSE)
   
-  
   visibleResult <- attr(results[[length(results)]], 'visible') %||% TRUE
   
   
@@ -1792,7 +1562,7 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
   
   # length of each result group
   resultLengths <- array(as.integer(objects), dim(objects), dimnames(objects))
-  resultLengths[!objects] <- sapply(results[!objects], \(resultGroup) if (hasdim(resultGroup)) nrow(resultGroup) else length(resultGroup))
+  resultLengths[!objects] <- unlist(lapply(results[!objects], \(resultGroup) if (hasdim(resultGroup)) nrow(resultGroup) else length(resultGroup)))
   
   keyLengths <- lengths(rowKey)
   keyLengths <- do.call('cbind', rep(list(keyLengths), ncol(results)))
@@ -1862,41 +1632,6 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
   
 }
 
-resultFields <- function(humtab) {
-  # Another function used by resultIn<- (withing cureResultN)
-  # Takes a humtab and identifies the result fields (columns), if any,
-  # are in it.
-  colnms <- colnames(humtab)
-  
-  resultfields  <- colnms[grepl('Result', colnms)]
-  
-  if (length(resultfields) != 0L) resultfields <- resultfields[order(as.numeric(stringr::str_extract(resultfields, '[0-9]+')))]
-  
-  resultfields
-}
-
-curResultN <- function(humtab) {
-          # A function used by resultIn<-
-          # identifies how many result fields (if any)
-          # are already in a humtable.
-          length(resultFields(humtab))   
-          
-}
-
-
-`resultFields<-` <- function(object, value) {
-  humtab <- getHumtab(object)
-  
-  results <- rev(resultFields(humtab))[seq_along(value)]
-  
-  for (i in seq_along(value)) {
-    colnames(humtab)[colnames(humtab) == results[i]] <- value[i]
-  }
-  
-  putHumtab(object) <- humtab
-  updateFields(object)
-
-}
 
 renameResults <- function(result, quosures, groupFields, allFields) {
   
