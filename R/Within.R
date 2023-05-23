@@ -613,11 +613,12 @@ with.humdrumR <- function(data, ...,
                           expandPaths = FALSE,
                           recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
                           drop = TRUE,
+                          .by = NULL,
                           variables = list()) {
   withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('summarize', 'pull'))  as.character(sys.call(1)[[1]]) else 'with', '.humdrumR')
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, 
-                       variables = variables, withFunc = withFunc), 
+                       .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
   
 
@@ -655,11 +656,12 @@ within.humdrumR <- function(data, ...,
                             alignLeft = TRUE,
                             expandPaths = FALSE, 
                             recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
+                            .by = NULL,
                             variables = list()) {
   withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe'))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
-                       expandPaths = expandPaths, recycle = recycle, variables = variables, 
+                       expandPaths = expandPaths, recycle = recycle, .by = .by, variables = variables, 
                        withFunc = withFunc), 
            envir = environment())
   
@@ -716,7 +718,7 @@ within.humdrumR <- function(data, ...,
 
 
 withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scalar", "even", "always", "never", "summarize"), 
-                        alignLeft = TRUE, expandPaths = FALSE, variables = list(), withFunc) {
+                        alignLeft = TRUE, expandPaths = FALSE, variables = list(), .by = NULL, withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
   dataTypes <- checkTypes(dataTypes, withFunc) # use this to index humtab later
@@ -735,7 +737,13 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   ### Preparing the "do" quosure
   fields <- fields(humdrumR)
   dotField <- fields[Selected == TRUE]$Name[1]
-  groupFields <- fields[GroupedBy > 0L]$Name
+  
+  ##### grouping
+  groupFields <- if (is.null(.by)) {
+    fields[GroupedBy > 0L]$Name 
+  } else {
+    fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
+  }
   
   doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle)
   
