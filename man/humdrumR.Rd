@@ -5,7 +5,14 @@
 \alias{humdrumR}
 \title{humdrumR}
 \usage{
-humdrumR(view, maxRecordsPerFile, maxTokenLength, nullPrint)
+humdrumR(
+  view,
+  maxRecordsPerFile,
+  maxTokenLength,
+  nullPrint,
+  syntaxHighlight,
+  censorEmptyRecords
+)
 }
 \description{
 \code{humdrumR} is a toolkit for the analysis of data encoded in the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}.

@@ -20,7 +20,7 @@ pullFields(
 fields(
   humdrumR,
   fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference",
-    "selected")
+    "Grouping", "selected")
 )
 }
 \arguments{

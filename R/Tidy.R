@@ -278,3 +278,54 @@ theme_humdrum <- function() {
 
 
 
+# Humdrum-style application ----
+
+humdrumRmethods <- function(name, overArgs = alist()) {
+  # prexisting method becomes .default
+  default <- match.fun(name)
+  envir <- rlang::fn_env(default)
+  
+  args <- formals(default)
+  
+  assign(paste0(name, '.default'), default, parent.frame())
+  
+  # humdrumR method
+  call <- rlang::sym(paste0(name, '.default'))
+  firstArg <- rlang::sym(names(args)[1])
+  
+  subargs <- args[-1]
+  ldots <- names(subargs) == '...'
+  if (any(ldots)) {
+    subargs[[which(ldots)]] <- quote(...)
+    names(subargs)[which(ldots)] <- ''
+  }
+  subargs[!ldots] <- rlang::syms(names(subargs)[!ldots])
+  subargs[names(overArgs)] <- overArgs
+  
+  humdrumR <- rlang::new_function(args, env = envir,
+                                  rlang::expr(within.humdrumR(!!firstArg, (!!call)(., !!!subargs))))
+  
+  assign(paste0(name, '.humdrumR'), humdrumR, parent.frame())
+  
+  generic <- rlang::new_function(args,
+                                 rlang::expr(UseMethod(!!name)),
+                                 env = envir)
+  class(generic) <- class(default)
+  
+  assign(name, generic, parent.frame())
+  
+}
+
+#' @exportS3Method kern default
+#' @exportS3Method kern humdrumR
+humdrumRmethods('kern', alist(Key = Key))
+#' @exportS3Method solfa default
+#' @exportS3Method solfa humdrumR
+humdrumRmethods('solfa', alist(Key = Key))
+#' @exportS3Method mint default
+#' @exportS3Method mint humdrumR
+humdrumRmethods('mint', alist(groupby = list(File, Spine, Path)))
+#' @exportS3Method hint default
+#' @exportS3Method hint humdrumR
+humdrumRmethods('hint', alist(groupby = list(File, Record), 
+                              orderby = list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop)))

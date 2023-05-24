@@ -13,7 +13,9 @@
   ...,
   dataTypes = "D",
   expandPaths = FALSE,
+  recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
   drop = TRUE,
+  .by = NULL,
   variables = list()
 )
 
@@ -23,6 +25,8 @@
   dataTypes = "D",
   alignLeft = TRUE,
   expandPaths = FALSE,
+  recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
+  .by = NULL,
   variables = list()
 )
 }

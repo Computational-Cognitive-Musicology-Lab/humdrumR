@@ -18,16 +18,31 @@
   .data,
   ...,
   dataTypes = "D",
-  fill = TRUE,
+  recycle = c("scalar", "never"),
   alignLeft = TRUE,
-  expandPaths = FALSE
+  expandPaths = FALSE,
+  .by = NULL
 )
 
-\method{summarise}{humdrumR}(.data, ..., dataTypes = "D", expandPaths = FALSE, drop = FALSE)
+\method{summarise}{humdrumR}(
+  .data,
+  ...,
+  dataTypes = "D",
+  expandPaths = FALSE,
+  drop = FALSE,
+  .by = NULL
+)
 
-\method{reframe}{humdrumR}(.data, ..., dataTypes = "D", expandPaths = FALSE)
+\method{reframe}{humdrumR}(
+  .data,
+  ...,
+  dataTypes = "D",
+  alignLeft = TRUE,
+  expandPaths = FALSE,
+  .by = NULL
+)
 
-\method{pull}{humdrumR}(.data, var, ..., dataTypes = "D", null = "asis")
+\method{pull}{humdrumR}(.data, var, ..., dataTypes = "D", null = "asis", drop = TRUE)
 
 \method{filter}{humdrumR}(.data, ...)
 

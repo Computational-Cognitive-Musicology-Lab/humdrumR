@@ -12,7 +12,7 @@
 \alias{removeEmptyStops}
 \title{Filter humdrum data}
 \usage{
-\method{subset}{humdrumR}(x, ..., removeEmptyPieces = TRUE)
+\method{subset}{humdrumR}(x, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
 
 clearFilter(humdrumR)
 
