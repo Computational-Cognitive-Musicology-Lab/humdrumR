@@ -2933,7 +2933,6 @@ syntaxHighlight <- function(token, dataTypes) {
   style[dataTypes == 'N'] <- 'italic'
   style[dataTypes == 'M'] <- 'underline'
   style[dataTypes == 'd'] <- 'blur'
-  style[dataTypes == 'L'] <- 'blur'
   
   textstyle(token, 
             colors[dataTypes],
