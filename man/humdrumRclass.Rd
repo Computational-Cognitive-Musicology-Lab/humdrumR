@@ -32,14 +32,13 @@ obtained with calls to \link[=humSize]{nrecord, npiece, length, ncol, etc.}.
 More detailed summary information can be obtained with the humdrumR \link[=humSummary]{corpus summary functions}.
 \code{humdrumR} data can also be coerced to more basic R data types using \link[=humCoercion]{as.matrix, as.data.frame, etc.}.
 A number of helpful functions are also defined to "reshape" or reorganize the
-data (e.g., \code{\link[=foldHumdrum]{foldHumdrum()}}, \code{\link[=collapseHumdrum]{collapseHumdrum()}}), or extract the data into "normal" \code{R}
-data structures (e.g, \code{\link[=as.matrix.humdrumR]{as.matrix.humdrumR()}}, \code{\link[=evalActive]{evalActive()}}).
+data (e.g., \code{\link[=foldHumdrum]{foldHumdrum()}}, \code{\link[=collapseHumdrum]{collapseHumdrum()}}).
 
 The most powerful features of \link{humdrumR} are the tools it gives you to...
 \itemize{
 \item Print a readable view of the data in shorthand/curtailed humdrum syntax.
 \item Filter \code{humdrumR} data, using \code{\link[=subset.humdrumR]{subset.humdrumR()}} and the standard \code{R} \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
-\item Apply arbitrary commands to \link[=humTable]{humtable} fields using the \link[=:withinHumdrum]{with(in)Humdrum} routines.
+\item Apply arbitrary commands to \link[=humTable]{humtable} fields using the \link[=withinHumdrum]{with(in)Humdrum} routines.
 }
 }
 \section{Slots}{
@@ -52,18 +51,36 @@ the \code{pattern} used in the call to \code{\link[=readHumdrum]{readHumdrum()}}
 The second, "\code{Names}," is a vector of strings representing all the files which matched the \code{pattern}
 and were read into the \code{humdrumR} object, with \code{\link[=names]{names()}} corresponding to their "subcorpora" labels (\code{Label}).}
 
-\item{\code{Fields}}{A list containing strings corresponding to the existing fields in the \code{humdrumR} object's
+\item{\code{Fields}}{A \link{data.table} indicating the existing fields in the \code{humdrumR} object's
 \link[=humTable]{humdrum table}.
 The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."}
-
-\item{\code{Active}}{A \code{\link[rlang:quosure-tools]{rlang::quosure()}} expression which serves the default, "\link[=humActive]{active expression}" for
-the dataset.}
 
 \item{\code{LoadTime}}{A \link[base:DateTimeClasses]{POSIXct} value, indicating the time at which \code{\link[=readHumdrum]{readHumdrum()}} was
 called to create this \code{humdrumR} object.}
 }}
 
+\section{Printing}{
+
+
+If you type the name of an object on the R command line, R will "print" the object in the console.
+A \code{humdrumR} object will, by default, print a humdrum-syntax score representation.
+The print/view settings for humdrumR can be manipulated with the \code{\link[=humdrumR]{humdrumR()}} function.
+Most notably, by calling \code{humdrumR('table')}, \code{humdrumR} will switch or printing a view of the underlying \link[=humTable]{humdrum table},
+rather than the humdrum-syntax score.
+You can return to the score view by calling \code{humdrumR('humdrum')}.
+If there are more than one pieces in the object, the beginning of the first piece is printed, followed by the end of the last piece.
+For more details on printing options, read the \code{\link[=humdrumR]{humdrumR()}} manual.
+
+When \code{humdrumR(view = 'table')}, the long \link[=humTable]{humdrum table} is printed.
+The \code{Piece}, \code{Spine}, and \code{Record} fields will always print in the output table, as well as \code{Path} and \code{Stop} if any
+paths/stops are present.
+After these stuctural fields, any/all selected fields are shown.
+When \code{humdrumR(view = 'humdrum')} (the default) a humdrumR score is printed, with record numbers enumerated at the left edge.
+}
+
 \seealso{
+humdrumR
+
 Other Core humdrum data representation: 
 \code{\link{humTable}}
 }

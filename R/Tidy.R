@@ -177,7 +177,7 @@ ungroup.humdrumR <- function(x, ...) {
 
 ### select ----
 
-#' @rdname tidyHumdrum
+#' @rdname selectedFields
 #' @export
 select.humdrumR <- function(.data, ...) {
     fields <- sapply(rlang::ensyms(...), as.character)

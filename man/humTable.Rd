@@ -13,14 +13,14 @@ pullFields(
   humdrumR,
   fields = selectedFields(humdrumR),
   dataTypes = "D",
-  null = c("charNA2dot", "NA2dot", "dotToNA", "asis"),
+  null = c("charNA2dot", "NA2dot", "dot2NA", "asis"),
   drop = FALSE
 )
 
 fields(
   humdrumR,
   fieldTypes = c("Data", "Structure", "Interpretation", "Formal", "Reference",
-    "selected")
+    "Grouping", "selected")
 )
 }
 \arguments{
@@ -58,7 +58,7 @@ as a single \link[data.table:data.table]{data.table}
 (A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}).
 Humdrum tables are stored "inside" every \link{humdrumRclass} object that you will work with, and various \code{humdrumR}
 functions allow you to study or manipulate the them.
-If you want to directly access the humdrum table within a \link{humdrumRclass} object, use the \link{getHumtab} function.
+If you want to directly access the humdrum table within a \link{humdrumRclass} object, use the \code{\link[=getHumtab]{getHumtab()}} function.
 
 \code{getHumtab} extracts the hudrum table from a \link[=humdrumRclass]{humdrumR object}.
 
@@ -73,8 +73,9 @@ data held in the field,
 and the \code{Type} of field (e.g., \code{"Formal"}).
 }
 \details{
-In a humdrum table, each row represents a single "token"
-in the original humdrum data. Even multistops---tokens separated by spaces---are broken onto
+In a humdrum table, by default, humdrum data is organized in a maximally "long" (or "tall")
+format, with each and every single "token" in the original data represented by a single row in the table.
+Even multistops---tokens separated by spaces---are broken onto
 their own rows. Meanwhile, each column in the humdrum table represents a single
 piece of information associated with each token, which we call a \strong{field}.
 Throughout this documentation, you should keep in mind that a "token" refers
@@ -85,13 +86,14 @@ to a \emph{row} in the humdrum table while a "field" refers to a \emph{column}:
 }
 }
 \section{Fields:}{
-There are five types of fields in a humdrum table:
+There are six types of fields in a humdrum table:
 \enumerate{
 \item Data fields
 \item Structure fields
 \item Interpretation fields
 \item Formal fields
 \item Reference fields
+\item Grouping fields
 }
 
 When first created by a call to \code{\link[=readHumdrum]{readHumdrum()}} every
@@ -108,12 +110,12 @@ Every humdrum table starts with a data
 field called \strong{Token}, which
 contains character strings representing the original strings read from the humdrum files.
 Users can create as many additional data fields as they like. Every call to
-\code{\link[=withinHumdrum]{withinHumdrum()}} generates one or \code{N} new data fields named \eqn{Result1, Result2, \ldots, ResultN}.
+\code{\link[=withinHumdrum]{withinHumdrum()}} generates new data fields.
 }
 
 \subsection{Structure fields:}{
 
-Every humdrum table starts with fifteen \emph{Structure} fields,
+Every humdrum table has fifteen \emph{Structure} fields,
 which describe where each data token was "located" in the original humdrum data:
 which file, which spine, which record, etc.
 See the vignette on humdrum syntax to fully understand the terms here.
@@ -228,9 +230,9 @@ tandem interpretations is impossible, because A) tandem interpretations can "ove
 users can create their own tandem interpretations. The best we can do in all cases is
 identify \emph{all} tandem interpretations that have appeared previously in the spine
 (counting most recent first). All these previous interpretations are encoded in a single
-character string in the \code{Tandem} field (see the \code{\link[=extractTandem]{extractTandem()}} docs for details).
+character string in the \code{Tandem} field (see the \code{\link[=tandem]{tandem()}} docs for details).
 If working with non-standard interpretations, users can parse the \code{Tandem} field using the
-\code{\link[=extractTandem]{extractTandem()}} function.
+\code{\link[=tandem]{tandem()}} function.
 If no tandem interpretations occur in a file, the \code{Tandem} field is full of empty strings (\code{""}).
 
 Fortunately, many tandem interpretations are widely used and standardized, and these
@@ -307,12 +309,12 @@ Each type of humdrum record uses a different null token:
 }
 
 Null tokens in a humdrum table are identified in the logical \code{Null} field.
-The \code{Null} field is set when a humdrum table is created (by \code{\link[=readHumdrum]{readHumdrum()}}) and is updated everytime
-a new \link[=humActive]{active field} is set.
+The \code{Null} field is set when a humdrum table is created (by \code{\link[=readHumdrum]{readHumdrum()}}) and is updated every time
+a new fields are \link[=selectedFields]{selected}.
 \code{Null} is set to \code{TRUE} wherever, either
 \itemize{
-\item the active field is \code{character} data and the token is a single \code{"."}, \code{"!"}, \code{"="}, or \code{"*"};
-\item the active field is \code{NA} (including \code{NA_character_}).
+\item the selected fields are all \code{character} data and the token is a single \code{"."}, \code{"!"}, \code{"="}, or \code{"*"};
+\item the selected field are all \code{NA} (including \code{NA_character_}).
 }
 
 In parallel to the \code{Null} field, null \emph{data} tokens (\code{"."}) are identified as their own record type: \code{"d"}.
@@ -320,9 +322,14 @@ All updates/changes to the \code{Null} field are also propagated to the \code{Ty
 a data record is \code{Null}.
 This is important/useful because \code{\link[=withinHumdrum]{withinHumdrum()}} routines are, by default, only applied to \code{"D"} data, ignoring \code{"d"}.
 
-Whenever you print or \link[=writeHumdrum]{export} a [humdrumR object\link{humdrumRclass}, null data in the active field
+Whenever you print or \link[=writeHumdrum]{export} a [humdrumR object\link{humdrumRclass}, null data in the selected fields
 (i.e., \code{Null == TRUE}) prints as \code{"."}.
 Thus, if you are working with numeric data with \code{NA} values, these \code{NA} values will print as \code{"."}.
+\subsection{Grouping fields:}{
+
+Grouping fields are special feels which may be created by calls to \code{\link[=group_by]{group_by()}}.
+These fields are deleted by calls to \code{\link[=ungroup]{ungroup()}}.
+}
 }
 
 \section{Reshaping:}{

@@ -19,8 +19,9 @@
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
 #' + To filter `humdrumR` data, we have the [subset.humdrumR()] function, which can also be called 
-#'   using `R`'s standard [indexing operators][base::Extract]: `[]` and `[[]]`.
-#' + To manipulate and modify `humdrumR` data, we have the [with and within][withinHumdrum] methods for `humdrumR` objects.
+#'   using `R`'s standard [indexing operators][base::Extract] (`[]` and `[[]]`) or the tidyverse [filter()].
+#' + To manipulate and modify `humdrumR` data, we have the [with and within][withinHumdrum] methods for `humdrumR` objects, and tidyverse
+#'   aliases [mutate()], [summarise()], and [reframe()].
 #' + To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
 #'   a useful API we call our [regular-expression dispatch system][humdrumR::humdrumDispatch].
 #' + Several [modules][humdrumPitch] for representing and manipulating musical pitch information, 
@@ -178,6 +179,59 @@ humdrumRoption <- function(name) {
 
 #' Set options for humdrumR!
 #' 
+#' The `humdrumR()` function sets general options for the package,
+#' mostly related to how `humdrumR` data objects are printed.
+#' Each argument to the function manipulates a print/package option: for any argument that is 
+#' not used, the option remains in its current setting.
+#' 
+#' @param view ***How should humdrumR data be printed?***
+#' 
+#' There are two options: `"humdrum"` (alias `"score"`) and `"table"` (aliases `"data.frame"` and `"tibble"`).
+#' These options are [partially matched][partialMatching].
+#' 
+#' Use [select()] to determine which fields to show.
+#' 
+#' @param maxRecordsPerFile ***How many records should be shown in each file, when more than one file is present?***
+#' 
+#' Defaults to `40`.
+#' 
+#' Can be any positive whole number.
+#' 
+#' @param maxTokenLength ***Length at which longer tokens are censored with ...***
+#' 
+#' Defaults to `16`.
+#' 
+#' Can be any positive whole number.
+#' 
+#' @param nullPrint ***How should null data points print?***
+#' 
+#' Default is `"NA2dot"`.
+#' 
+#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
+#' `"NA2dot"` means all `NA` values are converted to `"."`; `"dot2NA` means all `"."` are converted to `NA`; `charNA2dot` means `NA` values
+#' in `character` vectors are converted to `NA`, but not in other atomic types; `"asis"` means either `NA` or `"."` values may print, depending
+#' on what is in the field.
+#' 
+#' @param syntaxHighlight ***Should syntax highlighting (coloring) be used in printout?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton logical value; an on/off switch.
+#' 
+#' @param censorEmptyRecords ***Should consecutive records be "censored" (compressed) in printout?***
+#' 
+#' Defaults to `30`.
+#' 
+#' Can be any positive whole number, up to `Inf`.
+#' If `Inf`, no censoring will occur.
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' @seealso humdrumRclass
 #' @export
 humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight, censorEmptyRecords) {
   curOptions <- oldOptions <- humdrumRoptions()
