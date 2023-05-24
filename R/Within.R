@@ -1587,7 +1587,7 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
                            even      = keyLengths %% resultLengths != 0L,
                            never     = TRUE,
                            FALSE)
-    if (any(bad)) .stop("The {withFunc} command won't recycle these results when the recycle argument is set to '{recycle}.'",
+    if (any(bad)) .stop("The {withFunc} command won't recycle these results because the recycle argument is set to '{recycle}.'",
                         switch(recycle, 
                                scalar = "Only scalar (length 1) results will be recycled.",
                                even = "Only results of a length that evenly divides the input will be recycled."),

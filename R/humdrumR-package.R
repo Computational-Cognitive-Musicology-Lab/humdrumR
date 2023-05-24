@@ -165,7 +165,8 @@ humdrumR_defaults <- list(
   maxRecordsPerFile = 40L,
   maxTokenLength = 16L,
   nullPrint = 'NA2dot',
-  syntaxHighlight = TRUE
+  syntaxHighlight = TRUE,
+  censorEmptyRecords = 30L
   
 )
 
@@ -178,7 +179,7 @@ humdrumRoption <- function(name) {
 #' Set options for humdrumR!
 #' 
 #' @export
-humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight) {
+humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight, censorEmptyRecords) {
   curOptions <- oldOptions <- humdrumRoptions()
   
 
@@ -201,6 +202,12 @@ humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxH
   if (!missing(syntaxHighlight)) {
     checks(syntaxHighlight, xTF)
     curOptions$syntaxHighlight <- syntaxHighlight
+  }
+  if (!missing(censorEmptyRecords)) {
+    checks(censorEmptyRecords, xTF | (xwholenum & xpositive))
+    
+    if (is.logical(censorEmptyRecords)) censorEmptyRecords <- if (censorEmptyRecords) 30L else Inf
+    curOptions$censorEmptyRecords <- censorEmptyRecords
   }
   
   options(humdrumR_options = curOptions)

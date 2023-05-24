@@ -2242,7 +2242,8 @@ print_humdrumR <- function(humdrumR, view = humdrumRoption('view'),
                            firstAndLast = TRUE, screenWidth = options('width')$width - 10L,
                            null = humdrumRoption('nullPrint'), syntaxHighlight = humdrumRoption('syntaxHighlight'),
                            maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
-                           maxTokenLength = humdrumRoption('maxTokenLength'), collapseNull = 30L) {
+                           maxTokenLength = humdrumRoption('maxTokenLength'), 
+                           censorEmptyRecords = humdrumRoption('censorEmptyRecords')) {
     
   checks(humdrumR, xhumdrumR)
     
@@ -2259,7 +2260,7 @@ print_humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   
   
   tokmat <- if (view %in% c('score', 'humdrum')) {
-      tokmat_humdrum(humdrumR, dataTypes, collapseNull, null = null)
+      tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
   } else {
       tokmat_humtable(humdrumR, dataTypes, null = null)
   }
@@ -2316,7 +2317,7 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     
 }
 
-tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
+tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', censorEmptyRecords = Inf, null = c('charNA2dot', 'NA2dot', 'dotToNA', 'asis')) {
 
   humdrumR <- printableSelectedField(humdrumR, dataTypes = dataTypes, null = null)
     
@@ -2325,7 +2326,7 @@ tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', collapseNull = Inf, n
   # removes "hanging stops" like "a . ." -> "a"
   # if (anyStops(humdrumR)) tokmat[] <- stringr::str_replace(tokmat, '( \\.)+$', '')
   #
-  if (collapseNull < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = collapseNull)
+  if (censorEmptyRecords < Inf) tokmat <- censorEmptySpace(tokmat, collapseNull = censorEmptyRecords)
   
   Filenames <- getHumtab(humdrumR)[ , unique(Filename)]
   Piece   <- gsub('\\..*$', '', rownames(tokmat))
