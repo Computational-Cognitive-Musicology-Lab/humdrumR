@@ -62,6 +62,7 @@ tally <- function(...,
                   na.rm = FALSE,
                   exclude = NULL) {
   
+  
   # exprs <- rlang::enexprs(...)
   exprs <- as.list(substitute(list(...)))[-1L]
   

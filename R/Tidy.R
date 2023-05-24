@@ -4,11 +4,6 @@
 
 ## Hhelpers ----
 
-overrideBy <- function(.data, .by) {
-  if (is.null(.by)) return(.data)
-  
-  
-}
 
 
 ## Methods for dplyr "verbs" ----
@@ -218,7 +213,7 @@ ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') 
 #' @export
 ggplot.humdrum.table <- function(data = NULL, mapping = aes(), ...) {
   
-  ggplot(as.data.frame(tab), mapping = mapping, ...) + theme_humdrum()
+  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
 }
 
 
