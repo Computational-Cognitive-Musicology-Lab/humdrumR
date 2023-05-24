@@ -658,7 +658,7 @@ within.humdrumR <- function(data, ...,
                             recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
                             .by = NULL,
                             variables = list()) {
-  withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe'))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
+  withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe', 'subset', 'filter'))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
                        expandPaths = expandPaths, recycle = recycle, .by = .by, variables = variables, 

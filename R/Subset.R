@@ -65,20 +65,18 @@
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
 #' @aliases subset
-subset.humdrumR <- function(x, ..., dataTypes = 'D', any = FALSE, .by = NULL, removeEmptyPieces = TRUE) {
-  checks(any, xTF)
+subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPieces = TRUE) {
   checks(removeEmptyPieces, xTF)
   dataTypes <- checkTypes(dataTypes, 'subset.humdrumR')
   
   quosures <- rlang::enquos(...)
-  recycle <- if (any) 'scalar' else 'never'
   
   selectedFields <- selectedFields(x)
   
   # tmp names
   subsetFields <- tempfile(rep('subset', length(quosures)), '', '')
   quosures <- Map(quosures, subsetFields, f = \(quo, name) rlang::quo(!!(rlang::sym(name)) <- !!quo))
-  x <- rlang::eval_tidy(rlang::quo(within.humdrumR(x, !!!quosures, recycle = !!recycle,
+  x <- rlang::eval_tidy(rlang::quo(within.humdrumR(x, !!!quosures, recycle = 'scalar',
                                                    dataTypes = !!dataTypes,
                                                    .by = !!.by)))
   

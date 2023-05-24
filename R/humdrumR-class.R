@@ -2064,48 +2064,6 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
 }
 
-
-showFields <-  function(humdrumR) {
-          # This function is used to produce the human readable 
-          # list fields used by print_humdrumR
-          fields <- fields(humdrumR)[Type == 'Data' | Selected == TRUE | GroupedBy == TRUE]
-
-          ## prep for printing
-          selected <- fields$Selected
-          
-          fields[ , Name := paste0(ifelse(Selected, '*', ' '), Name)]
-          fields[ , Name := stringr::str_pad(Name, width = max(nchar(Name)), side = 'right')]
-          
-          fields[ , Print := paste0(Name, ' :: ', Class)]
-
-          
-          ## Print fields
-          fields[Type == 'Data' | Selected == TRUE,
-                  { cat('  ', Type[1], 'fields:', '\n\t        ')
-                    cat(Print, sep = '\n\t        ')
-                    cat('\n')
-                            }, 
-                  by = Type]
-
-          
-          # grouping fields
-          groupFields <- fields[GroupedBy == TRUE]
-          
-          if (nrow(groupFields)) {
-              ngroups <- nrow(unique(getHumtab(humdrumR, 'D')[ , gsub('[ *]*', '', groupFields$Name), with = FALSE]))
-              
-              groupFields[ ,
-                           { cat('   Grouping fields: (', num2print(ngroups), plural(ngroups, ' groups', ' only one "group"...'), ')\n\t        ', sep = '')
-                               cat(Print, sep = '\n\t        ')
-                               cat('\n')
-                           }]
-          }
-          
-          # cat('\t\tFields: ', paste(fieldprint, collapse = '\n\t\t        '), '\n', sep = '')
-          
-          invisible(fields)
-}
-
 fieldsInExpr <- function(humtab, expr) {
   ## This function identifies which, if any,
   ## fields in a humtable are referenced in an expression (or rhs for formula).
@@ -2397,7 +2355,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
                          screenWidth = options('width')$width - 10, showCensorship = TRUE, syntaxHighlight = TRUE) {
    
     tokmat <- parsed$Tokmat
-    Record <- as.numeric(parsed$Record)
+    Record <- parsed$Record
     Piece <- parsed$Piece
     global <- parsed$Global
     Filenames <- parsed$Filenames
@@ -2590,3 +2548,46 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     
 }
 
+
+
+showFields <-  function(humdrumR) {
+          # This function is used to produce the human readable 
+          # list fields used by print_humdrumR
+          fields <- fields(humdrumR)[Type == 'Data' | Selected == TRUE | GroupedBy == TRUE]
+
+          ## prep for printing
+          selected <- fields$Selected
+          
+          fields[ , Name := paste0(ifelse(Selected, '*', ' '), Name)]
+          fields[ , Name := stringr::str_pad(Name, width = max(nchar(Name)), side = 'right')]
+          
+          fields[ , Print := paste0(Name, ' :: ', Class)]
+
+          
+          ## Print fields
+          cat('\n')
+          fields[Type == 'Data' | Selected == TRUE,
+                  { cat('  ', Type[1], 'fields:', '\n\t        ')
+                    cat(Print, sep = '\n\t        ')
+                    cat('\n')
+                            }, 
+                  by = Type]
+
+          
+          # grouping fields
+          groupFields <- fields[GroupedBy == TRUE]
+          
+          if (nrow(groupFields)) {
+              ngroups <- nrow(unique(getHumtab(humdrumR, 'D')[ , gsub('[ *]*', '', groupFields$Name), with = FALSE]))
+              
+              groupFields[ ,
+                           { cat('   Grouping fields: (', num2print(ngroups), plural(ngroups, ' groups', ' only one "group"...'), ')\n\t        ', sep = '')
+                               cat(Print, sep = '\n\t        ')
+                               cat('\n')
+                           }]
+          }
+          
+          # cat('\t\tFields: ', paste(fieldprint, collapse = '\n\t\t        '), '\n', sep = '')
+          
+          invisible(fields)
+}
