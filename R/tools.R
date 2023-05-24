@@ -1520,7 +1520,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
 #' For this, we want `groupby = list(Piece, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `groupby` arguments to certain functions: `r harvard(byTable[byTable$Type == 'melodic', ]$Function, 'or')`.
+#' three fields as `groupby` arguments to certain functions: `r harvard(autoArgTable[autoArgTable$Type == 'melodic', ]$Function, 'or')`.
 #' So any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each piece.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

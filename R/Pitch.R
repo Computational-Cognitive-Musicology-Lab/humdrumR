@@ -2986,8 +2986,10 @@ makePitchTransformer <- function(deparser, callname,
                                  keyed = TRUE,
                                  # removeArgs = NULL, 
                                  extraArgs = alist()) {
-  withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
-  withinFields$Key        <<- c(withinFields$Key, callname)
+  autoArgTable <<- rbind(autoArgTable,
+                         data.table(Argument = 'Exclusive', Type = 'Exclusive', Function = callname, Expression = list(quote(Exclusive))))
+  autoArgTable <<- rbind(autoArgTable, 
+                         data.table(Argument = 'Key', Type = 'Keyed', Function = callname, Expression = list(quote(Key))))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)

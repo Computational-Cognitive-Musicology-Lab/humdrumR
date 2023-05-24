@@ -821,7 +821,7 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   doQuo <- laggedQuo(doQuo)
   
   # add in arguments that are already fields
-  doQuo <- fieldsArgsQuo(doQuo, colnames(humtab))
+  doQuo <- autoArgsQuo(doQuo, colnames(humtab))
   
   
   # splats
@@ -972,36 +972,12 @@ activateQuo <- function(funcQuosure, dotField) {
 
 #### Insert exclusive/keyed args where necessary
 
-fieldsArgsQuo <- function(funcQuosure, fields) {
-  funcQuosure <- fieldArgQuo(funcQuosure, fields)
-  funcQuosure <- byArgsQuo(funcQuosure)
-  funcQuosure
-}
 
-
-fieldArgQuo <- function(funcQuosure, fields) {
-  targetFields <- intersect(names(withinFields), fields)
-  
-  for (field in targetFields) {
-    predicate <- \(Head) Head %in% withinFields[[field]]
-    do <- \(exprA) {
-      if (!field %in% names(exprA$Args)) exprA$Args[[field]] <- rlang::sym(field)
-      exprA
-    }
-    
-    funcQuosure <- withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
-    
-  }
-  
-  funcQuosure
-}
-
-
-byArgsQuo <- function(funcQuosure) {
-  predicate <- \(Head) Head %in% byTable$Function
+autoArgsQuo <- function(funcQuosure, fields) {
+  predicate <- \(Head) Head %in% autoArgTable$Function
   do <- \(exprA) {
-    byTab <- byTable[Function %in% exprA$Head & !Argument %in% names(exprA$Args)]
-    args <- setNames(byTab$Expression, byTab$Argument)
+    tab <- autoArgTable[Function %in% exprA$Head & !Argument %in% names(exprA$Args) & Argument %in% fields]
+    args <- setNames(tab$Expression, tab$Argument)
     exprA$Args <- c(exprA$Args, args)
     exprA
   }

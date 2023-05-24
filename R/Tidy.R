@@ -280,17 +280,16 @@ theme_humdrum <- function() {
 
 # Humdrum-style application ----
 
-humdrumRmethods <- function(name, overArgs = alist()) {
+humdrumRmethods <- function(name) {
   # prexisting method becomes .default
   default <- match.fun(name)
   envir <- rlang::fn_env(default)
   
   args <- formals(default)
-  
   assign(paste0(name, '.default'), default, parent.frame())
   
   # humdrumR method
-  call <- rlang::sym(paste0(name, '.default'))
+  subcall <- rlang::sym(paste0(name, '.default'))
   firstArg <- rlang::sym(names(args)[1])
   
   subargs <- args[-1]
@@ -300,13 +299,18 @@ humdrumRmethods <- function(name, overArgs = alist()) {
     names(subargs)[which(ldots)] <- ''
   }
   subargs[!ldots] <- rlang::syms(names(subargs)[!ldots])
-  subargs[names(overArgs)] <- overArgs
   
-  humdrumR <- rlang::new_function(args, env = envir,
-                                  rlang::expr(within.humdrumR(!!firstArg, (!!call)(., !!!subargs))))
+  #### insert "auto args"
+  autoArgs <- autoArgTable[Function == name]
+  subargs[autoArgs$Argument] <- autoArgs$Expression
+  
+  humdrumR <- rlang::new_function(args[!names(args) %in% autoArgs$Argument], env = envir,
+                                  rlang::expr(within.humdrumR(!!firstArg, (!!subcall)(., !!!subargs))))
   
   assign(paste0(name, '.humdrumR'), humdrumR, parent.frame())
   
+  
+  # generic function
   generic <- rlang::new_function(args,
                                  rlang::expr(UseMethod(!!name)),
                                  env = envir)
@@ -316,16 +320,31 @@ humdrumRmethods <- function(name, overArgs = alist()) {
   
 }
 
+## Pitch functions ----
+
 #' @exportS3Method kern default
 #' @exportS3Method kern humdrumR
-humdrumRmethods('kern', alist(Key = Key))
+humdrumRmethods('kern')
 #' @exportS3Method solfa default
 #' @exportS3Method solfa humdrumR
-humdrumRmethods('solfa', alist(Key = Key))
+humdrumRmethods('solfa')
+
+
+### Interval functions ----
+
 #' @exportS3Method mint default
 #' @exportS3Method mint humdrumR
-humdrumRmethods('mint', alist(groupby = list(File, Spine, Path)))
+humdrumRmethods('mint')
 #' @exportS3Method hint default
 #' @exportS3Method hint humdrumR
-humdrumRmethods('hint', alist(groupby = list(File, Record), 
-                              orderby = list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop)))
+humdrumRmethods('hint')
+
+## Rhythm functions ----
+
+#' @exportS3Method recip default
+#' @exportS3Method recip humdrumR
+humdrumRmethods('recip')
+
+#' @exportS3Method duration default
+#' @exportS3Method duration humdrumR
+humdrumRmethods('duration')
