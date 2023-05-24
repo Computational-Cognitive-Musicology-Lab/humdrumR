@@ -162,7 +162,7 @@ NULL
 # Options -----
 
 humdrumR_defaults <- list(
-  view = 'score',
+  view = 'humdrum',
   maxRecordsPerFile = 40L,
   maxTokenLength = 16L,
   nullPrint = 'NA2dot',

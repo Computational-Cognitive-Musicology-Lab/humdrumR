@@ -2345,6 +2345,7 @@ print_humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   Nfiles <- length(humdrumR)          
   if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
   
+  if (view == 'score' && 'shiny' %in% .packages()) return(invisible(print_score(humdrumR, maxRecordsPerFile)))
   
   tokmat <- if (view %in% c('score', 'humdrum')) {
       tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
@@ -2534,6 +2535,22 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 }
 
 
+print_score <- function(humdrumR, maxRecordsPerFile) {
+  lines <- as.lines(humdrumR[1])
+  
+  output <- paste(lines, collapse = '\n')
+  
+  randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
+  
+  ui <- fluidPage(tags$head(tags$script(src = "https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js")),
+            tags$script(paste0("displayHumdrum({source: '", randomID,  "', autoResize: 'true'});")),
+            tags$script(id = randomID, type = 'text/x-humdrum', output))
+  
+  server <- function(input, output, session) {}
+  
+  runGadget(shinyApp(ui, server, stopOnCancel = TRUE)
+  
+}
 
 
 censorEmptySpace <- function(tokmat, collapseNull = 10L) {
