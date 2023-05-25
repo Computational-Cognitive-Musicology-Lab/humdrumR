@@ -615,7 +615,7 @@ with.humdrumR <- function(data, ...,
                           drop = TRUE,
                           .by = NULL,
                           variables = list()) {
-  withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('summarize', 'pull'))  as.character(sys.call(1)[[1]]) else 'with', '.humdrumR')
+  withFunc <- paste0(if (any(as.character(sys.call(1)[[1]]) %in% c('summarize', 'pull')))  as.character(sys.call(1)[[1]]) else 'with', '.humdrumR')
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, 
                        .by = .by, variables = variables, withFunc = withFunc), 
@@ -653,7 +653,7 @@ within.humdrumR <- function(data, ...,
                             recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
                             .by = NULL,
                             variables = list()) {
-  withFunc <- paste0(if (as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe', 'subset', 'filter'))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
+  withFunc <- paste0(if (any(as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe', 'subset', 'filter')))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
                        expandPaths = expandPaths, recycle = recycle, .by = .by, variables = variables, 
