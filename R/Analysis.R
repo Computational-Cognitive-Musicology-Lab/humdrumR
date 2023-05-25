@@ -1167,13 +1167,20 @@ toHNP <- function(lines, message) {
   
 }
 
-
+#' @export
 viewKernTable <- function(table) {
   df <- as.data.frame(table)
+  df <- df[order(df[[length(df)]], decreasing = TRUE), ]
   
   df <- subset(df, df[[length(df)]] > 0)
   
+  
+  
   kern <- lapply(as.list(df[1:(ncol(df) -1)]), as.character)
+  if (length(kern) > 1) {
+    kern[[1]] <- paste0('(', kern[[1]])
+    kern[[length(kern)]] <- paste0(kern[[length(kern)]], ')')
+  }
   N    <- df[[length(df)]]
   
   kernspine <- do.call('rbind', c(kern, list('=||')))
