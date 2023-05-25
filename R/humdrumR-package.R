@@ -57,32 +57,44 @@ NULL
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
-withinFields <- list(Exclusive = c('mint', 'hint', 'int'),
-                     Key = c('mint', 'hint', 'int', 'sonority'),
-                     BPM = c('timestamp'),
-                     Tandem = c('tandem'))
+
 
 # Package global data ----
 
 
 ### groupby ----
 
-byTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
-                             Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie', 'hop'), 
-                             Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
-                  data.table(Argument = 'groupby', Type = 'harmonic',
-                             Function = c('hint', 'sonority'),
-                             Expression = list(quote(list(Piece = Piece, Record = Record)))),
-                  data.table(Argument = 'groupby', Type = 'structure',       
-                             Function = c('timeline', 'timestamp', 'count', 'onbeat', 'subpos', 'metlev', 'metcount'),
-                             Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, ParentPath = ParentPath, Record = Record, Stop = Stop)))),
-                  data.table(Argument = 'orderby', Type = 'harmonic',
-                             Function = 'hint',
-                             Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop)))),
-                  data.table(Argument = 'meter', Type = 'meter',
-                             Function = c('metlev', 'metcount'),
-                             Expression = list(quote(TimeSignature)))
-                  )
+autoArgTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
+                                  Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie', 'hop'), 
+                                  Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
+                       data.table(Argument = 'groupby', Type = 'harmonic',
+                                  Function = c('hint', 'sonority'),
+                                  Expression = list(quote(list(Piece = Piece, Record = Record)))),
+                       data.table(Argument = 'groupby', Type = 'structure',       
+                                  Function = c('timeline', 'timestamp', 'count', 'onbeat', 'subpos', 'metlev', 'metcount'),
+                                  Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, ParentPath = ParentPath, Record = Record, Stop = Stop)))),
+                       data.table(Argument = 'orderby', Type = 'harmonic',
+                                  Function = 'hint',
+                                  Expression = list(quote(list(Piece = Piece, Record = Record, Spine = Spine, Path = Path, Stop = Stop)))),
+                       data.table(Argument = 'meter', Type = 'meter',
+                                  Function = c('metlev', 'metcount'),
+                                  Expression = list(quote(TimeSignature))),
+                       data.table(Argument = 'pickup', Type = 'pickup',
+                                  Function = c('metlev', 'timeline', 'timestamp', 'metcount', 'metsubpos'),
+                                  Expression = list(quote(Bar == 0L))),
+                       data.table(Argument = 'Key', Type = 'Keyed',
+                                  Function = c('mint', 'hint', 'int', 'sonority'),
+                                  Expression = list(quote(Key))),
+                       data.table(Argument = 'Exclusive', Type = 'Exclusive',
+                                  Function = c('mint', 'hint', 'int'),
+                                  Expression = list(quote(Exclusive))),
+                       data.table(Argument = 'BPM', Type = 'tempo',
+                                  Function = 'timestamp',
+                                  Expression = list(quote(BPM))),
+                       data.table(Argument = 'Tandem', Type = 'Tandem',
+                                  Function = 'tandem',
+                                  Expression = list(quote(Tandem)))
+)
 
 setOldClass('quosure')
 setOldClass('quosures')

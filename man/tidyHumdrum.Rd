@@ -11,6 +11,8 @@
 \alias{ungroup.humdrumR}
 \alias{ggplot.humdrumR}
 \alias{ggplot.humdrum.table}
+\alias{index}
+\alias{index2}
 \title{HumdrumR using Tidyverse "verbs"}
 \usage{
 \method{mutate}{humdrumR}(
@@ -52,6 +54,10 @@
 \method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
 
 \method{ggplot}{humdrum.table}(data = NULL, mapping = aes(), ...)
+
+index(x, i, j, drop = TRUE)
+
+index2(x, i, j, drop = TRUE)
 }
 \description{
 These methods for \link{dplyr} verbs are all shorthand calls for \link[=withHumdrum]{with/within/subset.humdrumR()}.

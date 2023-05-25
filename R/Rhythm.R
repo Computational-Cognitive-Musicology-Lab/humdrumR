@@ -880,7 +880,8 @@ rhythmArgCheck <- function(args, callname) {
 makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', extraArgs = list()) {
   # this function will create various rhythm transform functions
   
-  withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
+  autoArgTable <<- rbind(autoArgTable,
+                         data.table(Argument = 'Exclusive', Type = 'Exclusive', Function = callname, Expression = list(quote(Exclusive))))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)

@@ -9,7 +9,7 @@
 \alias{as.data.frame.probabilityDistribution}
 \title{Tabulate and/or cross-tabulate data}
 \usage{
-tally(..., na.rm = FALSE, exclude = NULL)
+tally(..., na.rm, exclude)
 
 \S4method{Ops}{humdrum.table,humdrum.table}(e1, e2)
 

@@ -58,9 +58,11 @@ setClass('humdrum.table', contains = 'table')
 #' cbind(genericTable, complexTable)
 #' 
 #' @export
-tally <- function(..., 
-                  na.rm = FALSE,
-                  exclude = NULL) {
+tally <- function(..., na.rm, exclude) UseMethod('tally')
+#' @export
+tally.default <- function(..., 
+                          na.rm = FALSE,
+                          exclude = NULL) {
   
   
   # exprs <- rlang::enexprs(...)
@@ -76,7 +78,7 @@ tally <- function(...,
                    if (inherits(arg, 'token')) factorize(arg) else arg
                  })
   tab <- do.call(base::table,
-                 c(args, list(exclude = if (na.rm) c(NA, NaN), 
+                 c(args, list(exclude = c(exclude, (if (na.rm) c(NA, NaN))), 
                               useNA = if (na.rm) 'no' else 'ifany', 
                               deparse.level = 0)))
   
@@ -88,6 +90,15 @@ tally <- function(...,
   
   
 }
+
+#' @export
+tally.humdrumR <- function(x, na.rm = FALSE, exclude = NULL) {
+  fields <- pullSelectedFields(x)
+  
+  do.call('tally', as.list(fields))
+  
+}
+
 
 #' @rdname tally
 #' @export
