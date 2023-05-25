@@ -218,7 +218,7 @@ ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') 
 #' @export
 ggplot.humdrum.table <- function(data = NULL, mapping = aes(), ...) {
   
-  ggplot(as.data.frame(tab), mapping = mapping, ...) + theme_humdrum()
+  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
 }
 
 
@@ -304,8 +304,10 @@ humdrumRmethods <- function(name) {
   autoArgs <- autoArgTable[Function == name]
   subargs[autoArgs$Argument] <- autoArgs$Expression
   
+  Name <- rlang::sym(stringr::str_to_title(name))
+  
   humdrumR <- rlang::new_function(args[!names(args) %in% autoArgs$Argument], env = envir,
-                                  rlang::expr(within.humdrumR(!!firstArg, (!!subcall)(., !!!subargs))))
+                                  rlang::expr(within.humdrumR(!!firstArg, !!Name <- (!!subcall)(., !!!subargs))))
   
   assign(paste0(name, '.humdrumR'), humdrumR, parent.frame())
   
