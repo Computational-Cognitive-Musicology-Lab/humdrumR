@@ -2596,7 +2596,7 @@ matched <- function(x, table, nomatch = NA) {
 
 
 
-.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame()) {
+.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame(), .open = '{', .close = '}') {
   strs <- unlist(list(...))
   ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
   ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
@@ -2619,7 +2619,7 @@ matched <- function(x, table, nomatch = NA) {
   strs, ifelses)
   
   strs <- paste(unlist(strs), collapse = sep)
-  glue::glue(strs, .envir = envir, .sep = sep, trim = trim)
+  glue::glue(strs, .envir = envir, .sep = sep, trim = trim, .open = .open, .close = .close)
 }
 
 harvard <- function(x, conjunction = '', quote = FALSE, quoteNA = FALSE) {

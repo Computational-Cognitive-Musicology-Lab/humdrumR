@@ -293,6 +293,7 @@ index2 <- function(x, i, j, drop = TRUE) {
   
   pat <- paste0(missing(i), missing(j))
   
+  if (!is.humdrumR(x)) return(x[[i]])
   switch(pat,
          'TRUETRUE' = x,
          'TRUEFALSE' = x[[  , j, drop]],

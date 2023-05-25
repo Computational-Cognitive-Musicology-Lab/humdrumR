@@ -1134,3 +1134,57 @@ draw_violin <- function(var, breaks = 'Sturges', col = 1, ...) {
 }
 
 
+# Notation viewer ----
+
+toHNP <- function(lines, message) {
+  output <- paste(lines, collapse = '\n')
+  
+  randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
+  message <- gsub("PLUGIN", '<a href="https://plugin.humdrum.org/">humdrum notation plugin</a>', message)
+  
+  html <- .glue(.open = '[[', .close = ']]',
+  '<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js"></script>
+    <script>displayHumdrum({source: "[[randomID]]", autoResize: "true"});</script>
+    </head>
+    <body>
+    <h1>HumdrumR viewer</h1>
+    <p>[[message]]</p>
+    <script id="[[randomID]]" type="text/x-humdrum">[[output]]</script>
+    </body>
+    </html>')
+  
+  
+  tempDir <- tempfile()
+  dir.create(tempDir)
+  htmlFile <- file.path(tempDir, 'index.html')
+  
+  writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
+  
+  getOption('viewer', default = utils::browseURL)(htmlFile)
+  
+}
+
+
+viewKernTable <- function(table) {
+  df <- as.data.frame(table)
+  
+  df <- subset(df, df[[length(df)]] > 0)
+  
+  kern <- lapply(as.list(df[1:(ncol(df) -1)]), as.character)
+  N    <- df[[length(df)]]
+  
+  kernspine <- do.call('rbind', c(kern, list('=||')))
+  kernspine <- c('**kern', kernspine, '*-')
+  
+  Nspine <- c(do.call('rbind', c(list(N), 
+                                 replicate(length(kern) - 1, list('.'), simplify = T), 
+                                 list('=||'))))
+  Nspine <- c('**cdata', Nspine, '*-')
+  
+  lines <- paste(kernspine, Nspine, sep = '\t')
+  
+  toHNP(lines, "Tabulating kern data and viewing using the PLUGIN.")
+}

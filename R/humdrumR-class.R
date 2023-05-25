@@ -2549,46 +2549,14 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 
 
 print_score <- function(humdrumR, maxRecordsPerFile) {
-    label <- rlang::as_label(rlang::enexpr(humdrumR))
     selectedFields <- selectedFields(humdrumR)
     
   humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot', useTokenGLIM = TRUE)
     
   lines <- as.lines(humdrumR[1])
   
-  output <- paste(lines, collapse = '\n')
-  
-  randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
-  
-  html <- '<!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js"></script>
-    <script>XXX</script>
-    </head>
-    <body>
-    <h1>HumdrumR viewer</h1>
-    <p>Viewing the FIELD using the <a href="https://plugin.humdrum.org/">humdrum notation plugin.</a></p>
-    <script id="ID" type="text/x-humdrum">OUTPUT</script>
-    </body>
-    </html>'
-  
-  html <- gsub('FIELD', paste0("'", paste(selectedFields, collapse = '/'),
-                               if (length(selectedFields) > 1L) "' fields" else "' field"), 
-               html)
-  html <- gsub('OBJECT', label, html)
-  html <- gsub('XXX', paste0("displayHumdrum({source: '", randomID,  "', autoResize: 'true'});"), html)
-  html <- gsub("ID", randomID, html)
-  html <- gsub("OUTPUT", output, html)
-               
-  
-  tempDir <- tempfile()
-  dir.create(tempDir)
-  htmlFile <- file.path(tempDir, 'index.html')
-  
-  writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
-  
-  getOption('viewer', default = utils::browseURL)(htmlFile)
+  toHNP(lines, .glue("Viewing the '{paste(selectedFields, collapse = '/')}' <fields|field>",
+                     "using the PLUGIN.", ifelse = length(selectedFields) > 1L))
   
   invisible(NULL)
 }
