@@ -2241,6 +2241,7 @@ pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('charNA2do
                                        matrix[] <- str_pad(c(matrix), width = max(nchar(matrix)))
                                        field <- paste0('[', do.call('paste', as.data.frame(matrix)),  ']')
                                    }
+                                   field <- gsub('\t\t*', '', field)
                                    field
                                    
                                }) # need[] in case there are matrices
@@ -2259,6 +2260,7 @@ pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('charNA2do
     }
     
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
+    
     field[field == ''] <- "'"
     
     
@@ -2389,6 +2391,7 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     
 
     tokmat <- do.call('cbind', as.list(tokenTable))
+    tokmat[is.na(tokmat)] <- '<NA>'
     
     # syntax highlighting prep
     types <- fields(humdrumR)[, setNames(Type, Name)[colnames(tokenTable)]]
