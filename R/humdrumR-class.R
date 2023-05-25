@@ -2567,13 +2567,15 @@ print_score <- function(humdrumR, maxRecordsPerFile) {
     <script>XXX</script>
     </head>
     <body>
-    <h1>humdrumR viewer</h1>
-    <p>Viewing the FIELD field(s) of the OBJECT data object.</p>
+    <h1>HumdrumR viewer</h1>
+    <p>Viewing the FIELD using the <a href="https://plugin.humdrum.org/">humdrum notation plugin.</a></p>
     <script id="ID" type="text/x-humdrum">OUTPUT</script>
     </body>
     </html>'
   
-  html <- gsub('FIELD', paste(selectedFields, collapse = '/'), html)
+  html <- gsub('FIELD', paste0("'", paste(selectedFields, collapse = '/'),
+                               if (length(selectedFields) > 1L) "' fields" else "' field"), 
+               html)
   html <- gsub('OBJECT', label, html)
   html <- gsub('XXX', paste0("displayHumdrum({source: '", randomID,  "', autoResize: 'true'});"), html)
   html <- gsub("ID", randomID, html)
