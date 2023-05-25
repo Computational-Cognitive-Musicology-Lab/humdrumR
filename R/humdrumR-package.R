@@ -186,7 +186,7 @@ humdrumRoption <- function(name) {
 #' 
 #' @param view ***How should humdrumR data be printed?***
 #' 
-#' There are two options: `"humdrum"` (alias `"score"`) and `"table"` (aliases `"data.frame"` and `"tibble"`).
+#' There are three options: `"humdrum"`, `"score"`, and `"table"` (aliases `"data.frame"` and `"tibble"`).
 #' These options are [partially matched][partialMatching].
 #' 
 #' Use [select()] to determine which fields to show.
@@ -224,9 +224,6 @@ humdrumRoption <- function(name) {
 #' 
 #' Can be any positive whole number, up to `Inf`.
 #' If `Inf`, no censoring will occur.
-#' 
-#' 
-#' 
 #' 
 #' 
 #' 

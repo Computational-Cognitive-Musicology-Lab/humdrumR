@@ -17,7 +17,7 @@ humdrumR(
 \arguments{
 \item{view}{\emph{\strong{How should humdrumR data be printed?}}
 
-There are two options: \code{"humdrum"} (alias \code{"score"}) and \code{"table"} (aliases \code{"data.frame"} and \code{"tibble"}).
+There are three options: \code{"humdrum"}, \code{"score"}, and \code{"table"} (aliases \code{"data.frame"} and \code{"tibble"}).
 These options are \link[=partialMatching]{partially matched}.
 
 Use \code{\link[=select]{select()}} to determine which fields to show.}

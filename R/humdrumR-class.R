@@ -312,6 +312,7 @@ orderHumtab <- function(humtab) {
 #' Most notably, by calling `humdrumR('table')`, `humdrumR` will switch or printing a view of the underlying [humdrum table][humTable],
 #' rather than the humdrum-syntax score.
 #' You can return to the score view by calling `humdrumR('humdrum')`.
+#' For `**kern` data, you can also view the notation of the score using `humdrumR('score')`.
 #' If there are more than one pieces in the object, the beginning of the first piece is printed, followed by the end of the last piece.
 #' For more details on printing options, read the [humdrumR()] manual.
 #' 
@@ -2293,57 +2294,42 @@ printableSelectedField <- function(humdrumR, dataTypes = 'D', null =  c('charNA2
 
 setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
-                    npieces  <- npieces(object)
-                    nfiles <- nfiles(object)
-                    trim <- if (npieces == 1L) 800L else humdrumRoption('maxRecordsPerFile')
-                    
-                    print_humdrumR(object, firstAndLast = TRUE, maxRecordsPerFile = trim)
-                    
-                    if (npieces > 1L) {
-                              cat('\n')
-                              cat('\thumdrumR corpus of', 
-                                  ifelse(npieces <= 100L, num2word(npieces), num2str(npieces)), 
-                                  'pieces',
-                                  if (nfiles != npieces) c('(in', num2word(nfiles), plural(nfiles, 'files)', 'file)')))
-                              
-                              
-                              if (anySubcorpora(object)) {
-                                  subnames <- namesSubcorpora(object)
-                                  cat(' (', num2word(length(subnames)), 
-                                      " subcorpora: ", 
-                                      paste(subnames, collapse = ', '), 
-                                      ')', sep = '')
-                              }
-                              cat('.\n')
-                                  
-                    }
-                    
-                    ## Fields
-                    showFields(object)
-                    
-                    invisible(NULL)
+                    print.humdrumR(object)
+                    return(invisible(NULL))
           })
 
-print_humdrumR <- function(humdrumR, view = humdrumRoption('view'), 
+
+#' @export
+print.humdrumR <- function(humdrumR, view = humdrumRoption('view'), 
                            dataTypes = if (view %in% c('score', 'humdrum')) "GLIMDd" else 'D', 
-                           firstAndLast = TRUE, screenWidth = options('width')$width - 10L,
-                           null = humdrumRoption('nullPrint'), syntaxHighlight = humdrumRoption('syntaxHighlight'),
-                           maxRecordsPerFile = humdrumRoption('maxRecordsPerFile'), 
+                           firstAndLast = TRUE, 
+                           screenWidth = options('width')$width - 10L,
+                           null = humdrumRoption('nullPrint'), 
+                           syntaxHighlight =  humdrumRoption('syntaxHighlight'),
+                           maxRecordsPerFile = if (length(humdrumR) == 1L) 800L else humdrumRoption('maxRecordsPerFile'), 
                            maxTokenLength = humdrumRoption('maxTokenLength'), 
                            censorEmptyRecords = humdrumRoption('censorEmptyRecords')) {
     
   checks(humdrumR, xhumdrumR)
-    
   dataTypes <- checkTypes(dataTypes, "print_humdrumR")
+  checks(view, xcharacter & xlen1 & xplegal(c('humdrum', 'score', 'table', 'tibble', 'data.frame')))
+  checks(firstAndLast, xTF)
+  checks(screenWidth, xwholenum & xpositive)
+  checks(null, xcharacter & xlen1 & xlegal(c('NA2dot', 'dot2NA', 'charNA2dot', 'asis')))
+  checks(syntaxHighlight, xTF)
+  checks(maxRecordsPerFile, xwholenum & xpositive)
+  checks(maxTokenLength, xwholenum & xpositive)
+  checks(censorEmptyRecords, xwholenum & xpositive)
   
+    
   
   if (is.empty(humdrumR)) {
     cat("\nEmpty humdrumR object\n")
-    return(invisible(NULL))
+    return(invisible(humdrumR))
   }
   
-  Nfiles <- length(humdrumR)          
-  if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
+  Npieces <- npieces(humdrumR)
+  if (Npieces > 2L && firstAndLast) humdrumR <- humdrumR[c(1, Npieces)]
   
   if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile))
   
@@ -2353,10 +2339,34 @@ print_humdrumR <- function(humdrumR, view = humdrumRoption('view'),
       tokmat_humtable(humdrumR, dataTypes, null = null)
   }
   
-  print_tokmat(tokmat, Nmorefiles = Nfiles - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
+  print_tokmat(tokmat, Nmorefiles = Npieces - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
                screenWidth = screenWidth, showCensorship = view == 'score', syntaxHighlight = syntaxHighlight)
 
-  invisible(NULL)
+  
+  
+  if (length(humdrumR) > 1L) {
+      Nfiles <- nfiles(humdrumR)
+      cat('\n')
+      cat('\thumdrumR corpus of', num2print(Npieces), 'pieces',
+          if (Nfiles != Npieces) c('(in', num2word(Nfiles), plural(Nfiles, 'files)', 'file)')))
+      
+      
+      if (anySubcorpora(humdrumR)) {
+          subnames <- namesSubcorpora(humdrumR)
+          cat(' (', num2word(length(subnames)), 
+              " subcorpora: ", 
+              paste(subnames, collapse = ', '), 
+              ')', sep = '')
+      }
+      cat('.\n')
+      
+  }
+  
+  ## Fields
+  showFields(humdrumR)
+  
+  
+  return(invisible(humdrumR))
   
 }
 

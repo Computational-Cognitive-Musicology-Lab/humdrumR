@@ -28,14 +28,14 @@ fields(
 
 Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to include in the output.}}
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to include.}}
 
-Defaults to \code{"GLIMDd"}.
+Defaults to \code{"GLIMDd"} for \code{as.lines()} and \code{as.matrix()}; \code{"Dd"} for \code{as.data.frame()};
+\code{"LIMDd"} for \code{as.matrices()} and \code{as.data.frames()}.
 
-Must be a \code{character} string, which specifies which types of data tokens/records to extract.
-Legal values are: \code{"G"} (global comments), \code{"L"} (local comments), \code{"I"} (interpretations),
-\code{"M"} (barlines), \code{"D"} (non-null data), or \code{"d"} (null data).
-Multiple types can be specified in a single string: e.g., \code{"GLIMD"}.}
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation for explanation.)}
 
 \item{fields}{\emph{\strong{Which fields to output.}}
 
@@ -44,11 +44,28 @@ Defaults to \code{selectedFields(humdrumR)}.
 Must be a \code{character} string \link[=partialMatching]{partially} matching the name of a data field in the \code{humdrumR} input.
 For example, \code{"Tok"} would match the \code{Token} field.}
 
+\item{null}{\emph{\strong{How should null data points be output?}}
+
+Default is \code{"NA2dot"}.
+
+Must be a single character string, \link[=partialMatchng]{partially matching} \code{"NA2dot"}, \code{"dot2NA"}, \verb{'charNA2dot"}, or \code{"asis"}.
+\code{"NA2dot"} means all \code{NA} values are converted to \code{"."}; \verb{"dot2NA} means all \code{"."} are converted to \code{NA}; \code{charNA2dot} means \code{NA} values
+in \code{character} vectors are converted to \code{NA}, but not in other atomic types; \code{"asis"} means either \code{NA} or \code{"."} values may print, depending
+on what is in the field.}
+
+\item{drop}{\emph{\strong{Should single fields be extracted from the \code{data.table}?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{fieldTypes}{\emph{\strong{Which types of fields to list.}}
 
 Shows all fields by default.
 
-Must be a \code{character} vector. Legal options are \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, and \code{"Reference"}.
+Must be a \code{character} vector. Legal options are \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, \code{"Reference"},
+and \code{"Grouping"}.
+You can also pass \code{"selected"} to extract only the \link[=selectedFields]{selected fields}.
 Types can be \link[=partialMatching]{partially matched}---for example, \code{"S"} for \code{"Structure"}.}
 }
 \description{
@@ -62,15 +79,9 @@ If you want to directly access the humdrum table within a \link{humdrumRclass} o
 
 \code{getHumtab} extracts the hudrum table from a \link[=humdrumRclass]{humdrumR object}.
 
-Individual fields from the humdrum table can be extracted using \code{getFields}.
-Returns a \link[data.table:data.table]{data.table()}, each column corresponding to one field.
-(The \code{data.table} is a column-subset of the humdrum table).
-
-Use \code{fields} to list the current fields in
+Use the \code{fields()} function list the current fields in
 a \link{humdrumRclass} object.
-It returns a \code{\link[=data.table]{data.table()}} with three columns: the field's \code{Name}, the \code{Class} of the
-data held in the field,
-and the \code{Type} of field (e.g., \code{"Formal"}).
+It returns a \code{\link[=data.table]{data.table()}} with five columns:
 }
 \details{
 In a humdrum table, by default, humdrum data is organized in a maximally "long" (or "tall")
@@ -83,6 +94,23 @@ to a \emph{row} in the humdrum table while a "field" refers to a \emph{column}:
 \itemize{
 \item Token = row
 \item Field = column
+}
+
+\itemize{
+\item \code{Name}
+\item \code{Class}
+\item \code{Type}
+\itemize{
+\item \code{Data}/\code{Structure}/\code{Interpretation}/\code{Formal}/\code{Reference}/\code{Grouping}
+}
+\item \code{Selected},
+\itemize{
+\item A \code{logical} indicating which fields are \link[=selectedFields]{selected}.
+}
+\item \code{GroupedBy}
+\itemize{
+\item A \code{logical} indicating which, if any fields, are currently grouping the data.
+}
 }
 }
 \section{Fields:}{

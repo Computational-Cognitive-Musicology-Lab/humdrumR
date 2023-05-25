@@ -68,6 +68,7 @@ The print/view settings for humdrumR can be manipulated with the \code{\link[=hu
 Most notably, by calling \code{humdrumR('table')}, \code{humdrumR} will switch or printing a view of the underlying \link[=humTable]{humdrum table},
 rather than the humdrum-syntax score.
 You can return to the score view by calling \code{humdrumR('humdrum')}.
+For \verb{**kern} data, you can also view the notation of the score using \code{humdrumR('score')}.
 If there are more than one pieces in the object, the beginning of the first piece is printed, followed by the end of the last piece.
 For more details on printing options, read the \code{\link[=humdrumR]{humdrumR()}} manual.
 
