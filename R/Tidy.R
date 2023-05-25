@@ -111,7 +111,6 @@ filter.humdrumR <- function(.data, ...) {
                               rlang::quo(!!name <- !!expr)
                             })
   names(exprs) <- NULL
-  exprs <- c(exprs, .data@Groupby)
   
   rlang::eval_tidy(rlang::quo(subset.humdrumR(.data, !!!exprs))) 
 }

@@ -1177,11 +1177,11 @@ viewKernTable <- function(table) {
   
   
   kern <- lapply(as.list(df[1:(ncol(df) -1)]), as.character)
-  if (length(kern) > 1) {
-    kern[[1]] <- paste0('(', kern[[1]])
-    kern[[length(kern)]] <- paste0(kern[[length(kern)]], ')')
-  }
-  N    <- df[[length(df)]]
+  # if (length(kern) > 1) {
+    # kern[[1]] <- paste0('(', kern[[1]])
+    # kern[[length(kern)]] <- paste0(kern[[length(kern)]], ')')
+  # }
+  N    <- num2str(df[[length(df)]])
   
   kernspine <- do.call('rbind', c(kern, list('=||')))
   kernspine <- c('**kern', kernspine, '*-')
