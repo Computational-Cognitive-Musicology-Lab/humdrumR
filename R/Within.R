@@ -816,7 +816,7 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   doQuo <- laggedQuo(doQuo)
   
   # add in arguments that are already fields
-  doQuo <- autoArgsQuo(doQuo, colnames(humtab))
+  doQuo <- autoArgsQuo(doQuo, humtab)
   
   
   # splats
@@ -968,10 +968,12 @@ activateQuo <- function(funcQuosure, dotField) {
 #### Insert exclusive/keyed args where necessary
 
 
-autoArgsQuo <- function(funcQuosure, fields) {
+autoArgsQuo <- function(funcQuosure, humtab) {
   predicate <- \(Head) Head %in% autoArgTable$Function
   do <- \(exprA) {
-    tab <- autoArgTable[Function %in% exprA$Head & !Argument %in% names(exprA$Args) & Argument %in% fields]
+    tab <- autoArgTable[Function == exprA$Head & 
+                          !Argument %in% names(exprA$Args) &
+                          sapply(Expression, \(expr) length(fieldsInExpr(humtab, expr)) > 0L)]
     args <- setNames(tab$Expression, tab$Argument)
     exprA$Args <- c(exprA$Args, args)
     exprA

@@ -35,19 +35,19 @@
 #' + Do you want to count the half-note level, which is "in between" the full measure (whole-note)
 #' and the tactus quarter-note?
 #' + How do you want to treat triplets or other tuplets? What is a piece uses a lot of 
+#'   triplet eighth-notes?
 #' + Do you want to consider hypermeter, *above* the measure level?
-#' triplet eighth-notes?
 #' 
 #' Fortunately, `humdrumR` and the `meter()` function give you options to precisely specify 
 #' metric levels.
 #' The most transparent way is to simply pass `meter()` a `list` of duration values, like `meter(list("1", "4", "8"))`.
 #' However, `meter()` includes a number of helpful arguments that can be used to quickly streamline the process of defining a meter.
-#' To understand these arguments, lets first clarify some metric defitions used in `humdrumR`:
+#' To understand these arguments, lets first clarify some metric definitions used in `humdrumR`:
 #' 
 #' + *Measure*: The duration of the "measure" of the meter. I.e., the highest metric level, or
 #' the least common multiple of all levels.
 #' + *Hypermeter*: Metric levels above the measure indicated by the time signature.
-#' + *Tactus*: The "main,", usually central, level.
+#' + *Tactus*: The "main," usually central, level.
 #' + *Subdivision*: The level directly below the tactus.
 #' + *Tick*: The smallest/fastest metric level. (The "ticks" in the grid.)
 #' + *Tatum*: The smallest common denominator between a set of beats/duration. 
@@ -194,7 +194,7 @@ meter <- function(x, ...) UseMethod('meter')
 meter.meter <- function(x, ...) x
 #' @rdname meter
 #' @export
-meter.rational <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.levels = 'both', subdiv = NULL, hyper = NULL, tatum = FALSE) {
+meter.rational <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.levels = 'neither', subdiv = NULL, hyper = NULL, tatum = FALSE) {
   levels <- list(x, ...)
   
   meter.list(levels, measure = measure, tactus = tactus, tick = tick, fill.levels = fill.levels, subdiv = subdiv, hyper = hyper, tatum = tatum)
@@ -203,7 +203,7 @@ meter.rational <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', f
 
 #' @rdname meter
 #' @export
-meter.list <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.levels = 'both', hyper = NULL, subdiv = NULL, tatum = FALSE) {
+meter.list <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.levels = 'neither', hyper = NULL, subdiv = NULL, tatum = FALSE) {
   checks(fill.levels, xlen1 & (xlogical | xcharacter &  xplegal(c('both', 'above', 'below', 'neither'))))
   if (is.logical(fill.levels)) fill.levels <- c('neither', 'both')[fill.levels + 1L]
   
@@ -531,13 +531,16 @@ tactus <- function(x, deparser, ...) UseMethod('tactus')
 #' @rdname tactus
 #' @export
 tactus.meter <- function(x, deparser = recip, sep = '+', ...) {
+  uniqx <- unique(x)
   
-  result <- Map('[[', x@Levels, x@Tactus)
-  if (is.null(deparser)) {
-    .unlist(result)
-  } else {
-    unlist(lapply(result, \(x) paste(deparser(x, ...), collapse = sep)))
-  }
+  uniqTacti <- Map('[[', uniqx@Levels, uniqx@Tactus)
+  
+  if (!is.null(deparser)) uniqTacti <- lapply(uniqTacti, \(x) paste(deparser(x, ...), collapse = sep))
+  
+  uniqTacti <- .unlist(uniqTacti)
+  
+  uniqTacti[matches(list(x@Levels, x@Tactus), list(uniqx@Levels, uniqx@Tactus))]
+
 } 
 #' @rdname tactus
 #' @export
@@ -1187,7 +1190,6 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
   
-  
   counts <- met$Counts
   
   
@@ -1243,7 +1245,6 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 
 .metric <- function(dur, meter = duple(5),  groupby = list(), pickup = NULL, ..., 
                     parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
-  
   if (length(unique(meter)) > 1L) {
     return(.metrics(dur, meter = meter, pickup = pickup,
                     groupby = groupby, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
@@ -1358,7 +1359,6 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   onbeats <- matrix(NA, 
                     nrow = length(dur), ncol = length(allCols),
                     dimnames = list(NULL, allCols))
-  
   
   for (met in mets) {
     counts[cbind(rep(met$Indices, ncol(met$Counts)), 
