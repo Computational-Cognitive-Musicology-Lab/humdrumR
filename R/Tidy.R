@@ -14,7 +14,7 @@
 #' 
 #' These methods for [dplyr] verbs are all shorthand calls for [with/within/subset.humdrumR()][withHumdrum].
 #' 
-#' @name tidyHumdrum
+#' @rdname tidyHumdrum
 #' @export
 mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', 'never'), alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
   quosures <- rlang::enquos(...)

@@ -790,7 +790,7 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' For matrices, ditto can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
 #' 
 #' The `ditto` method for a [humdrumR object][humdrumRclass] simply applies `ditto` to the, by default,
-#' the active field; thus `ditto(humData)` is equivalent to `within(humData, newField <- ditto(.), dataTypes = 'Dd')`.
+#' the selected field; thus `ditto(humData)` is equivalent to `within(humData, newField <- ditto(.), dataTypes = 'Dd')`.
 #' The `field` argument can be used to indicated a different field to apply to. The result of the dittoing
 #' is saved to a new field---the `newField` argument can be used to control what to name the new field.
 #' 

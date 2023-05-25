@@ -233,7 +233,7 @@ which this path split? Where \code{Path == 0}, parent path is also \code{0}.
 }
 \item \code{Null} :: \code{logical}
 \itemize{
-\item Is the \link[=humActive]{active field} data field null?
+\item Are the \link[=selectedFields]{selected field(s)} (all) null?
 \item See the detailed discussion below, in the section of this documentation called "Null Data."
 }
 \item \code{Filter} :: \code{logical}

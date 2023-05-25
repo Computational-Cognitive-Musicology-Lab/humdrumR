@@ -135,7 +135,7 @@ vector of \code{character} strings. These strings are
 treated as
 \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
 
-The tokens from the humdrumR object's \link[=humActive]{active field(s)} are searched
+The tokens from the humdrumR object's \link[=selectedFields]{selected field(s)} are searched
 for matches to any of the regular expressions you input. Any piece that contains
 \strong{any} match to \strong{any} of the regular expressions is retained---all other pieces
 are filtered out. Note that (because this is \code{[}single-bracket\verb{]} indexing) the entire piece is
@@ -150,7 +150,7 @@ be used in isolation or in combination.
 as in \code{humdata[[ , j]]}.)
 These strings are
 treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-The tokens from the humdrumR object's \link[=humActive]{active field(s)} are searched
+The tokens from the humdrumR object's \link[=selectedFields]{selected field(s)} are searched
 for matches to any of the regular expressions you input.
 Any record which contains at least one token matching any regex in \code{i}
 will be retained.

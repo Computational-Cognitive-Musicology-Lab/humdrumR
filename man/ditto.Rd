@@ -99,7 +99,7 @@ The \code{data.frame} method simply applies \code{ditto} to each column of the \
 For matrices, ditto can be applied across columns (\code{margin == 2}), rows (\code{margin == 1}), or other dimensions.
 
 The \code{ditto} method for a \link[=humdrumRclass]{humdrumR object} simply applies \code{ditto} to the, by default,
-the active field; thus \code{ditto(humData)} is equivalent to \code{within(humData, newField <- ditto(.), dataTypes = 'Dd')}.
+the selected field; thus \code{ditto(humData)} is equivalent to \code{within(humData, newField <- ditto(.), dataTypes = 'Dd')}.
 The \code{field} argument can be used to indicated a different field to apply to. The result of the dittoing
 is saved to a new field---the \code{newField} argument can be used to control what to name the new field.
 }

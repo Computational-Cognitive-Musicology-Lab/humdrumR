@@ -107,7 +107,7 @@
 #'             + `"L"` = local comment
 #'             + `"G"` = global comment. 
 #'     + `Null` :: `logical` 
-#'         + Is the [active field][humActive] data field null? 
+#'         + Are the [selected field(s)][selectedFields] (all) null? 
 #'         + See the detailed discussion below, in the section of this documentation called "Null Data."
 #'     + `Filter` :: `logical`
 #'         + Has this record/token been [filtered out][subset.humdrumR()]? 
@@ -444,13 +444,15 @@ is.humdrumR <- function(x){
 #' @details
 #' 
 #' Generally, coercion works by evaluating a humdrumR object's the 
-#' [active expression][humActive] and forcing the result to be an atomic vector.
-#' This process is accomplished by the [evalActive()] command.
-#' The [as.vector(humdrumR)][base::as.vector()] method is essentially a wrapper for [evalActive()], with the additional
+#' [selected fields][selectedFields] and forcing the result to be an atomic vector.
+#' When multiple field are selected, they are pasted together, separated by `", "`.
+#' If a field is not atomic (like a `list`, or `lm` object), a concise representation of the
+#' list or object class is printed.
+#' The [as.vector(humdrumR)][humCoercion] has the additional
 #' option of coercing the resulting vector to a particular type using the `mode` argument.
 #' 
 #' The [as.matrix(humdrumR)][base::as.matrix()] method take things a step further by putting the evaluated
-#' active expression into a two-dimensional matrix, with rows representing records and columns indicating 
+#' fields into a two-dimensional matrix, with rows representing records and columns indicating 
 #' spine paths (see Padding section below).
 #' [as.data.frame(humdrumR)][base::as.data.frame()] first calls `as.matrix` then converts the matrix to a
 #' `data.frame`.
@@ -557,7 +559,7 @@ is.humdrumR <- function(x){
 #' 
 #' Must be a single `character` string naming an [atomic vector type][base::vector] to coerce the output to (i.e., `logical` or `numeric`).
 #'   
-#' If set to `"any"`, the output type is simply whatever comes out of [evalActive()], which depends on the class of the underlying [fields][humTable].
+#' If set to `"any"`, the output type is simply whatever the type of the [selected field][selectedFields] is.
 #' 
 #' 
 #' 
@@ -1261,8 +1263,8 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' 
 #' The `fromField` (`character`, `length == 1`) controls which field in the `fold` 
 #' spine/path/stop is folded into a new field.
-#' The `fromField` argument defaults to the (first) [active field][humActive],
-#' and must match (or partially match) a field in the `humdrumR` argument data set.
+#' The `fromField` argument defaults to the (first) [selected fields][selectedFields],
+#' and must match (or [partially match][partialMatching]) a field in the `humdrumR` argument data set.
 #' In some cases, the `fold` data is smaller than the `onto` data---for instance,
 #' spine paths often only exist for part of a spine, so there is less data in the path 
 #' than in the full spine.
@@ -2161,7 +2163,6 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 ## Selected fields ----
 ####################################################-
 
-##### Manipulating the Active slot
 
 #' The "selected" fields of a [humdrumR object][humdrumRclass]
 #' 

@@ -2,7 +2,7 @@
 #' Write [humdrumR data][humdrumRclass] to humdrum files
 #' 
 #' `writeHumdrum` writes `humdrumR` data into humdrum-syntax text files.
-#' The current [active expression][humActive] is evaluated to generate the humdrum output
+#' The current [selected field(s)][selectedFields] are evaluated to generate the humdrum output
 #' data.
 #' The written output should match the printout if printing the data in the `R` terminal.
 #' 

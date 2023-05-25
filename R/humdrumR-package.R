@@ -41,11 +41,12 @@
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
 #' @importFrom rlang %|% %||% 
 #' @importFrom bit64 as.integer64 is.integer64 as.integer64 as.integer64.integer
-#' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom numbers primeFactors
-#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize
-#' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type aes
+#' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ
 #' @importFrom scales ContinuousRange
+#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize
+#' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type aes geom_bar geom_point
+#' @export summarise select filter mutate pull reframe group_by ungroup summarize
 NULL
 
 

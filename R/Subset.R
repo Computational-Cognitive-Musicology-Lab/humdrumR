@@ -290,7 +290,7 @@ removeEmptyStops <- function(humdrumR) {
 #' treated as 
 #' [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
 #' 
-#' The tokens from the humdrumR object's [active field(s)][humActive] are searched
+#' The tokens from the humdrumR object's [selected field(s)][selectedFields] are searched
 #' for matches to any of the regular expressions you input. Any piece that contains
 #' **any** match to **any** of the regular expressions is retained---all other pieces
 #' are filtered out. Note that (because this is `[`single-bracket`]` indexing) the entire piece is 
@@ -305,7 +305,7 @@ removeEmptyStops <- function(humdrumR) {
 #' as in `humdata[[ , j]]`.)
 #' These strings are 
 #' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
-#' The tokens from the humdrumR object's [active field(s)][humActive] are searched
+#' The tokens from the humdrumR object's [selected field(s)][selectedFields] are searched
 #' for matches to any of the regular expressions you input.
 #' Any record which contains at least one token matching any regex in `i`
 #' will be retained.

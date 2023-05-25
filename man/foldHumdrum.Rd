@@ -123,8 +123,8 @@ functions directly (details below).
 
 The \code{fromField} (\code{character}, \code{length == 1}) controls which field in the \code{fold}
 spine/path/stop is folded into a new field.
-The \code{fromField} argument defaults to the (first) \link[=humActive]{active field},
-and must match (or partially match) a field in the \code{humdrumR} argument data set.
+The \code{fromField} argument defaults to the (first) \link[=selectedFields]{selected fields},
+and must match (or \link[=partialMatching]{partially match}) a field in the \code{humdrumR} argument data set.
 In some cases, the \code{fold} data is smaller than the \code{onto} data---for instance,
 spine paths often only exist for part of a spine, so there is less data in the path
 than in the full spine.

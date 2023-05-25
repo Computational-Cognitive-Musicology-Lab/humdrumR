@@ -85,7 +85,7 @@ If \code{NULL}, not appended.}
 }
 \description{
 \code{writeHumdrum} writes \code{humdrumR} data into humdrum-syntax text files.
-The current \link[=humActive]{active expression} is evaluated to generate the humdrum output
+The current \link[=selectedFields]{selected field(s)} are evaluated to generate the humdrum output
 data.
 The written output should match the printout if printing the data in the \code{R} terminal.
 }
