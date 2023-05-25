@@ -343,6 +343,7 @@ NULL
 
 
 
+
 numericIndexCheck <- function(i) {
     if (any(i < 0) && any(i > 0)) stop("You can't mix negative and positive numbers when trying to index humdrumR objects.")
     if (all(i == 0)) stop("You can't index humdrumR objects with just zeros.")

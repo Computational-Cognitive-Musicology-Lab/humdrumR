@@ -2549,6 +2549,9 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 
 
 print_score <- function(humdrumR, maxRecordsPerFile) {
+    label <- rlang::as_label(rlang::enexpr(humdrumR))
+    selectedFields <- selectedFields(humdrumR)
+    
   humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot', useTokenGLIM = TRUE)
     
   lines <- as.lines(humdrumR[1])
@@ -2565,10 +2568,13 @@ print_score <- function(humdrumR, maxRecordsPerFile) {
     </head>
     <body>
     <h1>humdrumR viewer</h1>
+    <p>Viewing the FIELD field(s) of the OBJECT data object.</p>
     <script id="ID" type="text/x-humdrum">OUTPUT</script>
     </body>
     </html>'
   
+  html <- gsub('FIELD', paste(selectedFields, collapse = '/'), html)
+  html <- gsub('OBJECT', label, html)
   html <- gsub('XXX', paste0("displayHumdrum({source: '", randomID,  "', autoResize: 'true'});"), html)
   html <- gsub("ID", randomID, html)
   html <- gsub("OUTPUT", output, html)

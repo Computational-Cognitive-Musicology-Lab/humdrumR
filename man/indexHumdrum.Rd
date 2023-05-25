@@ -2,6 +2,8 @@
 % Please edit documentation in R/Subset.R
 \name{indexHumdrum}
 \alias{indexHumdrum}
+\alias{index}
+\alias{index2}
 \alias{[,humdrumR,missing,ANY-method}
 \alias{[,humdrumR,numeric,ANY-method}
 \alias{[,humdrumR,character,ANY-method}
@@ -12,6 +14,10 @@
 \alias{[[,humdrumR,ANY,ANY-method}
 \title{Indexing humdrumR objects}
 \usage{
+index(x, i, j, drop = FALSE)
+
+index2(x, i, j, drop = FALSE)
+
 humdata[] # returns unchanged
 
 humdata[x:y]

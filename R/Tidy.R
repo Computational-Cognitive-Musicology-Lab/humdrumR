@@ -272,4 +272,31 @@ theme_humdrum <- function() {
 }
 
 
+# Indexing in pipes ----
+
+
+#' @rdname tidyHumdrum
+#' @export
+index <- function(x, i, j, drop = TRUE) {
+  
+  pat <- paste0(missing(i), missing(j))
+  
+  switch(pat,
+         'TRUETRUE' = x,
+         'TRUEFALSE' = x[  , j, drop],
+         'FALSETRUE' = x[i ,  , drop],
+         'FALSEFALSE' = x[i, j, drop])
+}
+#' @rdname tidyHumdrum
+#' @export
+index2 <- function(x, i, j, drop = TRUE) {
+  
+  pat <- paste0(missing(i), missing(j))
+  
+  switch(pat,
+         'TRUETRUE' = x,
+         'TRUEFALSE' = x[[  , j, drop]],
+         'FALSETRUE' = x[[i ,  , drop]],
+         'FALSEFALSE' = x[[i, j, drop]])
+}
 
