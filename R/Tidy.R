@@ -90,7 +90,6 @@ pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = 'asis', drop 
     pulled <- rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!fields, dataTypes = !!dataTypes, drop = FALSE)))
     
   }
-  
   if (drop) pulled[[1]] else pulled
   
 }

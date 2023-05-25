@@ -2064,7 +2064,11 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
     
     # filter (subsetting)
     filter <- humtab$Filter
-    selectedTable[] <- selectedTable[ , lapply(.SD, ifelse, test = filter, yes = NA)]
+    selectedTable[] <- selectedTable[ , lapply(.SD, 
+                                               \(field) {
+                                                   field[filter] <- NA
+                                                   field
+                                               })]
     
     # decide how NA/null values are shown
     fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]

@@ -621,22 +621,17 @@ with.humdrumR <- function(data, ...,
                        .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
   
-
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
   
   if (drop) {
-    parts <- grepl('^_(by|subset)=..*_$|contextWindow', colnames(result))
-    if (any(parts)) partNames <- do.call('paste', c(result[ , parts, with = FALSE], list(sep = ';')))
     
-    result <- if (any(!parts)) result[[max(which(!parts))]]
+    result <- result[[max(which(!colnames(result) %in% groupFields))]]
     if (length(result) == 0L) return(result)
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
-    } else {
-      if (any(parts)) names(result) <- partNames
     }
   } else {
     visible <- TRUE
