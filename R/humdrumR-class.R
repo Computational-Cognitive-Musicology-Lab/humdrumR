@@ -2345,7 +2345,7 @@ print_humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   Nfiles <- length(humdrumR)          
   if (Nfiles > 2 && firstAndLast) humdrumR <- humdrumR[c(1, Nfiles)]
   
-  if (view == 'score' && 'shiny' %in% .packages()) return(invisible(print_score(humdrumR, maxRecordsPerFile)))
+  if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile))
   
   tokmat <- if (view %in% c('score', 'humdrum')) {
       tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
@@ -2542,14 +2542,32 @@ print_score <- function(humdrumR, maxRecordsPerFile) {
   
   randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
   
-  ui <- fluidPage(tags$head(tags$script(src = "https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js")),
-            tags$script(paste0("displayHumdrum({source: '", randomID,  "', autoResize: 'true'});")),
-            tags$script(id = randomID, type = 'text/x-humdrum', output))
+  html <- '<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js"></script>
+    <script>XXX</script>
+    </head>
+    <body>
+    <h1>humdrumR viewer</h1>
+    <script id="ID" type="text/x-humdrum">OUTPUT</script>
+    </body>
+    </html>'
   
-  server <- function(input, output, session) {}
+  html <- gsub('XXX', paste0("displayHumdrum({source: '", randomID,  "', autoResize: 'true'});"), html)
+  html <- gsub("ID", randomID, html)
+  html <- gsub("OUTPUT", output, html)
+               
   
-  runGadget(shinyApp(ui, server, stopOnCancel = TRUE)
+  tempDir <- tempfile()
+  dir.create(tempDir)
+  htmlFile <- file.path(tempDir, 'index.html')
   
+  writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
+  
+  getOption('viewer', default = utils::browseURL)(htmlFile)
+  
+  invisible(NULL)
 }
 
 
