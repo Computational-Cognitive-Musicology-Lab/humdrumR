@@ -2057,7 +2057,7 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
     
     null <- match.arg(null)
     
-    humdrumR <- update_Null(humdrumR, field = fields)
+    # humdrumR <- update_Null(humdrumR, field = fields)
     
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     selectedTable <- humtab[ , fields, with = FALSE]
@@ -2261,7 +2261,6 @@ pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('charNA2do
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
     field[field == ''] <- "'"
     
-    if (any(is.na(field))) .stop('Print field has NA values')
     
     data.table(Printable = field)
    
@@ -2333,7 +2332,7 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   
   if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile))
   
-  tokmat <- if (view %in% c('score', 'humdrum')) {
+  tokmat <- if (view == 'humdrum') {
       tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
   } else {
       tokmat_humtable(humdrumR, dataTypes, null = null)
@@ -2372,12 +2371,13 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
 
 
 tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
-    
     structureFields <- c('Piece', 'Filename', 'Spine', 'Path', 'Record', 'Stop')
     selectedFields <- selectedFields(humdrumR)
     tokenTable <- pullPrintable(humdrumR, unique(c(structureFields, selectedFields)),
+                                dataTypes = dataTypes,
                                 null = null, useTokenGLIM = FALSE, collapse = FALSE) 
    
+    
     
     setcolorder(tokenTable, unique(c(structureFields, selectedFields)))
     
@@ -2546,6 +2546,8 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 
 
 print_score <- function(humdrumR, maxRecordsPerFile) {
+  humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot', useTokenGLIM = TRUE)
+    
   lines <- as.lines(humdrumR[1])
   
   output <- paste(lines, collapse = '\n')
