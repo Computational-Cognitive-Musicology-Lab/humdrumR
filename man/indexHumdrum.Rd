@@ -10,6 +10,7 @@
 \alias{[[,humdrumR,character,missing-method}
 \alias{[[,humdrumR,missing,character-method}
 \alias{[[,humdrumR,ANY,ANY-method}
+\alias{[[,humdrumR,missing,missing-method}
 \title{Indexing humdrumR objects}
 \usage{
 humdata[] # returns unchanged
@@ -25,6 +26,8 @@ humdata[[ , x:y]]
 humdata[['regex']]
 
 humdata[[ , 'regex']]
+
+humdata[[x:y, l:m]]
 
 humdata[[x:y, l:m]]
 }

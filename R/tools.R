@@ -471,14 +471,7 @@ multimatch <- function(x, table, ...) {
   do.call('cbind', lapply(tables, \(tab) match(x, tab, ...)))
 }
 
-squashGroupby <- function(groupby = list()) {
-  groups <- do.call('paste', groupby) # seems to be fastest option
-  match(groups, unique(groups))
-  # groupby <- as.data.table(groupby)
-  # matches(groupby, unique(groupby))
 
-  
-}
 
 `%ins%` <- function(x, table) !is.na(matches(x, table))
 
@@ -736,6 +729,30 @@ segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
     
 }
 
+squashGroupby <- function(groupby = list()) {
+  groups <- do.call('paste', groupby) # seems to be fastest option
+  match(groups, unique(groups))
+  # groupby <- as.data.table(groupby)
+  # matches(groupby, unique(groupby))
+}
+
+group2segments <- function(x, as.factor = TRUE, ...) {
+  seg <- humdrumR::segments(x, ...)
+  
+  values <- do.call('paste', as.data.frame(attr(seg, 'values')))
+  attr(seg, 'values') <- NULL
+  count <- tapply_inplace(values, values, seq_along)
+  
+  if (as.factor) {
+    structure(seg, class = 'factor', levels = paste0(values, count))
+  } else {
+    data.table(Groups = x, Segments = seg, Count = count[seg])
+  }
+  
+  
+  
+}
+
 #' @export
 #' @rdname segments
 changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALSE) {
@@ -753,9 +770,9 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
                                head(x, -1L) != tail(x, -1L),
                                if (reverse) first))
   changes <- Reduce(if (any) '|' else '&', changes)
+  changes[is.na(changes)] <- FALSE
   
-  
-  values <- do.call('cbind', lapply(xs, '[', !is.na(changes) & changes))
+  values <- do.call('cbind', lapply(xs, '[',  changes))
   rownames(values) <- which(changes)
   
   if (value) {

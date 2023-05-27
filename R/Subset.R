@@ -560,4 +560,27 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'),
 #   
 
 
-
+#' @rdname indexHumdrum
+#' @usage humdata[[x:y, l:m]]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'), 
+          function(x, i, j, ..., removeEmpty = FALSE) {
+           
+            ldots <- list(...)
+            exclusives <- intersect(names(ldots), unique(x$Exclusive))
+            if (length(exclusives)) {
+              x <- subset(x, .by = 'File', {
+                keepSpines <- unique(Spine)
+                for (exclusive in exclusives) {
+                  excSpines <-sort(unique(Spine[Exclusive == exclusive]))
+                  keepSpines <- setdiff(keepSpines, setdiff(excSpines, excSpines[ldots[[exclusive]]]))
+                }
+                Spine %in% keepSpines
+              })
+              if (removeEmpty) x <- removeEmptySpines(x)
+            }
+            
+            
+           
+            x
+          })
