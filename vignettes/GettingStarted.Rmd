@@ -124,7 +124,7 @@ chorales
 
 ```
 
-Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2word(length(chorales)) ` files"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
+Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2word(length(chorales)) ` pieces"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
 Notice that when you print a `r hm` object, `r hm` shows you the beginning of the first file and the end of the last file, as well as telling you how many files there are in total.
 
 
@@ -133,7 +133,171 @@ Notice that when you print a `r hm` object, `r hm` shows you the beginning of th
 `readHumdrum` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
 
 
+# Counting Things
 
+The most fundamental analysis in computational musicology, is simply to count things!
+To count the contents of data, we can use the `tally()` function.
+
+```{r}
+chorales |> 
+  tally() 
+
+```
+
+That's quite a mess! What have we done?
+When we passes or humdrumR data object (`chorales`) to `tally()`, tally counted all the unique data tokens (ignoring non-data tokens, like barline and interpretations).
+There are a lot of unique tokens in this data, so it's not super helpful.
+Maybe we'd like to look at just the twenty most common tokens in the `chorales`?
+We can use `sort()` and `tail()`:
+
+
+```{r echo=-1}
+chorales |>  tally() |> sort() |> tail(n = 1) -> most
+
+chorales |> 
+  tally() |>
+  sort() |>
+  tail(n = 20)
+
+```
+
+Ah, that's more promising! We see that most common token is a quarter-note E4 (`4e`), which occurs `r most` times.
+
+## Separating pitch and rhythm
+
+To make our tallies more useful, we might want to tally only the pitch of rhythm part of the `**kern` data.
+We can do that using `r hm`'s suit of [pitch](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html) and [rhythm](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmFunctions.html) functions.
+For example, let's try the `pitch()` function:
+
+
+```{r}
+chorales |> 
+  pitch()
+
+```
+
+Ah, the `**kern` tokens have been translated to scientific pitch, and the non-pitch information has been deleted!
+Let's pass that to tally:
+
+```{r}
+chorales |>
+  pitch() |>
+  tally()
+
+
+```
+
+Pretty cool, but maybe we'd like to ignore octave right now:
+We can use the `simple` argument to get *simple* pitch information (no octave) and make a barplot:
+
+```{r}
+chorales |>
+  pitch(simple = TRUE) |>
+  tally() |>
+  draw()
+
+```
+
+Instead of pitch, we could do the same sort of tallying of rhythm information:
+
+```{r}
+
+chorales |>
+  notehead() |>
+  tally() |>
+  draw()
+
+```
+
+## Filtering
+
+Sometimes, we might only want to look at a subset of our data.
+For example, maybe we want to tally the notes used by the soprano voice.
+In these chorales, the soprano voice is always in the fourth spine.
+We can use the `filter()` function to indicate a subset we'd like to study:
+
+```{r}
+
+chorales |> 
+  pitch(simple = TRUE) |> 
+  filter(Spine == 4) |>
+  tally()
+
+```
+
+Let's try something even cooler.
+Notice that, in the chorale data, there are tandem interpretations that look like `*G:` and `*E:`.
+These are indications of the key.
+Anytime you read humdrum data that has these key interpretations, `r hm` will read them into a "field" called `Key`.
+We can tell `r hm` to show us the `Key` field (or any other field) by using `select()`:
+
+```{r}
+chorales |>
+  select(Key)
+
+chorales |> 
+  select(Key) |>
+  tally()
+```
+
+We can even tally the `Key` field to see what keys are present.
+There are (apparently) 1160 notes when the key is G major!
+What if we only want to tabulate notes in the key that key?
+
+```{r}
+
+chorales |>
+  select(Token) |>
+  filter(Key == 'G:') |>
+  pitch(simple = TRUE) |>
+  tally()
+
+```
+
+Guess what? There are a bunch more "fields" hidden in your humdrumR data object that you can use...and you can make your own!
+Try using the `fields()` function to see what fields are available---any of the fields you see can be selected with `select()`.
+Also, check out the [HumdrumR Data Model](HumdrumR's data model DataModel.html) vignette to dig into the details of what these "fields" really are.
+
+# Digging in Deeper
+
+What if we want to study rhythm and pitch (or key, or anything else) at the same time?
+Using the approach we've been using so far, we can only really look at one piece of information at a time.
+However, if we string some of our previous commands together we can make some magic:
+
+```{r}
+chorales |>
+  pitch(simple = TRUE) |>
+  select(Token) |>
+  recip() -> chorales
+
+chorales
+
+```
+
+We called `pitch()` like before, but then we selected `Token`---"Token" is the default data field in `r hm`---the original tokens from your data files you read.
+By calling `select(Token)` we sort of "reset" our selection to the original data.
+We can then call `recip()` to get the rhythm data, and then we assign (`->`) the dataset back to replace the `chorales` variable---this "saves" what we've done.
+The result is we now have a dataset with *three* "data fields": `r humdrumR:::harvard(fields(chorales, 'Data')$Name, 'and')`.
+We can select any of these three:
+
+```{r}
+
+chorales |> select(Pitch)
+chorales |> select(Recip)
+
+chorales |> select(Pitch, Recip)
+
+```
+
+We can "see" that all three of these data fields are present in our data, at your finger tips.
+
+
+```{r}
+chorales |> 
+  select(Pitch, Recip) |>
+  tally()
+
+```
 
 # The Data Model
 

@@ -942,6 +942,12 @@ activateQuo <- function(funcQuosure, dotField) {
   # of any `.` subexpressions.
   dotField <- rlang::sym(dotField)
   substituteName(funcQuosure, list(. = dotField))
+
+  # dotField <- rlang::syms(dotField)
+  # funcQuosure <- substituteName(funcQuosure, list(. = quote(!!!dotField)))
+  
+  # funcQuosure <- rlang::eval_tidy(rlang::quo(rlang::quo(!!funcQuosure)))
+  # funcQuosure
 }
 
 #### nested formulae in expressions

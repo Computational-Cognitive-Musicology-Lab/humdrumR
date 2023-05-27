@@ -348,6 +348,9 @@ humdrumRmethods <- function(name) {
 #' @exportS3Method kern default
 #' @exportS3Method kern humdrumR
 humdrumRmethods('kern')
+#' @exportS3Method pitch default
+#' @exportS3Method pitch humdrumR
+humdrumRmethods('pitch')
 #' @exportS3Method solfa default
 #' @exportS3Method solfa humdrumR
 humdrumRmethods('solfa')
@@ -371,3 +374,7 @@ humdrumRmethods('recip')
 #' @exportS3Method duration default
 #' @exportS3Method duration humdrumR
 humdrumRmethods('duration')
+
+#' @exportS3Method notehead default
+#' @exportS3Method notehead humdrumR
+humdrumRmethods('notehead')
