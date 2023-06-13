@@ -354,6 +354,12 @@ humdrumRmethods('pitch')
 #' @exportS3Method solfa default
 #' @exportS3Method solfa humdrumR
 humdrumRmethods('solfa')
+#' @exportS3Method semits default
+#' @exportS3Method semits humdrumR
+humdrumRmethods('semits')
+#' @exportS3Method midi default
+#' @exportS3Method midi humdrumR
+humdrumRmethods('midi')
 
 
 ### Interval functions ----

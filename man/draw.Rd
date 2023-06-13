@@ -7,11 +7,15 @@
 \alias{draw,missing,numeric-method}
 \alias{draw,discrete,discrete-method}
 \alias{draw,discrete,missing-method}
+\alias{draw,token,missing-method}
+\alias{draw,missing,token-method}
+\alias{draw,token,token-method}
 \alias{draw,table,ANY-method}
 \alias{draw,probabilityDistribution,ANY-method}
 \alias{draw,discrete,numeric-method}
 \alias{draw,list,numeric-method}
 \alias{draw,formula,ANY-method}
+\alias{draw,humdrumR,ANY-method}
 \title{Visualize data}
 \usage{
 draw(
@@ -88,6 +92,42 @@ draw(
   ...
 )
 
+\S4method{draw}{token,missing}(
+  x,
+  y,
+  col = 2,
+  facet = list(),
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
+
+\S4method{draw}{missing,token}(
+  x,
+  y,
+  col = 2,
+  facet = list(),
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
+
+\S4method{draw}{token,token}(
+  x,
+  y,
+  col = 2,
+  facet = list(),
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
+
 \S4method{draw}{table,ANY}(
   x,
   y,
@@ -106,6 +146,18 @@ draw(
 \S4method{draw}{list,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
 
 \S4method{draw}{formula,ANY}(x, y, col = 2, xlab = NULL, ylab = NULL, data = NULL, ...)
+
+\S4method{draw}{humdrumR,ANY}(
+  x,
+  y,
+  col = 2,
+  facet = list(),
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
 }
 \description{
 The \code{draw()} function is humdrumR's goto plotting function.

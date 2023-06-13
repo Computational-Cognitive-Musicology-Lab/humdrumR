@@ -293,7 +293,7 @@ setMethod('p', c('table'),
 
 
 
-setClassUnion("discrete", members = c('character', 'integer', 'logical', 'token', 'factor'))
+setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor'))
 
 #' @rdname p
 #' @export
@@ -614,7 +614,8 @@ setGeneric('draw', \(x, y,
                      main = '', sub = '',
                      xlab = NULL, ylab = NULL, ...) {
   oldpalette <- palette(flatly)
-  oldpar <- par(family = 'Lato', col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
+  oldpar <- par(family = 'Lato', 
+                col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
                 cex.axis = .7, pch = 16)
   
   on.exit({par(oldpar) ; palette(oldpalette)})
@@ -674,8 +675,6 @@ setMethod('draw', c('numeric', 'numeric'),
 setMethod('draw', c('numeric', 'missing'), 
           \(x, y, col = 3, breaks = 'Sturges', jitter = '', ..., cex = prep_cex(x) * .75, xlim = NULL, ylim = NULL) {
             
-            
-            
             breaks <- hist.default(x, breaks = breaks, plot = FALSE)
             
             xat <- breaks$breaks
@@ -708,8 +707,8 @@ setMethod('draw', c('numeric', 'missing'),
             
             if (length(x) > 1e5) x <- sample(x, 1e5)
             if (grepl('x', jitter)) x <- smartjitter(x)
-            points(x, rnorm(length(x), mean(ylim), diff(range(ylim)) / 20), 
-                   cex = cex , col = rgb(1,0,0, .1), pch = 16, xpd = TRUE)
+            # points(x, rnorm(length(x), mean(ylim), diff(range(ylim)) / 20), 
+                   # cex = cex , col = rgb(1,0,0, .1), pch = 16, xpd = TRUE)
             
             
             list(ylab = 'Proportion')
@@ -748,6 +747,31 @@ setMethod('draw', c('discrete', 'discrete'),
 setMethod('draw', c('discrete', 'missing'),
           function(x, y, ...){ 
             draw(tally(x), ..., xlab = '')
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('token', 'missing'),
+          function(x, y, ...){ 
+            x <- if (is.numeric(x)) untoken(x) else factorize(x)
+            draw(x = x, ..., xlab = '')
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('missing', 'token'),
+          function(x, y, ...){ 
+            y <- if (is.numeric(y)) untoken(y) else factorize(y)
+            draw( , y = y, ..., xlab = NA)
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c(x = 'token', y = 'token'),
+          function(x, y, ...){ 
+            x <- if (is.numeric(x)) untoken(x) else factorize(x)
+            y <- if (is.numeric(y)) untoken(y) else factorize(y)
+            draw(x, y, ..., xlab = '')
           })
 
 # #' @rdname draw
@@ -885,7 +909,23 @@ setMethod('draw', c('formula'),
             
           })
 
-
+#' @rdname draw
+#' @export
+setMethod('draw', c('humdrumR'),
+          function(x, facet = NULL, ...) {
+            selected <- pullSelectedField(x, null = 'asis')
+            fields <- fields(x)
+            groupFields <- if (length(facet)) {
+              fieldMatch(x, unlist(facet), callfun = 'draw')
+            } else {
+              fields[GroupedBy == TRUE]$Name 
+            }
+            if (length(groupFields)) {
+              facet <- pullFields(x, groupFields)
+            }
+            draw(selected, facet = facet, ...)
+            
+          })
 
 ## draw()'s helpers ----
 
@@ -1030,12 +1070,14 @@ draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xa
   xticks <- if (is.numeric(args$x)) prep_ticks(args$x, log = grepl('x', log), at = xat)
   yticks <- if (is.numeric(args$y)) prep_ticks(args$y, log = grepl('y', log), at = yat)
   args$ylim <- ylim %||% if (!is.null(yticks)) range(yticks)
+  args$xlim <- args$xlim %||% if (!is.null(xticks)) range(xticks)
+  
   
   args$xat <- args$yat <- NA
   
   facetLabels <- unique(as.data.frame(facets))
   facetLabels <- facetLabels[sapply(facetLabels, \(val) length(unique(val)) > 1L)]
-  facetLabels <- do.call('paste', facetLabels)
+  facetLabels <- paste(colnames(facetLabels), do.call('paste', facetLabels))
   
   facets <- squashGroupby(facets)
   args <- lapply(args, \(x) if (length(x) == length(facets)) split(x, f = facets) else rep(list(x), length(layout)))
@@ -1077,14 +1119,14 @@ draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xa
   layout(1)
   plot.window(c(0, 1), c(0, 1))
   par(oma = c(0,0,0,0))
-  if (nrow(layout) > 1) {
-    abline(h = head(seq(0, 1, length.out = nrow(layout) + 1)[-1], -1),
-           lty = 'dashed', col = setalpha(flatly[5], .3))
-  }
-  if (ncol(layout) > 1) {
-    abline(v = head(seq(0, 1, length.out = ncol(layout) + 1)[-1], -1),
-           lty = 'dashed', col = setalpha(flatly[5], .3))
-  }
+  # if (nrow(layout) > 1) {
+  #   abline(h = head(seq(0, 1, length.out = nrow(layout) + 1)[-1], -1),
+  #          lty = 'dashed', col = setalpha(flatly[5], .3))
+  # }
+  # if (ncol(layout) > 1) {
+  #   abline(v = head(seq(0, 1, length.out = ncol(layout) + 1)[-1], -1),
+  #          lty = 'dashed', col = setalpha(flatly[5], .3))
+  # }
   # list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
 }
 

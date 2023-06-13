@@ -734,7 +734,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   
   ##### grouping
   groupFields <- if (is.null(.by)) {
-    fields[GroupedBy > 0L]$Name 
+    fields[GroupedBy == TRUE]$Name 
   } else {
     fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
   }
