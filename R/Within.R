@@ -975,9 +975,9 @@ activateQuo <- function(funcQuosure, dotField) {
 
 
 autoArgsQuo <- function(funcQuosure, humtab) {
-  predicate <- \(Head) Head %in% autoArgTable$Function
+  predicate <- \(Head) Head %in% c(autoArgTable$Function, paste0(autoArgTable$Function, '.default'))
   do <- \(exprA) {
-    tab <- autoArgTable[Function == exprA$Head & 
+    tab <- autoArgTable[(Function == exprA$Head | paste0(Function, '.default') == exprA$Head) & 
                           !Argument %in% names(exprA$Args) &
                           sapply(Expression, \(expr) length(fieldsInExpr(humtab, expr)) > 0L)]
     args <- setNames(tab$Expression, tab$Argument)

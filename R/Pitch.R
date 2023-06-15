@@ -4243,7 +4243,7 @@ invert.factor <- invert.token
 #' 
 #' @param bracket ***Whether to print brackets around `incomplete` output.***
 #' 
-#' Defaults to `TRUE`.
+#' Defaults to `TRUE`, unless `incomplete` is `NA`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
@@ -4299,7 +4299,7 @@ invert.factor <- invert.token
 #;
 #' @name int
 #' @export
-int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, bracket = TRUE,
+int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, bracket = is.null(incomplete) || !is.na(incomplete),
                 classify = FALSE, 
                 ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
   
@@ -4354,7 +4354,7 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
 
 #' @rdname int
 #' @export 
-mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = TRUE,
+mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.null(incomplete) || !is.na(incomplete),
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
@@ -4450,7 +4450,7 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 
 #' @rdname int
 #' @export
-hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = TRUE,
+hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.null(incomplete) || !is.na(incomplete),
                  ...,
                  parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
 

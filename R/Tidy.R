@@ -301,6 +301,24 @@ index2 <- function(x, i, j, drop = TRUE) {
 
 # Humdrum-style application ----
 
+test <- function(func) {
+  args <- formals(func)
+   firstArg <- names(args)[1]
+  func <- rlang::enexpr(func)
+  firstArg <- rlang::sym(names(args)[1])
+  bquote({
+    
+    quos <- rlang::enquos(...)
+    
+    if (!any(.names(quos) %in% c(firstArg, ''))) quos <- c(rlang::quo(.), quos)
+    browser()
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), kern.default(!!!quos))))
+    
+  }) -> expr
+  
+  rlang::new_function(alist(x=, ... =), expr)
+}
+
 humdrumRmethods <- function(name) {
   # prexisting method becomes .default
   default <- match.fun(name)
@@ -310,25 +328,32 @@ humdrumRmethods <- function(name) {
   assign(paste0(name, '.default'), default, parent.frame())
   
   # humdrumR method
-  subcall <- rlang::sym(paste0(name, '.default'))
-  firstArg <- rlang::sym(names(args)[1])
-  
-  subargs <- args[-1]
-  ldots <- names(subargs) == '...'
-  if (any(ldots)) {
-    subargs[[which(ldots)]] <- quote(...)
-    names(subargs)[which(ldots)] <- ''
-  }
-  subargs[!ldots] <- rlang::syms(names(subargs)[!ldots])
-  
-  #### insert "auto args"
-  autoArgs <- autoArgTable[Function == name]
-  subargs[autoArgs$Argument] <- autoArgs$Expression
-  
+  .default <- rlang::sym(paste0(name, '.default'))
+  firstArg <- names(args)[1]
   Name <- rlang::sym(stringr::str_to_title(name))
   
-  humdrumR <- rlang::new_function(args[!names(args) %in% autoArgs$Argument], env = envir,
-                                  rlang::expr(within.humdrumR(!!firstArg, !!Name <- (!!subcall)(., !!!subargs))))
+  body <- bquote({
+    quos <- rlang::enquos(...)
+    
+    if (!any(.names(quos) %in% c(.(firstArg), ''))) quos <- c(rlang::quo(.), quos)
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos))))
+  })
+  
+  # subargs <- args[-1]
+  # ldots <- names(subargs) == '...'
+  # if (any(ldots)) {
+    # subargs[[which(ldots)]] <- quote(...)
+    # names(subargs)[which(ldots)] <- ''
+  # }
+  # subargs[!ldots] <- rlang::syms(names(subargs)[!ldots])
+  
+  #### insert "auto args"?
+  # autoArgs <- autoArgTable[Function == name]
+  # subargs[autoArgs$Argument] <- autoArgs$Expression
+  
+  
+  humdrumR <- rlang::new_function(setNames(alist(x = , ... = ), c(firstArg, '...')), env = envir,
+                                  body) #rlang::expr(within.humdrumR(!!firstArg, !!Name <- (!!.default)(., !!!subargs))))
   
   assign(paste0(name, '.humdrumR'), humdrumR, parent.frame())
   

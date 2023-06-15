@@ -92,10 +92,21 @@ tally.default <- function(...,
 }
 
 #' @export
-tally.humdrumR <- function(x, na.rm = FALSE, exclude = NULL) {
-  fields <- pullSelectedFields(x)
+tally.humdrumR <- function(x, ..., na.rm = FALSE, exclude = NULL) {
+  quos <- rlang::enquos(...)
   
-  do.call('tally', as.list(fields))
+  if (length(quos)) {
+    quo <- rlang::quo(with(x, tally(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
+    rlang::eval_tidy(quo)
+    
+    
+  } else {
+    fields <- pullSelectedFields(x)
+    
+    do.call('tally', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
+  }
+  
+  
   
 }
 
