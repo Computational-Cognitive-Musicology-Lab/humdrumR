@@ -345,21 +345,76 @@ humdrumRmethods <- function(name) {
 
 ## Pitch functions ----
 
+# lapply(rapply(humdrumR:::pitchFunctions, 
+#               \(x) ifelse(humdrumR:::.names(x) == '', x, names(x))),
+#        \(func) {
+#          paste0(sep = '',
+#              "#' @exportS3Method ", func, " default\n",
+#              "#' @exportS3Method ", func, " humdrumR\n",
+#              "humdrumRmethods('", func, "')\n")
+#        }) |> do.call(what = 'paste0') |> clipr::write_clip()
+
 #' @exportS3Method kern default
 #' @exportS3Method kern humdrumR
 humdrumRmethods('kern')
 #' @exportS3Method pitch default
 #' @exportS3Method pitch humdrumR
 humdrumRmethods('pitch')
+#' @exportS3Method lilypond default
+#' @exportS3Method lilypond humdrumR
+humdrumRmethods('lilypond')
+#' @exportS3Method helmholtz default
+#' @exportS3Method helmholtz humdrumR
+humdrumRmethods('helmholtz')
+#' @exportS3Method tonh default
+#' @exportS3Method tonh humdrumR
+humdrumRmethods('tonh')
+#' @exportS3Method interval default
+#' @exportS3Method interval humdrumR
+humdrumRmethods('interval')
 #' @exportS3Method solfa default
 #' @exportS3Method solfa humdrumR
 humdrumRmethods('solfa')
+#' @exportS3Method solfg default
+#' @exportS3Method solfg humdrumR
+humdrumRmethods('solfg')
+#' @exportS3Method degree default
+#' @exportS3Method degree humdrumR
+humdrumRmethods('degree')
+#' @exportS3Method deg default
+#' @exportS3Method deg humdrumR
+humdrumRmethods('deg')
+#' @exportS3Method bhatk default
+#' @exportS3Method bhatk humdrumR
+humdrumRmethods('bhatk')
+#' @exportS3Method step default
+#' @exportS3Method step humdrumR
+humdrumRmethods('step')
+#' @exportS3Method accidental default
+#' @exportS3Method accidental humdrumR
+humdrumRmethods('accidental')
+#' @exportS3Method quality default
+#' @exportS3Method quality humdrumR
+humdrumRmethods('quality')
+#' @exportS3Method octave default
+#' @exportS3Method octave humdrumR
+humdrumRmethods('octave')
 #' @exportS3Method semits default
 #' @exportS3Method semits humdrumR
 humdrumRmethods('semits')
 #' @exportS3Method midi default
 #' @exportS3Method midi humdrumR
 humdrumRmethods('midi')
+#' @exportS3Method cents default
+#' @exportS3Method cents humdrumR
+humdrumRmethods('cents')
+#' @exportS3Method pc default
+#' @exportS3Method pc humdrumR
+humdrumRmethods('pc')
+#' @exportS3Method freq default
+#' @exportS3Method freq humdrumR
+humdrumRmethods('freq')
+
 
 
 ### Interval functions ----
@@ -373,14 +428,33 @@ humdrumRmethods('hint')
 
 ## Rhythm functions ----
 
+# lapply(rapply(humdrumR:::rhythmFunctions,
+#               \(x) ifelse(humdrumR:::.names(x) == '', x, names(x))),
+#        \(func) {
+#          paste0(sep = '',
+#              "#' @exportS3Method ", func, " default\n",
+#              "#' @exportS3Method ", func, " humdrumR\n",
+#              "humdrumRmethods('", func, "')\n")
+#        }) |> do.call(what = 'paste0') |> clipr::write_clip()
+
 #' @exportS3Method recip default
 #' @exportS3Method recip humdrumR
 humdrumRmethods('recip')
-
-#' @exportS3Method duration default
-#' @exportS3Method duration humdrumR
-humdrumRmethods('duration')
-
 #' @exportS3Method notehead default
 #' @exportS3Method notehead humdrumR
 humdrumRmethods('notehead')
+#' @exportS3Method duration default
+#' @exportS3Method duration humdrumR
+humdrumRmethods('duration')
+#' @exportS3Method quarters default
+#' @exportS3Method quarters humdrumR
+humdrumRmethods('quarters')
+#' @exportS3Method dur default
+#' @exportS3Method dur humdrumR
+humdrumRmethods('dur')
+#' @exportS3Method seconds default
+#' @exportS3Method seconds humdrumR
+humdrumRmethods('seconds')
+#' @exportS3Method ms default
+#' @exportS3Method ms humdrumR
+humdrumRmethods('ms')
