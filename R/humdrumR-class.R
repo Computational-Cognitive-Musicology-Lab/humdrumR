@@ -32,8 +32,8 @@
 #' 6. Grouping fields
 #' 
 #' When first created by a call to [readHumdrum()] every
-#' humdrum table has at least nineteen fields: one data field (`Token`), two interpretation 
-#' fields (`Tandem` and `Exclusive`), three formal fields, and fifteen structure fields. Additional
+#' humdrum table has at least twenty fields: one data field (`Token`), two interpretation 
+#' fields (`Tandem` and `Exclusive`), three formal fields, and fourteen structure fields. Additional
 #' interpretation or reference fields
 #' may be present depending on the content of the humdrum file(s), and users can create additional data fields
 #' by using [within(humdrumR)][withinHumdrum] (and some other functions).
@@ -51,7 +51,7 @@
 #' 
 #' ### Structure fields:
 #' 
-#' Every humdrum table has fifteen *Structure* fields,
+#' Every humdrum table has fourteen *Structure* fields,
 #' which describe where each data token was "located" in the original humdrum data: 
 #' which file, which spine, which record, etc.
 #' See the vignette on humdrum syntax to fully understand the terms here.
@@ -109,8 +109,7 @@
 #'     + `Null` :: `logical` 
 #'         + Are the [selected field(s)][selectedFields] (all) null? 
 #'         + See the detailed discussion below, in the section of this documentation called "Null Data."
-#'     + `Filter` :: `logical`
-#'         + Has this record/token been [filtered out][subset.humdrumR()]? 
+
 #'         
 #' 
 #' 
@@ -409,7 +408,7 @@ setMethod('$<-', signature = c(x = 'humdrumR'),
                                          "This field should always keep the original humdrum data you imported.")
               
               structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Type')
               
               if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
                                               "For a complete list of structural fields, use the command fields(mydata, 'S').")
@@ -1419,7 +1418,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     # data fields in old rows need to be renamed, because they will now be columns
    
     fromTable[ , Null := NULL]
-    fromTable[ , Filter := NULL]
     fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
     fromTables <- Map(\(ftab, fname) {
                              colnames(ftab)[colnames(ftab) == fromField] <- fname
@@ -1428,7 +1426,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
                          }, fromTables, names(fromTables))
  
     newfields <- names(fromTables)
-    mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null', 'Filter'))
+    mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null'))
     humtab <- Reduce(\(htab, ftab) {
         # htab <- ftab[htab, on = mergeFields]
         htab <- rbind(ftab[htab, on = mergeFields],
@@ -1438,7 +1436,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
                       # htab[!ftab, on = mergeFields],
                       fill = TRUE)
         
-        htab$Filter[is.na(htab$Filter)] <- FALSE
         htab$Null[is.na(htab$Null)] <- FALSE
         if (fillFromField) {
             for (field in newfields) {
@@ -1905,7 +1902,7 @@ initFields <- function(humtab, tandemFields) {
         Type[Name == 'Token'] <- 'Data'
         Type[Name %in% c('Filename', 'Filepath', 'File', 'Label', 'Piece',
                          'Spine', 'Path', 'ParentPath', 'Stop',
-                         'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')] <- 'Structure'
+                         'Record', 'NData', 'Global', 'Null', 'Type')] <- 'Structure'
         Type[Name %in% c('Exclusive', 'Tandem', tandemFields)] <- 'Interpretation'
         Type[grepl('^Formal', Name) | Name %in% c('Bar', 'DoubleBar', 'BarLabel')] <- 'Formal'
         Type                 

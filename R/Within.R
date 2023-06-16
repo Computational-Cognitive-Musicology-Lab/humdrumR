@@ -569,7 +569,18 @@
 #' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
 #' or any combination of these (e.g., `"LIM"`).
 #' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
+#'
+#' @param .by ***Optional grouping fields; an alternative to using [group_by()].***
+#'
+#' Defaults to `NULL`.
 #' 
+#' Must be `NULL`, or `character` strings which [partially match][partialMatching] one or more
+#' [fields()] in the `data`.
+#'
+#' If not `NULL`, these fields are used to group the data.
+#' If grouping fields have already been set by a call to [group_by()],
+#' the `.by` argument overrides them.
+#'
 #' @param variables ***A named `list` of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.***
 #' 
 #' Defaults to `list()`.
@@ -666,7 +677,7 @@ within.humdrumR <- function(data, ...,
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
   bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Filter', 'Type')
+                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Type')
   #fields(humdrumR, 'S')$Name
   if (any(bad)) {
     if ('Token' %in% overWrote[bad]) {
@@ -742,7 +753,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle)
   
   ## Evaluate "do" expression! 
-  result <- evaluateDoQuo(doQuo, humtab[Type %in% dataTypes & Filter == FALSE], groupFields)
+  result <- evaluateDoQuo(doQuo, humtab[Type %in% dataTypes], groupFields)
   result <- parseResult(result, groupFields, recycle, alignLeft, withFunc)
   # result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo, alignLeft = alignLeft)
   

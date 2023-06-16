@@ -711,7 +711,6 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     humtab[ , Type := parseTokenType(Token)]
     humtab <- humtab[Type != 'P']
     humtab[ , Null := Token %in% c('.', '!', '*', '=')]
-    humtab[ , Filter := FALSE]
     humtab[ , Global := is.na(Spine)]
     humtab[ , Pattern := NULL]
     

@@ -9,50 +9,59 @@
 #' you can read about these indexing options [here][indexHumdrum].
 #' However, using `subset` directly can accomplish much more sophisticated filtering commands than the indexing
 #' methods.
+#' You can also use the [dplyr](https://dplyr.tidyverse.org/) "verb" `filter()` as an exact synonym for `subset()`
+#' (on [humdrumR corpus][humdrumR::humdrumRclass] data.)
 #' 
 #' 
 #' `subset.humdrumR` is used in a similar manner to [withinHumdrum],
-#' taking any number of "within expressions" as arguments.
-#' In fact, expression arguments are passed directly to an internal call to `withinHumdrum`, and 
-#' other control expressions (like `by` or `subset`) can be used as well.
+#' taking any number of "within expressions" as arguments;
+#' In fact, expression arguments are passed directly to an internal call to `within.humdrumR()`, 
+#' with the `.by` and/or `dataTypes` arguments passed directly.
 #' The only requirement is that the expressions/functions fed to `subset.humdrumR` 
 #' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
 #' which return a logical (`TRUE`/`FALSE`) vector.
-#' The returned vector must also be the same length as the input data (the number
+#' The returned vector must either be scalar (length `1`), or be the same length as the input data (the number
 #' of rows in the [humdrum table][humdrumR::humTable]).
-#' (You can use a `fill` expression if you want to "expand" shorter outputs for filtering purposes.)
+#' If the logical result is scalar, it will be recycled to match the input length: this is useful
+#' in combination with `group_by()`.
 #' 
-#' @section Filter field:
 #' 
-#' When using `subset`, `humdrumR` doesn't necessarily delete the data you filter out.
-#' Rather, there is a `logical` field in the [humdrum table][humTable] called `Filter`.
-#' `subset.humdrumR` updates the humdrum table's `Filter` field using an logical OR (`|`) between the 
-#' existing `Filter` field and the negation of your predicate: `Filter | !Predicate`.
-#' HumdrumR functions (mostly) ignore all data points where `Filter == TRUE`, treating them like `NULL` data.
-#' For example, when you print a 
-#' filtered `humdrumR` you'll see all the filtered data points turned to null data (`.`), and
-#' any calls to [withinHumdrum][with(in)Humdrum] will ignore the filtered data.
-#' This means that you can, recover the filtered data by calling `clearFilter` on your dataset.
+#' @section Nullifying data:
 #' 
-#' In some cases you might filter out large parts of your data, which will leave a bunch of empty null
-#' data points (`"."`).
-#' If you *want* to remove these filtered data points, you can call `removeEmptyFiles`, `removeEmptyPieces`,
-#' `removeEmptySpines`,  `removeEmptyPaths`, `removeEmptyRecords`, or `removeEmptyStops`.
-#' These functions go through each piece/spine/path/record and check if *all* the data in that region
-#' is null or filtered (i.e., `Null == TRUE | Filter == TRUE`); if so, that data will be removed.
-#' You can only remove the data if *all* of it is null (within a region) because otherwise the humdrum syntax is broken.
+#' When using `subset()`/`filter()`, `humdrumR` doesn't actually delete the data you filter out.
+#' Instead, what these functions do is set all filtered data fields to `NA` (null) values, including
+#' changing their data type to `"d"`.
+#' This ensures that the humdrum-syntax of the data is not broken by filtering!
+#' Thus, when you print a 
+#' filtered `humdrumR` you'll see all the filtered data points turned to null data (`.`).
+#' Since, most `humdrumR` functions ignore null data (`d`) by default, the data is effectively filtered out 
+#' for most practical purposes.
+#' However, if you need to use those null (`'d'`) data points (like, with [ditto()]), they
+#' can be accessed by setting `dataTypes = 'Dd'` in many functions.
+#' See the [ditto()] documentation for examples.
 #' 
-#' By default, `subset.humdrumR` automatically calls `removeEmptyPieces` at the end.
+#' @section Truly removing data:
+#' 
+#' In many cases, you may filter out large parts of your data, which leaves a bunch of empty null
+#' data points (`"."`) in our printout...which can be hard to read.
+#' If you *want* to **actually** remove these filtered data points, you can call `removeEmptyFiles()`, 
+#' `removeEmptyPieces()`, `removeEmptySpines()`,  `removeEmptyPaths()`, `removeEmptyRecords()`, or `removeEmptyStops()`.
+#' These functions will safely remove null data without breaking the humdrum syntax;
+#' They do this by going through each piece/spine/path/record and checking if *all* the data in that region
+#' is null; if, and only if, *all* the data is null, that portion of data will be removed.
+#' 
+#' By default, `subset.humdrumR()` automatically calls `removeEmptyPieces()` before returning.
 #' However, you can stop this by specifying  `removeEmptyPieces = FALSE`.
 #' 
 #' @section Renumbering:
 #'
-#' If filtered pieces are removed from a corpus (using `removeEmptyPieces` or `removeEmptySpines`, in combination with `subset`)
-#' the `File`, `Piece`, and/or `Spine` fields are renumbered to represented the remaining regions,
+#' If filtered pieces, files, or spines are removed from a corpus 
+#' (using `removeEmptyPieces()` or `removeEmptySpines()` in combination with `subset`)
+#' the `File`, `Piece`, `Record` and/or `Spine` fields are renumbered to represented the remaining regions,
 #' starting from `1`.
 #' For example, if you have a corpus of 10 pieces and remove the first piece (`Piece == 1`),
 #' the remaining pieces are renumbered from `2:10` to `1:9`.
-#' Spine renumbering works the same, except it is done independently *within* each piece.
+#' Spine/record renumbering works the same, except it is done independently *within* each piece.
 #' 
 #' @param x ***HumdrumR data.***
 #' 
@@ -60,7 +69,32 @@
 #' 
 #' @param ... ***Arbitrary expressions passed to [with(in)][withinHumdrum].***
 #'
-#' The "within" expression(s) must evaluate to full-length `logical` values.
+#' The "within" expression(s) must evaluate to either scalar or full-length `logical` values.
+#' 
+#' @param removeEmptyPieces ***Should empty pieces be removed?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
+#' @param dataTypes ***Which types of humdrum records to include.***
+#' 
+#' Defaults to `"D"`.
+#' 
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
+#'
+#' @param .by ***Optional grouping fields; an alternative to using [group_by()].***
+#'
+#' Defaults to `NULL`.
+#' 
+#' Must be `NULL`, or `character` strings which [partially match][partialMatching] one or more
+#' [fields()] in the `data`.
+#'
+#' If not `NULL`, these fields are used to group the data.
+#' If grouping fields have already been set by a call to [group_by()],
+#' the `.by` argument overrides them.
 #' 
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
@@ -71,7 +105,6 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   
   quosures <- rlang::enquos(...)
   
-  selectedFields <- selectedFields(x)
   subsets <- rlang::eval_tidy(rlang::quo(with.humdrumR(x, !!!quosures, recycle = 'scalar',
                                          dataTypes = !!dataTypes,
                                          .by = !!.by, drop = FALSE)))
@@ -88,9 +121,7 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   
   if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
   putHumtab(x, overwriteEmpty = dataTypes) <- humtab
-  x <- update_Null(x, selectedFields)
-  # x <- updateFields(x, selectNew = FALSE) 
-  # x <- selectFields(x, selectedFields) # this is still needed
+  x <- update_Null(x, selectedFields(x))
   
   x
   
@@ -117,18 +148,6 @@ nullify <- function(humtab, fields, null) {
   humtab
 }
 
-#' @export
-#' @rdname subset.humdrumR
-clearFilter <- function(humdrumR) {
-  humtab <-getHumtab(humdrumR)
-  
-  humtab[ , Filter := FALSE]
-  
-  putHumtab(humdrumR) <- update_Null.data.table(humtab)
-  
-  humdrumR
-  
-}
 
 ## Null indexing ----
 
@@ -164,41 +183,41 @@ removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
 
 #' @export
 #' @rdname subset.humdrumR
-removeEmptyFiles <- function(humdrumR) {
-  checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR, 'File', 'GLIMd')
+removeEmptyFiles <- function(x) {
+  checks(x, xclass('humdrumR'))
+  removeNull(x, 'File', 'GLIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
-removeEmptyPieces <- function(humdrumR) {
-  checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR, 'Piece', 'GLIMd')
+removeEmptyPieces <- function(x) {
+  checks(x, xclass('humdrumR'))
+  removeNull(x, 'Piece', 'GLIMd')
 }
 #' @export
 #' @rdname subset.humdrumR
-removeEmptySpines <- function(humdrumR) {
-  checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR,  c('Piece', 'Spine'), 'LIMd')
-}
-
-#' @export
-#' @rdname subset.humdrumR
-removeEmptyPaths <- function(humdrumR) {
-  checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR,  c('Piece', 'Spine', 'Path'), 'LIMd')
-}
-#' @export
-#' @rdname subset.humdrumR
-removeEmptyRecords <- function(humdrumR) {
-  checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR, c('Piece', 'Record'), 'd')
+removeEmptySpines <- function(x) {
+  checks(x, xclass('humdrumR'))
+  removeNull(x,  c('Piece', 'Spine'), 'LIMd')
 }
 
 #' @export
 #' @rdname subset.humdrumR
-removeEmptyStops <- function(humdrumR) {
-  checks(humdrumR, xclass('humdrumR'))
-  removeNull(humdrumR, c('Piece', 'Stop'), 'd')
+removeEmptyPaths <- function(x) {
+  checks(x, xclass('humdrumR'))
+  removeNull(x,  c('Piece', 'Spine', 'Path'), 'LIMd')
+}
+#' @export
+#' @rdname subset.humdrumR
+removeEmptyRecords <- function(x) {
+  checks(x, xclass('humdrumR'))
+  removeNull(x, c('Piece', 'Record'), 'd')
+}
+
+#' @export
+#' @rdname subset.humdrumR
+removeEmptyStops <- function(x) {
+  checks(x, xclass('humdrumR'))
+  removeNull(x, c('Piece', 'Stop'), 'd')
 }
 
 
