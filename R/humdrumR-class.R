@@ -106,10 +106,6 @@
 #'             + `"M"` = measure/barline 
 #'             + `"L"` = local comment
 #'             + `"G"` = global comment. 
-#'     + `Null` :: `logical` 
-#'         + Are the [selected field(s)][selectedFields] (all) null? 
-#'         + See the detailed discussion below, in the section of this documentation called "Null Data."
-
 #'         
 #' 
 #' 
@@ -184,7 +180,7 @@
 #' Examples of common reference records are `"!!!COM:"` (composer) and `"!!!OTL:"` (original title).
 #' Any humdrum data with these records will end up having `COM` and `OTL` fields in its humdrum table.
 #' 
-#' # Null Data:
+#' @section Null data:
 #' 
 #' In humdrum syntax, there is no requirement that every spine-path contains data
 #' in every record. Rather, spines are often padded with *null tokens*.
@@ -196,21 +192,22 @@
 #' + *Barline*: `=`
 #' + *Data*: `.`
 #' 
-#' Null tokens in a humdrum table are identified in the logical `Null` field.
-#' The `Null` field is set when a humdrum table is created (by [readHumdrum()]) and is updated every time 
-#' a new fields are [selected][selectedFields()].
-#' `Null` is set to `TRUE` wherever, either 
+#' Many `humdrumR` functions automatically ignore null data, unless you specifically tell them not to 
+#' (usually, using `dataTypes` argument).
+#' Whenever different [fields()] are created or [selected][selectedFields], `humdrumR` reevaluates
+#' what data locations it considers null.
+#' Note that `humdrumR` considers data locations to be "null" when
 #' 
-#' + the selected fields are all `character` data and the token is a single `"."`, `"!"`, `"="`, or `"*"`;
-#' + the selected field are all `NA` (including `NA_character_`).
+#' + the selected fields are all `character` data *and* the token is a single `"."`, `"!"`, `"="`, or `"*"`; **or**
+#' + the selected fields are all `NA` (including `NA_character_`).
 #' 
-#' In parallel to the `Null` field, null *data* tokens (`"."`) are identified as their own record type: `"d"`.
-#' All updates/changes to the `Null` field are also propagated to the `Type` field---i.e., setting `Type == d` wherever
-#' a data record is `Null`.
-#' This is important/useful because [withinHumdrum()] routines are, by default, only applied to `"D"` data, ignoring `"d"`.
+#' When `humdrumR` reevaluates null data, the `Type` field is updated, setting data records to `Type == "d"`
+#' for null data and `Type == "D"` for non-null data. 
+#' This is the main mechanism `humdrumR` functions use to ignore null data: most functions
+#' only look at data where `Type == "D"`.
 #' 
 #' Whenever you print or [export][writeHumdrum()] a [humdrumR object[humdrumRclass], null data in the selected fields
-#' (i.e., `Null == TRUE`) prints as `"."`.
+#' prints as `"."`---thus `NA` values print as `.`.
 #' Thus, if you are working with numeric data with `NA` values, these `NA` values will print as `"."`.
 #' 
 #' ### Grouping fields:
@@ -219,7 +216,7 @@
 #' These fields are deleted by calls to [ungroup()].
 #' 
 #' 
-#' # Reshaping:
+#' @section Reshaping:
 #' 
 #' Breaking the complex syntax of humdrum data into the "flat" structure of a humdrum table, with every single token on one line
 #' of a `data.table`, makes humdrum data easier to analyze.
@@ -408,7 +405,7 @@ setMethod('$<-', signature = c(x = 'humdrumR'),
                                          "This field should always keep the original humdrum data you imported.")
               
               structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Type')
+                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Type')
               
               if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
                                               "For a complete list of structural fields, use the command fields(mydata, 'S').")
@@ -1147,7 +1144,6 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
     }
     field[replacements] <- collapsed[replacements]
     humtab[[collapseField]] <- field
-    humtab$Null[replacements] <- FALSE
     humtab$Type[replacements] <- 'D'
     
     humtab
@@ -1417,7 +1413,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     # data fields in old rows need to be renamed, because they will now be columns
    
-    fromTable[ , Null := NULL]
     fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
     fromTables <- Map(\(ftab, fname) {
                              colnames(ftab)[colnames(ftab) == fromField] <- fname
@@ -1426,7 +1421,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
                          }, fromTables, names(fromTables))
  
     newfields <- names(fromTables)
-    mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name, c('Null'))
+    mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
     humtab <- Reduce(\(htab, ftab) {
         # htab <- ftab[htab, on = mergeFields]
         htab <- rbind(ftab[htab, on = mergeFields],
@@ -1436,7 +1431,6 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
                       # htab[!ftab, on = mergeFields],
                       fill = TRUE)
         
-        htab$Null[is.na(htab$Null)] <- FALSE
         if (fillFromField) {
             for (field in newfields) {
                 na <- is.na(htab[[field]])
@@ -1811,6 +1805,11 @@ is.nullToken <- function(tokens) {
     }
 }
 
+nullFields <- function(hum, fields, reduce = '&') {
+    nulls <- lapply(hum[ , field, with = FALSE], is.nullToken)
+    Reduce('&', nulls)
+}
+
 update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
 update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
@@ -1844,14 +1843,9 @@ update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
     
     exclusives <- hum[, Type == 'I' & grepl('^\\*\\*', Token)]
     
-    # if (!is.character(hum[[field]]) && !is.factor(hum[[field]])) field <- 'Token'
-    
-    # if (is.factor(hum[[field]])) hum[[field]] <- as.character(hum[[field]])
-    
     if (!is.null(Exclusive)) {
         
         hum[['Token']][exclusives] <- paste0('**', Exclusive)
-        # hum$Null[exclusives] <- FALSE
     } else {
         hum[['Token']][exclusives] <- paste0('**', hum$Exclusive[exclusives])
     }
@@ -1868,12 +1862,9 @@ update_Null.humdrumR <- function(hum, field = selectedFields(hum),  allFields = 
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
-    nulls <- lapply(hum[ , field, with = FALSE], is.nullToken)
-    null <- Reduce('&', nulls)
+    null <- nullFields(hum, field)
     
-    hum[, Null := null]
-    
-    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse(Null, 'd', 'D')]
+    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse(null, 'd', 'D')]
     hum
 }
 
@@ -1902,7 +1893,7 @@ initFields <- function(humtab, tandemFields) {
         Type[Name == 'Token'] <- 'Data'
         Type[Name %in% c('Filename', 'Filepath', 'File', 'Label', 'Piece',
                          'Spine', 'Path', 'ParentPath', 'Stop',
-                         'Record', 'NData', 'Global', 'Null', 'Type')] <- 'Structure'
+                         'Record', 'NData', 'Global', 'Type')] <- 'Structure'
         Type[Name %in% c('Exclusive', 'Tandem', tandemFields)] <- 'Interpretation'
         Type[grepl('^Formal', Name) | Name %in% c('Bar', 'DoubleBar', 'BarLabel')] <- 'Formal'
         Type                 
@@ -2061,7 +2052,6 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
     
     null <- match.arg(null)
     
-    # humdrumR <- update_Null(humdrumR, field = fields)
     
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     selectedTable <- humtab[ , fields, with = FALSE]

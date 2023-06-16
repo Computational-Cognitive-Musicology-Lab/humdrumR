@@ -1753,7 +1753,6 @@ timebase <- function(humdrumR, tb = '16') {
                            firstrow <- .SD[1]
                            firstrow$Token <- tb
                            firstrow$Type <- 'I'
-                           firstrow$Null <- FALSE
                            rbind(firstrow, .SD)
                            
                          }, by = list(File, Spine)])
@@ -1762,7 +1761,6 @@ timebase <- function(humdrumR, tb = '16') {
   
   for (field in fields(humdrumR, 'D')$Name) humtab[[field]][humtab$Duplicated] <- NA
   humtab$Type[humtab$Duplicated] <- 'd'
-  humtab$Null[humtab$Duplicated] <- TRUE
   
   putHumtab(humdrumR) <- humtab
   humdrumR@Humtable[ , c('..Timeline..', 'RecordDuration') := NULL]

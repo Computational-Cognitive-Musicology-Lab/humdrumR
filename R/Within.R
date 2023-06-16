@@ -677,7 +677,7 @@ within.humdrumR <- function(data, ...,
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
   bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Null', 'Type')
+                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Type')
   #fields(humdrumR, 'S')$Name
   if (any(bad)) {
     if ('Token' %in% overWrote[bad]) {
@@ -699,8 +699,7 @@ within.humdrumR <- function(data, ...,
   #### Put new humtable back into humdrumR object
   newfields <- setdiff(colnames(newhumtab), colnames(humtab))
   
-  notnull <- Reduce(`|`, lapply(newhumtab[, newfields, with = FALSE], \(field) if (is.logical(field)) logical(length(field)) else  !(is.na(field) | field == '.')))
-  newhumtab$Null[notnull] <- FALSE
+  notnull <- !nullFields(newhumtab, newfields)
   newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
   
   # What do do if d is in dataTypes
