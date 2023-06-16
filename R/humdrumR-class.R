@@ -1806,6 +1806,14 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
 
 ##
 
+is.nullToken <- function(tokens) {
+    if (is.list(tokens)) {
+        lengths(tokens) == 0L
+    } else {
+        is.na(tokens) | tokens %in% c('*', '=', '!', '.')
+    }
+}
+
 update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
 update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
@@ -1863,15 +1871,12 @@ update_Null.humdrumR <- function(hum, field = selectedFields(hum),  allFields = 
     hum
 }
 update_Null.data.table <- function(hum, field = 'Token', ...) {
-    nulls <- lapply(hum[ , field, with = FALSE], 
-                    \(x) {
-                        if (is.list(x)) lengths(x) == 0L else  is.na(x) | x %in% c('.', '!', '*', '=')
-                    })
+    nulls <- lapply(hum[ , field, with = FALSE], is.nullToken)
     null <- Reduce('&', nulls)
     
     hum[, Null := null]
     
-    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse( (Null | Filter), 'd', 'D')]
+    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse(Null, 'd', 'D')]
     hum
 }
 
@@ -2064,13 +2069,16 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     selectedTable <- humtab[ , fields, with = FALSE]
     
-    # filter (subsetting)
-    filter <- humtab$Filter
-    selectedTable[] <- selectedTable[ , lapply(.SD, 
-                                               \(field) {
-                                                   field[filter] <- NA
-                                                   field
-                                               })]
+
+    # selectedTable[] <- selectedTable[ , lapply(.SD, 
+    #                                            \(field) {
+    #                                                if (is.list(field)) {
+    #                                                   field[filter] <- lapply(field[filter], '[', i = 0)
+    #                                                } else {
+    #                                                   field[filter] <- NA
+    #                                                }
+    #                                                field
+    #                                            })]
     
     # decide how NA/null values are shown
     fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]

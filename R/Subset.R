@@ -72,34 +72,49 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   quosures <- rlang::enquos(...)
   
   selectedFields <- selectedFields(x)
+  subsets <- rlang::eval_tidy(rlang::quo(with.humdrumR(x, !!!quosures, recycle = 'scalar',
+                                         dataTypes = !!dataTypes,
+                                         .by = !!.by, drop = FALSE)))
   
-  # tmp names
-  subsetFields <- tempfile(rep('subset', length(quosures)), '', '')
-  quosures <- Map(quosures, subsetFields, f = \(quo, name) rlang::quo(!!(rlang::sym(name)) <- !!quo))
-  x <- rlang::eval_tidy(rlang::quo(within.humdrumR(x, !!!quosures, recycle = 'scalar',
-                                                   dataTypes = !!dataTypes,
-                                                   .by = !!.by)))
   
-  humtab <- getHumtab(x)
-  if (any(unlist(lapply(humtab[ , subsetFields, with = FALSE], class)) != 'logical')) .stop('In call to subset.humdrumR/filter.humdrumR, the subsetting expression must evaluate to a logical (TRUE/FALSE) vector.')
+  if (any(!sapply(subsets, is.logical))) .stop('In call to subset.humdrumR/filter.humdrumR,', 
+                                               'the subsetting expression(s) must evaluate to logical (TRUE/FALSE) vectors.')
   
-  humtab[['.TmpFilter.']] <- Reduce('&', humtab[ , subsetFields, with = FALSE])
-  humtab[ , .TmpFilter. := .TmpFilter. | is.na(.TmpFilter.)] 
+  subset <- Reduce('&', subsets)
   # NA values come in from record types we didn't use, which should NOT be filtered
   
-  humtab[ , Filter := Filter | !.TmpFilter.]
-  humtab[ , .TmpFilter. := NULL]
-  humtab[ , (subsetFields) := NULL]
-  humtab <- update_Null.data.table(humtab, selectedFields)
+  humtab <- getHumtab(x, dataTypes = dataTypes)
+  humtab <- nullify(humtab, fields(x, 'Data')$Name, !subset)
   
   if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
-  putHumtab(x) <- humtab
-  x <- updateFields(x, selectNew = FALSE) 
-  x <- selectFields(x, selectedFields) # this is still needed
+  putHumtab(x, overwriteEmpty = dataTypes) <- humtab
+  x <- update_Null(x, selectedFields)
+  # x <- updateFields(x, selectNew = FALSE) 
+  # x <- selectFields(x, selectedFields) # this is still needed
   
   x
   
   
+}
+
+
+nullify <- function(humtab, fields, null) {
+  if (!any(null) || length(fields) == 0L) return(humtab)
+  humtab[]
+  
+  nullifiedFields <- lapply(humtab[ , fields, with = FALSE],
+                            \(field) {
+                              if (is.list(field)) {
+                                field[null] <- lapply(field[null], '[', i = 0)
+                              } else {
+                                field[null] <- NA
+                              }
+                              field
+                            })
+  
+  for (field in fields) humtab[[field]] <- nullifiedFields[[field]]
+  
+  humtab
 }
 
 #' @export

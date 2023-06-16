@@ -621,7 +621,7 @@ with.humdrumR <- function(data, ...,
                        .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
   
-  
+  data@Humtable[ , `_rowKey_` := NULL] # this is needed, because the humdrum table was changed in place, inside the original object
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
   
@@ -682,7 +682,7 @@ within.humdrumR <- function(data, ...,
  
   ## put result into new humtab
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
-  humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed inPlace, inside the original object
+  humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed in place, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
   
   #### Put new humtable back into humdrumR object
