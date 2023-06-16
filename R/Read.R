@@ -741,9 +741,9 @@ parseRecords <- function(records, piece, reference) {
   humtab <- if (length(global) == 1 && is.na(global)) local else rbind(global$Data, local, fill = TRUE)
   
   # Data record numbers
-  humtab$NData <- rep(NA, nrow(humtab))
+  humtab$DataRecord <- rep(NA, nrow(humtab))
   D <- !grepl('^[!=*]', humtab$Token)
-  humtab$NData[D] <- match(humtab$Record[D],  sort(unique(humtab$Record[D])))
+  humtab$DataRecord[D] <- match(humtab$Record[D],  sort(unique(humtab$Record[D])))
   
   #
   humtab <- if (!(length(global) == 1 && is.na(global))) cbind(humtab, global$Table) else humtab

@@ -88,7 +88,7 @@
 #'           which this path split? Where `Path == 0`, parent path is also `0`.
 #'     + `Record` :: `integer`
 #'         + The record (i.e., line) number in the original file.
-#'     + `NData` :: `integer`
+#'     + `DataRecord` :: `integer`
 #'         + The *data* record enumeration in the file, starting from `1`.
 #'     + `Stop` :: `integer`
 #'         + Which token in a multistop token, numbered starting from `1`.
@@ -405,8 +405,8 @@ setMethod('$<-', signature = c(x = 'humdrumR'),
                                          "This field should always keep the original humdrum data you imported.")
               
               structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'NData', 'Global', 'Type')
-              
+                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
+
               if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
                                               "For a complete list of structural fields, use the command fields(mydata, 'S').")
               isnew <- !name %in% colnames(humtab)
@@ -1252,7 +1252,7 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' The default `what` value is `"Spine"`; other common fold options are `"Path"`,
 #' and `"Stop"`, though you might want to use the convenient `foldPaths()` and `foldStops()`
 #' functions directly (details below).
-#' (You may also fold across `"Record"` or `"NData"`), but these are advanced/tricky!)
+#' (You may also fold across `"Record"` or `"DataRecord"`), but these are advanced/tricky!)
 
 #' @section Which fields:
 #' 
@@ -1327,7 +1327,7 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' 
 #' Defaults to `"Spine"`.
 #' 
-#' Must be a single `character` string. Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"NData"`.
+#' Must be a single `character` string. Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"DataRecord"`.
 #'
 #' @param Piece ***Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).***
 #' 
@@ -1372,7 +1372,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     checks(fromField, xcharacter & xlen1)
     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
-    checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'NData')))
+    checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'DataRecord')))
     
     # start work
     humdrumR <- selectFields(humdrumR, fromField)
@@ -1401,8 +1401,8 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
                fromTable <- fromTable[!is.na(i),]
                i <- i[!is.na(i)]
                switch(what,
-                      Record = fromTable$NData  <- fromTable[ , NData  + (moves$To[i] - Record)],
-                      NData  = fromTable$Record <- fromTable[ , Record + (moves$To[i] - NData)])
+                      Record = fromTable$DataRecord  <- fromTable[ , DataRecord  + (moves$To[i] - Record)],
+                      DataRecord  = fromTable$Record <- fromTable[ , Record + (moves$To[i] - DataRecord)])
                
                fromTable[[what]] <-  moves$To[i]
                fromTable$FieldNames <- moves$FieldNames[i]
@@ -1893,7 +1893,7 @@ initFields <- function(humtab, tandemFields) {
         Type[Name == 'Token'] <- 'Data'
         Type[Name %in% c('Filename', 'Filepath', 'File', 'Label', 'Piece',
                          'Spine', 'Path', 'ParentPath', 'Stop',
-                         'Record', 'NData', 'Global', 'Type')] <- 'Structure'
+                         'Record', 'DataRecord', 'Global', 'Type')] <- 'Structure'
         Type[Name %in% c('Exclusive', 'Tandem', tandemFields)] <- 'Interpretation'
         Type[grepl('^Formal', Name) | Name %in% c('Bar', 'DoubleBar', 'BarLabel')] <- 'Formal'
         Type                 
