@@ -3,7 +3,6 @@
 \name{subset.humdrumR}
 \alias{subset.humdrumR}
 \alias{subset}
-\alias{clearFilter}
 \alias{removeEmptyFiles}
 \alias{removeEmptyPieces}
 \alias{removeEmptySpines}
@@ -14,19 +13,17 @@
 \usage{
 \method{subset}{humdrumR}(x, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
 
-clearFilter(humdrumR)
+removeEmptyFiles(x)
 
-removeEmptyFiles(humdrumR)
+removeEmptyPieces(x)
 
-removeEmptyPieces(humdrumR)
+removeEmptySpines(x)
 
-removeEmptySpines(humdrumR)
+removeEmptyPaths(x)
 
-removeEmptyPaths(humdrumR)
+removeEmptyRecords(x)
 
-removeEmptyRecords(humdrumR)
-
-removeEmptyStops(humdrumR)
+removeEmptyStops(x)
 }
 \arguments{
 \item{x}{\emph{\strong{HumdrumR data.}}
@@ -35,7 +32,32 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{...}{\emph{\strong{Arbitrary expressions passed to \link[=withinHumdrum]{with(in)}.}}
 
-The "within" expression(s) must evaluate to full-length \code{logical} values.}
+The "within" expression(s) must evaluate to either scalar or full-length \code{logical} values.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}
+
+Defaults to \code{"D"}.
+
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
+
+\item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \code{\link[=group_by]{group_by()}}.}}
+
+Defaults to \code{NULL}.
+
+Must be \code{NULL}, or \code{character} strings which \link[=partialMatching]{partially match} one or more
+\code{\link[=fields]{fields()}} in the \code{data}.
+
+If not \code{NULL}, these fields are used to group the data.
+If grouping fields have already been set by a call to \code{\link[=group_by]{group_by()}},
+the \code{.by} argument overrides them.}
+
+\item{removeEmptyPieces}{\emph{\strong{Should empty pieces be removed?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
 \code{subset.humdrumR} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}.
@@ -43,53 +65,63 @@ The standard indexing operators (\verb{[]} and \verb{[[]]}) actually work by cal
 you can read about these indexing options \link[=indexHumdrum]{here}.
 However, using \code{subset} directly can accomplish much more sophisticated filtering commands than the indexing
 methods.
+You can also use the \href{https://dplyr.tidyverse.org/}{dplyr} "verb" \code{filter()} as an exact synonym for \code{subset()}
+(on \link[=humdrumRclass]{humdrumR corpus} data.)
 }
 \details{
 \code{subset.humdrumR} is used in a similar manner to \link{withinHumdrum},
-taking any number of "within expressions" as arguments.
-In fact, expression arguments are passed directly to an internal call to \code{withinHumdrum}, and
-other control expressions (like \code{by} or \code{subset}) can be used as well.
+taking any number of "within expressions" as arguments;
+In fact, expression arguments are passed directly to an internal call to \code{within.humdrumR()},
+with the \code{.by} and/or \code{dataTypes} arguments passed directly.
 The only requirement is that the expressions/functions fed to \code{subset.humdrumR}
 \emph{must} be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions
 which return a logical (\code{TRUE}/\code{FALSE}) vector.
-The returned vector must also be the same length as the input data (the number
+The returned vector must either be scalar (length \code{1}), or be the same length as the input data (the number
 of rows in the \link[=humTable]{humdrum table}).
-(You can use a \code{fill} expression if you want to "expand" shorter outputs for filtering purposes.)
+If the logical result is scalar, it will be recycled to match the input length: this is useful
+in combination with \code{group_by()}.
 }
-\section{Filter field}{
+\section{Nullifying data}{
 
 
-When using \code{subset}, \code{humdrumR} doesn't necessarily delete the data you filter out.
-Rather, there is a \code{logical} field in the \link[=humTable]{humdrum table} called \code{Filter}.
-\code{subset.humdrumR} updates the humdrum table's \code{Filter} field using an logical OR (\code{|}) between the
-existing \code{Filter} field and the negation of your predicate: \code{Filter | !Predicate}.
-HumdrumR functions (mostly) ignore all data points where \code{Filter == TRUE}, treating them like \code{NULL} data.
-For example, when you print a
-filtered \code{humdrumR} you'll see all the filtered data points turned to null data (\code{.}), and
-any calls to \link[=with(in)Humdrum]{withinHumdrum} will ignore the filtered data.
-This means that you can, recover the filtered data by calling \code{clearFilter} on your dataset.
+When using \code{subset()}/\code{filter()}, \code{humdrumR} doesn't actually delete the data you filter out.
+Instead, what these functions do is set all filtered data fields to \code{NA} (null) values, including
+changing their data type to \code{"d"}.
+This ensures that the humdrum-syntax of the data is not broken by filtering!
+Thus, when you print a
+filtered \code{humdrumR} you'll see all the filtered data points turned to null data (\code{.}).
+Since, most \code{humdrumR} functions ignore null data (\code{d}) by default, the data is effectively filtered out
+for most practical purposes.
+However, if you need to use those null (\code{'d'}) data points (like, with \code{\link[=ditto]{ditto()}}), they
+can be accessed by setting \code{dataTypes = 'Dd'} in many functions.
+See the \code{\link[=ditto]{ditto()}} documentation for examples.
+}
 
-In some cases you might filter out large parts of your data, which will leave a bunch of empty null
-data points (\code{"."}).
-If you \emph{want} to remove these filtered data points, you can call \code{removeEmptyFiles}, \code{removeEmptyPieces},
-\code{removeEmptySpines},  \code{removeEmptyPaths}, \code{removeEmptyRecords}, or \code{removeEmptyStops}.
-These functions go through each piece/spine/path/record and check if \emph{all} the data in that region
-is null or filtered (i.e., \code{Null == TRUE | Filter == TRUE}); if so, that data will be removed.
-You can only remove the data if \emph{all} of it is null (within a region) because otherwise the humdrum syntax is broken.
+\section{Truly removing data}{
 
-By default, \code{subset.humdrumR} automatically calls \code{removeEmptyPieces} at the end.
+
+In many cases, you may filter out large parts of your data, which leaves a bunch of empty null
+data points (\code{"."}) in our printout...which can be hard to read.
+If you \emph{want} to \strong{actually} remove these filtered data points, you can call \code{removeEmptyFiles()},
+\code{removeEmptyPieces()}, \code{removeEmptySpines()},  \code{removeEmptyPaths()}, \code{removeEmptyRecords()}, or \code{removeEmptyStops()}.
+These functions will safely remove null data without breaking the humdrum syntax;
+They do this by going through each piece/spine/path/record and checking if \emph{all} the data in that region
+is null; if, and only if, \emph{all} the data is null, that portion of data will be removed.
+
+By default, \code{subset.humdrumR()} automatically calls \code{removeEmptyPieces()} before returning.
 However, you can stop this by specifying  \code{removeEmptyPieces = FALSE}.
 }
 
 \section{Renumbering}{
 
 
-If filtered pieces are removed from a corpus (using \code{removeEmptyPieces} or \code{removeEmptySpines}, in combination with \code{subset})
-the \code{File}, \code{Piece}, and/or \code{Spine} fields are renumbered to represented the remaining regions,
+If filtered pieces, files, or spines are removed from a corpus
+(using \code{removeEmptyPieces()} or \code{removeEmptySpines()} in combination with \code{subset})
+the \code{File}, \code{Piece}, \code{Record} and/or \code{Spine} fields are renumbered to represented the remaining regions,
 starting from \code{1}.
 For example, if you have a corpus of 10 pieces and remove the first piece (\code{Piece == 1}),
 the remaining pieces are renumbered from \code{2:10} to \code{1:9}.
-Spine renumbering works the same, except it is done independently \emph{within} each piece.
+Spine/record renumbering works the same, except it is done independently \emph{within} each piece.
 }
 
 \seealso{

@@ -126,10 +126,10 @@ There are six types of fields in a humdrum table:
 
 When first created by a call to \code{\link[=readHumdrum]{readHumdrum()}} every
 humdrum table has at least nineteen fields: one data field (\code{Token}), two interpretation
-fields (\code{Tandem} and \code{Exclusive}), three formal fields, and fifteen structure fields. Additional
-interpretation or reference fields
+fields (\code{Tandem} and \code{Exclusive}), three formal fields, and thirteen structure fields. Additional
+formal, interpretation, or reference fields
 may be present depending on the content of the humdrum file(s), and users can create additional data fields
-by using \link[=withinHumdrum]{within(humdrumR)} (and some other functions).
+by using \link[=withinHumdrum]{within.humdrumR()}, \code{\link[=mutate.humdrumR]{mutate.humdrumR()}}, or some other functions.
 \subsection{Data fields:}{
 
 \emph{Data} fields are used to describe individual data points
@@ -143,7 +143,7 @@ Users can create as many additional data fields as they like. Every call to
 
 \subsection{Structure fields:}{
 
-Every humdrum table has fifteen \emph{Structure} fields,
+Every humdrum table has thirteen \emph{Structure} fields,
 which describe where each data token was "located" in the original humdrum data:
 which file, which spine, which record, etc.
 See the vignette on humdrum syntax to fully understand the terms here.
@@ -201,7 +201,7 @@ which this path split? Where \code{Path == 0}, parent path is also \code{0}.
 \itemize{
 \item The record (i.e., line) number in the original file.
 }
-\item \code{NData} :: \code{integer}
+\item \code{DataRecord} :: \code{integer}
 \itemize{
 \item The \emph{data} record enumeration in the file, starting from \code{1}.
 }
@@ -230,15 +230,6 @@ which this path split? Where \code{Path == 0}, parent path is also \code{0}.
 \item \code{"L"} = local comment
 \item \code{"G"} = global comment.
 }
-}
-\item \code{Null} :: \code{logical}
-\itemize{
-\item Are the \link[=selectedFields]{selected field(s)} (all) null?
-\item See the detailed discussion below, in the section of this documentation called "Null Data."
-}
-\item \code{Filter} :: \code{logical}
-\itemize{
-\item Has this record/token been \link[=subset.humdrumR]{filtered out}?
 }
 }
 }
@@ -282,7 +273,7 @@ If part of a section is not given a name in a lower hierarchical level, the fiel
 empty (\code{""}) at that point.
 
 Humdrum data may, or may not, also include barlines (tokens beginning \code{"="}).
-Humdrum tables \emph{always} include three formal fields related to barlines:
+However, humdrum tables \emph{always} include three formal fields related to barlines:
 \itemize{
 \item \code{Bar} :: \code{integer}
 \itemize{
@@ -306,6 +297,9 @@ do weird things like skipping numbers, repeating numbers, or having suffixes (e.
 If no barline tokens appear in the file, \code{BarLabel} is all empty strings (\code{""}).
 }
 }
+
+If no barline tokens are present in a file, \code{Bar} and \code{DoubleBar} will be nothing but \code{0}s,
+and \code{BarLabel} will be all \code{NA}.
 }
 
 \subsection{Reference fields:}{
@@ -324,7 +318,9 @@ Any humdrum data with these records will end up having \code{COM} and \code{OTL}
 }
 }
 
-\section{Null Data:}{
+\section{Null data}{
+
+
 In humdrum syntax, there is no requirement that every spine-path contains data
 in every record. Rather, spines are often padded with \emph{null tokens}.
 In some cases, entire records may be padded with null tokens.
@@ -336,22 +332,23 @@ Each type of humdrum record uses a different null token:
 \item \emph{Data}: \code{.}
 }
 
-Null tokens in a humdrum table are identified in the logical \code{Null} field.
-The \code{Null} field is set when a humdrum table is created (by \code{\link[=readHumdrum]{readHumdrum()}}) and is updated every time
-a new fields are \link[=selectedFields]{selected}.
-\code{Null} is set to \code{TRUE} wherever, either
+Many \code{humdrumR} functions automatically ignore null data, unless you specifically tell them not to
+(usually, using \code{dataTypes} argument).
+Whenever different \code{\link[=fields]{fields()}} are created or \link[=selectedFields]{selected}, \code{humdrumR} reevaluates
+what data locations it considers null.
+Note that \code{humdrumR} considers data locations to be "null" when
 \itemize{
-\item the selected fields are all \code{character} data and the token is a single \code{"."}, \code{"!"}, \code{"="}, or \code{"*"};
-\item the selected field are all \code{NA} (including \code{NA_character_}).
+\item the selected fields are all \code{character} data \emph{and} the token is a single \code{"."}, \code{"!"}, \code{"="}, or \code{"*"}; \strong{or}
+\item the selected fields are all \code{NA} (including \code{NA_character_}).
 }
 
-In parallel to the \code{Null} field, null \emph{data} tokens (\code{"."}) are identified as their own record type: \code{"d"}.
-All updates/changes to the \code{Null} field are also propagated to the \code{Type} field---i.e., setting \code{Type == d} wherever
-a data record is \code{Null}.
-This is important/useful because \code{\link[=withinHumdrum]{withinHumdrum()}} routines are, by default, only applied to \code{"D"} data, ignoring \code{"d"}.
+When \code{humdrumR} reevaluates null data, the \code{Type} field is updated, setting data records to \code{Type == "d"}
+for null data and \code{Type == "D"} for non-null data.
+This is the main mechanism \code{humdrumR} functions use to ignore null data: most functions
+only look at data where \code{Type == "D"}.
 
 Whenever you print or \link[=writeHumdrum]{export} a [humdrumR object\link{humdrumRclass}, null data in the selected fields
-(i.e., \code{Null == TRUE}) prints as \code{"."}.
+prints as \code{"."}---thus \code{NA} values print as \code{.}.
 Thus, if you are working with numeric data with \code{NA} values, these \code{NA} values will print as \code{"."}.
 \subsection{Grouping fields:}{
 
@@ -360,7 +357,9 @@ These fields are deleted by calls to \code{\link[=ungroup]{ungroup()}}.
 }
 }
 
-\section{Reshaping:}{
+\section{Reshaping}{
+
+
 Breaking the complex syntax of humdrum data into the "flat" structure of a humdrum table, with every single token on one line
 of a \code{data.table}, makes humdrum data easier to analyze.
 Of course, thanks to the structure fields, we can easily

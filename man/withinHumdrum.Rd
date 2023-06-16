@@ -62,6 +62,17 @@ a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we w
 intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that
 the output is consistent.}
 
+\item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \code{\link[=group_by]{group_by()}}.}}
+
+Defaults to \code{NULL}.
+
+Must be \code{NULL}, or \code{character} strings which \link[=partialMatching]{partially match} one or more
+\code{\link[=fields]{fields()}} in the \code{data}.
+
+If not \code{NULL}, these fields are used to group the data.
+If grouping fields have already been set by a call to \code{\link[=group_by]{group_by()}},
+the \code{.by} argument overrides them.}
+
 \item{variables}{\emph{\strong{A named \code{list} of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.}}
 
 Defaults to \code{list()}.

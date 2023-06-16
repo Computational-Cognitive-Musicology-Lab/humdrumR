@@ -46,7 +46,7 @@ Must be natural numbers.}
 
 Defaults to \code{"Spine"}.
 
-Must be a single \code{character} string. Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"NData"}.}
+Must be a single \code{character} string. Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"DataRecord"}.}
 
 \item{Piece}{\emph{\strong{Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).}}
 
@@ -115,7 +115,7 @@ use the \code{what} argument (\code{character}, \code{length == 1}).
 The default \code{what} value is \code{"Spine"}; other common fold options are \code{"Path"},
 and \code{"Stop"}, though you might want to use the convenient \code{foldPaths()} and \code{foldStops()}
 functions directly (details below).
-(You may also fold across \code{"Record"} or \code{"NData"}), but these are advanced/tricky!)
+(You may also fold across \code{"Record"} or \code{"DataRecord"}), but these are advanced/tricky!)
 }
 
 \section{Which fields}{

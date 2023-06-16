@@ -98,7 +98,7 @@ Music unfolds over time, and humdrum data typically represents this
 by placing simultaneous events in the same record, with successive events
 in ever higher records---progressing "top down" through the file.
 In some humdrum data, only this (implicit) ordering of data over time is present.
-The \code{Record} and \code{NData} \link[=fields]{fields} capture this ordering in all data parsed by \code{humdrumR}.
+The \code{Record} and \code{DataRecord} \link[=fields]{fields} capture this ordering in all data parsed by \code{humdrumR}.
 However, many (probably most) humdrum data files contain at least some information about the relative
 duration of events, representing more detailed information about timing and rhythm.
 

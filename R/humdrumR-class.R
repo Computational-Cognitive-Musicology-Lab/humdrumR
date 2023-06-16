@@ -32,11 +32,11 @@
 #' 6. Grouping fields
 #' 
 #' When first created by a call to [readHumdrum()] every
-#' humdrum table has at least twenty fields: one data field (`Token`), two interpretation 
-#' fields (`Tandem` and `Exclusive`), three formal fields, and fourteen structure fields. Additional
-#' interpretation or reference fields
+#' humdrum table has at least nineteen fields: one data field (`Token`), two interpretation 
+#' fields (`Tandem` and `Exclusive`), three formal fields, and thirteen structure fields. Additional
+#' formal, interpretation, or reference fields
 #' may be present depending on the content of the humdrum file(s), and users can create additional data fields
-#' by using [within(humdrumR)][withinHumdrum] (and some other functions).
+#' by using [within.humdrumR()][withinHumdrum], [mutate.humdrumR()], or some other functions.
 #' 
 #' ### Data fields:
 #' 
@@ -49,9 +49,10 @@
 #' [withinHumdrum()] generates new data fields. 
 #' 
 #' 
+#' 
 #' ### Structure fields:
 #' 
-#' Every humdrum table has fourteen *Structure* fields,
+#' Every humdrum table has thirteen *Structure* fields,
 #' which describe where each data token was "located" in the original humdrum data: 
 #' which file, which spine, which record, etc.
 #' See the vignette on humdrum syntax to fully understand the terms here.
@@ -148,7 +149,7 @@
 #' empty (`""`) at that point.
 #' 
 #' Humdrum data may, or may not, also include barlines (tokens beginning `"="`).
-#' Humdrum tables *always* include three formal fields related to barlines:
+#' However, humdrum tables *always* include three formal fields related to barlines:
 #' 
 #' + `Bar` :: `integer` 
 #'     + How many barline records (single or double) have passed before this token?
@@ -165,6 +166,9 @@
 #'       measure-number labels in humdrum data (which appear in the `BarLabel` field) may
 #'       do weird things like skipping numbers, repeating numbers, or having suffixes (e.g., `"19a"`).
 #'       If no barline tokens appear in the file, `BarLabel` is all empty strings (`""`).
+#' 
+#' If no barline tokens are present in a file, `Bar` and `DoubleBar` will be nothing but `0`s,
+#' and `BarLabel` will be all `NA`.
 #' 
 #' ### Reference fields:
 #' 
