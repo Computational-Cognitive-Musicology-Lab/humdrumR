@@ -1481,7 +1481,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' by placing simultaneous events in the same record, with successive events
 #' in ever higher records---progressing "top down" through the file.
 #' In some humdrum data, only this (implicit) ordering of data over time is present.
-#' The `Record` and `NData` [fields][fields()] capture this ordering in all data parsed by `humdrumR`.
+#' The `Record` and `DataRecord` [fields][fields()] capture this ordering in all data parsed by `humdrumR`.
 #' However, many (probably most) humdrum data files contain at least some information about the relative 
 #' duration of events, representing more detailed information about timing and rhythm.
 #' 
