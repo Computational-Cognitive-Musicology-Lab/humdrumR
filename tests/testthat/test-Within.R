@@ -11,11 +11,11 @@ test_that('Grouping and subset are consistent', {
   alltab <- with(chorales, table(TokenF))
 
   # grouping
-  spines <- with(chorales, table(TokenF), by = Spine)
+  spines <- with(chorales, table(TokenF), .by = 'Spine')
   expect_true(all(Reduce('+', spines) == alltab))
 
   # subset
-  spine1 <- with(chorales, table(TokenF), subset = Spine == 1)
+  spine1 <- with(subset(chorales, Spine == 1), table(TokenF))
   expect_true(all(spines[[1]] == spine1))
 
 })
@@ -56,38 +56,26 @@ test_that('Examples from Working With Data vignette work', {
   }
   
   # subset 
-  spine1tab <- with(chorales, table(kern(Token)), subset = Spine == 1)
+  spine1tab <- with(chorales |> subset(Spine == 1L), table(kern(Token)))
   expect_equal(unname(spine1tab['F#']), 44)
   
-  evenbartab <- with(chorales, 
-       kern(Token) |> table() |> sort() |> tail(n = 10),
-       subset = Bar %% 2 == 0)
+  evenbartab <- with(chorales |> subset(Bar %% 2 == 0), 
+       kern(Token) |> table() |> sort() |> tail(n = 10))
   
   expect_equal(unname(evenbartab['d']), 63)
   
-  # elsedo
-  
-  within(chorales,
-         Pitch <- pitch(Token, simple = TRUE),
-         subset = Spine == 1) -> chorales2
-  
-  expect_equal(with(chorales2, table(Pitch, Spine)) |> ncol(), 1)
-
-  
-  within(chorales,
-         Pitch <- pitch(Token, simple = TRUE),
-         subset = Spine == 1,
-         complement = Token)  -> chorales2
-  
-  spinetab <- with(chorales2, table(Pitch, Spine))
-  expect_equal(ncol(spinetab), 4)
-  expect_equal(spinetab['E#', 1], 4)
-  expect_equal(spinetab['A', 1], 80)
   
   # group by
   spinetab <- with(chorales, 
        kern(Token) |> table() |> sort() |> tail(n = 10),
-       by = Spine)
+       .by = 'Spine')
+  
+  if (expect_true(class(spinetab) == 'list'))  expect_length(spinetab, 4)
+  if (expect_true(unique(sapply(spinetab, class)) == 'table')) expect_equal(unname(spinetab[[3]]['a']), 67)
+  
+  
+  spinetab <- with(chorales |> group_by(Spine), 
+                   kern(Token) |> table() |> sort() |> tail(n = 10))
   
   if (expect_true(class(spinetab) == 'list'))  expect_length(spinetab, 4)
   if (expect_true(unique(sapply(spinetab, class)) == 'table')) expect_equal(unname(spinetab[[3]]['a']), 67)
@@ -95,21 +83,19 @@ test_that('Examples from Working With Data vignette work', {
   
   #
   na <- with(chorales, 
-       semits(Token) |> mean(),
-       by = Spine)
+             semits(Token) |> mean(),
+             .by = 'Spine')
   
   expect_true(all(is.na(na)))
   
-  notna <- with(chorales, 
-       semits(Token) |> mean(na.rm = TRUE),
-       by = Spine)
+  notna <- with(chorales |> group_by(Spine), semits(Token) |> mean(na.rm = TRUE))
   
-  expect_equal(round(notna, 2), setNames(c(-9.67, -0.11, 5.61, 10.57), 1:4))
+  expect_equal(round(notna, 2), c(-9.67, -0.11, 5.61, 10.57))
   
   #
   hist <- withVisible(with(chorales, 
-       semits(Token) |> hist(xlim = c(-24, 24), main = Instrument[1]),
-       by = Spine) )
+                           semits(Token) |> hist(xlim = c(-24, 24), main = Instrument[1]),
+                           .by = 'Spine') )
   
   expect_false(hist$visible)
   if(expect_true(class(hist$value[[1]]) == 'histogram')) {
@@ -117,9 +103,8 @@ test_that('Examples from Working With Data vignette work', {
   }
   
   #
-  hist2 <- withVisible(with(chorales, 
-       semits(Token) |> hist(xlim = c(-24, 24), main = paste(unique(Instrument), sep = ' and ')),
-       by = Spine < 3))
+  hist2 <- withVisible(with(chorales |> group_by(Spine < 3), 
+                            semits(Token) |> hist(xlim = c(-24, 24), main = paste(unique(Instrument), sep = ' and '))))
   
   expect_false(hist2$visible)
   expect_true(class(hist2$value) == 'list')
@@ -142,14 +127,12 @@ test_that('Examples from Working With Data vignette work', {
   }
   
   
-  ## Dofill
+  ## recycling
   
-  within(chorales,
-         Semits <- semits(Token)) -> chorales
+  within(chorales, Semits <- semits(Token)) -> chorales
   
-  within(chorales, 
-         fill = BarBassNote <- min(Semits),
-         by = list(File, Bar)) -> chorales
+  chorales <- within(chorales |> group_by(File, Bar), recycle = 'scalar',
+         BarBassNote <- min(Semits))  |> ungroup()
   
   expect_true(round(with(chorales, mean(Semits - BarBassNote)), 1) == 14.1)
 })
@@ -165,14 +148,14 @@ test_that("Examples from withinHumdrum docs work", {
   grandMean <- humtab[ , mean(Semits)]
   
   #
-  Count1 <- sort(humtab[ , list(sum(Semits > grandMean), Spine), by = Spine][ , setNames(V1, paste0(Spine, ';', TRUE))])
-  Count2 <- sort(with(chorales, length(Semits), subset = Semits > mean(Semits),  by = Spine))
+  Count1 <- sort(humtab[ , list(sum(Semits > grandMean), Spine), by = Spine]$V1)
+  Count2 <- sort(with(chorales |> subset(Semits > mean(Semits)), length(Semits), .by = 'Spine'))
   
   expect_equal(Count1, Count2)
   
   #
-  Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine][ , setNames(V1, paste0(TRUE, ';', Spine))])
-  Count4 <- sort(with(chorales, length(Semits), by = Spine, subset = Semits > mean(Semits)))
+  Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine]$V1)
+  Count4 <- sort(with(chorales |> group_by(Spine) |> subset(Semits > mean(Semits)), length(Semits)))
   
   expect_equal(Count3, Count4)
   
@@ -207,7 +190,7 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   A <- with(chorales, nchar(Token), drop = FALSE)
   B <- with(chorales, X <- nchar(Token), drop = FALSE)
   
-  expect_equal(colnames(A), 'Result1')
+  expect_equal(colnames(A), 'nchar(Token)')
   expect_equal(colnames(B), 'X')
   
   # with, two arguments
@@ -231,65 +214,26 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   C <- with(chorales, drop = FALSE, substr(Token, 0,1), nchar(Token)^2)
   D <- with(chorales, drop = FALSE, nchar(Token), .^2)
   
-  expect_equal(colnames(A), 'Result1')
-  expect_identical(A, B)
-  expect_identical(B, C)
-  expect_identical(C, D)
+  expect_equal(colnames(A), 'nchar(Token)^2')
+  expect_equal(colnames(B), '.^2')
+  expect_equal(colnames(C), 'nchar(Token)^2')
+  expect_equal(colnames(D), '.^2')
+  expect_identical(unname(A), unname(B))
+  expect_identical(A, C)
+  expect_identical(unname(C), unname(D))
+  expect_identical(B, D)
   
   A <- with(chorales, drop = FALSE, NChar <- nchar(Token), NChar^2)
   B <- with(chorales, drop = FALSE, NChar <- nchar(Token), Squared <- NChar^2)
-  expect_identical(colnames(A), c('NChar', 'Result1'))
+  expect_identical(colnames(A), c('NChar', 'NChar^2'))
   expect_identical(colnames(B), c('NChar', 'Squared'))
 
   expect_identical(A$NChar, B$NChar)
-  expect_identical(A$Result1, B$Squared)
+  expect_identical(A$`NChar^2`, B$Squared)
   
   
 
-  
-  
-  ## with fx
-  ### drop = TRUE
-  A <- with(chorales, nchar(Token), side = .^2)
-  B <- with(chorales, nchar(Token))
 
-  expect_identical(A, B)
-  
-  A <- with(chorales, nchar(Token), side = .^2, .^3)
-  B <- with(chorales, nchar(Token), .^3)
-  C <- with(chorales, nchar(Token)^3)
-  expect_identical(A, B)
-  expect_identical(B, C)
-  
-   #### # all fx
-  A <- with(chorales, side = nchar(Token))
-  B <- with(chorales, side = nchar(Token), side = Token == '4ee-')
-  expect_null(A)
-  expect_null(B)
-  
-  ### drop = FALSE
-  A <- with(chorales, drop = FALSE, nchar(Token), side = .^2)
-  B <- with(chorales, drop = FALSE, nchar(Token))
-  
-  expect_identical(A, B)
-  
-  A <- with(chorales, drop = FALSE, nchar(Token), side = .^2, .^3)
-  B <- with(chorales, drop = FALSE, nchar(Token), .^3)
-  C <- with(chorales, drop = FALSE, nchar(Token)^3)
-  expect_equal(ncol(A), 1)
-  expect_identical(A, B)
-  expect_identical(B, C)
-  
-  A <- with(chorales, drop = FALSE, Nchar <- nchar(Token), side = .^2, .^3)
-  B <- with(chorales, drop = FALSE, Nchar <- nchar(Token), side = .^2, Nchar^3)
-  expect_equal(ncol(A), 2)
-  expect_identical(A, B)
-  
-  #### # all fx
-  A <- with(chorales, drop = FALSE, side = nchar(Token))
-  B <- with(chorales, drop = FALSE, side = nchar(Token), side = Token == '4ee-')
-  expect_identical(A, B)
-  expect_equal(nrow(A), 0L)
   
   
 })

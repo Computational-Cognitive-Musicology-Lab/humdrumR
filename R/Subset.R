@@ -105,11 +105,14 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   
   quosures <- rlang::enquos(...)
   
-  subsets <- rlang::eval_tidy(rlang::quo(with.humdrumR(x, !!!quosures, recycle = 'scalar',
-                                         dataTypes = !!dataTypes,
-                                         .by = !!.by, drop = FALSE)))
-  
-  
+  subsets <- local({
+    groupFields <- getGroupingFields(x, .by, 'subset.humdrumR') 
+    subsets <- rlang::eval_tidy(rlang::quo(with.humdrumR(x, !!!quosures, recycle = 'scalar',
+                                                         dataTypes = !!dataTypes,
+                                                         .by = !!.by, drop = FALSE)))
+    subsets[ , setdiff(names(subsets), groupFields), with = FALSE]
+  })
+
   if (any(!sapply(subsets, is.logical))) .stop('In call to subset.humdrumR/filter.humdrumR,', 
                                                'the subsetting expression(s) must evaluate to logical (TRUE/FALSE) vectors.')
   
@@ -119,10 +122,10 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   humtab <- getHumtab(x, dataTypes = dataTypes)
   humtab <- nullify(humtab, fields(x, 'Data')$Name, !subset)
   
-  if (removeEmptyPieces) humtab <- removeNull(humtab, 'Piece', 'GLIMd')
   putHumtab(x, overwriteEmpty = dataTypes) <- humtab
   x <- update_Null(x, selectedFields(x))
   
+  if (removeEmptyPieces) x <- removeNull(x, 'Piece', 'GLIMd')
   x
   
   
@@ -443,7 +446,7 @@ setMethod('[',
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
           function(x, i, removeEmpty = TRUE) {
-            x <- subset(x, fill = any(. %~l% !!i),  by = Piece)
+            x <- subset(x, any(. %~l% !!i), .by = 'Piece')
             
             if (removeEmpty) x <- removeEmptyPieces(x)
             
@@ -527,7 +530,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'),
 function(x, i, removeEmpty = FALSE) {
     # gets any record which contains match
   
-    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), by = Piece, dataTypes = "D")
+    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), .by = 'Piece', dataTypes = "D")
     
     if (removeEmpty) x <- removeEmptyRecords(x)
     
@@ -542,30 +545,24 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
           function(x, j, removeEmpty = TRUE) {
             #gets any spine which contains match
             
-            if (removeEmpty && all(grepl('^\\*\\*', j))) {
-              humtab <- getHumtab(x)
+            exclusive <- all(grepl('^\\*\\*', j))
+            expr <- quote(Spine %in% unique(Spine[. %~l% j]) | is.na(Spine))
+            
+            if (exclusive) {
               j <- gsub('^\\*\\**', '', j)
-              hits <- humtab[ , Spine %in% unique(Spine[Exclusive %in% j]) | is.na(Spine), by = Piece]$V1
+              expr <- substituteName(expr, list(. = quote(Exclusive)))
+            }
+            
+            if (removeEmpty && exclusive) {
+              humtab <- getHumtab(x)
+              hits <- rlang::eval_tidy(rlang::expr(humtab[ , !!expr, by = Piece]))$V1
               humtab <- humtab[hits == TRUE]
               putHumtab(x) <- renumberSpines.data.table(humtab)
               
             } else {
-              form <- do ~ Spine %in% unique(Spine[. %~l% j]) | is.na(Spine)
-              
-              if (all(grepl('^\\*\\*', j))) {
-                
-                j <- gsub('^\\*\\**', '', j)
-                form <- substituteName(form, list(. = quote(Exclusive)))
-                
-              } 
-              
-              x <- subset(x, form, by = Piece, dataTypes = "D")
-              
+              x <- rlang::eval_tidy(rlang::expr(subset(x, !!expr, .by = 'Piece', dataTypes = 'D')))
               if (removeEmpty) x <- removeEmptySpines(x)
             }
-           
-            
-            
             removeEmptyPieces(x)
 
           })

@@ -632,7 +632,6 @@ with.humdrumR <- function(data, ...,
                        .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
   
-  data@Humtable[ , `_rowKey_` := NULL] # this is needed, because the humdrum table was changed in place, inside the original object
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
   
@@ -694,7 +693,6 @@ within.humdrumR <- function(data, ...,
  
   ## put result into new humtab
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
-  humtab[ , `_rowKey_` := NULL] # this is needed, because humtab was changed in place, inside the original object
   newhumtab[ , `_rowKey_` := NULL]
   
   #### Put new humtable back into humdrumR object
@@ -731,7 +729,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   
   if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
   
-  humtab <- getHumtab(humdrumR)
+  humtab <- data.table::copy(getHumtab(humdrumR))
   humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
   # quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
@@ -744,11 +742,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   dotField <- fields[Selected == TRUE]$Name[1]
   
   ##### grouping
-  groupFields <- if (is.null(.by)) {
-    fields[GroupedBy == TRUE]$Name 
-  } else {
-    fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
-  }
+  groupFields <- getGroupingFields(humdrumR, .by, withFunc) 
   
   doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle)
   
@@ -1492,7 +1486,7 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
   results[] <- lapply(results, unlist, recursive = FALSE)
   
-  visibleResult <- attr(results[[length(results)]], 'visible') %||% TRUE
+  visibleResult <- attr(results[[length(results)]][[1]], 'visible') %||% TRUE
   
   
   results <- as.matrix(results) # allows me to lapply across all all at once
@@ -1535,8 +1529,11 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
                  })
   
   arrays <- sapply(results, is.array)
-  result <- as.data.table(results[!arrays])
-  for (array in names(results)[arrays]) result[[array]] <- results[[array]]
+  result <- as.data.table(results)
+  # arrays are split into new columns
+  # for (array in names(results)[arrays]) {
+    # result[[array]] <- results[[array]]
+  # }
   
   result <- cbind(`_rowKey_` = unlist(rowKey), as.data.table(lapply(grouping, rep, lengths(rowKey))), result)
   

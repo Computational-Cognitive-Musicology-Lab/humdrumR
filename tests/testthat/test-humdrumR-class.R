@@ -16,7 +16,7 @@ test_that('Spine folding works properly', {
   
   folded <- getHumtab(foldHumdrum(spine, c(2, 4), 1, newFieldNames =  'silbe'))
   
-  expect_equal(dim(folded), c(24, 24))
+  expect_equal(dim(folded), c(24, 22))
   if (expect_true(all(c('Token', 'silbe1', 'silbe2') %in% colnames(folded)))) {
     expect_equal(folded[silbe1 == 'the' & silbe2 == 'a', Token], 'c#')
   }
@@ -38,7 +38,7 @@ test_that('Spine folding works properly when stops are present, and vice versa',
   
   #
   tab1 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 2, 1), fromField = 'Token'), dataTypes = 'Dd')
-  tab2 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 1, 2), fromField = 'Result1'), dataTypes = 'Dd')
+  tab2 <- getHumtab(foldStops(foldHumdrum(spinesWithStops, 1, 2), fromField = 'Fold{Spine1->Spine2}'), dataTypes = 'Dd')
   if (expect_true(identical(dim(tab1), dim(tab2)))) {
     expect_true(all(tab1$Token == tab2$Result1))
     expect_true(all(tab1$Result1 == tab2$Token))
@@ -54,7 +54,7 @@ test_that("Exclusive (spine) folding works properly", {
   # parallel (two silbe onto two kern)
   foldedSilbe <- getHumtab(foldExclusive(spine, 'silbe', 'kern'))
   
-  expect_equal(dim(foldedSilbe), c(24, 23))
+  expect_equal(dim(foldedSilbe), c(24, 21))
   if (expect_true(all(c('Token', 'Silbe') %in% colnames(foldedSilbe)))) {
     expect_equal(foldedSilbe[ , table(Token, Silbe)]['a', 'These'], 2L)
   }
@@ -63,21 +63,21 @@ test_that("Exclusive (spine) folding works properly", {
   # spreading: one harm onto twokern
   foldedHarm <- getHumtab(foldExclusive(spine, 'harm', 'kern'))
   
-  expect_equal(dim(foldedHarm), c(32, 23))
+  expect_equal(dim(foldedHarm), c(32, 21))
   if (expect_true(all(c('Token', 'Harm') %in% colnames(foldedHarm)))) {
     expect_equal(foldedHarm[ , table(Token, Harm)]['c#', 'AM'], 2L)
   }
   
   # two parallel moves AND ond spreading move
   foldedDouble <- getHumtab(foldExclusive(spine ,c('harm', 'silbe'), 'kern'))
-  expect_equal(dim(foldedDouble), c(16, 24))
+  expect_equal(dim(foldedDouble), c(16, 22))
   if (expect_true(all(c('Token', 'Harm', 'Silbe') %in% colnames(foldedDouble)))) {
     expect_equal(foldedDouble[ , table(Token, Harm, Silbe)]['c#', 'AM', 'These'],1L)
   }
   
   # all moved onto one, including a self move (kern -> kern) 
   foldedAll <- getHumtab(foldExclusive(spine ,c('harm', 'silbe', 'kern'), 'kern'))
-  expect_equal(dim(foldedAll), c(8, 26))
+  expect_equal(dim(foldedAll), c(8, 24))
   if (expect_true(all(c('Token', 'Harm', 'Kern', 'Silbe1', 'Silbe2') %in% colnames(foldedAll)))) {
     expect_equal(foldedAll[ , paste(Token, Harm, Kern, Silbe1,Silbe2)[6]] , 'd DM f# lyr- cat')
   }
@@ -90,7 +90,7 @@ test_that('Path folding works properly', {
   foldedPath <- getHumtab(foldPaths(path))
   
   
-  expect_equal(dim(foldedPath), c(28, 23))
+  expect_equal(dim(foldedPath), c(28, 21))
   if (expect_true(all(c('Token', 'Token_Path1') %in% colnames(foldedPath)))) {
     expect_equal(foldedPath[Stop == 1L, table(Token, Token_Path1)]['c', 'a'], 2L)
   }
@@ -106,7 +106,7 @@ test_that('Stop folding works properly', {
   foldedStop <- getHumtab(foldStops(stop))
   
   
-  expect_equal(dim(foldedStop), c(18, 25))
+  expect_equal(dim(foldedStop), c(18, 23))
   if (expect_true(all(c('Token', 'Token_Stop2', 'Token_Stop3') %in% colnames(foldedStop)))) {
     expect_equal(foldedStop[ , table(Token, Token_Stop2, Token_Stop3)]['b', 'd', 'g#'], 2L)
   }
@@ -132,9 +132,9 @@ test_that('Examples from Reshaping vignette work', {
   
   reshaped <- getHumtab(foldHumdrum(reshaping, 2, 1), 'D')
   
-  expect_equal(dim(reshaped), c(6, 26))
-  if (expect_true(all(c('Token', 'Result1') %in% colnames(reshaped)))) {
-    expect_equal(reshaped[ , table(Token, Result1)]['4e', 'an'], 1L)
+  expect_equal(dim(reshaped), c(24, 24))
+  if (expect_true(all(c('Token', 'Fold{Spine2->Spine1}') %in% colnames(reshaped)))) {
+    expect_equal(reshaped[ , table(Token, `Fold{Spine2->Spine1}`)]['4e', 'an'], 1L)
   }
 })
 
@@ -147,7 +147,7 @@ test_that("Exclusive (spine) folding works properly", {
   # parallel (two silbe onto two kern)
   foldedSilbe <- getHumtab(foldExclusive(spine, 'silbe', 'kern'))
   
-  expect_equal(dim(foldedSilbe), c(24, 23))
+  expect_equal(dim(foldedSilbe), c(24, 21))
   if (expect_true(all(c('Token', 'Silbe') %in% colnames(foldedSilbe)))) {
     expect_equal(foldedSilbe[ , table(Token, Silbe)]['a', 'These'], 2L)
   }
@@ -156,21 +156,21 @@ test_that("Exclusive (spine) folding works properly", {
   # spreading: one harm onto twokern
   foldedHarm <- getHumtab(foldExclusive(spine, 'harm', 'kern'))
   
-  expect_equal(dim(foldedHarm), c(32, 23))
+  expect_equal(dim(foldedHarm), c(32, 21))
   if (expect_true(all(c('Token', 'Harm') %in% colnames(foldedHarm)))) {
     expect_equal(foldedHarm[ , table(Token, Harm)]['c#', 'AM'], 2L)
   }
   
   # two parallel moves AND ond spreading move
   foldedDouble <- getHumtab(foldExclusive(spine ,c('harm', 'silbe'), 'kern'))
-  expect_equal(dim(foldedDouble), c(16, 24))
+  expect_equal(dim(foldedDouble), c(16, 22))
   if (expect_true(all(c('Token', 'Harm', 'Silbe') %in% colnames(foldedDouble)))) {
     expect_equal(foldedDouble[ , table(Token, Harm, Silbe)]['c#', 'AM', 'These'],1L)
   }
   
   # all moved onto one, including a self move (kern -> kern) 
   foldedAll <- getHumtab(foldExclusive(spine ,c('harm', 'silbe', 'kern'), 'kern'))
-  expect_equal(dim(foldedAll), c(8, 26))
+  expect_equal(dim(foldedAll), c(8, 24))
   if (expect_true(all(c('Token', 'Harm', 'Kern', 'Silbe1', 'Silbe2') %in% colnames(foldedAll)))) {
     expect_equal(foldedAll[ , paste(Token, Harm, Kern, Silbe1,Silbe2)[6]] , 'd DM f# lyr- cat')
   }

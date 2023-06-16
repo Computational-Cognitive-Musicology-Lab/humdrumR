@@ -289,8 +289,8 @@ test_that("int, mint, and hint work", {
     classif <- c('c', 'd', 'f', 'g','g','c','b', 'c','c#', 'd','d#','e','g--')
     expect_equal(mint(classif, bracket = TRUE, classify = TRUE),
                  c("[c]", "+Step", "+Skip", "+Step", "Unison", "-Leap", "+Leap", "-Leap", "+Unison", "+Step", "+Unison", "+Step", "+Skip"))
-    expect_equal(mint(classif, classify = TRUE, atonal = TRUE, skips = FALSE),
-                 c("[c]", "+Step", "+Leap", "+Step", "Unison", "-Leap", "+Leap", "-Leap", "+Step", "+Step", "+Step", "+Step", "+Step"))
+    expect_equal(mint(classif, bracket = FALSE, classify = TRUE, atonal = TRUE, skips = FALSE),
+                 c("c", "+Step", "+Leap", "+Step", "Unison", "-Leap", "+Leap", "-Leap", "+Step", "+Step", "+Step", "+Step", "+Step"))
     
     ##
     chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001*.krn')
@@ -300,7 +300,7 @@ test_that("int, mint, and hint work", {
                       Bass <- hint(Token, lag = Spine == 1)
                       )
     
-    expect_true(with(chorale, subset = Spine < 3, all(as.character(Bass) == as.character(Lag))))
+    expect_true(with(chorale |> subset(Spine < 3), all(as.character(Bass) == as.character(Lag))))
     
     expect_equal(with(chorale, tally(mint(Token))['+M2']), 45)
     expect_equal(with(chorale, tally(hint(Token, lag = Spine == 4))['-M17']), 7)

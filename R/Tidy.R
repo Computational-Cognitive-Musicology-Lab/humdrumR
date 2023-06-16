@@ -123,6 +123,7 @@ filter.humdrumR <- function(.data, ...) {
 group_by.humdrumR <- function(.data, ..., .add = FALSE) {
   if (!.add) .data <- ungroup(.data)
   
+  selectedFields <- selectedFields(.data)
   exprs <- rlang::enquos(...)
   calls <- sapply(exprs, rlang::quo_is_call)
   
@@ -147,7 +148,8 @@ group_by.humdrumR <- function(.data, ..., .add = FALSE) {
   fields[ , GroupedBy := Name %in% groupFields | GroupedBy]
   .data@Fields <- fields
   
-  .data
+  selectFields(.data, selectedFields)
+
   
   
   
@@ -158,15 +160,13 @@ group_by.humdrumR <- function(.data, ..., .add = FALSE) {
 ungroup.humdrumR <- function(x, ...) {
   fields <- fields(x)
   fields[ , GroupedBy := FALSE]
-  
   remove <- fields[Type == 'Grouping', Name]
   if (length(remove)) {
     fields <- fields[Type != 'Grouping']
-    x@Fields <- fields
-    
-    x@Humtable[, remove := NULL]
+    for (field in remove) x@Humtable[[field]] <- NULL
   }
   
+  x@Fields <- fields
   x
   
 }

@@ -1810,7 +1810,7 @@ is.nullToken <- function(tokens) {
 }
 
 nullFields <- function(hum, fields, reduce = '&') {
-    nulls <- lapply(hum[ , field, with = FALSE], is.nullToken)
+    nulls <- lapply(hum[ , fields, with = FALSE], is.nullToken)
     Reduce('&', nulls)
 }
 
@@ -1868,7 +1868,7 @@ update_Null.humdrumR <- function(hum, field = selectedFields(hum),  allFields = 
 update_Null.data.table <- function(hum, field = 'Token', ...) {
     null <- nullFields(hum, field)
     
-    hum$Type[hum$Type %in% c('d', 'D')] <- hum[Type %in% c('d', 'D'),  ifelse(null, 'd', 'D')]
+    hum$Type[hum$Type %in% c('d', 'D')] <-  ifelse(null[hum$Type %in% c('d', 'D')], 'd', 'D')
     hum
 }
 
@@ -2289,7 +2289,14 @@ printableSelectedField <- function(humdrumR, dataTypes = 'D', null =  c('charNA2
 }
 
 
-
+getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR') {
+    if (is.null(.by)) {
+        fields(humdrumR)[GroupedBy == TRUE]$Name 
+    } else {
+        fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
+    }
+    
+}
 
 
 
@@ -2688,7 +2695,7 @@ showFields <-  function(humdrumR) {
           
           ## Print fields
           cat('\n')
-          fields[Type == 'Data' | Selected == TRUE,
+          fields[(Type == 'Data' | Selected == TRUE) & Type != 'Grouping',
                   { cat('  ', Type[1], 'fields:', '\n\t        ')
                     cat(Print, sep = '\n\t        ')
                     cat('\n')

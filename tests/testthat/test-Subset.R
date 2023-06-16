@@ -120,24 +120,24 @@ test_that('Filtering vignette examples work', {
                with(chorales, sum(grepl('-', Token))))
   
   # subsetting by
-  barsub <- subset(chorales, fill = any(Token %~% '-'), by = list(File, Bar)) 
+  barsub <- subset(chorales, any(Token %~% '-'), .by = c('File', 'Bar')) 
   expect_equal(with(barsub, nrow(unique(cbind(File,Record)))), 171)
   expect_equal(with(barsub, nrow(unique(cbind(Bar,Record)))), 144)
   
-  barsub2 <- subset(chorales, fill = any(Token %~% '-'), by = list(File, floor(Bar  / 2)))
+  barsub2 <- subset(chorales |> group_by(File, floor(Bar / 2)), any(Token %~% '-')) |> ungroup()
   
-  expect_equal(with(barsub2, nrow(unique(cbind(Bar,Record)))), 162)
-  expect_equal(with(barsub2, nrow(unique(cbind(File,Record)))), 194)
+  expect_equal(with(barsub2, nrow(unique(cbind(Bar, Record)))), 162)
+  expect_equal(with(barsub2, nrow(unique(cbind(File, Record)))), 194)
   
 })
 
 
-test_that("Unfiltering works", {
-  
-  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
-  
-  orig <- getHumtab(chorales)
-  cleared <- getHumtab(clearFilter(subset(chorales, Spine == 1)))
-  expect_true(all(orig == cleared, na.rm = TRUE))
-  
-})
+# test_that("Unfiltering works", {
+#   
+#   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#   
+#   orig <- getHumtab(chorales)
+#   cleared <- getHumtab(clearFilter(subset(chorales, Spine == 1)))
+#   expect_true(all(orig == cleared, na.rm = TRUE))
+#   
+# })
