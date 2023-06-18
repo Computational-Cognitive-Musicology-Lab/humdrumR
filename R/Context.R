@@ -480,8 +480,10 @@ context.humdrumR <- function(x, open,  close,
   close <- rlang::enexpr(close)
   
   humtab <- getHumtab(x, 'D')
+  groupFields <- getGroupingFields(x, .by, 'context.humdrumR()') 
+  
   windowFrame <- findWindows(humtab, open, close, 
-                             groupby = humtab[ , c('Piece', 'Spine', 'Path'), with = FALSE],
+                             groupby = humtab[ , union(c('Piece', 'Spine', 'Path'), groupFields), with = FALSE],
                              duplicate_indices = duplicate_indices,
                              overlap = overlap, depth = depth, rightward = rightward,
                              min_length = min_length, max_length = max_length)
