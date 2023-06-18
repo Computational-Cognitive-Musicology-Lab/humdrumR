@@ -796,9 +796,6 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   usedInExprs <- lapply(quosures, fieldsInExpr, humtab = humtab)
   usedClasses <- vapply(humtab[ , unique(unlist(usedInExprs)), with = FALSE], \(x) class(x)[1], FUN.VALUE = character(1)) 
   
-  # "recycle" as needed
-  # quosures <- Map(fillQuo, quosures, usedInExprs, recycle = recycle)
-  
   # if the targets are lists, Map
   quosures <- Map(quosures, usedInExprs, 
                   f = \(quo, curUsed) { 
@@ -810,11 +807,10 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
                   })
   
   
-  
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(quosures)
 
-  # turn . to active formula
+  # turn . to selected field
   doQuo <- activateQuo(doQuo, dotField)
   
   # lagged vectors
@@ -830,8 +826,6 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   
   # We may have added to the expr, so update what fields (if any) are used in formula
   usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
-
-  
 
     
   # if ngram is present
@@ -849,14 +843,6 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   # }
   # 
 
-  # rlang::quo({
-    # result <- withVisible(!!doQuo)
-    # 
-    # output <- result$value
-    # if (!is.null(output)) attr(output, 'visible') <- result$visible
-    # output
-    
-  # })
   doQuo
 }
 

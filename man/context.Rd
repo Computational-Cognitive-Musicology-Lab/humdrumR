@@ -4,25 +4,7 @@
 \alias{context}
 \title{Create arbitrary "context" across vectors.}
 \usage{
-context(
-  x,
-  open,
-  close,
-  reference = x,
-  overlap = "paired",
-  depth = NULL,
-  rightward = TRUE,
-  duplicate_indices = TRUE,
-  min_length = 2L,
-  max_length = Inf,
-  inPlace = FALSE,
-  complement = FALSE,
-  alignToOpen = TRUE,
-  collapse = TRUE,
-  sep = ",",
-  stripRegex = FALSE,
-  groupby = list()
-)
+context(x, open, close, ...)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to group into windows.}}

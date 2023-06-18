@@ -11,7 +11,7 @@ int(
   from = tint(0L, 0L),
   deparser = interval,
   incomplete = NULL,
-  bracket = is.null(incomplete) || !is.na(incomplete),
+  bracket = is.function(incomplete),
   classify = FALSE,
   ...,
   Exclusive = NULL,
@@ -24,7 +24,7 @@ mint(
   lag = 1,
   deparser = interval,
   incomplete = kern,
-  bracket = is.null(incomplete) || !is.na(incomplete),
+  bracket = is.function(incomplete),
   classify = FALSE,
   ...,
   parseArgs = list(),
@@ -39,7 +39,7 @@ hint(
   lag = 1,
   deparser = interval,
   incomplete = kern,
-  bracket = is.null(incomplete) || !is.na(incomplete),
+  bracket = is.function(incomplete),
   ...,
   parseArgs = list(),
   Exclusive = NULL,
@@ -75,7 +75,7 @@ Must \code{NULL}, a \link[=pitchFunctions]{pitch function}, or an atomic value o
 
 \item{bracket}{\emph{\strong{Whether to print brackets around \code{incomplete} output.}}
 
-Defaults to \code{TRUE}, unless \code{incomplete} is \code{NA}.
+Defaults to \code{TRUE} if \code{incomplete} is a function, \code{FALSE} otherwise.
 
 Must be a singleton \code{logical} value: an on/off switch.
 

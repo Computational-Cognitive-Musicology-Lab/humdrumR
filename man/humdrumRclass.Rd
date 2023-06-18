@@ -57,6 +57,9 @@ The fields are divided into five categories: "Data", "Structure", "Interpretatio
 
 \item{\code{LoadTime}}{A \link[base:DateTimeClasses]{POSIXct} value, indicating the time at which \code{\link[=readHumdrum]{readHumdrum()}} was
 called to create this \code{humdrumR} object.}
+
+\item{\code{Context}}{A \link{data.table} with two columns: \code{Open} and \code{Close}.
+Each row represents a contextual window to apply to the data.}
 }}
 
 \section{Printing}{

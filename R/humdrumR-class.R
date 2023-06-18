@@ -334,6 +334,8 @@ orderHumtab <- function(humtab) {
 #' The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."
 #' @slot LoadTime A [POSIXct][base::DateTimeClasses] value, indicating the time at which [readHumdrum()] was
 #' called to create this `humdrumR` object.
+#' @slot Context A [data.table] with two columns: `Open` and `Close`.
+#' Each row represents a contextual window to apply to the data.
 #
 #' @name humdrumRclass
 #' @seealso humdrumR
@@ -344,7 +346,8 @@ setClass('humdrumR',
          slots = c(Humtable = 'data.table',
                    Files = 'list',
                    Fields = 'data.frame',
-                   LoadTime = 'POSIXct'
+                   LoadTime = 'POSIXct',
+                   Context = 'data.table'
                    )) -> makeHumdrumR
 
 setMethod('initialize', 'humdrumR',
@@ -360,6 +363,7 @@ setMethod('initialize', 'humdrumR',
             .Object@Fields    <- fieldTable
             .Object@Files     <- list(Search = pattern, Names = unique(humtab$Filepath))
             .Object@LoadTime  <- Sys.time()
+            .Object@Context   <- data.table(Open = integer(0), Close = integer(0))
             .Object
           })
 
@@ -2377,6 +2381,7 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   ## Fields
   showFields(humdrumR)
   
+  showWindows(humdrumR)
   
   return(invisible(humdrumR))
   
@@ -2719,4 +2724,31 @@ showFields <-  function(humdrumR) {
           # cat('\t\tFields: ', paste(fieldprint, collapse = '\n\t\t        '), '\n', sep = '')
           
           invisible(fields)
+}
+
+
+showWindows <- function(humdrumR) {
+    windowFrame <- humdrumR@Context
+    
+    if (nrow(windowFrame)) {
+        overlap <- any(windowFrame$Depth > 1L)
+        
+        cat('   With ', num2print(nrow(windowFrame)),
+        if (overlap) ' (overlapping)', ' contextual windows:\n', 
+        sep = '')
+        
+        lengths <- windowFrame[ , Close - Open + 1L]
+        quants <- round(c(Shortest = min(lengths), Median = median(lengths), Longest = max(lengths)))
+        if (length(unique(quants)) == 1L) {
+            cat("\t\tAll windows' length ==", quants[1],'\n')
+        } else 
+            quants <- setNames(unique(quants), tapply(names(quants), quants, paste, collapse = '/'))
+            cat(paste0('\t\t', 
+                        str_pad(paste0(names(quants), ' '), 
+                                max(nchar(names(quants)) + 1L)), 
+                        'length == ', 
+                       quants), 
+                 sep = '\n')
+        }
+ 
 }

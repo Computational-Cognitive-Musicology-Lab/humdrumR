@@ -8,7 +8,7 @@
 
 
 
-parseContextExpression <- function(expr, other, groupby) {
+parseContextExpression <- function(expr, other) {
   if (is.null(expr)) expr <- quote('.')
   
   expr <- withinExpression(expr, applyTo = 'call', stopOnHit = TRUE,
@@ -16,7 +16,7 @@ parseContextExpression <- function(expr, other, groupby) {
                          \(exprA) {
                            
                            exprA$Args$along.with <- exprA$Args$along.with %||% quote(.)
-                           exprA$Args$groupby <- exprA$Args$groupby %||% groupby
+                           exprA$Args$groupby <- quote(groupby)
                            exprA
                            
                          })
@@ -416,7 +416,9 @@ parseContextExpression <- function(expr, other, groupby) {
 #' }
 #' 
 #' @export
-context <- function(x, open, close, reference = x, 
+context <- function(x, open, close, ...) UseMethod('context')
+#' @export
+context.default <- function(x, open, close, reference = x, 
                     overlap = 'paired', depth = NULL, rightward = TRUE, duplicate_indices = TRUE, 
                     min_length = 2L, max_length = Inf,
                     inPlace = FALSE, complement = FALSE, alignToOpen = TRUE, 
@@ -459,6 +461,36 @@ context <- function(x, open, close, reference = x,
   
 }
 
+#' @export
+context.humdrumR <- function(x, open,  close, 
+                             overlap = 'paired', depth = NULL,
+                             rightward = TRUE, duplicate_indices = TRUE, 
+                             min_length = 2L, max_length = Inf, 
+                             .by = NULL) {
+  
+  # checks(reference, xmatch(x) | xnrowmatch(x))
+  checks(overlap, xplegal(c('paired', 'nested', 'edge', 'none')))
+  checks(depth, xnull | (xwholenum & xnotzero))
+  checks(rightward, xTF)
+  checks(duplicate_indices, xTF)
+  checks(min_length, xpnatural)
+  checks(max_length, xpnatural)
+  
+  open  <- rlang::enexpr(open)
+  close <- rlang::enexpr(close)
+  
+  humtab <- getHumtab(x, 'D')
+  windowFrame <- findWindows(humtab, open, close, 
+                             groupby = humtab[ , c('Piece', 'Spine', 'Path'), with = FALSE],
+                             duplicate_indices = duplicate_indices,
+                             overlap = overlap, depth = depth, rightward = rightward,
+                             min_length = min_length, max_length = max_length)
+  
+  x@Context <- windowFrame
+  
+  x
+  
+}
 
 
 
@@ -471,8 +503,8 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
   
   if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), field %||% '.')
   
-  open <- parseContextExpression(open, other = quote(close), groupby = rlang::enexpr(groupby))
-  close <- parseContextExpression(close, other = quote(open), groupby = rlang::enexpr(groupby))
+  open <- parseContextExpression(open, other = quote(close))
+  close <- parseContextExpression(close, other = quote(open))
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
   if (!is.null(field)) {
     open  <- substituteName(open, list('.' = rlang::sym(field)))
@@ -490,7 +522,7 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
   open_indices <- close_indices <- NULL
   for (i in order(c(openDepends, closeDepends))) { # this is all just to make sure any the independent expressions are evaluated first
     val <- rlang::eval_tidy(list(open, close)[[i]], 
-                            data = c(x, list(open = open_indices, close = close_indices)))
+                            data = c(x, list(open = open_indices, close = close_indices, groupby = groupby)))
     if (is.logical(val)) val <- which(val)
     
     assign(c('open_indices', 'close_indices')[i], val)
