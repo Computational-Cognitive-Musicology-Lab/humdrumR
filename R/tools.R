@@ -2712,7 +2712,7 @@ list2str <- function(list, null = '.') {
 }
 
 setClassUnion('atomic', c('character', 'factor', 'integer', 'numeric', 'logical'))
-setGeneric('printable', function(x) standardGeneric('printable'))
+setGeneric('printable', function(x, ...) standardGeneric('printable'))
 setMethod('printable', 'list',
           function(x) {
             if (length(x) >= 5 || any(lengths(x) > 1L) || any(sapply(x, Negate(is.vector)))) {
@@ -2726,8 +2726,8 @@ setMethod('printable', 'list',
             }
           })
 setMethod('printable', 'atomic',
-          function(x) {
-            if (is.character(x)) x <- quotemark(x)
+          function(x, quotechar = TRUE) {
+            if (quotechar && is.character(x)) x <- quotemark(x)
             vals <-  if (length(x) < 5) {
               harvard(x, quote = FALSE)
             } else {
@@ -2743,9 +2743,8 @@ setMethod('printable', 'table',
           function(x) {
             paste0(class(x)[1], '[', paste(dim(x), collapse = ', '), ']')
           } )
-setMethod('printable', signature = c(),
-          function(x) paste0('<', paste(class(x), collapse = '/'), '>'))
-
+setMethod('printable', 'token', function(x) printable(x@.Data, quotechar = FALSE))
+setMethod('printable', signature = c(), function(x) paste0('<', paste(class(x), collapse = '/'), '>'))
 
 
 

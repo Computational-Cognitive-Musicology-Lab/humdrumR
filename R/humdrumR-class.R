@@ -2740,8 +2740,8 @@ showWindows <- function(humdrumR) {
         lengths <- windowFrame[ , Close - Open + 1L]
         quants <- round(c(Shortest = min(lengths), Median = median(lengths), Longest = max(lengths)))
         if (length(unique(quants)) == 1L) {
-            cat("\t\tAll windows' length ==", quants[1],'\n')
-        } else 
+            cat("\t\tAll windows length ==", quants[1],'\n')
+        } else {
             quants <- setNames(unique(quants), tapply(names(quants), quants, paste, collapse = '/'))
             cat(paste0('\t\t', 
                         str_pad(paste0(names(quants), ' '), 
@@ -2750,5 +2750,5 @@ showWindows <- function(humdrumR) {
                        quants), 
                  sep = '\n')
         }
- 
+    }
 }

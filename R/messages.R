@@ -488,6 +488,10 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
   stop(call. = FALSE, message)
 }
 
+.message <- function(..., ifelse = TRUE, sep = ' ') {
+  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
+  message(message, appendLF = FALSE)
+}
 
 .warn <- function(...,  ifelse = TRUE, sep = ' ', immediate. = FALSE) {
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
@@ -495,7 +499,7 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
   
   call <- sys.calls()[[1]]
   
-  warning('In your call ', rlang::expr_deparse(call), ': ',
+  warning('In your call ', rlang::expr_deparse(call), ': \n',
           .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1)),
           call. = FALSE,
           immediate. = immediate.)

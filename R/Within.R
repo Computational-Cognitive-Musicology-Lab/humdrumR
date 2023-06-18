@@ -747,9 +747,8 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle)
   
   ## Evaluate "do" expression! 
-  result <- evaluateDoQuo(doQuo, humtab[Type %in% dataTypes], groupFields)
+  result <- evaluateDoQuo(doQuo, humtab[Type %in% dataTypes], groupFields, humdrumR@Context)
   result <- parseResult(result, groupFields, recycle, alignLeft, withFunc)
-  # result <- evalDoQuo(do, humtab[Type %in% dataTypes],  quoTab[KeywordType == 'partitions'],  ordo, alignLeft = alignLeft)
   
   
   visible <- attr(result, 'visible')
@@ -825,23 +824,7 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   
   
   # We may have added to the expr, so update what fields (if any) are used in formula
-  usedInExpr <- unique(fieldsInExpr(humtab, doQuo))
-
-    
-  # if ngram is present
-  # if (any(quoTab$Keyword == 'ngram')) {
-  #   doQuo <- ngramifyQuo(doQuo, 
-  #                        quoTab[Keyword == 'ngram']$Quo[[1]], usedInExpr, 
-  #                        depth = 1L + any(lists))
-  # } 
-  # 
-  # if (any(quoTab$Keyword == 'context')) {
-  #   doQuo <- windowfyQuo(doQuo,  
-  #                        quoTab[Keyword == 'context']$Quo[[1]],
-  #                        usedInExpr, 
-  #                        depth = 1L + any(lists))
-  # }
-  # 
+  attr(doQuo, 'usedFields') <- unique(fieldsInExpr(humtab, doQuo))
 
   doQuo
 }
@@ -1291,131 +1274,26 @@ prepareContextQuo <- function(contextQuo, dotField) {
 ###########- Applying within.humdrumR's expression to a data.table
 
 
-evaluateDoQuo <- function(doQuo, humtab, groupFields) {
-  if (length(groupFields)) {
-    humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = groupFields, .SDcols = colnames(humtab)]
-  } else {
-    humtab[ ,  rlang::eval_tidy(doQuo, data = .SD) ] # outputs a data.table this way
-   
+evaluateDoQuo <- function(doQuo, humtab, groupFields, windowFrame) {
+  usedFields <- union(attr(doQuo, 'usedFields'), groupFields)
+  
+  if (nrow(windowFrame)) {
+    humtab <- windows2groups(humtab, windowFrame)
+    usedFields <- c(usedFields, 'contextWindow')
+    groupFields <- c(groupFields, 'contextWindow')
   }
   
-}
-
-
-evalDoQuo <- function(doQuo, humtab, partQuos, ordoQuo, alignLeft) {
-    result <- if(nrow(partQuos) == 0L) {
-        as.data.table(rlang::eval_tidy(doQuo, data = humtab))
-        
-    } else {
-        evalDoQuo_part(doQuo, humtab, partQuos, ordoQuo)
-    }
-   
-    parseResult(result, alignLeft)
-}
-evalDoQuo_part <- function(doQuo, humtab, partQuos, ordoQuo) {
-    ### evaluation partition expression and collapse results 
-    ## to a single factor
-    partType <- partQuos$Keyword[1]
-    
-    if (partType == 'context') return(evalDoQuo_context(doQuo, humtab, partQuos, ordoQuo))
-    
-    partition <- rlang::eval_tidy(partQuos$Quo[[1]], humtab)
-    
-    if (!is.list(partition)) partition <- list(partition)
-    partition <- lapply(partition, rep, length.out = nrow(humtab))
-    
-    partition <- Reduce(switch(partType, by = paste, subset = `&`), partition)
-    
-    partEval <- switch(partType,
-                       by    = evalDoQuo_by,
-                       subset = evalDoQuo_subset)
-    
-    partEval(doQuo, humtab, partition, partQuos, ordoQuo)
-    
-}
-
-evalDoQuo_by <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
-    # this function doesn't use reHum because data.table 
-    # pretty much already does (some) of whats needed.
-    targetFields <- namesInExprs(colnames(humtab), c(doQuo, partQuos[-1]$Quo))
-    targetFields <- unique(c(targetFields, '_rowKey_'))
-    
-    partition <- as.factor(partition)
-    
-    nparts <- max(as.integer(partition), na.rm = TRUE)
-    
-    if (nparts > 1e5L) message("Your group-by expression {by = ",
-                               rlang::as_label(partQuos$Quo[[1]]),
-                               "} is evaluating to ", 
-                               num2print(nparts), " groups.", 
-                                " If your within-expression is complex, this could take a while!")
-    
-    if (nparts > 1L && nparts <= 16 && all(par()$mfcol == c(1, 1))) {
-      oldpar <- par(no.readonly = TRUE,
-                    mfcol = find2Dlayout(nparts))
-      on.exit(par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt','pty', 'new')]))
-    }
-    partitionName <- paste0('_by=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
-    
-    result <- if (nrow(partQuos) > 1) {
-      results <- humtab[ , {
-        evaled <- evalDoQuo_part(doQuo, .SD, partQuos[-1], ordoQuo)
-        evaled[[partitionName]] <- if (nrow(evaled)) partition else partition[0]
-        list(list(evaled)) 
-      },
-      by = partition, .SDcols = targetFields]
-      data.table::rbindlist(results$V1)
-    } else {
-      # quoEnv <- rlang::new_environment(list(humtab = humtab, partition = partition),
-                                       # rlang::get_env(doQuo))
-      # result <- eval(rlang::quo_squash(rlang::expr( humtab[ , !!doQuo, by = partition])),
-                     # envir = quoEnv)
-      result <- humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = partition]
-      colnames(result)[colnames(result) == 'partition'] <- partitionName
-      result
-    }
-    
-    result
-    
-
-    
-}
-evalDoQuo_subset <- function(doQuo, humtab, partition, partQuos, ordoQuo) {
-  if (!is.logical(partition)) .stop("In your call to with(in).humdrumR with a 'subset = x' expression,",
-                                    "your subset expression must evaluate to a logical (TRUE/FALSE) vector.",
-                                   "The expression you've provided {{ {rlang::as_label(partQuos$Quo[[1]])} }}",
-                                   " evaluates to something of class {class(partition)}.")
+  result <- if (length(groupFields)) {
+    humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = groupFields, .SDcols = usedFields]
+  } else {
+    humtab[ ,  rlang::eval_tidy(doQuo, data = .SD), .SDcols = usedFields] # outputs a data.table this way
+  }
+ 
+  if (nrow(windowFrame)) result[, contextWindow := NULL]
   
-    
-  if (!any(partition)) warning(call. = FALSE, 
-                               "In your call to with(in).humdrumR, your subset never evaluates TRUE.",
-                               " Your within-expression is being evaluated on nothing.")
-  
-    if (nrow(partQuos) > 1L) {
-      
-      result <- evalDoQuo_part(doQuo, humtab[partition], partQuos[-1], ordoQuo)
-    
-    } else {
-      result <- as.data.table(rlang::eval_tidy(doQuo, data = humtab[partition]))
-    }
-    
-    partitionName <- paste0('_subset=', gsub('  *', '', rlang::as_label(partQuos$Quo[[1L]])), '_')
-    result[[partitionName]] <- TRUE
-    
-    if (!is.null(ordoQuo)) {
-        complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!partition]))
-        complement[[partitionName]] <- FALSE
-        
-        if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
-        
-        mismatch <-  !colnames(complement) %in% colnames(result)
-        colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
-        
-        result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
-    }
-    
-   result
+  result 
 }
+
 
 evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
   
@@ -1480,7 +1358,11 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   
   # "objects" are treated like length 1, and not vectorized
   objects <- array(FALSE, dim(results), dimnames(results))
-  objects[] <- sapply(results, \(resultGroup) length(resultGroup) &&  (is.table(resultGroup) || (is.object(resultGroup) && !is.atomic(resultGroup))))
+  objects[] <- sapply(results, 
+                      \(resultGroup) {
+                        length(resultGroup) &&
+                          (is.table(resultGroup) || (is.object(resultGroup) && !is.atomic(resultGroup)))
+                        })
   
   # pad results and/or trim rowKey to make them match in size
   c('results', 'rowKey') %<-% recycleResults(results, objects, rowKey, recycle, alignLeft, withFunc)

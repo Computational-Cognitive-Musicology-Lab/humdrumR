@@ -101,15 +101,7 @@ pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = 'asis', drop 
 #' @export
 filter.humdrumR <- function(.data, ...) {
   exprs <- rlang::enquos(...)
-  
-  # names <- .names(exprs)
-  # exprs[names != ''] <- Map(exprs[names != ''], names[names != ''],
-  #                           f = \(expr, name) {
-  #                             name <- rlang::sym(name)
-  #                             
-  #                             rlang::quo(!!name <- !!expr)
-  #                           })
-  # names(exprs) <- NULL
+  .data <- uncontextMessage(.data, 'filter')
   
   rlang::eval_tidy(rlang::quo(subset.humdrumR(.data, !!!exprs))) 
 }
@@ -121,6 +113,8 @@ filter.humdrumR <- function(.data, ...) {
 #' @rdname tidyHumdrum
 #' @export
 group_by.humdrumR <- function(.data, ..., .add = FALSE) {
+  .data <- uncontextMessage(.data, 'group_by')
+  
   if (!.add) .data <- ungroup(.data)
   
   selectedFields <- selectedFields(.data)

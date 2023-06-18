@@ -494,7 +494,26 @@ context.humdrumR <- function(x, open,  close,
   
 }
 
+#' @export
+#' @rdname context
+uncontext <- function(humdrumR) {
+  checks(humdrumR, xhumdrumR)
+  
+  humdrumR@Context <- humdrumR@Context[0]
+  humdrumR
+}
 
+uncontextMessage <- function(humdrumR, func) {
+  if (nrow(humdrumR@Context)) {
+    .warn("Using {func} requires removing contextual windows from your humdrumR data.",
+             "{num2print(nrow(humdrumR@Context))} windows are being removed.\n",
+             "To avoid this warning, manually remove the windows using uncontext() before calling {func}.\n")
+    
+    uncontext(humdrumR)
+  } else {
+    humdrumR
+  }
+}
 
 findWindows <- function(x, open, close = quote(nextopen - 1), ..., 
                         field = 'Token',

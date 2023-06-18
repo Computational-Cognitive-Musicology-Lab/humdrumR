@@ -101,6 +101,8 @@
 #' @aliases subset
 subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPieces = TRUE) {
   checks(removeEmptyPieces, xTF)
+  x <- uncontextMessage(x, 'subset')
+  
   dataTypes <- checkTypes(dataTypes, 'subset.humdrumR')
   
   quosures <- rlang::enquos(...)
