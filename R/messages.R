@@ -473,17 +473,19 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
   stack <- sapply(stack, paste, collapse = '\n')
   
-  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
+  # stack <- stack[!grepl('^check|\\.stop\\(', stack)]
   # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
   
-  cut <- 15
-  stack[-1] <- paste0(' -> ', stack[-1])
-  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
+  # cut <- 15
+  # stack[-1] <- paste0(' -> ', stack[-1])
+  # stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
   # 
-  message('humdrumR error in:')
-  message('\t', stack, sep = '')
+  # message('humdrumR error in:')
+  # message('\t', stack, sep = '')
+  call <- rlang::expr_deparse(sys.calls()[[1]])
   
-  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
+  message <- .glue('\tIn your call', call,'\n\n',
+                   ..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
   
   stop(call. = FALSE, message)
 }
@@ -497,9 +499,9 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
   stack <- sapply(stack, paste, collapse = '\n')
   
-  call <- sys.calls()[[1]]
+  call <- rlang::expr_deparse( sys.calls()[[1]])
   
-  warning('In your call ', rlang::expr_deparse(call), ': \n',
+  warning('In your call ', call, '\n\n',
           .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1)),
           call. = FALSE,
           immediate. = immediate.)

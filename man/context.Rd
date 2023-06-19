@@ -2,9 +2,12 @@
 % Please edit documentation in R/Context.R
 \name{context}
 \alias{context}
+\alias{uncontext}
 \title{Create arbitrary "context" across vectors.}
 \usage{
 context(x, open, close, ...)
+
+uncontext(humdrumR)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to group into windows.}}
@@ -113,12 +116,11 @@ Windows cannot cross group boundaries.}
 \description{
 The \code{context()} command can be used to group input data (vectors)
 into arbitrary contextual windows.
-Unlike the contextual-grouping you can achieve with \code{groupby} arguments
-to various functions (or \code{by} expressions in \link[=withHumdrum]{with(in).humdrumR)}),
+Unlike the contextual-grouping you can achieve with \code{group_by},
 \code{context()} can produce windows that \emph{overlap} or, the opposite case, that don't exhaustively
 divide the data.
-The \code{context()} should generally be used as a special argument to
-\link[=withHumdrum]{with(in).humdrumR)}, but it can also be called directly itself.
+The \code{context()} function should generally be call on
+\link[=humdrumRclass]{humdrumR data}, but it can also be called directly on vectors.
 }
 \details{
 \code{context()} takes an input vector (\code{x}) and divides it into windows based on
@@ -134,7 +136,7 @@ any indicated windows: if \code{complement = FALSE} (the default), these "outsid
 dropped; if \code{complement = TRUE}, they are retained.
 \item If \code{inPlace = TRUE}, windows are output in a vector of the same length as the input,
 padded with \code{NA} as needed---otherwise (the default), only the windows are returned
-\item If \code{collapse = TRUE}, the windows are collapsed to strings (separed by \code{sep}), otherwise,
+\item If \code{collapse = TRUE}, the windows are collapsed to strings (separated by \code{sep}), otherwise,
 a \code{list()} of windows is returned.
 }
 }
@@ -351,14 +353,15 @@ context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE)
 chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
 
 # 4-grams
-within(chorales,
-       paste(Token, collapse = '->'), 
-       context(open = hop(), open + 3))
+chorales |>
+  context(open = hop(), open + 3) |>
+  within(paste(Token, collapse = ','))
        
 # phrases leading to fermatas
-with(chorales, 
-     paste(Token, collapse = ','), 
-     context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
+chorales |>
+  context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
+  within(paste(Token, collapse = ','), alignLeft = FALSE)
+  
 }
 
 }

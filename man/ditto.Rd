@@ -23,7 +23,7 @@ ditto(x, ...)
 
 \method{ditto}{matrix}(x, margin = 2, ...)
 
-\method{ditto}{humdrumR}(x, field = selectedFields(x)[1], ..., newField = paste0(field, "_ditto"))
+\method{ditto}{humdrumR}(x, ..., initial = NA, reverse = FALSE)
 }
 \arguments{
 \item{x}{\emph{\strong{A vector.}}
@@ -65,17 +65,7 @@ Defaults to \code{2} (across columns) for \code{matrix} inputs.
 Must be natural number(s).
 
 E.g., for a matrix \code{1} indicates rows, \code{2} indicates columns.
-Where \code{x} has named dimnames, it can be a character vector selecting dimension names.}
-
-\item{field}{\emph{\strong{Which field to ditto?}}
-
-Must be a single \code{character} string.
-
-Is (\link[=partialMatching]{partially matched}) against \link[=humTable]{fields} in \code{x}.}
-
-\item{newField}{\emph{\strong{What to name the new (dittoed) field.}}
-
-Defaults to the \code{field} name appended with \code{"_ditto"}.
+Where \code{x} has named dimnames, it can be a character vector selecting dimension names.
 
 Must be a single \code{character} string.}
 }

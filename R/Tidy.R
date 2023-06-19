@@ -5,6 +5,39 @@
 ## Hhelpers ----
 
 
+tidyNamer <- function(quosures) {
+  names <- .names(quosures)
+  
+  assigned <- sapply(quosures, 
+                        \(quo) {
+                          exprA <- analyzeExpr(quo)
+                          if (exprA$Head == '<-')  rlang::as_label(exprA$Args[[1]]) else  '' 
+                        })
+  
+  doubleAssign <- names != '' & assigned != ''
+  if (any(doubleAssign)) {
+    sameName <- names[doubleAssign] == assigned[doubleAssign]
+    if (all(sameName)) {
+      example <- names[doubleAssign][which(sameName)[1]]
+      .warn("You are using '=' AND '<-' at the same time; you only need one or the other.",
+            "For example, '{example} = {example} <-' could just be '{example} ='.")
+    } else {
+      bad <- paste0(names[doubleAssign][!sameName], ' = ', assigned[doubleAssign][!sameName], ' <- ...')
+      .stop("You are using '=' AND '<-' to assign contradictory field names.",
+            "For example, '{bad[1]}' is contradictory.")
+    }
+  }
+  
+  names <- ifelse(names == '', assigned, names)
+  names[names == ''] <- sapply(quosures[names == ''], rlang::as_label)
+  # if (any(duplicated(names))) .stop("You can't run summarize.humdrumR() and give {num2word(max(table(names)))} columns the same name!")
+  
+  names <- rlang::syms(names)
+  
+  Map(quosures, names, f = \(quo, name) rlang::quo(!!name <- !!quo))
+  
+}
+
 
 ## Methods for dplyr "verbs" ----
 
@@ -21,10 +54,7 @@ mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', '
   
   recycle <- match.arg(recycle)
   
-  #names
-  names <- unlist(Map(quosures, .names(quosures), f = \(quo, name) if (name == '')  rlang::as_label(quo) else name))
-  if (any(duplicated(names))) .stop("You can't run mutate.humdrumR() and give {num2word(max(table(names)))} new fields the same name!")
-  quosures <- Map(quosures, names, f = \(quo, name) rlang::quo(!!(rlang::sym(name)) <- !!quo))
+  quosures <- tidyNamer(quosures)
   
   # eval
   rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = !!recycle,
@@ -42,10 +72,7 @@ mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', '
 summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE, drop = FALSE, .by = NULL) {
   quosures <- rlang::enquos(...)
   
-  # names
-  names <- unlist(Map(quosures, .names(quosures), f = \(quo, name) if (name == '')  rlang::as_label(quo) else name))
-  if (any(duplicated(names))) .stop("You can't run summarize.humdrumR() and give {num2word(max(table(names)))} columns the same name!")
-  quosures <- Map(quosures, names, f = \(quo, name) rlang::quo(!!(rlang::sym(name)) <- !!quo))
+  quosures <- tidyNamer(quosures)
   
   # eval
   rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!quosures, recycle = 'summarize',
@@ -63,10 +90,7 @@ summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE,
 reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
   quosures <- rlang::enquos(...)
   
-  # names
-  names <- unlist(Map(quosures, .names(quosures), f = \(quo, name) if (name == '')  rlang::as_label(quo) else name))
-  if (any(duplicated(names))) .stop("You can't run mutate.humdrumR() and give {num2word(max(table(names)))} new fields the same name!")
-  quosures <- Map(quosures, names, f = \(quo, name) rlang::quo(!!(rlang::sym(name)) <- !!quo))
+  quosures <- tidyNamer(quosures)
   
   # eval
   rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = 'pad',
@@ -477,3 +501,33 @@ humdrumRmethods('seconds')
 #' @exportS3Method ms default
 #' @exportS3Method ms humdrumR
 humdrumRmethods('ms')
+
+## Other functions ----
+
+
+#' @rdname ditto
+#' @export
+ditto.humdrumR <- function(x, ..., initial = NA, reverse = FALSE) {
+  
+  quosures <- rlang::enquos(...)
+  
+  
+  if (length(quosures) == 0L) {
+    selected <- selectedFields(x)
+    quosures <- setNames(rlang::syms(selected), paste0('ditto(', selected, ')'))
+  }
+  
+  quosures <- tidyNamer(quosures) # this makes all expressions of form name <- quo
+  
+  quosures <- lapply(quosures,
+                     \(quo) {
+                       exprA <- analyzeExpr(quo)
+                       expr <- exprA$Args[[2]]
+                       expr <- rlang::quo(ditto(!!expr, initial = !!initial, reverse = !!reverse))
+                       exprA$Args[[2]] <- expr
+                       unanalyzeExpr(exprA)
+                     })
+ 
+  rlang::eval_tidy(rlang::quo(within(x, !!!quosures, dataTypes = 'Dd')))
+  
+}

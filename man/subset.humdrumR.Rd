@@ -3,6 +3,8 @@
 \name{subset.humdrumR}
 \alias{subset.humdrumR}
 \alias{subset}
+\alias{removeSubset}
+\alias{unfilter}
 \alias{removeEmptyFiles}
 \alias{removeEmptyPieces}
 \alias{removeEmptySpines}
@@ -12,6 +14,10 @@
 \title{Filter humdrum data}
 \usage{
 \method{subset}{humdrumR}(x, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
+
+removeSubset(humdrumR)
+
+unfilter(humdrumR)
 
 removeEmptyFiles(x)
 

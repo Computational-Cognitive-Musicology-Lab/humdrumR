@@ -846,16 +846,6 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' E.g., for a matrix `1` indicates rows, `2` indicates columns.
 #' Where `x` has named dimnames, it can be a character vector selecting dimension names.
 #' 
-#' @param field ***Which field to ditto?***
-#'
-#' Must be a single `character` string.
-#'
-#' Is ([partially matched][partialMatching]) against [fields][humTable] in `x`.
-#'
-#' 
-#' @param newField ***What to name the new (dittoed) field.***
-#'
-#' Defaults to the `field` name appended with `"_ditto"`.
 #' 
 #' Must be a single `character` string.
 #' 
@@ -920,18 +910,6 @@ ditto.matrix <- function(x, margin = 2, ...) {
   
 }
 
-#' @rdname ditto
-#' @export
-ditto.humdrumR <- function(x, field = selectedFields(x)[1], ..., newField = paste0(field, '_ditto')) {
-  checks(newField, xcharacter & xlen1)
-  field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
-  newField <- rlang::sym(newField)
-  rlang::eval_tidy(rlang::expr({
-
-      within(x, !!newField <- ditto(!!field, ...), dataTypes = 'Dd')
-
-  }))
-}
 
 
 
