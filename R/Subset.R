@@ -125,6 +125,7 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   humtab <- nullify(humtab, fields(x, 'Data')$Name, !subset)
   
   putHumtab(x, overwriteEmpty = dataTypes) <- humtab
+  x <- updateFields(x, selectNew = FALSE)
   x <- update_Null(x, selectedFields(x))
   
   if (removeEmptyPieces) x <- removeNull(x, 'Piece', 'GLIMd')
@@ -136,7 +137,6 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
 
 nullify <- function(humtab, fields, null) {
   if (!any(null) || length(fields) == 0L) return(humtab)
-  humtab[]
   
   nullifiedFields <- lapply(humtab[ , fields, with = FALSE],
                             \(field) {
@@ -148,9 +148,8 @@ nullify <- function(humtab, fields, null) {
                               field
                             })
   
-  for (field in fields) humtab[[field]] <- nullifiedFields[[field]]
-  
-  humtab
+  colnames(humtab)[colnames(humtab) %in% fields] <- paste0('_filtered_', colnames(humtab)[colnames(humtab) %in% fields])
+  cbind(humtab, as.data.frame(nullifiedFields))
 }
 
 

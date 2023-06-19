@@ -1939,9 +1939,13 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
     
     new <- setdiff(colnames(humtab), fieldTable$Name)
     if (length(new)) {
+        filtered <- grepl('^_filtered_', new)
         fieldTable <- rbind(fieldTable, 
-                            data.table(Name = new, Type = 'Data', 
-                                       Class = '_tmp_', Selected = selectNew, GroupedBy = FALSE))
+                            data.table(Name = new, 
+                                       Type = ifelse(filtered, 'Filtered', 'Data'), 
+                                       Class = '_tmp_', 
+                                       Selected = !filtered & selectNew, 
+                                       GroupedBy = FALSE))
     }
     
     setorder(fieldTable, Type, Class)
@@ -2118,12 +2122,11 @@ pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 
 #' @rdname humTable
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')) { 
-  #
 
   checks(humdrumR, xhumdrumR)
   fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', 'fields')
             
-  humdrumR@Fields[Type %in% fieldTypes | ('selected' %in% fieldTypes & Selected == TRUE)]
+  humdrumR@Fields[Type != 'Filtered' & (Type %in% fieldTypes | ('selected' %in% fieldTypes & Selected == TRUE))]
 
 }
 
