@@ -53,12 +53,11 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' The `context()` command can be used to group input data (vectors)
 #' into arbitrary contextual windows.
-#' Unlike the contextual-grouping you can achieve with `groupby` arguments
-#' to various functions (or `by` expressions in [with(in).humdrumR)][withHumdrum]),
+#' Unlike the contextual-grouping you can achieve with `group_by`,
 #' `context()` can produce windows that *overlap* or, the opposite case, that don't exhaustively
 #' divide the data.
-#' The `context()` should generally be used as a special argument to
-#' [with(in).humdrumR)][withHumdrum], but it can also be called directly itself.
+#' The `context()` function should generally be call on 
+#' [humdrumR data][humdrumRclass], but it can also be called directly on vectors.
 #'  
 #' @details 
 #' 
@@ -75,7 +74,7 @@ parseContextExpression <- function(expr, other) {
 #'   dropped; if `complement = TRUE`, they are retained.
 #' + If `inPlace = TRUE`, windows are output in a vector of the same length as the input,
 #'   padded with `NA` as needed---otherwise (the default), only the windows are returned
-#' + If `collapse = TRUE`, the windows are collapsed to strings (separed by `sep`), otherwise,
+#' + If `collapse = TRUE`, the windows are collapsed to strings (separated by `sep`), otherwise,
 #'   a `list()` of windows is returned.
 #'
 #' 
@@ -405,14 +404,15 @@ parseContextExpression <- function(expr, other) {
 #' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
 #' 
 #' # 4-grams
-#' within(chorales,
-#'        paste(Token, collapse = '->'), 
-#'        context(open = hop(), open + 3))
+#' chorales |>
+#'   context(open = hop(), open + 3) |>
+#'   within(paste(Token, collapse = ','))
 #'        
 #' # phrases leading to fermatas
-#' with(chorales, 
-#'      paste(Token, collapse = ','), 
-#'      context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
+#' chorales |>
+#'   context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
+#'   within(paste(Token, collapse = ','), alignLeft = FALSE)
+#'   
 #' }
 #' 
 #' @export
