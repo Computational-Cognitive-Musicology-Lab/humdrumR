@@ -148,9 +148,36 @@ nullify <- function(humtab, fields, null) {
                               field
                             })
   
-  colnames(humtab)[colnames(humtab) %in% fields] <- paste0('_filtered_', colnames(humtab)[colnames(humtab) %in% fields])
+  colnames(humtab)[colnames(humtab) %in% fields] <- paste0('_unfiltered_', colnames(humtab)[colnames(humtab) %in% fields])
   cbind(humtab, as.data.frame(nullifiedFields))
 }
+
+#' @export
+#' @rdname subset.humdrumR
+removeSubset <- function(humdrumR) {
+  fields <- humdrumR@Fields
+  humtab <- humdrumR@Humtable
+  
+  unfiltered <- fields[Type == 'Unfiltered', Name]
+  filtered <- gsub('^_unfiltered_', '', unfiltered)
+  
+  for (i in seq_along(filtered)) {
+    null <- is.na(humtab[[filtered[i]]])
+    humtab[[filtered[i]]][null] <- humtab[[unfiltered[i]]][null]
+  }
+  
+  humdrumR@Fields <- fields[Type != 'Unfiltered']
+  humdrumR@Humtable <- humtab
+
+  humdrumR <- update_Null(humdrumR, filtered)
+  
+  humdrumR
+  
+}
+
+#' @export
+#' @rdname subset.humdrumR
+unfilter <- removeSubset
 
 
 ## Null indexing ----
