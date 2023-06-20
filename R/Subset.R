@@ -152,34 +152,6 @@ nullify <- function(humtab, fields, null) {
   cbind(humtab, as.data.frame(nullifiedFields))
 }
 
-#' @export
-#' @rdname subset.humdrumR
-removeSubset <- function(humdrumR) {
-  fields <- humdrumR@Fields
-  humtab <- humdrumR@Humtable
-  
-  unfiltered <- fields[Type == 'Unfiltered', Name]
-  filtered <- gsub('^_unfiltered_', '', unfiltered)
-  
-  for (i in seq_along(filtered)) {
-    null <- is.na(humtab[[filtered[i]]])
-    humtab[[filtered[i]]][null] <- humtab[[unfiltered[i]]][null]
-  }
-  
-  humdrumR@Fields <- fields[Type != 'Unfiltered']
-  humdrumR@Humtable <- humtab
-
-  humdrumR <- update_Null(humdrumR, filtered)
-  
-  humdrumR
-  
-}
-
-#' @export
-#' @rdname subset.humdrumR
-unfilter <- removeSubset
-
-
 ## Null indexing ----
 
 # humdrumR filtering and application can result in lots of filtered tokens.
@@ -252,7 +224,7 @@ removeEmptyStops <- function(x) {
 }
 
 
-# Indexing ----
+# Indexing humdrumR ----
 
 #' Indexing humdrumR objects
 #'
@@ -643,3 +615,68 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
            
             x
           })
+
+
+# Unfiltering humdrumR ----
+
+
+#' @export
+#' @rdname subset.humdrumR
+removeSubset <- function(humdrumR, complement = NULL) {
+  fields <- humdrumR@Fields
+  humtab <- humdrumR@Humtable
+  
+  data <- fields[Type == 'Data', Name]
+  
+  unfiltered <- fields[Type == 'Unfiltered', Name]
+  
+  unfiltered_match <- match(paste0('_unfiltered_', data), unfiltered)
+  
+  
+  complement <- if (!is.null(complement)) if (paste0('_unfiltered_', complement) %in% fields$Name) paste0('_unfiltered_', complement) else complement
+  
+  for (i in seq_along(data)) {
+    if (is.null(complement) && is.na(unfiltered_match[i])) break
+    
+    field <- humtab[[data[i]]]
+    replaceWith <- if (is.na(unfiltered_match[i])) humtab[[complement]] else humtab[[unfiltered[unfiltered_match[i]]]]
+    
+    null <- is.na(field)
+    
+    field[null] <- replaceWith[null]
+    
+    humtab[[data[i]]] <- field
+  }
+  
+  humdrumR@Fields <- fields[Type != 'Unfiltered']
+  humdrumR@Humtable <- humtab
+  
+  humdrumR <- update_Null(humdrumR, data)
+  
+  humdrumR
+  
+}
+
+#' @export
+#' @rdname subset.humdrumR
+unfilter <- removeSubset
+
+
+## Complement ----
+
+
+complement <- function(humdrumR, complement) {
+  complement <- fieldMatch(humdrumR, complement, 'complement', 'complement')
+  complementFiltered <- paste0('_unfiltered_', complement)
+  
+  humtab <- getHumtab(humdrumR)
+  
+  selected <- selectedFields(humdrumR)
+  
+  for (field in selected) {
+    humtab[[field]] <- ifelse(is.na(humtab[[field]]), humtab[[complementFiltered]], humtab[[field]])
+  }
+  
+  putHumtab(humdrumR) <- humtab
+  unfilter(humdrumR)
+}
