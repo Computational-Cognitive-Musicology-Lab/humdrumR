@@ -514,7 +514,7 @@ ditto.humdrumR <- function(x, ..., initial = NA, reverse = FALSE) {
   
   if (length(quosures) == 0L) {
     selected <- selectedFields(x)
-    quosures <- setNames(rlang::syms(selected), paste0('ditto(', selected, ')'))
+    quosures <- setNames(rlang::syms(selected), selected)
   }
   
   quosures <- tidyNamer(quosures) # this makes all expressions of form name <- quo
@@ -522,8 +522,14 @@ ditto.humdrumR <- function(x, ..., initial = NA, reverse = FALSE) {
   quosures <- lapply(quosures,
                      \(quo) {
                        exprA <- analyzeExpr(quo)
+                       
+                       if (rlang::as_label(exprA$Args[[1]]) %in% fields(x)$Name) {
+                         exprA$Args[[1]] <- paste0("ditto(", exprA$Args[[1]], ")")
+                       } 
+                       
                        expr <- exprA$Args[[2]]
                        expr <- rlang::quo(ditto(!!expr, initial = !!initial, reverse = !!reverse))
+                       
                        exprA$Args[[2]] <- expr
                        unanalyzeExpr(exprA)
                      })

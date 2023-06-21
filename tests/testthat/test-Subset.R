@@ -132,12 +132,51 @@ test_that('Filtering vignette examples work', {
 })
 
 
-# test_that("Unfiltering works", {
+test_that("Unfiltering works", {
 #   
-#   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 #   
-#   orig <- getHumtab(chorales)
-#   cleared <- getHumtab(clearFilter(subset(chorales, Spine == 1)))
-#   expect_true(all(orig == cleared, na.rm = TRUE))
-#   
-# })
+  orig <- getHumtab(chorales)
+  cleared <- getHumtab(unfilter(subset(chorales, Spine == 1)))
+  expect_true(all(orig == cleared, na.rm = TRUE))
+
+  # can use subset/complement to achieve ifelse() 
+  chorales |> 
+    semits() |>
+    mutate(Semits2 = ifelse(Spine == 1, Semits + 12, Semits)) |>
+    pull() -> semits1
+  
+  chorales |> 
+    semits() |>
+    subset(Spine == 1) |>
+    mutate(Semits2 = Semits + 12) |>
+    unfilter(complement = 'Semits') |>
+    select(Semits2) |>
+    pull() -> semits2
+  
+  expect_true(all(semits1 == semits2))
+  
+  
+  ## with ditto
+  chorales |> kern(simple = TRUE) |> subset(Token %~% '4') -> chorales_sub
+  chorales_sub |>
+    ditto(Kern) |>
+    unfilter() |>
+    select(Kern, 'ditto(Kern)') |>
+    tally() -> tally1
+  
+  chorales |> kern(simple = TRUE) |>  with(tally(ditto(Kern, null = Token %!~% '4'))) -> tally2
+    
+  expect_true(all(rowSums(tally1[ , -ncol(tally1)]) == tally2))
+  
+  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(tally1[, ncol(tally1)]))
+  
+  # complement
+  chorales |> subset(DataRecord %% 2 == 0) -> chorales_sub
+  
+  chorales |> recip() |> tally() -> total
+  chorales_sub |> recip() |> tally() -> sub
+  chorales_sub |> complement() |> recip() |> tally() -> comp
+  
+  expect_true(all(total == (sub + comp)[names(total)]))
+})

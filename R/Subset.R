@@ -636,14 +636,14 @@ removeSubset <- function(humdrumR, complement = NULL) {
   dataFields <- fields[Type == 'Data', Name]
   
   complementFields <- fields[Type == 'Complement', Name]
-  complementFields <- complementFields[match(paste0('_complement_', dataFields), complement)]
+  complementFields <- complementFields[match(paste0('_complement_', dataFields), complementFields)]
   
   
   
   complement <- if (!is.null(complement)) if (paste0('_complement_', complement) %in% fields$Name) paste0('_complement_', complement) else complement
   
   for (i in seq_along(dataFields)) {
-    if (is.null(complement) && is.na(complementFields[i])) break
+    if (is.null(complement) && is.na(complementFields[i])) next
     
     field <- humtab[[dataFields[i]]]
     replaceWith <- if (is.na(complementFields[i])) humtab[[complement]] else humtab[[complementFields[i]]]
@@ -656,7 +656,7 @@ removeSubset <- function(humdrumR, complement = NULL) {
   }
   
   humdrumR@Fields <- fields[Type != 'Complement']
-  humdrumR@Humtable <- humtab
+  humdrumR@Humtable <- humtab[ , !grepl('_complement_', colnames(humtab)), with = FALSE]
   
   humdrumR <- update_Null(humdrumR, dataFields)
   
