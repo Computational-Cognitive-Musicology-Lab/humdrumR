@@ -696,3 +696,24 @@ complement <- function(humdrumR) {
   humdrumR
     
 }
+
+#' @export
+#' @rdname subset.humdrumR
+combineFields <- function(humdrumR, ...) {
+  fieldLists <- list(...)
+  newFields <- .names(fieldLists)
+  
+  if (any(newFields == '')) .stop("You must give a name for the newly combined fields.")
+  
+  humtab <- getHumtab(humdrumR)
+  
+  for (newField in newFields) {
+    fields <- humtab[ , fieldLists[[newField]], with = FALSE]
+    humtab[[newField]] <- Reduce(\(cur, nex) ifelse(is.na(cur), nex, cur), fields)
+  }
+  
+  putHumtab(humdrumR) <- humtab
+  
+  humdrumR <- updateFields(humdrumR)
+  update_Null(humdrumR, newFields)
+}
