@@ -121,10 +121,10 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   subset <- Reduce('&', subsets)
   # NA values come in from record types we didn't use, which should NOT be filtered
   
-  humtab <- getHumtab(x )#, dataTypes = dataTypes)
+  humtab <- getHumtab(x)
   humtab <- nullify(humtab, fields(x, 'Data')$Name, subset, dataTypes)
   
-  putHumtab(x) <- humtab #, overwriteEmpty = dataTypes) <- humtab
+  putHumtab(x) <- humtab 
   x <- updateFields(x, selectNew = FALSE)
   x <- update_Null(x, selectedFields(x))
   
@@ -172,8 +172,7 @@ removeNull.humdrumR <- function(hum, by = 'Piece', nullTypes = 'd', ...) {
   
   humtab <- getHumtab(hum)
   putHumtab(hum) <- removeNull.data.table(humtab, by = by, nullTypes = nullTypes)
-  
-  hum
+  updateFields(hum) # in case any complements have been deleted
  
 }
 removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
@@ -186,7 +185,20 @@ removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
   
   if ('Piece' %in% by) hum <- renumberFiles.data.table(hum)
   if ('Spine' %in% by) hum <- renumberSpines(hum)
+  
+  if (any(grepl('^_complement_', colnames(hum)))) {
+    complements <- grep('^_complement_', colnames(hum), value = TRUE)
+    for (comp in complements) {
+      
+      sub <- gsub('^_complement_', '', comp)
+      if (all(is.na(hum[[comp]]) |
+              (!is.na(hum[[sub]]) & hum[[comp]] == hum[[sub]]),
+              na.rm = TRUE)) hum[[comp]] <- NULL
+    }
+  }
+  
   hum
+  
 }
 
 
@@ -630,13 +642,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
 #' @export
 #' @rdname subset.humdrumR
 removeSubset <- function(humdrumR, complement = NULL) {
-  fields <- humdrumR@Fields
-  humtab <- humdrumR@Humtable
+  fields <- fields(humdrumR)
+  humtab <- getHumtab(humdrumR)
   
   dataFields <- fields[Type == 'Data', Name]
-  
-  complementFields <- fields[Type == 'Complement', Name]
-  complementFields <- complementFields[match(paste0('_complement_', dataFields), complementFields)]
+  complementFields <- fields[Type == 'Data', ifelse(Complement, paste0("_complement_", Name), NA_character_)]
   
   
   
@@ -655,8 +665,8 @@ removeSubset <- function(humdrumR, complement = NULL) {
     humtab[[dataFields[i]]] <- field
   }
   
-  humdrumR@Fields <- fields[Type != 'Complement']
-  humdrumR@Humtable <- humtab[ , !grepl('_complement_', colnames(humtab)), with = FALSE]
+  humdrumR@Fields$Complement <- FALSE
+  putHumtab(humdrumR) <- humtab[ , !grepl('_complement_', colnames(humtab)), with = FALSE]
   
   humdrumR <- update_Null(humdrumR, dataFields)
   
@@ -674,15 +684,11 @@ unfilter <- removeSubset
 #' @export
 #' @rdname subset.humdrumR
 complement <- function(humdrumR) {
-  fields <- humdrumR@Fields
-  humtab <- humdrumR@Humtable
+  fields <- fields(humdrumR)[Type == 'Data' & Complement, Name]
+  if (length(fields) == 0L) return(humdrumR)
   
-  dataFields <- fields[Type == 'Data', Name]
-  
-  hasComplement <- paste0('_complement_', dataFields) %in% fields$Name
-  
-  
-  for (field in dataFields[hasComplement]) {
+  humtab <- getHumtab(humdrumR)
+  for (field in fields) {
     
     curField <- humtab[[field]]
     humtab[[field]] <- humtab[[paste0('_complement_', field)]]
@@ -691,7 +697,7 @@ complement <- function(humdrumR) {
   
   humdrumR@Humtable <- humtab
   
-  humdrumR <- update_Null(humdrumR, dataFields)
+  humdrumR <- update_Null(humdrumR, fields)
   
   humdrumR
     

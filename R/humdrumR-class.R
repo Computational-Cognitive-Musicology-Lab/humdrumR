@@ -1910,6 +1910,7 @@ initFields <- function(humtab, tandemFields) {
     setorder(fieldTable, Type, Class)
     fieldTable[ , Selected := Name == 'Token']
     fieldTable[ , GroupedBy := FALSE]
+    fieldTable[ , Complement := FALSE]
     fieldTable
 }
 
@@ -1933,25 +1934,30 @@ fieldClass <- function(x) {
 }
 
 updateFields <- function(humdrumR, selectNew = TRUE) {
-    humtab <- humdrumR@Humtable
+    humtab <- getHumtab(humdrumR)
+    
     fieldTable <- humdrumR@Fields
     fieldTable <- fieldTable[Name %in% colnames(humtab)] # removes fields that don't exist in humtab
     
     new <- setdiff(colnames(humtab), fieldTable$Name)
+    new <- new[!grepl('^_complement_', new)]
     if (length(new)) {
-        complement <- grepl('^_complement_', new)
         fieldTable <- rbind(fieldTable, 
                             data.table(Name = new, 
-                                       Type = ifelse(complement, 'Complement', 'Data'), 
+                                       Type = 'Data', 
                                        Class = '_tmp_', 
-                                       Selected = !complement & selectNew, 
-                                       GroupedBy = FALSE))
+                                       Selected = selectNew, 
+                                       GroupedBy = FALSE,
+                                       Complement = FALSE))
     }
+    
+    
+    fieldTable$Class <- sapply(humtab[ , fieldTable$Name, with = FALSE], 
+                               fieldClass)
+    fieldTable$Complement <- paste0('_complement_', fieldTable$Name) %in% colnames(humtab)
     
     setorder(fieldTable, Type, Class)
     setcolorder(humtab, fieldTable$Name)
-    
-    fieldTable$Class <- sapply(humtab, fieldClass)
     
     if (length(new) && selectNew) fieldTable[ , Selected := Name %in% new]
     humdrumR@Fields <- fieldTable

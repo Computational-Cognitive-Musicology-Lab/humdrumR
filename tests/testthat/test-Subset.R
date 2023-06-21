@@ -165,11 +165,11 @@ test_that("Unfiltering works", {
     select(Kern, 'ditto(Kern)') |>
     tally() -> tally1
   
-  chorales |> kern(simple = TRUE) |>  with(tally(ditto(Kern, null = Token %!~% '4'))) -> tally2
+  chorales |> kern(simple = TRUE) |> with(tally(ditto(Kern, null = Token %!~% '4'))) -> tally2
     
-  expect_true(all(rowSums(tally1[ , -ncol(tally1)]) == tally2))
+  expect_true(all(colSums(tally1[-nrow(tally1), ]) == tally2))
   
-  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(tally1[, ncol(tally1)]))
+  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(tally1[nrow(tally1), ]))
   
   # complement
   chorales |> subset(DataRecord %% 2 == 0) -> chorales_sub
@@ -180,3 +180,23 @@ test_that("Unfiltering works", {
   
   expect_true(all(total == (sub + comp)[names(total)]))
 })
+
+
+test_that("Remove empty spines works correctly", {
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+  
+  sub <- subset(chorales, Spine == 1)
+  
+  expect_true(fields(sub)[Name == 'Token', Complement])
+  expect_equal(dim(getHumtab(chorales)), dim(getHumtab(sub)) - c(0, 1)) # because complement column as been added
+  expect_equal(sub |> with(length(Token)), getHumtab(sub, 'D') |> nrow())
+  expect_true('_complement_Token' %in% colnames(getHumtab(sub)))
+  
+  subr <- removeEmptySpines(sub)
+  expect_false(fields(subr)[Name == 'Token', Complement])
+  expect_equal(dim(getHumtab(subr)),c(getHumtab(sub, 'GLIMDd')[Spine == 1 | is.na(Spine)] |> nrow(),
+                                      ncol(getHumtab(chorales))))
+  
+  
+})
+  
