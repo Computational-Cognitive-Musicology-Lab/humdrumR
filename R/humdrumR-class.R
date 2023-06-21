@@ -1939,12 +1939,12 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
     
     new <- setdiff(colnames(humtab), fieldTable$Name)
     if (length(new)) {
-        unfiltered <- grepl('^_unfiltered_', new)
+        complement <- grepl('^_complement_', new)
         fieldTable <- rbind(fieldTable, 
                             data.table(Name = new, 
-                                       Type = ifelse(unfiltered, 'Unfiltered', 'Data'), 
+                                       Type = ifelse(complement, 'Complement', 'Data'), 
                                        Class = '_tmp_', 
-                                       Selected = !unfiltered & selectNew, 
+                                       Selected = !complement & selectNew, 
                                        GroupedBy = FALSE))
     }
     
@@ -2126,7 +2126,7 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
   checks(humdrumR, xhumdrumR)
   fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', 'fields')
             
-  humdrumR@Fields[Type != 'Unfiltered' & (Type %in% fieldTypes | ('selected' %in% fieldTypes & Selected == TRUE))]
+  humdrumR@Fields[Type != 'Complement' & (Type %in% fieldTypes | ('selected' %in% fieldTypes & Selected == TRUE))]
 
 }
 
