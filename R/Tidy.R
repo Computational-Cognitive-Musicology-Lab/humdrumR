@@ -199,22 +199,27 @@ ungroup.humdrumR <- function(x, ...) {
 
 #' @rdname selectedFields
 #' @export
-select.humdrumR <- function(.data, ..., fieldTypes = "Data") {
+select.humdrumR <- function(.data, ..., fieldTypes = "any") {
  
     exprs <- rlang::enexprs(...)
     fields <- if (length(exprs) == 0L) {
       'Token'
     } else {
       tidyselect_humdrumRfields(.data, exprs, fieldTypes, 'select.humdrumR')
-       
     }
     selectFields(.data, fields)
 }
 
 tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
+  fields <- fields(humdrumR)
   
   types <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping')
-  fields <- fields(humdrumR)
+  
+  fieldTypes <- if ('any' %in% tolower(fieldTypes)) {
+    types
+  } else {
+    fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', callname, includeSelected = FALSE)
+  }
   
   # select by field type (character string only, partially matched)
   typeSelections <- lapply(exprs, 
@@ -223,19 +228,14 @@ tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
                                type <- types[pmatch(expr, types, nomatch = 0L)]
                                if (length(type)) fields[Type == type, Name]
                              }
-                             
                            })
   
   exprs <- exprs[lengths(typeSelections) == 0L]
   
   # select by field names
-  
-  fieldTypes <- if ('any' %in% tolower(fieldTypes)) {
-    types
-  } else {
-    fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', callname, includeSelected = FALSE)
-  }
-  options <- fields[Type %in% fieldTypes, Name]
+  fields <- fields[order(!Type %in% fieldTypes)]
+
+  options <- fields$Name
   expr <- rlang::expr(c(!!!exprs))
   fieldSelections <- options[tidyselect::eval_select(expr, setNames(options, options), strict = FALSE)]
   ##

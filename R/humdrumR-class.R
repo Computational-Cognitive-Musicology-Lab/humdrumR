@@ -1983,7 +1983,7 @@ initFields <- function(humtab, tandemFields) {
     }]
     
     setorder(fieldTable, Type, Class)
-    fieldTable[ , Selected := Name == 'Token']
+    fieldTable[ , Selected := as.integer(Name == 'Token')]
     fieldTable[ , GroupedBy := FALSE]
     fieldTable[ , Complement := FALSE]
     fieldTable
@@ -2021,7 +2021,7 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
                             data.table(Name = new, 
                                        Type = 'Data', 
                                        Class = '_tmp_', 
-                                       Selected = selectNew, 
+                                       Selected = 0L, 
                                        GroupedBy = FALSE,
                                        Complement = FALSE))
     }
@@ -2031,10 +2031,10 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
                                fieldClass)
     fieldTable$Complement <- paste0('_complement_', fieldTable$Name) %in% colnames(humtab)
     
-    setorder(fieldTable, Type, Class)
+    setorder(fieldTable, Type, Name)
     setcolorder(humtab, fieldTable$Name)
     
-    if (length(new) && selectNew) fieldTable[ , Selected := Name %in% new]
+    if (length(new) && selectNew) fieldTable[ , Selected := match(Name, new, nomatch = 0L)]
     humdrumR@Fields <- fieldTable
     
     humdrumR
@@ -2294,7 +2294,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' humData |> select(Structure)
 #'
 #' @export
-selectedFields <- function(humdrumR) fields(humdrumR)[Selected == TRUE]$Name
+selectedFields <- function(humdrumR) fields(humdrumR)[Selected > 0L][order(Selected)]$Name
 
 pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
     fieldInTable <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)[ , 1L, with = FALSE]
@@ -2316,9 +2316,9 @@ selectFields <- function(humdrumR, fields) {
     
     fieldTable <- humdrumR@Fields
     
-    fieldTable[ , Selected := Name %in% fields]
+    fieldTable[ , Selected := match(Name, fields, nomatch = 0L)]
     
-    humdrumR@Fields <- fieldTable #data.table::copy(fieldTable)
+    # humdrumR@Fields <- #data.table::copy(fieldTable)
     
     humdrumR <- update_humdrumR.humdrumR(humdrumR, field = fields)
     humdrumR
@@ -2326,7 +2326,10 @@ selectFields <- function(humdrumR, fields) {
 
 
 
-pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), useTokenGLIM = TRUE, collapse = TRUE){
+pullPrintable <- function(humdrumR, fields, 
+                          dataTypes = 'D', 
+                          null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), 
+                          useTokenGLIM = TRUE, collapse = TRUE){
     
     fields <- pullFields(humdrumR, fields, dataTypes = dataTypes, null = null)
     
@@ -2345,7 +2348,7 @@ pullPrintable <- function(humdrumR, fields, dataTypes = 'D', null = c('charNA2do
                                }) # need[] in case there are matrices
     if (!collapse) return(fields)                  
       
-    field <- do.call('paste', c(fields, list(sep = ', ')))
+    field <- do.call('paste', c(fields, list(sep = '')))
     ## fill from token field
     TokenType <- pullFields(humdrumR, c('Token', 'Type'), dataTypes = dataTypes, null = 'NA2dot')
     if (useTokenGLIM && any(grepl('[GLIM]', dataTypes))) {
@@ -2777,26 +2780,22 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
 showFields <-  function(humdrumR) {
           # This function is used to produce the human readable 
           # list fields used by print_humdrumR
-          fields <- fields(humdrumR)[Type == 'Data' | Selected == TRUE | GroupedBy == TRUE]
+          fields <- fields(humdrumR)[Type == 'Data' | Selected > 0 | GroupedBy == TRUE]
 
           ## prep for printing
-          selected <- fields$Selected
-          
           fields[ , Name := paste0(ifelse(Selected, '*', ' '), Name)]
           fields[ , Name := stringr::str_pad(Name, width = max(nchar(Name)), side = 'right')]
           
           fields[ , Print := paste0(Name, ' :: ', Class)]
-
           
           ## Print fields
           cat('\n')
-          fields[(Type == 'Data' | Selected == TRUE) & Type != 'Grouping',
+          fields[(Type == 'Data' | Selected > 0L) & Type != 'Grouping',
                   { cat('  ', Type[1], 'fields:', '\n\t        ')
                     cat(Print, sep = '\n\t        ')
                     cat('\n')
                             }, 
                   by = Type]
-
           
           # grouping fields
           groupFields <- fields[GroupedBy == TRUE]

@@ -739,7 +739,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   
   ### Preparing the "do" quosure
   fields <- fields(humdrumR)
-  dotField <- fields[Selected == TRUE]$Name[1]
+  dotField <- fields[Selected == 1L]$Name
   
   ##### grouping
   groupFields <- getGroupingFields(humdrumR, .by, withFunc) 
