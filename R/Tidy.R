@@ -251,6 +251,24 @@ tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
   selections
 }
 
+### pivot ----
+
+#' @rdname tidyHumdrum
+#' @export
+pivot_wider.humdrumR <- function(data, names_from = 'Spine', value_from = selectedFields(data)[1], fold, onto) {
+  if (missing(fold)) fold <- 2:ncol(data)
+  if (missing(onto)) onto <- 1
+  foldHumdrum(data, fold, onto, what = names_from[1], fromField = value_from, newFieldNames = paste0(names_from, fold))
+}
+
+#' @rdname tidyHumdrum
+#' @export
+pivot_longer.humdrumR <- function(data, cols, fieldTypes = 'D') {
+  fields <- tidyselect_humdrumRfields(data, list(rlang::enexpr(cols)), fieldTypes = fieldTypes, callname = 'pivot_longer.humdrumR()')
+  
+  rend(data, fields)
+}
+
 #############################################################-
 # ggplot2 stuff #############################################-----
 ##############################################################-

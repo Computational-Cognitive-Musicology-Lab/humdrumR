@@ -46,6 +46,7 @@
 #' @importFrom scales ContinuousRange
 #' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize
 #' @importFrom tidyselect eval_select
+#' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type aes geom_bar geom_point
 #' @export summarise select filter mutate pull reframe group_by ungroup summarize
 NULL
