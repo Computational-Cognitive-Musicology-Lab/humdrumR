@@ -1885,10 +1885,11 @@ update_Null.data.table <- function(hum, field = 'Token', ...) {
 
 ## Manipulating the @Fields slot ----
 
-checkFieldTypes <- function(types, argname, callname) {
-    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')
+checkFieldTypes <- function(types, argname, callname, includeSelected = TRUE) {
+    valid <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', if (includeSelected) 'selected')
     types <- matched(types, valid, nomatch = types)
-    checks(types, xcharacter & xmaxlength(7) & xplegal(c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')))
+    checks(types, #argname = argname, 
+           xcharacter & xmaxlength(7) & xplegal(valid))
 }
 
 initFields <- function(humtab, tandemFields) {
@@ -1993,6 +1994,8 @@ naDots <- function(field, null, types) {
 #' @export
 names.humdrumR <- function(humdrumR) names(getHumtab(humdrumR))
 
+
+
 fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
           fields <- fields(humdrumR)$Name
           target <- pmatch(fieldnames, fields)
@@ -2023,6 +2026,10 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 
 }
 
+
+fieldMatchExprs <- function(humdrumR, exprs) {
+    
+}
 
 #' Individual fields from the humdrum table can be extracted using `pull()`, which
 #' returns a [data.table()][data.table::data.table()] with each column corresponding to one field. 

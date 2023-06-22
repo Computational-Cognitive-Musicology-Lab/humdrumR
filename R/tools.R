@@ -2247,6 +2247,25 @@ literalizeQuo <- function(quo) {
 }
 
 
+exprStringMatch <- function(exprs, strings, includeSymbols = FALSE) {
+  
+  hits <- sapply(exprs, is.character)
+  
+  if (includeSymbols) {
+    syms <- !hit & lengths(exprs) == 1L
+    exprs[syms] <- lapply(exprs[syms], as.character)
+    hits <- hits | syms
+  }
+  
+  exprs[hits] <- lapply(exprs[hits], 
+                               \(x) { 
+                                 strings[pmatch(x, strings, nomatch = 0)]
+                                 })
+  
+  exprs
+}
+
+
 withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
   if (is.null(expr)) return(expr)
   exprA <- analyzeExpr(expr)

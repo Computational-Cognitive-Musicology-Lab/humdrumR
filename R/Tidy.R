@@ -106,14 +106,18 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expa
 
 #' @rdname tidyHumdrum
 #' @export
-pull.humdrumR <- function(.data, var, ..., dataTypes = 'D', null = 'asis', drop = TRUE) {
-  if (missing(var)) {
-    pulled <- pullSelectedFields(.data, dataTypes = dataTypes, null = null)
+pull.humdrumR <- function(.data, ..., dataTypes = 'D', fieldTypes = "any", null = 'asis', drop = TRUE) {
+  
+  exprs <- rlang::enexprs(...)
+  
+  fields <- if (length(exprs)) {
+    tidyselect_humdrumRfields(.data, exprs, fieldTypes, 'pull.humdrumR()')
   } else {
-    fields <- rlang::enquos(var, ...)
-    pulled <- rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!fields, dataTypes = !!dataTypes, drop = FALSE)))
-    
+    selectedFields(.data)
   }
+ 
+  pulled <- pullFields(.data, fields = fields, dataTypes = dataTypes, null = null)
+
   if (drop) pulled[[1]] else pulled
   
 }
@@ -195,20 +199,56 @@ ungroup.humdrumR <- function(x, ...) {
 
 #' @rdname selectedFields
 #' @export
-select.humdrumR <- function(.data, ...) {
-    fields <- sapply(rlang::ensyms(...), as.character)
-    if (length(fields) == 0L) fields <- 'Token'
-    
-    fieldTypes <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference')
-    if (any(fields %in% fieldTypes)) {
-     fields <- unique(c(fields, fields(.data)[Type %in% fields]$Name))
-     fields <- setdiff(fields, fieldTypes)
+select.humdrumR <- function(.data, ..., fieldTypes = "Data") {
+ 
+    exprs <- rlang::enexprs(...)
+    fields <- if (length(exprs) == 0L) {
+      'Token'
+    } else {
+      tidyselect_humdrumRfields(.data, exprs, fieldTypes, 'select.humdrumR')
+       
     }
-    
-    fields <- fieldMatch(.data, fields, callfun = 'select')
-    
     selectFields(.data, fields)
-    
+}
+
+tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
+  
+  types <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping')
+  fields <- fields(humdrumR)
+  
+  # select by field type (character string only, partially matched)
+  typeSelections <- lapply(exprs, 
+                           \(expr) {
+                             if (is.character(expr)) {
+                               type <- types[pmatch(expr, types, nomatch = 0L)]
+                               if (length(type)) fields[Type == type, Name]
+                             }
+                             
+                           })
+  
+  exprs <- exprs[lengths(typeSelections) == 0L]
+  
+  # select by field names
+  
+  fieldTypes <- if ('any' %in% tolower(fieldTypes)) {
+    types
+  } else {
+    fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', callname, includeSelected = FALSE)
+  }
+  options <- fields[Type %in% fieldTypes, Name]
+  expr <- rlang::expr(c(!!!exprs))
+  fieldSelections <- options[tidyselect::eval_select(expr, setNames(options, options), strict = FALSE)]
+  ##
+  selections <- union(fieldSelections, unlist(typeSelections))
+  
+  
+  if (length(selections) == 0L) {
+    exprs <- do.call('harvard', c(lapply(rlang::enexprs(...), rlang::as_label), conjunction = '', quote = TRUE))
+    .stop("The <expressions {exprs} don't|expression {exprs} doesn't> match any {fieldTypes} fields in your humdrumR data.",
+          ifelse = length(exprs) > 1)
+  }
+  
+  selections
 }
 
 #############################################################-
