@@ -1499,6 +1499,46 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
 #     updateFields(humdrumR)   
 # }
 
+rend <- function(humdrumR, field = 'Kern') {
+    humtab <- getHumtab(humdrumR, 'IMDd')
+    
+    spines <- humtab[, {
+      list(list(if (any(!is.na(Kern))) c(Token = 1, Kern = 1) else c(Token = 1)))
+    }, by = Spine]
+    spines <- spines[ , list(oldSpine = rep(Spine, lengths(V1)), newSpine = cumsum(unlist(V1)))]
+    
+    old <- data.table::copy(humtab)
+    new <- data.table::copy(humtab)
+    
+    
+    old[ , Kern := NULL]
+    new[ , Token := NULL]
+    colnames(new)[colnames(new) == 'Kern'] <- 'Token'
+    
+    old[ , Spine := spines[!duplicated(oldSpine), newSpine[match(Spine, oldSpine)]]]
+    new[ , Spine := spines[ duplicated(oldSpine), newSpine[match(Spine, oldSpine)]]]
+    
+    
+    embeddedExclusive <- getExclusive(new$Token)
+    
+    new$Token <- as.character(new$Token)
+    new$Token[is.na(new$Token)] <- old$Token[is.na(new$Token)]
+    if (!is.null(embeddedExclusive)) {
+        new$Token[grepl('^\\*\\*', new$Token)] <- paste0('**', embeddedExclusive)
+        new$Exclusive <- embeddedExclusive
+    }
+    
+    humtab <- rbind(old, new)
+    
+    putHumtab(humdrumR) <- humtab
+    humdrumR <- updateFields(humdrumR)
+    selectFields(humdrumR, 'Token')
+    
+    
+    
+    
+}
+
 foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NULL) {
     checks(fold, xwholenum)
     
