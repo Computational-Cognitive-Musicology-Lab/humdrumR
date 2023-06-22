@@ -1465,6 +1465,40 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
 
 }
 
+# pivotHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL, 
+#                         fromField = selectedFields(humdrumR)[1], fillFromField = FALSE,
+#                         newFieldNames = NULL) {
+#     
+#     # argument checks
+#     checks(humdrumR, xhumdrumR)
+#     checks(fold, xnatural)
+#     checks(onto, xnatural)
+#     
+#     checks(fromField, xcharacter & xlen1)
+#     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
+#     checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'DataRecord')))
+#    
+#     
+#     humtab <- data.table::copy(getHumtab(humdrumR))
+#     moves <- foldMoves(humtab, fold, onto, what, Piece, newFieldNames)
+#     humtab[ , "_pivot_" := {
+#         pivot <- rep(fromField, length(Token))
+#         pivot[Spine %in% moves$From] <- moves$FieldNames[match(Spine[Spine %in% moves$From], moves$From)]
+#         pivot
+#     }]
+#     
+#     humtab[, Spine := ifelse(Spine %in% moves$From, moves$To[match(Spine, moves$From)], Spine)]
+#     
+#     humtab <- as.data.table(tidyr::pivot_wider(humtab, names_from = '_pivot_', values_from = Token, values_fill = NA))
+#     
+#     humtab <- renumberSpines.data.table(humtab)
+#     
+#     
+#     putHumtab(humdrumR) <- humtab
+#     
+#     updateFields(humdrumR)   
+# }
+
 foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NULL) {
     checks(fold, xwholenum)
     
