@@ -774,7 +774,7 @@ parseReference <- function(refTable, reference) {
           # This parses a character vector of reference records into
           # a data.table with columns indicating reference keys
           # and rows holdingtheir values
-  if (is.null(reference)) return(NULL)    
+  if (length(reference) == 0L) return(NULL)    
     
   refrecords <- stringr::str_sub(refTable, start = 4L) # rid of !!!
   
@@ -1105,7 +1105,7 @@ parseTandem <- function(tandems, known) {
     # and parses these into a table of new Interpretation fields
     # for the humdrum table.
     # Known indicates
-    if (is.null(known) || all(tandems == "", na.rm = TRUE)) return(NULL)
+    if (length(known) == 0L || all(tandems == "", na.rm = TRUE)) return(NULL)
     
     # which are the tandems we want it to recognize
     REs <- getRE(known)
