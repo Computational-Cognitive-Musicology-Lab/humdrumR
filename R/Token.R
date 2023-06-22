@@ -156,6 +156,7 @@ setMethod('show', 'token',
 #' @rdname token
 #' @export
 format.token <- function(x, ...) {
+  x <- x@.Data
   x[is.na(x)] <- '.'
   x
 }
