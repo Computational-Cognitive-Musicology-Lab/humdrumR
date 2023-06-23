@@ -1018,7 +1018,7 @@ parseTokenType <- function(spine, E = FALSE, S = FALSE) {
     out[stringi::stri_detect_regex(spine, '^!!')] <- 'G'
     
     if (E) out[stringi::stri_detect_regex(spine, '^\\*\\*')] <- 'E'
-    if (S) out[stringi::stri_detect_regex(spine, '^\\*[-v^>]')] <- 'S'
+    if (S) out[stringi::stri_detect_regex(spine, '^\\*[-v^>]|\\*tb')] <- 'S'
     
     out
 }

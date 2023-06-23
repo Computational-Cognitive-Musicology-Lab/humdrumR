@@ -877,7 +877,9 @@ rhythmArgCheck <- function(args, callname) {
   args
 }
 
-makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', extraArgs = list()) {
+makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', 
+                                  tandem = c('TimeSignature', 'Mensuration', 'BPM'),
+                                  extraArgs = list()) {
   # this function will create various rhythm transform functions
   
   autoArgTable <<- rbind(autoArgTable,
@@ -950,6 +952,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
         token(output, Exclusive = callname, 
               deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
               factorizer = set.ramut,
+              tandem = tandem,
               parser = rhythmInterval,
               deparser = !!deparser)
 

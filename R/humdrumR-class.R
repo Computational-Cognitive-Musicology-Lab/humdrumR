@@ -1938,6 +1938,13 @@ update_Interpretations.data.table <- function(hum, field = 'Token', ...) {
     }
     
     #tandem <- #################
+    tandem <- getTandem(hum[[field]])
+    if (!is.null(tandem)) {
+        tandems <- knownInterpretations[Name %in% tandem, RE]
+        hits <- Reduce('|', lapply(tandems, stringi::stri_detect_regex, str = hum[['Token']]))
+        hum[[field]][hits] <- hum[['Token']][hits]
+    }
+    
     hum
 }
 
