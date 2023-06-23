@@ -1914,14 +1914,17 @@ update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
 update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
-    field <- selectedFields(hum)[1]
-    putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, field)
+    fields <- selectedFields(hum)
+    putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, fields)
     
     hum
 }
-update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
-    field <- field[1]
-    # Exclusive <- getExclusive(hum[[field]]) 
+update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
+    
+    exclusiveFields <- Reduce('|', lapply(paste0('^Exclusive\\.', fields), stringi::stri_detect_regex, str = colnames(hum)))
+    if (any(exclusiveFields)) {
+        hum[ , Exclusive := do.call('paste0', hum[ , exclusiveFields, with = FALSE])]
+    }
     
     
     hum

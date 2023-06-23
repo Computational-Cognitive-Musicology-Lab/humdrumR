@@ -676,6 +676,7 @@ within.humdrumR <- function(data, ...,
   overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
   
   bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                          'Exclusive',
                           'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
 
   #fields(humdrumR, 'S')$Name
