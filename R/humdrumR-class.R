@@ -1452,7 +1452,7 @@ foldHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     humtab <- update_humdrumR(humtab, field = c(newfields, fields(humdrumR, 'D')$Name))
     humtab <- removeNull(humtab, by = c('Piece', what), nullTypes = 'LIMd')
-    humtab <- update_Null(humtab, field = newfields)
+    humtab <- update_Dd(humtab, field = newfields)
     
     putHumtab(humdrumR, overwriteEmpty = c()) <- orderHumtab(humtab)
     
@@ -1765,7 +1765,7 @@ unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
         multiHumtab[, eval(field) := rep_len(get(field)[!is.na(get(field))], length(Token)), by = list(Piece, Record)]   
     }
     humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'Piece')]))
-    humtab <- update_Null(humtab, field = fromFields)
+    humtab <- update_Dd(humtab, field = fromFields)
     putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
     humdrumR
 }
@@ -1893,17 +1893,17 @@ nullFields <- function(hum, fields, reduce = '&') {
 }
 
 update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
-update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) {
+update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Dd = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
-    humtab <- update_humdrumR.data.table(humtab, Exclusive, Null, ...)
+    humtab <- update_humdrumR.data.table(humtab, Exclusive, Dd, ...)
     
     putHumtab(hum, overwriteEmpty = c('d')) <- humtab
     hum
 }
-update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Null = TRUE, ...) {
+update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Dd = TRUE, ...) {
     
     if (Exclusive) hum <- update_Exclusive(hum, ...)
-    if (Null) hum <- update_Null(hum, ...)
+    if (Dd) hum <- update_Dd(hum, ...)
     hum
     
 }
@@ -1941,15 +1941,15 @@ update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
 }
 
 #
-update_Null <- function(hum, field, ...) UseMethod('update_Null')
-update_Null.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FALSE, ...) {
+update_Dd <- function(hum, field, ...) UseMethod('update_Dd')
+update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FALSE, ...) {
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, overwriteEmpty = "GLIMDd") <- update_Null.data.table(humtab, field = field)
+    putHumtab(hum, overwriteEmpty = "GLIMDd") <- update_Dd.data.table(humtab, field = field)
     hum
 }
-update_Null.data.table <- function(hum, field = 'Token', ...) {
+update_Dd.data.table <- function(hum, field = 'Token', ...) {
     null <- nullFields(hum, field)
     
     hum$Type[hum$Type %in% c('d', 'D')] <-  ifelse(null[hum$Type %in% c('d', 'D')], 'd', 'D')
@@ -2250,7 +2250,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
     
     putHumtab(humdrumR) <- humtab
     
-    update_Null(humdrumR)
+    update_Dd(humdrumR)
     
 }
 

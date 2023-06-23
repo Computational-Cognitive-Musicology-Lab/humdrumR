@@ -126,7 +126,7 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   
   putHumtab(x) <- humtab 
   x <- updateFields(x, selectNew = FALSE)
-  x <- update_Null(x, selectedFields(x))
+  x <- update_Dd(x, selectedFields(x))
   
   if (removeEmptyPieces) x <- removeNull(x, 'Piece', 'GLIMd')
   x
@@ -668,7 +668,7 @@ removeSubset <- function(humdrumR, complement = NULL) {
   humdrumR@Fields$Complement <- FALSE
   putHumtab(humdrumR) <- humtab[ , !grepl('_complement_', colnames(humtab)), with = FALSE]
   
-  humdrumR <- update_Null(humdrumR, dataFields)
+  humdrumR <- update_Dd(humdrumR, dataFields)
   
   humdrumR
   
@@ -697,7 +697,7 @@ complement <- function(humdrumR) {
   
   humdrumR@Humtable <- humtab
   
-  humdrumR <- update_Null(humdrumR, fields)
+  humdrumR <- update_Dd(humdrumR, fields)
   
   humdrumR
     
@@ -721,5 +721,5 @@ combineFields <- function(humdrumR, ...) {
   putHumtab(humdrumR) <- humtab
   
   humdrumR <- updateFields(humdrumR)
-  update_Null(humdrumR, newFields)
+  update_Dd(humdrumR, newFields)
 }
