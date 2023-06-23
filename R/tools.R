@@ -2814,7 +2814,7 @@ trimTokens <- function(tokmat, maxTokenLength) {
     
     toolong <- toklen > maxTokenLength
     tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, maxTokenLength)
-    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '___') # these two ... are not the same! one is RE other is literal
+    tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
     tokmat[is.na(tokmat)] <- ''
     
     tokmat

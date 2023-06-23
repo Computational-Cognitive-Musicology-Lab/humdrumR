@@ -708,7 +708,7 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     
     
     ## Other general information about tokens
-    humtab[ , Type := parseTokenType(Token)]
+    humtab[ , Type := parseTokenType(Token, E = TRUE, S = TRUE)]
     humtab <- humtab[Type != 'P']
     humtab[ , Global := is.na(Spine)]
     humtab[ , Pattern := NULL]
@@ -1003,7 +1003,7 @@ separatePieces <- function(fileFrame) {
 #   type
 # }
 
-parseTokenType <- function(spine, E = FALSE) {
+parseTokenType <- function(spine, E = FALSE, S = FALSE) {
     # This is called by parseRecords
     # simply categories records by spine type,
     # to create the humdrum tables Type field.
@@ -1018,6 +1018,7 @@ parseTokenType <- function(spine, E = FALSE) {
     out[stringi::stri_detect_regex(spine, '^!!')] <- 'G'
     
     if (E) out[stringi::stri_detect_regex(spine, '^\\*\\*')] <- 'E'
+    if (S) out[stringi::stri_detect_regex(spine, '^\\*[-v^>]')] <- 'S'
     
     out
 }

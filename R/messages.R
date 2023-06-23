@@ -417,7 +417,7 @@ xcharclass <- function(chars, single = TRUE) {
   
 }
 
-xrecordtypes <- xcharacter & xminlength(1) & xmaxlength(6) & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd'))), 
+xrecordtypes <- xcharacter & xminlength(1) & xmaxlength(8) & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd', 'S', 'E'))), 
                                               glue::glue("must be a string of characters representing humdrum's six record types: {.values(c('G', 'L', 'I', 'M', 'D','d'), conj = 'or')}"),
                                               \(arg) glue::glue("'argname' includes the character(s) {.values(setdiff(unlist(strsplit(arg, split = '')), c('G', 'L', 'I', 'M', 'D', 'd')))}"))
 
@@ -431,7 +431,12 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
   # which is what many functions want to work with
   
   checks(dataTypes, xrecordtypes)
-  unique(unlist(strsplit(dataTypes, split = '')))
+  dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
+  
+  if (any(dataTypes == 'I')) dataTypes <- union(dataTypes, c('S', 'E'))
+  
+  dataTypes
+  
 }
 
 

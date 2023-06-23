@@ -178,12 +178,12 @@ NULL
 
 humdrumR_defaults <- list(
   view = 'humdrum',
+  dataTypes = 'GLIMDd',
   maxRecordsPerFile = 40L,
   maxTokenLength = 16L,
   nullPrint = 'NA2dot',
   syntaxHighlight = TRUE,
   censorEmptyRecords = 30L
-  
 )
 
 humdrumRoptions <- function() options('humdrumR_options')[[1]]
@@ -205,6 +205,15 @@ humdrumRoption <- function(name) {
 #' These options are [partially matched][partialMatching].
 #' 
 #' Use [select()] to determine which fields to show.
+#' 
+#' @param dataTypes ***Which types of humdrum record(s) to view.***
+#' 
+#' Defaults to `"GLIMDd"` for `as.lines()` and `as.matrix()`; `"Dd"` for `as.data.frame()`;
+#' `"LIMDd"` for `as.matrices()` and `as.data.frames()`.
+#' 
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation for explanation.)
 #' 
 #' @param maxRecordsPerFile ***How many records should be shown in each file, when more than one file is present?***
 #' 
@@ -245,13 +254,17 @@ humdrumRoption <- function(name) {
 #' 
 #' @seealso humdrumRclass
 #' @export
-humdrumR <- function(view, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight, censorEmptyRecords) {
+humdrumR <- function(view, dataTypes, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight, censorEmptyRecords) {
   curOptions <- oldOptions <- humdrumRoptions()
   
 
   if (!missing(view)) {
     view <- checks(view, xplegal(c('score', 'table', 'tibble', 'humdrum', 'data.frame')))
     curOptions$view <- match.arg(view, c('score', 'table', 'tibble', 'humdrum', 'data.frame'))
+  }
+  if (!missing(dataTypes)) {
+    dataTypes <- checkTypes(dataTypes, 'humdrumR')
+    curOptions$dataTypes <- dataTypes
   }
   if (!missing(maxRecordsPerFile)) {
     checks(maxRecordsPerFile, xwholenum & xpositive)

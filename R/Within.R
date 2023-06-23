@@ -706,15 +706,15 @@ within.humdrumR <- function(data, ...,
     humdrumR@Humtable <- humdrumR@Humtable[Type != 'd'] 
   }
   
-  newhumtab <- update_humdrumR.data.table(newhumtab, field = c(newFields, overWrote))
+  # newhumtab <- update_humdrumR.data.table(newhumtab, )
   humdrumR@Humtable <- newhumtab
   
   # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newFields)) {
     humdrumR <- updateFields(humdrumR)
   }
-  humdrumR
-  # update_humdrumR(humdrumR, field = c(newfields, overWrote))
+  
+  update_humdrumR(humdrumR, field = c(newFields, overWrote))
 
 
 }
