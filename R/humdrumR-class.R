@@ -2328,6 +2328,7 @@ pullPrintable <- function(humdrumR, fields,
     
     Exclusives <- lapply(fieldTable, getExclusive)
     Exclusives[lengths(Exclusives) == 0L] <- names(fieldTable)[lengths(Exclusives) == 0L]
+    tandems <- unlist(unique(lapply(fieldTable, getTandem)))
     
     # change fields to character
     fieldTable[ , (fields) := lapply(fields, 
@@ -2353,10 +2354,18 @@ pullPrintable <- function(humdrumR, fields,
       
     field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
     
-    ## Do we need to grab and interpretations from the Token field?
+    ## Do we need to grab any interpretations from the Token field?
     if (length(useToken) && any(grepl(captureRE(useToken), dataTypes))) {
         # humtab[, !Type %in% c('D', 'd')]
-        fill <- fieldTable$Type %in% useToken & (is.na(field) | is.nullToken(field))
+        Type <- fieldTable$Type
+        fill <- Type %in% useToken & (is.na(field) | is.nullToken(field))
+        
+        if (length(tandems)) {
+            tandemRE <- knownInterpretations[Name %in% tandems, RE]
+            fill[Type == 'I'] <- fill[Type == 'I']  & Reduce('|', lapply(tandemRE, 
+                                                                         stringi::stri_detect_regex, 
+                                                                         str = fieldTable$Token[Type == 'I'] ))
+        }
         field[fill] <- fieldTable$Token[fill]
     } 
     
@@ -2364,6 +2373,8 @@ pullPrintable <- function(humdrumR, fields,
         Exclusive <- paste0('**', do.call('paste', c(Exclusives[fields], list(sep = '**'))))
         field[fieldTable$Type == 'E'] <- Exclusive
     }
+    
+
     
     
     # syntax <- hum[, Type == 'S']
