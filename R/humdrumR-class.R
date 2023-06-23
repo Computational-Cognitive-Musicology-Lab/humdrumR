@@ -1893,16 +1893,16 @@ nullFields <- function(hum, fields, reduce = '&') {
 }
 
 update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
-update_humdrumR.humdrumR <- function(hum,  Interpretations = TRUE, Null = TRUE , ...) {
+update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Null = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
-    humtab <- update_humdrumR.data.table(humtab, Interpretations, Null, ...)
+    humtab <- update_humdrumR.data.table(humtab, Exclusive, Null, ...)
     
     putHumtab(hum, overwriteEmpty = c('d')) <- humtab
     hum
 }
-update_humdrumR.data.table <- function(hum, Interpretations = TRUE, Null = TRUE, ...) {
+update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Null = TRUE, ...) {
     
-    if (Interpretations) hum <- update_Interpretations(hum, ...)
+    if (Exclusive) hum <- update_Exclusive(hum, ...)
     if (Null) hum <- update_Null(hum, ...)
     hum
     
@@ -1910,16 +1910,16 @@ update_humdrumR.data.table <- function(hum, Interpretations = TRUE, Null = TRUE,
 
 
 #
-update_Interpretations <- function(hum, ...) UseMethod('update_Interpretations')
-update_Interpretations.humdrumR <- function(hum, ...) {
+update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
+update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
     field <- selectedFields(hum)[1]
-    putHumtab(hum, overwriteEmpty = 'ID') <- update_Interpretations.data.table(humtab, field)
+    putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, field)
     
     hum
 }
-update_Interpretations.data.table <- function(hum, field = 'Token', ...) {
+update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
     field <- field[1]
     Exclusive <- getExclusive(hum[[field]]) 
     
@@ -1935,14 +1935,6 @@ update_Interpretations.data.table <- function(hum, field = 'Token', ...) {
     syntax <- hum[, Type == 'S']
     if (any(syntax)) {
         hum[[field]][syntax] <- hum[['Token']][syntax]
-    }
-    
-    #tandem <- #################
-    tandem <- getTandem(hum[[field]])
-    if (!is.null(tandem)) {
-        tandems <- knownInterpretations[Name %in% tandem, RE]
-        hits <- Reduce('|', lapply(tandems, stringi::stri_detect_regex, str = hum[['Token']]))
-        hum[[field]][hits] <- hum[['Token']][hits]
     }
     
     hum

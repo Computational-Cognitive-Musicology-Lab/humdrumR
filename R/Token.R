@@ -41,8 +41,6 @@ token <- function(x, Exclusive = NULL, ...) {
 
 getExclusive <- function(x) if (inherits(x, 'token')) x@Exclusive
 
-getTandem <- function(x) if (inherits(x, 'token')) x@Attributes$tandem
-
 untoken <- function(x) x@.Data
 
 ## Vectorization ####

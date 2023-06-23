@@ -2984,7 +2984,6 @@ pitchArgCheck <- function(args,  callname) {
 makePitchTransformer <- function(deparser, callname, 
                                  outputClass = 'character', 
                                  keyed = TRUE,
-                                 tandem = c('Key', 'KeySignature', 'Clef'),
                                  # removeArgs = NULL, 
                                  extraArgs = alist()) {
   autoArgTable <<- rbind(autoArgTable,
@@ -3076,7 +3075,6 @@ makePitchTransformer <- function(deparser, callname,
         token(output, Exclusive = callname,
               deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Key', 'Exclusive')][-1],
               gamutArgs = gamutArgs,
-              tandem = tandem,
               factorizer = set.gamut,
               parser = tonalInterval,
               deparser = !!deparser)
@@ -3134,7 +3132,7 @@ makePitchTransformer <- function(deparser, callname,
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
 #' @export 
-freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('Clef'),
+freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric',
                               extraArgs = alist(tonalHarmonic = 2^(19/12), 
                                                 frequency.reference = 440,
                                                 frequence.reference.note = 'a')) 
@@ -3168,12 +3166,12 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('Clef'),
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
 #' @export 
-semits <- makePitchTransformer(tint2semits, 'semits', 'integer', tandem = c('Clef'))
+semits <- makePitchTransformer(tint2semits, 'semits', 'integer')
 
 
 #' @rdname semits
 #' @export 
-midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('Clef'))
+midi  <- makePitchTransformer(tint2midi, 'midi', 'integer')
 
 #' @section Cents:
 #'
@@ -3199,8 +3197,7 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('Clef'))
 #' @inheritParams freq
 #' @rdname semits
 #' @export 
-cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', 
-                               tandem = c('Clef'), extraArgs = alist(tonalHarmonic = 2^(19/12)))
+cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', extraArgs = alist(tonalHarmonic = 2^(19/12)))
 
 
 
@@ -3243,7 +3240,7 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric',
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
 #' @export 
-pc <- makePitchTransformer(tint2pc, 'pc', 'character', tandem = c('Clef'))
+pc <- makePitchTransformer(tint2pc, 'pc', 'character')
 
 
 #' Scientific pitch representation
