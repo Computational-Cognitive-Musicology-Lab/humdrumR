@@ -1883,7 +1883,7 @@ is.nullToken <- function(tokens) {
     if (is.list(tokens)) {
         lengths(tokens) == 0L
     } else {
-        is.na(tokens) | tokens %in% c('*', '=', '!', '!!', '.')
+        is.na(tokens) | tokens %in% c('*', '=', '!', '!!', '.', '**')
     }
 }
 
@@ -1921,21 +1921,8 @@ update_Exclusive.humdrumR <- function(hum, ...) {
 }
 update_Exclusive.data.table <- function(hum, field = 'Token', ...) {
     field <- field[1]
-    Exclusive <- getExclusive(hum[[field]]) 
+    # Exclusive <- getExclusive(hum[[field]]) 
     
-    exclusives <- hum[, Type == 'E']
-    
-    if (!is.null(Exclusive)) {
-        
-        hum[[field]][exclusives] <- paste0('**', Exclusive)
-    } else {
-        hum[[field]][exclusives] <- paste0('**', hum$Exclusive[exclusives])
-    }
-    
-    syntax <- hum[, Type == 'S']
-    if (any(syntax)) {
-        hum[[field]][syntax] <- hum[['Token']][syntax]
-    }
     
     hum
 }
@@ -1974,7 +1961,6 @@ checkFieldTypes <- function(types, argname, callname, includeSelected = TRUE) {
 
 initFields <- function(humtab, tandemFields) {
     fields <- colnames(humtab)
-    
     fieldTable <- data.table(Name = fields, Class = sapply(humtab, class), Type = 'Reference')
     
     fieldTable[ , Type := {
@@ -1987,6 +1973,8 @@ initFields <- function(humtab, tandemFields) {
         Type[grepl('^Formal', Name) | Name %in% c('Bar', 'DoubleBar', 'BarLabel')] <- 'Formal'
         Type                 
     }]
+    
+    humtab[ , Exclusive.Token := Exclusive] # changes this in place
     
     setorder(fieldTable, Type, Class)
     fieldTable[ , Selected := as.integer(Name == 'Token')]
@@ -2021,7 +2009,7 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
     fieldTable <- fieldTable[Name %in% colnames(humtab)] # removes fields that don't exist in humtab
     
     new <- setdiff(colnames(humtab), fieldTable$Name)
-    new <- new[!grepl('^_complement_', new)]
+    new <- new[!grepl('^_complement_|Exclusive\\.', new)]
     if (length(new)) {
         fieldTable <- rbind(fieldTable, 
                             data.table(Name = new, 
@@ -2056,7 +2044,7 @@ naDots <- function(field, null, types) {
     if (null == 'asis') return(field)
     na <- is.na(field)
     
-    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=')[types]
+    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=', E = '**', S = '*')[types]
     
     
     if (null == 'dot2NA') {
@@ -2334,17 +2322,25 @@ selectFields <- function(humdrumR, fields) {
 
 pullPrintable <- function(humdrumR, fields, 
                           dataTypes = 'D', 
-                          null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), 
                           useToken = c('G', 'L', 'I', 'M', 'S', 'E'), collapse = TRUE){
     
-    fieldTable <- pullFields(humdrumR, union(fields, c('Token', 'Type')), dataTypes = dataTypes, null = null)
+    fieldTable <- pullFields(humdrumR, union(fields, c('Token', 'Type')), dataTypes = dataTypes, null = 'dot2NA')
     
+    Exclusives <- lapply(fieldTable, getExclusive)
+    Exclusives[lengths(Exclusives) == 0L] <- names(fieldTable)[lengths(Exclusives) == 0L]
+    
+    # change fields to character
     fieldTable[ , (fields) := lapply(fields, 
                                      \(field) {
                                          field <- fieldTable[[field]]
-                                         if (is.list(field)) return(list2str(field))
-                                         if (is.token(field)) field <- field@.Data
-                                         field[] <- as.character(field)
+                                         
+                                         if (is.list(field)) {
+                                             field <- list2str(field)
+                                         } else {
+                                             if (is.token(field)) field <- field@.Data
+                                             field[] <- as.character(field)
+                                         }
+                                         
                                          if (is.matrix(field)) {
                                              matrix[] <- str_pad(c(matrix), width = max(nchar(matrix)))
                                              field <- paste0('[', do.call('paste', as.data.frame(matrix)),  ']')
@@ -2355,19 +2351,28 @@ pullPrintable <- function(humdrumR, fields,
                                      })] 
     if (!collapse) return(fieldTable)                  
       
-    field <- do.call('paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
+    field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
     
-    ## fill from token field
+    ## Do we need to grab and interpretations from the Token field?
     if (length(useToken) && any(grepl(captureRE(useToken), dataTypes))) {
         # humtab[, !Type %in% c('D', 'd')]
         fill <- fieldTable$Type %in% useToken & (is.na(field) | is.nullToken(field))
         field[fill] <- fieldTable$Token[fill]
-        
     } 
- 
+    
+    if (length(Exclusives)) {
+        Exclusive <- paste0('**', do.call('paste', c(Exclusives[fields], list(sep = '**'))))
+        field[fieldTable$Type == 'E'] <- Exclusive
+    }
+    
+    
+    # syntax <- hum[, Type == 'S']
+    # if (any(syntax)) {
+        # hum[[field]][syntax] <- hum[['Token']][syntax]
+    # }
     
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
-    
+    field <- naDots(field, 'NA2dot', fieldTable$Type)
     field[field == ''] <- "'"
     
     
@@ -2377,9 +2382,15 @@ pullPrintable <- function(humdrumR, fields,
 
 
 
-printableSelectedField <- function(humdrumR, dataTypes = 'D', null =  c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), useTokenGLIM = FALSE) {
-    printableField <- pullPrintable(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'GLIMDd', 
-                                    null = null, useToken = 'G', collapse = TRUE)
+printableSelectedField <- function(humdrumR, 
+                                   dataTypes = 'D', useToken = 'GLIM',
+                                   null =  c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
+    dataTypes <- checkTypes(dataTypes, 'printableSelectField')
+    useToken <- checkTypes(useToken, 'printableSelectField', 'useToken')
+    
+    printableField <- pullPrintable(humdrumR, fields = selectedFields(humdrumR), 
+                                    dataTypes = dataTypes,  useToken = useToken,
+                                    collapse = TRUE)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd')
     humtab$Printable <- printableField[[1]]
@@ -2667,7 +2678,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 print_score <- function(humdrumR, maxRecordsPerFile) {
     selectedFields <- selectedFields(humdrumR)
     
-  humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot', useTokenGLIM = TRUE)
+  humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot')
     
   lines <- as.lines(humdrumR[1])
   

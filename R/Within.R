@@ -697,19 +697,11 @@ within.humdrumR <- function(data, ...,
   
   #### Put new humtable back into humdrumR object
   newFields <- setdiff(colnames(newhumtab), colnames(humtab))
-  
-  notnull <- !nullFields(newhumtab, c(overWrote, newFields))
-  newhumtab$Type[newhumtab$Type == 'd' & notnull] <- 'D'
-  
-  # What do do if d is in dataTypes
-  if (any(grepl('d', dataTypes))) {
-    humdrumR@Humtable <- humdrumR@Humtable[Type != 'd'] 
-  }
-  
+
+  newhumtab <- addExclusiveFields(newhumtab, newFields)
   newhumtab <- update_humdrumR.data.table(newhumtab, field = c(newFields, overWrote))
   humdrumR@Humtable <- newhumtab
   
-  # tell the humdrumR object about the new fields and set the Active formula.
   if (length(newFields)) {
     humdrumR <- updateFields(humdrumR)
   }
@@ -1495,4 +1487,17 @@ renameResults <- function(result, quosures, groupFields, allFields) {
   }
 
   result
+}
+
+addExclusiveFields <- function(humtab, fields) {
+  newcols <- lapply(humtab[ , fields, with = FALSE],
+         \(field) {
+           exclusive <- getExclusive(field)
+           if (!is.null(exclusive)) {
+             ifelse(is.na(field), NA_character_, exclusive)
+           }
+         })
+  names(newcols) <- paste0('Exclusive.', fields)
+  newcols <- Filter(length, newcols)
+  cbind(humtab, as.data.frame(newcols))
 }
