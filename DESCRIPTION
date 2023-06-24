@@ -17,6 +17,7 @@ Collate: humdrumR-package.R
          messages.R
          Dispatch.R
          humdrumR-class.R
+         Reshape.R
          Interpretations.R
          Summary.R
          Read.R
