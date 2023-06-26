@@ -628,7 +628,7 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     j[is.na(j)] <- 1L
     
     
-    field <- pullSelectedField(x, dataTypes = dataTypes)
+    field <- pullPrintable(x, selectedFields(x), dataTypes = dataTypes)[[1]]
     if (is.factor(field)) field <- as.character(field) # R does't allow factors in matrices
     # padder <- as(padder, class(field))
     
@@ -1448,8 +1448,7 @@ pullPrintable <- function(humdrumR, fields,
     
     fieldTable <- pullFields(humdrumR, union(fields, c('Token', 'Type')), dataTypes = dataTypes, null = 'dot2NA')
     
-    Exclusives <- lapply(fieldTable, getExclusive)
-    Exclusives[lengths(Exclusives) == 0L] <- names(fieldTable)[lengths(Exclusives) == 0L]
+    Exclusives <- Filter(length, lapply(fieldTable[ , fields, with = FALSE], getExclusive))
     tandems <- unlist(unique(lapply(fieldTable, getTandem)))
     
     # change fields to character
@@ -1474,12 +1473,16 @@ pullPrintable <- function(humdrumR, fields,
                                      })] 
     if (!collapse) return(fieldTable)                  
       
-    field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
+    # field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
+    field <- Reduce(\(a, b) {
+        ifelse(fieldTable$Type %in% c('I', 'M', 'd', 'S') & a == b, a, .paste(a, b, sep = ''))
+        
+    }, fieldTable[, fields, with = FALSE])
     
+    Type <- fieldTable$Type
     ## Do we need to grab any interpretations from the Token field?
     if (length(useToken) && any(grepl(captureRE(useToken), dataTypes))) {
         # humtab[, !Type %in% c('D', 'd')]
-        Type <- fieldTable$Type
         fill <- Type %in% useToken & (is.na(field) | is.nullToken(field))
         
         if (length(tandems)) {
@@ -1492,8 +1495,7 @@ pullPrintable <- function(humdrumR, fields,
     } 
     
     if (length(Exclusives)) {
-        Exclusive <- paste0('**', do.call('paste', c(Exclusives[fields], list(sep = '**'))))
-        field[fieldTable$Type == 'E'] <- Exclusive
+        field[Type == 'E'] <- paste0('**', do.call('paste', c(Exclusives[fields], list(sep = '**'))))
     }
     
 
@@ -1530,9 +1532,6 @@ printableSelectedField <- function(humdrumR,
     putHumtab(humdrumR) <- humtab
     
     updateFields(humdrumR)
-    
-    
-    
 }
 
 
@@ -1680,7 +1679,7 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
 
 tokmat_humdrum <- function(humdrumR, dataTypes = 'GLIMDd', censorEmptyRecords = Inf, null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
 
-  humdrumR <- printableSelectedField(humdrumR, dataTypes = dataTypes, null = null)
+  # humdrumR <- printableSelectedField(humdrumR, dataTypes = dataTypes, null = null)
     
   tokmat <- as.matrix(humdrumR, dataTypes = union(c('S', 'E'), dataTypes), padPaths = 'corpus', padder = '')
   
@@ -1739,7 +1738,7 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
     ## Trim and align columns, and collopse to lines
     tokmat[!global, ] <- trimTokens(tokmat[!global, , drop = FALSE], maxTokenLength = maxTokenLength)
     
-    lines <- padColumns(tokmat, global, screenWidth, if (syntaxHighlight) syntax)
+    lines <- padColumns(tokmat, global, maxTokenLength, screenWidth, if (syntaxHighlight) syntax)
     
     starMessage <- attr(lines, 'message')
   
@@ -1870,7 +1869,7 @@ censorEmptySpace <- function(tokmat, collapseNull = 10L) {
     tokmat
 }
 
-padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10L, syntax) {
+padColumns <- function(tokmat, global, maxTokenLength, screenWidth = options('width')$width - 10L, syntax) {
     # This function takes a token matrix
     # and pads each token with the appropriate number of spaces
     # such that the lines will print as nicely aligned columns.
@@ -1882,6 +1881,11 @@ padColumns <- function(tokmat, global, screenWidth = options('width')$width - 10
     lenCol <- sapply(as.data.frame(toklen[!global, ]), max) + 2L
     # lenCol <- apply(toklen[!global, ], 2, max) + 2L
     
+    if (sum(lenCol) < (screenWidth - 5L)) {
+        # if there is extra space, fill it (up to maxTokenLength)
+        lenCol[-1] <- pmin(lenCol[-1] + ((screenWidth - sum(lenCol)) %/% (length(lenCol) - 1L)), 
+                           maxTokenLength)
+    }
     screen <- cumsum(lenCol) <= screenWidth
     lenCol <- lenCol[screen]
     tokmat <- tokmat[ , screen, drop = FALSE]

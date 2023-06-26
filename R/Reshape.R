@@ -198,7 +198,7 @@ contractPaths <- function(humtab) {
 #' Only has an effect if `collapseAtomic == TRUE`.
 #' 
 #' @family {Humdrum data reshaping functions}
-#' @seealso The humdrum [folding functions][foldHumdrum()] serve a similar function,
+#' @seealso The humdrum [folding functions][cleave()] serve a similar function,
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
 collapseHumdrum <- function(humdrumR, by,
@@ -326,14 +326,14 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' If we want to treat data in multiple spines/paths/stops as different aspects of the same data
 #' it is easiest to reshape the data so that the information is in different humdrumR [fields][fields()]
 #' rather than separate spines/paths/stops.
-#' We "fold" the data from one structural location over "on top" of other data using `foldHumdrum`.
+#' We "fold" the data from one structural location over "on top" of other data using `cleave`.
 #' 
 #' @section From where to where:
 #' 
 #' The `numeric` `fold` and `onto` arguments specify where to fold from/to.
 #' `fold` indicates the Spine/Path/Stop to fold *from*, "*on to*" the Spine/Path/Stop
 #' indicated by `onto`.
-#' For example, if you specify `foldHumdrum(mydata, fold = 2, onto = 1, what = 'Spine')`
+#' For example, if you specify `cleave(mydata, fold = 2, onto = 1, what = 'Spine')`
 #' spine 2 will be folded "on top of" spine 1.
 #' The `fold` and `onto` targets may not overlap.
 #' 
@@ -452,7 +452,7 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #'   
 #' @param fillFromField ***Should the content of the `fromField` be to copied unfolded sections?***
 #' 
-#' Defaults to `FALSE` for `foldHumdrum()` and `foldStops()`; `TRUE` for `foldPaths()`.
+#' Defaults to `FALSE` for `cleave()` and `foldStops()`; `TRUE` for `foldPaths()`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #'
@@ -464,42 +464,44 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' 
 #' Must be `character`.
 #' 
-#' @seealso The [collapse family of functions][collapseHumdrum()] serves a somewhat
-#' similar function, "collapsing" data *within* a field.
-#' @family {Folding functions}
+#' @seealso The complement/opposite of `cleave()` is [rend()].
+#' The [collapse family of functions][collapseHumdrum()] serves a somewhat
+#' similar function to `cleave()`.
 #' @family {Humdrum data reshaping functions}
 #' @export
-cleave <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL, 
+cleave <- function(humdrumR, ...,
                    field = selectedFields(humdrumR)[1], complement = FALSE,
                    newFieldNames = NULL) {
     # argument checks
     checks(humdrumR, xhumdrumR)
-    checks(fold, xnatural)
-    checks(onto, xnatural)
-    
     checks(field, xcharacter & xlen1)
-    field <- fieldMatch(humdrumR, field, 'foldHumdrum', 'fromField')
-    checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'DataRecord')))
+
+    field <- fieldMatch(humdrumR, field, 'cleave', 'fromField')
     
-    # start work
+    
+    
+    # humtab and fields
     humdrumR <- selectFields(humdrumR, field)
-    
     humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
-    moves <- foldMoves(humtab, fold, onto, what, Piece, newFieldNames)
+    
+    # what are we doing?
+    c('groupDT', 'what') %<-% cleaveParseGroups(...)
+    groupDT <- cleaveMoves(humtab, groupDT, what, newFieldNames)
+    
 
     # 
-    fromHits <- humtab[ , list(Piece, get(what)) %ins% moves[, c('Piece', 'From'), with = FALSE]]
+    fromHits <- humtab[ , list(Piece, get(what)) %ins% groupDT[, c('Piece', 'From'), with = FALSE]]
     fromTable <- humtab[fromHits == TRUE, c(field, fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
     
     if (all(is.na(fromTable[[field]]))) {
-        .warn("Your fromField doesn't have any non-null data where {what} == {harvard(fold, 'or')}.",
+        .warn("Your fromField doesn't have any non-null data where {what} %in% {harvard(unique(groupDT$To)}.",
               "Your humdrumR data is being returned unchanged.")
         return(humdrumR)
     }
     
     humtab[[field]][fromHits & humtab$Type == 'D'] <- NA
     #
-    whichMatch <- fromTable[ ,  matches(list(Piece, get(what)), moves[ , c('Piece', 'From'), with = FALSE], multi = TRUE)]
+    whichMatch <- fromTable[ ,  matches(list(Piece, get(what)), groupDT[ , c('Piece', 'From'), with = FALSE], multi = TRUE)]
     
     #
     fromTable <- do.call('rbind', lapply(1:ncol(whichMatch),
@@ -508,11 +510,11 @@ cleave <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
                fromTable <- fromTable[!is.na(i),]
                i <- i[!is.na(i)]
                switch(what,
-                      Record = fromTable$DataRecord  <- fromTable[ , DataRecord  + (moves$To[i] - Record)],
-                      DataRecord  = fromTable$Record <- fromTable[ , Record + (moves$To[i] - DataRecord)])
+                      Record = fromTable$DataRecord  <- fromTable[ , DataRecord  + (groupDT$To[i] - Record)],
+                      DataRecord  = fromTable$Record <- fromTable[ , Record + (groupDT$To[i] - DataRecord)])
                
-               fromTable[[what]] <-  moves$To[i]
-               fromTable$FieldNames <- moves$FieldNames[i]
+               fromTable[[what]] <-  groupDT$To[i]
+               fromTable$FieldName <- groupDT$FieldName[i]
                fromTable
            }))
    
@@ -520,7 +522,7 @@ cleave <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
     
     # data fields in old rows need to be renamed, because they will now be columns
    
-    fromTables <- split(fromTable, by = 'FieldNames', keep.by = FALSE)
+    fromTables <- split(fromTable, by = 'FieldName', keep.by = FALSE)
     fromTables <- Map(\(ftab, fname) {
                              colnames(ftab)[colnames(ftab) == field] <- fname
                              ftab
@@ -574,12 +576,12 @@ cleave <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
 #     checks(onto, xnatural)
 #     
 #     checks(fromField, xcharacter & xlen1)
-#     fromField <- fieldMatch(humdrumR, fromField, 'foldHumdrum', 'fromField')
+#     fromField <- fieldMatch(humdrumR, fromField, 'cleave', 'fromField')
 #     checks(what, xcharacter & xlen1 & xlegal(c('Spine', 'Path', 'Stop', 'Record', 'DataRecord')))
 #    
 #     
 #     humtab <- data.table::copy(getHumtab(humdrumR))
-#     moves <- foldMoves(humtab, fold, onto, what, Piece, newFieldNames)
+#     moves <- cleaveMoves(humtab, fold, onto, what, Piece, newFieldNames)
 #     humtab[ , "_pivot_" := {
 #         pivot <- rep(fromField, length(Token))
 #         pivot[Spine %in% moves$From] <- moves$FieldNames[match(Spine[Spine %in% moves$From], moves$From)]
@@ -598,189 +600,243 @@ cleave <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL,
 #     updateFields(humdrumR)   
 # }
 
-foldMoves <- function(humtab, fold, onto, what, Piece = NULL, newFieldNames = NULL) {
-    checks(fold, xwholenum)
+
+cleaveParseGroups <- function(...) {
+  groups <- list(...)
+  if (length(groups) == 0L) .stop("The cleave() function requires at least one group of structural locations to cleave together.")
+  
+  ## what
+  what <- local({
+    what <- .names(groups)
+    what[what == ''] <- 'Spine'
+    what <- unique(what)
+    options <- c('Spine', 'Path', 'Stop', 'Record', 'DataRecord')
     
+    matches <- unique(pmatch(what, options, duplicates.ok = TRUE))
+    if (any(is.na(matches))) {
+      .stop("In a call to cleave(), your arguments must (partially) match one of the following field names:",
+            "{harvard(options, 'or', quote = TRUE)}.", 
+            "{harvard(what[is.na(matches)], 'and', quote = TRUE)} <do|does> not match.", 
+            ifelse = sum(is.na(matches)) > 1L)
+    }
+    what <- options[matches]
+    if (length(what) > 1L) .stop("The cleave() function can only cleave one type of location at a time.",
+                                 "Your argument names (or lack of them) are indicating location fields {harvard(what, 'AND', quote = TRUE)}.")
+    what
+  })
+  
+  ## targets
+  lists <- sapply(groups, is.list)
+  if (any(lists)) {
+    if (any(!lists)) .stop("In a call to cleave(), Piece-wise cleave groups must be indicated with lists of groups,", 
+                           "one per piece. In your call, {num2print(sum(lists))} of your grouping arguments is",
+                           "a list, but the other {num2print(sum(!lists))} <aren't|isn't>;",
+                           "They must be ALL Piece-wise (lists) (or have no Piece-wise arguments).",
+                           ifelse = sum(!lists) > 1L)
     
-    if (!is.null(Piece)) {
-        if (length(unique(lengths(list(fold, onto, Piece)))) > 1){
-            .stop("In your call to cleave(), ",
-                  "if the 'Piece' argument is not NULL,",
-                  "the 'Piece', 'fold', and 'onto' arguments must all be the same length.")
-        }
-    } else {
-        Piece <- rep(unique(humtab$Piece), each = max(length(fold), length(onto)))
-        
-        match_size(Piece = Piece, fold = fold, onto = onto, toEnv = TRUE)
+    classes <- unique(unlist(lapply(groups, \(group) unlist(lapply(group, class)))))
+    groups <- lapply(groups, \(group) lapply(group, unique))
+    lengths <- unlist(lapply(groups, lengths))
+    
+    groupDT <- cleaveParseGroups_list(groups)
+  } else {
+    classes <- sapply(groups, class)
+    
+    groups <- lapply(groups, unique)
+    lengths <- lengths(groups)
+    
+    to   <- unlist(lapply(groups, '[', i = 1L))
+    from <- lapply(groups, '[', i = -1L)
+    to <- rep(to, lengths(from))
+    
+    groupDT <- data.table(From = unlist(from), To = to)
+    setorder(groupDT, To, From)
+  }
+  
+  if (any(lengths == 1L)) .stop("In a call to cleave(), groups to cleave must have more than one unique target {what} to cleave together.",
+                                "{num2print(sum(lengths == 1L), capitalize = TRUE)} of the groups you have provided <are|is> length 1.",
+                                ifelse = sum(lengths == 1L) > 1L)
+  
+  if (any(!classes %in% c('character', 'numeric', 'integer'))) {
+    .stop("When using cleave(), the groups to cleave must be indicated with character strings",
+          "(exclusive interpretatios) or natural numbers (spines).",
+          "You have provided<| a> {harvard(setdiff(classes, c('character', 'numeric', 'integer')), 'and', quote = TRUE)} argument<s|>.",
+          ifelse = sum(!classes %in% c('character', 'numeric', 'integer')) > 1L)
+  }
+  
+  if (!(all(classes == 'character') || all(classes %in% c('numeric', 'integer')))) {
+    .stop("When using cleave(), all cleave grouping arguments must be the same class.",
+          "They must either ALL be 'character' (exclusive interpretations) or ALL be natural numbers (spines).")
+  } 
+  
+  if (classes[1] == 'character') {
+    groupDT[ , c('From', 'To') := lapply(list(From, To), gsub, pattern = '^\\*\\**', replacement = '')]
+    groupDT <- unique(groupDT)
+  }
+  
+  
+  
+  list(groupDT = groupDT, what = what)
+  
+}
+
+
+cleaveParseGroups_list <- function(groups) {
+  lens <- lengths(groups)
+  if (length(unique(lens)) > 1L) .stop("Using cleave(), Piece-wise (list) group arguments must all be the same length.")
+  
+  names <- lapply(groups, .names)
+  if (length(groups) > 1L && any(!Reduce('==', names))) .stop("Using cleave(), Piece-wise list grouping arguments must all have identical names, or no names.")
+  
+  unnamed <- names[[1]] == ''
+  if (!(all(unnamed) | all(!unnamed))) .stop("Using cleave(), Piece-wise list grouping arguments must have no names, or ",
+                                             "have EVERY index named.",
+                                             "Your call includes {num2print(sum(unnamed))} unnamed indices and {num2print(sum(!unnamed))} named indices.")
+  if (!all(unnamed) && any(!grepl('[1-9][0-9]*', names[[1]]))) .stop("Using cleave(), the names of Piece-wise (list) grouping arguments must",
+                                                    "either be absent (no names) or by positive whole numbers.",
+                                                    "Your list includes invalid names like",
+                                                    "{harvard(grep('[1-9][0-9]*', value = TRUE, invert = TRUE, head(unique(names[[1]]), 5)), 'and', quote = TRUE)}.")
+  
+  piece <- if (all(unnamed)) {
+    seq_along(groups[[1]])
+  } else {
+    as.integer(names[[1]])
+  }
+  
+  dt <- data.table::rbindlist(lapply(groups, 
+                                     \(group) {
+                                       from <- lapply(group, '[', i = -1L)
+                                       to   <- unlist(lapply(group, '[', i = 1L))
+                                       
+                                       to <- rep(to, lengths(from))
+                                       piece <- rep(piece, lengths(from))
+                                       data.table(From = unlist(from), To = to, Piece = piece)
+                                       
+                                       
+                                     }))
+  
+  setorder(dt, Piece, To, From)
+}
+
+cleaveMoves <- function(humtab, groupDT, what, newFieldNames = NULL) {
+    
+    if (is.null(groupDT$Piece)) {
+      piece <- rep(unique(humtab$Piece), each = nrow(groupDT))
+      groupDT <- groupDT[rep(1:nrow(groupDT), length(unique(humtab$Piece)))]
+      groupDT[ , Piece := piece]
     }    
     
-    moves <- unique(data.table(Piece = Piece, From = fold, To = onto))
-    moves[] <- lapply(moves, as.integer)
     
-    # Check for errors
-    moves[ ,  if (any(To %in% From)) .stop("In your call to cleave(), the 'fold' and 'onto' {what}s can't overlap within any 'Piece'.") , by = Piece]
-    
-    
-    # name fields
-    moves[ , NewField := seq_along(From), by = .(Piece, To)]
-    NnewFields <- length(unique(moves$NewField))
-
-    
-    newFieldNames <- if (is.null(newFieldNames)) {
-        newFieldNames <- moves[ , paste0(what, paste(unique(From), collapse = ','), what, paste(unique(To), collapse = ',')), by = NewField]$V1
-        tail(n = length(newFieldNames), make.unique(c(colnames(humtab), newFieldNames), sep = '.'))
-        
+    if (class(groupDT$From) == 'character') {
+      # this turns exclusives into integers, but also creates fieldNames
+      groupDT <- cleaveParseExclusives(humtab, groupDT, newFieldNames)
     } else {
-        if (length(newFieldNames) < NnewFields) {
-            newFieldNames <- c(head(newFieldNames, -1L),
-                               paste0(tail(newFieldNames, 1L), 
-                                      seq_len(NnewFields - length(newFieldNames) + 1)))
-        } 
-        newFieldNames[1:length(unique(moves$NewField))]
+      # name fields
+      groupDT[ , newFieldN := seq_along(From), by = .(Piece, To)]
+      NnewFields <- length(unique(groupDT$newFieldN))
+      
+      if (is.null(newFieldNames)) {
+         groupDT[ , FieldNames := paste0(what, paste(unique(From), collapse = '|')), by = newFieldN]
         
-        
+      } else {
+        newFieldNames <- make.unique(rep(newFieldNames, length.out = max(groupDT$newFieldN)), sep = '')
+        groupDT[ , FieldName := newFieldNames[newFieldN]]
+      }
     }
     
-    moves[ , FieldNames := newFieldNames[NewField]]
+    groupDT$From <- as.integer(groupDT$From) 
+    groupDT$To <- as.integer(groupDT$To) 
     
+    groupDT
+}
+
+cleaveParseExclusives <- function(humtab, groupDT, newFieldNames = NULL) {
+  uniqueExclusives <- union(groupDT$From, groupDT$To) # solely used for error message below
+
+  
+  groupDT <- humtab[ , {
+    curPiece <- Piece
+    To <- groupDT[Piece == curPiece, unique(To)]
+    From <- groupDT[Piece == curPiece, unique(From)]
     
-    
-    moves
+    toSpine <- setdiff(unique(Spine[Exclusive == To]), NA)
+    if (length(toSpine)) {
+      do.call('rbind', lapply(From, 
+                              \(fromExclusive) {
+                                fromSpine <- setdiff(unique(Spine[Exclusive == fromExclusive]), NA)
+                                if (length(fromSpine) == 0L) return(data.table(From = integer(0), 
+                                                                               To = integer(0), 
+                                                                               Exclusive = character(0)))
+                                if (!(length(fromSpine) == 1L && length(toSpine) == 1L && fromSpine == toSpine)) {
+                                  
+                                  if (length(fromSpine) == length(toSpine) && all(fromSpine == toSpine)) {
+                                    fromSpine <- fromSpine[-1]
+                                    toSpine <- toSpine[1]
+                                  }   
+                                  as.data.table(match_size(From = fromSpine, To = toSpine,  Exclusive = fromExclusive))
+                                }  
+                                
+                              })) -> groupDT_piece
+      # if one exclusive is collapsing onto itself (like kern -> kern),
+      # other spines collapsing onto the collapsed one will result in overlaps
+      # there's no way to see this before now
+      overlaps <- groupDT_piece[ , To %in% From]
+      if (any(overlaps)) {
+        groupDT_piece$To[overlaps] <- groupDT_piece[overlaps == FALSE][groupDT_piece[overlaps == TRUE], on ='Exclusive']$To
+        groupDT_piece <- groupDT_piece[!duplicated(groupDT_piece)]
+      }
+      groupDT_piece
+    }
+  }, by = Piece]
+  
+  if (nrow(groupDT) == 0L) {
+    uniqueExclusives <- gsub('^\\**', '**', uniqueExclusives)
+    .stop("cleave() has found no matching files with which contain any combinations of the exclusive interpretations",
+          "{harvard(uniqueExclusives, 'and', quote = TRUE)}.")
+
+  }
+  groupDT <- groupDT[, list(From, newFieldN = seq_along(From)), by = .(Piece, To, Exclusive)]
+  groupDT[ , FieldName := stringr::str_to_sentence(paste0(Exclusive, if (any(newFieldN > 1)) newFieldN)), by = Exclusive]
+  groupDT[ , newFieldN := match(FieldName, unique(FieldName))]
+  
+  if (!is.null(newFieldNames)) {
+    newFieldNames <- make.unique(rep(newFieldNames, length.out = max(groupDT$newFieldN)), sep = '')
+    groupDT[ , FieldName := newFieldNames[newFieldN]]
+  } 
+ 
+  groupDT
 }
 #    
 
-#' "Fold" exclusive interpretations into new fields
-#' 
-#' 
-#' `foldExclusive()` is a special version of [foldHumdrum()], which 
-#' "folds" spines based on their exclusive interpretations.
-#' For instance, we can "fold" all the `**silbe` spines in a corpus
-#' onto their respective `**kern` spines.
-#' 
-#' 
-#' 
-#' @details 
-#' 
-#' The `fold` and `onto` arguments (`character`, `length == 1`)
-#' must match exclusive interpretations in the `humdrumR` object input.
-#' Within each file, mismatches in the number of matching `onto` and `fold` spines
-#' are handled "in parallel," just like [foldHumdrum()].
-#' Multi-matching spines are matched from left-to-right.
-#'
-#' If no matching exclusive interpetation pairs are found, 
-#' the unchanged `humdrumR` object is returned with a warning.
-#' 
-#' @param humdrumR ***HumdrumR data.***
-#' 
-#' Must be a [humdrumR data object][humdrumRclass].
-#' 
-#' @param fold,onto ***Which exclusive interpretation(s) to "fold" from/to.***
-#'    
-#' Must be non-empty `character` vectors. `onto` must be a single string; `from` may contain multiple exclusive strings.
-#' 
-#' Must be specified *without* the `**` prefix: `"kern"` not `"**kern"`.
-#' 
-#' @family {Folding functions}
-#' @export
-foldExclusive <- function(humdrumR, fold, onto, fromField = selectedFields(humdrumR)[1]) {
-    checks(humdrumR, xhumdrumR)
-    checks(fold, xcharnotempty)
-    checks(onto, xcharnotempty & xlen1)
-    
-    fold <- unique(gsub('^\\*\\*', '', fold))
-    onto <- unique(gsub('^\\*\\*', '', onto))
-    
-    humtab <- getHumtab(humdrumR, dataTypes = 'LIMDd')
-    moves <- humtab[,{
-        toSpine <- setdiff(unique(Spine[Exclusive == onto]), NA)
-        if (length(toSpine)) {
-            do.call('rbind', lapply(fold, 
-                   \(fromExclusive) {
-                       fromSpine <- setdiff(unique(Spine[Exclusive == fromExclusive]), NA)
-                       if (length(fromSpine) == 0L) return(data.table(From = integer(0), 
-                                                                      To = integer(0), 
-                                                                      Exclusive = character(0)))
-                       if (!(length(fromSpine) == 1L && length(toSpine) == 1L && fromSpine == toSpine)) {
-                        
-                           if (all(fromSpine == toSpine)) {
-                               fromSpine <- fromSpine[-1]
-                               toSpine <- toSpine[1]
-                           }   
-                           
-                           as.data.table(match_size(From = fromSpine, To = toSpine,  Exclusive = fromExclusive))
-                       }  
-                       
-                   })) -> moves
-            # if one exclusive is collapsing onto itself (like kern -> kern),
-            # other spines collapsing onto the collapsed one will result in overlaps
-            # there's no way to see this before now
-            overlaps <- moves[ , To %in% From]
-            if (any(overlaps)) {
-                moves$To[overlaps] <- moves[overlaps == FALSE][moves[overlaps == TRUE], on ='Exclusive']$To
-                moves <- moves[!duplicated(moves)]
-            }
-            moves
-        }
-    }, by = Piece]
-    
-    if (nrow(moves) == 0L) {
-        .warn("foldExclusive found no matching files with both '{fold}' and '{onto}'",
-              'exclusive interpretations.',
-              "Your humdrumR data is returned unchaged.")
-        return(humdrumR)
-    }
-    
-    moves <- moves[, list(From, N = seq_along(From)), by = .(Piece, To, Exclusive)]
-    moves[ , Group := paste0(Exclusive, if (any(N > 1)) N), by = Exclusive]
-    
-    newexclusives <- unique(moves$Group)
-    newFieldNames <- stringr::str_to_sentence(newexclusives)
-    
-    humdrumR <- foldHumdrum(humdrumR, 
-                            fold = moves$From, 
-                            onto = moves$To, 
-                            Piece = moves$Piece, what = 'Spine',
-                            fromField = fromField,
-                            newFieldNames = newFieldNames)
-    
-    # add exclusives to data
-    humtab <- getHumtab(humdrumR)
-    for (i in seq_along(newexclusives)) {
-        humtab[[newFieldNames[i]]] <- token(humtab[[newFieldNames[i]]], Exclusive = newexclusives[i]) 
-    }
-    putHumtab(humdrumR) <- humtab
-    
-    humdrumR
-    
-    
-}
 
-#' @rdname foldHumdrum
+### Predefined cleaves ----
+
+#' @rdname cleave
 #' @export
-foldPaths <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFromField = TRUE) {
-    checks(humdrumR, xhumdrumR)
+cleaveSpines <- cleave
+
+#' @rdname cleave
+#' @export
+cleavePaths <- function(humdrumR, field = selectedFields(humdrumR)[1], complement = TRUE) {
     
-    paths <- unique(getHumtab(humdrumR)$Path)
+    paths <- sort(unique(getHumtab(humdrumR)$Path))
     paths <- paths[!is.na(paths)]
     
-    if (all(paths == 1L)) return(humdrumR)
+    if (all(paths == 0L)) return(humdrumR)
     
     dataFields <- fields(humdrumR, fieldTypes = 'Data')
-    minPath <- min(paths)
+
     
-    paths <- setdiff(paths, minPath)
-    
-    foldHumdrum(humdrumR, paths, minPath, what = 'Path', 
-                fromField = fromField, fillFromField = fillFromField,
-                newFieldNames = paste0(fromField, '_Path', paths))
+    cleave(humdrumR, Path = paths, field = field, complement = complement,
+              newFieldNames = paste0(field, '_Path', paths[-1]))
     
 
     
 }
 
-#' @rdname foldHumdrum
+#' @rdname cleave
 #' @export
-foldStops <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFromField = FALSE) {
+cleaveStops <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFromField = FALSE) {
     checks(humdrumR, xhumdrumR)
            
    stops <- unique(getHumtab(humdrumR)$Stop)
@@ -789,60 +845,33 @@ foldStops <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFro
    if (all(stops == 1L)) return(humdrumR)
    
    dataFields <- fields(humdrumR, fieldTypes = 'Data')
-   minStop <- min(stops)
    
-   stops <- setdiff(stops, minStop)
    
-   foldHumdrum(humdrumR, stops, minStop, what = 'Stop', 
-               fromField = fromField, fillFromField = fillFromField,
-               newFieldNames = paste0(fromField, '_Stop', stops))
+   cleave(humdrumR, Stop = stops, field = field, complement = complement,
+          newFieldNames = paste0(field, '_Stop', paths[-1]))
    
    
 }
 
-#' "Unfold" data into multiple stops
-#' 
-#' If some record/spine/path locations have different numbers of
-#' stops in different fields, this function spreads the data from the 
-#' smaller fields into multiple stops.
-#' 
-#' @family {Folding functions}
-#' @seealso The opposite (kinda) of [foldStops()]
-#' @export
-unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
-    checks(humdrumR, xhumdrumR)
-    if (!anyStops(humdrumR)) return(humdrumR)
-    checks(fromFields, xcharacter & xlen0)
-    
-    #
-    humtab <- getHumtab(humdrumR, 'D')
-    
-    multistopRecords <- humtab[ , list(Record = unique(Record)[rowSums(table(Record,Stop)) > 1]), by = Piece]
-    multiHumtab <- humtab[multistopRecords, on = c('Record', 'Piece')]
-    fromFields <- fromFields[multiHumtab[, sapply(fromFields, \(field) any(is.na(get(field))))]]
-    for (field in fromFields) {
-        
-        multiHumtab[, eval(field) := rep_len(get(field)[!is.na(get(field))], length(Token)), by = list(Piece, Record)]   
-    }
-    humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'Piece')]))
-    humtab <- update_Dd(humtab, field = fromFields)
-    putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
-    humdrumR
-}
 
 #' "Fold" grace notes into neighbos
 #' 
 #' 
-#' @family {Folding functions}
-#' @seealso `foldGraceNotes` makes use of the more general [foldHumdrum()].
+#' @seealso `foldGraceNotes` makes use of the more general [cleave()].
 #' @export
-foldGraceNotes <- function(humdrumR) {
+cleaveGraceNotes <- function(humdrumR) {
     warn("foldGraceNotes has not been implemented yet!")
     humdrumR
 }
 
 ## rend ----
 
+
+#' Separate data fields into new spines, paths, or stops.
+#' 
+#' @export
+#' @seealso The complement/opposite of `rend()` is [cleave()].
+#' @family {Humdrum data reshaping functions}
 rend <- function(humdrumR, field = 'Kern') {
     humtab <- getHumtab(humdrumR, 'IMDd')
     
@@ -883,3 +912,33 @@ rend <- function(humdrumR, field = 'Kern') {
     
 }
 
+
+
+#' "Unfold" data into multiple stops
+#' 
+#' If some record/spine/path locations have different numbers of
+#' stops in different fields, this function spreads the data from the 
+#' smaller fields into multiple stops.
+#' 
+#' @seealso The opposite (kinda) of [foldStops()]
+#' @export
+unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
+  checks(humdrumR, xhumdrumR)
+  if (!anyStops(humdrumR)) return(humdrumR)
+  checks(fromFields, xcharacter & xlen0)
+  
+  #
+  humtab <- getHumtab(humdrumR, 'D')
+  
+  multistopRecords <- humtab[ , list(Record = unique(Record)[rowSums(table(Record,Stop)) > 1]), by = Piece]
+  multiHumtab <- humtab[multistopRecords, on = c('Record', 'Piece')]
+  fromFields <- fromFields[multiHumtab[, sapply(fromFields, \(field) any(is.na(get(field))))]]
+  for (field in fromFields) {
+    
+    multiHumtab[, eval(field) := rep_len(get(field)[!is.na(get(field))], length(Token)), by = list(Piece, Record)]   
+  }
+  humtab <- orderHumtab(rbind(multiHumtab, humtab[!multistopRecords, on = c('Record', 'Piece')]))
+  humtab <- update_Dd(humtab, field = fromFields)
+  putHumtab(humdrumR, overwriteEmpty = c()) <- humtab
+  humdrumR
+}
