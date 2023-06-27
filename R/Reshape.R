@@ -470,7 +470,7 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' @family {Humdrum data reshaping functions}
 #' @export
 cleave <- function(humdrumR, ...,
-                   field = selectedFields(humdrumR)[1], complement = FALSE,
+                   field = selectedFields(humdrumR)[1], 
                    newFieldNames = NULL) {
     # argument checks
     checks(humdrumR, xhumdrumR)
@@ -491,7 +491,7 @@ cleave <- function(humdrumR, ...,
 
     # 
     fromHits <- humtab[ , list(Piece, get(what)) %ins% groupDT[, c('Piece', 'From'), with = FALSE]]
-    fromTable <- humtab[fromHits == TRUE, c(field, fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
+    fromTable <- humtab[fromHits == TRUE, c(field, 'Exclusive', fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
     
     if (all(is.na(fromTable[[field]]))) {
         .warn("Your fromField doesn't have any non-null data where {what} %in% {harvard(unique(groupDT$To)}.",
@@ -525,6 +525,7 @@ cleave <- function(humdrumR, ...,
     fromTables <- split(fromTable, by = 'FieldName', keep.by = FALSE)
     fromTables <- Map(\(ftab, fname) {
                              colnames(ftab)[colnames(ftab) == field] <- fname
+                             colnames(ftab)[colnames(ftab) == 'Exclusive'] <- paste0('Exclusive.', fname)
                              ftab
 
                          }, fromTables, names(fromTables))
@@ -539,15 +540,15 @@ cleave <- function(humdrumR, ...,
                       # or vice versa
                       # htab[!ftab, on = mergeFields],
                       fill = TRUE)
-        
-        if (complement) {
-            for (field in newfields) {
-                na <- is.na(htab[[field]])
+        # 
+        # if (complement) {
+            # for (field in newfields) {
+                # na <- is.na(htab[[field]])
                 # hits <- na & htab$Spine %in% unique(htab$Spine[!na])
-                htab[[field]][na] <- htab[[field]][na]
-            }
-        }
-        htab
+                # htab[[field]][na] <- htab[[field]][na]
+            # }
+        # }
+        # htab
         
     }, fromTables, init = humtab)
  
@@ -817,7 +818,7 @@ cleaveSpines <- cleave
 
 #' @rdname cleave
 #' @export
-cleavePaths <- function(humdrumR, field = selectedFields(humdrumR)[1], complement = TRUE) {
+cleavePaths <- function(humdrumR, field = selectedFields(humdrumR)[1]) {
     
     paths <- sort(unique(getHumtab(humdrumR)$Path))
     paths <- paths[!is.na(paths)]
@@ -827,7 +828,7 @@ cleavePaths <- function(humdrumR, field = selectedFields(humdrumR)[1], complemen
     dataFields <- fields(humdrumR, fieldTypes = 'Data')
 
     
-    cleave(humdrumR, Path = paths, field = field, complement = complement,
+    cleave(humdrumR, Path = paths, field = field,
               newFieldNames = paste0(field, '_Path', paths[-1]))
     
 
@@ -847,7 +848,7 @@ cleaveStops <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillF
    dataFields <- fields(humdrumR, fieldTypes = 'Data')
    
    
-   cleave(humdrumR, Stop = stops, field = field, complement = complement,
+   cleave(humdrumR, Stop = stops, field = field,
           newFieldNames = paste0(field, '_Stop', paths[-1]))
    
    
