@@ -180,7 +180,7 @@ humdrumR_defaults <- list(
   view = 'humdrum',
   dataTypes = 'GLIMDd',
   maxRecordsPerFile = 40L,
-  maxTokenLength = 24L,
+  maxTokenLength = 20L,
   nullPrint = 'NA2dot',
   syntaxHighlight = TRUE,
   censorEmptyRecords = 30L

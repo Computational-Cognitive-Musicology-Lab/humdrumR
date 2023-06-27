@@ -106,12 +106,12 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expa
 
 #' @rdname tidyHumdrum
 #' @export
-pull.humdrumR <- function(.data, ..., dataTypes = 'D', fieldTypes = "any", null = 'asis', drop = TRUE) {
+pull.humdrumR <- function(.data, ..., dataTypes = 'D', null = 'asis', drop = TRUE) {
   
   exprs <- rlang::enexprs(...)
   
   fields <- if (length(exprs)) {
-    tidyselect_humdrumRfields(.data, exprs, fieldTypes, 'pull.humdrumR()')
+    tidyselect_humdrumRfields(.data, exprs, ..., callname = 'pull.humdrumR()')
   } else {
     selectedFields(.data)
   }

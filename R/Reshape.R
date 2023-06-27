@@ -873,40 +873,48 @@ cleaveGraceNotes <- function(humdrumR) {
 #' @export
 #' @seealso The complement/opposite of `rend()` is [cleave()].
 #' @family {Humdrum data reshaping functions}
-rend <- function(humdrumR, field = 'Kern') {
+rend <- function(humdrumR, field) {
     humtab <- getHumtab(humdrumR, 'IMDd')
     
-    spines <- humtab[, {
-      list(list(if (any(!is.na(Kern))) c(Token = 1, Kern = 1) else c(Token = 1)))
-    }, by = Spine]
+    # tidyselect_humdrumRfields
+    
+    selected <- selectedFields(humdrumR)[1]
+    
+    spines <- humtab[ , list(list(if (any(!is.na(get(field)))) c(1L, 1L) else 1L)),  by = Spine]
     spines <- spines[ , list(oldSpine = rep(Spine, lengths(V1)), newSpine = cumsum(unlist(V1)))]
     
     old <- data.table::copy(humtab)
     new <- data.table::copy(humtab)
     
     
-    old[ , Kern := NULL]
-    new[ , Token := NULL]
-    colnames(new)[colnames(new) == 'Kern'] <- 'Token'
+    # give both data.tables the same fields
+    old[ , (field) := NULL]
+    new[ , (selected) := NULL]
+    colnames(new)[colnames(new) == field] <- selected
     
+    # make sure classes are same
+    new[[selected]] <- as(new[[selected]], class(old[[selected]]))
+    
+    # Exclusive. fields
+    exclusiveFields <- paste0('Exclusive.', c(field, selected))
+    if (exclusiveFields[1] %in% colnames(new)) {
+      old[ , (exclusiveFields[1]) := NULL]
+      new[ , (exclusiveFields[2]) := NULL]
+      colnames(new)[colnames(new) == exclusiveFields[1]] <- exclusiveFields[2]
+      
+      
+    } 
+    
+    
+    # change spines
     old[ , Spine := spines[!duplicated(oldSpine), newSpine[match(Spine, oldSpine)]]]
     new[ , Spine := spines[ duplicated(oldSpine), newSpine[match(Spine, oldSpine)]]]
-    
-    
-    embeddedExclusive <- getExclusive(new$Token)
-    
-    new$Token <- as.character(new$Token)
-    new$Token[is.na(new$Token)] <- old$Token[is.na(new$Token)]
-    if (!is.null(embeddedExclusive)) {
-        new$Token[grepl('^\\*\\*', new$Token)] <- paste0('**', embeddedExclusive)
-        new$Exclusive <- embeddedExclusive
-    }
     
     humtab <- rbind(old, new)
     
     putHumtab(humdrumR) <- humtab
     humdrumR <- updateFields(humdrumR)
-    selectFields(humdrumR, 'Token')
+    selectFields(humdrumR, selected)
     
     
     
