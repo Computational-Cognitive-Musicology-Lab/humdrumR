@@ -377,23 +377,6 @@ index2 <- function(x, i, j, drop = TRUE) {
 
 # Humdrum-style application ----
 
-test <- function(func) {
-  args <- formals(func)
-   firstArg <- names(args)[1]
-  func <- rlang::enexpr(func)
-  firstArg <- rlang::sym(names(args)[1])
-  bquote({
-    
-    quos <- rlang::enquos(...)
-    
-    if (!any(.names(quos) %in% c(firstArg, ''))) quos <- c(rlang::quo(.), quos)
-    browser()
-    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), kern.default(!!!quos))))
-    
-  }) -> expr
-  
-  rlang::new_function(alist(x=, ... =), expr)
-}
 
 humdrumRmethods <- function(name) {
   # prexisting method becomes .default

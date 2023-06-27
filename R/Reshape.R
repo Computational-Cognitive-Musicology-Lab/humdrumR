@@ -873,48 +873,57 @@ cleaveGraceNotes <- function(humdrumR) {
 #' @export
 #' @seealso The complement/opposite of `rend()` is [cleave()].
 #' @family {Humdrum data reshaping functions}
-rend <- function(humdrumR, field) {
+rend <- function(humdrumR, ..., rendNull = FALSE) {
     humtab <- getHumtab(humdrumR, 'IMDd')
     
-    # tidyselect_humdrumRfields
+    exprs <- rlang::enexprs(...)
+    fields <- if (length(exprs)) tidyselect_humdrumRfields(humdrumR, exprs, ..., callname = 'rend()') else selectedFields(humdrumR)
     
-    selected <- selectedFields(humdrumR)[1]
+    if ('Token' %in% fields) fields <- fields[order(fields != 'Token')] # put Token at the beginning
     
-    spines <- humtab[ , list(list(if (any(!is.na(get(field)))) c(1L, 1L) else 1L)),  by = Spine]
-    spines <- spines[ , list(oldSpine = rep(Spine, lengths(V1)), newSpine = cumsum(unlist(V1)))]
+    spines <- humtab[ , list(Field = fields, nonNull = sapply(.SD, \(field) any(!is.na(field)))), by = list(Piece, Spine), .SDcols = fields]
     
-    old <- data.table::copy(humtab)
-    new <- data.table::copy(humtab)
+    if (!rendNull) {
+      spines[ , newSpine := cumsum(nonNull), by = Piece]
+      spines <- spines[nonNull == TRUE]
+    } else {
+      spines[ , newSpine := seq_along(nonNull), by = Piece]
+    }
+    
+    # what classes are different fields?
+    classes <- lapply(humtab[ , fields, with = FALSE], class)
+    if (length(unique(classes)) > 1L) humtab[ , (fields) := lapply(fields, \(field) as.character(humtab[[field]]))]
+    
+    Exclusive.fields <- intersect(paste0('Exclusive.', fields), colnames(humtab))
+    humtabs <- lapply(fields, 
+           \(field) {
+             htab <- data.table::copy(humtab)
+             htab[ , (setdiff(fields, field)) := NULL]
+             
+             Exclusive.field <- paste0('Exclusive.', field)
+             if (Exclusive.field %in% Exclusive.fields) {
+               if (length(setdiff(Exclusive.fields, Exclusive.field))) htab[ , (setdiff(Exclusive.fields, Exclusive.field)) := NULL]
+               colnames(htab)[colnames(htab) == Exclusive.field] <- paste0('Exclusive.', fields[1]) # need to make sure this gets created
+             }
+             
+             colnames(htab)[colnames(htab) == field] <- fields[1]
+             
+             spineMatches <- matches(htab[ , list(Piece, Spine)], spines[Field == field, list(Piece, Spine)])
+             htab <- htab[!is.na(spineMatches)]
+             htab$Spine <- spines[Field == field]$newSpine[spineMatches[!is.na(spineMatches)]]
+             # humtab[ , Spine := ifelse(is.na(spineMatches), Spine,
+                                       # spines[Field == field]$newSpine[spineMatches])]
+             htab
+             
+           })
     
     
-    # give both data.tables the same fields
-    old[ , (field) := NULL]
-    new[ , (selected) := NULL]
-    colnames(new)[colnames(new) == field] <- selected
     
-    # make sure classes are same
-    new[[selected]] <- as(new[[selected]], class(old[[selected]]))
-    
-    # Exclusive. fields
-    exclusiveFields <- paste0('Exclusive.', c(field, selected))
-    if (exclusiveFields[1] %in% colnames(new)) {
-      old[ , (exclusiveFields[1]) := NULL]
-      new[ , (exclusiveFields[2]) := NULL]
-      colnames(new)[colnames(new) == exclusiveFields[1]] <- exclusiveFields[2]
-      
-      
-    } 
-    
-    
-    # change spines
-    old[ , Spine := spines[!duplicated(oldSpine), newSpine[match(Spine, oldSpine)]]]
-    new[ , Spine := spines[ duplicated(oldSpine), newSpine[match(Spine, oldSpine)]]]
-    
-    humtab <- rbind(old, new)
+    humtab <- data.table::rbindlist(humtabs, fill = TRUE)
     
     putHumtab(humdrumR) <- humtab
     humdrumR <- updateFields(humdrumR)
-    selectFields(humdrumR, selected)
+    selectFields(humdrumR, fields[1])
     
     
     
