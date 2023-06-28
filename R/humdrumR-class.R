@@ -1191,7 +1191,7 @@ fieldsInExpr <- function(humtab, expr) {
   namesInExpr(colnames(humtab), expr)
 }
 
-fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
+fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fields') {
     fields <- fields(humdrumR)$Name
     target <- pmatch(fieldnames, fields)
     
@@ -1289,6 +1289,8 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' Must be a [humdrumR data object][humdrumRclass].
 #' 
 #' @param ... ***Which fields to output.***
+#' 
+#' If no arguments are provided, the `Token` field is selected.
 #' 
 #' These arguments can be any combination of `character` strings, numbers, or symbols used
 #' to match fields in the `humdrumR` input using [tidyverse][dplyr::select()] semantics.
@@ -1468,57 +1470,12 @@ getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR'
 ## Extracting ("pull") fields ----
 
 
-#' Extract field(s) from [humdrumR data][humdrumRclass]
-#' 
-#' Individual fields from the humdrum table can be extracted using `pull()`, which
-#' returns a [data.table()][data.table::data.table()] with each column corresponding to one field. 
-#' (The `data.table` is a column-subset of the humdrum table).
-#' By default, `pullFields()` pulls the [selected fields][selectedFields].
-#' If only one field is pulled, and `drop = TRUE`, the field is extracted from the `data.table` and returned
-#' as a vector.
-#' 
-#' @param fields ***Which fields to output.***
-#' 
-#' Defaults to `selectedFields(humdrumR)`.
-#' 
-#' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
-#' For example, `"Tok"` would match the `Token` field.
-#'   
-#' @param dataTypes ***Which types of humdrum record(s) to include.***
-#' 
-#' Defaults to `"GLIMDd"` for `as.lines()` and `as.matrix()`; `"Dd"` for `as.data.frame()`;
-#' `"LIMDd"` for `as.matrices()` and `as.data.frames()`.
-#' 
-#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#' or any combination of these (e.g., `"LIM"`).
-#' (See the [humdrum table][humTable] documentation for explanation.)
-#' 
-#' @param null ***How should null data points be output?***
-#' 
-#' Default is `"NA2dot"`.
-#' 
-#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
-#' `"NA2dot"` means all `NA` values are converted to `"."`; `"dot2NA` means all `"."` are converted to `NA`; `charNA2dot` means `NA` values
-#' in `character` vectors are converted to `NA`, but not in other atomic types; `"asis"` means either `NA` or `"."` values may print, depending
-#' on what is in the field.
-#' 
-#' @param drop ***Should single fields be extracted from the `data.table`?***
-#' 
-#' Defaults to `FALSE`.
-#' 
-#' Must be a singleton `logical` value: an on/off switch.
-#' 
-#' @seealso {To know what fields are available to pull, use [fields()].
-#' To know what fields are selected---the default fields to pull---use [selectedFields()].}
-#' @export
-pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'D', 
-                       null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), drop = FALSE) {
-    checks(humdrumR, xhumdrumR)
-    checks(drop, xTF)
-    dataTypes <- checkTypes(dataTypes, 'pullFields')
-    
-    null <- match.arg(null)
-    
+
+
+pullFields <- function(humdrumR, fields, dataTypes = 'D', 
+                       null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'),
+                       drop = FALSE) {
+
     
     humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
     selectedTable <- humtab[ , fields, with = FALSE]
@@ -1637,30 +1594,146 @@ pullPrintable <- function(humdrumR, fields,
     
 }
 
+### Exported pull functions ----
 
-
-#' @rdname pullFields
-#' @aliases pull
+#' Extract field(s) from [humdrumR data][humdrumRclass]
+#' 
+#' Individual fields from the [humdrum table][humTable] can be extracted using `pull()`.
+#' Multiple fields can be extracted using `pull_data.frame()`, `pull_data.table`, or `pull_tibble()`
+#' ---the resulting data.frames are a column-subset of the humdrum table.
+#' You can also use the `$` operator to extract a single field, just like `pull()`.
+#'
+#'
+#' @details
+#' 
+#' The functions, `pull_data.___`, `pull()`, and `$.humdrumR` are the "escape hatch" to pull your 
+#' data out of the [humdrumR data world][humdrumRclass] into "normal" R.
+#' The `pull()` function (and the `$`) method, the actual vector content of a (single) field.
+#' The other functions return *always* return a `data.frame`/`data.table`/`tibble`, even if it has only one column.
+#' If no fields are indicated, the data's [selected fields][selectedFields] are pulled; in the case of `pull()`,
+#' only the *first* seleced field is pulled.
+#' 
+#' The `dataTypes` argument controls which types of data are pulled---by default, only non-null data is returned.
+#' The `null` argument controls how null data is returned, with four options: 
+#' 
+#' + `"NA2dot"` means all `NA` values are converted to `"."`; note that this will cause all output to be coerced to `character`.
+#' + `"dot2NA"` means all `"."` are converted to `NA`.
+#' + `"charNA2dot"` means `NA` values in `character` vectors are converted to `NA`, but not in other atomic types.
+#' + `"asis"` means either `NA` or `"."` values may print, depending on what is in the field.
+#' 
+#' Note that `pull_tibble()` won't work if you don't independently load the `tibble` (or `tidyverse`) package---
+#' i.e., call `library(tibble)`.
+#' 
+#' @param humdrumR,.data,x ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#' 
+#' @param ... ***Which fields to output.***
+#' 
+#' If no arguments are provided, the object's [selected fields][selectFields] are pulled.
+#' 
+#' These arguments can be any combination of `character` strings, numbers, or symbols used
+#' to match fields in the `humdrumR` input using [tidyverse][dplyr::select()] semantics.
+#' 
+#' Unlike in tidyverse `select()`, field names can be [partially matched][partialMatching].
+#' You can also include `character` strings [partially matching][partialMatching] 
+#' `"Data"`, `"Structure"`, `"Interpretation"`, `"Formal"`, `"Reference"` or `"Grouping"`,
+#' which will select all fields of those types (see [fields()] for further explanation).
+#' 
+#' @param var ***Which field to output.***
+#' 
+#' Defaults to `selectedFields(humdrumR)[1]`.
+#' 
+#' Must be either a single `character` string or `symbol` which [partially matches][partialMatching] 
+#' a field name, or a single whole-number, which selects the field by the row index of the [fields()] output.
+#' If a negative number is provided, nth-to-last index is used---for example, `-1` would grab the last field.
+#'   
+#' @param dataTypes ***Which types of humdrum record(s) to include.***
+#' 
+#' Only non-null data tokens (`"D"`) are returned by default.
+#' 
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation for explanation.)
+#' 
+#' @param null ***How should null data points be output?***
+#' 
+#' Default is `"charNA2dot"`.
+#' 
+#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
+#' 
+#' @seealso {To know what fields are available to pull, use [fields()].
+#' To know what fields are selected---the default fields to pull---use [selectedFields()].}
+#' @examples
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData |> pull(Token)
+#' humData$Token
+#' 
+#' humData |> pull_data.table(Token, Spine)
+#' humData |> pull_tibble(everything())
+#' @name pullHumdrum
 #' @export
-pull.humdrumR <- function(.data, ..., dataTypes = 'D', fieldTypes = 'D', null = 'asis', drop = TRUE) {
+pull_data.table <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot') {
+    checks(humdrumR, xhumdrumR)
+    dataTypes <- checkTypes(dataTypes, 'pull_data.table')
+    checks(null, xplegal(c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')))
     
     exprs <- rlang::enexprs(...)
-    
     fields <- if (length(exprs)) {
-        tidyselect_humdrumRfields(.data, exprs, fieldTypes = 'D', callname = 'pull.humdrumR')
+        tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'any', callname = 'pull.humdrumR')
     } else {
         selectedFields(.data)
     }
     
-    pulled <- pullFields(.data, fields = fields, dataTypes = dataTypes, null = null)
+    pullFields(humdrumR, fields, dataTypes = dataTypes, null = null)
+}
+
+#' @name pullHumdrum
+#' @export
+pull_data.frame <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot') {
+    as.data.frame(pull_data.table(humdrumR, ..., dataTypes = dataTypes, null = null))
+}
+
+#' @name pullHumdrum
+#' @export
+pull_tibble <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot') {
+    as_tibble(pull_data.table(humdrumR, ..., dataTypes = dataTypes, null = null))
+}
+
+#' @rdname pullHumdrum
+#' @aliases pull
+#' @export
+pull.humdrumR <- function(.data, var, dataTypes = 'D', null = 'asis') {
     
-    if (drop) pulled[[1]] else pulled
+    checks(.data, xhumdrumR)
+    dataTypes <- checkTypes(dataTypes, 'pull.humdrumR', argname = 'var')
+    checks(null, xplegal(c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')))
+    
+    var <- rlang::ensym(var)
+    
+    if (is.atomic(var)) checks(var, ((xcharacter | xwholenum) & xlen1))
+    
+    if (is.symbol(var)) var <- as.character(var)
+    if (is.numeric(var)) {
+        fields <- fields(.data)$Name
+        if (var == 0 | abs(var) > length(fields)) .stop("Your numeric 'var' argument is larger",
+                                                        "than the number of fields available to pull.")
+        if (var < 0) var <- max(0, length(fields) + 1 + var)
+        var <- fields[var]
+    } else {
+        var <- fieldMatch(.data, var, 'pull')
+    }
+    
+    pullFields(.data, fields = var, dataTypes = dataTypes, null = null)[[1]]
+    
     
 }
 
 #### $ methods ----
 
-#' @rdname pullFields
+#' @rdname pullHumdrum
 #' @export 
 setMethod('$', signature = c(x = 'humdrumR'),
           function(x, name) {

@@ -17,6 +17,8 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{...}{\emph{\strong{Which fields to output.}}
 
+If no arguments are provided, the \code{Token} field is selected.
+
 These arguments can be any combination of \code{character} strings, numbers, or symbols used
 to match fields in the \code{humdrumR} input using \link[dplyr:select]{tidyverse} semantics.
 
