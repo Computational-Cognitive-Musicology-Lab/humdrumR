@@ -74,7 +74,7 @@ mergeHumdrum <- function(...) {
 #' own new spines (shifting higher spines over as needed).
 #' 
 #' 
-#' @family {Humdrum data reshaping functions}
+#' @family {Humdrum table reshaping functions}
 #' @export
 expandPaths <- function(x, asSpines) UseMethod('expandPaths')
 #' @export
@@ -197,7 +197,7 @@ contractPaths <- function(humtab) {
 #'
 #' Only has an effect if `collapseAtomic == TRUE`.
 #' 
-#' @family {Humdrum data reshaping functions}
+#' @family {Humdrum table reshaping functions}
 #' @seealso The humdrum [folding functions][cleave()] serve a similar function,
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
@@ -316,9 +316,18 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 
 # Cleave and Rend ----
 
-## Cleave ----
+## cleave ----
 
-#' "Fold" humdrumR data into new fields
+#' Align data from separate spines into new fields.
+#' 
+#' Cleave, as in "to cleave together," moves data from separate spines (or paths) into 
+#' new fields in the *same* spine(s).
+#' Under the hood, `cleave()` essentially runs a specialized call to make the [humdrum table][humTable]
+#' "wider," similar to R functions like [cast()][reshape2], [spread()][tidyr], or [pivot_wider()][tidyr].
+#' In fact, a humdrumR method for [pivot_wider()][tidyr] is defined, which is equivalent to `cleave()`.
+#' The `cleave()` function is essentially the inverse of [rend()].
+#' 
+#' 
 #'
 #' Many humdrum datasets encode data across multiple spines, spine-paths, or stops.
 #' By default, `humdrumR` parses each separate spine, spine-path, and stop as their own individual
@@ -467,7 +476,8 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' @seealso The complement/opposite of `cleave()` is [rend()].
 #' The [collapse family of functions][collapseHumdrum()] serves a somewhat
 #' similar function to `cleave()`.
-#' @family {Humdrum data reshaping functions}
+#' @family {Humdrum table reshaping functions}
+#' @family {Humdrum table pivoting functions}
 #' @export
 cleave <- function(humdrumR, ...,
                    field = selectedFields(humdrumR)[1], 
@@ -476,7 +486,7 @@ cleave <- function(humdrumR, ...,
     checks(humdrumR, xhumdrumR)
     checks(field, xcharacter & xlen1)
 
-    field <- fieldMatch(humdrumR, field, 'cleave', 'fromField')
+    field <- fieldMatch(humdrumR, field, 'cleave', 'field')
     
     
     
@@ -805,9 +815,25 @@ cleaveParseExclusives <- function(humtab, groupDT, newFieldNames = NULL) {
     groupDT[ , FieldName := newFieldNames[newFieldN]]
   } 
  
-  groupDT
+  groupDTa
 }
-#    
+    
+#' @rdname cleave
+#' @export
+pivot_wider.humdrumR <- function(data, names_from = 'Spine', values_from = selectedFields(data)[1]) {
+  checks(names_from, xcharacter & xlen1)
+  checks(values_from, xcharacter & xlen1)
+  
+  names_from <- fieldMatch(data, names_from, 'pivot_wider.humdrumR()', argname = 'names_from')
+  values_from <- fieldMatch(data, values_from, 'pivot_wider.humdrumR()', argname = 'values_from')
+  
+  which <- sort(unique(pullFields(data, names_from, 'GLIMDd', drop = TRUE, null = 'asis')))
+  
+  args <- list(which, humdrumR = data, field = values_from)
+  names(args)[1] <- names_from
+  
+  do.call('cleave', args)
+}
 
 
 ### Predefined cleaves ----
@@ -868,11 +894,18 @@ cleaveGraceNotes <- function(humdrumR) {
 ## rend ----
 
 
-#' Separate data fields into new spines, paths, or stops.
+#' Separate data fields into new spines.
+#' 
+#' Rend, as in "to rend apart," splits data in separate fields into separate *spines*.
+#' Under the hood, `rend()` essentially runs a specialized call to make the [humdrum table][humTable]
+#' "longer"/"taller," similar to R functions like [melt()][reshape2], [gather()][tidyr], or [pivot_longer()][tidyr].
+#' In fact, a humdrumR method for [pivot_longer()][tidyr] is defined, which is equivalent to `rend()`.
+#' The `rend()` function is essentially the inverse of [cleave()].
 #' 
 #' @export
 #' @seealso The complement/opposite of `rend()` is [cleave()].
-#' @family {Humdrum data reshaping functions}
+#' @family {Humdrum table reshaping functions}
+#' @family {Humdrum table pivoting functions}
 rend <- function(humdrumR, ..., rendNull = FALSE) {
     humtab <- getHumtab(humdrumR, 'IMDd')
     
@@ -900,13 +933,13 @@ rend <- function(humdrumR, ..., rendNull = FALSE) {
              htab <- data.table::copy(humtab)
              htab[ , (setdiff(fields, field)) := NULL]
              
+             colnames(htab)[colnames(htab) == field] <- fields[1]
+             
              Exclusive.field <- paste0('Exclusive.', field)
              if (Exclusive.field %in% Exclusive.fields) {
                if (length(setdiff(Exclusive.fields, Exclusive.field))) htab[ , (setdiff(Exclusive.fields, Exclusive.field)) := NULL]
                colnames(htab)[colnames(htab) == Exclusive.field] <- paste0('Exclusive.', fields[1]) # need to make sure this gets created
              }
-             
-             colnames(htab)[colnames(htab) == field] <- fields[1]
              
              spineMatches <- matches(htab[ , list(Piece, Spine)], spines[Field == field, list(Piece, Spine)])
              htab <- htab[!is.na(spineMatches)]
@@ -930,7 +963,15 @@ rend <- function(humdrumR, ..., rendNull = FALSE) {
     
 }
 
-
+#' @rdname rend
+#' @export
+pivot_longer.humdrumR <- function(data, cols, ...) {
+  fields <- tidyselect_humdrumRfields(data, list(rlang::enexpr(cols)), 
+                                      ...,
+                                      callname = 'pivot_longer.humdrumR')
+  
+  rend(data, fields, ...)
+}
 
 #' "Unfold" data into multiple stops
 #' 

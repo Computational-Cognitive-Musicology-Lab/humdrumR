@@ -386,47 +386,6 @@ structureTab <- function(..., groupby = list()) {
 # humdrumR core methods ####
 
 
-## $ methods ----
-
-#' @export
-setMethod('$', signature = c(x = 'humdrumR'),
-          function(x, name) {
-              name <- as.character(name)
-              
-              match <- fieldMatch(x, name, callfun = '$', argname = 'name')
-              
-              getHumtab(x, 'D')[[match[1]]]
-          })
-
-#' @export
-setMethod('$<-', signature = c(x = 'humdrumR'),
-          function(x, name, value) {
-              checks(value, (xvector | xinherits('token')) & xlen)
-              
-              humtab <- getHumtab(x, 'D')
-              if (!(length(value) == 1L | length(value) == nrow(humtab))) .stop("When using humdrumR$<- value, the value must either be length 1",
-                                                                                "or exactly the same length as the number of non-null data tokens in the",
-                                                                                "humdrumR object's selected fields.")
-              name <- as.character(name)
-              
-              if (name == 'Token') .stop("In your use of humdrumR$<-, you are trying to overwrite the 'Token' field, which is not allowed.",
-                                         "This field should always keep the original humdrum data you imported.")
-              
-              structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
-
-              if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
-                                              "For a complete list of structural fields, use the command fields(mydata, 'S').")
-              isnew <- !name %in% colnames(humtab)
-              humtab[[name]] <- value
-              
-              putHumtab(x, overwriteEmpty = c()) <- humtab
-              x <- updateFields(x)
-              
-              x
-              
-          })
-
 
 ## As/Is ####
 
@@ -998,19 +957,6 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
 
 ##
 
-is.nullToken <- function(tokens) {
-    if (is.list(tokens)) {
-        lengths(tokens) == 0L
-    } else {
-        is.na(tokens) | tokens %in% c('*', '=', '!', '!!', '.', '**')
-    }
-}
-
-nullFields <- function(hum, fields, reduce = '&') {
-    nulls <- lapply(hum[ , fields, with = FALSE], is.nullToken)
-    Reduce('&', nulls)
-}
-
 update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
 update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Dd = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
@@ -1063,6 +1009,19 @@ update_Dd.data.table <- function(hum, field = 'Token', ...) {
     
     hum$Type[hum$Type %in% c('d', 'D')] <-  ifelse(null[hum$Type %in% c('d', 'D')], 'd', 'D')
     hum
+}
+
+is.nullToken <- function(tokens) {
+    if (is.list(tokens)) {
+        lengths(tokens) == 0L
+    } else {
+        is.na(tokens) | tokens %in% c('*', '=', '!', '!!', '.', '**')
+    }
+}
+
+nullFields <- function(hum, fields, reduce = '&') {
+    nulls <- lapply(hum[ , fields, with = FALSE], is.nullToken)
+    Reduce('&', nulls)
 }
 
 
@@ -1158,143 +1117,34 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
 }
 
 
+fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
+    humtab <- getHumtab(humdrumR, 'GLIMDd')
+    
+    where <- if (!is.null(where)) eval(where, envir = humtab) else TRUE
+    
+    for (field in to) {
+        if (class(humtab[[from]]) == class(humtab[[field]])) {
+            
+            hits <- is.na(humtab[[field]]) & where
+            
+            
+            humtab[[field]][hits] <- humtab[[from]][hits]
+        }
+    }
+    
+    putHumtab(humdrumR) <- humtab
+    
+    update_Dd(humdrumR)
+    
+}
+
 ## Querying fields ----
 
 
 
-naDots <- function(field, null, types) {
-    if (null == 'asis') return(field)
-    na <- is.na(field)
-    
-    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=', E = '**', S = '*')[types]
-    
-    
-    if (null == 'dot2NA') {
-        na <- na | field == nulltoken
-        field[na] <- NA
-    } else {
-        if (null == 'charNA2dot') na <- is.character(field) & na
-        field[na] <- nulltoken[na]
-    }
-    
-    field   
-}
-
-
-#' @export
-names.humdrumR <- function(humdrumR) names(getHumtab(humdrumR))
 
 
 
-fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
-          fields <- fields(humdrumR)$Name
-          target <- pmatch(fieldnames, fields)
-          
-          nomatch <- is.na(target)
-          
-          if (all(nomatch)) {
-              .stop("In the '{argname}' argument of your call to humdrumR::{callfun},", 
-                    ifelse = length(fieldnames),
-                    harvard(fieldnames, 'and', quote = TRUE),
-                    '<is not the name of a field|are not names of fields>',
-                    'in your humdrumR object.')
-          }
-          
-          if (any(nomatch)) {
-              .warn('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
-                    ifelse = length(argname),
-                    harvard(fieldnames[is.na(target)],  'and'),
-                    '<is not the name of a field|are not names of fields>',
-                    'in your humdrumR object.')
-                      
-              target <- target[!nomatch]
-              
-          }
-          
-
-          fields[target]
-
-}
-
-
-fieldMatchExprs <- function(humdrumR, exprs) {
-    
-}
-
-#' Individual fields from the humdrum table can be extracted using `pull()`, which
-#' returns a [data.table()][data.table::data.table()] with each column corresponding to one field. 
-#' (The `data.table` is a column-subset of the humdrum table).
-#' By default, `pullFields()` pulls the [selected fields][selectedFields].
-#' If only one field is pulled, and `drop = TRUE`, the field is extracted from the `data.table` and returned
-#' as a vector.
-#' 
-#' @param fields ***Which fields to output.***
-#' 
-#' Defaults to `selectedFields(humdrumR)`.
-#' 
-#' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
-#' For example, `"Tok"` would match the `Token` field.
-#'   
-#' @param dataTypes ***Which types of humdrum record(s) to include.***
-#' 
-#' Defaults to `"GLIMDd"` for `as.lines()` and `as.matrix()`; `"Dd"` for `as.data.frame()`;
-#' `"LIMDd"` for `as.matrices()` and `as.data.frames()`.
-#' 
-#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
-#' or any combination of these (e.g., `"LIM"`).
-#' (See the [humdrum table][humTable] documentation for explanation.)
-#' 
-#' @param null ***How should null data points be output?***
-#' 
-#' Default is `"NA2dot"`.
-#' 
-#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
-#' `"NA2dot"` means all `NA` values are converted to `"."`; `"dot2NA` means all `"."` are converted to `NA`; `charNA2dot` means `NA` values
-#' in `character` vectors are converted to `NA`, but not in other atomic types; `"asis"` means either `NA` or `"."` values may print, depending
-#' on what is in the field.
-#' 
-#' @param drop ***Should single fields be extracted from the `data.table`?***
-#' 
-#' Defaults to `FALSE`.
-#' 
-#' Must be a singleton `logical` value: an on/off switch.
-#'   
-#' @rdname humTable
-pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), drop = FALSE) {
-    checks(humdrumR, xhumdrumR)
-    checks(drop, xTF)
-    dataTypes <- checkTypes(dataTypes, 'pullFields')
-    
-    null <- match.arg(null)
-    
-    
-    humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
-    selectedTable <- humtab[ , fields, with = FALSE]
-    
-
-    # selectedTable[] <- selectedTable[ , lapply(.SD, 
-    #                                            \(field) {
-    #                                                if (is.list(field)) {
-    #                                                   field[filter] <- lapply(field[filter], '[', i = 0)
-    #                                                } else {
-    #                                                   field[filter] <- NA
-    #                                                }
-    #                                                field
-    #                                            })]
-    
-    # decide how NA/null values are shown
-    fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]
-    fieldTypes <- lapply(as.list(fieldTypes), 
-                         \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
-                                                                                      Structure = 'D', Reference = 'G')[fieldType],
-                                                                                      fieldType, length = nrow(selectedTable)))
-    
-    selectedTable[] <- Map(naDots, selectedTable, types = fieldTypes, null = null)
-    
-    # return
-    if (length(fields) == 1L && drop) selectedTable[[1]] else selectedTable
-    
-}
 
 
 #' Tabulate current fields in a [humdrumR corpus][humdrumRclass]
@@ -1341,90 +1191,126 @@ fieldsInExpr <- function(humtab, expr) {
   namesInExpr(colnames(humtab), expr)
 }
 
-
-
-fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
-    humtab <- getHumtab(humdrumR, 'GLIMDd')
+fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fieldnames') {
+    fields <- fields(humdrumR)$Name
+    target <- pmatch(fieldnames, fields)
     
-    where <- if (!is.null(where)) eval(where, envir = humtab) else TRUE
-        
-    for (field in to) {
-        if (class(humtab[[from]]) == class(humtab[[field]])) {
-            
-            hits <- is.na(humtab[[field]]) & where
-            
-            
-            humtab[[field]][hits] <- humtab[[from]][hits]
-        }
+    nomatch <- is.na(target)
+    
+    if (all(nomatch)) {
+        .stop("In the '{argname}' argument of your call to humdrumR::{callfun},", 
+              ifelse = length(fieldnames),
+              harvard(fieldnames, 'and', quote = TRUE),
+              '<is not the name of a field|are not names of fields>',
+              'in your humdrumR object.')
     }
     
-    putHumtab(humdrumR) <- humtab
+    if (any(nomatch)) {
+        .warn('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
+              ifelse = length(argname),
+              harvard(fieldnames[is.na(target)],  'and'),
+              '<is not the name of a field|are not names of fields>',
+              'in your humdrumR object.')
+        
+        target <- target[!nomatch]
+        
+    }
     
-    update_Dd(humdrumR)
+    
+    fields[target]
     
 }
 
 
+#' @rdname fields
+#' @export
+names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 
 
 
-####################################################-
-## Selected fields ----
-####################################################-
+## Selecting fields ----
 
 
 #' The "selected" fields of a [humdrumR object][humdrumRclass]
 #' 
 #' Every `humdrumR` object will have, at any given time, one or more of its
 #' fields "selected."
-#' Selected fields are show in the console printout.
-#' The first selected field is also passed as the hidden `.` variable in calls to `with`, `within`,
-#' `mutate`, `summarize`, or `reframe`.
+#' Selected fields are show when a [humdrumR object][humdrumRclass] prints on the console.
+#' At the bottom of the printout, the selected fields are also marked by an `*`.
+#' The currently selected fields can also be queried directly using the `selectedFields()` function, or 
+#' by inspecting the output of [fields()].
 #' 
 #' @details
+#'
+#' The "selected" fields play an important role in humdrumR analysis.
+#' In addition to controlling what [fields()] you "see" in the console printout, 
+#' the select fields are the fields that many functions [humdrumR][humdrumR] functions will automatically
+#' apply themselves to.
+#' For example, if you call [ditto()], [tally()], or [kern()] on a [humdrumR data object][humdrumRclass],
+#' these functions will be applied the selected field(s).
+#' (Most functions are only applied to the *first* selected field; see their own manuals for details.)
+#' The first selected field is also passed as the hidden `.` variable in calls to `with()`, `within()`,
+#' `mutate()`, `summarize()`, or `reframe()`---so if you don't remember what the selected field is you can just put a `.`!
 #' 
-#' The currently selected fields are shown when a [humdrumR object][humdrumRclass] prints on the console.
-#' At the bottom of the printout, the selected fields are also marked by an `*`.
-#' The currently selected fields can also be queried directly using the `selectedFields()` function.
-#' The selected fields can be set by calls to the tidyverse `select()` function.
-#' As a shorthand, the keywords `"Data"`, `"Structure"`, `"Interpretation"`, `"Reference"`, or `"Formal"` can
-#' be used to select *all* fields of each [field types][fields()].
+#' The selected fields also play an important role in defining/redefining "null" data.
+#' Whenever new fields are selected, their data tokens are checked for `NA` values or null
+#' tokens (`"."`).
+#' Anywhere where *all* the selected fields are null, the `Type` field is updated to `"d"`;
+#' wherever *any* field is **not** null, the `Type` field is updated to `"D"`.
+#' Many functions ignore `d` (null data) tokens by default, so selecting fields can be a way controlling which data you
+#' want to analyze and which you don't.
+#'
+#'
+#' ## Selecting fields
 #' 
-#' The selected fields play an important role in defining/redefining "null" data.
-#' Whenever new fields are selected, they are checked for `NA` values or null
-#' tokens---`"."`, `"*"`, `"!"`, or `"="`---and the `Null` structural field is set to `TRUE`
-#' wherever they appear.
-#' The `Type` field is also set to `"d"` wherever `Null == TRUE & Type == 'D'`.
-#' If more than one field is selected, all fields must be null to be marked as such.
+#' The selected fields can be set by calls to `selectFields()` or, more commonly, the tidyverse `select()` function.
+#' Whereas `selectFields()` accepts only `character` strings ([partially matched][partialMatching]),
+#' [select.humdrumR()] can use tidyverse
+#' [special select() features][dplyr::select()].
+#' If you call `select()` with no argument, the original `Token` field is selected by default.
 #' 
+#' Note that when you call `selectFields()` or `select.humdrumR()`, the selected field is changed *in place*,
+#' meaning that the selection changes *even if you don't (re)assign the output*!
+#' 
+#' If you use `select()` with a numeric selections, like `select(1:3)`, fields are numbered in the (row) order
+#' shown in call to [fields()].
+#' Fields are always sorted first by `Type` (`Data` first), then by name.
+#' If you provide a `fieldTypes` argument, the numeric selection is reduced to only those fields you choose,
+#' matching with the row-numbers you'd see if you call [fields(humData, fieldTypes = ...)][fields()].
+#' So, for example, `select(humData, 1:3, fieldTypes = 'Stru')` will select the first three structural fields.
+#' With calls to `select()`, you can also simply provide the keywords `"Data"`, `"Structure"`, 
+#' `"Interpretation"`, `"Reference"`, or `"Formal"`
+#' to select *all* fields of each [field type][fields()].
 #' 
 #' 
 #' @examples
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
+#' # see what is selected
 #' selectedFields(humData)
 #' 
+#' # change selection
 #' humData |> select(Spine, Record, Token) |> selectedFields()
 #'
 #' humData |> select(Structure)
+#' 
+#' humData |> select(4)
+#' humData |> select(1:3, fieldTypes = 'Structure')
+#' 
+#' # effect of selection
+#' 
+#' humData |> select(Token) |> tally()
+#' humData |> select(Spine) |> tally()
 #'
 #' @export
-selectedFields <- function(humdrumR) fields(humdrumR)[Selected > 0L][order(Selected)]$Name
+selectedFields <- function(humdrumR) {
+    fields(humdrumR)[Selected > 0L][order(Selected)]$Name
+} 
 
-pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
-    fieldInTable <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)[ , 1L, with = FALSE]
-    
-    if (drop) fieldInTable[[1]] else fieldInTable
-    
-}
 
-pullSelectedFields <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
-
-    pullFields(humdrumR, selectedFields(humdrumR), dataTypes = dataTypes, null = null)
-    
-}
-
+#' @export
+#' @rdname selectedFields
 selectFields <- function(humdrumR, fields) {
     checks(humdrumR, xhumdrumR)
     
@@ -1440,6 +1326,194 @@ selectFields <- function(humdrumR, fields) {
     humdrumR
 }
 
+
+
+#' @rdname selectedFields
+#' @export
+select.humdrumR <- function(.data, ..., fieldTypes = "any") {
+ 
+    exprs <- rlang::enexprs(...)
+    fields <- if (length(exprs) == 0L) {
+      'Token'
+    } else {
+      tidyselect_humdrumRfields(.data, exprs, fieldTypes, 'select.humdrumR')
+    }
+    selectFields(.data, fields)
+}
+
+#### select helpers ----
+
+tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
+  fields <- fields(humdrumR)
+  
+  types <- c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping')
+  
+  fieldTypes <- if ('any' %in% tolower(fieldTypes)) {
+    types
+  } else {
+    fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', callname, includeSelected = FALSE)
+  }
+  
+  # select by field type (character string only, partially matched)
+  typeSelections <- lapply(exprs, 
+                           \(expr) {
+                             if (is.character(expr)) {
+                               type <- types[pmatch(expr, types, nomatch = 0L)]
+                               if (length(type)) fields[Type == type, Name]
+                             }
+                           })
+  
+  
+  # select by field names
+  fieldSelections <- local({
+    fields <- fields[order(!Type %in% fieldTypes)]
+    options <- fields$Name
+    expr <- rlang::expr(c(!!!(exprs[lengths(typeSelections) == 0L])))
+    tried <- try(options[tidyselect::eval_select(expr, setNames(options, options), strict = FALSE)], silent = TRUE)
+    if (class(tried) == 'try-error') .stop('In a call to {callname}(), you can ONLY provide the names of humdrumR fields,',
+                                           'or special tidyverse "select features" involving those fields.',
+                                           "You can't provide more complex/arbitrary expressions.")
+    
+    tried
+  })
+ 
+  ##
+  selections <- union(fieldSelections, unlist(typeSelections))
+  
+  
+  if (length(selections) == 0L) {
+    exprs <- do.call('harvard', c(lapply(exprs, rlang::as_label), conjunction = '', quote = TRUE))
+    .stop("The <expressions {exprs} don't|expression {exprs} doesn't> match any {harvard(fieldTypes, 'or')} fields in your humdrumR data.",
+          ifelse = length(exprs) > 1)
+  }
+  
+  selections
+}
+
+
+
+printableSelectedField <- function(humdrumR, 
+                                   dataTypes = 'D', useToken = 'GLIM',
+                                   null =  c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
+    dataTypes <- checkTypes(dataTypes, 'printableSelectField')
+    useToken <- checkTypes(useToken, 'printableSelectField', 'useToken')
+    
+    printableField <- pullPrintable(humdrumR, fields = selectedFields(humdrumR), 
+                                    dataTypes = dataTypes,  useToken = useToken,
+                                    collapse = TRUE)
+    
+    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd')
+    humtab$Printable <- printableField[[1]]
+    putHumtab(humdrumR) <- humtab
+    
+    updateFields(humdrumR)
+}
+
+
+getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR') {
+    if (is.null(.by)) {
+        fields(humdrumR)[GroupedBy == TRUE]$Name 
+    } else {
+        fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
+    }
+    
+}
+
+
+## Extracting ("pull") fields ----
+
+
+
+#' Individual fields from the humdrum table can be extracted using `pull()`, which
+#' returns a [data.table()][data.table::data.table()] with each column corresponding to one field. 
+#' (The `data.table` is a column-subset of the humdrum table).
+#' By default, `pullFields()` pulls the [selected fields][selectedFields].
+#' If only one field is pulled, and `drop = TRUE`, the field is extracted from the `data.table` and returned
+#' as a vector.
+#' 
+#' @param fields ***Which fields to output.***
+#' 
+#' Defaults to `selectedFields(humdrumR)`.
+#' 
+#' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
+#' For example, `"Tok"` would match the `Token` field.
+#'   
+#' @param dataTypes ***Which types of humdrum record(s) to include.***
+#' 
+#' Defaults to `"GLIMDd"` for `as.lines()` and `as.matrix()`; `"Dd"` for `as.data.frame()`;
+#' `"LIMDd"` for `as.matrices()` and `as.data.frames()`.
+#' 
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation for explanation.)
+#' 
+#' @param null ***How should null data points be output?***
+#' 
+#' Default is `"NA2dot"`.
+#' 
+#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
+#' `"NA2dot"` means all `NA` values are converted to `"."`; `"dot2NA` means all `"."` are converted to `NA`; `charNA2dot` means `NA` values
+#' in `character` vectors are converted to `NA`, but not in other atomic types; `"asis"` means either `NA` or `"."` values may print, depending
+#' on what is in the field.
+#' 
+#' @param drop ***Should single fields be extracted from the `data.table`?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'   
+#' @rdname humTable
+pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'D', 
+                       null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), drop = FALSE) {
+    checks(humdrumR, xhumdrumR)
+    checks(drop, xTF)
+    dataTypes <- checkTypes(dataTypes, 'pullFields')
+    
+    null <- match.arg(null)
+    
+    
+    humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+    selectedTable <- humtab[ , fields, with = FALSE]
+    
+    
+    # selectedTable[] <- selectedTable[ , lapply(.SD, 
+    #                                            \(field) {
+    #                                                if (is.list(field)) {
+    #                                                   field[filter] <- lapply(field[filter], '[', i = 0)
+    #                                                } else {
+    #                                                   field[filter] <- NA
+    #                                                }
+    #                                                field
+    #                                            })]
+    
+    # decide how NA/null values are shown
+    fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]
+    fieldTypes <- lapply(as.list(fieldTypes), 
+                         \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
+                                                                                      Structure = 'D', Reference = 'G')[fieldType],
+                                                                                    fieldType, length = nrow(selectedTable)))
+    
+    selectedTable[] <- Map(naDots, selectedTable, types = fieldTypes, null = null)
+    
+    # return
+    if (length(fields) == 1L && drop) selectedTable[[1]] else selectedTable
+    
+}
+
+
+
+pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
+    fieldInTable <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)[ , 1L, with = FALSE]
+    
+    if (drop) fieldInTable[[1]] else fieldInTable
+    
+}
+
+pullSelectedFields <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
+    
+    pullFields(humdrumR, selectedFields(humdrumR), dataTypes = dataTypes, null = null)
+    
+}
 
 
 pullPrintable <- function(humdrumR, fields, 
@@ -1472,7 +1546,7 @@ pullPrintable <- function(humdrumR, fields,
                                          
                                      })] 
     if (!collapse) return(fieldTable)                  
-      
+    
     # field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
     field <- Reduce(\(a, b) {
         ifelse(fieldTable$Type %in% c('I', 'M', 'd', 'S') & a == b, a, .paste(a, b, sep = ''))
@@ -1498,12 +1572,12 @@ pullPrintable <- function(humdrumR, fields,
         field[Type == 'E'] <- paste0('**', do.call('paste', c(Exclusives[fields], list(sep = '**'))))
     }
     
-
+    
     
     
     # syntax <- hum[, Type == 'S']
     # if (any(syntax)) {
-        # hum[[field]][syntax] <- hum[['Token']][syntax]
+    # hum[[field]][syntax] <- hum[['Token']][syntax]
     # }
     
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
@@ -1512,38 +1586,95 @@ pullPrintable <- function(humdrumR, fields,
     
     
     data.table(Printable = field)
-   
+    
 }
 
 
 
-printableSelectedField <- function(humdrumR, 
-                                   dataTypes = 'D', useToken = 'GLIM',
-                                   null =  c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
-    dataTypes <- checkTypes(dataTypes, 'printableSelectField')
-    useToken <- checkTypes(useToken, 'printableSelectField', 'useToken')
+#' @rdname pullFields
+#' @export
+pull.humdrumR <- function(.data, ..., dataTypes = 'D', fieldTypes = 'D', null = 'asis', drop = TRUE) {
     
-    printableField <- pullPrintable(humdrumR, fields = selectedFields(humdrumR), 
-                                    dataTypes = dataTypes,  useToken = useToken,
-                                    collapse = TRUE)
+    exprs <- rlang::enexprs(...)
     
-    humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd')
-    humtab$Printable <- printableField[[1]]
-    putHumtab(humdrumR) <- humtab
-    
-    updateFields(humdrumR)
-}
-
-
-getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR') {
-    if (is.null(.by)) {
-        fields(humdrumR)[GroupedBy == TRUE]$Name 
+    fields <- if (length(exprs)) {
+        tidyselect_humdrumRfields(.data, exprs, fieldTypes = 'D', callname = 'pull.humdrumR')
     } else {
-        fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
+        selectedFields(.data)
     }
     
+    pulled <- pullFields(.data, fields = fields, dataTypes = dataTypes, null = null)
+    
+    if (drop) pulled[[1]] else pulled
+    
 }
 
+#### $ methods ----
+
+#' @rdname pullFields
+#' @export 
+setMethod('$', signature = c(x = 'humdrumR'),
+          function(x, name) {
+              name <- as.character(name)
+              
+              match <- fieldMatch(x, name, callfun = '$', argname = 'name')
+              
+              getHumtab(x, 'D')[[match[1]]]
+          })
+
+
+#' @export
+setMethod('$<-', signature = c(x = 'humdrumR'),
+          function(x, name, value) {
+              checks(value, (xvector | xinherits('token')) & xlen)
+              
+              humtab <- getHumtab(x, 'D')
+              if (!(length(value) == 1L | length(value) == nrow(humtab))) .stop("When using humdrumR$<- value, the value must either be length 1",
+                                                                                "or exactly the same length as the number of non-null data tokens in the",
+                                                                                "humdrumR object's selected fields.")
+              name <- as.character(name)
+              
+              if (name == 'Token') .stop("In your use of humdrumR$<-, you are trying to overwrite the 'Token' field, which is not allowed.",
+                                         "This field should always keep the original humdrum data you imported.")
+              
+              structural <- c('Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                              'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
+              
+              if (name %in% structural) .stop("In your use of humdrumR$<-, you are trying to overwrite the structural field '{match}', which is not allowed.",
+                                              "For a complete list of structural fields, use the command fields(mydata, 'S').")
+              isnew <- !name %in% colnames(humtab)
+              humtab[[name]] <- value
+              
+              putHumtab(x, overwriteEmpty = c()) <- humtab
+              x <- updateFields(x)
+              
+              x
+              
+          })
+
+
+
+
+#### pull helpers ----
+
+
+naDots <- function(field, null, types) {
+    if (null == 'asis') return(field)
+    na <- is.na(field)
+    
+    nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=', E = '**', S = '*')[types]
+    
+    
+    if (null == 'dot2NA') {
+        na <- na | field == nulltoken
+        field[na] <- NA
+    } else {
+        if (null == 'charNA2dot') na <- is.character(field) & na
+        field[na] <- nulltoken[na]
+    }
+    
+    field   
+}
 
 
 ####################################################-

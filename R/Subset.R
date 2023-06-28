@@ -135,6 +135,17 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
 }
 
 
+
+#' @rdname subset.humdrumR
+#' @export
+filter.humdrumR <- function(.data, ...) {
+  exprs <- rlang::enquos(...)
+  .data <- uncontextMessage(.data, 'filter')
+  
+  rlang::eval_tidy(rlang::quo(subset.humdrumR(.data, !!!exprs))) 
+}
+
+
 nullify <- function(humtab, fields, subset, dataTypes) {
   if (all(subset) || length(fields) == 0L) return(humtab)
   
