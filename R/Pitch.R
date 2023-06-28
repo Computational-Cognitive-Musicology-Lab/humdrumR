@@ -3647,7 +3647,69 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, e
 octave <- makePitchTransformer(tint2octave, 'octave', 'integer')
 
 
+### humdrumR methods ----
 
+
+#' @exportS3Method kern default
+#' @exportS3Method kern humdrumR
+humdrumRmethods('kern')
+#' @exportS3Method pitch default
+#' @exportS3Method pitch humdrumR
+humdrumRmethods('pitch')
+#' @exportS3Method lilypond default
+#' @exportS3Method lilypond humdrumR
+humdrumRmethods('lilypond')
+#' @exportS3Method helmholtz default
+#' @exportS3Method helmholtz humdrumR
+humdrumRmethods('helmholtz')
+#' @exportS3Method tonh default
+#' @exportS3Method tonh humdrumR
+humdrumRmethods('tonh')
+#' @exportS3Method interval default
+#' @exportS3Method interval humdrumR
+humdrumRmethods('interval')
+#' @exportS3Method solfa default
+#' @exportS3Method solfa humdrumR
+humdrumRmethods('solfa')
+#' @exportS3Method solfg default
+#' @exportS3Method solfg humdrumR
+humdrumRmethods('solfg')
+#' @exportS3Method degree default
+#' @exportS3Method degree humdrumR
+humdrumRmethods('degree')
+#' @exportS3Method deg default
+#' @exportS3Method deg humdrumR
+humdrumRmethods('deg')
+#' @exportS3Method bhatk default
+#' @exportS3Method bhatk humdrumR
+humdrumRmethods('bhatk')
+#' @exportS3Method step default
+#' @exportS3Method step humdrumR
+humdrumRmethods('step')
+#' @exportS3Method accidental default
+#' @exportS3Method accidental humdrumR
+humdrumRmethods('accidental')
+#' @exportS3Method quality default
+#' @exportS3Method quality humdrumR
+humdrumRmethods('quality')
+#' @exportS3Method octave default
+#' @exportS3Method octave humdrumR
+humdrumRmethods('octave')
+#' @exportS3Method semits default
+#' @exportS3Method semits humdrumR
+humdrumRmethods('semits')
+#' @exportS3Method midi default
+#' @exportS3Method midi humdrumR
+humdrumRmethods('midi')
+#' @exportS3Method cents default
+#' @exportS3Method cents humdrumR
+humdrumRmethods('cents')
+#' @exportS3Method pc default
+#' @exportS3Method pc humdrumR
+humdrumRmethods('pc')
+#' @exportS3Method freq default
+#' @exportS3Method freq humdrumR
+humdrumRmethods('freq')
 
 
 ###################################################################### ###
@@ -4063,7 +4125,7 @@ invert.factor <- invert.token
 ### Inversion methods ####
 
 
-## Melodic Intervals ####
+## Intervals ####
 
 #' Calculate intervals between pitches
 #' 
@@ -4355,6 +4417,7 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
 }
 
 
+
 #' @rdname int
 #' @export 
 mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.function(incomplete),
@@ -4449,7 +4512,7 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 
 
 
-## Harmonic Intervals ####
+
 
 #' @rdname int
 #' @export
@@ -4475,6 +4538,18 @@ hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = i
   
  
 }
+
+
+### humdrumR methods ----
+
+
+#' @exportS3Method mint default
+#' @exportS3Method mint humdrumR
+humdrumRmethods('mint')
+#' @exportS3Method hint default
+#' @exportS3Method hint humdrumR
+humdrumRmethods('hint')
+
 
 ###################################################################### ### 
 # Predefined tonalIntervals ##############################################

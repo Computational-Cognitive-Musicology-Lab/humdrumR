@@ -1,6 +1,6 @@
 Package: humdrumR
 Title: humdrumR
-Version: 0.6.5.3
+Version: 0.7.0.0
 Authors@R: c(person("Nathaniel", "Condit-Schultz", email = "natcs@gatech.edu", role = c("aut", "cre")),
              person("Claire", "Arthur", email = "claire.arthur@gatech.edu", role = "aut"))
 Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 
@@ -35,7 +35,6 @@ Collate: humdrumR-package.R
          Rhythm.R
          Metric.R
 	 Lyrics.R
-         Tidy.R
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 

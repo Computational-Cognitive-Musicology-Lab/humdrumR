@@ -7,6 +7,7 @@
 \usage{
 humdrumR(
   view,
+  dataTypes,
   maxRecordsPerFile,
   maxTokenLength,
   nullPrint,
@@ -21,6 +22,15 @@ There are three options: \code{"humdrum"}, \code{"score"}, and \code{"table"} (a
 These options are \link[=partialMatching]{partially matched}.
 
 Use \code{\link[=select]{select()}} to determine which fields to show.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to view.}}
+
+Defaults to \code{"GLIMDd"} for \code{as.lines()} and \code{as.matrix()}; \code{"Dd"} for \code{as.data.frame()};
+\code{"LIMDd"} for \code{as.matrices()} and \code{as.data.frames()}.
+
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation for explanation.)}
 
 \item{maxRecordsPerFile}{\emph{\strong{How many records should be shown in each file, when more than one file is present?}}
 

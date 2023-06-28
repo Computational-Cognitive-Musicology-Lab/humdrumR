@@ -3,6 +3,7 @@
 \name{subset.humdrumR}
 \alias{subset.humdrumR}
 \alias{subset}
+\alias{filter.humdrumR}
 \alias{removeEmptyFiles}
 \alias{removeEmptyPieces}
 \alias{removeEmptySpines}
@@ -12,10 +13,11 @@
 \alias{removeSubset}
 \alias{unfilter}
 \alias{complement}
-\alias{combineFields}
 \title{Filter humdrum data}
 \usage{
 \method{subset}{humdrumR}(x, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
+
+\method{filter}{humdrumR}(.data, ...)
 
 removeEmptyFiles(x)
 
@@ -34,8 +36,6 @@ removeSubset(humdrumR, complement = NULL)
 unfilter(humdrumR, complement = NULL)
 
 complement(humdrumR)
-
-combineFields(humdrumR, ...)
 }
 \arguments{
 \item{x}{\emph{\strong{HumdrumR data.}}

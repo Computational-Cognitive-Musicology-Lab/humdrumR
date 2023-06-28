@@ -1176,6 +1176,32 @@ dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60',
                                                                 years = FALSE,
                                                                 milliseconds = TRUE))
 
+### humdrumR methods ----
+
+
+#' @exportS3Method recip default
+#' @exportS3Method recip humdrumR
+humdrumRmethods('recip')
+#' @exportS3Method notehead default
+#' @exportS3Method notehead humdrumR
+humdrumRmethods('notehead')
+#' @exportS3Method duration default
+#' @exportS3Method duration humdrumR
+humdrumRmethods('duration')
+#' @exportS3Method quarters default
+#' @exportS3Method quarters humdrumR
+humdrumRmethods('quarters')
+#' @exportS3Method dur default
+#' @exportS3Method dur humdrumR
+humdrumRmethods('dur')
+#' @exportS3Method seconds default
+#' @exportS3Method seconds humdrumR
+humdrumRmethods('seconds')
+#' @exportS3Method ms default
+#' @exportS3Method ms humdrumR
+humdrumRmethods('ms')
+
+
 ###################################################################### ###
 # Manipulating rhythm intervals ##########################################
 ###################################################################### ###

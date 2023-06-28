@@ -1,4 +1,4 @@
-#' Humdrum tables (and their Fields)
+#' Humdrum tables (and their "fields")
 #' 
 #' In the [humdrumR] package, the fundamental data structure is called a **Humdrum Table**.
 #' A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
@@ -1222,7 +1222,7 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
 }
 
 
-#' @rdname fields
+#' @rdname humTable
 #' @export
 names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 
@@ -1462,7 +1462,7 @@ getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR'
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #'   
-#' @rdname humTable
+#' @export
 pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'D', 
                        null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), drop = FALSE) {
     checks(humdrumR, xhumdrumR)

@@ -473,9 +473,9 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' 
 #' Must be `character`.
 #' 
-#' @seealso The complement/opposite of `cleave()` is [rend()].
+#' @seealso {The complement/opposite of `cleave()` is [rend()].
 #' The [collapse family of functions][collapseHumdrum()] serves a somewhat
-#' similar function to `cleave()`.
+#' similar function to `cleave()`.}
 #' @family {Humdrum table reshaping functions}
 #' @family {Humdrum table pivoting functions}
 #' @export
@@ -903,7 +903,7 @@ cleaveGraceNotes <- function(humdrumR) {
 #' The `rend()` function is essentially the inverse of [cleave()].
 #' 
 #' @export
-#' @seealso The complement/opposite of `rend()` is [cleave()].
+#' @seealso {The complement/opposite of `rend()` is [cleave()].}
 #' @family {Humdrum table reshaping functions}
 #' @family {Humdrum table pivoting functions}
 rend <- function(humdrumR, ..., rendNull = FALSE) {

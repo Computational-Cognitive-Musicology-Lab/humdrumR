@@ -1,24 +1,7 @@
-# This file defines the functions with.humdrumR and within.humdrumR, which are used to apply
-# expressions to fields in a humdrumR data object in a manner analogous to the base
-# with and within functions (as applied to data.frames).
-#
-# with.humdrumR, and within.humdrumR 
-# are each exported for users to use.
-# getTandem is also exported.
-# All other functions are just used by with/within.humdrumR.
-#
-# within.humdrumR has two major parts to it:
-#   1: Applying the desired expression to the humdrumR object,
-#   with various specical options specified by the desired arguments (e.g., partition, ngram).
-#   2: Taking the results of the expression and (re)assembling/inserting
-#   it into the humdrumR object. This second part, is primarily
-#   accomplished by the function putHumtab. 
-# with.humdrumR skips the second step!
 
 #################################################-
 # within.humdrumR ----
 ##################################################-
-
 
 
 #' with(in)Humdrum
@@ -1502,3 +1485,237 @@ addExclusiveFields <- function(humtab, fields) {
   newcols <- Filter(length, newcols)
   cbind(humtab, as.data.frame(newcols))
 }
+
+
+# Methods for tidyverse ----
+
+## dplyr ----
+
+tidyNamer <- function(quosures) {
+  names <- .names(quosures)
+  
+  assigned <- sapply(quosures, 
+                        \(quo) {
+                          exprA <- analyzeExpr(quo)
+                          if (exprA$Head == '<-')  rlang::as_label(exprA$Args[[1]]) else  '' 
+                        })
+  
+  doubleAssign <- names != '' & assigned != ''
+  if (any(doubleAssign)) {
+    sameName <- names[doubleAssign] == assigned[doubleAssign]
+    if (all(sameName)) {
+      example <- names[doubleAssign][which(sameName)[1]]
+      .warn("You are using '=' AND '<-' at the same time; you only need one or the other.",
+            "For example, '{example} = {example} <-' could just be '{example} ='.")
+    } else {
+      bad <- paste0(names[doubleAssign][!sameName], ' = ', assigned[doubleAssign][!sameName], ' <- ...')
+      .stop("You are using '=' AND '<-' to assign contradictory field names.",
+            "For example, '{bad[1]}' is contradictory.")
+    }
+  }
+  
+  names <- ifelse(names == '', assigned, names)
+  names[names == ''] <- sapply(quosures[names == ''], rlang::as_label)
+  # if (any(duplicated(names))) .stop("You can't run summarize.humdrumR() and give {num2word(max(table(names)))} columns the same name!")
+  
+  names <- rlang::syms(names)
+  
+  Map(quosures, names, f = \(quo, name) rlang::quo(!!name <- !!quo))
+  
+}
+
+
+
+
+#' HumdrumR using Tidyverse "verbs"
+#' 
+#' These methods for [dplyr] verbs are all shorthand calls for [with/within/subset.humdrumR()][withHumdrum].
+#' 
+#' @rdname withinHumdrum
+#' @export
+mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', 'never'), alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
+  quosures <- rlang::enquos(...)
+  
+  recycle <- match.arg(recycle)
+  
+  quosures <- tidyNamer(quosures)
+  
+  # eval
+  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = !!recycle,
+                                              dataTypes = !!dataTypes,
+                                              alignLeft = !!alignLeft,
+                                              expandPaths = !!expandPaths,
+                                              .by = !!.by)))
+  
+}
+
+
+
+#' @rdname withinHumdrum
+#' @export
+summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE, drop = FALSE, .by = NULL) {
+  quosures <- rlang::enquos(...)
+  
+  quosures <- tidyNamer(quosures)
+  
+  # eval
+  rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!quosures, recycle = 'summarize',
+                                            dataTypes = !!dataTypes,
+                                            drop = !!drop,
+                                            .by = !!.by)))
+  
+}
+
+
+
+
+#' @rdname withinHumdrum
+#' @export
+reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
+  quosures <- rlang::enquos(...)
+  
+  quosures <- tidyNamer(quosures)
+  
+  # eval
+  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = 'pad',
+                                              dataTypes = !!dataTypes,
+                                              alignLeft = !!alignLeft,
+                                              expandPaths = !!expandPaths,
+                                              .by = !!.by)))
+  
+}
+
+### grouping ----
+
+#' @rdname withinHumdrum
+#' @export
+group_by.humdrumR <- function(.data, ..., .add = FALSE) {
+  .data <- uncontextMessage(.data, 'group_by')
+  
+  if (!.add) .data <- ungroup(.data)
+  
+  selectedFields <- selectedFields(.data)
+  exprs <- rlang::enquos(...)
+  calls <- sapply(exprs, rlang::quo_is_call)
+  
+  groupFields <- sapply(exprs[!calls], rlang::as_name)
+  if (length(groupFields)) groupFields <- fieldMatch(.data, groupFields, 'group_by')
+  
+  
+  fields <- fields(.data)
+  groupn <- max(fields$GroupedBy)
+  
+  if (any(calls)) {
+    oldfields <- fields$Name
+    
+    .data <- rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!(exprs[calls]))))
+    fields <- fields(.data)
+    
+    newfields <- fields[ , !Name %in% oldfields]
+    fields$Type[newfields] <- 'Grouping'
+    groupFields <- c(fields$Name[newfields], groupFields)
+  }
+  
+  fields[ , GroupedBy := Name %in% groupFields | GroupedBy]
+  .data@Fields <- fields
+  
+  selectFields(.data, selectedFields)
+
+  
+  
+  
+}
+
+#' @rdname withinHumdrum
+#' @export
+ungroup.humdrumR <- function(x, ...) {
+  fields <- fields(x)
+  fields[ , GroupedBy := FALSE]
+  remove <- fields[Type == 'Grouping', Name]
+  if (length(remove)) {
+    fields <- fields[Type != 'Grouping']
+    for (field in remove) x@Humtable[[field]] <- NULL
+  }
+  
+  x@Fields <- fields
+  x
+  
+}
+
+
+
+
+
+## ggplot2  -----
+
+
+#' @rdname withinHumdrum
+#' @export
+ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
+  humtab <- getHumtab(data, dataTypes = dataTypes)
+  
+  ggplot(humtab, mapping = mapping, ...) + theme_humdrum()
+}
+
+#' @rdname withinHumdrum
+#' @export
+ggplot.humdrum.table <- function(data = NULL, mapping = aes(), ...) {
+  
+  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
+}
+
+
+### Treatment of token ----
+
+#' @export
+scale_type.token <- function(x) if (class(x@.Data) %in% c('integer', 'numeric', 'integer64')) 'continuous' else 'discrete'
+
+
+#' @export
+scale_x_token <- function(..., expand = waiver(), guide = waiver(), position = "bottom") {
+  sc <- ggplot2::discrete_scale(c("x", "xmin", "xmax", "xend"), "position_d", identity, ...,
+                                # limits = c("c", "c#", "d-", "d", "d#", "e-", "e", "e#", "f", "f#", "f##", "g-", "g", "g#", "a-", "a", "a#", "b-", "b", "b#"),
+                                expand = expand, guide = guide, position = position, super = ScaleDiscretePosition)
+  
+  sc$range_c <- scales::ContinuousRange$new()
+  sc
+}
+
+
+
+### humdrumR plot style ----
+
+#### Colors ----
+
+scale_color_humdrum <- ggplot2::scale_fill_manual(values = flatly)
+# scale_color_continuous(type = colorRamp(flatly[2:3]))
+
+options(ggplot2.continuous.fill = ggplot2::scale_color_gradientn(colors = flatly_continuous(100)))
+options(ggplot2.continuous.color = ggplot2::scale_color_gradientn(colours = flatly_continuous(100)))
+options(ggplot2.continuous.colour = ggplot2::scale_color_gradientn(colours = flatly_continuous(100)))
+
+# options(ggplot2.continuous.colour = 'humdrum')
+
+#### Theme ----
+
+
+theme_humdrum <- function() {
+  ggplot2::update_geom_defaults("point", list(size = .5, color = flatly[1], fill = flatly[2]))
+  ggplot2::update_geom_defaults("line", list(size = .5, color = flatly[4], fill = flatly[3]))
+  ggplot2::update_geom_defaults("rect", list(fill = flatly[1]))
+  
+  theme(panel.background = element_blank(), axis.ticks = element_blank(),
+        strip.background = element_blank(), 
+        # panel.border = element_rect(linetype = 'dashed', fill = NA),
+        legend.key = element_rect(fill = NA),
+        title = element_text(family = 'Lato', color = flatly[5], size = 16),
+        plot.title.position = 'plot', plot.title = element_text(hjust = .5),
+        line = element_line(color = flatly[1]),
+        rect = element_rect(color = flatly[2]),
+        text = element_text(family = 'Lato', color = flatly[4]),
+        axis.text = element_text(color = flatly[5], size = 7),
+        axis.title = element_text(color = flatly[4], size = 11)
+        )
+}
+
+

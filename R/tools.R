@@ -911,6 +911,39 @@ ditto.matrix <- function(x, margin = 2, ...) {
 }
 
 
+#' @rdname ditto
+#' @export
+ditto.humdrumR <- function(x, ..., initial = NA, reverse = FALSE) {
+  
+  quosures <- rlang::enquos(...)
+  
+  
+  if (length(quosures) == 0L) {
+    selected <- selectedFields(x)
+    quosures <- setNames(rlang::syms(selected), selected)
+  }
+  
+  quosures <- tidyNamer(quosures) # this makes all expressions of form name <- quo
+  
+  quosures <- lapply(quosures,
+                     \(quo) {
+                       exprA <- analyzeExpr(quo)
+                       
+                       if (rlang::as_label(exprA$Args[[1]]) %in% fields(x)$Name) {
+                         exprA$Args[[1]] <- paste0("ditto(", exprA$Args[[1]], ")")
+                       } 
+                       
+                       expr <- exprA$Args[[2]]
+                       expr <- rlang::quo(ditto(!!expr, initial = !!initial, reverse = !!reverse))
+                       
+                       exprA$Args[[2]] <- expr
+                       unanalyzeExpr(exprA)
+                     })
+  
+  rlang::eval_tidy(rlang::quo(within(x, !!!quosures, dataTypes = 'Dd')))
+  
+}
+
 
 
 ## Dimensions ----

@@ -6,6 +6,13 @@
 \alias{with}
 \alias{with.humdrumR}
 \alias{within.humdrumR}
+\alias{mutate.humdrumR}
+\alias{summarise.humdrumR}
+\alias{reframe.humdrumR}
+\alias{group_by.humdrumR}
+\alias{ungroup.humdrumR}
+\alias{ggplot.humdrumR}
+\alias{ggplot.humdrum.table}
 \title{with(in)Humdrum}
 \usage{
 \method{with}{humdrumR}(
@@ -29,6 +36,42 @@
   .by = NULL,
   variables = list()
 )
+
+\method{mutate}{humdrumR}(
+  .data,
+  ...,
+  dataTypes = "D",
+  recycle = c("scalar", "never"),
+  alignLeft = TRUE,
+  expandPaths = FALSE,
+  .by = NULL
+)
+
+\method{summarise}{humdrumR}(
+  .data,
+  ...,
+  dataTypes = "D",
+  expandPaths = FALSE,
+  drop = FALSE,
+  .by = NULL
+)
+
+\method{reframe}{humdrumR}(
+  .data,
+  ...,
+  dataTypes = "D",
+  alignLeft = TRUE,
+  expandPaths = FALSE,
+  .by = NULL
+)
+
+\method{group_by}{humdrumR}(.data, ..., .add = FALSE)
+
+\method{ungroup}{humdrumR}(x, ...)
+
+\method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
+
+\method{ggplot}{humdrum.table}(data = NULL, mapping = aes(), ...)
 }
 \arguments{
 \item{data}{\emph{\strong{HumdrumR data.}}
@@ -93,6 +136,8 @@ a \code{data.table}.
 \description{
 Evaluate arbitrary expressions using the fields within \link[=humdrumRclass]{humdrumR} data,
 while employing split/apply/combine, windowing, and other analysis options.
+
+These methods for \link{dplyr} verbs are all shorthand calls for \link[=withHumdrum]{with/within/subset.humdrumR()}.
 }
 \section{Overview}{
 

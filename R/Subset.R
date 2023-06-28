@@ -647,6 +647,38 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
           })
 
 
+
+## Indexing in pipes ----
+
+
+#' @rdname indexHumdrum
+#' @export
+index <- function(x, i, j, drop = TRUE) {
+  
+  pat <- paste0(missing(i), missing(j))
+  
+  switch(pat,
+         'TRUETRUE' = x,
+         'TRUEFALSE' = x[  , j, drop],
+         'FALSETRUE' = x[i ,  , drop],
+         'FALSEFALSE' = x[i, j, drop])
+}
+
+#' @rdname indexHumdrum
+#' @export
+index2 <- function(x, i, j, drop = TRUE) {
+  
+  pat <- paste0(missing(i), missing(j))
+  
+  if (!is.humdrumR(x)) return(x[[i]])
+  switch(pat,
+         'TRUETRUE' = x,
+         'TRUEFALSE' = x[[  , j, drop]],
+         'FALSETRUE' = x[[i ,  , drop]],
+         'FALSEFALSE' = x[[i, j, drop]])
+}
+
+
 # Unfiltering humdrumR ----
 
 
@@ -714,8 +746,8 @@ complement <- function(humdrumR) {
     
 }
 
+#' @seealso {You can do similar things using [subset.humdrumR() and complement()][subset.humdrumR]. }
 #' @export
-#' @rdname subset.humdrumR
 combineFields <- function(humdrumR, ...) {
   fieldLists <- list(...)
   newFields <- .names(fieldLists)
@@ -734,3 +766,5 @@ combineFields <- function(humdrumR, ...) {
   humdrumR <- updateFields(humdrumR)
   update_Dd(humdrumR, newFields)
 }
+
+

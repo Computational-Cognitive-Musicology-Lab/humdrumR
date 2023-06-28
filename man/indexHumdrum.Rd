@@ -2,15 +2,17 @@
 % Please edit documentation in R/Subset.R
 \name{indexHumdrum}
 \alias{indexHumdrum}
-\alias{[,humdrumR,missing,ANY,ANY-method}
-\alias{[,humdrumR,numeric,ANY,ANY-method}
-\alias{[,humdrumR,character,ANY,ANY-method}
+\alias{[,humdrumR,missing,ANY-method}
+\alias{[,humdrumR,numeric,ANY-method}
+\alias{[,humdrumR,character,ANY-method}
 \alias{[[,humdrumR,numeric,missing-method}
 \alias{[[,humdrumR,missing,numeric-method}
 \alias{[[,humdrumR,character,missing-method}
 \alias{[[,humdrumR,missing,character-method}
 \alias{[[,humdrumR,ANY,ANY-method}
 \alias{[[,humdrumR,missing,missing-method}
+\alias{index}
+\alias{index2}
 \title{Indexing humdrumR objects}
 \usage{
 humdata[] # returns unchanged
@@ -30,6 +32,10 @@ humdata[[ , 'regex']]
 humdata[[x:y, l:m]]
 
 humdata[[x:y, l:m]]
+
+index(x, i, j, drop = TRUE)
+
+index2(x, i, j, drop = TRUE)
 }
 \arguments{
 \item{x}{\emph{\strong{HumdrumR data to index.}}
