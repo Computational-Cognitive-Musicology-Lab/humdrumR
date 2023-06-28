@@ -2111,32 +2111,6 @@ visible <- function(withV) {
   result
 }
 
-withExpression <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
-    exprA <- analyzeExpr(expr)
-    output <- NULL
-    if (exprA$Type %in% applyTo) {
-        hit <- do...(predicate, exprA, envir = parent.frame())
-        if (hit) {
-            output <- func(exprA)
-        } 
-    } else {
-        hit <- FALSE
-    }
-    
-    if (exprA$Type == 'call' && !hit) {
-        output <- list()
-        for (i in seq_along(exprA$Args)) {
-            output[[i]] <- Recall(exprA$Args[[i]], 
-                                      func = func, 
-                                      predicate = predicate, 
-                                      applyTo = applyTo)
-        }
-        if (length(output) == 0L || all(lengths(output) == 0L)) output <- NULL
-        
-    }
-    output
-}
-
 
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))

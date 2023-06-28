@@ -5,7 +5,7 @@
 \alias{pivot_longer.humdrumR}
 \title{Separate data fields into new spines.}
 \usage{
-rend(humdrumR, ..., rendNull = FALSE)
+rend(humdrumR, ..., rendEmpty = FALSE)
 
 \method{pivot_longer}{humdrumR}(data, cols, ...)
 }
@@ -17,7 +17,7 @@ In fact, a humdrumR method for \link[=tidyr]{pivot_longer()} is defined, which i
 The \code{rend()} function is essentially the inverse of \code{\link[=cleave]{cleave()}}.
 }
 \seealso{
-The complement/opposite of \code{rend()} is \code{\link[=cleave]{cleave()}}.
+{The complement/opposite of \code{rend()} is \code{\link[=cleave]{cleave()}}.}
 
 Other {Humdrum table reshaping functions}: 
 \code{\link{cleave}()},

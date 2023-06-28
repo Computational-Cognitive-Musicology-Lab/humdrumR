@@ -1235,24 +1235,27 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' 
 #' Every `humdrumR` object will have, at any given time, one or more of its
 #' fields "selected."
-#' Selected fields are show when a [humdrumR object][humdrumRclass] prints on the console.
-#' At the bottom of the printout, the selected fields are also marked by an `*`.
-#' The currently selected fields can also be queried directly using the `selectedFields()` function, or 
+#' The selected fields are the fields that are shown when a 
+#' [humdrumR object][humdrumRclass] prints on the console.
+#' (At the bottom of the printout, the selected fields are also marked by a `*`.)
+#' The selected fields can also be queried directly using the `selectedFields()` function, or 
 #' by inspecting the output of [fields()].
 #' 
 #' @details
 #'
-#' The "selected" fields play an important role in humdrumR analysis.
+#' The "selected" fields play an important role in [humdrumR].
 #' In addition to controlling what [fields()] you "see" in the console printout, 
-#' the select fields are the fields that many functions [humdrumR][humdrumR] functions will automatically
+#' the select fields are the fields that many [humdrumR][humdrumR] functions will automatically
 #' apply themselves to.
 #' For example, if you call [ditto()], [tally()], or [kern()] on a [humdrumR data object][humdrumRclass],
 #' these functions will be applied the selected field(s).
-#' (Most functions are only applied to the *first* selected field; see their own manuals for details.)
-#' The first selected field is also passed as the hidden `.` variable in calls to `with()`, `within()`,
-#' `mutate()`, `summarize()`, or `reframe()`---so if you don't remember what the selected field is you can just put a `.`!
+#' (However, most such functions are only applied to the *first* selected field, 
+#' if there is more than one; see their own manuals for details.)
+#' The first selected field is also passed as the hidden `.` variable in calls to [with()/within()/,
+#' mutate()/summarize()/reframe()][withinHumdrum]---so if you don't remember what fields are selected
+#' you can just put a `.`!
 #' 
-#' The selected fields also play an important role in defining/redefining "null" data.
+#' The selected fields also have a role in identifying "null" data.
 #' Whenever new fields are selected, their data tokens are checked for `NA` values or null
 #' tokens (`"."`).
 #' Anywhere where *all* the selected fields are null, the `Type` field is updated to `"d"`;
@@ -1263,26 +1266,47 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #'
 #' ## Selecting fields
 #' 
-#' The selected fields can be set by calls to `selectFields()` or, more commonly, the tidyverse `select()` function.
-#' Whereas `selectFields()` accepts only `character` strings ([partially matched][partialMatching]),
-#' [select.humdrumR()] can use tidyverse
-#' [special select() features][dplyr::select()].
+#' Fields can be selected using the tidyverse `select()` function, 
+#' and can use any of `select()`'s [special select features][dplyr::select()].
 #' If you call `select()` with no argument, the original `Token` field is selected by default.
-#' 
-#' Note that when you call `selectFields()` or `select.humdrumR()`, the selected field is changed *in place*,
-#' meaning that the selection changes *even if you don't (re)assign the output*!
-#' 
-#' If you use `select()` with a numeric selections, like `select(1:3)`, fields are numbered in the (row) order
+#'
+#' If you use `select()` with a numeric selections or, like `select(1:3)`, fields are numbered in the (row) order
 #' shown in call to [fields()].
 #' Fields are always sorted first by `Type` (`Data` first), then by name.
 #' If you provide a `fieldTypes` argument, the numeric selection is reduced to only those fields you choose,
 #' matching with the row-numbers you'd see if you call [fields(humData, fieldTypes = ...)][fields()].
-#' So, for example, `select(humData, 1:3, fieldTypes = 'Stru')` will select the first three structural fields.
-#' With calls to `select()`, you can also simply provide the keywords `"Data"`, `"Structure"`, 
+#' So, for example, `select(humData, 1:3, fieldTypes = 'Structure')` will select the first three structural fields.
+#' You can also simply provide the keywords `"Data"`, `"Structure"`, 
 #' `"Interpretation"`, `"Reference"`, or `"Formal"`
 #' to select *all* fields of each [field type][fields()].
 #' 
+#' Note that when you call `select()` on [humdrumR data][humdrumRclass], 
+#' the selected field(s) change **in place**,
+#' meaning that the selection changes *even if you don't (re)assign the output*!
 #' 
+#' @param humdrumR,.data ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#' 
+#' @param ... ***Which fields to output.***
+#' 
+#' These arguments can be any combination of `character` strings, numbers, or symbols used
+#' to match fields in the `humdrumR` input using [tidyverse][dplyr::select()] semantics.
+#' 
+#' Unlike in tidyverse `select()`, field names can be [partially matched][partialMatching].
+#' You can also include `character` strings [partially matching][partialMatching] 
+#' `"Data"`, `"Structure"`, `"Interpretation"`, `"Formal"`, `"Reference"` or `"Grouping"`,
+#' which will select all fields of those types (see [fields()] for further explanation).
+#' 
+#' @param fieldTypes ***Which field types are available for numeric selecting?***
+#' 
+#' Defaults to `"any"`, so all fields are counted for numeric selection.
+#' 
+#' Must be a `character` vector. Legal options are `"Data"`, `"Structure"`, `"Interpretation"`, `"Formal"`, `"Reference"`,
+#' `"Grouping"`, and `"any"`, corresponding to the `Type` column in the output of [fields()].
+#' Types can be [partially matched][partialMatching]---for example, `"S"` for `"Structure"`.
+#' 
+#'
 #' @examples
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
@@ -1303,15 +1327,14 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' humData |> select(Token) |> tally()
 #' humData |> select(Spine) |> tally()
 #'
+#' @seealso {Use [fields()] to see what fields are available, and how they are ordered.
+#' To actually *extract* fields, see [pullFields()].}
 #' @export
 selectedFields <- function(humdrumR) {
     fields(humdrumR)[Selected > 0L][order(Selected)]$Name
 } 
 
-
-#' @export
-#' @rdname selectedFields
-selectFields <- function(humdrumR, fields) {
+selectFields <- function(humdrumR, fields = 'Token') {
     checks(humdrumR, xhumdrumR)
     
     fields <- fieldMatch(humdrumR, fields, 'selectFields', 'fields')
@@ -1329,7 +1352,8 @@ selectFields <- function(humdrumR, fields) {
 
 
 #' @rdname selectedFields
-#' @export
+#' @aliases select
+#' @export 
 select.humdrumR <- function(.data, ..., fieldTypes = "any") {
  
     exprs <- rlang::enexprs(...)
@@ -1353,6 +1377,7 @@ tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
   } else {
     fieldTypes <- checkFieldTypes(fieldTypes, 'fieldTypes', callname, includeSelected = FALSE)
   }
+ 
   
   # select by field type (character string only, partially matched)
   typeSelections <- lapply(exprs, 
@@ -1363,16 +1388,36 @@ tidyselect_humdrumRfields <- function(humdrumR, exprs, fieldTypes, callname) {
                              }
                            })
   
+  fieldExprs <- exprs[lengths(typeSelections) == 0L]
   
   # select by field names
+  
+  fieldExprs <- lapply(fieldExprs, withinExpression,
+                       stopOnHit = TRUE,
+                       applyTo = c('atomic', 'symbol'),
+                       predicate = \(Type, Class) (Type == 'atomic' && Class =='character') | Type == 'symbol',
+                       func = \(exprA) {
+                           
+                           name <- if (exprA$Type == 'symbol') exprA$Head else exprA$Args[[1]]
+                           
+                           pname <- pmatch(name, fields$Name)
+                           if (!is.na(pname)) name <- fields$Name[pname]
+                           
+                           if (exprA$Type == 'symbol') exprA$Head <- name else exprA$Args[[1]] <- name
+                           
+                           exprA
+                           
+                       })
+  
   fieldSelections <- local({
     fields <- fields[order(!Type %in% fieldTypes)]
     options <- fields$Name
-    expr <- rlang::expr(c(!!!(exprs[lengths(typeSelections) == 0L])))
+    expr <- rlang::expr(c(!!!(fieldExprs)))
     tried <- try(options[tidyselect::eval_select(expr, setNames(options, options), strict = FALSE)], silent = TRUE)
     if (class(tried) == 'try-error') .stop('In a call to {callname}(), you can ONLY provide the names of humdrumR fields,',
-                                           'or special tidyverse "select features" involving those fields.',
-                                           "You can't provide more complex/arbitrary expressions.")
+                                           'or special tidyverse "select features" expressions involving those fields.',
+                                            "You can't provide more complex/arbitrary expressions.")
+    
     
     tried
   })
@@ -1423,7 +1468,8 @@ getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR'
 ## Extracting ("pull") fields ----
 
 
-
+#' Extract field(s) from [humdrumR data][humdrumRclass]
+#' 
 #' Individual fields from the humdrum table can be extracted using `pull()`, which
 #' returns a [data.table()][data.table::data.table()] with each column corresponding to one field. 
 #' (The `data.table` is a column-subset of the humdrum table).
@@ -1461,7 +1507,9 @@ getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR'
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
-#'   
+#' 
+#' @seealso {To know what fields are available to pull, use [fields()].
+#' To know what fields are selected---the default fields to pull---use [selectedFields()].}
 #' @export
 pullFields <- function(humdrumR, fields = selectedFields(humdrumR), dataTypes = 'D', 
                        null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'), drop = FALSE) {
@@ -1592,6 +1640,7 @@ pullPrintable <- function(humdrumR, fields,
 
 
 #' @rdname pullFields
+#' @aliases pull
 #' @export
 pull.humdrumR <- function(.data, ..., dataTypes = 'D', fieldTypes = 'D', null = 'asis', drop = TRUE) {
     

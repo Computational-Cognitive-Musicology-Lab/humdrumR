@@ -197,9 +197,9 @@ based on their exclusive interpretation.
 }
 
 \seealso{
-The complement/opposite of \code{cleave()} is \code{\link[=rend]{rend()}}.
+{The complement/opposite of \code{cleave()} is \code{\link[=rend]{rend()}}.
 The \link[=collapseHumdrum]{collapse family of functions} serves a somewhat
-similar function to \code{cleave()}.
+similar function to \code{cleave()}.}
 
 Other {Humdrum table reshaping functions}: 
 \code{\link{collapseHumdrum}()},

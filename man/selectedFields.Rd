@@ -2,36 +2,59 @@
 % Please edit documentation in R/humdrumR-class.R
 \name{selectedFields}
 \alias{selectedFields}
-\alias{selectFields}
 \alias{select.humdrumR}
+\alias{select}
 \title{The "selected" fields of a \link[=humdrumRclass]{humdrumR object}}
 \usage{
 selectedFields(humdrumR)
 
-selectFields(humdrumR, fields)
-
 \method{select}{humdrumR}(.data, ..., fieldTypes = "any")
+}
+\arguments{
+\item{humdrumR, .data}{\emph{\strong{HumdrumR data.}}
+
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{...}{\emph{\strong{Which fields to output.}}
+
+These arguments can be any combination of \code{character} strings, numbers, or symbols used
+to match fields in the \code{humdrumR} input using \link[dplyr:select]{tidyverse} semantics.
+
+Unlike in tidyverse \code{select()}, field names can be \link[=partialMatching]{partially matched}.
+You can also include \code{character} strings \link[=partialMatching]{partially matching}
+\code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, \code{"Reference"} or \code{"Grouping"},
+which will select all fields of those types (see \code{\link[=fields]{fields()}} for further explanation).}
+
+\item{fieldTypes}{\emph{\strong{Which field types are available for numeric selecting?}}
+
+Defaults to \code{"any"}, so all fields are counted for numeric selection.
+
+Must be a \code{character} vector. Legal options are \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, \code{"Reference"},
+\code{"Grouping"}, and \code{"any"}, corresponding to the \code{Type} column in the output of \code{\link[=fields]{fields()}}.
+Types can be \link[=partialMatching]{partially matched}---for example, \code{"S"} for \code{"Structure"}.}
 }
 \description{
 Every \code{humdrumR} object will have, at any given time, one or more of its
 fields "selected."
-Selected fields are show when a \link[=humdrumRclass]{humdrumR object} prints on the console.
-At the bottom of the printout, the selected fields are also marked by an \code{*}.
-The currently selected fields can also be queried directly using the \code{selectedFields()} function, or
+The selected fields are the fields that are shown when a
+\link[=humdrumRclass]{humdrumR object} prints on the console.
+(At the bottom of the printout, the selected fields are also marked by a \code{*}.)
+The selected fields can also be queried directly using the \code{selectedFields()} function, or
 by inspecting the output of \code{\link[=fields]{fields()}}.
 }
 \details{
-The "selected" fields play an important role in humdrumR analysis.
+The "selected" fields play an important role in \link{humdrumR}.
 In addition to controlling what \code{\link[=fields]{fields()}} you "see" in the console printout,
-the select fields are the fields that many functions \link{humdrumR} functions will automatically
+the select fields are the fields that many \link{humdrumR} functions will automatically
 apply themselves to.
 For example, if you call \code{\link[=ditto]{ditto()}}, \code{\link[=tally]{tally()}}, or \code{\link[=kern]{kern()}} on a \link[=humdrumRclass]{humdrumR data object},
 these functions will be applied the selected field(s).
-(Most functions are only applied to the \emph{first} selected field; see their own manuals for details.)
-The first selected field is also passed as the hidden \code{.} variable in calls to \code{with()}, \code{within()},
-\code{mutate()}, \code{summarize()}, or \code{reframe()}---so if you don't remember what the selected field is you can just put a \code{.}!
+(However, most such functions are only applied to the \emph{first} selected field,
+if there is more than one; see their own manuals for details.)
+The first selected field is also passed as the hidden \code{.} variable in calls to \link[=withinHumdrum]{with()/within()/, mutate()/summarize()/reframe()}---so if you don't remember what fields are selected
+you can just put a \code{.}!
 
-The selected fields also play an important role in defining/redefining "null" data.
+The selected fields also have a role in identifying "null" data.
 Whenever new fields are selected, their data tokens are checked for \code{NA} values or null
 tokens (\code{"."}).
 Anywhere where \emph{all} the selected fields are null, the \code{Type} field is updated to \code{"d"};
@@ -40,24 +63,23 @@ Many functions ignore \code{d} (null data) tokens by default, so selecting field
 want to analyze and which you don't.
 \subsection{Selecting fields}{
 
-The selected fields can be set by calls to \code{selectFields()} or, more commonly, the tidyverse \code{select()} function.
-Whereas \code{selectFields()} accepts only \code{character} strings (\link[=partialMatching]{partially matched}),
-\code{\link[=select.humdrumR]{select.humdrumR()}} can use tidyverse
-\link[dplyr:select]{special select() features}.
+Fields can be selected using the tidyverse \code{select()} function,
+and can use any of \code{select()}'s \link[dplyr:select]{special select features}.
 If you call \code{select()} with no argument, the original \code{Token} field is selected by default.
 
-Note that when you call \code{selectFields()} or \code{select.humdrumR()}, the selected field is changed \emph{in place},
-meaning that the selection changes \emph{even if you don't (re)assign the output}!
-
-If you use \code{select()} with a numeric selections, like \code{select(1:3)}, fields are numbered in the (row) order
+If you use \code{select()} with a numeric selections or, like \code{select(1:3)}, fields are numbered in the (row) order
 shown in call to \code{\link[=fields]{fields()}}.
 Fields are always sorted first by \code{Type} (\code{Data} first), then by name.
 If you provide a \code{fieldTypes} argument, the numeric selection is reduced to only those fields you choose,
 matching with the row-numbers you'd see if you call \link[=fields]{fields(humData, fieldTypes = ...)}.
-So, for example, \code{select(humData, 1:3, fieldTypes = 'Stru')} will select the first three structural fields.
-With calls to \code{select()}, you can also simply provide the keywords \code{"Data"}, \code{"Structure"},
+So, for example, \code{select(humData, 1:3, fieldTypes = 'Structure')} will select the first three structural fields.
+You can also simply provide the keywords \code{"Data"}, \code{"Structure"},
 \code{"Interpretation"}, \code{"Reference"}, or \code{"Formal"}
 to select \emph{all} fields of each \link[=fields]{field type}.
+
+Note that when you call \code{select()} on \link[=humdrumRclass]{humdrumR data},
+the selected field(s) change \strong{in place},
+meaning that the selection changes \emph{even if you don't (re)assign the output}!
 }
 }
 \examples{
@@ -80,4 +102,8 @@ humData |> select(1:3, fieldTypes = 'Structure')
 humData |> select(Token) |> tally()
 humData |> select(Spine) |> tally()
 
+}
+\seealso{
+{Use \code{\link[=fields]{fields()}} to see what fields are available, and how they are ordered.
+To actually \emph{extract} fields, see \code{\link[=pullFields]{pullFields()}}.}
 }

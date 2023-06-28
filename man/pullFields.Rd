@@ -3,13 +3,9 @@
 \name{pullFields}
 \alias{pullFields}
 \alias{pull.humdrumR}
+\alias{pull}
 \alias{$,humdrumR-method}
-\title{Individual fields from the humdrum table can be extracted using \code{pull()}, which
-returns a \link[data.table:data.table]{data.table()} with each column corresponding to one field.
-(The \code{data.table} is a column-subset of the humdrum table).
-By default, \code{pullFields()} pulls the \link[=selectedFields]{selected fields}.
-If only one field is pulled, and \code{drop = TRUE}, the field is extracted from the \code{data.table} and returned
-as a vector.}
+\title{Extract field(s) from \link[=humdrumRclass]{humdrumR data}}
 \usage{
 pullFields(
   humdrumR,
@@ -62,4 +58,8 @@ returns a \link[data.table:data.table]{data.table()} with each column correspond
 By default, \code{pullFields()} pulls the \link[=selectedFields]{selected fields}.
 If only one field is pulled, and \code{drop = TRUE}, the field is extracted from the \code{data.table} and returned
 as a vector.
+}
+\seealso{
+{To know what fields are available to pull, use \code{\link[=fields]{fields()}}.
+To know what fields are selected---the default fields to pull---use \code{\link[=selectedFields]{selectedFields()}}.}
 }
