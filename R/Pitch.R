@@ -2935,13 +2935,13 @@ pitchArgCheck <- function(args,  callname) {
   argnames <- .names(args)
   
   for (arg in intersect(argnames, c('generic', 'specific', 'compound', 'simple', 'accidental.melodic', 'octave.absolute', 'octave.relative'))) {
-    checks(args[[arg]], argname = arg, xTF, seealso = '?pitchDeparsing')
+    checks(args[[arg]], argname = arg, xTF, seealso = c(paste0('?', callname), '?pitchDeparsing'))
   }
   scalarchar <- c('flat', 'sharp', 'doublesharp', 'doubleflat', 'natural',
                   'diminish', 'augment', 'major', 'minor', 'perfect',
                   'up', 'down', 'same')
   for (arg in intersect(argnames, scalarchar)) {
-    checks(args[[arg]], xcharacter & xlen1, seealso = '?pitchDeparsing')
+    checks(args[[arg]], xcharacter & xlen1, seealso = c(paste0('?', callname), '?pitchDeparsing'))
   }
   
   if ('generic' %in% argnames) {

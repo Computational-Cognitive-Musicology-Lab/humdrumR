@@ -4,36 +4,43 @@
 
 #' Filter humdrum data
 #' 
-#' `subset.humdrumR` is a command used to filter a [humdrumR corpus][humdrumR::humdrumRclass].
-#' The standard indexing operators (`[]` and `[[]]`) actually work by calling `subset` under-the-hood;
-#' you can read about these indexing options [here][indexHumdrum].
-#' However, using `subset` directly can accomplish much more sophisticated filtering commands than the indexing
+#' HumdrumR defines [subset()][base::subset] (base R) and [filter()][dplyr::filter] (tidyverse) methods 
+#' for [humdrumR data][humdrumR::humdrumRclass]---these two `.humdrumR` methods are synonymous,
+#' working exactly the same.
+#' They are used to "filter" the contents of the underlying [humdrum table][humTable].
+#' This filtering is (by default) not destructive, allowing you to recover the filtered data
+#' using `removeSubset()` or `unfilter()` (which are also synonyms).
+#' R's standard indexing operators (`[]` and `[[]]`) can also be used to filter data---
+#' you can read about these indexing options [here][indexHumdrum]---however, 
+#' the `subset()`/`filter()` can accomplish much more sophisticated filtering commands than the indexing
 #' methods.
-#' You can also use the [dplyr](https://dplyr.tidyverse.org/) "verb" `filter()` as an exact synonym for `subset()`
-#' (on [humdrumR corpus][humdrumR::humdrumRclass] data.)
 #' 
+#' @details
 #' 
-#' `subset.humdrumR` is used in a similar manner to [withinHumdrum],
-#' taking any number of "within expressions" as arguments;
-#' In fact, expression arguments are passed directly to an internal call to `within.humdrumR()`, 
-#' with the `.by` and/or `dataTypes` arguments passed directly.
-#' The only requirement is that the expressions/functions fed to `subset.humdrumR` 
-#' *must* be [predicate](https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)) expressions 
-#' which return a logical (`TRUE`/`FALSE`) vector.
+#' `subset()` and `filter()` are passed one or more expressions which are using the 
+#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrumR].
+#' This evaluation can thus include all of [within.humdrumR()]'s functionality (and arguments)
+#' including group-apply.
+#' The only requirement is that the expressions/functions fed to `subset()`/`filter()`
+#' *must* be return a logical (`TRUE`/`FALSE`) vector (`NA` values are treated as `FALSE`).
 #' The returned vector must either be scalar (length `1`), or be the same length as the input data (the number
 #' of rows in the [humdrum table][humdrumR::humTable]).
 #' If the logical result is scalar, it will be recycled to match the input length: this is useful
-#' in combination with `group_by()`.
+#' in combination with `group_by()`; for example, you can split the data into groups, then
+#' return a single `TRUE` or `FALSE` for each group, causing the whole group to be filtered or not.
 #' 
+#' Note that `subset()`/`filter()` are incompatible with [contextual windows][context()]; if
+#' your data has contextual windows defined, they will be removed (with a warning message) before filtering.
 #' 
 #' @section Nullifying data:
 #' 
-#' When using `subset()`/`filter()`, `humdrumR` doesn't actually delete the data you filter out.
-#' Instead, what these functions do is set all filtered data fields to `NA` (null) values, including
+#' When using `subset()`/`filter()`, humdrumR doesn't actually delete the data you filter out.
+#' Instead, what these functions do is set all filtered data fields to `NA` (null) values, and
 #' changing their data type to `"d"`.
 #' This ensures that the humdrum-syntax of the data is not broken by filtering!
 #' Thus, when you print a 
-#' filtered `humdrumR` you'll see all the filtered data points turned to null data (`.`).
+#' filtered [humdrumR object][humdrumR::humdrumRclass] you'll see all the filtered data points 
+#' turned to null data (`.`).
 #' Since, most `humdrumR` functions ignore null data (`d`) by default, the data is effectively filtered out 
 #' for most practical purposes.
 #' However, if you need to use those null (`'d'`) data points (like, with [ditto()]), they
@@ -42,8 +49,8 @@
 #' 
 #' @section Truly removing data:
 #' 
-#' In many cases, you may filter out large parts of your data, which leaves a bunch of empty null
-#' data points (`"."`) in our printout...which can be hard to read.
+#' In many cases, filtering out large parts of your data leaves a bunch of empty null
+#' data points (`"."`) in your printout...which maybe be difficult to read.
 #' If you *want* to **actually** remove these filtered data points, you can call `removeEmptyFiles()`, 
 #' `removeEmptyPieces()`, `removeEmptySpines()`,  `removeEmptyPaths()`, `removeEmptyRecords()`, or `removeEmptyStops()`.
 #' These functions will safely remove null data without breaking the humdrum syntax;
@@ -56,14 +63,14 @@
 #' @section Renumbering:
 #'
 #' If filtered pieces, files, or spines are removed from a corpus 
-#' (using `removeEmptyPieces()` or `removeEmptySpines()` in combination with `subset`)
+#' (using `removeEmptyPieces()` or `removeEmptySpines()`)
 #' the `File`, `Piece`, `Record` and/or `Spine` fields are renumbered to represented the remaining regions,
 #' starting from `1`.
 #' For example, if you have a corpus of 10 pieces and remove the first piece (`Piece == 1`),
 #' the remaining pieces are renumbered from `2:10` to `1:9`.
 #' Spine/record renumbering works the same, except it is done independently *within* each piece.
 #' 
-#' @param x ***HumdrumR data.***
+#' @param x,.data ***HumdrumR data.***
 #' 
 #' Must be a [humdrumR data object][humdrumRclass].
 #' 
@@ -96,6 +103,20 @@
 #' If grouping fields have already been set by a call to [group_by()],
 #' the `.by` argument overrides them.
 #' 
+#' @examples
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' # remove spine 1 (non destructive)
+#' humData |> subset(Spine > 1)
+#' 
+#' # remove spine 1 (destructive)
+#' humData |> subset(Spine > 1) |> removeEmptySpines()
+#' 
+#' # remove odd numbered bars
+#' 
+#' humData |> group_by(Bar) |> subset(Bar[1] %% 2 == 1)
+#' 
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
 #' @aliases subset
@@ -119,7 +140,9 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
                                                'the subsetting expression(s) must evaluate to logical (TRUE/FALSE) vectors.')
   
   subset <- Reduce('&', subsets)
-  # NA values come in from record types we didn't use, which should NOT be filtered
+  subset[is.na(subset)] <- FALSE
+  # NA values are results of NA values in the evaluated expression, 
+  # and should be treated as FALSE, same as to base::subset() and dplyr::filter()
   
   humtab <- getHumtab(x)
   humtab <- nullify(humtab, fields(x, 'Data')$Name, subset, dataTypes)
@@ -138,11 +161,14 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
 
 #' @rdname subset.humdrumR
 #' @export
-filter.humdrumR <- function(.data, ...) {
+filter.humdrumR <- function(.data, ..., dataTypes = 'D', .by = NULL, removeEmptyPieces = TRUE) {
   exprs <- rlang::enquos(...)
   .data <- uncontextMessage(.data, 'filter')
   
-  rlang::eval_tidy(rlang::quo(subset.humdrumR(.data, !!!exprs))) 
+  rlang::eval_tidy(rlang::quo(subset.humdrumR(.data, !!!exprs, 
+                                              dataTypes = !!dataTypes, 
+                                              .by = !!.by, 
+                                              removeEmptyPieces = !!removeEmptyPieces))) 
 }
 
 
@@ -254,431 +280,6 @@ removeEmptyStops <- function(x) {
 }
 
 
-# Indexing humdrumR ----
-
-#' Indexing humdrumR objects
-#'
-#' R's built-in indexing operators, `[]` (single brakcets) and `[[]]` (double brackets) can
-#' be used as shortcuts for common calls to [subset.humdrumR()],
-#' allowing you to filter out specific pieces, spines, or records.
-#' 
-#' @details 
-#'  
-#' In `R`, the basic [indexing operators][base::Extract], `[]` and `[[]]`,
-#' are used to select subsets of data.
-#' For many data types (for instance, base R [lists][base::list])
-#' the **`[`single brackets`]`** are used for "shallower" extraction while the 
-#' **`[[`double brackets`]]`** are used for "deeper" extraction.
-#' [HumdrumR corpus][humdrumR::humdrumRclass] indexing follows this same basic pattern:
-#' **`[`single brackets`]`** are used to index `humdrumR` objects
-#' *by piece* while **`[[`double brackets`]]`** are used to index
-#' *within pieces*. (Accidentally writing `[]` when you need
-#' `[[]]` is a very common error, so watch out!)
-#' 
-#' Whether, indexing by piece or within, `humdrumR` objects can use
-#' two types of indexing arguments:
-#' 
-#' + By `numeric` (ordinal integers)
-#' + By `character` string (regular expressions)
-#' 
-#' For more powerful/flexible indexing options, use [subset][subset.humdrumR()] directly.
-#' 
-#' 
-#' ### Numeric indexing:
-#' 
-#' 
-#' Indexing `humdrumR` corpora with
-#' **`[`single brackets`]`** will accept
-#' one numeric argument.
-#' This argument will be used to pick pieces within the `humdrumR` object ordinally.
-#' Thus, `humdata[1:10]` will select the first ten pieces in the data while `humdata[42]`
-#' will select only the 42nd piece. 
-#' 
-#' Indexing `humdrumR` objects with
-#'  **`[[`double brackets`]]`** will accept 
-#' one or two numeric arguments, `i` and `j`, either of which can 
-#' be used in isolation or in combination.
-#' (If `j` is used in isolation, it must be named or placed after a comma, as in `humdata[[ , j ]]`.)
-#' 
-#' + `i` is used to index data records (i.e., based on the humtable `Record` field).
-#'   Thus, `humdata[[1:20]]` indexes the first twenty records *from each piece*
-#'   in the corpus, and `humdata[[42]]` extracts the 42nd record *from each piece*.
-#' + `j` is used to index spines  (i.e., based on the `Spine` field).
-#'   Thus, `humdata[[ , 3:4]]` returns the third and fourth spines *from each*
-#'   piece in the corpus.
-#' 
-#' When indexing [humdrumR corpora][humdrumR::humdrumRclass] with numbers,
-#' all `numeric` (double) inputs are converted to integers.
-#' 
-#' Since [subset][subset.humdrumR] always renumbers pieces/spines that remain after filtering/indexing,
-#' `humdrumR` indexing is entirely **ordinal**.
-#' For example,
-#' 
-#' ```
-#' humsubset <- humdata[11:20]
-#' humsubset[2]
-#' ````
-#' 
-#' will return the 12th piece from the original `humdata` object.
-#' This is because the first call to `[]` returns the 11th through 20th pieces, which
-#' are renumbered `1:10` and the second index call returns the *new* 2nd index, which was the 12th
-#' originally.
-#' Similarly,
-#' 
-#' ```
-#' humsubset2 <- humdata[[ , 2:4]]
-#' humsubset2[[ , 2]]
-#' ```
-#
-#' will return the third spine from the original data.
-#' 
-#' As in normal `R` indexing, negative numbers can be used, causing corresponding elements to be
-#' *removed* instead of retained. Thus, `humdata[-3:-5]` will remove the third, fourth, and fifth pieces from the data
-#' while `humdata[[ , -3:-5]]` will remove the third, fourth, and fifth spines from each piece.
-#' Positive and negative indices cannot be mixed in a single argument.
-#' 
-#' 
-#' 
-#' In all cases, indices outside of range (or of value `0`) are ignored.
-#' E.g., if you have a corpus of twenty pieces and you call `corpus[21]`, there is no 21st piece, so `21` is "out of range".
-#' If all your input indices are `0` and error will result.
-#' If all your input indices are out of range then 
-#' an empty `humdrumR` object is returned.
-#' For instance, `humdata[[401:500, ]]` will return an empty
-#' `humdrumR` object if there are no pieces with more than 400
-#' data records.
-#' 
-#' 
-#' ### Character indexing:
-#' 
-#' Indexing [humdrumR objects][humdrumR:humdrumRclass] with 
-#' `[`single brackets`]` will accept one 
-#' vector of `character` strings. These strings are 
-#' treated as 
-#' [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
-#' 
-#' The tokens from the humdrumR object's [selected field(s)][selectedFields] are searched
-#' for matches to any of the regular expressions you input. Any piece that contains
-#' **any** match to **any** of the regular expressions is retained---all other pieces
-#' are filtered out. Note that (because this is `[`single-bracket`]` indexing) the entire piece is 
-#' retained, even if there is only one match.
-#' If no matches occur in any pieces, an empty `humdrumR` object is returned.
-#' 
-#' Indexing `humdrumR` objects with `[[`double brackets`]]` will 
-#' accept one or two vectors of `character` strings, `i` and `j`, 
-#' either of which can 
-#' be used in isolation or in combination. 
-#' (If `j` is used in isolation, it must be placed after a comma, 
-#' as in `humdata[[ , j]]`.)
-#' These strings are 
-#' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes).
-#' The tokens from the humdrumR object's [selected field(s)][selectedFields] are searched
-#' for matches to any of the regular expressions you input.
-#' Any record which contains at least one token matching any regex in `i`
-#' will be retained.
-#' Similarly, any spine which contains at least one token matching any
-#' regex in `j` is retained.
-#' If `i` and `j` are used together,
-#' matching spines (`j`) are indexed first, so that 
-#' tokens matching the regular expression(s) in `i`
-#' must be found in the matching spines.
-#' 
-#' @section removeEmpty:
-#' 
-#' By default, calls to indexing operators will completely remove
-#' data which you are filtering out.
-#' However, if you set the `removeEmpty` argument to `FALSE`,
-#' the filtered data is set to `NULL`, but not actually removed from the data object.
-#' (See [subset.humdrumR()] for more details.)
-#' 
-#' @param x ***HumdrumR data to index.***
-#'
-#' Must be a [humdrumR data object][humdrumRclass].
-#'
-#' @param i ***Index for vectors or matrix/data.frame rows.***
-#'
-#' A numeric vector or a `character` string treated as a regular expression.
-#'
-#' @param j ***Index for matrix/data.frame columns.***
-#'
-#' A numeric vector or a `character` string treated as a regular expression.
-#'
-#' @seealso {These indexing operators work through special calls to [subset.humdrumR()]}
-#' @name indexHumdrum
-NULL
-
-
-
-
-
-numericIndexCheck <- function(i) {
-    if (any(i < 0) && any(i > 0)) stop("You can't mix negative and positive numbers when trying to index humdrumR objects.")
-    if (all(i == 0)) stop("You can't index humdrumR objects with just zeros.")
-    
-    if (any(i == 0)) {
-        warning("Your indexing of a humdrumR object is mixing zeros in with non-zero numbers. These zeros are simply ignored.")
-        i <- i[i != 0]
-    }
-    
-    if (any(duplicated(i))) {
-        warning("When indexing a humdrumR object with numeric values, duplicates are ignored.")
-        i <- i[!duplicated(i)]
-    }
-    
-    i
-}
-
-
-## Single brackets [] ----
-
-
-#' @rdname indexHumdrum
-#' @usage humdata[] # returns unchanged
-#' @export
-setMethod('[',
-          signature = c(x = 'humdrumR', i = 'missing'),
-          definition = force)
-
-### numeric ----
-
-#' @rdname indexHumdrum
-#' @usage humdata[x:y]
-#' @export
-setMethod('[',
-          signature = c(x = 'humdrumR', i = 'numeric'),
-          function(x, i, removeEmpty = TRUE) {
-              i <- numericIndexCheck(i)
-              
-              if (removeEmpty) {
-                humtab <- getHumtab(x)
-                
-                targets <- humtab[ , sort(unique(Piece))[i]]
-                humtab <- humtab[Piece %in% targets]
-               
-                
-                putHumtab(x) <- humtab
-              } else {
-                x <- subset(x, Piece %in% sort(unique(Piece))[!!i])
-              }
-             
-              
-              x
-
-          })
-
-
-
-### character ----
-
-#' @rdname indexHumdrum
-#' @usage humdata['regex']
-#' @export
-setMethod('[',
-          signature = c(x = 'humdrumR', i = 'character'),
-          function(x, i, removeEmpty = TRUE) {
-            x <- subset(x, any(. %~l% !!i), .by = 'Piece')
-            
-            if (removeEmpty) x <- removeEmptyPieces(x)
-            
-            x
-          })
-
-
-
-
-## Double brackets [[]] ----
-    
-
-### numeric ----
-
-#' @rdname indexHumdrum
-#' @usage humdata[[x:y]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'), 
-          function(x, i, j, removeEmpty = TRUE) {
-            
-            i <- numericIndexCheck(i)    
-            if (removeEmpty) {
-              humtab <- getHumtab(x)
-              
-              humtab <- if (all(i > 0L)) {
-                humtab[Record %in% i | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
-              } else {
-                humtab[!(Record %in% abs(i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token)]
-              }
-              
-              putHumtab(x) <- humtab
-             
-            } else {
-              x <- if (all(i > 0L)) {
-                subset(x, Record %in% (!!i) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), dataTypes = 'GLIMDd')
-              } else {
-                subset(x, !(Record %in% abs(!!i)) | Token %in% c('*-', '*v', '*^') | grepl('\\*\\*', Token), dataTypes = 'GLIMDd')
-              }
-          
-            }
-            
-            removeEmptyPieces(x)
-
-          })
-
-
-#' @rdname indexHumdrum
-#' @usage humdata[[ , x:y]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'), 
-          function(x, j, removeEmpty = TRUE) {
-              j <- numericIndexCheck(j)    
-              
-              if (removeEmpty) {
-                humtab <- getHumtab(x)
-                humtab <- humtab[is.na(Spine) | Spine %in% sort(unique(Spine))[j]]
-                # sort(unique(Spine))[j] is needed so that negative indices are used!
-                
-                putHumtab(x) <- renumberSpines.data.table(humtab)
-              } else {
-                
-                
-                x <- subset(x, Spine %in% sort(unique(Spine))[!!j] | is.na(Spine), dataTypes = "D")
-              }
-              
-              removeEmptyPieces(x)
-              
-              
-          })
-
-
-
-### character ----
-
-
-
-#' @rdname indexHumdrum
-#' @usage humdata[['regex']]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
-function(x, i, removeEmpty = FALSE) {
-    # gets any record which contains match
-  
-    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), .by = 'Piece', dataTypes = "D")
-    
-    if (removeEmpty) x <- removeEmptyRecords(x)
-    
-    removeEmptyPieces(x)
-})
-
-
-#' @rdname indexHumdrum
-#' @usage humdata[[ , 'regex']]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
-          function(x, j, removeEmpty = TRUE) {
-            #gets any spine which contains match
-            
-            exclusive <- all(grepl('^\\*\\*', j))
-            expr <- quote(Spine %in% unique(Spine[. %~l% j]) | is.na(Spine))
-            
-            if (exclusive) {
-              j <- gsub('^\\*\\**', '', j)
-              expr <- substituteName(expr, list(. = quote(Exclusive)))
-            }
-            
-            if (removeEmpty && exclusive) {
-              humtab <- getHumtab(x)
-              hits <- rlang::eval_tidy(rlang::expr(humtab[ , !!expr, by = Piece]))$V1
-              humtab <- humtab[hits == TRUE]
-              putHumtab(x) <- renumberSpines.data.table(humtab)
-              
-            } else {
-              x <- rlang::eval_tidy(rlang::expr(subset(x, !!expr, .by = 'Piece', dataTypes = 'D')))
-              if (removeEmpty) x <- removeEmptySpines(x)
-            }
-            removeEmptyPieces(x)
-
-          })
-
-
-
-
-
-
-
-
-
-#' @rdname indexHumdrum
-#' @usage humdata[[x:y, l:m]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'), 
-          function(x, i, j, removeEmpty = FALSE) {
-            x <- x[[ , j]]
-            x <- x[[i, ]]
-            
-            if (removeEmpty) x <- removeEmptyRecords(removeEmptySpines(x))
-            x
-          })
-
-
-#   
-
-
-#' @rdname indexHumdrum
-#' @usage humdata[[x:y, l:m]]
-#' @export
-setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'), 
-          function(x, i, j, ..., removeEmpty = FALSE) {
-           
-            ldots <- list(...)
-            exclusives <- intersect(names(ldots), unique(x$Exclusive))
-            if (length(exclusives)) {
-              x <- subset(x, .by = 'File', {
-                keepSpines <- unique(Spine)
-                for (exclusive in exclusives) {
-                  excSpines <-sort(unique(Spine[Exclusive == exclusive]))
-                  keepSpines <- setdiff(keepSpines, setdiff(excSpines, excSpines[ldots[[exclusive]]]))
-                }
-                Spine %in% keepSpines
-              })
-              if (removeEmpty) x <- removeEmptySpines(x)
-            }
-            
-            
-           
-            x
-          })
-
-
-
-## Indexing in pipes ----
-
-
-#' @rdname indexHumdrum
-#' @export
-index <- function(x, i, j, drop = TRUE) {
-  
-  pat <- paste0(missing(i), missing(j))
-  
-  switch(pat,
-         'TRUETRUE' = x,
-         'TRUEFALSE' = x[  , j, drop],
-         'FALSETRUE' = x[i ,  , drop],
-         'FALSEFALSE' = x[i, j, drop])
-}
-
-#' @rdname indexHumdrum
-#' @export
-index2 <- function(x, i, j, drop = TRUE) {
-  
-  pat <- paste0(missing(i), missing(j))
-  
-  if (!is.humdrumR(x)) return(x[[i]])
-  switch(pat,
-         'TRUETRUE' = x,
-         'TRUEFALSE' = x[[  , j, drop]],
-         'FALSETRUE' = x[[i ,  , drop]],
-         'FALSEFALSE' = x[[i, j, drop]])
-}
-
-
 # Unfiltering humdrumR ----
 
 
@@ -767,4 +368,482 @@ combineFields <- function(humdrumR, ...) {
   update_Dd(humdrumR, newFields)
 }
 
+
+
+# Indexing humdrumR ----
+
+#' Indexing humdrumR objects
+#'
+#' R's built-in indexing operators, `[]` (single brakcets) and `[[]]` (double brackets) can
+#' be used to filter [humdrumR data][humdrumR::humdrumRclass], by removing specific
+#' pieces, spines, or records from the [humdrum table][humTable].
+#' Unlike the more flexible/powerful [subset()/filter()][subset.humdrumR()] methods,
+#' the indexing operators are generally destructive (by default), meaning filtered data can no longer
+#' be accessed after indexing.
+#' The functions `index()` and `index2()` are synonyms for single and double brackets respectively, 
+#' which can be used in pipes.
+#' 
+#' 
+#' @details 
+#'  
+#' In R, the fundamental [indexing operators][base::Extract], `[]` and `[[]]`,
+#' are used to select subsets of data.
+#' For many data types (for instance, base R [lists][base::list])
+#' the **`[`single brackets`]`** are used for "shallower" extraction while the 
+#' **`[[`double brackets`]]`** are used for "deeper" extraction.
+#' By rough analogy with this "shallow vs deep" dichotomy, [HumdrumR corpus][humdrumR::humdrumRclass] 
+#' indexing brackets are used in two ways:
+#' 
+#' + **`[`single brackets`]`** are used to select *pieces* in your data.
+#' + **`[[`double brackets`]]`** are used to select records or spines *within the pieces* in your data.
+#' 
+#' (Accidentally writing `[]` when you need
+#' `[[]]` is a very common error, so watch out!)
+#' 
+#' Whether, indexing by piece or within, `humdrumR` objects can use
+#' two types of indexing arguments: `numeric` (ordinal integers) or `character` string 
+#' (interpreted as regular expressions).
+#' 
+#' 
+#' 
+#' ### Numeric indexing:
+#' 
+#' 
+#' Indexing `humdrumR` corpora with
+#' **`[`single brackets`]`** will accept
+#' one numeric argument---only whole numbers are accepted.
+#' This argument will be used to pick pieces within the `humdrumR` object ordinally.
+#' Thus, `humData[1:10]` will select the first ten pieces in the data while `humData[42]`
+#' will select only the 42nd piece. 
+#' 
+#' Indexing `humdrumR` objects with
+#'  **`[[`double brackets`]]`** will accept 
+#' one or two numeric arguments, `i` and `j`, either of which can 
+#' be used in isolation or in combination.
+#' (If `j` is used in isolation, it must be named or placed after a comma, as in `humData[[ , j ]]`.)
+#' 
+#' + `i` is used to index records (i.e., based on the humtable `Record` field).
+#'   Thus, `humData[[1:20]]` indexes the first twenty records *from each piece*
+#'   in the corpus, and `humData[[42]]` extracts the 42nd record *from each piece*.
+#'
+#'   To avoid breaking the humdrum syntax, exclusive interpretations and spine-path 
+#'   interpretations are not removed.
+#' + `j` is used to index spines  (i.e., based on the `Spine` field).
+#'   Thus, `humData[[ , 3:4]]` returns the third and fourth spines *from each*
+#'   piece in the corpus.
+#' 
+#' 
+#' Pieces/spines/records are renumbered after indexing 
+#' (see the **Renumbering** section of the [subset()/filter() docs][subset.humdrumR()] for explantion).
+#' As a result, `humdrumR` indexing is entirely **ordinal**.
+#' For example,
+#' 
+#' ```
+#' humsubset <- humData[11:20]
+#' humsubset[2]
+#' ````
+#' 
+#' will return the 12th piece from the original `humData` object.
+#' This is because the first call to `[]` returns the 11th through 20th pieces, which
+#' are renumbered `1:10` and the second index call returns the *new* 2nd index, which was the 12th
+#' originally.
+#' Similarly,
+#' 
+#' ```
+#' humsubset2 <- humData[[ , 2:4]]
+#' humsubset2[[ , 2]]
+#' ```
+#
+#' will return the third spine from the original data.
+#' 
+#' 
+#' #### Negative numbers 
+#' 
+#' As in normal `R` indexing, negative numbers can be used, causing corresponding elements to be
+#' *removed* instead of retained. Thus, `humData[-3:-5]` will remove the third, fourth, and fifth pieces from the data
+#' while `humData[[ , -3:-5]]` will remove the third, fourth, and fifth spines from each piece.
+#' Positive and negative indices cannot be mixed in a single argument.
+#' 
+#' #### Out of bounds indices
+#' 
+#' In all cases, indices outside of bounds (or of value `0`) are ignored.
+#' E.g., if you have a corpus of twenty pieces and you call `corpus[21]`, there is no 21st piece, so `21` is "out of bounds".
+#' If all your input indices are `0` and error will result.
+#' If *all* your input indices are out of bounds then 
+#' an empty `humdrumR` object is returned.
+#' For instance, `humData[[401:500, ]]` will return an empty
+#' `humdrumR` object if there are no pieces with more than 400
+#' data records.
+#' 
+#' 
+#' ### Character indexing:
+#' 
+#' If you index a [humdrumR object][humdrumR:humdrumRclass]
+#' with `character` strings, these strings are 
+#' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes),
+#' which are matched against non-null data tokens (`"D"`) in the object's first [selected field][selectedFields].
+#' A match to **any** of the regular expressions considered a match.
+#' 
+#' Indexing with `[`single brackets`]` accepts one 
+#' vector of `character` regular expressions.
+#' Any piece that contains even a single match will be retained.
+#' If no matches occur in any pieces, an empty `humdrumR` object is returned.
+#' 
+#' Indexing `humdrumR` objects with `[[`double brackets`]]` 
+#' accepts one or two vectors of `character` strings, `i` and `j`, 
+#' either of which can be used in isolation or in combination. 
+#' (If `j` is used in isolation, it must be placed after a comma, 
+#' as in `humData[[ , j]]`.)
+#' Any data record which contains at least one match to the `i` regex(es)
+#' will be retained.
+#' Similarly, any spine which contains at least one match to the
+#' `j` regex(es) is retained.
+#' If `i` and `j` are used together,
+#' matching spines (`j`) are indexed first, so that 
+#' tokens matching the regular expression(s) in `i`
+#' must be found in the matching spines.
+#' 
+#' ### Exclusive indexing:
+#' 
+#' Spines can also be indexed ordinally by exclusive interpretation.
+#' To do this, provide a double-bracket index with a *named* numeric (whole number) argument,
+#' with name(s) corresponding to exclusive interpretations in the data.
+#' For example, if you want to index the 3rd `**kern` spine in each piece,
+#' use `humData[[kern = 3]]`.
+#' Note that *other* exclusive interpretations in each piece are unaffected---in 
+#' this example, only the kern spines (if there are any) are indexed!
+#' 
+#' 
+#' @section removeEmpty:
+#' 
+#' The `removeEmpty` argument to any humdrumR indexing controls whether
+#' filtered data is completely removed from the data, or simply set to null 
+#' This means the filtered data can be recovered using [unfilter()] (see the [subset()/filter()][subset.humdrumR()]
+#' docs for an explanation).
+#' By default, piece-indexing and spine-indexing have `removeEmpty = TRUE`,
+#' but record-indexing defaults to `removeEmpty = FALSE`.
+#' 
+#' 
+#' 
+#' @param x ***HumdrumR data to index.***
+#'
+#' Must be a [humdrumR data object][humdrumRclass].
+#'
+#' @param i ***Index for vectors or matrix/data.frame rows.***
+#'
+#' A numeric vector or a `character` string treated as a regular expression.
+#'
+#' @param j ***Index for matrix/data.frame columns.***
+#'
+#' A numeric vector or a `character` string treated as a regular expression.
+#'
+#' @examples
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")
+#' 
+#' humData[1:2]
+#' humData[-1]
+#' 
+#' humData[[ , 3:4]]
+#' humData[[1:40 , ]]
+#' 
+#' # find all pieces which use a flat 3
+#' humData['b3']
+#' 
+#' # find all records that use a flat 3
+#' humData[['b3', ]]
+#' humData[['b3', removeEmpty = TRUE]]
+#' 
+#' # Exclusive interpretation indexing
+#' humData[[deg = 1]]
+#'
+#' # pipe indexing
+#' humData |> index(1:3) |> index2(3:4)
+
+#' 
+#' @seealso {For more powerful/flexible indexing options, use [subset()/filter()][subset.humdrumR].}
+#' @name indexHumdrum
+NULL
+
+
+
+
+
+numericIndexCheck <- function(i, argname = 'i') {
+    
+    
+  
+    checks(i, xwholenum & xposORneg, argname, seealso = '?indexHumdrum')
+    # if (any(i < 0) && any(i > 0)) .stop("You can't mix negative and positive numbers when trying to index humdrumR objects.")
+    if (all(i == 0)) .stop("You can't index humdrumR objects with just zeros.")
+    
+    if (any(i == 0)) {
+        .warn("Your indexing of a humdrumR object is mixing zeros in with non-zero numbers. These zeros are simply ignored.")
+        i <- i[i != 0]
+    }
+    
+    if (any(duplicated(i))) {
+        .warn("When indexing a humdrumR object with numeric values, duplicates are ignored.")
+        i <- i[!duplicated(i)]
+    }
+    
+    i
+}
+
+
+## Single brackets [] ----
+
+
+#' @rdname indexHumdrum
+#' @usage humData[] # returns unchanged
+#' @export
+setMethod('[',
+          signature = c(x = 'humdrumR', i = 'missing'),
+          definition = force)
+
+### numeric ----
+
+#' @rdname indexHumdrum
+#' @usage humData[x:y]
+#' @export
+setMethod('[',
+          signature = c(x = 'humdrumR', i = 'numeric'),
+          function(x, i, removeEmpty = TRUE) {
+              i <- numericIndexCheck(i)
+              
+              if (removeEmpty) {
+                humtab <- getHumtab(x)
+                
+                targets <- humtab[ , sort(unique(Piece))[i]]
+                humtab <- humtab[Piece %in% targets]
+               
+                
+                putHumtab(x) <- humtab
+              } else {
+                x <- subset(x, Piece %in% sort(unique(Piece))[!!i])
+              }
+             
+              
+              x
+
+          })
+
+
+
+### character ----
+
+#' @rdname indexHumdrum
+#' @usage humData['regex']
+#' @export
+setMethod('[',
+          signature = c(x = 'humdrumR', i = 'character'),
+          function(x, i, removeEmpty = TRUE) {
+            x <- subset(x, any(. %~l% !!i), .by = 'Piece')
+            
+            if (removeEmpty) x <- removeEmptyPieces(x)
+            
+            x
+          })
+
+
+
+
+## Double brackets [[]] ----
+    
+
+### numeric ----
+
+#' @rdname indexHumdrum
+#' @usage humData[[x:y]]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'), 
+          function(x, i, j, removeEmpty = TRUE) {
+            
+            i <- numericIndexCheck(i)    
+            if (removeEmpty) {
+              humtab <- getHumtab(x)
+              
+              humtab <- if (all(i > 0L)) {
+                humtab[Record %in% i | Type %in% c('E', 'S')]
+              } else {
+                humtab[!(Record %in% abs(i)) | Type %in% c('E', 'S')]
+              }
+              
+              putHumtab(x) <- humtab
+             
+            } else {
+              x <- if (all(i > 0L)) {
+                subset(x, Record %in% (!!i) | Type %in% c('E', 'S'), dataTypes = 'GLIMDd')
+              } else {
+                subset(x, !(Record %in% abs(!!i)) | Type %in% c('E', 'S'), dataTypes = 'GLIMDd')
+              }
+          
+            }
+            
+            removeEmptyPieces(x)
+
+          })
+
+
+#' @rdname indexHumdrum
+#' @usage humData[[ , x:y]]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'), 
+          function(x, j, removeEmpty = TRUE) {
+              j <- numericIndexCheck(j, 'j')    
+              
+              if (removeEmpty) {
+                humtab <- getHumtab(x)
+                humtab <- humtab[is.na(Spine) | Spine %in% sort(unique(Spine))[j]]
+                # sort(unique(Spine))[j] is needed so that negative indices are used!
+                
+                putHumtab(x) <- renumberSpines.data.table(humtab)
+              } else {
+                
+                
+                x <- subset(x, Spine %in% sort(unique(Spine))[!!j] | is.na(Spine), dataTypes = "D")
+              }
+              
+              removeEmptyPieces(x)
+              
+              
+          })
+
+
+
+### character ----
+
+
+
+#' @rdname indexHumdrum
+#' @usage humData[['regex']]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
+function(x, i, removeEmpty = FALSE) {
+    # gets any record which contains match
+  
+    x <- subset(x, Record %in% unique(Record[. %~l% !!i]), .by = 'Piece', dataTypes = "D")
+    
+    if (removeEmpty) x <- removeEmptyRecords(x)
+    
+    removeEmptyPieces(x)
+})
+
+
+#' @rdname indexHumdrum
+#' @usage humData[[ , 'regex']]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
+          function(x, j, removeEmpty = TRUE) {
+            #gets any spine which contains match
+            
+            exclusive <- all(grepl('^\\*\\*', j))
+            expr <- quote(Spine %in% unique(Spine[. %~l% j]) | is.na(Spine))
+            
+            if (exclusive) {
+              j <- gsub('^\\*\\**', '', j)
+              expr <- substituteName(expr, list(. = quote(Exclusive)))
+            }
+            
+            if (removeEmpty && exclusive) {
+              humtab <- getHumtab(x)
+              hits <- rlang::eval_tidy(rlang::expr(humtab[ , !!expr, by = Piece]))$V1
+              humtab <- humtab[hits == TRUE]
+              putHumtab(x) <- renumberSpines.data.table(humtab)
+              
+            } else {
+              x <- rlang::eval_tidy(rlang::expr(subset(x, !!expr, .by = 'Piece', dataTypes = 'D')))
+              if (removeEmpty) x <- removeEmptySpines(x)
+            }
+            removeEmptyPieces(x)
+
+          })
+
+
+
+
+
+
+
+
+
+#' @rdname indexHumdrum
+#' @usage humData[[x:y, l:m]]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'), 
+          function(x, i, j, removeEmpty = FALSE) {
+            x <- x[[ , j]]
+            x <- x[[i, ]]
+            
+            if (removeEmpty) x <- removeEmptyRecords(removeEmptySpines(x))
+            x
+          })
+
+
+#   
+
+
+#### Exclusive interpretation indexing ----
+
+#' @rdname indexHumdrum
+#' @usage humData[[ , , regex]]
+#' @export
+setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'), 
+          function(x, i, j, ..., removeEmpty = TRUE) {
+           
+            ldots <- list(...)
+            names(ldots) <- gsub('^\\**', '', names(ldots))
+            exclusives <- intersect(names(ldots), unique(x$Exclusive))
+            
+            ldots <- ldots[names(ldots) %in% exclusives]
+            ldots <- Map(numericIndexCheck, ldots, names(ldots))
+            
+            if (length(exclusives)) {
+              x <- subset(x, .by = 'File', {
+                keepSpines <- unique(Spine)
+                for (exclusive in exclusives) {
+                  excSpines <- sort(unique(Spine[Exclusive == exclusive]))
+                  keepSpines <- setdiff(keepSpines, setdiff(excSpines, excSpines[ldots[[exclusive]]]))
+                }
+                Spine %in% keepSpines
+              })
+              if (removeEmpty) x <- removeEmptySpines(x)
+            }
+            
+            
+           
+            x
+          })
+
+
+
+## Indexing in pipes ----
+
+
+#' @rdname indexHumdrum
+#' @export
+index <- function(x, i, j, drop = TRUE) {
+  
+  pat <- paste0(missing(i), missing(j))
+  
+  switch(pat,
+         'TRUETRUE' = x,
+         'TRUEFALSE' = x[  , j, drop],
+         'FALSETRUE' = x[i ,  , drop],
+         'FALSEFALSE' = x[i, j, drop])
+}
+
+#' @rdname indexHumdrum
+#' @export
+index2 <- function(x, i, j, drop = TRUE) {
+  
+  pat <- paste0(missing(i), missing(j))
+  
+  if (!is.humdrumR(x)) return(x[[i]])
+  switch(pat,
+         'TRUETRUE' = x,
+         'TRUEFALSE' = x[[  , j, drop]],
+         'FALSETRUE' = x[[i ,  , drop]],
+         'FALSEFALSE' = x[[i, j, drop]])
+}
 

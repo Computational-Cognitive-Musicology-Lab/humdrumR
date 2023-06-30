@@ -777,7 +777,7 @@ count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NUL
   
   checks(dur, xcharacter | xnumber)
   checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
-  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
+  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?count", 'the rhythm vignette'))
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
   checks(offBeats, xTF)
   
@@ -844,7 +844,7 @@ count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NUL
 subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
   
   checks(dur, xcharacter | xnumber)
-  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
+  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?subpos", 'the rhythm vignette'))
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
   checks(deparser, xclass('rhythmFunction'))
   
@@ -1185,7 +1185,7 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL
   checks(dur, xcharacter | xnumber)
   checks(offBeats, xTF)
   checks(remainderSubdivides, xTF)
-  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = 'the rhythm vignette')
+  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?metcount", 'the rhythm vignette'))
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)

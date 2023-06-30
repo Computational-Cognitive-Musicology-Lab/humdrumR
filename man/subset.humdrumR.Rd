@@ -17,7 +17,7 @@
 \usage{
 \method{subset}{humdrumR}(x, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
 
-\method{filter}{humdrumR}(.data, ...)
+\method{filter}{humdrumR}(.data, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
 
 removeEmptyFiles(x)
 
@@ -38,7 +38,7 @@ unfilter(humdrumR, complement = NULL)
 complement(humdrumR)
 }
 \arguments{
-\item{x}{\emph{\strong{HumdrumR data.}}
+\item{x, .data}{\emph{\strong{HumdrumR data.}}
 
 Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
@@ -72,36 +72,43 @@ Defaults to \code{TRUE}.
 Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
-\code{subset.humdrumR} is a command used to filter a \link[=humdrumRclass]{humdrumR corpus}.
-The standard indexing operators (\verb{[]} and \verb{[[]]}) actually work by calling \code{subset} under-the-hood;
-you can read about these indexing options \link[=indexHumdrum]{here}.
-However, using \code{subset} directly can accomplish much more sophisticated filtering commands than the indexing
+HumdrumR defines \link[base:subset]{subset()} (base R) and \link[dplyr:filter]{filter()} (tidyverse) methods
+for \link[=humdrumRclass]{humdrumR data}---these two \code{.humdrumR} methods are synonymous,
+working exactly the same.
+They are used to "filter" the contents of the underlying \link[=humTable]{humdrum table}.
+This filtering is (by default) not destructive, allowing you to recover the filtered data
+using \code{removeSubset()} or \code{unfilter()} (which are also synonyms).
+R's standard indexing operators (\verb{[]} and \verb{[[]]}) can also be used to filter data---
+you can read about these indexing options \link[=indexHumdrum]{here}---however,
+the \code{subset()}/\code{filter()} can accomplish much more sophisticated filtering commands than the indexing
 methods.
-You can also use the \href{https://dplyr.tidyverse.org/}{dplyr} "verb" \code{filter()} as an exact synonym for \code{subset()}
-(on \link[=humdrumRclass]{humdrumR corpus} data.)
 }
 \details{
-\code{subset.humdrumR} is used in a similar manner to \link{withinHumdrum},
-taking any number of "within expressions" as arguments;
-In fact, expression arguments are passed directly to an internal call to \code{within.humdrumR()},
-with the \code{.by} and/or \code{dataTypes} arguments passed directly.
-The only requirement is that the expressions/functions fed to \code{subset.humdrumR}
-\emph{must} be \href{https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)}{predicate} expressions
-which return a logical (\code{TRUE}/\code{FALSE}) vector.
+\code{subset()} and \code{filter()} are passed one or more expressions which are using the
+fields of the \link[=humTable]{humdrum table} using a call to \link[=withinHumdrumR]{within}.
+This evaluation can thus include all of \code{\link[=within.humdrumR]{within.humdrumR()}}'s functionality (and arguments)
+including group-apply.
+The only requirement is that the expressions/functions fed to \code{subset()}/\code{filter()}
+\emph{must} be return a logical (\code{TRUE}/\code{FALSE}) vector (\code{NA} values are treated as \code{FALSE}).
 The returned vector must either be scalar (length \code{1}), or be the same length as the input data (the number
 of rows in the \link[=humTable]{humdrum table}).
 If the logical result is scalar, it will be recycled to match the input length: this is useful
-in combination with \code{group_by()}.
+in combination with \code{group_by()}; for example, you can split the data into groups, then
+return a single \code{TRUE} or \code{FALSE} for each group, causing the whole group to be filtered or not.
+
+Note that \code{subset()}/\code{filter()} are incompatible with \link[=context]{contextual windows}; if
+your data has contextual windows defined, they will be removed (with a warning message) before filtering.
 }
 \section{Nullifying data}{
 
 
-When using \code{subset()}/\code{filter()}, \code{humdrumR} doesn't actually delete the data you filter out.
-Instead, what these functions do is set all filtered data fields to \code{NA} (null) values, including
+When using \code{subset()}/\code{filter()}, humdrumR doesn't actually delete the data you filter out.
+Instead, what these functions do is set all filtered data fields to \code{NA} (null) values, and
 changing their data type to \code{"d"}.
 This ensures that the humdrum-syntax of the data is not broken by filtering!
 Thus, when you print a
-filtered \code{humdrumR} you'll see all the filtered data points turned to null data (\code{.}).
+filtered \link[=humdrumRclass]{humdrumR object} you'll see all the filtered data points
+turned to null data (\code{.}).
 Since, most \code{humdrumR} functions ignore null data (\code{d}) by default, the data is effectively filtered out
 for most practical purposes.
 However, if you need to use those null (\code{'d'}) data points (like, with \code{\link[=ditto]{ditto()}}), they
@@ -112,8 +119,8 @@ See the \code{\link[=ditto]{ditto()}} documentation for examples.
 \section{Truly removing data}{
 
 
-In many cases, you may filter out large parts of your data, which leaves a bunch of empty null
-data points (\code{"."}) in our printout...which can be hard to read.
+In many cases, filtering out large parts of your data leaves a bunch of empty null
+data points (\code{"."}) in your printout...which maybe be difficult to read.
 If you \emph{want} to \strong{actually} remove these filtered data points, you can call \code{removeEmptyFiles()},
 \code{removeEmptyPieces()}, \code{removeEmptySpines()},  \code{removeEmptyPaths()}, \code{removeEmptyRecords()}, or \code{removeEmptyStops()}.
 These functions will safely remove null data without breaking the humdrum syntax;
@@ -128,7 +135,7 @@ However, you can stop this by specifying  \code{removeEmptyPieces = FALSE}.
 
 
 If filtered pieces, files, or spines are removed from a corpus
-(using \code{removeEmptyPieces()} or \code{removeEmptySpines()} in combination with \code{subset})
+(using \code{removeEmptyPieces()} or \code{removeEmptySpines()})
 the \code{File}, \code{Piece}, \code{Record} and/or \code{Spine} fields are renumbered to represented the remaining regions,
 starting from \code{1}.
 For example, if you have a corpus of 10 pieces and remove the first piece (\code{Piece == 1}),
@@ -136,6 +143,21 @@ the remaining pieces are renumbered from \code{2:10} to \code{1:9}.
 Spine/record renumbering works the same, except it is done independently \emph{within} each piece.
 }
 
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+# remove spine 1 (non destructive)
+humData |> subset(Spine > 1)
+
+# remove spine 1 (destructive)
+humData |> subset(Spine > 1) |> removeEmptySpines()
+
+# remove odd numbered bars
+
+humData |> group_by(Bar) |> subset(Bar[1] \%\% 2 == 1)
+
+}
 \seealso{
 {The \link[=indexHumdrum]{indexing operators} \verb{[]} and \verb{[[]]} can be used as shortcuts for common \code{subset} calls.}
 }

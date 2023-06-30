@@ -1699,7 +1699,7 @@ pull_data.frame <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot')
 #' @name pullHumdrum
 #' @export
 pull_tibble <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot') {
-    as_tibble(pull_data.table(humdrumR, ..., dataTypes = dataTypes, null = null))
+    tibble::as_tibble(pull_data.table(humdrumR, ..., dataTypes = dataTypes, null = null))
 }
 
 #' @rdname pullHumdrum

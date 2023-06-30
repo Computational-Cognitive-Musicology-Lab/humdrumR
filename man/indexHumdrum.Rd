@@ -15,23 +15,23 @@
 \alias{index2}
 \title{Indexing humdrumR objects}
 \usage{
-humdata[] # returns unchanged
+humData[] # returns unchanged
 
-humdata[x:y]
+humData[x:y]
 
-humdata['regex']
+humData['regex']
 
-humdata[[x:y]]
+humData[[x:y]]
 
-humdata[[ , x:y]]
+humData[[ , x:y]]
 
-humdata[['regex']]
+humData[['regex']]
 
-humdata[[ , 'regex']]
+humData[[ , 'regex']]
 
-humdata[[x:y, l:m]]
+humData[[x:y, l:m]]
 
-humdata[[x:y, l:m]]
+humData[[ , , regex]]
 
 index(x, i, j, drop = TRUE)
 
@@ -52,135 +52,175 @@ A numeric vector or a \code{character} string treated as a regular expression.}
 }
 \description{
 R's built-in indexing operators, \verb{[]} (single brakcets) and \verb{[[]]} (double brackets) can
-be used as shortcuts for common calls to \code{\link[=subset.humdrumR]{subset.humdrumR()}},
-allowing you to filter out specific pieces, spines, or records.
+be used to filter \link[=humdrumRclass]{humdrumR data}, by removing specific
+pieces, spines, or records from the \link[=humTable]{humdrum table}.
+Unlike the more flexible/powerful \link[=subset.humdrumR]{subset()/filter()} methods,
+the indexing operators are generally destructive (by default), meaning filtered data can no longer
+be accessed after indexing.
+The functions \code{index()} and \code{index2()} are synonyms for single and double brackets respectively,
+which can be used in pipes.
 }
 \details{
-In \code{R}, the basic \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
+In R, the fundamental \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
 are used to select subsets of data.
 For many data types (for instance, base R \link[base:list]{lists})
 the \strong{\code{[}single brackets\verb{]}} are used for "shallower" extraction while the
 \strong{\code{[[}double brackets\verb{]]}} are used for "deeper" extraction.
-\link[=humdrumRclass]{HumdrumR corpus} indexing follows this same basic pattern:
-\strong{\code{[}single brackets\verb{]}} are used to index \code{humdrumR} objects
-\emph{by piece} while \strong{\code{[[}double brackets\verb{]]}} are used to index
-\emph{within pieces}. (Accidentally writing \verb{[]} when you need
+By rough analogy with this "shallow vs deep" dichotomy, \link[=humdrumRclass]{HumdrumR corpus}
+indexing brackets are used in two ways:
+\itemize{
+\item \strong{\code{[}single brackets\verb{]}} are used to select \emph{pieces} in your data.
+\item \strong{\code{[[}double brackets\verb{]]}} are used to select records or spines \emph{within the pieces} in your data.
+}
+
+(Accidentally writing \verb{[]} when you need
 \verb{[[]]} is a very common error, so watch out!)
 
 Whether, indexing by piece or within, \code{humdrumR} objects can use
-two types of indexing arguments:
-\itemize{
-\item By \code{numeric} (ordinal integers)
-\item By \code{character} string (regular expressions)
-}
-
-For more powerful/flexible indexing options, use \link[=subset.humdrumR]{subset} directly.
+two types of indexing arguments: \code{numeric} (ordinal integers) or \code{character} string
+(interpreted as regular expressions).
 \subsection{Numeric indexing:}{
 
 Indexing \code{humdrumR} corpora with
 \strong{\code{[}single brackets\verb{]}} will accept
-one numeric argument.
+one numeric argument---only whole numbers are accepted.
 This argument will be used to pick pieces within the \code{humdrumR} object ordinally.
-Thus, \code{humdata[1:10]} will select the first ten pieces in the data while \code{humdata[42]}
+Thus, \code{humData[1:10]} will select the first ten pieces in the data while \code{humData[42]}
 will select only the 42nd piece.
 
 Indexing \code{humdrumR} objects with
 \strong{\code{[[}double brackets\verb{]]}} will accept
 one or two numeric arguments, \code{i} and \code{j}, either of which can
 be used in isolation or in combination.
-(If \code{j} is used in isolation, it must be named or placed after a comma, as in \code{humdata[[ , j ]]}.)
+(If \code{j} is used in isolation, it must be named or placed after a comma, as in \code{humData[[ , j ]]}.)
 \itemize{
-\item \code{i} is used to index data records (i.e., based on the humtable \code{Record} field).
-Thus, \code{humdata[[1:20]]} indexes the first twenty records \emph{from each piece}
-in the corpus, and \code{humdata[[42]]} extracts the 42nd record \emph{from each piece}.
+\item \code{i} is used to index records (i.e., based on the humtable \code{Record} field).
+Thus, \code{humData[[1:20]]} indexes the first twenty records \emph{from each piece}
+in the corpus, and \code{humData[[42]]} extracts the 42nd record \emph{from each piece}.
+
+To avoid breaking the humdrum syntax, exclusive interpretations and spine-path
+interpretations are not removed.
 \item \code{j} is used to index spines  (i.e., based on the \code{Spine} field).
-Thus, \code{humdata[[ , 3:4]]} returns the third and fourth spines \emph{from each}
+Thus, \code{humData[[ , 3:4]]} returns the third and fourth spines \emph{from each}
 piece in the corpus.
 }
 
-When indexing \link[=humdrumRclass]{humdrumR corpora} with numbers,
-all \code{numeric} (double) inputs are converted to integers.
-
-Since \link[=subset.humdrumR]{subset} always renumbers pieces/spines that remain after filtering/indexing,
-\code{humdrumR} indexing is entirely \strong{ordinal}.
+Pieces/spines/records are renumbered after indexing
+(see the \strong{Renumbering} section of the \link[=subset.humdrumR]{subset()/filter() docs} for explantion).
+As a result, \code{humdrumR} indexing is entirely \strong{ordinal}.
 For example,
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset <- humdata[11:20]
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset <- humData[11:20]
 humsubset[2]
 }\if{html}{\out{</div>}}
 
-will return the 12th piece from the original \code{humdata} object.
+will return the 12th piece from the original \code{humData} object.
 This is because the first call to \verb{[]} returns the 11th through 20th pieces, which
 are renumbered \code{1:10} and the second index call returns the \emph{new} 2nd index, which was the 12th
 originally.
 Similarly,
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset2 <- humdata[[ , 2:4]]
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humsubset2 <- humData[[ , 2:4]]
 humsubset2[[ , 2]]
 }\if{html}{\out{</div>}}
 
 will return the third spine from the original data.
+\subsection{Negative numbers}{
 
 As in normal \code{R} indexing, negative numbers can be used, causing corresponding elements to be
-\emph{removed} instead of retained. Thus, \code{humdata[-3:-5]} will remove the third, fourth, and fifth pieces from the data
-while \code{humdata[[ , -3:-5]]} will remove the third, fourth, and fifth spines from each piece.
+\emph{removed} instead of retained. Thus, \code{humData[-3:-5]} will remove the third, fourth, and fifth pieces from the data
+while \code{humData[[ , -3:-5]]} will remove the third, fourth, and fifth spines from each piece.
 Positive and negative indices cannot be mixed in a single argument.
+}
 
-In all cases, indices outside of range (or of value \code{0}) are ignored.
-E.g., if you have a corpus of twenty pieces and you call \code{corpus[21]}, there is no 21st piece, so \code{21} is "out of range".
+\subsection{Out of bounds indices}{
+
+In all cases, indices outside of bounds (or of value \code{0}) are ignored.
+E.g., if you have a corpus of twenty pieces and you call \code{corpus[21]}, there is no 21st piece, so \code{21} is "out of bounds".
 If all your input indices are \code{0} and error will result.
-If all your input indices are out of range then
+If \emph{all} your input indices are out of bounds then
 an empty \code{humdrumR} object is returned.
-For instance, \code{humdata[[401:500, ]]} will return an empty
+For instance, \code{humData[[401:500, ]]} will return an empty
 \code{humdrumR} object if there are no pieces with more than 400
 data records.
 }
 
+}
+
 \subsection{Character indexing:}{
 
-Indexing \link[=humdrumR:humdrumRclass]{humdrumR objects} with
-\code{[}single brackets\verb{]} will accept one
-vector of \code{character} strings. These strings are
-treated as
-\href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
+If you index a \link[=humdrumR:humdrumRclass]{humdrumR object}
+with \code{character} strings, these strings are
+treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes),
+which are matched against non-null data tokens (\code{"D"}) in the object's first \link[=selectedFields]{selected field}.
+A match to \strong{any} of the regular expressions considered a match.
 
-The tokens from the humdrumR object's \link[=selectedFields]{selected field(s)} are searched
-for matches to any of the regular expressions you input. Any piece that contains
-\strong{any} match to \strong{any} of the regular expressions is retained---all other pieces
-are filtered out. Note that (because this is \code{[}single-bracket\verb{]} indexing) the entire piece is
-retained, even if there is only one match.
+Indexing with \code{[}single brackets\verb{]} accepts one
+vector of \code{character} regular expressions.
+Any piece that contains even a single match will be retained.
 If no matches occur in any pieces, an empty \code{humdrumR} object is returned.
 
-Indexing \code{humdrumR} objects with \code{[[}double brackets\verb{]]} will
-accept one or two vectors of \code{character} strings, \code{i} and \code{j},
-either of which can
-be used in isolation or in combination.
+Indexing \code{humdrumR} objects with \code{[[}double brackets\verb{]]}
+accepts one or two vectors of \code{character} strings, \code{i} and \code{j},
+either of which can be used in isolation or in combination.
 (If \code{j} is used in isolation, it must be placed after a comma,
-as in \code{humdata[[ , j]]}.)
-These strings are
-treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes).
-The tokens from the humdrumR object's \link[=selectedFields]{selected field(s)} are searched
-for matches to any of the regular expressions you input.
-Any record which contains at least one token matching any regex in \code{i}
+as in \code{humData[[ , j]]}.)
+Any data record which contains at least one match to the \code{i} regex(es)
 will be retained.
-Similarly, any spine which contains at least one token matching any
-regex in \code{j} is retained.
+Similarly, any spine which contains at least one match to the
+\code{j} regex(es) is retained.
 If \code{i} and \code{j} are used together,
 matching spines (\code{j}) are indexed first, so that
 tokens matching the regular expression(s) in \code{i}
 must be found in the matching spines.
 }
+
+\subsection{Exclusive indexing:}{
+
+Spines can also be indexed ordinally by exclusive interpretation.
+To do this, provide a double-bracket index with a \emph{named} numeric (whole number) argument,
+with name(s) corresponding to exclusive interpretations in the data.
+For example, if you want to index the 3rd \verb{**kern} spine in each piece,
+use \code{humData[[kern = 3]]}.
+Note that \emph{other} exclusive interpretations in each piece are unaffected---in
+this example, only the kern spines (if there are any) are indexed!
+}
 }
 \section{removeEmpty}{
 
 
-By default, calls to indexing operators will completely remove
-data which you are filtering out.
-However, if you set the \code{removeEmpty} argument to \code{FALSE},
-the filtered data is set to \code{NULL}, but not actually removed from the data object.
-(See \code{\link[=subset.humdrumR]{subset.humdrumR()}} for more details.)
+The \code{removeEmpty} argument to any humdrumR indexing controls whether
+filtered data is completely removed from the data, or simply set to null
+This means the filtered data can be recovered using \code{\link[=unfilter]{unfilter()}} (see the \link[=subset.humdrumR]{subset()/filter()}
+docs for an explanation).
+By default, piece-indexing and spine-indexing have \code{removeEmpty = TRUE},
+but record-indexing defaults to \code{removeEmpty = FALSE}.
 }
 
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")
+
+humData[1:2]
+humData[-1]
+
+humData[[ , 3:4]]
+humData[[1:40 , ]]
+
+# find all pieces which use a flat 3
+humData['b3']
+
+# find all records that use a flat 3
+humData[['b3', ]]
+humData[['b3', removeEmpty = TRUE]]
+
+# Exclusive interpretation indexing
+humData[[deg = 1]]
+
+# pipe indexing
+humData |> index(1:3) |> index2(3:4)
+
+}
 \seealso{
-{These indexing operators work through special calls to \code{\link[=subset.humdrumR]{subset.humdrumR()}}}
+{For more powerful/flexible indexing options, use \link[=subset.humdrumR]{subset()/filter()}.}
 }

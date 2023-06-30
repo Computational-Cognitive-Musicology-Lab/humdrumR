@@ -57,7 +57,7 @@ checks <- function(arg, argcheck, argname, seealso = c()) {
   if (missing(argname)) argname <- rlang::expr_name(rlang::enexpr(arg))
   callname <- rlang::expr_name(callstack[[1]][[1]])
   
-  seealso <- c(paste0('?', callname), seealso)
+  if (length(seealso) == 0L) seealso <- paste0('?', callname)
   
   messages <- docheck(argcheck, arg, argname)
  
@@ -208,7 +208,7 @@ dochecks <- function(arg, ...) {
   arg <- unique(arg)
   if (is.character(arg)) arg <- quotemark(arg)
   if (length(arg) > n) {
-    arg <- c(arg[1:n], glue::glue('{length(arg) - n} more values.'))
+    arg <- c(arg[1:n], glue::glue('{length(arg) - n} more values'))
   }
   harvard(arg, conj, FALSE)
 }
@@ -317,6 +317,9 @@ xwholenum <- xnumber & argCheck(\(arg) all(arg == round(arg)), 'must be whole nu
 xnatural <- xnumber & xmin(0) & xwholenum
 xpnatural <- xnumber & xmin(1) & xwholenum
 
+xposORneg <- argCheck(\(arg)  all(arg >= 0) || all(arg <= 0), "can't mix negative and positive indices", 
+                      \(arg) "'argname' includes {.values(arg[arg > 0])} AND {.values(arg[arg < 0])}")
+
 ### Length -----
 
 
@@ -389,7 +392,7 @@ xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
 
 xlegal <- function(values) {
   argCheck(\(arg) all(arg %in% values), 
-           glue::glue("contains invalid values; valid values are {.values(values)}."),
+           glue::glue("contains invalid values; valid values are {.values(values)}"),
            \(arg) .show_values(arg[!arg %in% values]))
 }
 
