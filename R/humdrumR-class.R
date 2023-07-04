@@ -236,7 +236,15 @@
 #' ["cleaving"][cleave()] different parts of the data into new fields,
 #' or otherwise [reshaping humdrum data][humCoercion] into basic R data structures you might prefer.
 #' 
-#'
+#' @examples
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' fields(humData)
+#' 
+#' getHumtab(humData)
+#' getHumtab(humData, dataTypes = 'D')
+#' 
 #' @family {Core humdrum data representation}
 #' @name humTable
 NULL
@@ -1299,6 +1307,8 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' (At the bottom of the printout, the selected fields are also marked by a `*`.)
 #' The selected fields can also be queried directly using the `selectedFields()` function, or 
 #' by inspecting the output of [fields()].
+#' The selected fields also play other important roles in `humdrumR` 
+#' (see details).
 #' 
 #' @details
 #'
@@ -1659,14 +1669,21 @@ pullPrintable <- function(humdrumR, fields,
 #'
 #' @details
 #' 
-#' The functions, `pull_data.___`, `pull()`, and `$.humdrumR` are the "escape hatch" to pull your 
+#' The functions `pull()`, `pull.data.xxx()`, `pull.tibble()`, and `$` are 
+#' the "escape hatch" to pull your 
 #' data out of the [humdrumR data world][humdrumRclass] into "normal" R.
-#' The `pull()` function (and the `$`) method, the actual vector content of a (single) field.
-#' The other functions return *always* return a `data.frame`/`data.table`/`tibble`, even if it has only one column.
-#' If no fields are indicated, the data's [selected fields][selectedFields] are pulled; in the case of `pull()`,
-#' only the *first* seleced field is pulled.
+#' Use the `pull()` function or the `$` to access the actual vector content of a single field.
+#' The other functions *always* return a `data.frame`/`data.table`/`tibble`, even if it has only one column.
 #' 
-#' The `dataTypes` argument controls which types of data are pulled---by default, only non-null data is returned.
+#' Choose which field(s) to return using the `...`, `var`, or `name` arguments.
+#' The `var` and `...` options use tidyverse style select semantics (see [select()][selectedFields]).
+#' If no fields are indicated, the data's [selected fields][selectedFields] are pulled; in the case of `pull()` and `$`,
+#' only the *first* selected field is pulled.
+#' 
+#' The `dataTypes` argument controls which *types* of data are pulled---by default, 
+#' only non-null data (`Type == "D"`) is pulled.
+#' The `$` operator can only grab non-null data.
+#' 
 #' The `null` argument controls how null data is returned, with four options: 
 #' 
 #' + `"NA2dot"` means all `NA` values are converted to `"."`; note that this will cause all output to be coerced to `character`.
@@ -1716,7 +1733,7 @@ pullPrintable <- function(humdrumR, fields,
 #' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
 #' 
 #' @seealso {To know what fields are available to pull, use [fields()].
-#' To know what fields are selected---the default fields to pull---use [selectedFields()].}
+#'           To know what fields are selected---the default fields to pull---use [selectedFields()].}
 #' @examples
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
@@ -1726,6 +1743,7 @@ pullPrintable <- function(humdrumR, fields,
 #' 
 #' humData |> pull_data.table(Token, Spine)
 #' humData |> pull_tibble(everything())
+#' 
 #' @name pullHumdrum
 #' @export
 pull_data.table <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot') {

@@ -66,14 +66,21 @@ Multiple fields can be extracted using \code{pull_data.frame()}, \code{pull_data
 You can also use the \code{$} operator to extract a single field, just like \code{pull()}.
 }
 \details{
-The functions, \code{pull_data.___}, \code{pull()}, and \verb{$.humdrumR} are the "escape hatch" to pull your
+The functions \code{pull()}, \code{pull.data.xxx()}, \code{pull.tibble()}, and \code{$} are
+the "escape hatch" to pull your
 data out of the \link[=humdrumRclass]{humdrumR data world} into "normal" R.
-The \code{pull()} function (and the \code{$}) method, the actual vector content of a (single) field.
-The other functions return \emph{always} return a \code{data.frame}/\code{data.table}/\code{tibble}, even if it has only one column.
-If no fields are indicated, the data's \link[=selectedFields]{selected fields} are pulled; in the case of \code{pull()},
-only the \emph{first} seleced field is pulled.
+Use the \code{pull()} function or the \code{$} to access the actual vector content of a single field.
+The other functions \emph{always} return a \code{data.frame}/\code{data.table}/\code{tibble}, even if it has only one column.
 
-The \code{dataTypes} argument controls which types of data are pulled---by default, only non-null data is returned.
+Choose which field(s) to return using the \code{...}, \code{var}, or \code{name} arguments.
+The \code{var} and \code{...} options use tidyverse style select semantics (see \link[=selectedFields]{select()}).
+If no fields are indicated, the data's \link[=selectedFields]{selected fields} are pulled; in the case of \code{pull()} and \code{$},
+only the \emph{first} selected field is pulled.
+
+The \code{dataTypes} argument controls which \emph{types} of data are pulled---by default,
+only non-null data (\code{Type == "D"}) is pulled.
+The \code{$} operator can only grab non-null data.
+
 The \code{null} argument controls how null data is returned, with four options:
 \itemize{
 \item \code{"NA2dot"} means all \code{NA} values are converted to \code{"."}; note that this will cause all output to be coerced to \code{character}.
@@ -94,6 +101,7 @@ humData$Token
 
 humData |> pull_data.table(Token, Spine)
 humData |> pull_tibble(everything())
+
 }
 \seealso{
 {To know what fields are available to pull, use \code{\link[=fields]{fields()}}.

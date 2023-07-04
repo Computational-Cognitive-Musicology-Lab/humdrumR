@@ -43,6 +43,8 @@ The selected fields are the fields that are shown when a
 (At the bottom of the printout, the selected fields are also marked by a \code{*}.)
 The selected fields can also be queried directly using the \code{selectedFields()} function, or
 by inspecting the output of \code{\link[=fields]{fields()}}.
+The selected fields also play other important roles in \code{humdrumR}
+(see details).
 }
 \details{
 The "selected" fields play an important role in \link{humdrumR}.

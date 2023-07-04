@@ -160,6 +160,7 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
 
 
 #' @rdname subset.humdrumR
+#' @aliases filter
 #' @export
 filter.humdrumR <- function(.data, ..., dataTypes = 'D', .by = NULL, removeEmptyPieces = TRUE) {
   exprs <- rlang::enquos(...)
