@@ -888,26 +888,104 @@ cleaveGraceNotes <- function(humdrumR) {
 
 #' Separate data fields into new spines.
 #' 
-#' Rend, as in "to rend apart," splits data in separate fields into separate *spines*.
+#' Rend, as in "to rend apart," splits data in separate fields into separate spines or paths.
 #' Under the hood, `rend()` essentially runs a specialized call to make the [humdrum table][humTable]
 #' "longer"/"taller," similar to R functions like [melt()][reshape2], [gather()][tidyr], or [pivot_longer()][tidyr].
 #' In fact, a humdrumR method for [pivot_longer()][tidyr] is defined, which is equivalent to `rend()`.
 #' The `rend()` function is essentially the inverse of [cleave()].
 #' 
-#' @export
+#' @details
+#' 
+#' The `rend()` function takes any number of `...` arguments to [select][selectedFields] fields in the `humdrumR` data.
+#' The identified fields are then split into new spines.
+#' If no fields are provided, the data's [selected fields][selectedFields] are rended.
+#' New spines are generated from existing spines; if we start with spines 1, 2, 3, and rend *two* fields...
+#' 
+#' + the original spine 1 will be rended into new spines 1 and 2;
+#' + the original spine 2 will be rended into new spines 3 and 4;
+#' + the original spine 3 will be rended into new spines 5 and 6.
+#'  
+#' However, by default, spines are only rended if they contain non-null data points
+#' in the target fields.
+#' If for example, the original spine 2 had no non-null data in one of the rended fields, 
+#' if would not be rended into two spines.
+#' However, if `rendEmpty` is set to `TRUE`, 
+#' *all* spines will be rended even if empty (all null data).
+#' 
+#' Note that, since differnt fields may be different data types, `rend()` will generally coerce the result to `character`.
+#' 
+#' ### Fields
+#' 
+#' When you rend fields, a new field is generated.
+#' The name of the new field is specified by `newField`---by default, `newField` is `NULL` and the names of the rended
+#' fields are simply pasted together.
+#' If `removeRended = TRUE` (the default), the original fields are removed from the data.
+#' However, certain fields, like `Token` and any [structural fields][humTable] cannot be removed from the data.
+#' Therefore, if you rend these fields, they will not be deleted, even if `removeRended = TRUE`.
+#' 
+#' If you only provide one field name to rend, is automatically take to be `Token`.
+#' Thus, `rend(humData, 'Solfa')` is equivalent to `rend(humData, 'Token', 'Solfa')`.
+#' 
+#' @param humdrumR ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#' 
+#' @param ... ***Which fields to rend?***
+#' 
+#' These arguments can be any combination of `character` strings, numbers, or symbols used
+#' to match fields in the `humdrumR` input using [tidyverse][dplyr::select()] semantics.
+#' See the [select()][selectedFields] docs for details.
+#' 
+#' @param fieldName ***A name for the newly rended field.***
+#'
+#' Defaults to pasting the names of selected fields (`...`) together, separated by `.`.
+#' 
+#' Must be either `NULL`, or a single non-empty `character` string.
+#' 
+#' @param removeRended ***Should rended fields be removed from the output?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param rendEmpty ***Empty spines be rended?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' 
+#' @examples 
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData |> mutate(Recip = recip(Token), Solfa = solfa(Token, simple = TRUE)) -> humData
+#' 
+#' humData |> rend(c('Recip', 'Solfa'))
+#' 
+#' humData |> select(c('Recip', 'Solfa')) |> rend()
+#' 
 #' @seealso {The complement/opposite of `rend()` is [cleave()].}
 #' @family {Humdrum table reshaping functions}
 #' @family {Humdrum table pivoting functions}
-rend <- function(humdrumR, ..., rendEmpty = FALSE) {
+#' @export
+rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty = FALSE) {
   checks(humdrumR, xhumdrumR)
+  checks(fieldName, xlen1 & xcharnotempty)
+  checks(removeRended, xTF)
   checks(rendEmpty, xTF)
   
   humtab <- getHumtab(humdrumR, 'IMDd')
   
   exprs <- rlang::enexprs(...)
-  fields <- if (length(exprs)) tidyselect_humdrumRfields(humdrumR, exprs, ..., callname = 'rend()') else selectedFields(humdrumR)
+  fields <- if (length(exprs)) tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'Data', callname = 'rend()') else selectedFields(humdrumR)
   
-  if ('Token' %in% fields) fields <- fields[order(fields != 'Token')] # put Token at the beginning
+  if (length(fields) == 1L) {
+    if (fields == 'Token') .stop("You haven't provide rend() and fields besides Token. You can't rend Token form itself.")
+    fields <- unique(c('Token', fields))
+  }
+  
+  fieldName <- fieldName %||% paste(fields, collapse = '.')
   
   spines <- humtab[ , list(Field = fields, nonNull = sapply(.SD, \(field) any(!is.na(field)))), by = list(Piece, Spine), .SDcols = fields]
   
@@ -922,13 +1000,22 @@ rend <- function(humdrumR, ..., rendEmpty = FALSE) {
   classes <- lapply(humtab[ , fields, with = FALSE], class)
   if (length(unique(classes)) > 1L) humtab[ , (fields) := lapply(fields, \(field) as.character(humtab[[field]]))]
   
+  cantRemove <- c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal', 
+                  'Exclusive', 
+                  'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
+  
   Exclusive.fields <- intersect(paste0('Exclusive.', fields), colnames(humtab))
   humtabs <- lapply(fields, 
                     \(field) {
                       htab <- data.table::copy(humtab)
                       htab[ , (setdiff(fields, field)) := NULL]
                       
-                      colnames(htab)[colnames(htab) == field] <- fields[1]
+                      if (removeRended && !field %in% cantRemove) {
+                        colnames(htab)[colnames(htab) == field] <- fieldName
+                      } else {
+                        htab[[fieldName]] <- htab[[field]]
+                        
+                      }
                       
                       Exclusive.field <- paste0('Exclusive.', field)
                       if (Exclusive.field %in% Exclusive.fields) {
@@ -949,7 +1036,7 @@ rend <- function(humdrumR, ..., rendEmpty = FALSE) {
   
   putHumtab(humdrumR) <- humtab
   humdrumR <- updateFields(humdrumR)
-  selectFields(humdrumR, fields[1])
+  selectFields(humdrumR, fieldName)
   
 }
 

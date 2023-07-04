@@ -5,16 +5,88 @@
 \alias{pivot_longer.humdrumR}
 \title{Separate data fields into new spines.}
 \usage{
-rend(humdrumR, ..., rendEmpty = FALSE)
+rend(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty = FALSE)
 
 \method{pivot_longer}{humdrumR}(data, cols, ...)
 }
+\arguments{
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
+
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{...}{\emph{\strong{Which fields to rend?}}
+
+These arguments can be any combination of \code{character} strings, numbers, or symbols used
+to match fields in the \code{humdrumR} input using \link[dplyr:select]{tidyverse} semantics.
+See the \link[=selectedFields]{select()} docs for details.}
+
+\item{fieldName}{\emph{\strong{A name for the newly rended field.}}
+
+Defaults to pasting the names of selected fields (\code{...}) together, separated by \code{.}.
+
+Must be either \code{NULL}, or a single non-empty \code{character} string.}
+
+\item{removeRended}{\emph{\strong{Should rended fields be removed from the output?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{rendEmpty}{\emph{\strong{Empty spines be rended?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+}
 \description{
-Rend, as in "to rend apart," splits data in separate fields into separate \emph{spines}.
+Rend, as in "to rend apart," splits data in separate fields into separate spines or paths.
 Under the hood, \code{rend()} essentially runs a specialized call to make the \link[=humTable]{humdrum table}
 "longer"/"taller," similar to R functions like \link[=reshape2]{melt()}, \link[=tidyr]{gather()}, or \link[=tidyr]{pivot_longer()}.
 In fact, a humdrumR method for \link[=tidyr]{pivot_longer()} is defined, which is equivalent to \code{rend()}.
 The \code{rend()} function is essentially the inverse of \code{\link[=cleave]{cleave()}}.
+}
+\details{
+The \code{rend()} function takes any number of \code{...} arguments to \link[=selectedFields]{select} fields in the \code{humdrumR} data.
+The identified fields are then split into new spines.
+If no fields are provided, the data's \link[=selectedFields]{selected fields} are rended.
+New spines are generated from existing spines; if we start with spines 1, 2, 3, and rend \emph{two} fields...
+\itemize{
+\item the original spine 1 will be rended into new spines 1 and 2;
+\item the original spine 2 will be rended into new spines 3 and 4;
+\item the original spine 3 will be rended into new spines 5 and 6.
+}
+
+However, by default, spines are only rended if they contain non-null data points
+in the target fields.
+If for example, the original spine 2 had no non-null data in one of the rended fields,
+if would not be rended into two spines.
+However, if \code{rendEmpty} is set to \code{TRUE},
+\emph{all} spines will be rended even if empty (all null data).
+
+Note that, since differnt fields may be different data types, \code{rend()} will generally coerce the result to \code{character}.
+\subsection{Fields}{
+
+When you rend fields, a new field is generated.
+The name of the new field is specified by \code{newField}---by default, \code{newField} is \code{NULL} and the names of the rended
+fields are simply pasted together.
+If \code{removeRended = TRUE} (the default), the original fields are removed from the data.
+However, certain fields, like \code{Token} and any \link[=humTable]{structural fields} cannot be removed from the data.
+Therefore, if you rend these fields, they will not be deleted, even if \code{removeRended = TRUE}.
+
+If you only provide one field name to rend, is automatically take to be \code{Token}.
+Thus, \code{rend(humData, 'Solfa')} is equivalent to \code{rend(humData, 'Token', 'Solfa')}.
+}
+}
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+humData |> mutate(Recip = recip(Token), Solfa = solfa(Token, simple = TRUE)) -> humData
+
+humData |> rend(c('Recip', 'Solfa'))
+
+humData |> select(c('Recip', 'Solfa')) |> rend()
+
 }
 \seealso{
 {The complement/opposite of \code{rend()} is \code{\link[=cleave]{cleave()}}.}

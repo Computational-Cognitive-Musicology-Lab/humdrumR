@@ -12,20 +12,11 @@ cleave(humdrumR, ..., field = selectedFields(humdrumR)[1], newFields = NULL)
 
 \method{pivot_wider}{humdrumR}(data, names_from = "Spine", values_from = selectedFields(data)[1])
 
-cleaveSpines(
-  humdrumR,
-  ...,
-  field = selectedFields(humdrumR)[1],
-  newFields = NULL
-)
+cleaveSpines(humdrumR, field = selectedFields(humdrumR)[1])
 
 cleavePaths(humdrumR, field = selectedFields(humdrumR)[1])
 
-cleaveStops(
-  humdrumR,
-  fromField = selectedFields(humdrumR)[1],
-  fillFromField = FALSE
-)
+cleaveStops(humdrumR, field = selectedFields(humdrumR)[1])
 }
 \arguments{
 \item{humdrumR}{\emph{\strong{HumdrumR data.}}
@@ -66,6 +57,9 @@ it is easiest to reshape the data so that the information is in different humdru
 rather than separate spines/paths/stops.
 In the humdrum syntax view, the spines (or path/stops) are moved "on top" of each other, cleaving them
 together.
+
+The convenient \code{cleaveSpines()}, \code{cleaveStops()}, and \code{cleavePaths()} functions automatically cleave \emph{all} stops/paths in a dataset
+onto the first spine/stop/path, creating new fields named, e.g., \code{Path1}, \code{Path2}, etc.
 \subsection{Syntax}{
 
 The \code{cleave()} function takes any number of \code{...} arguments specifying \emph{groups} of spines/paths/stops
@@ -154,22 +148,16 @@ and \code{Silbe}.
 No \code{Kern} field is created, because the \code{Kern} data is left in the \code{Token} field.
 }
 
-\section{Predefined cleaves}{
-
-
-The convenient \code{cleaveStops()} and \code{cleavePaths()} functions automatically cleave \emph{all} stops/paths in a dataset
-onto the first stop/path, creating new fields named, e.g., \code{Path1}, \code{Path2}, etc.
-}
-
 \examples{
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/MozartVariations/.*.krn")
 
 
 humData |> cleave(3:4)
-humData |> cleave(Path = 0:1)
+humData |> cleave(Path = 0:1, newFields = 'Ossia')
+humData |> cleavePaths()
 
-humData |> cleave(c('function', 'harm'))
+humData |> cleave(c('function', 'harm'), newFields = 'Harmony')
 
 humData |> cleave(c('kern', 'function', 'harm'))
 
