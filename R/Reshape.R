@@ -327,164 +327,151 @@ collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1
 #' In fact, a humdrumR method for [pivot_wider()][tidyr] is defined, which is equivalent to `cleave()`.
 #' The `cleave()` function is essentially the inverse of [rend()].
 #' 
+#' @details
 #' 
-#'
 #' Many humdrum datasets encode data across multiple spines, spine-paths, or stops.
 #' By default, `humdrumR` parses each separate spine, spine-path, and stop as their own individual
 #' data points, taking up one row in the [humdrum table][humTable].
 #' If we want to treat data in multiple spines/paths/stops as different aspects of the same data
 #' it is easiest to reshape the data so that the information is in different humdrumR [fields][fields()]
 #' rather than separate spines/paths/stops.
-#' We "fold" the data from one structural location over "on top" of other data using `cleave`.
+#' In the humdrum syntax view, the spines (or path/stops) are moved "on top" of each other, cleaving them
+#' together.
 #' 
-#' @section From where to where:
-#' 
-#' The `numeric` `fold` and `onto` arguments specify where to fold from/to.
-#' `fold` indicates the Spine/Path/Stop to fold *from*, "*on to*" the Spine/Path/Stop
-#' indicated by `onto`.
-#' For example, if you specify `cleave(mydata, fold = 2, onto = 1, what = 'Spine')`
-#' spine 2 will be folded "on top of" spine 1.
-#' The `fold` and `onto` targets may not overlap.
+#' The convenient `cleaveSpines()`, `cleaveStops()`, and `cleavePaths()` functions automatically cleave *all* stops/paths in a dataset 
+#' onto the first spine/stop/path, creating new fields named, e.g., `Path1`, `Path2`, etc.
 #' 
 #' 
-#' The `fold` and `onto` arguments can be vectors of any length, which are interpreted in parallel:
-#' for example, the combination `fold = 1:2` and `onto = 3:4` would map the first spine
-#' to the third spine (`1 -> 3`) and the second spine to the 4th spine (`2 -> 4`).
-#' If the `onto` targets are duplicated, the `fold` spines will be folded onto
-#' multiple new fields: for example, the combination `fold = 1:2` and `onto = c(3, 3)` will
-#' map first spine *and* the second spine on to *two* new fields of the third spine.
-#' If the `fold` target is duplicated, the same `fold` spines can be copied onto multiple
-#' `onto` spines: for example, the combination `fold = 1` and `onto = 2:3` will map the contents 
-#' of the first spine onto the second *and* third spine, duplicating the spine-1 data.
+#' ## Syntax
 #' 
-#' The lengths of `fold` and `onto` are automatically matched, so
-#' arguments like `fold = 1:2` and `onto = 3` are equivalent to `fold = 1:2, onto = c(3, 3)`.
-#' This makes it easy to do things like "copy all four spines onto spine 1": 
-#' just write `fold = 2:4, onto = 1`.
+#' The `cleave()` function takes any number of `...` arguments specifying *groups* of spines/paths/stops
+#' to cleave together. 
 #' 
+#' + `cleave(humData, Spine = 1:2)` will cleave the first and second spine.
+#' + `cleave(humData, Spine = 1:4)` will cleave the first four spines.
+#' + `cleave(humData, Spine = 1:2, Spine = 3:4)` will cleave spine 1 with spine 2, and separately, spine 3 with spine 4.
 #' 
-#' To specify what structural field you want to fold across, 
-#' use the `what` argument (`character`, `length == 1`).
-#' The default `what` value is `"Spine"`; other common fold options are `"Path"`,
-#' and `"Stop"`, though you might want to use the convenient `foldPaths()` and `foldStops()`
-#' functions directly (details below).
-#' (You may also fold across `"Record"` or `"DataRecord"`), but these are advanced/tricky!)
-
-#' @section Which fields:
+#' The default is to cleave spines, so you can actually omit the `Spine = ` part: e.g., `cleave(humData, 1:2)` is the same
+#' as `cleave(humData, Spine = 1:2)`.
+#' If you want to cleave spine paths, you'll need to explicitly call something like `cleave(humData, Path = 0:1)`.
+#' The *first* element in each group is used as the original location which all other spines/paths/stops are cleaved into.
+#' The ordering of the remaining elements is irrelevant.
 #' 
-#' The `fromField` (`character`, `length == 1`) controls which field in the `fold` 
-#' spine/path/stop is folded into a new field.
-#' The `fromField` argument defaults to the (first) [selected fields][selectedFields],
-#' and must match (or [partially match][partialMatching]) a field in the `humdrumR` argument data set.
-#' In some cases, the `fold` data is smaller than the `onto` data---for instance,
-#' spine paths often only exist for part of a spine, so there is less data in the path 
-#' than in the full spine.
-#' In these cases, it can be helpful to set `fillFromField == TRUE`,
-#' which causes the missing parts of `fold` to be filled with data from the `from`
-#' field. `foldPaths` does this by default.
+#' ### Piece-specific cleaving
+#'
+#' By default, the same cleaving will be applied in all pieces (if the pieces *have* the target spines/paths/stops).
+#' However, you can use an alternate argument structure to apply differerent cleaves to different pieces.
+#' To do so, provide groups to cleave arguments in a list, with each element in the list representing cleave group
+#' in one piece.
+#' If the listed groups are unnamed, the groups are mapped to pieces by index.
+#' For example, the call `cleave(humData, list(1:2, 2:3, 3:4, NULL, 1:3))` will result in the following cleaves:
 #' 
-#' The resulting new fields will automatically be named as appropriate `Result`s fields.
-#' The `newFieldNames` argument (`character`) can be used to control the output names:
-#' one for each new field created by the fold.
-#' If you specify too many `newFieldNames`, the later names are ignored.
-#' If you specify too few `newFieldNames`, the later names will be given result names, 
-#' consistent with the default behavior.
+#' + In piece 1, cleave spines 1 and 2.
+#' + In piece 2, cleave spines 2 and 3.
+#' + In piece 3, cleave spines 3 and 4.
+#' + In piece 4, no cleave (no changes).
+#' + In piece 5, cleave the first three spines.
+#' + In any remaining pieces (6 or greater), no cleaves.
+#' 
+#' Alternatively, you can name the list elements with integers corresponding to pieces.
+#' For example, `cleave(humData, Path = list("1" = 0:1, 5 = 0:2"))` will cleave paths 0 and 1 in
+#' piece 1, and paths `0:2` in piece 5.
 #' 
 #' 
-#' @section Piece-Specific Folding:
+#' ### Exclusive interpretations
 #' 
-#' By default, the same "fold" is carried out in each piece in the input corpus 
-#' (`humdrumR` argument).
-#' If you need to specify different folds in different pieces, you have to specify the `Piece`
-#' argument (`numeric`, whole number).
-#' For *every* piece in the corpus you want to apply folds to, you must specify all the `fold`
-#' and `onto` arguments in parallel vectors with the `Piece` argument (even if this is reduendant 
-#' for some files).
-#' For example, if we specify the combinations,
+#' When cleaving spines, you can specify spines using character strings representing exclusive interpretations.
+#' So you can call `cleave(humData, c('kern', 'silbe'))`, which will cause `**kern` and `**silbe` spines in each piece to
+#' be cleaved.
+#' Note that any exclusive interpretations which aren't "mentioned" in the call remain in their original field.
 #' 
-#' |  `fold`  |  `onto`  | `Piece` |
-#' |:--------:|:--------:|:------:|
-#' | `1`      | `2`      | `1`    |
-#' | `3`      | `4`      | `1`    |
-#' | `1`      | `2`      | `2`    |
-#' | `4`      | `3`      | `2`    |
+#' The behavior of exclusive cleaving depends on the relative number of each target exclusive interpretation in each piece.
+#' If there are equal numbers of each interpretation, the spines are grouped in parallel.
+#' For example, if a piece has the spines `**kern **silbe **kern **silbe`, the command `cleave(humData, c('kern', 'silbe'))`
+#' will see that there are two `**kern`/`**silbe` pairs, and cleave them just like `cleave(humData, 1:2, 3:4)`.
 #' 
-#' then
+#' If there are different numbers of spines matching each exclusive interpretation, the cleave behavior depends on which
+#' field is the first field in your input argument---we'll call that the "target" exclusive.
+#' Consider a file with spines `**kern **kern **harm`.
+#' If we specify a cleave call `cleave(humData, c('kern', 'harm'))` that means we want `**kern` to be the "target" exclusive.
+#' Since there are fewer `**harm` spines than `**kern` spines, the data in the `**harm` spine will be *duplicated*, can cleaved
+#' to **both** `**kern` spines in parallel.
+#' If we instead call `cleave(humData, c('harm', 'kern'))`, making `**harm` the "target", the two `**kern` spines will both be "piled" atop
+#' the single `**harm` spine, making two new `**kern` fields.
 #' 
-#' + In `Piece` one: 
-#'   + the first spine is mapped to the second spine
-#'   + the third spine is mapped to the fourth spine
-#' + In `Piece` two: 
-#'   + the first spine is mapped to the second spine
-#'   + the fourth spine is mapped to the third spine
 #' 
-#' If any files in the corpus are not included, they will not be affected at all!
+#' @section Fields:
 #' 
-#' @section Predefined folds:
+#' Cleaving can (for now) only be applied to one field in our data, which defaults to the first [selected field][selectedFields];
+#' You can change the target field with the `field` argument.
 #' 
-#' The convenient `foldStops()` and `foldPaths()` functions automatically fold *all* stops/paths in a dataset 
-#' onto the first stop/path, creating new fields named, e.g., `Path1`, `Path2`, etc.
-#' Another extremely useful function is [foldExclusive()], which automatically folds spines 
-#' based on their exclusive interpretation.
+#' Cleaving will always introduce new fields into your data.
+#' The first spine/path/stop in each cleave group is left in it's original (target) field.
+#' Other spine/path/stops will be put into new fields.
+#' So if you call `humData |> select(Token) |> cleave(humData, 1:2)`, spine 1 will remain in the `Token`
+#' field and spine 2 data will be put in a new field.
+#' By default, the new field(s) will be automatically named by appending the type of cleave (spine vs path vs stop)
+#' to the number.
+#' In the `cleave(humData, 1:2)` case, the new field will be called `Spine2`.
+#' You can control the name with the `newFields` argument, which must be a `character` vector.
+#' You can provide as many new field names as there will be new fields.
+#' If you provide too few field names, your name(s) will have numbers appended as necceasary to cover all the new fields;
+#' If you provide too many field names, the extra names will simply be ignored.
+#' 
+#' When cleaving by exclusive interpretation `newFields` can be used in the exact same way.
+#' However, by default (if `newFields` is `NULL`), `cleave()` will names fields by their exclusive interpretation.
+#' Note that the original target field (specified by the `field`) argument will not have it's name changed.
+#' So for example, `humData |> select(Token) |> cleave(humData, c('kern', 'silbe'))` will result in the spines `Token`
+#' and `Silbe`. 
+#' No `Kern` field is created, because the `Kern` data is left in the `Token` field.
 #' 
 #' @param humdrumR ***HumdrumR data.***
 #' 
 #' Must be a [humdrumR data object][humdrumRclass].
 #' 
-#' @param fold ***Which target structure (spine, path, etc.) to "fold" onto another structural position.***
+#' @param ... ***What to cleave?***
 #' 
-#' Must be natural numbers.
+#' Must be natural numbers, `character` strings representing exclusive interpretations, or lists of either.
 #' 
-#' @param onto ***Which target structure (spine, path, etc.) is the data "folded" onto.***
-#'   
-#' Must be natural numbers.
+#' @param field ***Which field cleave data from.***
 #' 
-#' @param what ***The structural (spine, path, etc.) which is folded across.***
-#' 
-#' Defaults to `"Spine"`.
-#' 
-#' Must be a single `character` string. Valid options are `"Spine"`, `"Path"`, `"Stop"`, `"Record"`,and `"DataRecord"`.
-#'
-#' @param Piece ***Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).***
-#' 
-#' Defaults to `NULL`.
-#' 
-#' Must be natural numbers; must be length `length(onto)`.
-#' 
-#' @param fromField ***Which field to "fold."***
-#' 
-#' Defaults to `selectedFields(humdrumR)[1]`.
+#' Defaults to first [selected field][selectedFields]. 
 #' 
 #' Must be a `character` string [partially][partialMatching] matching the name of a data field in the `humdrumR` input.
 #' For example, `"Tok"` would match the `Token` field.
-#' This is the field which is "folded" into a new field.
 #'   
-#' @param fillFromField ***Should the content of the `fromField` be to copied unfolded sections?***
+#' @param newFields ***Names to use for new fields created by the cleave.***
 #' 
-#' Defaults to `FALSE` for `cleave()` and `foldStops()`; `TRUE` for `foldPaths()`.
+#' By default generates names by structure/number (like `Spine2`) or exclusive interpretation (like `Silbe`).
 #' 
-#' Must be a singleton `logical` value: an on/off switch.
+#' Must be non-empty `character` string.
+#' 
+#' @examples
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/MozartVariations/.*.krn")
+#' 
+#' 
+#' humData |> cleave(3:4)
+#' humData |> cleave(Path = 0:1, newFields = 'Ossia')
+#' humData |> cleavePaths()
 #'
-#' This only comes into play if the folding field is smaller than the `to` field.
-#'
-#' @param newFieldNames ***Names to use for new fields created by the folding.***
+#' humData |> cleave(c('function', 'harm'), newFields = 'Harmony')
 #' 
-#' Defaults to `NULL`.
-#' 
-#' Must be `character`.
+#' humData |> cleave(c('kern', 'function', 'harm'))
 #' 
 #' @seealso {The complement/opposite of `cleave()` is [rend()].
-#' The [collapse family of functions][collapseHumdrum()] serves a somewhat
-#' similar function to `cleave()`.}
+#'           The [collapse family of functions][collapseHumdrum()] serves a somewhat
+#'            similar function to `cleave()`.}
 #' @family {Humdrum table reshaping functions}
 #' @family {Humdrum table pivoting functions}
 #' @export
 cleave <- function(humdrumR, ...,
                    field = selectedFields(humdrumR)[1], 
-                   newFieldNames = NULL) {
+                   newFields = NULL) {
     # argument checks
     checks(humdrumR, xhumdrumR)
     checks(field, xcharacter & xlen1)
+    checks(newFields, xnull | (xcharnotempty & xlen))
 
     field <- fieldMatch(humdrumR, field, 'cleave', 'field')
     
@@ -496,7 +483,7 @@ cleave <- function(humdrumR, ...,
     
     # what are we doing?
     c('groupDT', 'what') %<-% cleaveParseGroups(...)
-    groupDT <- cleaveMoves(humtab, groupDT, what, newFieldNames)
+    groupDT <- cleaveMoves(humtab, groupDT, what, newFields)
     
 
     # 
@@ -579,7 +566,7 @@ cleave <- function(humdrumR, ...,
 
 # pivotHumdrum <- function(humdrumR, fold,  onto, what = 'Spine', Piece = NULL, 
 #                         fromField = selectedFields(humdrumR)[1], fillFromField = FALSE,
-#                         newFieldNames = NULL) {
+#                         newFields = NULL) {
 #     
 #     # argument checks
 #     checks(humdrumR, xhumdrumR)
@@ -592,7 +579,7 @@ cleave <- function(humdrumR, ...,
 #    
 #     
 #     humtab <- data.table::copy(getHumtab(humdrumR))
-#     moves <- cleaveMoves(humtab, fold, onto, what, Piece, newFieldNames)
+#     moves <- cleaveMoves(humtab, fold, onto, what, Piece, newFields)
 #     humtab[ , "_pivot_" := {
 #         pivot <- rep(fromField, length(Token))
 #         pivot[Spine %in% moves$From] <- moves$FieldNames[match(Spine[Spine %in% moves$From], moves$From)]
@@ -729,7 +716,7 @@ cleaveParseGroups_list <- function(groups) {
   setorder(dt, Piece, To, From)
 }
 
-cleaveMoves <- function(humtab, groupDT, what, newFieldNames = NULL) {
+cleaveMoves <- function(humtab, groupDT, what, newFields = NULL) {
     
     if (is.null(groupDT$Piece)) {
       piece <- rep(unique(humtab$Piece), each = nrow(groupDT))
@@ -740,18 +727,18 @@ cleaveMoves <- function(humtab, groupDT, what, newFieldNames = NULL) {
     
     if (class(groupDT$From) == 'character') {
       # this turns exclusives into integers, but also creates fieldNames
-      groupDT <- cleaveParseExclusives(humtab, groupDT, newFieldNames)
+      groupDT <- cleaveParseExclusives(humtab, groupDT, newFields)
     } else {
       # name fields
       groupDT[ , newFieldN := seq_along(From), by = .(Piece, To)]
       NnewFields <- length(unique(groupDT$newFieldN))
       
-      if (is.null(newFieldNames)) {
+      if (is.null(newFields)) {
          groupDT[ , FieldNames := paste0(what, paste(unique(From), collapse = '|')), by = newFieldN]
         
       } else {
-        newFieldNames <- make.unique(rep(newFieldNames, length.out = max(groupDT$newFieldN)), sep = '')
-        groupDT[ , FieldName := newFieldNames[newFieldN]]
+        newFields <- make.unique(rep(newFields, length.out = max(groupDT$newFieldN)), sep = '')
+        groupDT[ , FieldName := newFields[newFieldN]]
       }
     }
     
@@ -761,7 +748,7 @@ cleaveMoves <- function(humtab, groupDT, what, newFieldNames = NULL) {
     groupDT
 }
 
-cleaveParseExclusives <- function(humtab, groupDT, newFieldNames = NULL) {
+cleaveParseExclusives <- function(humtab, groupDT, newFields = NULL) {
   uniqueExclusives <- union(groupDT$From, groupDT$To) # solely used for error message below
 
   
@@ -810,12 +797,12 @@ cleaveParseExclusives <- function(humtab, groupDT, newFieldNames = NULL) {
   groupDT[ , FieldName := stringr::str_to_sentence(paste0(Exclusive, if (any(newFieldN > 1)) newFieldN)), by = Exclusive]
   groupDT[ , newFieldN := match(FieldName, unique(FieldName))]
   
-  if (!is.null(newFieldNames)) {
-    newFieldNames <- make.unique(rep(newFieldNames, length.out = max(groupDT$newFieldN)), sep = '')
-    groupDT[ , FieldName := newFieldNames[newFieldN]]
+  if (!is.null(newFields)) {
+    newFields <- make.unique(rep(newFields, length.out = max(groupDT$newFieldN)), sep = '')
+    groupDT[ , FieldName := newFields[newFieldN]]
   } 
  
-  groupDTa
+  groupDT
 }
     
 #' @rdname cleave
@@ -840,7 +827,17 @@ pivot_wider.humdrumR <- function(data, names_from = 'Spine', values_from = selec
 
 #' @rdname cleave
 #' @export
-cleaveSpines <- cleave
+cleaveSpines <- function(humdrumR, field = selectedFields(humdrumR)[1]) {
+  spines <- sort(unique(getHumtab(humdrumR)$Spine))
+  spines <- spines[!is.na(spines)]
+  
+  if (all(spines == 0L)) {
+    .warn('No pieces with multiple spines to cleave.')
+    return(humdrumR)
+  }
+  
+  cleave(humdrumR, Spine = spines, field = field)
+}
 
 #' @rdname cleave
 #' @export
@@ -849,34 +846,29 @@ cleavePaths <- function(humdrumR, field = selectedFields(humdrumR)[1]) {
     paths <- sort(unique(getHumtab(humdrumR)$Path))
     paths <- paths[!is.na(paths)]
     
-    if (all(paths == 0L)) return(humdrumR)
+    if (all(paths == 0L)) {
+      .warn('No paths to cleave.')
+      return(humdrumR)
+    }
     
-    dataFields <- fields(humdrumR, fieldTypes = 'Data')
-
-    
-    cleave(humdrumR, Path = paths, field = field,
-              newFieldNames = paste0(field, '_Path', paths[-1]))
-    
-
+    cleave(humdrumR, Path = paths, field = field)
     
 }
 
 #' @rdname cleave
 #' @export
-cleaveStops <- function(humdrumR, fromField = selectedFields(humdrumR)[1], fillFromField = FALSE) {
-    checks(humdrumR, xhumdrumR)
+cleaveStops <- function(humdrumR, field = selectedFields(humdrumR)[1]) {
+   checks(humdrumR, xhumdrumR)
            
    stops <- unique(getHumtab(humdrumR)$Stop)
    stops <- stops[!is.na(stops)] 
    
-   if (all(stops == 1L)) return(humdrumR)
-   
-   dataFields <- fields(humdrumR, fieldTypes = 'Data')
-   
-   
-   cleave(humdrumR, Stop = stops, field = field,
-          newFieldNames = paste0(field, '_Stop', paths[-1]))
-   
+   if (length(unique(stops)) == 1L) {
+     .warn('No multi-stops to cleave')
+     return(humdrumR)
+   } 
+
+   cleave(humdrumR, Stop = stops, field = field)
    
 }
 

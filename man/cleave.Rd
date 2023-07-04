@@ -8,12 +8,7 @@
 \alias{cleaveStops}
 \title{Align data from separate spines into new fields.}
 \usage{
-cleave(
-  humdrumR,
-  ...,
-  field = selectedFields(humdrumR)[1],
-  newFieldNames = NULL
-)
+cleave(humdrumR, ..., field = selectedFields(humdrumR)[1], newFields = NULL)
 
 \method{pivot_wider}{humdrumR}(data, names_from = "Spine", values_from = selectedFields(data)[1])
 
@@ -21,7 +16,7 @@ cleaveSpines(
   humdrumR,
   ...,
   field = selectedFields(humdrumR)[1],
-  newFieldNames = NULL
+  newFields = NULL
 )
 
 cleavePaths(humdrumR, field = selectedFields(humdrumR)[1])
@@ -37,47 +32,22 @@ cleaveStops(
 
 Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{newFieldNames}{\emph{\strong{Names to use for new fields created by the folding.}}
+\item{...}{\emph{\strong{What to cleave?}}
 
-Defaults to \code{NULL}.
+Must be natural numbers, \code{character} strings representing exclusive interpretations, or lists of either.}
 
-Must be \code{character}.}
+\item{field}{\emph{\strong{Which field cleave data from.}}
 
-\item{fromField}{\emph{\strong{Which field to "fold."}}
-
-Defaults to \code{selectedFields(humdrumR)[1]}.
+Defaults to first \link[=selectedFields]{selected field}.
 
 Must be a \code{character} string \link[=partialMatching]{partially} matching the name of a data field in the \code{humdrumR} input.
-For example, \code{"Tok"} would match the \code{Token} field.
-This is the field which is "folded" into a new field.}
+For example, \code{"Tok"} would match the \code{Token} field.}
 
-\item{fillFromField}{\emph{\strong{Should the content of the \code{fromField} be to copied unfolded sections?}}
+\item{newFields}{\emph{\strong{Names to use for new fields created by the cleave.}}
 
-Defaults to \code{FALSE} for \code{cleave()} and \code{foldStops()}; \code{TRUE} for \code{foldPaths()}.
+By default generates names by structure/number (like \code{Spine2}) or exclusive interpretation (like \code{Silbe}).
 
-Must be a singleton \code{logical} value: an on/off switch.
-
-This only comes into play if the folding field is smaller than the \code{to} field.}
-
-\item{fold}{\emph{\strong{Which target structure (spine, path, etc.) to "fold" onto another structural position.}}
-
-Must be natural numbers.}
-
-\item{onto}{\emph{\strong{Which target structure (spine, path, etc.) is the data "folded" onto.}}
-
-Must be natural numbers.}
-
-\item{what}{\emph{\strong{The structural (spine, path, etc.) which is folded across.}}
-
-Defaults to \code{"Spine"}.
-
-Must be a single \code{character} string. Valid options are \code{"Spine"}, \code{"Path"}, \code{"Stop"}, \code{"Record"},and \code{"DataRecord"}.}
-
-\item{Piece}{\emph{\strong{Which pieces in the corpus should be folded (see "Piece-Specific Folding" section, below).}}
-
-Defaults to \code{NULL}.
-
-Must be natural numbers; must be length \code{length(onto)}.}
+Must be non-empty \code{character} string.}
 }
 \description{
 Cleave, as in "to cleave together," moves data from separate spines (or paths) into
@@ -94,108 +64,116 @@ data points, taking up one row in the \link[=humTable]{humdrum table}.
 If we want to treat data in multiple spines/paths/stops as different aspects of the same data
 it is easiest to reshape the data so that the information is in different humdrumR \link[=fields]{fields}
 rather than separate spines/paths/stops.
-We "fold" the data from one structural location over "on top" of other data using \code{cleave}.
-}
-\section{From where to where}{
+In the humdrum syntax view, the spines (or path/stops) are moved "on top" of each other, cleaving them
+together.
+\subsection{Syntax}{
 
-
-The \code{numeric} \code{fold} and \code{onto} arguments specify where to fold from/to.
-\code{fold} indicates the Spine/Path/Stop to fold \emph{from}, "\emph{on to}" the Spine/Path/Stop
-indicated by \code{onto}.
-For example, if you specify \code{cleave(mydata, fold = 2, onto = 1, what = 'Spine')}
-spine 2 will be folded "on top of" spine 1.
-The \code{fold} and \code{onto} targets may not overlap.
-
-The \code{fold} and \code{onto} arguments can be vectors of any length, which are interpreted in parallel:
-for example, the combination \code{fold = 1:2} and \code{onto = 3:4} would map the first spine
-to the third spine (\code{1 -> 3}) and the second spine to the 4th spine (\code{2 -> 4}).
-If the \code{onto} targets are duplicated, the \code{fold} spines will be folded onto
-multiple new fields: for example, the combination \code{fold = 1:2} and \code{onto = c(3, 3)} will
-map first spine \emph{and} the second spine on to \emph{two} new fields of the third spine.
-If the \code{fold} target is duplicated, the same \code{fold} spines can be copied onto multiple
-\code{onto} spines: for example, the combination \code{fold = 1} and \code{onto = 2:3} will map the contents
-of the first spine onto the second \emph{and} third spine, duplicating the spine-1 data.
-
-The lengths of \code{fold} and \code{onto} are automatically matched, so
-arguments like \code{fold = 1:2} and \code{onto = 3} are equivalent to \verb{fold = 1:2, onto = c(3, 3)}.
-This makes it easy to do things like "copy all four spines onto spine 1":
-just write \verb{fold = 2:4, onto = 1}.
-
-To specify what structural field you want to fold across,
-use the \code{what} argument (\code{character}, \code{length == 1}).
-The default \code{what} value is \code{"Spine"}; other common fold options are \code{"Path"},
-and \code{"Stop"}, though you might want to use the convenient \code{foldPaths()} and \code{foldStops()}
-functions directly (details below).
-(You may also fold across \code{"Record"} or \code{"DataRecord"}), but these are advanced/tricky!)
-}
-
-\section{Which fields}{
-
-
-The \code{fromField} (\code{character}, \code{length == 1}) controls which field in the \code{fold}
-spine/path/stop is folded into a new field.
-The \code{fromField} argument defaults to the (first) \link[=selectedFields]{selected fields},
-and must match (or \link[=partialMatching]{partially match}) a field in the \code{humdrumR} argument data set.
-In some cases, the \code{fold} data is smaller than the \code{onto} data---for instance,
-spine paths often only exist for part of a spine, so there is less data in the path
-than in the full spine.
-In these cases, it can be helpful to set \code{fillFromField == TRUE},
-which causes the missing parts of \code{fold} to be filled with data from the \code{from}
-field. \code{foldPaths} does this by default.
-
-The resulting new fields will automatically be named as appropriate \code{Result}s fields.
-The \code{newFieldNames} argument (\code{character}) can be used to control the output names:
-one for each new field created by the fold.
-If you specify too many \code{newFieldNames}, the later names are ignored.
-If you specify too few \code{newFieldNames}, the later names will be given result names,
-consistent with the default behavior.
-}
-
-\section{Piece-Specific Folding}{
-
-
-By default, the same "fold" is carried out in each piece in the input corpus
-(\code{humdrumR} argument).
-If you need to specify different folds in different pieces, you have to specify the \code{Piece}
-argument (\code{numeric}, whole number).
-For \emph{every} piece in the corpus you want to apply folds to, you must specify all the \code{fold}
-and \code{onto} arguments in parallel vectors with the \code{Piece} argument (even if this is reduendant
-for some files).
-For example, if we specify the combinations,\tabular{ccc}{
-   \code{fold} \tab \code{onto} \tab \code{Piece} \cr
-   \code{1} \tab \code{2} \tab \code{1} \cr
-   \code{3} \tab \code{4} \tab \code{1} \cr
-   \code{1} \tab \code{2} \tab \code{2} \cr
-   \code{4} \tab \code{3} \tab \code{2} \cr
-}
-
-
-then
+The \code{cleave()} function takes any number of \code{...} arguments specifying \emph{groups} of spines/paths/stops
+to cleave together.
 \itemize{
-\item In \code{Piece} one:
+\item \code{cleave(humData, Spine = 1:2)} will cleave the first and second spine.
+\item \code{cleave(humData, Spine = 1:4)} will cleave the first four spines.
+\item \code{cleave(humData, Spine = 1:2, Spine = 3:4)} will cleave spine 1 with spine 2, and separately, spine 3 with spine 4.
+}
+
+The default is to cleave spines, so you can actually omit the \verb{Spine = } part: e.g., \code{cleave(humData, 1:2)} is the same
+as \code{cleave(humData, Spine = 1:2)}.
+If you want to cleave spine paths, you'll need to explicitly call something like \code{cleave(humData, Path = 0:1)}.
+The \emph{first} element in each group is used as the original location which all other spines/paths/stops are cleaved into.
+The ordering of the remaining elements is irrelevant.
+\subsection{Piece-specific cleaving}{
+
+By default, the same cleaving will be applied in all pieces (if the pieces \emph{have} the target spines/paths/stops).
+However, you can use an alternate argument structure to apply differerent cleaves to different pieces.
+To do so, provide groups to cleave arguments in a list, with each element in the list representing cleave group
+in one piece.
+If the listed groups are unnamed, the groups are mapped to pieces by index.
+For example, the call \code{cleave(humData, list(1:2, 2:3, 3:4, NULL, 1:3))} will result in the following cleaves:
 \itemize{
-\item the first spine is mapped to the second spine
-\item the third spine is mapped to the fourth spine
-}
-\item In \code{Piece} two:
-\itemize{
-\item the first spine is mapped to the second spine
-\item the fourth spine is mapped to the third spine
-}
+\item In piece 1, cleave spines 1 and 2.
+\item In piece 2, cleave spines 2 and 3.
+\item In piece 3, cleave spines 3 and 4.
+\item In piece 4, no cleave (no changes).
+\item In piece 5, cleave the first three spines.
+\item In any remaining pieces (6 or greater), no cleaves.
 }
 
-If any files in the corpus are not included, they will not be affected at all!
+Alternatively, you can name the list elements with integers corresponding to pieces.
+For example, \verb{cleave(humData, Path = list("1" = 0:1, 5 = 0:2"))} will cleave paths 0 and 1 in
+piece 1, and paths \code{0:2} in piece 5.
 }
 
-\section{Predefined folds}{
+\subsection{Exclusive interpretations}{
+
+When cleaving spines, you can specify spines using character strings representing exclusive interpretations.
+So you can call \code{cleave(humData, c('kern', 'silbe'))}, which will cause \verb{**kern} and \verb{**silbe} spines in each piece to
+be cleaved.
+Note that any exclusive interpretations which aren't "mentioned" in the call remain in their original field.
+
+The behavior of exclusive cleaving depends on the relative number of each target exclusive interpretation in each piece.
+If there are equal numbers of each interpretation, the spines are grouped in parallel.
+For example, if a piece has the spines \verb{**kern **silbe **kern **silbe}, the command \code{cleave(humData, c('kern', 'silbe'))}
+will see that there are two \verb{**kern}/\verb{**silbe} pairs, and cleave them just like \code{cleave(humData, 1:2, 3:4)}.
+
+If there are different numbers of spines matching each exclusive interpretation, the cleave behavior depends on which
+field is the first field in your input argument---we'll call that the "target" exclusive.
+Consider a file with spines \verb{**kern **kern **harm}.
+If we specify a cleave call \code{cleave(humData, c('kern', 'harm'))} that means we want \verb{**kern} to be the "target" exclusive.
+Since there are fewer \verb{**harm} spines than \verb{**kern} spines, the data in the \verb{**harm} spine will be \emph{duplicated}, can cleaved
+to \strong{both} \verb{**kern} spines in parallel.
+If we instead call \code{cleave(humData, c('harm', 'kern'))}, making \verb{**harm} the "target", the two \verb{**kern} spines will both be "piled" atop
+the single \verb{**harm} spine, making two new \verb{**kern} fields.
+}
+
+}
+}
+\section{Fields}{
 
 
-The convenient \code{foldStops()} and \code{foldPaths()} functions automatically fold \emph{all} stops/paths in a dataset
+Cleaving can (for now) only be applied to one field in our data, which defaults to the first \link[=selectedFields]{selected field};
+You can change the target field with the \code{field} argument.
+
+Cleaving will always introduce new fields into your data.
+The first spine/path/stop in each cleave group is left in it's original (target) field.
+Other spine/path/stops will be put into new fields.
+So if you call \code{humData |> select(Token) |> cleave(humData, 1:2)}, spine 1 will remain in the \code{Token}
+field and spine 2 data will be put in a new field.
+By default, the new field(s) will be automatically named by appending the type of cleave (spine vs path vs stop)
+to the number.
+In the \code{cleave(humData, 1:2)} case, the new field will be called \code{Spine2}.
+You can control the name with the \code{newFields} argument, which must be a \code{character} vector.
+You can provide as many new field names as there will be new fields.
+If you provide too few field names, your name(s) will have numbers appended as necceasary to cover all the new fields;
+If you provide too many field names, the extra names will simply be ignored.
+
+When cleaving by exclusive interpretation \code{newFields} can be used in the exact same way.
+However, by default (if \code{newFields} is \code{NULL}), \code{cleave()} will names fields by their exclusive interpretation.
+Note that the original target field (specified by the \code{field}) argument will not have it's name changed.
+So for example, \code{humData |> select(Token) |> cleave(humData, c('kern', 'silbe'))} will result in the spines \code{Token}
+and \code{Silbe}.
+No \code{Kern} field is created, because the \code{Kern} data is left in the \code{Token} field.
+}
+
+\section{Predefined cleaves}{
+
+
+The convenient \code{cleaveStops()} and \code{cleavePaths()} functions automatically cleave \emph{all} stops/paths in a dataset
 onto the first stop/path, creating new fields named, e.g., \code{Path1}, \code{Path2}, etc.
-Another extremely useful function is \code{\link[=foldExclusive]{foldExclusive()}}, which automatically folds spines
-based on their exclusive interpretation.
 }
 
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/MozartVariations/.*.krn")
+
+
+humData |> cleave(3:4)
+humData |> cleave(Path = 0:1)
+
+humData |> cleave(c('function', 'harm'))
+
+humData |> cleave(c('kern', 'function', 'harm'))
+
+}
 \seealso{
 {The complement/opposite of \code{cleave()} is \code{\link[=rend]{rend()}}.
 The \link[=collapseHumdrum]{collapse family of functions} serves a somewhat
