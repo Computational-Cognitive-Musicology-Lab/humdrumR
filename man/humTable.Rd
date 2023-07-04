@@ -29,7 +29,8 @@ Defaults to \code{"GLIMDd"}.
 Must be a \code{character} string, which specifies which types of data tokens/records to extract.
 Legal values are: \code{"G"} (global comments), \code{"L"} (local comments), \code{"I"} (interpretations),
 \code{"M"} (barlines), \code{"D"} (non-null data), or \code{"d"} (null data).
-Multiple types can be specified in a single string: e.g., \code{"GLIMD"}.}
+Multiple types can be specified in a single string: e.g., \code{"GLIMD"}.
+Note that \code{"I"} also grabs \code{"E"} (exclusive) and \code{"S"} (spine-control) tokens.}
 
 \item{fieldTypes}{\emph{\strong{Which types of fields to list.}}
 
@@ -41,7 +42,7 @@ You can also pass \code{"selected"} to extract only the \link[=selectedFields]{s
 Types can be \link[=partialMatching]{partially matched}---for example, \code{"S"} for \code{"Structure"}.}
 }
 \description{
-In the \link{humdrumR} package, the fundamental data structure is called a \strong{Humdrum Table}.
+In the \link{humdrumR} package, the fundamental data structure is called a \strong{humdrum table}.
 A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
 as a single \link[data.table:data.table]{data.table}
 (A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}).
@@ -49,16 +50,15 @@ Humdrum tables are stored "inside" every \link{humdrumRclass} object that you wi
 functions allow you to study or manipulate the them.
 If you want to directly access the humdrum table within a \link{humdrumRclass} object, use the \code{\link[=getHumtab]{getHumtab()}} function.
 
-\code{getHumtab} extracts the hudrum table from a \link[=humdrumRclass]{humdrumR object}.
+The \code{getHumtab()} function extracts the humdrum table from a \link[=humdrumRclass]{humdrumR object}.
 
-Use the \code{fields()} function list the current fields in
+Use the \code{fields()} function to list the current fields in
 a \link{humdrumRclass} object.
-It returns a \code{\link[=data.table]{data.table()}} with five columns:
 }
 \details{
 In a humdrum table, by default, humdrum data is organized in a maximally "long" (or "tall")
 format, with each and every single "token" in the original data represented by a single row in the table.
-Even multistops---tokens separated by spaces---are broken onto
+Even multiple-stops---tokens separated by spaces---are broken onto
 their own rows. Meanwhile, each column in the humdrum table represents a single
 piece of information associated with each token, which we call a \strong{field}.
 Throughout this documentation, you should keep in mind that a "token" refers
@@ -66,23 +66,6 @@ to a \emph{row} in the humdrum table while a "field" refers to a \emph{column}:
 \itemize{
 \item Token = row
 \item Field = column
-}
-
-\itemize{
-\item \code{Name}
-\item \code{Class}
-\item \code{Type}
-\itemize{
-\item \code{Data}/\code{Structure}/\code{Interpretation}/\code{Formal}/\code{Reference}/\code{Grouping}
-}
-\item \code{Selected},
-\itemize{
-\item A \code{logical} indicating which fields are \link[=selectedFields]{selected}.
-}
-\item \code{GroupedBy}
-\itemize{
-\item A \code{logical} indicating which, if any fields, are currently grouping the data.
-}
 }
 }
 \section{Fields:}{
@@ -96,19 +79,19 @@ There are six types of fields in a humdrum table:
 \item Grouping fields
 }
 
-When first created by a call to \code{\link[=readHumdrum]{readHumdrum()}} every
+When first created by a call to \code{\link[=readHumdrum]{readHumdrum()}}, every
 humdrum table has at least nineteen fields: one data field (\code{Token}), two interpretation
 fields (\code{Tandem} and \code{Exclusive}), three formal fields, and thirteen structure fields. Additional
 formal, interpretation, or reference fields
-may be present depending on the content of the humdrum file(s), and users can create additional data fields
-by using \link[=withinHumdrum]{within.humdrumR()}, \code{\link[=mutate.humdrumR]{mutate.humdrumR()}}, or some other functions.
+\emph{may} be present depending on the content of the humdrum file(s), and you can create additional data fields
+by using \link[=withinHumdrum]{within.humdrumR()}, \code{\link[=mutate.humdrumR]{mutate.humdrumR()}}, or other functions.
 \subsection{Data fields:}{
 
 \emph{Data} fields are used to describe individual data points
 in humdrum data (as opposed to groups of points).
 Every humdrum table starts with a data
 field called \strong{Token}, which
-contains character strings representing the original strings read from the humdrum files.
+contains \code{character} strings representing the original strings read from the humdrum files.
 Users can create as many additional data fields as they like. Every call to
 \code{\link[=withinHumdrum]{withinHumdrum()}} generates new data fields.
 }
@@ -179,8 +162,8 @@ which this path split? Where \code{Path == 0}, parent path is also \code{0}.
 }
 \item \code{Stop} :: \code{integer}
 \itemize{
-\item Which token in a multistop token, numbered starting from \code{1}.
-\item In files with no multistops, the \code{Stop} field is all \code{1}s.
+\item Which token in a multi-stop token, numbered starting from \code{1}.
+\item In files with no multi-stops, the \code{Stop} field is all \code{1}s.
 \item This field is always \code{NA} when \code{Global == TRUE}.
 }
 \item \code{Global} :: \code{logical}
@@ -195,12 +178,14 @@ which this path split? Where \code{Path == 0}, parent path is also \code{0}.
 \itemize{
 \item What type of record is it?
 \itemize{
-\item \code{"D"} = non-null data
-\item \code{"d"} = null data
+\item \code{"G"} = global comment.
+\item \code{"L"} = local comment
 \item \code{"I"} = interpretation
 \item \code{"M"} = measure/barline
-\item \code{"L"} = local comment
-\item \code{"G"} = global comment.
+\item \code{"D"} = non-null data
+\item \code{"d"} = null data
+\item \code{"E"} = exclusive interpretation
+\item \code{"S"} = spine-control tokens (\verb{*^}, \verb{*v}, \verb{*-})
 }
 }
 }
@@ -288,6 +273,13 @@ files read by \code{\link[=readHumdrum]{readHumdrum()}}, no reference fields are
 Examples of common reference records are \code{"!!!COM:"} (composer) and \code{"!!!OTL:"} (original title).
 Any humdrum data with these records will end up having \code{COM} and \code{OTL} fields in its humdrum table.
 }
+
+\subsection{Grouping fields:}{
+
+Grouping fields are special fields which may be created by calls to \code{\link[=group_by]{group_by()}}.
+These fields are deleted by calls to \code{\link[=ungroup]{ungroup()}}.
+These fields are generally hidden/inaccessible to users.
+}
 }
 
 \section{Null data}{
@@ -310,7 +302,7 @@ Whenever different \code{\link[=fields]{fields()}} are created or \link[=selecte
 what data locations it considers null.
 Note that \code{humdrumR} considers data locations to be "null" when
 \itemize{
-\item the selected fields are all \code{character} data \emph{and} the token is a single \code{"."}, \code{"!"}, \code{"="}, or \code{"*"}; \strong{or}
+\item the selected fields are all \code{character} data \emph{and} the token is a one of \code{c(".", "!", "!!", "=", "*", "**")}; \strong{or}
 \item the selected fields are all \code{NA} (including \code{NA_character_}).
 }
 
@@ -322,11 +314,6 @@ only look at data where \code{Type == "D"}.
 Whenever you print or \link[=writeHumdrum]{export} a [humdrumR object\link{humdrumRclass}, null data in the selected fields
 prints as \code{"."}---thus \code{NA} values print as \code{.}.
 Thus, if you are working with numeric data with \code{NA} values, these \code{NA} values will print as \code{"."}.
-\subsection{Grouping fields:}{
-
-Grouping fields are special feels which may be created by calls to \code{\link[=group_by]{group_by()}}.
-These fields are deleted by calls to \code{\link[=ungroup]{ungroup()}}.
-}
 }
 
 \section{Reshaping}{
@@ -338,12 +325,46 @@ Of course, thanks to the structure fields, we can easily
 regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 However, in some cases, you might want to work with humdrum data in a different structure or "shape."
 \code{humdrumR} has several options for \link[=collapseHumdrum]{"collapsing"} tokens within humdrum tables,
-\link[=foldHumdrum]{"folding"} different parts of the data into new fields,
+\link[=cleave]{"cleaving"} different parts of the data into new fields,
 or otherwise \link[=humCoercion]{reshaping humdrum data} into basic R data structures you might prefer.
 }
 
-\seealso{
-Other Core humdrum data representation: 
-\code{\link{humdrumRclass}}
+\section{Querying Fields}{
+
+
+The \code{fields()} function takes a \link[=humdrumRclass]{humdrumR object}
+and returns a \code{\link[=data.table]{data.table()}}, with each
+row describing an available field in the humdrum table.
+The output table has five columns:
+\itemize{
+\item \code{Name}
+\itemize{
+\item The field name.
 }
-\concept{Core humdrum data representation}
+\item \code{Class}
+\itemize{
+\item The \code{\link[=class]{class()}} of the data in the field.
+}
+\item \code{Type}
+\itemize{
+\item The type of field (described above).
+Can be \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal"}, \code{"Reference"}, or \code{"Grouping"}.
+}
+\item \code{Selected},
+\itemize{
+\item A \code{logical} indicating which fields are \link[=selectedFields]{selected}.
+}
+\item \code{GroupedBy}
+\itemize{
+\item A \code{logical} indicating which, if any, fields are currently \link[=withinHumdrum]{grouping} the data.
+}
+}
+
+Using the \code{\link[=names]{names()}} function on a \link[=humdrumRclass]{humdrumR object} will
+get just the field names, the same as \code{fields(humData)$Name}.
+}
+
+\seealso{
+{To actually extract fields from \link{humdrumR data}, see the \code{\link[=pull]{pull()}} family of functions.}
+}
+\concept{{Core humdrum data representation}}

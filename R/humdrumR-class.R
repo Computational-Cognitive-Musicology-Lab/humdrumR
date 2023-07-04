@@ -1,6 +1,8 @@
+# Humdrum table  ----
+
 #' Humdrum tables (and their "fields")
 #' 
-#' In the [humdrumR] package, the fundamental data structure is called a **Humdrum Table**.
+#' In the [humdrumR] package, the fundamental data structure is called a **humdrum table**.
 #' A humdrum table encodes all the information in a collection of one or more humdrum-syntax files
 #' as a single [data.table][data.table::data.table] 
 #' (A `data.table` is an "enhanced" version of R's standard [data.frame]).
@@ -11,7 +13,7 @@
 #' 
 #' In a humdrum table, by default, humdrum data is organized in a maximally "long" (or "tall")
 #' format, with each and every single "token" in the original data represented by a single row in the table.
-#' Even multistops---tokens separated by spaces---are broken onto
+#' Even multiple-stops---tokens separated by spaces---are broken onto
 #' their own rows. Meanwhile, each column in the humdrum table represents a single
 #' piece of information associated with each token, which we call a **field**.
 #' Throughout this documentation, you should keep in mind that a "token" refers
@@ -31,12 +33,12 @@
 #' 5. Reference fields
 #' 6. Grouping fields
 #' 
-#' When first created by a call to [readHumdrum()] every
+#' When first created by a call to [readHumdrum()], every
 #' humdrum table has at least nineteen fields: one data field (`Token`), two interpretation 
 #' fields (`Tandem` and `Exclusive`), three formal fields, and thirteen structure fields. Additional
 #' formal, interpretation, or reference fields
-#' may be present depending on the content of the humdrum file(s), and users can create additional data fields
-#' by using [within.humdrumR()][withinHumdrum], [mutate.humdrumR()], or some other functions.
+#' *may* be present depending on the content of the humdrum file(s), and you can create additional data fields
+#' by using [within.humdrumR()][withinHumdrum], [mutate.humdrumR()], or other functions.
 #' 
 #' ### Data fields:
 #' 
@@ -44,7 +46,7 @@
 #' in humdrum data (as opposed to groups of points). 
 #' Every humdrum table starts with a data
 #' field called **Token**, which
-#' contains character strings representing the original strings read from the humdrum files. 
+#' contains `character` strings representing the original strings read from the humdrum files. 
 #' Users can create as many additional data fields as they like. Every call to
 #' [withinHumdrum()] generates new data fields. 
 #' 
@@ -92,8 +94,8 @@
 #'     + `DataRecord` :: `integer`
 #'         + The *data* record enumeration in the file, starting from `1`.
 #'     + `Stop` :: `integer`
-#'         + Which token in a multistop token, numbered starting from `1`.
-#'         + In files with no multistops, the `Stop` field is all `1`s.
+#'         + Which token in a multi-stop token, numbered starting from `1`.
+#'         + In files with no multi-stops, the `Stop` field is all `1`s.
 #'         + This field is always `NA` when `Global == TRUE`.
 #'     + `Global` :: `logical`
 #'         + Did the token come from a global record (as opposed to a local record)?
@@ -101,14 +103,15 @@
 #' + *Token info*:
 #'     + `Type` :: `character`
 #'         + What type of record is it? 
-#'             + `"D"` = non-null data 
-#'             + `"d"` = null data
+#'             + `"G"` = global comment. 
+#'             + `"L"` = local comment
 #'             + `"I"` = interpretation
 #'             + `"M"` = measure/barline 
-#'             + `"L"` = local comment
-#'             + `"G"` = global comment. 
+#'             + `"D"` = non-null data 
+#'             + `"d"` = null data
+#'             + `"E"` = exclusive interpretation
+#'             + `"S"` = spine-control tokens (`*^`, `*v`, `*-`)
 #'         
-#' 
 #' 
 #' 
 #' ### Interpretation fields:
@@ -184,6 +187,13 @@
 #' Examples of common reference records are `"!!!COM:"` (composer) and `"!!!OTL:"` (original title).
 #' Any humdrum data with these records will end up having `COM` and `OTL` fields in its humdrum table.
 #' 
+#' ### Grouping fields:
+#' 
+#' Grouping fields are special fields which may be created by calls to [group_by()].
+#' These fields are deleted by calls to [ungroup()].
+#' These fields are generally hidden/inaccessible to users.
+#' 
+#' 
 #' @section Null data:
 #' 
 #' In humdrum syntax, there is no requirement that every spine-path contains data
@@ -202,7 +212,7 @@
 #' what data locations it considers null.
 #' Note that `humdrumR` considers data locations to be "null" when
 #' 
-#' + the selected fields are all `character` data *and* the token is a single `"."`, `"!"`, `"="`, or `"*"`; **or**
+#' + the selected fields are all `character` data *and* the token is a one of `c(".", "!", "!!", "=", "*", "**")`; **or**
 #' + the selected fields are all `NA` (including `NA_character_`).
 #' 
 #' When `humdrumR` reevaluates null data, the `Type` field is updated, setting data records to `Type == "d"`
@@ -214,11 +224,6 @@
 #' prints as `"."`---thus `NA` values print as `.`.
 #' Thus, if you are working with numeric data with `NA` values, these `NA` values will print as `"."`.
 #' 
-#' ### Grouping fields:
-#' 
-#' Grouping fields are special feels which may be created by calls to [group_by()].
-#' These fields are deleted by calls to [ungroup()].
-#' 
 #' 
 #' @section Reshaping:
 #' 
@@ -228,11 +233,11 @@
 #' regroup and reform the original humdrum data or use the structure of the data (like spines) in our analyses.
 #' However, in some cases, you might want to work with humdrum data in a different structure or "shape."
 #' `humdrumR` has several options for ["collapsing"][collapseHumdrum()] tokens within humdrum tables, 
-#' ["folding"][foldHumdrum()] different parts of the data into new fields,
+#' ["cleaving"][cleave()] different parts of the data into new fields,
 #' or otherwise [reshaping humdrum data][humCoercion] into basic R data structures you might prefer.
 #' 
 #'
-#' @family Core humdrum data representation
+#' @family {Core humdrum data representation}
 #' @name humTable
 NULL
 
@@ -271,7 +276,7 @@ orderHumtab <- function(humtab) {
 }
 
 #######################################################-
-#################################### humdrumR S4 class ----
+# humdrumR S4 class ----
 ######################################################-
 
 #' `humdrumR` class
@@ -283,12 +288,13 @@ orderHumtab <- function(humtab) {
 #' In the documentation, we refer to these objects interchangeably as 
 #' "`humdrumR` corpora", "`humdrumR` objects," or `humdrumR` data(sets).
 #' In coding examples we name them "`humData`."
+#' Test is an object/variable is a `humdrumR` dataset using `is.humdrumR()`.
 #' 
 #' The most important part of a `humdrumR` object is the 
-#' [humdrum tables][humTable] it holds within it;
+#' [humdrum table][humTable] it holds within it;
 #' In essence, a `humdrumR` object is simply a wrapper around its
 #' humdrum table, which helps users to
-#' to visualize, [index][subset.humdrumR()], [summarize][humSummary], and [manipulate][withinHumdrum]
+#' to visualize, [filter][subset.humdrumR()], [summarize][humSummary], and [manipulate][withinHumdrum]
 #' the table in a variety of ways.
 #' 
 #' Basic information about the size and shape of `humdrumR` objects can be
@@ -296,32 +302,59 @@ orderHumtab <- function(humtab) {
 #' More detailed summary information can be obtained with the humdrumR [corpus summary functions][humSummary].
 #' `humdrumR` data can also be coerced to more basic R data types using [as.matrix, as.data.frame, etc.][humCoercion].
 #' A number of helpful functions are also defined to "reshape" or reorganize the
-#'  data (e.g., [foldHumdrum()], [collapseHumdrum()]).
+#'  data (e.g., [cleave()], [rend()], [collapseHumdrum()]).
 #' 
 #' The most powerful features of [humdrumR] are the tools it gives you to...
 #' 
 #' + Print a readable view of the data in shorthand/curtailed humdrum syntax.
 #' + Filter `humdrumR` data, using [subset.humdrumR()] and the standard `R` [indexing operators][base::Extract]: `[]` and `[[]]`.
-#' + Apply arbitrary commands to [humtable][humTable] fields using the [with(in)Humdrum][withinHumdrum] routines.
+#' + Apply arbitrary commands to [humtable][humTable] fields using the [with(in)Humdrum][withinHumdrum] routines,
+#' and related tidyverse commands (`mutate()`, `summarize()`, etc.).
 #' 
-#' @section Printing: 
+#' @section Viewing your Data: 
 #' 
 #' If you type the name of an object on the R command line, R will "print" the object in the console.
-#' A `humdrumR` object will, by default, print a humdrum-syntax score representation.
-#' The print/view settings for humdrumR can be manipulated with the [humdrumR()] function.
-#' Most notably, by calling `humdrumR('table')`, `humdrumR` will switch or printing a view of the underlying [humdrum table][humTable],
-#' rather than the humdrum-syntax score.
-#' You can return to the score view by calling `humdrumR('humdrum')`.
-#' For `**kern` data, you can also view the notation of the score using `humdrumR('score')`.
-#' If there are more than one pieces in the object, the beginning of the first piece is printed, followed by the end of the last piece.
-#' For more details on printing options, read the [humdrumR()] manual.
+#' This can be also be done explicitly using the `humdrumR` method of the [print()] function.
+#' The humdrumR print method contains a number of arguments, which can be manipulated directly in calls to `print()`.
+#' However, the `humdrumR` print argument draws its defaults from global `humdrumR` options
+#' which can be also controlled with the [humdrumR()] function.
+#' Generaly, changing print options with [humdrumR()] is the best option, as once you change them,
+#' all automatic printing will follow your new settings---this means you can avoid explicitly calling [print()].
+#'
+#' When printing, only the [selected fields][selectedFields] in the data are shown.
 #' 
-#' When `humdrumR(view = 'table')`, the long [humdrum table][humTable] is printed.
-#' The `Piece`, `Spine`, and `Record` fields will always print in the output table, as well as `Path` and `Stop` if any
-#' paths/stops are present.
-#' After these stuctural fields, any/all selected fields are shown.
-#' When `humdrumR(view = 'humdrum')` (the default) a humdrumR score is printed, with record numbers enumerated at the left edge.
+#' #### View types
 #' 
+#' There are three options for how to view `humdrumR` data, which can be toggled between 
+#' using the `view` argument to [print()] or [humdrumR()].
+#' Since `view` is the first argument to the [humdrumR()] function, you can switch between views by simply calling
+#' `humdrumR('humdrum')` or `humdrumR('score')` or `humdrumR('table')`.
+#' The options are:
+#' 
+#' + `"humdrum"` (the default): prints a humdrum-syntax score representation, with record numbers enumerated at the left side.
+#' 
+#'   When the `Token` field is selected, and you haven't applied any [filters][subset.humdrumR()],
+#'   this view will show your original data as it was in the files you [read][readHumdrum()].
+#'   
+#'   If more than one field is selected, they are pasted together in the printed output.
+#'   
+#' + `"table"`: prints a view of the underlying [humdrum table][humTable].
+#' 
+#'   In addition to the [selected fields][selectedFields], the `Piece`, `Spine`, and `Record` fields will
+#'   always print in the output table, as well as `Path` and `Stop` if any paths/stops are present.
+#'   
+#' + `"score"`: will (attempt to) show a rendered score of (the first piece) in your data.
+#' 
+#'   This view is only likely to work correctly if you are using Rstudio and connected to the internet.
+#'   Score rendering is accomplished using Craig Sapp's [Humdrum Notation Plugin](https://plugin.humdrum.org/).
+#'    
+#' For `table` and `humdrum` views, if there are more than one pieces in the object, 
+#' the beginning of the first piece is printed, followed by the end of the last piece;
+#' How *much* of the first/last piece are printed is controlled by the `maxRecordsPerFile` print argument.
+#' Both of these views also highlight the output with different colors representing different types of data tokens:
+#' this can be disabled using `syntaxHighlight = FALSE`.
+#' For `score` view, only the first piece is shown.
+#'
 #' 
 #' 
 #' @slot Humtable A [humdrum tables][humTable]---i.e, a [data.table::data.table()] with particular fields.
@@ -336,11 +369,25 @@ orderHumtab <- function(humtab) {
 #' called to create this `humdrumR` object.
 #' @slot Context A [data.table] with two columns: `Open` and `Close`.
 #' Each row represents a contextual window to apply to the data.
-#
+#'
+#' @param humdrumR ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#'
+#' @examples 
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData 
+#' 
+#' humData |> print(view = 'table')
+#' 
+#' @inheritParams humdrumR
 #' @name humdrumRclass
-#' @seealso humdrumR
+#' @seealso {The actual data is stored in the internal [humdrum table][humTable].
+#' You can set printing options globally using the [humdrumR()] function.}
 #' @family Core humdrum data representation
-#' @aliases humdrumRS4
+#' @aliases humdrumRS4 humData
 #' @export
 setClass('humdrumR', 
          slots = c(Humtable = 'data.table',
@@ -868,7 +915,7 @@ is.ragged <- function(humdrumR) {
 
 #' Access a Humdrum Table
 #' 
-#' `getHumtab` extracts the hudrum table from a [humdrumR object][humdrumRclass].
+#' The `getHumtab()` function extracts the humdrum table from a [humdrumR object][humdrumRclass].
 #' 
 #' @param humdrumR ***HumdrumR data.***
 #' 
@@ -882,6 +929,7 @@ is.ragged <- function(humdrumR) {
 #' Legal values are: `"G"` (global comments), `"L"` (local comments), `"I"` (interpretations),
 #' `"M"` (barlines), `"D"` (non-null data), or `"d"` (null data).
 #' Multiple types can be specified in a single string: e.g., `"GLIMD"`.
+#' Note that `"I"` also grabs `"E"` (exclusive) and `"S"` (spine-control) tokens.
 #' 
 #' 
 #' @rdname humTable
@@ -1146,22 +1194,32 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 
 
 
-
-#' Tabulate current fields in a [humdrumR corpus][humdrumRclass]
-#'
-#' Use the `fields()` function list the current fields in 
+#' List fields in a humdrumR object
+#' 
+#' Use the `fields()` function to list the current fields in 
 #' a [humdrumRclass] object.
-#' It returns a [data.table()] with five columns:
+#' 
+#' @section Querying Fields:
+#' 
+#' The `fields()` function takes a [humdrumR object][humdrumRclass]
+#' and returns a [data.table()], with each
+#' row describing an available field in the humdrum table.
+#' The output table has five columns:
 #' 
 #' + `Name`
+#'   + The field name.
 #' + `Class`
+#'   + The [class()] of the data in the field.
 #' + `Type`
-#'   + `Data`/`Structure`/`Interpretation`/`Formal`/`Reference`/`Grouping`
+#'   + The type of field (described above). 
+#'     Can be `"Data"`, `"Structure"`, `"Interpretation"`, `"Formal"`, `"Reference"`, or `"Grouping"`.
 #' + `Selected`,
 #'   + A `logical` indicating which fields are [selected][selectedFields()].
 #' + `GroupedBy`
-#'   + A `logical` indicating which, if any fields, are currently grouping the data.
+#'   + A `logical` indicating which, if any, fields are currently [grouping][withinHumdrum] the data.
 #'
+#' Using the [names()] function on a [humdrumR object][humdrumRclass] will
+#' get just the field names, the same as `fields(humData)$Name`.
 #' 
 #' @param fieldTypes ***Which types of fields to list.***
 #' 
@@ -1172,6 +1230,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' You can also pass `"selected"` to extract only the [selected fields][selectedFields()].
 #' Types can be [partially matched][partialMatching]---for example, `"S"` for `"Structure"`.
 #'   
+#' @seealso {To actually extract fields from [humdrumR data], see the [pull()] family of functions.}
 #' @rdname humTable
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')) { 
@@ -1522,10 +1581,10 @@ pullSelectedFields <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot',
 
 
 pullPrintable <- function(humdrumR, fields, 
-                          dataTypes = 'D', 
+                          dataTypes = 'D', null = 'NA2dot',
                           useToken = c('G', 'L', 'I', 'M', 'S', 'E'), collapse = TRUE){
     
-    fieldTable <- pullFields(humdrumR, union(fields, c('Token', 'Type')), dataTypes = dataTypes, null = 'dot2NA')
+    fieldTable <- pullFields(humdrumR, union(fields, c('Token', 'Type')), dataTypes = dataTypes, null = if (collapse) 'dot2NA' else null)
     
     Exclusives <- Filter(length, lapply(fieldTable[ , fields, with = FALSE], getExclusive))
     tandems <- unlist(unique(lapply(fieldTable, getTandem)))
@@ -1550,7 +1609,7 @@ pullPrintable <- function(humdrumR, fields,
                                          field
                                          
                                      })] 
-    if (!collapse) return(fieldTable)                  
+    if (!collapse) return(fieldTable[ , fields, with = FALSE])                  
     
     # field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
     field <- Reduce(\(a, b) {
@@ -1578,15 +1637,9 @@ pullPrintable <- function(humdrumR, fields,
     }
     
     
-    
-    
-    # syntax <- hum[, Type == 'S']
-    # if (any(syntax)) {
-    # hum[[field]][syntax] <- hum[['Token']][syntax]
-    # }
-    
+
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
-    field <- naDots(field, 'NA2dot', fieldTable$Type)
+    field <- naDots(field, null, fieldTable$Type)
     field[field == ''] <- "'"
     
     
@@ -1809,7 +1862,7 @@ setMethod('show', signature = c(object = 'humdrumR'),
                     return(invisible(NULL))
           })
 
-
+#' @rdname humdrumRclass
 #' @export
 print.humdrumR <- function(humdrumR, view = humdrumRoption('view'), 
                            dataTypes = humdrumRoption('dataTypes'), 
@@ -1887,10 +1940,9 @@ tokmat_humtable <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'N
     structureFields <- c('Piece', 'Filename', 'Spine', 'Path', 'Record', 'Stop')
     selectedFields <- selectedFields(humdrumR)
     tokenTable <- pullPrintable(humdrumR, unique(c(structureFields, selectedFields)),
-                                dataTypes = dataTypes,
-                                null = null, useTokenGLIM = FALSE, collapse = FALSE) 
+                                dataTypes = dataTypes, null = 'charNA2dot',
+                                useToken = FALSE, collapse = FALSE) 
    
-    
     
     setcolorder(tokenTable, unique(c(structureFields, selectedFields)))
     

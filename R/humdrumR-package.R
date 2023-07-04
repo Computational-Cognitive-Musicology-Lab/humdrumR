@@ -6,8 +6,7 @@
 #' The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.
 #' Tens of thousands of musical scores (and other musical data) have been encoded in the humdrum syntax, many available online through repositories such as 
 #' [KernScores](http://kern.ccarh.org/).
-#' 
-#' `humdrumR` is intended as a modernized replacement for the original [humdrum toolkit](http://www.humdrum.org/), leveraging
+#' The `humdrumR` package is intended as a modernized replacement for the original [humdrum toolkit](http://www.humdrum.org/), leveraging
 #' the power of `R` to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 #'
 #' @section Package design:
@@ -18,8 +17,8 @@
 #'   the [humdrum table][humdrumR::humTable]. 
 #' + To create `humdrumR` data, a sophisticated humdrum data parser: [readHumdrum].
 #'   `humdrumR` data can also be written back to humdrum-syntax text files using [writeHumdrum].
-#' + To filter `humdrumR` data, we have the [subset.humdrumR()] function, which can also be called 
-#'   using `R`'s standard [indexing operators][base::Extract] (`[]` and `[[]]`) or the tidyverse [filter()].
+#' + To filter `humdrumR` data, we have the [subset()/filter()][subset.humdrumR()] functions, as well as methhods for
+#'   `R`'s standard [indexing operators][base::Extract] (`[]` and `[[]]`).
 #' + To manipulate and modify `humdrumR` data, we have the [with and within][withinHumdrum] methods for `humdrumR` objects, and tidyverse
 #'   aliases [mutate()], [summarise()], and [reframe()].
 #' + To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---, 
@@ -29,6 +28,15 @@
 #' + A [module][humdrumR::humRhythm] for representing and manipulating musical rhythm information, 
 #'   with a core [rhythmInterval] class to represent rhythms.
 #'
+#'
+#' @section Package options:
+#' 
+#' The `humdrumR()` function sets general options for the package,
+#' mostly related to how [humdrumR data objects][humdrumRclass] are viewed.
+#' Each argument to the function manipulates a print/package option: for any argument that is 
+#' not used, the option remains in its current setting (i.e., unchanged).
+#' These package options are all enumerated and explained in the **Arguments** section above.
+#' 
 #' @keywords internal
 #' @docType package
 #' @name humdrumR
@@ -55,8 +63,10 @@ NULL
 #' `humdrumR`'s root directory on your machine.
 #'
 #' `humdrumRroot` is the path to where the `humdrumR` package is install on your machine.
-#' When you installed `humdrumR` a few basic humdrum files were stored here as well, in subdirectories `examples` and `HumdrumData`.
+#' When you installed `humdrumR` a few basic humdrum files were stored here as well, 
+#' in subdirectories `examples` and `HumdrumData`.
 #'
+#' @rdname humdrumR
 #' @export
 humdrumRroot <- system.file(package = 'humdrumR')
 
@@ -192,12 +202,11 @@ humdrumRoption <- function(name) {
   opts[[pmatch(name[1], names(opts))]]
 }
 
-#' Set options for humdrumR!
+#' Change humdrumR global parameters
 #' 
-#' The `humdrumR()` function sets general options for the package,
-#' mostly related to how `humdrumR` data objects are printed.
-#' Each argument to the function manipulates a print/package option: for any argument that is 
-#' not used, the option remains in its current setting.
+#' The `humdrumR()` *function* is used to set 
+#' global package options within an R session, mostly regarding
+#' the viewing of [humdrumR datasets][humdrumRclass].
 #' 
 #' @param view ***How should humdrumR data be printed?***
 #' 
@@ -249,10 +258,17 @@ humdrumRoption <- function(name) {
 #' Can be any positive whole number, up to `Inf`.
 #' If `Inf`, no censoring will occur.
 #' 
+#' @examples
 #' 
+#' # change default view to table
+#' humdrumR("table")
 #' 
+#' humdrumR(view = 'humdrum', maxRecordsPerFile = 50)
 #' 
-#' @seealso humdrumRclass
+#' # see the humdrumR package directory contents
+#' dir(humdrumRroot) 
+#' 
+#' @rdname humdrumR
 #' @export
 humdrumR <- function(view, dataTypes, maxRecordsPerFile, maxTokenLength, nullPrint, syntaxHighlight, censorEmptyRecords) {
   curOptions <- oldOptions <- humdrumRoptions()

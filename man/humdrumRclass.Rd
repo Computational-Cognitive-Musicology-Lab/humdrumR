@@ -5,10 +5,72 @@
 \alias{humdrumRclass}
 \alias{makeHumdrumR}
 \alias{humdrumRS4}
+\alias{humData}
 \alias{is.humdrumR}
+\alias{print.humdrumR}
 \title{\code{humdrumR} class}
 \usage{
 is.humdrumR(x)
+
+\method{print}{humdrumR}(
+  humdrumR,
+  view = humdrumRoption("view"),
+  dataTypes = humdrumRoption("dataTypes"),
+  firstAndLast = TRUE,
+  screenWidth = options("width")$width - 10L,
+  null = humdrumRoption("nullPrint"),
+  syntaxHighlight = humdrumRoption("syntaxHighlight"),
+  maxRecordsPerFile = if (length(humdrumR) == 1L) 800L else
+    humdrumRoption("maxRecordsPerFile"),
+  maxTokenLength = humdrumRoption("maxTokenLength"),
+  censorEmptyRecords = humdrumRoption("censorEmptyRecords")
+)
+}
+\arguments{
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
+
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{view}{\emph{\strong{How should humdrumR data be printed?}}
+
+There are three options: \code{"humdrum"}, \code{"score"}, and \code{"table"} (aliases \code{"data.frame"} and \code{"tibble"}).
+These options are \link[=partialMatching]{partially matched}.
+
+Use \code{\link[=select]{select()}} to determine which fields to show.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to view.}}
+
+Defaults to \code{"GLIMDd"} for \code{as.lines()} and \code{as.matrix()}; \code{"Dd"} for \code{as.data.frame()};
+\code{"LIMDd"} for \code{as.matrices()} and \code{as.data.frames()}.
+
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation for explanation.)}
+
+\item{syntaxHighlight}{\emph{\strong{Should syntax highlighting (coloring) be used in printout?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton logical value; an on/off switch.}
+
+\item{maxRecordsPerFile}{\emph{\strong{How many records should be shown in each file, when more than one file is present?}}
+
+Defaults to \code{40}.
+
+Can be any positive whole number.}
+
+\item{maxTokenLength}{\emph{\strong{Length at which longer tokens are censored with ...}}
+
+Defaults to \code{16}.
+
+Can be any positive whole number.}
+
+\item{censorEmptyRecords}{\emph{\strong{Should consecutive records be "censored" (compressed) in printout?}}
+
+Defaults to \code{30}.
+
+Can be any positive whole number, up to \code{Inf}.
+If \code{Inf}, no censoring will occur.}
 }
 \description{
 This \code{S4} class is the basic unit of the
@@ -18,13 +80,14 @@ more humdrum files.
 In the documentation, we refer to these objects interchangeably as
 "\code{humdrumR} corpora", "\code{humdrumR} objects," or \code{humdrumR} data(sets).
 In coding examples we name them "\code{humData}."
+Test is an object/variable is a \code{humdrumR} dataset using \code{is.humdrumR()}.
 }
 \details{
 The most important part of a \code{humdrumR} object is the
-\link[=humTable]{humdrum tables} it holds within it;
+\link[=humTable]{humdrum table} it holds within it;
 In essence, a \code{humdrumR} object is simply a wrapper around its
 humdrum table, which helps users to
-to visualize, \link[=subset.humdrumR]{index}, \link[=humSummary]{summarize}, and \link[=withinHumdrum]{manipulate}
+to visualize, \link[=subset.humdrumR]{filter}, \link[=humSummary]{summarize}, and \link[=withinHumdrum]{manipulate}
 the table in a variety of ways.
 
 Basic information about the size and shape of \code{humdrumR} objects can be
@@ -32,13 +95,14 @@ obtained with calls to \link[=humSize]{nrecord, npiece, length, ncol, etc.}.
 More detailed summary information can be obtained with the humdrumR \link[=humSummary]{corpus summary functions}.
 \code{humdrumR} data can also be coerced to more basic R data types using \link[=humCoercion]{as.matrix, as.data.frame, etc.}.
 A number of helpful functions are also defined to "reshape" or reorganize the
-data (e.g., \code{\link[=foldHumdrum]{foldHumdrum()}}, \code{\link[=collapseHumdrum]{collapseHumdrum()}}).
+data (e.g., \code{\link[=cleave]{cleave()}}, \code{\link[=rend]{rend()}}, \code{\link[=collapseHumdrum]{collapseHumdrum()}}).
 
 The most powerful features of \link{humdrumR} are the tools it gives you to...
 \itemize{
 \item Print a readable view of the data in shorthand/curtailed humdrum syntax.
 \item Filter \code{humdrumR} data, using \code{\link[=subset.humdrumR]{subset.humdrumR()}} and the standard \code{R} \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
-\item Apply arbitrary commands to \link[=humTable]{humtable} fields using the \link[=withinHumdrum]{with(in)Humdrum} routines.
+\item Apply arbitrary commands to \link[=humTable]{humtable} fields using the \link[=withinHumdrum]{with(in)Humdrum} routines,
+and related tidyverse commands (\code{mutate()}, \code{summarize()}, etc.).
 }
 }
 \section{Slots}{
@@ -62,30 +126,62 @@ called to create this \code{humdrumR} object.}
 Each row represents a contextual window to apply to the data.}
 }}
 
-\section{Printing}{
+\section{Viewing your Data}{
 
 
 If you type the name of an object on the R command line, R will "print" the object in the console.
-A \code{humdrumR} object will, by default, print a humdrum-syntax score representation.
-The print/view settings for humdrumR can be manipulated with the \code{\link[=humdrumR]{humdrumR()}} function.
-Most notably, by calling \code{humdrumR('table')}, \code{humdrumR} will switch or printing a view of the underlying \link[=humTable]{humdrum table},
-rather than the humdrum-syntax score.
-You can return to the score view by calling \code{humdrumR('humdrum')}.
-For \verb{**kern} data, you can also view the notation of the score using \code{humdrumR('score')}.
-If there are more than one pieces in the object, the beginning of the first piece is printed, followed by the end of the last piece.
-For more details on printing options, read the \code{\link[=humdrumR]{humdrumR()}} manual.
+This can be also be done explicitly using the \code{humdrumR} method of the \code{\link[=print]{print()}} function.
+The humdrumR print method contains a number of arguments, which can be manipulated directly in calls to \code{print()}.
+However, the \code{humdrumR} print argument draws its defaults from global \code{humdrumR} options
+which can be also controlled with the \code{\link[=humdrumR]{humdrumR()}} function.
+Generaly, changing print options with \code{\link[=humdrumR]{humdrumR()}} is the best option, as once you change them,
+all automatic printing will follow your new settings---this means you can avoid explicitly calling \code{\link[=print]{print()}}.
 
-When \code{humdrumR(view = 'table')}, the long \link[=humTable]{humdrum table} is printed.
-The \code{Piece}, \code{Spine}, and \code{Record} fields will always print in the output table, as well as \code{Path} and \code{Stop} if any
-paths/stops are present.
-After these stuctural fields, any/all selected fields are shown.
-When \code{humdrumR(view = 'humdrum')} (the default) a humdrumR score is printed, with record numbers enumerated at the left edge.
+When printing, only the \link[=selectedFields]{selected fields} in the data are shown.
+\subsection{View types}{
+
+There are three options for how to view \code{humdrumR} data, which can be toggled between
+using the \code{view} argument to \code{\link[=print]{print()}} or \code{\link[=humdrumR]{humdrumR()}}.
+Since \code{view} is the first argument to the \code{\link[=humdrumR]{humdrumR()}} function, you can switch between views by simply calling
+\code{humdrumR('humdrum')} or \code{humdrumR('score')} or \code{humdrumR('table')}.
+The options are:
+\itemize{
+\item \code{"humdrum"} (the default): prints a humdrum-syntax score representation, with record numbers enumerated at the left side.
+
+When the \code{Token} field is selected, and you haven't applied any \link[=subset.humdrumR]{filters},
+this view will show your original data as it was in the files you \link[=readHumdrum]{read}.
+
+If more than one field is selected, they are pasted together in the printed output.
+\item \code{"table"}: prints a view of the underlying \link[=humTable]{humdrum table}.
+
+In addition to the \link[=selectedFields]{selected fields}, the \code{Piece}, \code{Spine}, and \code{Record} fields will
+always print in the output table, as well as \code{Path} and \code{Stop} if any paths/stops are present.
+\item \code{"score"}: will (attempt to) show a rendered score of (the first piece) in your data.
+
+This view is only likely to work correctly if you are using Rstudio and connected to the internet.
+Score rendering is accomplished using Craig Sapp's \href{https://plugin.humdrum.org/}{Humdrum Notation Plugin}.
 }
 
-\seealso{
-humdrumR
+For \code{table} and \code{humdrum} views, if there are more than one pieces in the object,
+the beginning of the first piece is printed, followed by the end of the last piece;
+How \emph{much} of the first/last piece are printed is controlled by the \code{maxRecordsPerFile} print argument.
+Both of these views also highlight the output with different colors representing different types of data tokens:
+this can be disabled using \code{syntaxHighlight = FALSE}.
+For \code{score} view, only the first piece is shown.
+}
+}
 
-Other Core humdrum data representation: 
-\code{\link{humTable}}
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+humData 
+
+humData |> print(view = 'table')
+
+}
+\seealso{
+{The actual data is stored in the internal \link[=humTable]{humdrum table}.
+You can set printing options globally using the \code{\link[=humdrumR]{humdrumR()}} function.}
 }
 \concept{Core humdrum data representation}
