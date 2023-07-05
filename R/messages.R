@@ -433,7 +433,7 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
   # returns dataTypes as a vector of single-characters
   # which is what many functions want to work with
   
-  checks(dataTypes, xrecordtypes)
+  checks(dataTypes, xrecordtypes, argname = argname)
   dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
   
   if (any(dataTypes == 'I')) dataTypes <- union(dataTypes, c('S', 'E'))
@@ -442,6 +442,12 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
   
 }
 
+checkRecycle <- function(recycle, options = c("yes", "no", "pad", "ifscalar", "ifeven", "never", "summarize")) {
+  checks(recycle, xcharacter & xlen1 & xplegal(options))
+  
+  pmatches(recycle, c("yes", "no", "pad", "ifscalar", "ifeven", "never", "summarize"))
+  
+}
 
 ##
 

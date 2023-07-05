@@ -239,3 +239,82 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
 })
 
   
+
+testthat("recycle are works correctly", {
+  chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor00[12].krn')
+  chorg <- group_by(chor, Spine)
+  
+  expect_equal(length(with(chorg, mean(nchar(Token)))), 4)
+  
+  fullLength <- chor |> with(length(Token)) 
+  
+  #### First for with()
+  
+  # 'yes'
+  expect_equal(fullLength, length(with(chorg, mean(nchar(Token)), recycle = 'yes')))
+  
+  # 'no'
+  expect_equal(length(with(chorg, mean(nchar(Token)), recycle = 'no')), 4)
+  expect_equal(length(with(chorg, range(nchar(Token)), recycle = 'no')), 8)
+  
+  # 'pad'
+  padded <-  chorg |> with(mean(nchar(Token)), recycle='pad') 
+  expect_equal(fullLength, length(padded))
+  expect_equal(sum(is.na(padded)), fullLength - 4L) # four spines
+  
+  padded2 <-  chorg |> with(range(nchar(Token)), recycle='pad') 
+  expect_equal(fullLength, length(padded2))
+  expect_equal(sum(is.na(padded2)), fullLength - 8L) # four spines times 2
+  
+  # 'ifscalar'
+  expect_equal(with(chorg, mean(nchar(Token)), recycle = 'yes'),
+               with(chorg, mean(nchar(Token)), recycle = 'ifscalar'))
+  expect_error(with(chorg, range(nchar(Token)), recycle = 'ifscalar'))
+  
+  # 'ifeven'
+  expect_equal(with(chor, range(nchar(Token)), recycle = 'yes'),
+               with(chor, range(nchar(Token)), recycle = 'ifeven'))
+  expect_error(with(chor, c(range(nchar(Token)), mean(nchar(Token))), recycle = 'ifeven')) # 3 doesn't divide
+  
+  # 'never' 
+  expect_error(with(chor, mean(nchar(Token)), recycle = 'never'))
+  expect_equal(length(with(chor, nchar(Token), recycle = 'never')), fullLength)
+  
+  # 'summarize'
+  expect_error(with(chor, nchar(Token), recycle = 'summarize'))
+  expect_equal(with(chorg, mean(nchar(Token)), recycle = 'no'),
+               with(chorg, mean(nchar(Token)), recycle = 'summarize'))
+  
+  ### within()
+  
+  # 'yes'
+  expect_equal(fullLength, 
+               within(chorg, mean(nchar(Token)), recycle = 'yes') |> pull() |> length())
+  
+  # 'no'
+  expect_error(within(chorg, mean(nchar(Token)), recycle = 'no'))
+  
+  # 'pad'
+  expect_equal(within(chorg, mean(nchar(Token)), recycle = 'pad') |> pull() |> length(),
+               4) # 4 spines
+  
+  # 'ifscalar'
+  expect_identical(within(chorg, mean(nchar(Token)), recycle = 'yes'),
+                   within(chorg, mean(nchar(Token)), recycle = 'ifscalar'))
+  expect_error(within(chorg, range(nchar(Token)), recycle = 'ifscalar'))
+  
+  # 'ifeven'
+  expect_identical(within(chor, range(nchar(Token)), recycle = 'yes'),
+                   within(chor, range(nchar(Token)), recycle = 'ifeven'))
+  expect_error(within(chor, c(range(nchar(Token)), mean(nchar(Token))), recycle = 'ifeven')) # 3 doesn't divide
+  
+  # 'never' 
+  expect_error(within(chor, mean(nchar(Token)), recycle = 'never'))
+  expect_equal(within(chor, nchar(Token), recycle = 'never') |> pull() |> length(), fullLength)
+  
+  # 'summarize'
+  expect_error(within(chor, nchar(Token), recycle = 'summarize'))
+  
+  
+               
+})

@@ -189,8 +189,8 @@
 #' 
 #' ### Grouping fields:
 #' 
-#' Grouping fields are special fields which may be created by calls to [group_by()].
-#' These fields are deleted by calls to [ungroup()].
+#' Grouping fields are special fields which may be created by calls to [group_by()][groupHumdrum].
+#' These fields are deleted by calls to [ungroup()][groupHumdrum].
 #' These fields are generally hidden/inaccessible to users.
 #' 
 #' 
@@ -1224,7 +1224,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' + `Selected`,
 #'   + A `logical` indicating which fields are [selected][selectedFields()].
 #' + `GroupedBy`
-#'   + A `logical` indicating which, if any, fields are currently [grouping][withinHumdrum] the data.
+#'   + A `logical` indicating which, if any, fields are currently [grouping][humGrouping] the data.
 #'
 #' Using the [names()] function on a [humdrumR object][humdrumRclass] will
 #' get just the field names, the same as `fields(humData)$Name`.
@@ -1527,10 +1527,12 @@ printableSelectedField <- function(humdrumR,
 
 
 getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR') {
-    if (is.null(.by)) {
+    .by <- rlang::enexprs(.by)
+    
+    if (is.null(.by[[1]])) {
         fields(humdrumR)[GroupedBy == TRUE]$Name 
     } else {
-        fieldMatch(humdrumR, unlist(.by), callfun = withFunc)
+        tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'Data', callname = withFunc)
     }
     
 }
@@ -1782,6 +1784,7 @@ pull.humdrumR <- function(.data, var, dataTypes = 'D', null = 'asis') {
     dataTypes <- checkTypes(dataTypes, 'pull.humdrumR', argname = 'var')
     checks(null, xplegal(c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')))
     
+    if (missing(var)) var <- selectedFields(.data)[1]
     var <- rlang::ensym(var)
     
     if (is.atomic(var)) checks(var, ((xcharacter | xwholenum) & xlen1))

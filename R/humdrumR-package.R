@@ -155,8 +155,10 @@ NULL
 # Lessons ----
 
 
-#' Partial matching
+#' What is "partial matching"?
 #' 
+#' @section Partial matching explained:
+#'
 #' `R` has a very useful functionality called "*partial matching*," where we can
 #' match a **incomplete** character string or variable name with a list of options.
 #' This is achieved using the base-`R` function [pmatch()], but many `R` functions make use of it,
@@ -181,8 +183,144 @@ NULL
 #' @name partialMatching
 NULL
 
+#' "Evaluating" "Expressions" in "Environments"?
+#' 
+#' @section Expressions:
+#' 
+#' The term "expression" is just a fancy way of describing any bit of (valid) code than can be parsed
+#' and evaluated (executed) by R.
+#' For example, the following bits of code are all valid R "expressions":
+#' 
+#' + `2 + 2`
+#' + `sqrt(2)`
+#' + `x <- (1:10)^2`
+#' + `log(x, base = 10) |> mean(na.rm = TRUE)`
+#' + `sum((x - mean(x))^2)`
+#' + ```
+#'   { 
+#'     x <- 1:10
+#'     b <- mean(x)
+#'     z <- x * z
+#'   }
+#'   ```
+#' 
+#' Expressions are frequently built of other expressions: so `2 + 2` is an expression, and `sqrt(2 + 2)` is an expression.
+#' The `{ }` operators are used to group any valid expressions into one bigger expression.
+#' You can also use `;` to write two expressions on the same line, like `x <- 2; log(x^2)`
+#' 
+#' @section Evaluation:
+#' 
+#' An expression like `sum((x - mean(x))^2)` is just a sequence of characters until we do something with it.
+#' We call this "*evaluating*" the expression.
+#' This exactly what the R "interpreter" does when you "run" some R code.
+#' 
+#' In R, an evaluated expression always "returns" a "*result*"---a value, like a number, `character` string, or some other data.
+#' Some expressions might "return" `NULL` as their result, but it's still a result!
+#' In a multi-line expression, like `{sqrt(2); 2 + 2}` or
+#' 
+#' ```
+#' {
+#'   x <- 2
+#'   x^2
+#' }
+#' ```
+#' 
+#' the result of the overall expression is simply the result of the last expression---so the last two examples both return the result `4`.
+#' 
+#
+#' 
+#' @section Environment:
+#' 
+#' To evaluate an expression, R must look up any variable names in the expression in the current "*environment*";
+#' For example, the expression `sum((x - mean(x))^2)` includes the variables `sum`, `mean`, and `x`.
+#' The variables `sum` and `mean` are [base] R functions, so R will find them no problem (unless you [remove][rm()] them).
+#' However, `x` is not generally going to be "defined" unless *you've* defined it.
+#' If you try to evaluate `sum((x - mean(x))^2)`, you'll get an error if `x` is not defined.
+#' 
+#' There are many different "[environments][environment]" in R, where R will search for variables:
+#' When you run R, you can save variables in the *global environment*; R-packages have their own environments;
+#' *every* time you call a function, 
+#' the function has its *own* environment inside it---this is why a function can "see" it's own arguments,
+#' but variable you save inside a function isn't "visible" outside the function.
+#' 
+#' One of the greatest features of R is that we can often tell R to evaluate an expression using
+#' a specific [data.frame] as the environment, so we can use the column names of our data as variables.
+#' The humdrumR [with(in)][withinHumdrum] (and their tidyverse equivalents) use this functionality a lot!
+#' 
+#' ### Incomplete expressions
+#' 
+#' One of the most annoying things that can happen in R is if you try running something and it kind just hangs,
+#' getting stuck with nothing happening no matter how many times you press enter.
+#' This is usually because you have (accidentally) provided R and *incomplete* expression.
+#' For example, `2 + ` is an incomplete expression---that `+` needs a number after it!
+#' Failing to have properly paired parentheses will often result in incomplete expressions:
+#' For example, `mean(sqrt(log(x))` is an incomplete expression!
+#'
+#' 
+#' @name evaluatingExpressions
+NULL
 
 
+#' What are "recycling" or "padding"?
+#' 
+#' @section Recycling and Padding results:
+#' 
+#' Many R functions will "recycle" their results; other functions will "pad" their results.
+#' What does this mean?
+#' The two options refer to different strategies R code often provides to 
+#' maintain [vectorization][vectorization].
+#' The key idea of vectorization is that we want the length/size of function inputs and outputs to be the same.
+#' If I give a 100-long vector to a function as input, I want a 100-long vector as output.
+#' 
+#' #### Result is too short (pad or recycle)
+#' 
+#' What happens if I have a that outputs a result that is *shorter* than the input, but I **need**
+#' it to be the same length?
+#' Well, one option is to "pad" the output with `NA` values.
+#' For example, if I call `mean(1:9)`, my 9-long input results in a scalar (1-long) output (`5`).
+#' To force the output to be 9-long (to match the input), I could pad it with `NA` like `c(5, NA, NA, NA, NA, NA, NA, NA, NA)`.
+#' 
+#' In many cases, padding a result like `mean(1:9)` is not very useful---the useful information (the mean, in this case)
+#' is stuck at only one index!
+#' Instead, it is more useful to "recycle" the result.
+#' What we do is take the result and duplicate it ("recycle") over and over again until it matches the length of the
+#' input.
+#' So we'd recycle the result of `mean(1:9)` to be `c(5, 5, 5, 5, 5, 5, 5, 5, 5)`.
+#' This is often (but not always) very useful!
+#' 
+#' The most common (and best) case for recycling is, like our example above, when the result we recycle is a "scalar" (single)
+#' value.
+#' That one value is simply copied `length(input)` times.
+#' We can also recycle results that are non-scalar.
+#' For example, imagine we have a function `summ()` which calculates the minimum, median, and maximum of a vector:
+#' the call `summ(1:9)` would return `c(1, 5, 9)`.
+#' This result could be recycled to get `c(1, 5, 9, 1, 5, 9, 1, 5, 9)`.
+#' This sort of recycling is less likely to be useful, and can be confusing sometimes---for example, there is
+#' probably no meaningful reason why the median should line up with the original input values `c(2, 5, 8)`.
+#' However, R will (generally) happily do it for you!
+#' It is good practice to *only* rely on scalar recycling, and avoid non-scalar recycling unless you are really
+#' sure it is what you want.
+#' 
+#' One final note: if the result you are recycling isn't a length which evenly divides the input, you will see an *warning* message
+#' saying `longer object length is not a multiple of shorter object length`.
+#' To give an example, image if we used the `range()` function, which returns the minimum and the maximum but not the median, on our input:
+#' the result of `range(1:9)` is `c(1, 9)`, and this would recycle as `c(1, 9, 1, 9, 1, 9, 1, 9, 1)`.
+#' The last repetition of the result is cut short, because two does not evenly divide nine.
+#' Since non-scalar recycling of results is often not useful or meaningful in *general*, R takes it
+#' as a particularly bad sign that your result does not evenly divide your input, which is why you get a warning.
+#' 
+#' 
+#' #### Result is too long (index)
+#' 
+#' What happens if I have a function that outputs a result that is *longer* than the input, but I **need**
+#' it to be the same length?
+#' Well, the most obvious thing to do is cut off the excess---so something like `head(output, n = length(input)`.
+#' Of course, that may or may not make sense depending
+#' on what the function is doing!
+#' 
+#' @name recycling
+#' @aliases padding
+NULL
 
 # Options -----
 

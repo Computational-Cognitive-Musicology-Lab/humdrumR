@@ -4,31 +4,63 @@
 ##################################################-
 
 
-#' with(in)Humdrum
+#' Working *with* humdrum data fields
 #' 
-#' Evaluate arbitrary expressions using the fields within [humdrumR][humdrumRclass] data,
-#' while employing split/apply/combine, windowing, and other analysis options.
+#' These functions are the primary means of working with
+#' humdrumR data. 
+#' They allow us to perform arbitrary (free form) manipulation of data [fields][fields()]
+#' held within a [humdrumR data object][humdrumRclass], with convenient functionality
+#' for ignoring null data, [lagging][lag()] data, [grouping][groupHumdrum] data, [windowing][context()], and more.
+#' The `with()` and `within()` functions, which come from [base R][base], are the core functions.
+#' However, the [dplyr] "verbs" `mutate()`, `summarize()`, and `reframe()` can be used as well---they
+#' are equivalent to using `with()`/`within()` with particular arguments.
+#' 
 #' 
 #' @section Overview:
 #' 
 #' These functions are the primary means of working with
-#' humdrumR data. They are analogous to the base-R
-#' [with and within][base::with()]
-#' methods for [data.frames][base::data.frame].
-#' Specifically they allow you to evaluate arbitrary
-#' expressions using the fields of a [humdrumR data object][humdrumRclass].
-#' This means that you can drop "inside" your [humdrumR data object][humdrumRclass] and run whatever commands 
-#' you want using the fields of the [humdrum data table][humTable], 
-#' while keeping the data safely "encapsulated" within the humdrum object---at least, until you *want*
-#' to pull it out.
+#' [humdrumR data][humdrumRclass]. 
+#' They all allow you us to write code that accesses and manipulates the raw [fields()]
+#' in our data.
+#' The main differences between them are what they do with the *results* of our code:
+#' `with()` and `summarize()` return results in normal, "raw" R formats, **removed** from the [humdrumR data][humdrumRclass];
+#' In contrast, `within()`, `mutate()`, and `reframe()` always insert the results of your code into
+#' new [fields()] **within** your humdrum data.
+#' The other distinctions between these functions have to do with how they recycle/pad results (see next section).
 #' 
-#' The difference between `with.humdrumR` and `within.humdrumR` is
-#' analogous to the difference between [base::with()] and [base::within()].
-#' `with.humdrumR` evaluates your expression(s) and then simply returns the result of
-#' the evaluation. `within.humdrumR` evaluates your expression(s) and then
-#' inserts the results back into the humdrumR object, generating new
-#' fields called `ResultX` (see details).
 #' 
+#'
+#'
+#' @section Expression evaluation:
+#'
+#' They all do "[non-standard evalation](http://adv-r.had.co.nz/Computing-on-the-language.html)" of 
+#' the [expressions][evaluatingExpressions] you provide them as arguments.
+#' Basically, when you a function like `with()` or `mutate()`, the expressions you write inside
+#' the function call aren't [evaluated][evaluatingExpressions] right then and there---instead, R takes those expressions
+#' into the [environment][evaluatingExpressions] of your [humdrum table][humTable], where
+#' all your fields are "visible" to the expression.
+#' 
+#' Expressions we provide to `with()`, `within()`, `mutate()`, `summarize()`, or `reframe()` undergo some special preprocessing
+#' before they are evaluated.
+#'
+#' An "expression" is a legal bit of R code, like `2 + 2` or `x - mean(x)`. 
+#' Each call to `with`/`within.humdrumR` must have at least one expression to evaluate.
+#' We will refer to these as "within-expressions."
+#' These expressions are passed to `with`/`within.humdrumR` as unnamed arguments: for example,
+#' `with(humData, myExpressionHere)`.
+#' 
+#' Within expressions are evaluated within the `humdrumR` object's humdrum table,
+#' which means the expression can refer fields in the humdrumR object by name (`Record`, `Token`, `Piece`, etc.)
+#' just like any other variables.
+#' Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
+#' (and generally should be) vectorized.
+#' Note that the within-expression value is only evaluated over data-points/records that match the type
+#' indicated in the `dataTypes` argument.
+#' By default, only non-null data tokens (`"D"`) are used.
+#' 
+#' If multiple within-expressions are provided, each expression is evaluated in order (left to right).
+#' Each expression can refer to the results of the last expression (as `.`), or 
+#' to variables defined in previous expressions.
 #' In addition, `with` and `within` offer a number of powerful options that make working with 
 #' humdrum data easier:
 #' *evaluation control arguments* can be used to control
@@ -49,28 +81,6 @@
 #' so if write `grou` instead of `groupby`, you won't get an error!
 #' In some cases, you can specify more than one of the same type of control argument (details below).
 #'
-#'
-#' @section Expression evaluation:
-#'
-#' An "expression" is a legal bit of R code, like `2 + 2` or `x - mean(x)`. 
-#' Each call to `with`/`within.humdrumR` must have at least one expression to evaluate.
-#' We will refer to these as "within-expressions."
-#' These expressions are passed to `with`/`within.humdrumR` as unnamed arguments: for example,
-#' `with(humData, myExpressionHere)`.
-#' 
-#' Within expressions are evaluated within the `humdrumR` object's humdrum table,
-#' which means the expression can refer fields in the humdrumR object by name (`Record`, `Token`, `Piece`, etc.)
-#' just like any other variables.
-#' Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
-#' (and generally should be) vectorized.
-#' Note that the within-expression value is only evaluated over data-points/records that match the type
-#' indicated in the `dataTypes` argument.
-#' By default, only non-null data tokens (`"D"`) are used.
-#' 
-#' If multiple within-expressions are provided, each expression is evaluated in order (left to right).
-#' Each expression can refer to the results of the last expression (as `.`), or 
-#' to variables defined in previous expressions.
-#' 
 #' A number of special [syntactic sugars](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic) 
 #' can be used in within expressions.
 #' 
@@ -134,19 +144,7 @@
 #' which is confusing, so don't do it!)
 #' 
 #' 
-#' ### Recycling ("filling") results:
 #' 
-#' The result of your within expression may be shorter than the input vectors ([humtable fields][humTable]).
-#' However, in some calls to `within.humdrumR` in particular, you'd like to return a single number and 
-#' recycle it to "fill" the original data field.
-#' In other words, you'd like the output (result) of your expression to be repeated until it matches the
-#' length of the input field(s).
-#' You could do this manually be using the [base::rep()] function, but `with`/`within.humdrumR` provide a
-#' syntactic sugar for this:
-#' You can name your expression `recycle` or `fill` ([partially matched][partialMatching]),
-#' which will cause the result to be recycled.
-#' All this does is take `yourExpression(field, ...)` and wrap it in 
-#' `rep(yourExpression(field, ...), length.out = length(field))`.
 #' 
 #' ### Lagged vectors
 #' 
@@ -192,35 +190,90 @@
 #' 
 #' Note that, since `with`/`within.humdrumR` passes `groupby = list(Piece, Spine, Path)`
 #' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each piece.
+#'  
+#' 
+#' @section Parsing expression results:
+#' 
+#' The main differences between the `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` humdrumR methods
+#' are what they do with the *results* of code passed to them.
+#' The major difference is that `within()`, `mutate()`, and `reframe()` put results into new [fields]
+#' in a [humdrumR data][humdrumRclass], while `with()` and `summarize()` just return their results in "normal" R.
+#' The other differences between the functions simply relate to how the `recycle` and `drop` arguments are used (details below).
+#' 
+#' The `recycle` argument controls how the results of your code are, or aren't, [recycled (or padded)][recycling].
+#' When you write code using your [humdrumR data][humdrumRclass]'s [fields()]
+#' as input, your results are inspected to see how long they are compared to the length of the input field(s).
+#' If any of your results are *longer* than the input, you'll get an error message---`humdrumR` can't (yet) handle that case.
+#' If any of your results are *shorter* than the input, the `recycle` argument controls what happens to that result.
+#' There are seven options:
+#' 
+#' + `"no"`: The result is not recycled. For calls to `within()`, `mutate`, or `reframe()`, this option is not allowed.
+#' + `"yes"`: the result is recycled, no matter how long it is.
+#' + `"pad"`: the result is padded with `NA` values.
+#' + `"ifscalar"`: if the result is scalar (length 1), it is recycled; otherwise you see an error.
+#' + `"ifeven"`: if the result length evenly divides the input length, it is recycled; otherwise you see an error.
+#' + `"never"`: The result is not recycled. If the result does not match the input length, you see an error.
+#' + `"summarize"`: if the result is not scalar, *even if it matches the input length*, you see an error. The result is not recycled.
+#' 
+#' The result of padding/recycling also depends on the `alignLeft` argument:
+#' If `alignLeft = TRUE`, results are padded to the right: like `c(result, NA, NA, ...)`;
+#' If `alignLeft = FALSE`, results are padded on the left: like `c(..., NA, NA, results)`.
+#' Recycling is also affected if the result's length does not evenly divide the input length.
+#' For example, consider a result `c(1, 2, 3)` which needs to be recycled to length `10`:
+#' If `alignLeft = TRUE`, the result is recycled `c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)`;
+#' If `alignLeft = FALSE`, the result is recycled `c(3, 1, 2, 3, 1, 2, 3, 1, 2, 3)`.
 #' 
 #' 
-#' @section Results:
+#' ### with() and summarize()
 #' 
-#' The difference between `with.humdrumR` and `within.humdrumR` is in what they do with the results
-#' of the evaluated within-expression(s).
+#' The humdrumR `with()` and `summarize()` methods return "normal" R data objects.
+#' The only difference between the `with()` and `summarize()` methods is their default  `drop` and `recycle` arguments:
 #' 
+#' + `with(..., drop = TRUE, recycle = 'no')`
+#' + `summarize(..., drop = FALSE, recycle = 'summarize')`
+#'
+#' If `drop = TRUE`, they return whatever your code's result is, with no parsing.
+#' This can be *any* kind of R data, 
+#' including [vectors][vector] or objects like [lm fits][lm]
+#' or [tables][base::table];
+#' If `drop = FALSE`, the results will instead be returned in a [data.table].
+#' This `data.table` will include the columns for each result, but also any [grouping][group_by()] columns as well.
 #' 
-#' ### Within
+#'
+#' ### within(), mutate(), and reframe().
 #' 
+#' The humdrumR `within()`, `mutate()`, and `reframe()` methods always return a new [humdrumR data object][humdrumRclass],
+#' with new [fields] created from your code results.
+#' The only differences between these methods is their default `recycle` argument, and the types of `recycle` argument they allow:
 #' 
-#' For calls to `within.humdrumR`, the result of the final within-expression
-#' is inserted back into the `[humtable][humdrum table]`. 
-#' Most results should be `atomic` vectors, though `list`s can also be placed as fields.
-#' If results are shorter than the input fields of the [humtable][humdrum table] 
-#' they are padded with null values to fill the same length as the input.
-#' Non-vector results (`object`s) and tables are put into lists, and treated like any other list.
-#' In the result, data/record-types that are not indicated by the `dataTypes` argument are also 
-#' returned padded as null values.
+#' + `within(..., recycle = 'pad')`
+#'   + Can accept any `recycle` option except `"no"`.
+#' + `mutate(..., recycle = 'ifscalar')`
+#'   + Can only accept `"ifscalar"` or `"never"`.
+#' + `reframe(..., recycle = 'pad')`
+#'   + Can only accept `"pad"` or `"yes"`.
 #' 
-#' If you don't explicitly name the result of your within-expression, it is put into a new field labeled 
-#' `ResultX`, where `X` is the lowest number of "ResultX" fields that is not already taken.
-#' You can explicitly name the result field with a top-level assignment in the expression.
-#' For example, `within(data, Semits <- semits(Token))` will put the result of 
-#' `semits(Token)` into a new field called `Semits`.
-#' In fact, if you assign the results of multiple within-expressions, 
-#' each result that is the same length as the last result will be put into a new field.
-#' Thus, you can create multiple new fields in a single call:
-#' for example,
+#' ## New field names
+#' 
+#' When running `within()`, `mutate()`, or `reframe()` new [fields()] are 
+#' added to the output [humdrumR data][humdrumRclass].
+#' You can explicitly name these fields (recomended), or allow `humdrumR` to automatically name them.
+#' When using `with(..., drop = FALSE)` or `summarize(..., drop = FALSE)`, the column names of the output [data.table]
+#' are determined in the same way.
+#' 
+#' If you don't explicitly name the code expressions you provide, the new fields are named
+#' by capturing the expression code itself as a `character` string.
+#' However, it is generally a better idea to explicitly name your new fields.
+#' This can be done in two ways:
+#' 
+#' + Base-R [within][base::within] style: Use the `<-` assignment operator inside your expression.
+#'   + Example: `within(humData, Kern <- kern(Token))`.
+#' + Tidyverse [mutate][dplyr::mutate] style: provide the expression as a named argument with `=`.
+#'   + Example: `mutate(humData, Kern = kern(Token))`.
+#'   
+#' Either style can be used with any of the `humdrumR` methods.
+#' Only top-level assignment will create a new field, which means only one field can be assigned per expression.
+#' For example, 
 #' 
 #' ```
 #' within(humData, 
@@ -228,28 +281,54 @@
 #'        Recip <- recip(Token))
 #' ```
 #' 
-#' creates *two* new fields, `Semits` *and* `Recip`.
-#' (As explained above, the second within-expression could also refer to the `Semits` variable
-#' created in the previous expression.)
+#' will create two fields (`Semits` and `Recip`).
+#' However, 
+#' 
+#' ```
+#' within(humData,
+#'        { 
+#'          Semits <- semits(Token)
+#'          Recip <- recip(Token)
+#'         })
+#' ```
+#' 
+#' will not.
+#' The [result of expressions][evaluatingExpressions] grouped by `{}` is always the *last* expression in the brackets.
+#' Thus, the last example above will only create one new field, corresponding to the result of `recip(Token)`.
+#' However, the resulting field won't be called `Recip`!
+#' This is because only *top-level* assignments are used to name an expression:
+#' To name a multi-expression expression (using `{}`), you could do something like this:
+#' 
+#' ```
+#' within(humData,
+#'        Recip <- { 
+#'          Semits <- semits(Token)
+#'          recip(Token)
+#'         })
+#' 
+#' ```
+#' 
+#' Of course, only the result of `recip(Token)` would be saved to `Recip`, so the `Semits <- semits(Token)` expression is doing nothing here.
+#' 
+#' #### Self references
+#' 
+#' All expressions provided to the `with()`/`within()` methods are evaluated in order, from left to right,
+#' so any assignments in a previous expression will be visible to the next expression.
+#' This means we could, for example do this:
+#' 
+#' ```{r}
+#' within(humData, 
+#'        Kern <- kern(Token),
+#'        Kern2 <- paste0(Kern, nchar(Kern)))
+#' 
+#' ```
+#'  
+#' the use of `Kern` in the second expression will refer to the `Kern` assigned in the previous expression.
 #' 
 #' 
-#' ### With
-#' 
-#' For calls to `with.humdrumR`, the result is simply returned as is.
-#' This is what you want when you want to get out of the [humdrumR object][humdrumRclass] and drop back 
-#' into "normal" R, often in the last stages of an analysis.
-#' 
-#' `with.humdrumR` has a `drop` argument, which defaults to `TRUE`.
-#' If `drop = FALSE`, the result is returned in a [data.table()].
-#' The column names of this results table are generated as described in the previous section:
-#' i.e., defaulting to `ResultX` but allowing explicit naming with through one or more
-#' explicit assignments in the within-expressions.
-#' In addition, if `subset` or `groupby` arguments are used, columns are included which indicate
-#' the value of the evaluated `subset`/`groupby` factor for each row.
 #' 
 #' 
-#' 
-#' @section Partitioning data:
+#' @section Group by:
 #'
 #' `groupby` (e.g., `by`) and `subset` expression control arguments all you to evaluate
 #' your within-expressions within specific subsets of the data.
@@ -553,7 +632,7 @@
 #' or any combination of these (e.g., `"LIM"`).
 #' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
 #'
-#' @param .by ***Optional grouping fields; an alternative to using [group_by()].***
+#' @param .by ***Optional grouping fields; an alternative to using [group_by()][groupHumdrum].***
 #'
 #' Defaults to `NULL`.
 #' 
@@ -561,7 +640,7 @@
 #' [fields()] in the `data`.
 #'
 #' If not `NULL`, these fields are used to group the data.
-#' If grouping fields have already been set by a call to [group_by()],
+#' If grouping fields have already been set by a call to [group_by()][groupHumdrum],
 #' the `.by` argument overrides them.
 #'
 #' @param variables ***A named `list` of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.***
@@ -605,15 +684,20 @@ NULL
 with.humdrumR <- function(data, ..., 
                           dataTypes = 'D',
                           expandPaths = FALSE,
-                          recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
+                          recycle = "no",
+                          alignLeft = TRUE,
                           drop = TRUE,
                           .by = NULL,
                           variables = list()) {
   withFunc <- paste0(if (any(as.character(sys.call(1)[[1]]) %in% c('summarize', 'pull')))  as.character(sys.call(1)[[1]]) else 'with', '.humdrumR')
   
-  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, 
+  recycle <- checkRecycle(recycle)
+  
+  list2env(withHumdrum(data, ..., dataTypes = dataTypes, expandPaths = expandPaths, recycle = recycle, alignLeft = alignLeft,
                        .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
+  
+  if (recycle == 'pad') result <- result[humtab[Type %in% dataTypes, list(`_rowKey_`)], on ='_rowKey_'] 
   
   result[ , `_rowKey_` := NULL][]
   ### Do we want extract the results from the data.table? 
@@ -643,10 +727,12 @@ within.humdrumR <- function(data, ...,
                             dataTypes = 'D', 
                             alignLeft = TRUE,
                             expandPaths = FALSE, 
-                            recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
+                            recycle = "pad",
                             .by = NULL,
                             variables = list()) {
   withFunc <- paste0(if (any(as.character(sys.call(1)[[1]]) %in% c('mutate', 'reframe', 'subset', 'filter')))  as.character(sys.call(1)[[1]]) else 'within', '.humdrumR')
+  
+  recycle <- checkRecycle(recycle, c("yes", "pad", "ifscalar", "ifeven", "never", "summarize"))
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
                        expandPaths = expandPaths, recycle = recycle, .by = .by, variables = variables, 
@@ -696,12 +782,11 @@ within.humdrumR <- function(data, ...,
 }
 
 
-withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scalar", "even", "always", "never", "summarize"), 
+withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never', 
                         alignLeft = TRUE, expandPaths = FALSE, variables = list(), .by = NULL, withFunc) {
   # this function does most of the behind-the-scences work for both 
   # with.humdrumR and within.humdrumR.
   dataTypes <- checkTypes(dataTypes, withFunc) # use this to index humtab later
-  recycle <- match.arg(recycle)
   
   if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
   
@@ -710,6 +795,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = c("pad", "scal
   
   # quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
   quosures <- rlang::enquos(...)
+  quosures <- tidyNamer(quosures)
   if (length(quosures) == 0L) .stop("In a call to {withFunc}, you must provide an expression to evaluate!")
   
   
@@ -1412,24 +1498,32 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
   
   if (recycle == 'summarize' && !(all(scalar))) .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
   
-  if (!recycle %in% c('pad', 'summarize') && any(!match & !objects)) {
+  if (!recycle %in% c('pad', 'summarize', 'no') && any(!match & !objects)) {
     bad <- !match & switch(recycle,
-                           scalar    = resultLengths != 1L,
-                           even      = keyLengths %% resultLengths != 0L,
+                           ifscalar  = resultLengths != 1L,
+                           ifeven    = keyLengths %% resultLengths != 0L,
                            never     = TRUE,
                            FALSE)
     if (any(bad)) .stop("The {withFunc} command won't recycle these results because the recycle argument is set to '{recycle}.'",
                         switch(recycle, 
-                               scalar = "Only scalar (length 1) results will be recycled.",
-                               even = "Only results of a length that evenly divides the input will be recycled."),
+                               ifscalar = "Only scalar (length 1) results will be recycled.",
+                               ifeven = "Only results of a length that evenly divides the input will be recycled."),
                         "See the 'recycling' section of ?withHumdrum for explanation.")
     
     results[!match & !objects] <- Map(results[!match & !objects], keyLengths[!match & !objects], 
                                       f = \(result, keyLength) {
+                                        i <- if (hasdim(result)) 1:nrow(result) else seq_along(result)
+                                        
+                                        i <- if (alignLeft) { 
+                                          rep(i, length.out = keyLength) 
+                                        } else { 
+                                            rev(rep(rev(i), length.out = keyLength))
+                                          }
+                                        
                                         if (hasdim(result)) {
-                                          result[rep(1:nrow(result), length.out = keyLength), , drop = FALSE]
+                                          result[i, , drop = FALSE]
                                         } else {
-                                          rep(result, length.out = keyLength)
+                                          result[i]
                                         }
                                         
                                       })
@@ -1533,19 +1627,11 @@ tidyNamer <- function(quosures) {
 #' 
 #' @rdname withinHumdrum
 #' @export
-mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', 'never'), alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
-  quosures <- rlang::enquos(...)
+mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = 'ifscalar', alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
+  recycle <- checkRecycle(recycle, options = c('ifscalar', 'never'))
   
-  recycle <- match.arg(recycle)
-  
-  quosures <- tidyNamer(quosures)
-  
-  # eval
-  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = !!recycle,
-                                              dataTypes = !!dataTypes,
-                                              alignLeft = !!alignLeft,
-                                              expandPaths = !!expandPaths,
-                                              .by = !!.by)))
+  within.humdrumR(.data, ..., recycle = recycle, dataTypes = dataTypes, 
+                  alignLeft = alignLeft, expandPaths = expandPaths, .by = .by)
   
 }
 
@@ -1554,15 +1640,9 @@ mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = c('scalar', '
 #' @rdname withinHumdrum
 #' @export
 summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE, drop = FALSE, .by = NULL) {
-  quosures <- rlang::enquos(...)
   
-  quosures <- tidyNamer(quosures)
-  
-  # eval
-  rlang::eval_tidy(rlang::quo(with.humdrumR(.data, !!!quosures, recycle = 'summarize',
-                                            dataTypes = !!dataTypes,
-                                            drop = !!drop,
-                                            .by = !!.by)))
+  with.humdrumR(.data, ..., recycle = 'summarize', 
+                dataTypes = dataTypes, drop = drop, expandPaths = expandPaths, .by = .by)
   
 }
 
@@ -1571,77 +1651,13 @@ summarise.humdrumR <- function(.data, ..., dataTypes = 'D', expandPaths = FALSE,
 
 #' @rdname withinHumdrum
 #' @export
-reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
-  quosures <- rlang::enquos(...)
+reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expandPaths = FALSE, recycle = 'pad', .by = NULL) {
+  recycle <- checkRecycle(recycle, options = c('yes', 'pad'))
   
-  quosures <- tidyNamer(quosures)
-  
-  # eval
-  rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!quosures, recycle = 'pad',
-                                              dataTypes = !!dataTypes,
-                                              alignLeft = !!alignLeft,
-                                              expandPaths = !!expandPaths,
-                                              .by = !!.by)))
+  within.humdrumR(.data, ..., recycle = recycle, dataTypes = dataTypes, 
+                  alignLeft = alignLeft, expandPaths = expandPaths, .by = .by)
   
 }
-
-### grouping ----
-
-#' @rdname withinHumdrum
-#' @export
-group_by.humdrumR <- function(.data, ..., .add = FALSE) {
-  .data <- uncontextMessage(.data, 'group_by')
-  
-  if (!.add) .data <- ungroup(.data)
-  
-  selectedFields <- selectedFields(.data)
-  exprs <- rlang::enquos(...)
-  calls <- sapply(exprs, rlang::quo_is_call)
-  
-  groupFields <- sapply(exprs[!calls], rlang::as_name)
-  if (length(groupFields)) groupFields <- fieldMatch(.data, groupFields, 'group_by')
-  
-  
-  fields <- fields(.data)
-  groupn <- max(fields$GroupedBy)
-  
-  if (any(calls)) {
-    oldfields <- fields$Name
-    
-    .data <- rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!(exprs[calls]))))
-    fields <- fields(.data)
-    
-    newfields <- fields[ , !Name %in% oldfields]
-    fields$Type[newfields] <- 'Grouping'
-    groupFields <- c(fields$Name[newfields], groupFields)
-  }
-  
-  fields[ , GroupedBy := Name %in% groupFields | GroupedBy]
-  .data@Fields <- fields
-  
-  selectFields(.data, selectedFields)
-
-  
-  
-  
-}
-
-#' @rdname withinHumdrum
-#' @export
-ungroup.humdrumR <- function(x, ...) {
-  fields <- fields(x)
-  fields[ , GroupedBy := FALSE]
-  remove <- fields[Type == 'Grouping', Name]
-  if (length(remove)) {
-    fields <- fields[Type != 'Grouping']
-    for (field in remove) x@Humtable[[field]] <- NULL
-  }
-  
-  x@Fields <- fields
-  x
-  
-}
-
 
 
 

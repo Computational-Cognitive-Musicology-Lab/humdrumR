@@ -1,4 +1,70 @@
 #################################-
+# Grouping data  ############----
+#################################-
+
+
+### grouping ----
+
+#' @name groupHumdrum
+#' @aliases group_by
+#' @export
+group_by.humdrumR <- function(.data, ..., .add = FALSE) {
+  .data <- uncontextMessage(.data, 'group_by')
+  
+  if (!.add) .data <- ungroup(.data)
+  
+  selectedFields <- selectedFields(.data)
+  exprs <- rlang::enquos(...)
+  calls <- sapply(exprs, rlang::quo_is_call)
+  
+  groupFields <- sapply(exprs[!calls], rlang::as_name)
+  if (length(groupFields)) groupFields <- fieldMatch(.data, groupFields, 'group_by')
+  
+  
+  fields <- fields(.data)
+  groupn <- max(fields$GroupedBy)
+  
+  if (any(calls)) {
+    oldfields <- fields$Name
+    
+    .data <- rlang::eval_tidy(rlang::quo(within.humdrumR(.data, !!!(exprs[calls]))))
+    fields <- fields(.data)
+    
+    newfields <- fields[ , !Name %in% oldfields]
+    fields$Type[newfields] <- 'Grouping'
+    groupFields <- c(fields$Name[newfields], groupFields)
+  }
+  
+  fields[ , GroupedBy := Name %in% groupFields | GroupedBy]
+  .data@Fields <- fields
+  
+  selectFields(.data, selectedFields)
+  
+  
+  
+  
+}
+
+#' @rdname groupHumdrum
+#' @aliases ungroup
+#' @export
+ungroup.humdrumR <- function(x, ...) {
+  fields <- fields(x)
+  fields[ , GroupedBy := FALSE]
+  remove <- fields[Type == 'Grouping', Name]
+  if (length(remove)) {
+    fields <- fields[Type != 'Grouping']
+    for (field in remove) x@Humtable[[field]] <- NULL
+  }
+  
+  x@Fields <- fields
+  x
+  
+}
+
+
+
+#################################-
 # Finding context ############----
 #################################-
 

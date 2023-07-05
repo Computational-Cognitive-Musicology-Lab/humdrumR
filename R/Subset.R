@@ -92,7 +92,7 @@
 #' or any combination of these (e.g., `"LIM"`).
 #' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
 #'
-#' @param .by ***Optional grouping fields; an alternative to using [group_by()].***
+#' @param .by ***Optional grouping fields; an alternative to using [group_by()][groupHumdrum].***
 #'
 #' Defaults to `NULL`.
 #' 
@@ -100,7 +100,7 @@
 #' [fields()] in the `data`.
 #'
 #' If not `NULL`, these fields are used to group the data.
-#' If grouping fields have already been set by a call to [group_by()],
+#' If grouping fields have already been set by a call to [group_by()][groupHumdrum],
 #' the `.by` argument overrides them.
 #' 
 #' @examples
