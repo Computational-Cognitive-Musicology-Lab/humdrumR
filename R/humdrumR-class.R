@@ -1527,12 +1527,12 @@ printableSelectedField <- function(humdrumR,
 
 
 getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR') {
-    .by <- rlang::enexprs(.by)
     
-    if (is.null(.by[[1]])) {
+    if (is.null(.by)) {
         fields(humdrumR)[GroupedBy == TRUE]$Name 
     } else {
-        tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'Data', callname = withFunc)
+        fieldMatch(humdrumR, .by, callfun = withFunc, argname = '.by')
+        # tidyselect_humdrumRfields(humdrumR, .by, fieldTypes = 'Data', callname = withFunc)
     }
     
 }

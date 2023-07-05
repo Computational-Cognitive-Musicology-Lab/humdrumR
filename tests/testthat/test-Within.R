@@ -232,9 +232,6 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   expect_identical(A$`NChar^2`, B$Squared)
   
   
-
-
-  
   
 })
 
@@ -317,4 +314,17 @@ testthat("recycle are works correctly", {
   
   
                
+})
+
+
+testthat('lag/lead sugar works', {
+  
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
+  chorales |> mutate(Kern = kern(Token, simple = TRUE)) -> chorales
+  
+  chorales |> with(tally(Kern[lag = 0:1], na.rm = TRUE)) -> lag
+  chorales |> with(tally(Kern[lead = 0:1], na.rm = TRUE)) -> lead
+  dimnames(lag) <- dimnames(lead) <- NULL
+  expect_equal(lag, t(lead))
+  
 })

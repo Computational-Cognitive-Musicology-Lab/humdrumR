@@ -322,6 +322,15 @@ NULL
 #' @aliases padding
 NULL
 
+#' What is "vectorization"?
+#'
+#' @section Vectorization explained:
+#' 
+#' Blah blah
+#' 
+#' @name vectorization
+NULL
+
 # Options -----
 
 humdrumR_defaults <- list(

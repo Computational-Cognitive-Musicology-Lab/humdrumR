@@ -20,142 +20,173 @@
 #' 
 #' These functions are the primary means of working with
 #' [humdrumR data][humdrumRclass]. 
-#' They all allow you us to write code that accesses and manipulates the raw [fields()]
+#' They all allow you to write code that accesses and manipulates the raw [fields()]
 #' in our data.
 #' The main differences between them are what they do with the *results* of our code:
 #' `with()` and `summarize()` return results in normal, "raw" R formats, **removed** from the [humdrumR data][humdrumRclass];
 #' In contrast, `within()`, `mutate()`, and `reframe()` always insert the results of your code into
 #' new [fields()] **within** your humdrum data.
-#' The other distinctions between these functions have to do with how they recycle/pad results (see next section).
+#' The other distinctions between these functions have to do with how they recycle/pad results (see below).
 #' 
 #' 
-#'
 #'
 #' @section Expression evaluation:
 #'
-#' They all do "[non-standard evalation](http://adv-r.had.co.nz/Computing-on-the-language.html)" of 
-#' the [expressions][evaluatingExpressions] you provide them as arguments.
-#' Basically, when you a function like `with()` or `mutate()`, the expressions you write inside
+#' The `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` methods for [humdrumR data][humdrumRclass]
+#' all perform "[non-standard evalation](http://adv-r.had.co.nz/Computing-on-the-language.html)" of 
+#' any [expressions][evaluatingExpressions] you provide them as arguments.
+#' Basically, when you use a function like `with(...)` or `mutate(...)`, the expressions you write inside
 #' the function call aren't [evaluated][evaluatingExpressions] right then and there---instead, R takes those expressions
-#' into the [environment][evaluatingExpressions] of your [humdrum table][humTable], where
+#' into the "[environment][evaluatingExpressions]" of your [humdrum table][humTable], where
 #' all your fields are "visible" to the expression.
+#' This means you can write code (expressions) that refer to your [fields()], like `Token` or `Spine`.
+#' For example:
 #' 
-#' Expressions we provide to `with()`, `within()`, `mutate()`, `summarize()`, or `reframe()` undergo some special preprocessing
-#' before they are evaluated.
-#'
-#' An "expression" is a legal bit of R code, like `2 + 2` or `x - mean(x)`. 
-#' Each call to `with`/`within.humdrumR` must have at least one expression to evaluate.
-#' We will refer to these as "within-expressions."
-#' These expressions are passed to `with`/`within.humdrumR` as unnamed arguments: for example,
-#' `with(humData, myExpressionHere)`.
+#' ```
+#' with(humData, 
+#'      ifelse(Spine > 2, 
+#'             kern(Token), 
+#'             recip(Token)))
+#' ```
 #' 
-#' Within expressions are evaluated within the `humdrumR` object's humdrum table,
-#' which means the expression can refer fields in the humdrumR object by name (`Record`, `Token`, `Piece`, etc.)
-#' just like any other variables.
-#' Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
-#' (and generally should be) vectorized.
-#' Note that the within-expression value is only evaluated over data-points/records that match the type
-#' indicated in the `dataTypes` argument.
-#' By default, only non-null data tokens (`"D"`) are used.
+#' Since all the fields in a [humdrum table][humTable] are the same length, the expressions you write
+#' can be, and generally should be, [vectorized][vectorization].
 #' 
-#' If multiple within-expressions are provided, each expression is evaluated in order (left to right).
-#' Each expression can refer to the results of the last expression (as `.`), or 
-#' to variables defined in previous expressions.
-#' In addition, `with` and `within` offer a number of powerful options that make working with 
-#' humdrum data easier:
-#' *evaluation control arguments* can be used to control
-#' how your expressions are evaluated.
-#' You can evaluate expressions...
+#' By default, `with()`, `within()`, etc. don't use the whole [humdrum table][humTable],
+#' but instead only evaluate their expressions using rows correspoing to non-null data tokens (`Type == "D"`).
+#' This means that interpretations, comments, barlines, and null data tokens are automatically ignored for you!
+#' This feature is controlled by the `dataTypes` argument:
+#' you can choose to work with the other token types by providing a `character` string containing combinations
+#' of the characters `G` (global comments), `L` (local comments), `I` (interpretations), 
+#' `M` (barlines), `D` (non-null data), or `d` (null data).
+#' For example, `dataTypes = 'MDd'` will evaluate your expressions on barline tokens (`=`), as well as both null
+#' and non-null data.
+#' See the [ditto()] manual for an example application of using `dataTypes = 'Dd'`.
 #' 
-#' + In a subset of the data using `subset`...
-#'   + either ignoring the rest of the data or evaluating a *different* expression in the other part.
-#' + Separately in different subsets of the data, which are then recombined (split-apply-combine) using `by`.
-#' + Across contextual windows in the data (e.g., ngrams, rolling windows).
-#' + Which produce a plots with particular [plotting parameters][graphics::par()], and/or without 
-#'   returning anything using `sidefx`.
-#' + "Fill" short results to match the original field size using `fill`.
-#' + Only in certain record types (defaulting only data records) using `dataTypes`.
+#' If multiple expression arguments are provided, each expression is evaluated in order (left to right).
+#' Each expression can refer variables assigned in the previous expression (examples below).
 #' 
-#' These arguments are specified as named arguments to `with`/`within` calls.
-#' Even though they aren't formal arguments, they are [partially matched][partialMatching],
-#' so if write `grou` instead of `groupby`, you won't get an error!
-#' In some cases, you can specify more than one of the same type of control argument (details below).
-#'
-#' A number of special [syntactic sugars](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic) 
-#' can be used in within expressions.
+#' ### Expression Pre-processing
 #' 
-#' + The `.` placeholder.
-#' + Side effects
-#' + Recycled ("filled") results
-#' + Lagged vectors
-#' + etc.
+#' The `with()`, `within()`, `mutate()`, `summarize()`, or `reframe()` methods all do some
+#' pre-processing of your expressions before evaluatinng thing.
+#' This pre-processing provides some convenient "[syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar)" 
+#' for working with humdrum data.
+#' There are currently six pre-processes:
+#' 
+#' + Variable interpolation.
+#' + The `.` placeholder for selected fields.
+#' + Automatic argument insertion.
+#' + "Lagged"-vectors shorthand.
+#' + "Splatted" arguments.
+#' + List mapping.
 #' 
 #' Each of these is explained below.
 #' 
-#' ### The . placeholder
-#' 
-#' The `.` variable can be used as a special placeholder in within expressions.
-#' In the first within expression, `.` is interpreted as the humdrumR object's 
-#' current [active expression][humActive].
-#' If multiple within expressions are given, beyond the first expression,  `.` refers to result of 
-#' the *previous* expression.
-#' For example, if `Token` is the [active expression][humActive], then:
-#' 
-#' ```
-#' with(humData, nchar(.), mean(.), .^2)
-#' 
-#' ```
-#' 
-#' would return the same result as:
-#' 
-#' ```
-#' with(humData, mean(nchar(Token))^2)
-#' ```
-#' 
-#' 
+#' #### Manual variable interpolation
+#'  
+#' The `variable` argument can be provided as an (option) `list` of named values.
+#' If any of the names in the `variable` list appear as symbols (variable names)
+#' in any expression argument, their value is interpolated in place of that symbol.
+#' For example, in
 #'
-#' 
-#' ### Side effects:
-#' 
-#' In some cases, you want to evaluate a within-expression for its 
-#' "[side effect](https://en.wikipedia.org/wiki/Side_effect_(computer_science))";
-#' This means that the expression *does* something you want (the "side effect") but doesn't actually
-#' evaluate to (return) a result that you want.
-#' The most common "side effect" is creating a plot.
-#' Other examples might be printing text to the console using [base::cat()] or [base::print()], or 
-#' writing to a file.
-#' 
-#' Side effects can be achieved by naming your expression `sidefx` or `fx`---as usual,
-#' these arguments can be [partially matched][partialMatching], so `side` also works, and is commonly used.
-#' Side-effect expressions are executed, but their result (if any) is ignored.
-#' This means that if you call something like `newData <- within(humData, side = plot(x))`, the plot is made
-#' but the result (`newData`) is identical to `humData`.
-#' 
-#' Side-effects can also be used in combination with other within expressions.
-#' Their result is ignored, and *not* fed to the next expression as `.`.
-#' For example the command
+#' ```
+#' within(humData, kern(Token, simple = x), variable(x = TRUE))
 #' 
 #' ```
-#' with(humData, nchar(Token), side = hist(.), mean(.))
+#' 
+#' the variable `x` will be changed to `TRUE`, resulting in:
+#' 
+#' ```
+#' within(humData, kern(Token, simple = TRUE))
+#' 
 #' ```
 #' 
-#' creates a histogram of `nchar(Token)` and also returns the mean of `nchar(Token)`.
-#' (Note that variables explicitly assigned in a `side` call *are* visible in later calls,
-#' which is confusing, so don't do it!)
+#' This feature is most useful for programmatic purposes, like if you'd like
+#' to run the same expression many times but with slightly different parameters.
 #' 
 #' 
 #' 
+#' #### The . placeholder
 #' 
-#' ### Lagged vectors
+#' The `.` variable can be used as a special placeholder representing the data's first
+#' [selected field][selectedFields].
+#' For example, in
 #' 
-#' We very often want to work with "[lagged][lag()]" vectors of data.
+#' ```
+#' humData |>
+#'   select(Token) |>
+#'   with(tally(.))
+#' 
+#' ```
+#' 
+#' will run [tally()] on the `Token` field.
+#' 
+#' Because new fields created by `within()`/`mutate()`/`reframe()` become the [selected fields][selectedFields]
+#' (details below), the `.` makes it easy to refer to the *last* new field in pipes.
+#' For example, in
+#' 
+#' 
+#' ```
+#' humData |>
+#'    mutate(kern(Token, simple = TRUE)) |>
+#'    with(tally(.))
+#' 
+#' ```
+#' 
+#' the `tally()` function is run on the output of the `mutate(kern(Token, simpe = TRUE))` expression.
+#
+#' #### Automatic argument insertion
+#' 
+#' Many [humdrumR] functions are designed to work with certain common fields in [humdrumR data][humdrumRclass].
+#' For example, many [pitch functions][pitchFunctions] have a `Key` argument, which (can) take the 
+#' content of the `Key` field, which is automatically created by [readHumdrum()] if there are key interpretations,
+#' like `*G:` in the data.
+#' When an expression argument uses one of these functions, but doesn't explicitly set the argument, humdrumR
+#' will *automatically* insert the appropriate field into the call (if the field is present).
+#' So, for example, if you run
+#' 
+#' ```
+#' humData |> 
+#'    mutate(Solfa = solfa(Token))
+#' ```
+#'
+#' on a data set that includes a `Key` field, the expression will be changed to:
+#' 
+#' ```
+#' humData |> 
+#'    mutate(Solfa = solfa(Token, Key = Key))
+#' ```
+#' 
+#' If you *don't* want this to happen, you need to explicitly give a different `Key` argument, like:
+#' 
+#' ```
+#' humData |> 
+#'    mutate(Solfa = solfa(Token, Key = 'F:'))
+#' ```
+#' 
+#' (The `Key` argument can also be set to `NULL`).
+#' 
+#' Another common/important automatic argument insertion is for functions with a `groupby` argument.
+#' These functions will automatically have appropriate grouping fields inserted into them.
+#' For example, the [mint()] (melodic intervals) command will *automatically* by applied using `groupby`
+#' `groupby = list(Piece, Spine, Path)`, which makes sure that melodic intervals are only calculated within
+#' spine paths...not between pieces/spines/paths (which wouldn't make sense!).
+#' 
+#' All `humdrumR` functions which use automatic argument interpolation will mention it in their own documentation.
+#' For example, the [?solfa] documentation mentions the treatment of `Key` in it's "Key" section.
+#' 
+#' #### Lagged vectors
+#' 
+#' In music analysis, we very often want to work with "[lagged][lag()]" vectors of data.
 #' For example, we want to look at the relationship between a vector and the previous values of the 
 #' same vector---e.g., the vector offset or "lagged" by one index.
-#' The `humdrumR` [lag()] function is useful for this, as it gives us several options for lagging vectors,
+#' The [lag()] and [lead()] functions are useful for this,
 #' always keeping them the same length so vectorization is never hindered.
-#' `with` and `within.humdrumR` give us a very convenient short cut to using `lag`.
-#' In a within-expression, any vector can be indexed with an `integer` argument named `lag` (case insensitive),
-#' causing it to be lagged by that integer.
+#' 
+#' In expression arguments, we can use a convenient shorthand to call `lag()` (or `lead`).
+#' In an expression, any vector can be indexed with an `integer` argument named `lag` or `lead` (case insensitive),
+#' causing it to be lagged/ead by that integer ammount.
 #' (A vector indexed with `lag = 0` returns the unchanged vector.)
 #' For example, the following two calls are the same:
 #' 
@@ -164,7 +195,8 @@
 #' with(humData, lag(Token, 1))
 #' ```
 #' 
-#' If the `lag` index has *multiple* values and the indexed object appears within a higher function call,
+#' This is most useful if the `lag`/`lead` index has *multiple* values:
+#' if the indexed object appears within a higher function call,
 #' each lag is inserted as a *separate* argument to that call.
 #' Thus, *these* two calls are also the same:
 #' 
@@ -174,22 +206,22 @@
 #' with(humData, table(lag(Token, 1), lag(Token, 2))
 #' ```
 #' 
-#' [lag()] is a function with a `groupby` argument, which `with`/`within.humdrumR`
-#' will automatically feed the fields `list(Piece, Spine, Path)`.
-#' This is the default "melodic" behavior in most music.
-#' If you'd like to turn this off, you need to override it by adding your own
+#' Note that the lagging will also be automatically be grouped within the fields `list(Piece, Spine, Path)`,
+#' which is the default "melodic" structure in most data.
+#' This assures that a vector is "lagged" from one piece to another, or from one spine to the next.
+#' If you'd like to turn this off or change the grouping, you need to override it by adding a
 #' `groupby` argument to the lagged index, like `Token[lag = 1, groupby = list(...)]`.
 #' 
 #' 
 #' Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
-#' For example, if you want to create character-string 5-grams of your data, you could call:
+#' For example, if you want to create `character`-string 5-grams of your data, you could call:
 #' 
 #' ```
 #' with(humData, paste(Token[lag = 0:5], sep = '-'))
 #' ```
 #' 
-#' Note that, since `with`/`within.humdrumR` passes `groupby = list(Piece, Spine, Path)`
-#' to [lag()], these are true "melodic" n-grams, only created within spine-paths within each piece.
+#' Since the lagging is grouped by `list(Piece, Spine, Path)`, 
+#' these are true "melodic" n-grams, only created within spine-paths within each piece.
 #'  
 #' 
 #' @section Parsing expression results:
@@ -224,7 +256,7 @@
 #' If `alignLeft = FALSE`, the result is recycled `c(3, 1, 2, 3, 1, 2, 3, 1, 2, 3)`.
 #' 
 #' 
-#' ### with() and summarize()
+#' #### with() and summarize()
 #' 
 #' The humdrumR `with()` and `summarize()` methods return "normal" R data objects.
 #' The only difference between the `with()` and `summarize()` methods is their default  `drop` and `recycle` arguments:
@@ -240,7 +272,7 @@
 #' This `data.table` will include the columns for each result, but also any [grouping][group_by()] columns as well.
 #' 
 #'
-#' ### within(), mutate(), and reframe().
+#' #### within(), mutate(), and reframe().
 #' 
 #' The humdrumR `within()`, `mutate()`, and `reframe()` methods always return a new [humdrumR data object][humdrumRclass],
 #' with new [fields] created from your code results.
@@ -253,11 +285,12 @@
 #' + `reframe(..., recycle = 'pad')`
 #'   + Can only accept `"pad"` or `"yes"`.
 #' 
-#' ## New field names
+#' ### New field names
 #' 
 #' When running `within()`, `mutate()`, or `reframe()` new [fields()] are 
 #' added to the output [humdrumR data][humdrumRclass].
-#' You can explicitly name these fields (recomended), or allow `humdrumR` to automatically name them.
+#' These new fields become the [selected fields][selectedFields] in the output.
+#' You can explicitly name these fields (recommended), or allow `humdrumR` to automatically name them.
 #' When using `with(..., drop = FALSE)` or `summarize(..., drop = FALSE)`, the column names of the output [data.table]
 #' are determined in the same way.
 #' 
@@ -735,7 +768,8 @@ within.humdrumR <- function(data, ...,
   recycle <- checkRecycle(recycle, c("yes", "pad", "ifscalar", "ifeven", "never", "summarize"))
   
   list2env(withHumdrum(data, ..., dataTypes = dataTypes, alignLeft = alignLeft,
-                       expandPaths = expandPaths, recycle = recycle, .by = .by, variables = variables, 
+                       expandPaths = expandPaths, recycle = recycle, 
+                       .by = .by, variables = variables, 
                        withFunc = withFunc), 
            envir = environment())
   
@@ -806,7 +840,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   ##### grouping
   groupFields <- getGroupingFields(humdrumR, .by, withFunc) 
   
-  doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle)
+  doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle, variables)
   
   ## Evaluate "do" expression! 
   result <- evaluateDoQuo(doQuo, humtab[Type %in% dataTypes], groupFields, humdrumR@Context)
@@ -849,7 +883,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
 
 ## Preparing doQuo ----
 
-prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
+prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   # This is the main function used by [.withinmHumdrum] to prepare the current
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   
@@ -870,7 +904,10 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(quosures)
-
+  
+  # insert variables
+  doQuo <- interpolateVariablesQuo(doQuo, variables)
+  
   # turn . to selected field
   doQuo <- activateQuo(doQuo, dotField)
   
@@ -879,8 +916,7 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   
   # add in arguments that are already fields
   doQuo <- autoArgsQuo(doQuo, humtab)
-  
-  
+
   # splats
   doQuo <- splatQuo(doQuo, humtab)
   
@@ -891,32 +927,6 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle) {
   doQuo
 }
 
-
-fillQuo <- function(doQuo, usedInExpr) {
-    # this takes a do(fill) quosure and makes sure its
-    # results expands to be the same size as its input
-    if (length(usedInExpr) == 0L) usedInExpr <- '.'
-    usedInExpr <- rlang::syms(usedInExpr)
-    
-    analE <- analyzeExpr(doQuo)
-    
-    if (analE$Head == '<-') {
-      
-      analE$Args[[2]] <- rlang::quo({
-        targetlen <- max(lengths(list(!!!usedInExpr)))
-        rep(!!analE$Args[[2]], length.out = targetlen)
-      } )
-      unanalyzeExpr(analE)
-    } else {
-      rlang::quo({
-        targetlen <- max(lengths(list(!!!usedInExpr)))
-        rep(!!doQuo, length.out = targetlen)
-      } )
-    }
-    
-    
-    
-}
 
 concatDoQuos <- function(quosures) {
     ## this function takes a named list of quosures and creates a single quosure
@@ -969,6 +979,8 @@ concatDoQuos <- function(quosures) {
 }
 
 ####################### Functions used inside prepareQuo
+
+#### adding/manipulating variables ----
 
 activateQuo <- function(funcQuosure, dotField) {
   # This function takes the `expression` argument
@@ -1024,23 +1036,39 @@ autoArgsQuo <- function(funcQuosure, humtab) {
 }
 
 
-#### Lag/Led vectors
+
+interpolateVariablesQuo <- function(quo, variables) {
+  
+  withinExpression(quo, predicate = \() TRUE, applyTo = 'symbol',
+                   \(exprA)
+                   
+                   if (exprA$Head %in% names(variables)) {
+                     analyzeExpr(variables[[exprA$Head]])
+                   } else {
+                     exprA
+                   })
+                   
+}
+
+#### Lag/Led vectors ----
 
 laggedQuo <- function(funcQuosure) {
   
-  predicate <- \(Head, Args) Head == '[' && any(tolower(names(Args)) == 'lag') 
+  predicate <- \(Head, Args) Head == '[' && any(tolower(names(Args)) %in% c('lag', 'lead')) 
   
   do <- \(exprA) {
     
     args <- exprA$Args
     if (!'groupby' %in% .names(args)) args$groupby <- expr(list(Piece, Spine, Path))
     
-    names(args)[tolower(names(args)) == 'lag'] <- 'n'
+    lagorlead <- names(args)[tolower(names(args)) %in% c('lag', 'lead')]
+    
+    names(args)[tolower(names(args)) == lagorlead] <- 'n'
     n <- rlang::eval_tidy(args$n)
-    if (!is.numeric(n) || any((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
+    if (!is.numeric(n) || any((n %% 1) != 0)) .stop('Invalid [{lagorlead} = ] {lagorlead} expression.')
     args$n <- NULL
     
-    lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
+    lagExprs <- lapply(n, \(curn) rlang::expr((!!rlang::sym(lagorlead))(!!!args, n = !!curn)))
 
     exprA$Head <- 'splat'
     exprA$Args <- lagExprs
@@ -1052,10 +1080,10 @@ laggedQuo <- function(funcQuosure) {
   
 }
 
-#### Interpretations in expressions
 
 
-#### Splatting in expressions
+
+#### Splatting in expressions ----
 # "splatting" refers to spreading a list of values expressions 
 # into arguments to of a call.
 # This is usually done in R using do.call, and can also be done useing
@@ -1177,157 +1205,51 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
 
 }
 
-ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
-          # This function takes an expression and a vector of strings representing
-          # names used in that expression and creates an expression
-          # which uses applyNgram on these named objects.
-          # It first uses xifyQuo to put the expression in the form of a 
-          # lambda function.
-          # 
-          # 
-  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
-  
-  # rlang::quo_set_expr(funcQuosure,
-                      # rlang::expr(applyNgram(n = !!rlang::quo_get_expr(ngramQuosure), 
-                                             # vecs = list(!!!lapply(usedInExpr, rlang::sym)), 
-                                             # f = !!rlang::quo_get_expr(funcQuosure))))
-  rlang::quo(
-            applyNgram(n = !!ngramQuosure, 
-                       vecs = list(!!!lapply(usedInExpr, rlang::sym)),
-                       f = !!funcQuosure))
-  
-}
-
-windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
-  funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
-  
-  if (!'groupby' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['groupby']] <- quote(list(Piece, Spine))
-  if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
-  
-  applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild', 'passOutside')])
-  windowQuosure[[2]] <- windowQuosure[[2]][!.names(windowQuosure[[2]]) %in% c('leftEdge', 'rebuild', 'passOutside')]
-  
-  
-  rlang::quo(
-    windowApply(func = !!funcQuosure,
-                x = !!rlang::sym(usedInExpr[1]),
-                windows = !!windowQuosure,
-                !!!applyArgs))
-  
-}
-
-
-
-
-# Change or insert values in an expression
-# 
-# This function can be used to modify arguments to a functions
-# within an existing expression (or quosure/formula).
-# 
-# `interpolateArguments` inteprets named value in its `namedArgs` 
-# argument in one of two ways: If the named value is a list, it interprets
-# the name of the list as a function call, and inserts/swaps any arguments
-# in that list into any instances of that function call within the `expr`.
-# Named arguments are inserted or substituted if already present in expression.
-# Unnamed argmuments are simply added to the call.
-# Examples:
-#
-# ```
-# myexpr <- quote(dnorm(x, mean = 5))
-# interpolateArguments(myexpr, list(dnorm = list(mean = 2, sd = 5, TRUE)))
-# 
-# # result is new expresson: dnorm(x, mean = 2, sd = 5, TRUE)
-# ```
-#
-# If a named valued in the `namedArgs` argument is not a list,
-# that name/value pair is substituted anywhere it is present in the expression.
-# This approach is often more conscise, but arguments cannot be added to an 
-# expression this way, only substituted if already present.
-# Examples:
-# 
-# ```
-# myexpr <- quote(dnorm(x, mean = 5))
-# interpolateArguments(myexpr, mean = 2)
-# 
-# # result is new expression: dnorm(x, mean = 2)
+# ngramifyQuo <- function(funcQuosure, ngramQuosure, usedInExpr, depth = 1L) {
+#           # This function takes an expression and a vector of strings representing
+#           # names used in that expression and creates an expression
+#           # which uses applyNgram on these named objects.
+#           # It first uses xifyQuo to put the expression in the form of a 
+#           # lambda function.
+#           # 
+#           # 
+#   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
+#   
+#   # rlang::quo_set_expr(funcQuosure,
+#                       # rlang::expr(applyNgram(n = !!rlang::quo_get_expr(ngramQuosure), 
+#                                              # vecs = list(!!!lapply(usedInExpr, rlang::sym)), 
+#                                              # f = !!rlang::quo_get_expr(funcQuosure))))
+#   rlang::quo(
+#             applyNgram(n = !!ngramQuosure, 
+#                        vecs = list(!!!lapply(usedInExpr, rlang::sym)),
+#                        f = !!funcQuosure))
+#   
 # }
-# ```
-#
-# @examples
-# myexpr2 <- quote(A + b*x + rnorm(length(a), mean(Z), sd = 2))
-# 
-# interpolateArguments(myexpr2,
-#                      list(sd = 10, mean = list(na.rm = TRUE)))
-#                        
-# # result is new expression: 
-# # a + b*x + rnorm(length(a), mean(Z, na.rm = TRUE), sd = 10)
-# 
-# 
-# @param expr A unevaluated expression object.
-# @param namedArgs A list of named arguments. Unnamed arguments are simply ignored.
-# 
-interpolateArguments <- function(quo, namedArgs) {
-    expr <- rlang::quo_get_expr(quo)
-    expr <- .interpolateArguments(expr, namedArgs)
-    
-    rlang::new_quosure(expr, rlang::quo_get_env(quo))
-    
-}
-    
-.interpolateArguments <- function(expr, namedArgs) {    
-    # the use interpolateArguments takes quosures
-    # under the hood, .interpolateArguments works with raw expressions.
-    # this is necessarry because .interpolateArguments is recursive.
- if (!is.call(expr)) return(expr)
-          
- argNames <- names(namedArgs)
- 
- callname <- deparse(expr[[1]])
- if (callname %in% argNames) {
-           callArgs <- namedArgs[[which(argNames == callname)[1]]]
-           callargNames <- names(callArgs)
-           if (!is.null(callargNames) && !is.null(names(expr))) {
-                    alreadythere <- names(expr) %in% callargNames & callargNames != ''
-                    expr <- expr[!alreadythere]
-           }
-           
-           for (i in seq_along(callArgs)) {
-                     expr[[length(expr) + 1]] <- callArgs[[i]]
-                     if (!is.null(callargNames) && callargNames[i] != '') names(expr)[length(expr)] <- callargNames[i]
-           }
-           namedArgs <- namedArgs[argNames != callname]
-           argNames <- argNames[argNames != callname]
-           if (length(namedArgs) == 0) return(expr)
- } 
- #       
- named <- if (is.null(names(expr))) logical(length(expr)) else names(expr) != ''
- named[1] <- FALSE
- if (any(named) && any(argNames %in% names(expr[named]))) {
-           for (name in argNames[argNames %in% names(expr[named])]) {
-                     expr[[name]] <- namedArgs[[name]] 
-           }
- }     
- 
- expr[!named] <- lapply(expr[!named], .interpolateArguments, namedArgs = namedArgs)      
-           
- expr
-}
+
+# windowfyQuo <- function(funcQuosure, windowQuosure, usedInExpr, depth = 1L) {
+#   funcQuosure <- xifyQuo(funcQuosure, usedInExpr, depth)
+#   
+#   if (!'groupby' %in% .names(windowQuosure[[2]])) windowQuosure[[2]][['groupby']] <- quote(list(Piece, Spine))
+#   if (!'x' %in% .names(windowQuosure[[2]]) && .names(windowQuosure[[2]])[2] != '' ) windowQuosure[[2]][['x']] <- rlang::sym(usedInExpr[1])
+#   
+#   applyArgs <- as.list(windowQuosure[[2]][c('leftEdge', 'rebuild', 'passOutside')])
+#   windowQuosure[[2]] <- windowQuosure[[2]][!.names(windowQuosure[[2]]) %in% c('leftEdge', 'rebuild', 'passOutside')]
+#   
+#   
+#   rlang::quo(
+#     windowApply(func = !!funcQuosure,
+#                 x = !!rlang::sym(usedInExpr[1]),
+#                 windows = !!windowQuosure,
+#                 !!!applyArgs))
+#   
+# }
 
 
-prepareContextQuo <- function(contextQuo, dotField) {
-  exprA <- analyzeExpr(contextQuo)
-  
-  exprA$Head <- 'findWindows'
-  exprA$Args$field <- dotField
-  
-  passAsExprs <- .names(exprA$Args) %in% c('open', 'close', '')
-  exprA$Args[passAsExprs] <- lapply(exprA$Args[passAsExprs], \(expr) call('quote', expr))
-  
-  if (!'groupby' %in% names(exprA$Args)) exprA$Args$groupby <- quote(list(Piece, Spine, Path)) 
-  exprA$Args$x <- quote(humtab)
-  
-  unanalyzeExpr(exprA)
-}
+
+
+    
+
+
 
 
 
