@@ -1880,7 +1880,7 @@ naDots <- function(field, null, types) {
 setMethod('show', signature = c(object = 'humdrumR'),
           function(object) {
                     print.humdrumR(object)
-                    return(invisible(NULL))
+                    return(invisible(NULL)) # this is what show is supposed to do
           })
 
 #' @rdname humdrumRclass
@@ -1915,17 +1915,17 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
   
   Npieces <- npieces(humdrumR)
   Nfiles <- nfiles(humdrumR) # needs to be done before firstLast indexing
-  if (Npieces > 2L && firstAndLast) humdrumR <- humdrumR[c(1, Npieces)]
+  if (Npieces > 2L && firstAndLast) .humdrumR <- humdrumR[c(1L, Npieces)]
   
-  if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile))
+  if (view == 'score') return(print_score(.humdrumR, maxRecordsPerFile))
   
   tokmat <- if (view == 'humdrum') {
-      tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
+      tokmat_humdrum(.humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
   } else {
-      tokmat_humtable(humdrumR, dataTypes, null = null)
+      tokmat_humtable(.humdrumR, dataTypes, null = null)
   }
   
-  print_tokmat(tokmat, Nmorefiles = Npieces - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
+  print_tokmat(tokmat, Nmorefiles = Npieces - length(.humdrumR), maxRecordsPerFile, maxTokenLength, 
                screenWidth = screenWidth, showCensorship = view == 'humdrum', syntaxHighlight = syntaxHighlight)
 
   

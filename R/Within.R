@@ -74,37 +74,13 @@
 #' for working with humdrum data.
 #' There are currently six pre-processes:
 #' 
-#' + Variable interpolation.
 #' + The `.` placeholder for selected fields.
 #' + Automatic argument insertion.
 #' + "Lagged"-vectors shorthand.
 #' + "Splatted" arguments.
-#' + List mapping.
+#' + Variable interpolation.
 #' 
 #' Each of these is explained below.
-#' 
-#' #### Manual variable interpolation
-#'  
-#' The `variable` argument can be provided as an (option) `list` of named values.
-#' If any of the names in the `variable` list appear as symbols (variable names)
-#' in any expression argument, their value is interpolated in place of that symbol.
-#' For example, in
-#'
-#' ```
-#' within(humData, kern(Token, simple = x), variable(x = TRUE))
-#' 
-#' ```
-#' 
-#' the variable `x` will be changed to `TRUE`, resulting in:
-#' 
-#' ```
-#' within(humData, kern(Token, simple = TRUE))
-#' 
-#' ```
-#' 
-#' This feature is most useful for programmatic purposes, like if you'd like
-#' to run the same expression many times but with slightly different parameters.
-#' 
 #' 
 #' 
 #' #### The . placeholder
@@ -224,6 +200,54 @@
 #' these are true "melodic" n-grams, only created within spine-paths within each piece.
 #'  
 #' 
+#' #### Splatted arguments
+#' 
+#' "Splatting" refers to feeding a function a list/vector of arguments.
+#' Sometimes we want to divide our data into pieces (a l\'a [group_by]), but
+#' rather than applying the same expression to each piece, we want to feed
+#' the separate pieces as separate arguments to the same function.
+#' You can use some 
+#' [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
+#' to do just this.
+#' We can index any field in our call with a `splat` argument, which must be a `Field %in% x`.
+#' For example,
+#'
+#' ```
+#' within(humdata, list(Token[splat = Spine %in% 1:2])) 
+#' ```
+#' 
+#' In this call, the `Token` field will be divided into two groups, one where `Spine == 1` and the other where
+#' `Spine == 2`; the first group (`Spine == 1`) will be used as the first argument to `list`, and the second group
+#' (`Spine == 2`) as the second argument.
+#' Thus, `within` translates the previous expression to this:
+#' 
+#' ```
+#' within(humdata,
+#'        list(Token[Spine == 1], Token[Spine == 2]))
+#'        
+#'        
+#' #### Manual variable interpolation
+#'  
+#' The `variable` argument can be provided as an (option) `list` of named values.
+#' If any of the names in the `variable` list appear as symbols (variable names)
+#' in any expression argument, their value is interpolated in place of that symbol.
+#' For example, in
+#'
+#' ```
+#' within(humData, kern(Token, simple = x), variable(x = TRUE))
+#' 
+#' ```
+#' 
+#' the variable `x` will be changed to `TRUE`, resulting in:
+#' 
+#' ```
+#' within(humData, kern(Token, simple = TRUE))
+#' 
+#' ```
+#' 
+#' This feature is most useful for programmatic purposes, like if you'd like
+#' to run the same expression many times but with slightly different parameters.
+#'
 #' @section Parsing expression results:
 #' 
 #' The main differences between the `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` humdrumR methods
@@ -528,125 +552,14 @@
 #' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
 #' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
 
-#' @section Plotting parameters:
-#'
-#' As mentioned above, plots in within-expressions should (often) be called using the `sidefx` argument name.
-#' When plotting, `with`/`within.humdrumR` also allows you to specify plotting options inline,
-#'  without having to make a separate call
-#' to [par()]. Any [par()] argument can be specified by providing a named list to the `graphics` keyword.
-#' For example, we can set the plot margins with the `mar` argument:
+
 #' 
-#' ```
-#' within(data, 
-#'        side = plot(sort(table(Token))), 
-#'        graphics = list(mar = c(4, 4, 4, 4)))
 #' 
-#' ```
-#' The best part is `with`/`within.humdrumR` will reset `par` to it's previous state after its done.
-#' 
-#' You can also use the syntactic sugar, `graphics(parargs = ...)`:
-#' 
-#' ```
-#' within(data,
-#'        side = plot(sort(nchar(Token))),
-#'        graphics(mar = c(4, 4, 4, 4)))
+
 #' ```
 #' 
 #' 
-#' 
-#' @section Splatting:
-#' 
-#' ("Splatting" refers to feeding a function a list/vector of arguments.)
-#' Sometimes we want to divide our data into pieces (a l\'a `partition` option), but
-#' rather than applying the same expression to each piece, we want to feed
-#' the separate pieces as separate arguments to the same function.
-#' In `with`/`within.humdrumR` you can use some 
-#' [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
-#' to do just this.
-#' We can index any field in our call with a `splat` argument, which must be a `Field %in% x`.
-#' For example,
-#'
-#' ```
-#' within(humdata, list(Token[splat = Spine %in% 1:2])) 
-#' ```
-#' 
-#' In this call, the `Token` field will be divided into two groups, one where `Spine == 1` and the other where
-#' `Spine == 2`; the first group (`Spine == 1`) will be used as the first argument to `list`, and the second group
-#' (`Spine == 2`) as the second argument.
-#' Thus, `within` translates the previous expression to this:
-#' 
-#' ```
-#' within(humdata,
-#'        list(Token[Spine == 1], Token[Spine == 2]))
-#' ```
-#' 
-#' 
-#' @section Advanced scripting:
-#' 
-#' `with.humdrumR` and `within.humdrumR` use
-#' [non-standard evaluation](http://adv-r.had.co.nz/Computing-on-the-language.html)
-#' of their expressions.
-#' This is very useful on the command line or in a script running one command at a time.
-#' However, if you want to more advanced scripting non-standard evaluation can be a problem.
-#' For example, if you to loop through a list of within-expressions
-#' or reuse a common combination coor arguments many times.
-#' 
-#' Fortunately, R has *formula*, which are a way of capturing ("quoting") expressions into a 
-#' concrete object that you can manipulate. Better yet, `with`/`within.humdrumR` will 
-#' interpret formulae passed to them as arguments.
-#' Basically, the right-hand side of any formula is interpreted as an 
-#' expression to evaluate.
-#' If a formula is passed as a unnamed argument to `with`/`within`, the left-hand side
-#' of the formula (if any) is treated as the argument name.
-#' If you name a formula argument that has a left-hand side, the left-hand side is ignored.
-#' 
-#' ```
-#' 
-#' with(humdrumR, table(Token), by = Spine)
-#' with(humdrumR, ~table(Token), by ~ Spine)
-#' 
-#' ````
-#' 
-#' This approach would allows us to, same `~table(Token)` or `by ~ Spine` as variables, 
-#' allowing us to do things like:
-#' 
-#' ```
-#' 
-#' tabler <- ~table(.)
-#' byspine <- by ~ Spine
-#' 
-#' with(humData, tabler, byspine)
-#' 
-#' ```
-#' 
-#' We can even make lists and loop through them:
-#' 
-#' ```
-#' bys <- list(~ Spine, ~ Piece, ~ COM)
-#' 
-#' for (b in bys) with(humData, table(.), by = b)
-#' 
-#' ```
-#' 
-#' ### Variables
-#' 
-#' Another useful scripting option is to include free variables in your 
-#' within-expressions, which can then be fed in using the `variables` argument.
-#' `variables` must be a named list.
-#' Variables in the within-expression which match a name of from the `variables`
-#' list have that value interpolated.
-#' This allows us, for example, to run commands like:
-#' 
-#' ```
-#' nums <- c(2, 3, 4, 5)
-#' expression <- ~.^N
-#' 
-#' for (n in nums) with(humData, expression, variables = list(N = n))
-#' 
-#' ```
-#' 
-#' Each time `with` is called, the `N` in `.^N` is replaced by the current value of `n`.
-#'      
+   
 #' @param data ***HumdrumR data.***
 #' 
 #' Must be a [humdrumR data object][humdrumRclass].
@@ -737,11 +650,16 @@ with.humdrumR <- function(data, ...,
   
   if (drop) {
     
+    groups <- result[ , groupFields, with = FALSE]
+    groupNames <- do.call('paste', c(Map(groupFields, groups, f = paste0), list(sep = ',')))
     result <- result[[max(which(!colnames(result) %in% groupFields))]]
     if (length(result) == 0L) return(result)
     
+    
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
+    } else {
+      if (!any(duplicated(groupNames))) names(result) <- groupNames
     }
   } else {
     visible <- TRUE
@@ -829,7 +747,6 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   
   # quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
   quosures <- rlang::enquos(...)
-  quosures <- tidyNamer(quosures)
   if (length(quosures) == 0L) .stop("In a call to {withFunc}, you must provide an expression to evaluate!")
   
   
@@ -888,25 +805,24 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   
   # what fields are used, and what are their classes?
-  usedInExprs <- lapply(quosures, fieldsInExpr, humtab = humtab)
-  usedClasses <- vapply(humtab[ , unique(unlist(usedInExprs)), with = FALSE], \(x) class(x)[1], FUN.VALUE = character(1)) 
+  # usedInExprs <- lapply(quosures, fieldsInExpr, humtab = humtab)
+  # usedClasses <- vapply(humtab[ , unique(unlist(usedInExprs)), with = FALSE], \(x) class(x)[1], FUN.VALUE = character(1)) 
   
   # if the targets are lists, Map
-  quosures <- Map(quosures, usedInExprs, 
-                  f = \(quo, curUsed) { 
-                    if (any(usedClasses[curUsed] == 'list')) {
-                      mapifyQuo(quo, curUsed, depth = 1L) 
-                    } else {
-                      quo
-                    }
-                  })
+  # quosures <- Map(quosures, usedInExprs, 
+  #                 f = \(quo, curUsed) { 
+  #                   if (any(usedClasses[curUsed] == 'list')) {
+  #                     mapifyQuo(quo, curUsed, depth = 1L) 
+  #                   } else {
+  #                     quo
+  #                   }
+  #                 })
   
+  quosures <- quoFieldNames(quosures)
   
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(quosures)
   
-  # insert variables
-  doQuo <- interpolateVariablesQuo(doQuo, variables)
   
   # turn . to selected field
   doQuo <- activateQuo(doQuo, dotField)
@@ -920,6 +836,8 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   # splats
   doQuo <- splatQuo(doQuo, humtab)
   
+  # insert variables
+  doQuo <- interpolateVariablesQuo(doQuo, variables)
   
   # We may have added to the expr, so update what fields (if any) are used in formula
   attr(doQuo, 'usedFields') <- unique(fieldsInExpr(humtab, doQuo))
@@ -928,54 +846,60 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
 }
 
 
+quoFieldNames <- function(quosures) {
+  names <- 
+  
+  quoTab <- do.call('rbind', 
+                    Map(quosures, .names(quosures), seq_along(quosures) == length(quosures),
+                        f = \(quo, named, islast) {
+                          exprA <- analyzeExpr(quo)
+                          
+                          
+                          if (exprA$Head == '<-') {
+                            assigned <- rlang::as_label(exprA$Args[[1]])
+                            
+                            if (named != '') { # this means we have assignment AND naming
+                              if (named == assigned) {
+                                .warn("You are using '=' AND '<-' at the same time; you only need one or the other.",
+                                      "For example, '{name} = {assign} <-' could just be '{name} ='.")
+                              } else {
+                                bad <- paste0(named, ' = ', assigned, ' <- ...')
+                                .stop("You are using '=' AND '<-' to assign contradictory field names.",
+                                      "For example, '{bad}' is contradictory.")
+                              }
+                            }
+                            
+                            if (islast) exprA$Args[[2]] <- rlang::quo(visible.attr(withVisible(!!exprA$Args[[2]])))
+                            quo <- unanalyzeExpr(exprA)
+                            
+                          } else {
+                            
+                            assigned <- if (named == '') rlang::as_label(quo) else named
+                            quo <- if (islast) rlang::quo(!!assigned <-  visible.attr(withVisible(!!quo))) else rlang::quo(!!assigned <- !!quo)
+                          
+                          }
+                          
+                          data.table(Name = assigned, Quo = list(quo))
+                        }))
+  
+  
+  setNames(quoTab$Quo, quoTab$Name)
+  
+}
+
 concatDoQuos <- function(quosures) {
-    ## this function takes a named list of quosures and creates a single quosure
-    # which applies each of them in turn.
-   
+  assigned <- names(quosures)
+   rlang::quo({
+    {!!!quosures}
     
-    assignOut <- list()
-    resultName <- "_Result_"
-    varname <- quote(.)
+    results <- setNames(list(list(list(!!!rlang::syms(assigned)))), assigned) 
+    # Need three lists here, and two for _rowKey_ 
     
-    whichResult <- length(quosures)
+    results[['_rowKey_']] <- list(list(`_rowKey_`))
     
-    for (i in 1:length(quosures)) {
-        if (is.null(quosures[[i]])) next
-        if (i > 1L) quosures[[i]] <- substituteName(quosures[[i]], list(. = varname))
-        
-        # if (sideEffects[i]) next
-        
-        exprA <- analyzeExpr(quosures[[i]])
-        
-        if (exprA$Head == '<-') {
-          varname <- exprA$Args[[1]]
-          if (i != whichResult) {
-            assignOut <- c(assignOut, varname)
-          } else {
-            resultName <- as.character(varname)
-          }
-        } else {
-          if (i  < length(quosures)) {
-            varname <- rlang::sym(tempfile('xxx', tmpdir = ''))
-            quosures[[i]] <- rlang::new_quosure(expr(!!varname <- !!quosures[[i]]), 
-                                              env = rlang::quo_get_env(quosures[[i]]))
-          }
-        }
-    }
-    # if (is.null(assignOut[[length(assignOut)]]))  assignOut$Result <- quote(result)
-    names(assignOut) <- sapply(assignOut, as.character)
+    results
     
-    doQuo <- rlang::quo({
-      
-      result <- list(list(visible(withVisible({!!!quosures}))))
-      
-      results <- c(lapply(list(!!!assignOut), \(assign) list(list(assign))), use.names = TRUE,
-                   setNames(list(result), !!resultName),
-                   list(`_rowKey_` = list(list(`_rowKey_`))))
-      results
-    }) 
-    
-    doQuo
+    })
 }
 
 ####################### Functions used inside prepareQuo
@@ -1332,9 +1256,10 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   grouping <- results[ , groupFields, with = FALSE]
   rowKey <- unlist(results[['_rowKey_']], recursive = FALSE)
   results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
+  
+  visibleResult <- is.visible(results[[length(results)]][[1]]) # determined by last result
   results[] <- lapply(results, unlist, recursive = FALSE)
   
-  visibleResult <- attr(results[[length(results)]][[1]], 'visible') %||% TRUE
   
   
   results <- as.matrix(results) # allows me to lapply across all all at once
@@ -1507,38 +1432,6 @@ addExclusiveFields <- function(humtab, fields) {
 
 ## dplyr ----
 
-tidyNamer <- function(quosures) {
-  names <- .names(quosures)
-  
-  assigned <- sapply(quosures, 
-                        \(quo) {
-                          exprA <- analyzeExpr(quo)
-                          if (exprA$Head == '<-')  rlang::as_label(exprA$Args[[1]]) else  '' 
-                        })
-  
-  doubleAssign <- names != '' & assigned != ''
-  if (any(doubleAssign)) {
-    sameName <- names[doubleAssign] == assigned[doubleAssign]
-    if (all(sameName)) {
-      example <- names[doubleAssign][which(sameName)[1]]
-      .warn("You are using '=' AND '<-' at the same time; you only need one or the other.",
-            "For example, '{example} = {example} <-' could just be '{example} ='.")
-    } else {
-      bad <- paste0(names[doubleAssign][!sameName], ' = ', assigned[doubleAssign][!sameName], ' <- ...')
-      .stop("You are using '=' AND '<-' to assign contradictory field names.",
-            "For example, '{bad[1]}' is contradictory.")
-    }
-  }
-  
-  names <- ifelse(names == '', assigned, names)
-  names[names == ''] <- sapply(quosures[names == ''], rlang::as_label)
-  # if (any(duplicated(names))) .stop("You can't run summarize.humdrumR() and give {num2word(max(table(names)))} columns the same name!")
-  
-  names <- rlang::syms(names)
-  
-  Map(quosures, names, f = \(quo, name) rlang::quo(!!name <- !!quo))
-  
-}
 
 
 

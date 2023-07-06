@@ -2101,7 +2101,7 @@ deparse.unique <- function(exprs) {
   make.unique(labels)
 }
 
-visible <- function(withV) {
+visible.attr <- function(withV) {
   if (is.null(withV$value)) return(NULL)
   visible <- withV$visible
   result <- withV$value
@@ -2111,6 +2111,12 @@ visible <- function(withV) {
   result
 }
 
+is.visible <- function(x) {
+  visible <- attr(x, 'visible')
+  
+  visible %||% TRUE
+  
+}
 
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
