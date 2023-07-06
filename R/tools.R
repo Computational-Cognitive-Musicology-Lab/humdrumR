@@ -2279,13 +2279,14 @@ exprStringMatch <- function(exprs, strings, includeSymbols = FALSE) {
 }
 
 
-withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
+withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE, envir = parent.frame()) {
   if (is.null(expr)) return(expr)
   exprA <- analyzeExpr(expr)
   
   if (exprA$Type %in% applyTo) {
-    hit <- do...(predicate, exprA, envir = parent.frame())
+    hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
+      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
       exprA <- func(exprA)
     } 
   } else {
@@ -2297,11 +2298,19 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
     for (i in seq_along(exprA$Args)) {
       # print(exprA$Args[[i]])
       cur <- exprA$Args[[i]]
-      if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
-                                                                    func = func, 
-                                                                    predicate = predicate, 
-                                                                    stopOnHit = stopOnHit,
-                                                                    applyTo = applyTo)
+      if (!missing(cur) && !is.null(cur)) {
+        innerEnvir <- switch(exprA$Form,
+                             quosure = ,
+                             formula = exprA$Environment,
+                             envir)
+        
+        exprA$Args[[i]] <- Recall(cur, 
+                                  func = func, 
+                                  predicate = predicate, 
+                                  stopOnHit = stopOnHit,
+                                  applyTo = applyTo,
+                                  envir = innerEnvir)
+      }
     }
     
   }

@@ -328,3 +328,52 @@ testthat('lag/lead sugar works', {
   expect_equal(lag, t(lead))
   
 })
+
+
+testthat("Quosures thread environment variables correctly", {
+  chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')[[ , 1]]
+  chor |> mutate(N = nchar(Token)) -> chor
+  
+  # inside
+  expect_equal(with(chor, 
+                    {
+                      a <- 'mean'
+                      paste(median(N), a)
+                    }), 
+               '3 mean')
+  
+  # outside
+  a <- 'mean'
+  expect_equal(with(chor, paste(median(N), a)),  '3 mean')
+  
+  # inside trumps outside
+  a <- 'mean'
+  expect_equal(with(chor, 
+                    {
+                      a <- 'median'
+                      paste(median(N), a)
+                    }), 
+               '3 median')
+  
+  # for loop
+  result <- c()
+  for (i in 1:5) result <- c(result, with(chor, median(N) * i)) 
+  expect_equal(result, 1:5 * 3)
+  
+  # sapply
+  expect_equal(sapply(1:5, \(i) with(chor, median(N) * i)), 1:5 * 3)
+  
+  # function argument
+  f <- function(x) {
+    paste0(with(chor, paste(median(N), x)))
+  }
+  expect_equal(f('median'), '3 median')
+  
+  # lag
+  i <- 1
+  expect_true(all(with(chor, table(N[lag = i])) == c(17, 34, 11)))
+  
+  i <- 1:3
+  expect_equal(dim(with(chor, table(N[lag = i]))), c(3, 3, 3))
+  
+})

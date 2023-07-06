@@ -10,7 +10,8 @@
 #' humdrumR data. 
 #' They allow us to perform arbitrary (free form) manipulation of data [fields][fields()]
 #' held within a [humdrumR data object][humdrumRclass], with convenient functionality
-#' for ignoring null data, [lagging][lag()] data, [grouping][groupHumdrum] data, [windowing][context()], and more.
+#' for ignoring null data, [lagging][lag()] data, [grouping][groupHumdrum] data, 
+#' [windowing][context()], and more.
 #' The `with()` and `within()` functions, which come from [base R][base], are the core functions.
 #' However, the [dplyr] "verbs" `mutate()`, `summarize()`, and `reframe()` can be used as well---they
 #' are equivalent to using `with()`/`within()` with particular arguments.
@@ -22,8 +23,9 @@
 #' [humdrumR data][humdrumRclass]. 
 #' They all allow you to write code that accesses and manipulates the raw [fields()]
 #' in our data.
-#' The main differences between them are what they do with the *results* of our code:
-#' `with()` and `summarize()` return results in normal, "raw" R formats, **removed** from the [humdrumR data][humdrumRclass];
+#' The main differences between them are what they do with the *results* of your code:
+#' `with()` and `summarize()` return results in normal, "raw" R formats, **removed** 
+#' from the [humdrumR data][humdrumRclass];
 #' In contrast, `within()`, `mutate()`, and `reframe()` always insert the results of your code into
 #' new [fields()] **within** your humdrum data.
 #' The other distinctions between these functions have to do with how they recycle/pad results (see below).
@@ -43,6 +45,7 @@
 #' For example:
 #' 
 #' ```
+#' 
 #' with(humData, 
 #'      ifelse(Spine > 2, 
 #'             kern(Token), 
@@ -53,32 +56,34 @@
 #' can be, and generally should be, [vectorized][vectorization].
 #' 
 #' By default, `with()`, `within()`, etc. don't use the whole [humdrum table][humTable],
-#' but instead only evaluate their expressions using rows correspoing to non-null data tokens (`Type == "D"`).
+#' but instead only evaluate their expressions using rows containing non-null data tokens (`Type == "D"`).
 #' This means that interpretations, comments, barlines, and null data tokens are automatically ignored for you!
 #' This feature is controlled by the `dataTypes` argument:
 #' you can choose to work with the other token types by providing a `character` string containing combinations
 #' of the characters `G` (global comments), `L` (local comments), `I` (interpretations), 
 #' `M` (barlines), `D` (non-null data), or `d` (null data).
-#' For example, `dataTypes = 'MDd'` will evaluate your expressions on barline tokens (`=`), as well as both null
-#' and non-null data.
+#' For example, `dataTypes = 'MDd'` will evaluate your expressions on barline tokens (`=`), non-null data,
+#' and null data.
 #' See the [ditto()] manual for an example application of using `dataTypes = 'Dd'`.
+#' Keep in mind that `humdrumR` dynamically updates what tokens are considered "null" (`"d"`) based on what fields
+#' are [selected][selectedFields].
 #' 
-#' If multiple expression arguments are provided, each expression is evaluated in order (left to right).
+#' If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 #' Each expression can refer variables assigned in the previous expression (examples below).
 #' 
 #' ### Expression Pre-processing
 #' 
-#' The `with()`, `within()`, `mutate()`, `summarize()`, or `reframe()` methods all do some
-#' pre-processing of your expressions before evaluatinng thing.
+#' These functions all do some
+#' pre-processing of expressions arguments before evaluating them.
 #' This pre-processing provides some convenient "[syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar)" 
 #' for working with humdrum data.
-#' There are currently six pre-processes:
+#' There are currently five pre-processing steps:
 #' 
-#' + The `.` placeholder for selected fields.
-#' + Automatic argument insertion.
-#' + "Lagged"-vectors shorthand.
-#' + "Splatted" arguments.
-#' + Variable interpolation.
+#' 1. Explicit variable interpolation.
+#' 2. The `.` placeholder for selected fields.
+#' 3. Automatic argument insertion.
+#' 4. "Lagged"-vectors shorthand.
+#' 5. "Splatted" arguments.
 #' 
 #' Each of these is explained below.
 #' 
@@ -115,9 +120,9 @@
 #' #### Automatic argument insertion
 #' 
 #' Many [humdrumR] functions are designed to work with certain common fields in [humdrumR data][humdrumRclass].
-#' For example, many [pitch functions][pitchFunctions] have a `Key` argument, which (can) take the 
-#' content of the `Key` field, which is automatically created by [readHumdrum()] if there are key interpretations,
-#' like `*G:` in the data.
+#' For example, many [pitch functions][pitchFunctions] have a `Key` argument which (can) take the 
+#' content of the `Key` which [readHumdrum()] creates when there are key interpretations,
+#' like `*G:`, in the data.
 #' When an expression argument uses one of these functions, but doesn't explicitly set the argument, humdrumR
 #' will *automatically* insert the appropriate field into the call (if the field is present).
 #' So, for example, if you run
@@ -150,7 +155,7 @@
 #' spine paths...not between pieces/spines/paths (which wouldn't make sense!).
 #' 
 #' All `humdrumR` functions which use automatic argument interpolation will mention it in their own documentation.
-#' For example, the [?solfa] documentation mentions the treatment of `Key` in it's "Key" section.
+#' For example, the [?solfa] documentation mentions the treatment of `Key` in its "Key" section.
 #' 
 #' #### Lagged vectors
 #' 
@@ -162,13 +167,13 @@
 #' 
 #' In expression arguments, we can use a convenient shorthand to call `lag()` (or `lead`).
 #' In an expression, any vector can be indexed with an `integer` argument named `lag` or `lead` (case insensitive),
-#' causing it to be lagged/ead by that integer ammount.
+#' causing it to be lagged/led by that integer amount.
 #' (A vector indexed with `lag = 0` returns the unchanged vector.)
 #' For example, the following two calls are the same:
 #' 
 #' ```
-#' with(humData, Token[lag = 1])
-#' with(humData, lag(Token, 1))
+#' humData |> with(Token[lag = 1])
+#' humData |> with(lag(Token, 1))
 #' ```
 #' 
 #' This is most useful if the `lag`/`lead` index has *multiple* values:
@@ -177,12 +182,12 @@
 #' Thus, *these* two calls are also the same:
 #' 
 #' ```
-#' with(humData, table(Token[lag = 1:2])
-#' 
-#' with(humData, table(lag(Token, 1), lag(Token, 2))
+#' humData |> with(tally(Token[lag = 1:2]))
+
+#' humData |> with(tally(lag(Token, 1), lag(Token, 2)))
 #' ```
 #' 
-#' Note that the lagging will also be automatically be grouped within the fields `list(Piece, Spine, Path)`,
+#' Note that the lagging will also be automatically grouped within the fields `list(Piece, Spine, Path)`,
 #' which is the default "melodic" structure in most data.
 #' This assures that a vector is "lagged" from one piece to another, or from one spine to the next.
 #' If you'd like to turn this off or change the grouping, you need to override it by adding a
@@ -193,7 +198,7 @@
 #' For example, if you want to create `character`-string 5-grams of your data, you could call:
 #' 
 #' ```
-#' with(humData, paste(Token[lag = 0:5], sep = '-'))
+#' humData |> with(paste(Token[lag = 0:5], sep = '-'))
 #' ```
 #' 
 #' Since the lagging is grouped by `list(Piece, Spine, Path)`, 
@@ -213,7 +218,7 @@
 #' For example,
 #'
 #' ```
-#' within(humdata, list(Token[splat = Spine %in% 1:2])) 
+#' humData |> with(list(Token[splat = Spine %in% 1:2]))
 #' ```
 #' 
 #' In this call, the `Token` field will be divided into two groups, one where `Spine == 1` and the other where
@@ -222,8 +227,21 @@
 #' Thus, `within` translates the previous expression to this:
 #' 
 #' ```
-#' within(humdata,
-#'        list(Token[Spine == 1], Token[Spine == 2]))
+#' humData |> within(list(Token[Spine == 1], Token[Spine == 2]))
+#' ```
+#' 
+#' Splatting can be little weird, because there is nothing to assure that the splatted arguments 
+#' are all the same length, which we usually want ([vectorization]).
+#' For example, in the previous example, there is no guarantee that `Token[Spine == 1]` and `Token[Spine == 2]` are the same length.
+#' This just means we should only use splatting if we really understand the groups we are splatting.
+#' For example, *if* there are [no spine paths or stops in our data][anyPaths()], *then* we can know that all spines
+#' have the same number of data records, but only including **all** data records (null *and* non-null).      
+#' So, if I know there are no stops/paths in our data, we can run something like this:
+#' 
+#' ```
+#' humData |> within(dataTypes = 'Dd', 
+#'                   tally(Token[splat = Spine %in% 1:2]))
+#' ```
 #'        
 #'        
 #' #### Manual variable interpolation
@@ -651,7 +669,8 @@ with.humdrumR <- function(data, ...,
   if (drop) {
     
     groups <- result[ , groupFields, with = FALSE]
-    groupNames <- do.call('paste', c(Map(groupFields, groups, f = paste0), list(sep = ',')))
+    groupNames <- if (length(groups)) do.call('paste', c(Map(groupFields, groups, f = paste0), list(sep = ',')))
+    
     result <- result[[max(which(!colnames(result) %in% groupFields))]]
     if (length(result) == 0L) return(result)
     
@@ -823,12 +842,14 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   # collapse doQuos to a single doQuo
   doQuo <- concatDoQuos(quosures)
   
+  # insert variables
+  doQuo <- interpolateVariablesQuo(doQuo, variables)
   
   # turn . to selected field
   doQuo <- activateQuo(doQuo, dotField)
   
   # lagged vectors
-  doQuo <- laggedQuo(doQuo)
+  doQuo <- laggedQuo(doQuo, humtab)
   
   # add in arguments that are already fields
   doQuo <- autoArgsQuo(doQuo, humtab)
@@ -836,8 +857,6 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   # splats
   doQuo <- splatQuo(doQuo, humtab)
   
-  # insert variables
-  doQuo <- interpolateVariablesQuo(doQuo, variables)
   
   # We may have added to the expr, so update what fields (if any) are used in formula
   attr(doQuo, 'usedFields') <- unique(fieldsInExpr(humtab, doQuo))
@@ -976,7 +995,8 @@ interpolateVariablesQuo <- function(quo, variables) {
 
 #### Lag/Led vectors ----
 
-laggedQuo <- function(funcQuosure) {
+laggedQuo <- function(funcQuosure, humtab) {
+  fields <- colnames(humtab)
   
   predicate <- \(Head, Args) Head == '[' && any(tolower(names(Args)) %in% c('lag', 'lead')) 
   
@@ -986,13 +1006,19 @@ laggedQuo <- function(funcQuosure) {
     if (!'groupby' %in% .names(args)) args$groupby <- expr(list(Piece, Spine, Path))
     
     lagorlead <- names(args)[tolower(names(args)) %in% c('lag', 'lead')]
+    n <- args[[lagorlead]]
+    args[[lagorlead]] <- NULL
     
-    names(args)[tolower(names(args)) == lagorlead] <- 'n'
-    n <- rlang::eval_tidy(args$n)
-    if (!is.numeric(n) || any((n %% 1) != 0)) .stop('Invalid [{lagorlead} = ] {lagorlead} expression.')
-    args$n <- NULL
+    # do/can we evaluate n now?
+    if (is.symbol(n)) {
+      nchar <- as.character(n)
+      if (!nchar %in% fields && (!is.null(exprA$Environment) && exists(nchar, envir = exprA$Environment))) {
+        n <- eval(n, exprA$Environment)
+      }
+    }
     
     lagExprs <- lapply(n, \(curn) rlang::expr((!!rlang::sym(lagorlead))(!!!args, n = !!curn)))
+    # this SHOULD be expr(), not quo()
 
     exprA$Head <- 'splat'
     exprA$Args <- lagExprs

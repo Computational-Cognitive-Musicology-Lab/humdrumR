@@ -1913,22 +1913,24 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
     return(invisible(humdrumR))
   }
   
-  Npieces <- npieces(humdrumR)
-  Nfiles <- nfiles(humdrumR) # needs to be done before firstLast indexing
-  if (Npieces > 2L && firstAndLast) .humdrumR <- humdrumR[c(1L, Npieces)]
-  
-  if (view == 'score') return(print_score(.humdrumR, maxRecordsPerFile))
-  
-  tokmat <- if (view == 'humdrum') {
-      tokmat_humdrum(.humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
-  } else {
-      tokmat_humtable(.humdrumR, dataTypes, null = null)
-  }
-  
-  print_tokmat(tokmat, Nmorefiles = Npieces - length(.humdrumR), maxRecordsPerFile, maxTokenLength, 
-               screenWidth = screenWidth, showCensorship = view == 'humdrum', syntaxHighlight = syntaxHighlight)
-
-  
+  local({# we (may) change humdrumR object in here.
+      Npieces <- npieces(humdrumR)
+      Nfiles <- nfiles(humdrumR) # needs to be done before firstLast indexing
+      if (Npieces > 2L && firstAndLast) humdrumR <- humdrumR[c(1L, Npieces)]
+      
+      if (view == 'score') return(print_score(.humdrumR, maxRecordsPerFile))
+      
+      tokmat <- if (view == 'humdrum') {
+          tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
+      } else {
+          tokmat_humtable(humdrumR, dataTypes, null = null)
+      }
+      
+      print_tokmat(tokmat, Nmorefiles = Npieces - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
+                   screenWidth = screenWidth, showCensorship = view == 'humdrum', syntaxHighlight = syntaxHighlight)
+      
+  })
+ 
   
   if (length(humdrumR) > 1L) {
       cat('\n')
