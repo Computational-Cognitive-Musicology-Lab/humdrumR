@@ -87,6 +87,27 @@
 #' 
 #' Each of these is explained below.
 #' 
+#' #### Explicit variable interpolation
+#'  
+#' The `variable` argument can be provided as an (option) `list` of named values.
+#' If any of the names in the `variable` list appear as symbols (variable names)
+#' in any expression argument, their value is interpolated in place of that symbol.
+#' For example, in
+#'
+#' ```
+#' within(humData, kern(Token, simple = x), variable(x = TRUE))
+#' 
+#' ```
+#' 
+#' the variable `x` will be changed to `TRUE`, resulting in:
+#' 
+#' ```
+#' within(humData, kern(Token, simple = TRUE))
+#' 
+#' ```
+#' 
+#' This feature is most useful for programmatic purposes, like if you'd like
+#' to run the same expression many times but with slightly different parameters.
 #' 
 #' #### The . placeholder
 #' 
@@ -242,29 +263,32 @@
 #' humData |> within(dataTypes = 'Dd', 
 #'                   tally(Token[splat = Spine %in% 1:2]))
 #' ```
-#'        
-#'        
-#' #### Manual variable interpolation
-#'  
-#' The `variable` argument can be provided as an (option) `list` of named values.
-#' If any of the names in the `variable` list appear as symbols (variable names)
-#' in any expression argument, their value is interpolated in place of that symbol.
-#' For example, in
+#'       
+#' ## Saving expressions for later
+#' 
+#' In some cases you may find that there are certain arguments expressions that you use repeatedly.
+#' You can store expressions as variables by "quoting" them: the most common way to 
+#' quote an expression in R is using the [~][base::tilde], which creates what is called a
+#'  "formula"---essentially a quoted expression.
+#' You can also quote expressions, using [quote()].
+#' Once you've quoted an expression you can pass it to 
+#' `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()`.
 #'
-#' ```
-#' within(humData, kern(Token, simple = x), variable(x = TRUE))
+#' Image that you have three different datasets (`humData1`, `humData2`, and `humData3`),
+#' and you'd like to evaluate the expression `tally(kern(Token, simple = TRUE))` in all three.
+#' Use the `~` operator to quote and save that expression to variable, then use it with `with()`:
 #' 
 #' ```
+#' tallyKern <- ~tally(kern(Token, simple = TRUE))
 #' 
-#' the variable `x` will be changed to `TRUE`, resulting in:
+#' humData1 |> with(tallyKern)
+#' humData2 |> with(tallyKern)
+#' humData3 |> with(tallyKern)
 #' 
 #' ```
-#' within(humData, kern(Token, simple = TRUE))
 #' 
-#' ```
 #' 
-#' This feature is most useful for programmatic purposes, like if you'd like
-#' to run the same expression many times but with slightly different parameters.
+#'        
 #'
 #' @section Parsing expression results:
 #' 
@@ -310,9 +334,13 @@
 #' This can be *any* kind of R data, 
 #' including [vectors][vector] or objects like [lm fits][lm]
 #' or [tables][base::table];
-#' If `drop = FALSE`, the results will instead be returned in a [data.table].
-#' This `data.table` will include the columns for each result, but also any [grouping][group_by()] columns as well.
+#' If `drop = FALSE`, the results will instead be returned in a [data.table()].
 #' 
+#' If you are working with [grouped data][group_by()],
+#' the `drop = FALSE` output (`data.table`) will include all [grouping][group_by()] columns as well
+#' as the results of your expressions.
+#' If `drop = TRUE` *and* there is only one result per group, the grouping fields will be
+#' used to generate names for the output vector.
 #'
 #' #### within(), mutate(), and reframe().
 #' 
@@ -837,6 +865,7 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   #                   }
   #                 })
   
+  quosures <- unformula(quosures)
   quosures <- quoFieldNames(quosures)
   
   # collapse doQuos to a single doQuo
@@ -864,9 +893,28 @@ prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
   doQuo
 }
 
+unformula <- function(quosures) {
+  lapply(quosures,
+         \(quo) { 
+           if (rlang::quo_is_symbol(quo)) {
+             quochar <- as.character(rlang::quo_squash(quo))
+             
+             if (exists(quochar, mode = 'language', envir = rlang::quo_get_env(quo))) {
+               quo <- rlang::as_quosure(rlang::quo_get_env(quo)[[quochar]], 
+                                        env = rlang::quo_get_env(quo))
+             }
+           } else {
+             if (as.character(rlang::quo_get_expr(quo)[[1]]) %in% c('~', 'quote', 'expression')){ 
+               quo <- rlang::as_quosure(eval(rlang::quo_get_expr(quo), 
+                                             rlang::quo_get_env(quo)))
+             } 
+             
+           }
+           quo
+         })
+}
 
 quoFieldNames <- function(quosures) {
-  names <- 
   
   quoTab <- do.call('rbind', 
                     Map(quosures, .names(quosures), seq_along(quosures) == length(quosures),

@@ -232,12 +232,13 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   expect_identical(A$`NChar^2`, B$Squared)
   
   
+  expect_equal(names(with(chorales, mean(nchar(Token)), .by = 'Spine')), paste0('Spine', 1:4))
   
 })
 
   
 
-testthat("recycle are works correctly", {
+test_that("recycle are works correctly", {
   chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor00[12].krn')
   chorg <- group_by(chor, Spine)
   
@@ -317,7 +318,7 @@ testthat("recycle are works correctly", {
 })
 
 
-testthat('lag/lead sugar works', {
+test_that('lag/lead sugar works', {
   
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
   chorales |> mutate(Kern = kern(Token, simple = TRUE)) -> chorales
@@ -330,7 +331,7 @@ testthat('lag/lead sugar works', {
 })
 
 
-testthat("Quosures thread environment variables correctly", {
+test_that("Quosures thread environment variables correctly", {
   chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')[[ , 1]]
   chor |> mutate(N = nchar(Token)) -> chor
   
@@ -364,9 +365,10 @@ testthat("Quosures thread environment variables correctly", {
   expect_equal(sapply(1:5, \(i) with(chor, median(N) * i)), 1:5 * 3)
   
   # function argument
-  f <- function(x) {
+  
+  (function(x) {
     paste0(with(chor, paste(median(N), x)))
-  }
+  }) -> f
   expect_equal(f('median'), '3 median')
   
   # lag
@@ -375,5 +377,27 @@ testthat("Quosures thread environment variables correctly", {
   
   i <- 1:3
   expect_equal(dim(with(chor, table(N[lag = i]))), c(3, 3, 3))
+  
+})
+
+testthat("Quoted expressions and formulae work", {
+  chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+  
+  
+  result1 <- with(chor, mean(nchar(Token)) + 1)
+  result2 <- with(chor, ~mean(nchar(Token)) + 1)
+  result3 <- with(chor, quote(mean(nchar(Token)) + 1))
+  
+  form <- ~mean(nchar(Token)) + 1
+  quoted <- quote(mean(nchar(Token)) + 1)
+  
+  result4 <- with(chor, form)
+  result5 <- with(chor, quoted)
+  
+  expect_identical(result1, result2)
+  expect_identical(result2, result3)
+  expect_identical(result3, result4)
+  expect_identical(result4, result5)
+  
   
 })
