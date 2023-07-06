@@ -2,10 +2,45 @@
 % Please edit documentation in R/Context.R
 \name{context}
 \alias{context}
+\alias{context.default}
+\alias{context.humdrumR}
 \alias{uncontext}
 \title{Create arbitrary "context" across vectors.}
 \usage{
 context(x, open, close, ...)
+
+\method{context}{default}(
+  x,
+  open,
+  close,
+  reference = x,
+  overlap = "paired",
+  depth = NULL,
+  rightward = TRUE,
+  duplicate_indices = TRUE,
+  min_length = 2L,
+  max_length = Inf,
+  inPlace = FALSE,
+  complement = FALSE,
+  alignToOpen = TRUE,
+  collapse = TRUE,
+  sep = ",",
+  stripRegex = FALSE,
+  groupby = list()
+)
+
+\method{context}{humdrumR}(
+  humdrumR,
+  open,
+  close,
+  overlap = "paired",
+  depth = NULL,
+  rightward = TRUE,
+  duplicate_indices = TRUE,
+  min_length = 2L,
+  max_length = Inf,
+  .by = NULL
+)
 
 uncontext(humdrumR)
 }
@@ -112,24 +147,32 @@ Must be a \code{\link[=list]{list()}}, which is either empty or contains vectors
 In calls to \link[=withinHumdrum]{with/within.humdrumR}, \code{groupby} is passed \code{list(Piece, Spine, Path)} by default.
 
 Windows cannot cross group boundaries.}
+
+\item{humdrumR}{\emph{\strong{HumdrumR data.}}
+
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
 }
 \description{
 The \code{context()} command can be used to group input data (vectors)
 into arbitrary contextual windows.
-Unlike the contextual-grouping you can achieve with \code{group_by},
-\code{context()} can produce windows that \emph{overlap} or, the opposite case, that don't exhaustively
+Unlike \link[=groupHumdrum]{grouping vectors},
+\code{context()} windows are always contiguous in the \link[=humTable]{humdrum table}
+(which can depend on \link[=order_by]{order}), can \emph{overlap}, and don't necesarily exhaustively
 divide the data.
-The \code{context()} function should generally be call on
+The \code{context()} function should generally be called on
 \link[=humdrumRclass]{humdrumR data}, but it can also be called directly on vectors.
 }
 \details{
-\code{context()} takes an input vector (\code{x}) and divides it into windows based on
-the content of the \code{reference} vector, which must be the same length as \code{x}---
-by default, \code{x} is reused as \code{reference}, so windows are based on the input \code{x} itself.
+The \code{context()} function takes an input vector (\code{x}) and divides it into windows based on
+the content of the \code{reference} vector, which must be the same length as \code{x}.
+By default, \code{x} is reused as \code{reference}, so windows are based on the input \code{x} itself.
 As a more complex option, \code{reference} can be a named \code{list()} or \code{data.frame} (\code{nrow == length(x)})---
 the (named) elements of \code{reference} are then visible to the \code{open} and \code{close} arguments (see below).
+When \code{context()} is applied to a \link[=humdrumRclass]{humdrumR data object}, the entire
+\link[=humTable]{humdrum table} is available for reference.
 
-The \code{collapse}, \code{inPlace}, and \code{complement} arguments how windows are output.
+When called directly on
+The \code{collapse}, \code{inPlace}, and \code{complement} arguments control how windows are output.
 \itemize{
 \item The "complement" refers to elements of the input vector that don't fall inside
 any indicated windows: if \code{complement = FALSE} (the default), these "outside" values are
@@ -139,6 +182,20 @@ padded with \code{NA} as needed---otherwise (the default), only the windows are 
 \item If \code{collapse = TRUE}, the windows are collapsed to strings (separated by \code{sep}), otherwise,
 a \code{list()} of windows is returned.
 }
+
+When using \code{context()} inside \code{with}/\code{within.humdrumR}, the \code{alignToOpen} argument will have no effect.
+If you want output to align with the right side of each window, use \code{alignLeft = FALSE} as an argument to
+\strong{with}/\strong{within}, not as an argument to \code{context()}.
+The \code{inPlace}, \code{collapse}, \code{sep}, and \code{stripRegex} arguments will have no effect when \code{context()} is used
+as syntactic sugar in a \code{with}/\code{within.humdrumR} call.
+
+As with a \code{subset} expression, you can provide a \code{complement} expression to go along with a \code{context()}.
+(Note that the \code{complement} argument to \code{context()} itself is ignored.)
+The \code{complement} expression will be evaluated on any data points that aren't captured within \emph{any} contextual windows.
+
+Any \code{by} or \code{subset} expressions placed before a \code{context()} expression are evaluated first, in order from left to right.
+This means you can \emph{first} run subset or \code{groupby}, then calculate context within the subset/partition.
+However, any \code{subset} or \code{groupby} expressions that are passed in an argument \emph{after} \code{context()} are ignored.
 }
 \section{Defining windows}{
 
@@ -148,7 +205,7 @@ and can take some time to master!
 The basic idea is that you must indicate where you want windows to start ("\emph{open}") and
 where you want them to end ("\emph{close}"):
 you indicate this using the \code{open} and \code{close} arguments.
-These arguments simple indicate indices in the input vector;
+These arguments simply indicate indices in the input vector;
 For example, if we want a window to open at the 4th and 11th indices,
 and close at the 15th and 24th index,
 we can write (using the built-in \code{letters} vector for practice):
@@ -158,7 +215,7 @@ we can write (using the built-in \code{letters} vector for practice):
 }\if{html}{\out{</div>}}
 
 This is quite trivial.
-However, the \code{open} and \code{close} arguments can actually be arbitary expressions
+However, the \code{open} and \code{close} arguments can actually be arbitary \link[=evaluatingExpressions]{expressions}
 which do a number of special tricks, including refering to each other.
 For example, if either argument includes a call to \code{\link[=hop]{hop()}},
 \code{hop()} will automatically be applied along the input vector.
@@ -191,7 +248,7 @@ This is useful if you want to open/close windows in reference to multiple vector
 
 If either \code{open} or \code{close} are provided a \code{character} string, this string is treated
 as a regular expression and is matched against the \code{reference} vector.
-For exaple, we could make windows in the alphabet starting or ending on each vowel:
+For example, we could make windows in the alphabet starting or ending on each vowel:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = open + 4)
 context(letters, open = close - 4, close = '[aeiou]', alignToOpen = FALSE)
@@ -210,8 +267,8 @@ once windowing is done.
 
 The \code{open} and \code{close} arguments have a few more special behaviors.
 What if we'd like each of our windows to close right before the next window opens?
-We can do this by making the \code{close} argument to refer to the \emph{next} \code{open}, by
-referring to \code{nextopen} object:
+We can do this by making the \code{close} argument refer to the \emph{next} \code{open}, by
+referring to the \code{nextopen} variable:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L)
 }\if{html}{\out{</div>}}
@@ -224,14 +281,14 @@ Conversely, \code{open} can refer to the \code{prevclose} close:
 Notice that when we called \code{context(letters, open = '[aeiou]', close = nextopen - 1L)},
 the window opening on \code{"u"} is not returned.
 This is because there is no "\code{nextopen}" open to close on.
-We can instead provide an \code{context()} alternative, using \code{|} (or):
+We can instead provide \code{context()} an alternative, using \code{|} (or):
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | 26)
 
 }\if{html}{\out{</div>}}
 
 What if we don't know exactly how long our input vector is?
-Refer to the \code{end} object:
+Refer to the \code{end} variable:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L | end)
 }\if{html}{\out{</div>}}
@@ -241,7 +298,7 @@ Refer to the \code{end} object:
 \section{Nested Windows}{
 
 
-A common use case for \code{context()} is analyzing phrases indicated in music.
+A common use-case for \code{context()} is analyzing phrases indicated in music.
 In \verb{**kern}, phrases are indicated with opening (\code{(}) and close (\verb{)}) parentheses,
 which we can capture with regular expressions for \code{open} and \code{close}.
 Here is an example:
@@ -290,7 +347,7 @@ I \code{depth} is \code{NULL} (the default), all depths are returned.
 
 
 There are some other options for controlling how windows can, or cannot, overlap.
-Perhaps we'd like to look at every melodic phrase moving from so (dominant) to do (tonic).
+Perhaps we'd like to look at every melodic phrase moving from \emph{So} (dominant) to \emph{Do} (tonic).
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{melody <- c('so', 'la', 'ti', 'do', 'so', 'fi', 'so', 'la', 'ti', 're', 'do', 'so', 'la', 're', 'do')
 
@@ -299,9 +356,9 @@ context(melody, open = 'so', close = 'do')
 }\if{html}{\out{</div>}}
 
 This output is probably not what we want.
-Again, \code{context()} (by default) pairs each opening with the next close \emph{which hasn't already been paird}.
-In this case, that means the third so is getting pairs with the third do,
-even though there is another do in between!
+Again, \code{context()} (by default) pairs each opening with the next close \emph{which hasn't already been paired}.
+In this case, that means the third \emph{So} is getting pairs with the third \emph{Do},
+even though there is another \emph{Do} in between!
 We might want to try either the \code{"edge"} or \code{"none"} options for the \code{overlap} argument:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(melody, open = 'so', close = 'do', overlap = 'edge')
@@ -309,7 +366,7 @@ context(melody, open = 'so', close = 'do', overlap = 'none')
 ```
 
 The `"edge"` option allows the closing edge of windows to share a `close`---in this case,
-the second and third so (`open`) are paired with the same do.
+the second and third *So* (`open`) are paired with the same *Do*.
 On the other hand, with `overlap = "none"`, overlapping windows are simply not allowed, so the third `open` 
 simply doesn't get paired with anything.
 

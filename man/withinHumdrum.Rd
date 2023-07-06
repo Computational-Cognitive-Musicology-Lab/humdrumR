@@ -9,18 +9,17 @@
 \alias{mutate.humdrumR}
 \alias{summarise.humdrumR}
 \alias{reframe.humdrumR}
-\alias{group_by.humdrumR}
-\alias{ungroup.humdrumR}
 \alias{ggplot.humdrumR}
 \alias{ggplot.humdrum.table}
-\title{with(in)Humdrum}
+\title{Working \emph{with} humdrum data fields}
 \usage{
 \method{with}{humdrumR}(
   data,
   ...,
   dataTypes = "D",
+  recycle = "no",
+  alignLeft = TRUE,
   expandPaths = FALSE,
-  recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
   drop = TRUE,
   .by = NULL,
   variables = list()
@@ -32,7 +31,7 @@
   dataTypes = "D",
   alignLeft = TRUE,
   expandPaths = FALSE,
-  recycle = c("pad", "scalar", "even", "always", "never", "summarize"),
+  recycle = "pad",
   .by = NULL,
   variables = list()
 )
@@ -41,7 +40,7 @@
   .data,
   ...,
   dataTypes = "D",
-  recycle = c("scalar", "never"),
+  recycle = "ifscalar",
   alignLeft = TRUE,
   expandPaths = FALSE,
   .by = NULL
@@ -62,12 +61,9 @@
   dataTypes = "D",
   alignLeft = TRUE,
   expandPaths = FALSE,
+  recycle = "pad",
   .by = NULL
 )
-
-\method{group_by}{humdrumR}(.data, ..., .add = FALSE)
-
-\method{ungroup}{humdrumR}(x, ...)
 
 \method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
 
@@ -80,9 +76,11 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{...}{\emph{\strong{Any number of expressions to evaluate.}}
 
-Unnamed expressions are interpreted as the "main" \emph{within-expressions}.
-Possible \emph{evaluation control arguments} include \code{by}, \code{subset}, and \code{context}.
-Other evaluation options can be achieved with \code{recycle} or \code{side} arguments.}
+These expressions can reference \code{\link[=fields]{fields()}} in the data by name,
+as well as variables outside the data.
+
+If the expressions are named, the names are used to name new fields
+(or column names for \code{with(..., drop = FALSE)}.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}
 
@@ -92,6 +90,21 @@ Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 
 or any combination of these (e.g., \code{"LIM"}).
 (See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 
+\item{alignLeft}{\emph{\strong{Should output that is shorter than input be aligned to the left?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{expandPaths}{\emph{\strong{Should spine paths be expanded before evaluating expressions?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+If \code{TRUE}, the \code{\link[=expandPaths]{expandPaths()}} function is run on the data
+before evaluating the expressions.
+After evaluation, the expanded locations are removed from the output.}
+
 \item{drop}{\emph{\strong{Whether to return a simplified data structure.}}
 
 Defaults to \code{TRUE}.
@@ -99,13 +112,11 @@ Defaults to \code{TRUE}.
 Must be a singleton \code{logical} value: an on/off switch.
 
 This argument is conceptually similar to the \code{drop} argument in R matrices.
-If \code{drop = TRUE}, the output of \code{with.humdrumR} is simplified as much as possible (trying to return
+If \code{drop = TRUE}, the output of \code{with()}/\code{summarize()} is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
-a \code{data.table}. The default value (\code{drop = TRUE}) is usually what we want because it is more
-intuitive, but in more complex code, it can be helpful to set \code{drop = FALSE} so that
-the output is consistent.}
+a \link{data.table}.}
 
-\item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \code{\link[=group_by]{group_by()}}.}}
+\item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \link[=groupHumdrum]{group_by()}.}}
 
 Defaults to \code{NULL}.
 
@@ -113,29 +124,27 @@ Must be \code{NULL}, or \code{character} strings which \link[=partialMatching]{p
 \code{\link[=fields]{fields()}} in the \code{data}.
 
 If not \code{NULL}, these fields are used to group the data.
-If grouping fields have already been set by a call to \code{\link[=group_by]{group_by()}},
+If grouping fields have already been set by a call to \link[=groupHumdrum]{group_by()},
 the \code{.by} argument overrides them.}
 
-\item{variables}{\emph{\strong{A named \code{list} of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.}}
+\item{variables}{\emph{\strong{A named \code{list} of values, to interpolate into your expressions.}}
 
 Defaults to \code{list()}.
 
-Must be \code{list}.}
-
-\item{alignLeft}{\emph{\strong{Should output that is shorter than input be aligned to the left?}}
-
-Defaults to \code{TRUE}.
-
-Must be a singleton \code{logical} value: an on/off switch.}
-}
-\value{
-From \code{within.humdrumR}  a new humdrumR data object.
-From \code{with.humdrumR}, whatever value is returned by the expression or, if \code{drop = TRUE},
-a \code{data.table}.
+Must be a named \code{list}.
+These values are interpolated into the \code{...} expression arguments wherever
+a variable name matches a name from the list.}
 }
 \description{
-Evaluate arbitrary expressions using the fields within \link[=humdrumRclass]{humdrumR} data,
-while employing split/apply/combine, windowing, and other analysis options.
+These functions are the primary means of working with
+humdrumR data.
+They allow us to perform arbitrary (free form) manipulation of data \link[=fields]{fields}
+held within a \link[=humdrumRclass]{humdrumR data object}, with convenient functionality
+for ignoring null data, \link[=lag]{lagging} data, \link[=groupHumdrum]{grouping} data,
+\link[=context]{windowing}, and more.
+The \code{with()} and \code{within()} functions, which come from \link[=base]{base R}, are the core functions.
+However, the \link{dplyr} "verbs" \code{mutate()}, \code{summarize()}, and \code{reframe()} can be used as well---they
+are equivalent to using \code{with()}/\code{within()} with particular arguments.
 
 These methods for \link{dplyr} verbs are all shorthand calls for \link[=withHumdrum]{with/within/subset.humdrumR()}.
 }
@@ -143,448 +152,213 @@ These methods for \link{dplyr} verbs are all shorthand calls for \link[=withHumd
 
 
 These functions are the primary means of working with
-humdrumR data. They are analogous to the base-R
-\link[base:with]{with and within}
-methods for \link[base:data.frame]{data.frames}.
-Specifically they allow you to evaluate arbitrary
-expressions using the fields of a \link[=humdrumRclass]{humdrumR data object}.
-This means that you can drop "inside" your \link[=humdrumRclass]{humdrumR data object} and run whatever commands
-you want using the fields of the \link[=humTable]{humdrum data table},
-while keeping the data safely "encapsulated" within the humdrum object---at least, until you \emph{want}
-to pull it out.
-
-The difference between \code{with.humdrumR} and \code{within.humdrumR} is
-analogous to the difference between \code{\link[base:with]{base::with()}} and \code{\link[base:with]{base::within()}}.
-\code{with.humdrumR} evaluates your expression(s) and then simply returns the result of
-the evaluation. \code{within.humdrumR} evaluates your expression(s) and then
-inserts the results back into the humdrumR object, generating new
-fields called \code{ResultX} (see details).
-
-In addition, \code{with} and \code{within} offer a number of powerful options that make working with
-humdrum data easier:
-\emph{evaluation control arguments} can be used to control
-how your expressions are evaluated.
-You can evaluate expressions...
-\itemize{
-\item In a subset of the data using \code{subset}...
-\itemize{
-\item either ignoring the rest of the data or evaluating a \emph{different} expression in the other part.
-}
-\item Separately in different subsets of the data, which are then recombined (split-apply-combine) using \code{by}.
-\item Across contextual windows in the data (e.g., ngrams, rolling windows).
-\item Which produce a plots with particular \link[graphics:par]{plotting parameters}, and/or without
-returning anything using \code{sidefx}.
-\item "Fill" short results to match the original field size using \code{fill}.
-\item Only in certain record types (defaulting only data records) using \code{dataTypes}.
-}
-
-These arguments are specified as named arguments to \code{with}/\code{within} calls.
-Even though they aren't formal arguments, they are \link[=partialMatching]{partially matched},
-so if write \code{grou} instead of \code{groupby}, you won't get an error!
-In some cases, you can specify more than one of the same type of control argument (details below).
+\link[=humdrumRclass]{humdrumR data}.
+They all allow you to write code that accesses and manipulates the raw \code{\link[=fields]{fields()}}
+in our data.
+The main differences between them are what they do with the \emph{results} of your code:
+\code{with()} and \code{summarize()} return results in normal, "raw" R formats, \strong{removed}
+from the \link[=humdrumRclass]{humdrumR data};
+In contrast, \code{within()}, \code{mutate()}, and \code{reframe()} always insert the results of your code into
+new \code{\link[=fields]{fields()}} \strong{within} your humdrum data.
+The other distinctions between these functions have to do with how they recycle/pad results (see below).
 }
 
 \section{Expression evaluation}{
 
 
-An "expression" is a legal bit of R code, like \code{2 + 2} or \code{x - mean(x)}.
-Each call to \code{with}/\code{within.humdrumR} must have at least one expression to evaluate.
-We will refer to these as "within-expressions."
-These expressions are passed to \code{with}/\code{within.humdrumR} as unnamed arguments: for example,
-\code{with(humData, myExpressionHere)}.
+The \code{with()}, \code{within()}, \code{mutate()}, \code{summarize()}, and \code{reframe()} methods for \link[=humdrumRclass]{humdrumR data}
+all perform "\href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evalation}" of
+any \link[=evaluatingExpressions]{expressions} you provide them as arguments.
+Basically, when you use a function like \code{with(...)} or \code{mutate(...)}, the expressions you write inside
+the function call aren't \link[=evaluatingExpressions]{evaluated} right then and there---instead, R takes those expressions
+into the "\link[=evaluatingExpressions]{environment}" of your \link[=humTable]{humdrum table}, where
+all your fields are "visible" to the expression.
+This means you can write code (expressions) that refer to your \code{\link[=fields]{fields()}}, like \code{Token} or \code{Spine}.
+For example:
 
-Within expressions are evaluated within the \code{humdrumR} object's humdrum table,
-which means the expression can refer fields in the humdrumR object by name (\code{Record}, \code{Token}, \code{Piece}, etc.)
-just like any other variables.
-Since all the fields in a humdrum object are vectors of the same length, within expressions are easily
-(and generally should be) vectorized.
-Note that the within-expression value is only evaluated over data-points/records that match the type
-indicated in the \code{dataTypes} argument.
-By default, only non-null data tokens (\code{"D"}) are used.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
+with(humData, 
+     ifelse(Spine > 2, 
+            kern(Token), 
+            recip(Token)))
+}\if{html}{\out{</div>}}
 
-If multiple within-expressions are provided, each expression is evaluated in order (left to right).
-Each expression can refer to the results of the last expression (as \code{.}), or
-to variables defined in previous expressions.
+Since all the fields in a \link[=humTable]{humdrum table} are the same length, the expressions you write
+can be, and generally should be, \link[=vectorization]{vectorized}.
 
-A number of special \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugars}
-can be used in within expressions.
-\itemize{
-\item The \code{.} placeholder.
-\item Side effects
-\item Recycled ("filled") results
-\item Lagged vectors
-\item etc.
+By default, \code{with()}, \code{within()}, etc. don't use the whole \link[=humTable]{humdrum table},
+but instead only evaluate their expressions using rows containing non-null data tokens (\code{Type == "D"}).
+This means that interpretations, comments, barlines, and null data tokens are automatically ignored for you!
+This feature is controlled by the \code{dataTypes} argument:
+you can choose to work with the other token types by providing a \code{character} string containing combinations
+of the characters \code{G} (global comments), \code{L} (local comments), \code{I} (interpretations),
+\code{M} (barlines), \code{D} (non-null data), or \code{d} (null data).
+For example, \code{dataTypes = 'MDd'} will evaluate your expressions on barline tokens (\code{=}), non-null data,
+and null data.
+See the \code{\link[=ditto]{ditto()}} manual for an example application of using \code{dataTypes = 'Dd'}.
+Keep in mind that \code{humdrumR} dynamically updates what tokens are considered "null" (\code{"d"}) based on what fields
+are \link[=selectedFields]{selected}.
+
+If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
+Each expression can refer variables assigned in the previous expression (examples below).
+\subsection{Expression Pre-processing}{
+
+These functions all do some
+pre-processing of expressions arguments before evaluating them.
+This pre-processing provides some convenient "\href{https://en.wikipedia.org/wiki/Syntactic_sugar}{syntactic sugar}"
+for working with humdrum data.
+There are currently five pre-processing steps:
+\enumerate{
+\item Explicit variable interpolation.
+\item The \code{.} placeholder for selected fields.
+\item Automatic argument insertion.
+\item "Lagged"-vectors shorthand.
+\item "Splatted" arguments.
 }
 
 Each of these is explained below.
+\subsection{Explicit variable interpolation}{
+
+The \code{variable} argument can be provided as an (option) \code{list} of named values.
+If any of the names in the \code{variable} list appear as symbols (variable names)
+in any expression argument, their value is interpolated in place of that symbol.
+For example, in
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, kern(Token, simple = x), variable(x = TRUE))
+
+}\if{html}{\out{</div>}}
+
+the variable \code{x} will be changed to \code{TRUE}, resulting in:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, kern(Token, simple = TRUE))
+
+}\if{html}{\out{</div>}}
+
+This feature is most useful for programmatic purposes, like if you'd like
+to run the same expression many times but with slightly different parameters.
+}
+
 \subsection{The . placeholder}{
 
-The \code{.} variable can be used as a special placeholder in within expressions.
-In the first within expression, \code{.} is interpreted as the humdrumR object's
-current \link[=humActive]{active expression}.
-If multiple within expressions are given, beyond the first expression,  \code{.} refers to result of
-the \emph{previous} expression.
-For example, if \code{Token} is the \link[=humActive]{active expression}, then:
+The \code{.} variable can be used as a special placeholder representing the data's first
+\link[=selectedFields]{selected field}.
+For example, in
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, nchar(.), mean(.), .^2)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |>
+  select(Token) |>
+  with(tally(.))
 
 }\if{html}{\out{</div>}}
 
-would return the same result as:
+will run \code{\link[=tally]{tally()}} on the \code{Token} field.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, mean(nchar(Token))^2)
+Because new fields created by \code{within()}/\code{mutate()}/\code{reframe()} become the \link[=selectedFields]{selected fields}
+(details below), the \code{.} makes it easy to refer to the \emph{last} new field in pipes.
+For example, in
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |>
+   mutate(kern(Token, simple = TRUE)) |>
+   with(tally(.))
+
 }\if{html}{\out{</div>}}
+
+the \code{tally()} function is run on the output of the \code{mutate(kern(Token, simpe = TRUE))} expression.
 }
 
-\subsection{Side effects:}{
+\subsection{Automatic argument insertion}{
 
-In some cases, you want to evaluate a within-expression for its
-"\href{https://en.wikipedia.org/wiki/Side_effect_(computer_science)}{side effect}";
-This means that the expression \emph{does} something you want (the "side effect") but doesn't actually
-evaluate to (return) a result that you want.
-The most common "side effect" is creating a plot.
-Other examples might be printing text to the console using \code{\link[base:cat]{base::cat()}} or \code{\link[base:print]{base::print()}}, or
-writing to a file.
+Many \link{humdrumR} functions are designed to work with certain common fields in \link[=humdrumRclass]{humdrumR data}.
+For example, many \link[=pitchFunctions]{pitch functions} have a \code{Key} argument which (can) take the
+content of the \code{Key} which \code{\link[=readHumdrum]{readHumdrum()}} creates when there are key interpretations,
+like \verb{*G:}, in the data.
+When an expression argument uses one of these functions, but doesn't explicitly set the argument, humdrumR
+will \emph{automatically} insert the appropriate field into the call (if the field is present).
+So, for example, if you run
 
-Side effects can be achieved by naming your expression \code{sidefx} or \code{fx}---as usual,
-these arguments can be \link[=partialMatching]{partially matched}, so \code{side} also works, and is commonly used.
-Side-effect expressions are executed, but their result (if any) is ignored.
-This means that if you call something like \code{newData <- within(humData, side = plot(x))}, the plot is made
-but the result (\code{newData}) is identical to \code{humData}.
-
-Side-effects can also be used in combination with other within expressions.
-Their result is ignored, and \emph{not} fed to the next expression as \code{.}.
-For example the command
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, nchar(Token), side = hist(.), mean(.))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> 
+   mutate(Solfa = solfa(Token))
 }\if{html}{\out{</div>}}
 
-creates a histogram of \code{nchar(Token)} and also returns the mean of \code{nchar(Token)}.
-(Note that variables explicitly assigned in a \code{side} call \emph{are} visible in later calls,
-which is confusing, so don't do it!)
-}
+on a data set that includes a \code{Key} field, the expression will be changed to:
 
-\subsection{Recycling ("filling") results:}{
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> 
+   mutate(Solfa = solfa(Token, Key = Key))
+}\if{html}{\out{</div>}}
 
-The result of your within expression may be shorter than the input vectors (\link[=humTable]{humtable fields}).
-However, in some calls to \code{within.humdrumR} in particular, you'd like to return a single number and
-recycle it to "fill" the original data field.
-In other words, you'd like the output (result) of your expression to be repeated until it matches the
-length of the input field(s).
-You could do this manually be using the \code{\link[base:rep]{base::rep()}} function, but \code{with}/\code{within.humdrumR} provide a
-syntactic sugar for this:
-You can name your expression \code{recycle} or \code{fill} (\link[=partialMatching]{partially matched}),
-which will cause the result to be recycled.
-All this does is take \code{yourExpression(field, ...)} and wrap it in
-\code{rep(yourExpression(field, ...), length.out = length(field))}.
+If you \emph{don't} want this to happen, you need to explicitly give a different \code{Key} argument, like:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> 
+   mutate(Solfa = solfa(Token, Key = 'F:'))
+}\if{html}{\out{</div>}}
+
+(The \code{Key} argument can also be set to \code{NULL}).
+
+Another common/important automatic argument insertion is for functions with a \code{groupby} argument.
+These functions will automatically have appropriate grouping fields inserted into them.
+For example, the \code{\link[=mint]{mint()}} (melodic intervals) command will \emph{automatically} by applied using \code{groupby}
+\code{groupby = list(Piece, Spine, Path)}, which makes sure that melodic intervals are only calculated within
+spine paths...not between pieces/spines/paths (which wouldn't make sense!).
+
+All \code{humdrumR} functions which use automatic argument interpolation will mention it in their own documentation.
+For example, the \link{?solfa} documentation mentions the treatment of \code{Key} in its "Key" section.
 }
 
 \subsection{Lagged vectors}{
 
-We very often want to work with "\link[=lag]{lagged}" vectors of data.
+In music analysis, we very often want to work with "\link[=lag]{lagged}" vectors of data.
 For example, we want to look at the relationship between a vector and the previous values of the
 same vector---e.g., the vector offset or "lagged" by one index.
-The \code{humdrumR} \code{\link[=lag]{lag()}} function is useful for this, as it gives us several options for lagging vectors,
+The \code{\link[=lag]{lag()}} and \code{\link[=lead]{lead()}} functions are useful for this,
 always keeping them the same length so vectorization is never hindered.
-\code{with} and \code{within.humdrumR} give us a very convenient short cut to using \code{lag}.
-In a within-expression, any vector can be indexed with an \code{integer} argument named \code{lag} (case insensitive),
-causing it to be lagged by that integer.
+
+In expression arguments, we can use a convenient shorthand to call \code{lag()} (or \code{lead}).
+In an expression, any vector can be indexed with an \code{integer} argument named \code{lag} or \code{lead} (case insensitive),
+causing it to be lagged/led by that integer amount.
 (A vector indexed with \code{lag = 0} returns the unchanged vector.)
 For example, the following two calls are the same:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, Token[lag = 1])
-with(humData, lag(Token, 1))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> with(Token[lag = 1])
+humData |> with(lag(Token, 1))
 }\if{html}{\out{</div>}}
 
-If the \code{lag} index has \emph{multiple} values and the indexed object appears within a higher function call,
+This is most useful if the \code{lag}/\code{lead} index has \emph{multiple} values:
+if the indexed object appears within a higher function call,
 each lag is inserted as a \emph{separate} argument to that call.
 Thus, \emph{these} two calls are also the same:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, table(Token[lag = 1:2])
-
-with(humData, table(lag(Token, 1), lag(Token, 2))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> with(tally(Token[lag = 1:2]))
+humData |> with(tally(lag(Token, 1), lag(Token, 2)))
 }\if{html}{\out{</div>}}
 
-\code{\link[=lag]{lag()}} is a function with a \code{groupby} argument, which \code{with}/\code{within.humdrumR}
-will automatically feed the fields \code{list(Piece, Spine, Path)}.
-This is the default "melodic" behavior in most music.
-If you'd like to turn this off, you need to override it by adding your own
+Note that the lagging will also be automatically grouped within the fields \code{list(Piece, Spine, Path)},
+which is the default "melodic" structure in most data.
+This assures that a vector is "lagged" from one piece to another, or from one spine to the next.
+If you'd like to turn this off or change the grouping, you need to override it by adding a
 \code{groupby} argument to the lagged index, like \code{Token[lag = 1, groupby = list(...)]}.
 
 Using lagged vectors, since they are vectorized, is the fastest (computationally) and easiest way of working with n-grams.
-For example, if you want to create character-string 5-grams of your data, you could call:
+For example, if you want to create \code{character}-string 5-grams of your data, you could call:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humData, paste(Token[lag = 0:5], sep = '-'))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> with(paste(Token[lag = 0:5], sep = '-'))
 }\if{html}{\out{</div>}}
 
-Note that, since \code{with}/\code{within.humdrumR} passes \code{groupby = list(Piece, Spine, Path)}
-to \code{\link[=lag]{lag()}}, these are true "melodic" n-grams, only created within spine-paths within each piece.
-}
-}
-
-\section{Results}{
-
-
-The difference between \code{with.humdrumR} and \code{within.humdrumR} is in what they do with the results
-of the evaluated within-expression(s).
-\subsection{Within}{
-
-For calls to \code{within.humdrumR}, the result of the final within-expression
-is inserted back into the \verb{[humtable][humdrum table]}.
-Most results should be \code{atomic} vectors, though \code{list}s can also be placed as fields.
-If results are shorter than the input fields of the \link[=humdrum table]{humtable}
-they are padded with null values to fill the same length as the input.
-Non-vector results (\code{object}s) and tables are put into lists, and treated like any other list.
-In the result, data/record-types that are not indicated by the \code{dataTypes} argument are also
-returned padded as null values.
-
-If you don't explicitly name the result of your within-expression, it is put into a new field labeled
-\code{ResultX}, where \code{X} is the lowest number of "ResultX" fields that is not already taken.
-You can explicitly name the result field with a top-level assignment in the expression.
-For example, \code{within(data, Semits <- semits(Token))} will put the result of
-\code{semits(Token)} into a new field called \code{Semits}.
-In fact, if you assign the results of multiple within-expressions,
-each result that is the same length as the last result will be put into a new field.
-Thus, you can create multiple new fields in a single call:
-for example,
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, 
-       Semits <- semits(Token),
-       Recip <- recip(Token))
-}\if{html}{\out{</div>}}
-
-creates \emph{two} new fields, \code{Semits} \emph{and} \code{Recip}.
-(As explained above, the second within-expression could also refer to the \code{Semits} variable
-created in the previous expression.)
+Since the lagging is grouped by \code{list(Piece, Spine, Path)},
+these are true "melodic" n-grams, only created within spine-paths within each piece.
 }
 
-\subsection{With}{
+\subsection{Splatted arguments}{
 
-For calls to \code{with.humdrumR}, the result is simply returned as is.
-This is what you want when you want to get out of the \link[=humdrumRclass]{humdrumR object} and drop back
-into "normal" R, often in the last stages of an analysis.
-
-\code{with.humdrumR} has a \code{drop} argument, which defaults to \code{TRUE}.
-If \code{drop = FALSE}, the result is returned in a \code{\link[=data.table]{data.table()}}.
-The column names of this results table are generated as described in the previous section:
-i.e., defaulting to \code{ResultX} but allowing explicit naming with through one or more
-explicit assignments in the within-expressions.
-In addition, if \code{subset} or \code{groupby} arguments are used, columns are included which indicate
-the value of the evaluated \code{subset}/\code{groupby} factor for each row.
-}
-}
-
-\section{Partitioning data}{
-
-
-\code{groupby} (e.g., \code{by}) and \code{subset} expression control arguments all you to evaluate
-your within-expressions within specific subsets of the data.
-A \code{subset} argument can be used to evaluate your within-expression only within a subset of the data.
-A \code{groupby} argument breaks the data into groups,
-evaluating the within-expression(s) \emph{separately} within each group.
-The results of the grouped evaluations are then returned in a list (\code{with}) or recombined
-into the original data \code{within}---this is a form of the "split-apply-combine" routine that is
-key to \code{R} data analysis.
-
-\code{subset} and \code{groupby} arguments are themselves arbitrary expressions which are evaluated within
-the [humdrum table][humTable], so they can (and usually do) refer to fields in the table.
-Any \code{with}/\code{within.humdrumR} call can include zero, one, \emph{or more} \code{subset} and/or \code{groupby} arguments,
-including combinations of both.
-If more than one \code{subset}/\code{groupy} by argument is included, they are evaluated in order (left to right),
-\emph{recursively}: each one evaluated within the partition(s) established by the previous expression.
-The normal \emph{within} expression(s) are then, all evaluated within the partition(s) established by the
-last  \code{subset}/\code{groupby} argument.
-The "Advanced" partitioning section below explores this in more detail.
-\subsection{Apply in subset:}{
-
-A \code{subset} argument is an arbitrary expression which identifies a subset of the humdrum data.
-\code{subset} expressions must evaluate to
-a single logical vector,
-The \code{subset} result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
-The within expression(s) are only evaluated where the \code{subset} argument(s) return \code{TRUE}.
-
-In a call to \code{with}, only the result evaluated where \code{subset == TRUE} is returned.
-However, in a call to \code{within}, we must decide what to
-do with rest of the data: the \href{https://en.wikipedia.org/wiki/Complement_(set_theory)}{complement}
-of the subset.
-By default, \code{within} pads the returned values with null data
-where ever \code{subset == FALSE} (in the complement).
-So if you, for example, run the command \code{within(humData, kern(Token), subset = Spine == 1)}
-the new field created by \code{within} will be filled with \code{kern} data where \code{Spine == 1},
-but the remaining spines (if any) will all by null.
-
-If you want to explicitly control what is put into the complement
-part of a new field, you can specifying alternate
-within-expression(s) to evaluate where \code{subset == FALSE}.
-These must be named \code{complement}, or the aliases
-\code{rest} or \code{otherwise} (these are all [partially matched][partialMatching]).
-A \code{complement} expression can only be specified in combination with a \code{subset} argument,
-and must be \emph{in addition} to a normal within-expression.
-The idea is that you evaluate the "normal" within-expression where \code{subset == TRUE}, \emph{or else}
-you specify evaluate the \code{complement} expression.
-The results of Complement expressions are always recycled to fill the whole complement (see the "recycle")
-
-A common use case for a \code{complement} expression is to use the within expression to change the data in one spine
-but return the data unchanged in other spines.
-For example, we could specify \code{within(humData, kern(Token), subset = Spine == 1, complement = Token)}.
-Spine 1 will (as before) have \code{kern} applied to it.
-However, instead of return a new field with null values in the other spine(s),
-this call will return the original (unaltered) values from the \code{Token} field in the other spines.
-}
-
-\subsection{Group by:}{
-
-A \code{groupby} expression (use \code{by} for short) partitions your data exhaustively into
-(possibly non-contiguous) groups, and evaluates your within-expression(s) \emph{separately}
-within each group.
-This works the similarly to the \code{by} argument in
-\verb{[data.table][data.table]}s, the \code{INDEX}
-argument of \verb{[base][tapply]}, or the \code{INDICES} argument of \verb{[base][by]}.
-Each \code{groupby} expression must evaluate, within the \code{humdrumR} data object, to a vector (or a list of vectors
-of equal length) to group the data by.
-Each unique combination of values across these vectors becomes one group.
-
-Most commonly, the \code{groupby} expression(s) are simply field(s) in the data:
-for instance,
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humdata,
-     table(Token),
-     by = Piece)
-}\if{html}{\out{</div>}}
-
-will apply the function \verb{[base][table]} to the \code{Token} field
-\emph{separately} for each piece in the \code{humdrumR} data.
-However, we can also use more complex expressions like
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humdata,
-     table(Token), 
-     by = Spine > 3 | Record \\\%\\\% 2 == 0)
-}\if{html}{\out{</div>}}
-
-which will evaluate the do expression in two groups, one where either the spine number is
-three or less \emph{or} the record number is even, and another group where the opposite is true.
-
-If the \code{groupby} expression evaluates to a list of grouping vectors,
-the within expressions are evaluated across every combination of categories across all the vectors.
-Thus,
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{with(humdata, 
-     table(Token),
-     by = list(Piece, Spine))
-}\if{html}{\out{</div>}}
-
-will apply \code{table} to \code{Token} across each spine \emph{in} each piece.
-}
-
-\subsection{Advanced partitioning:}{
-
-If multiple \code{groupby} or \code{subset} expressions, or combinations of the two, are specified,
-each is evaluated recursively, in order from left to right.
-If \code{subset} is specified after \code{groupby}, the \code{subset} expression is evaluated within each \code{groupby} group
-If \code{groupby} is specified after \code{subset}, the grouping \code{by} expression is evaluated only where \code{subset == TRUE}.
-Thus, if you specify
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humdata,
-         sd(Semits),
-         by = Piece, 
-         subset = Semits > mean(Semits))
-```
-
-the standard deviation of the `semits` field will be calculated in each piece,
-but only where the `semits` field is greater than the mean `semits` value
-*within that file*. Contrast this with this call:
-
-```
-within(humdata,
-         sd(Semits)
-         subset = Semits > mean(Semits), 
-         by = Piece) 
-```
-
-wherein the standard deviation of `semits` is, again, calculated for each piece,
-but this time wherever the `semits` field is greater than the mean value *across all the data*.
-
-
-[humTable]: R:humTable
-[humTable]: R:humTable
-[complement]: R:complement
-[partialMatching]: R:partialMatching
-[data.table]: R:data.table
-[tapply]: R:tapply
-[by]: R:by
-[table]: R:table
-}\if{html}{\out{</div>}}
-}
-}
-
-\section{Windowing data}{
-
-
-\code{with}/\code{within.humdrumR} can work in tandem with the \code{context()} function to evaluate do expressions
-within arbitrary contextual windows.
-To do so, simply place a call to \code{context()} in an unnamed argument to \code{with}/\code{within.humdrumR()};
-you must provide \code{open} and \code{close} arguments.
-The \code{overlap}, \code{depth}, \code{rightward}, \code{duplicate_indices}, \code{min_length}, and \code{max_length} arguments can be used here,
-just as they are in a separate call to \code{context()} --- see the \code{context()} man page.
-Do not give the \code{context()} command inside a \code{with}/\code{within.humdrumR} call a \code{x} or \code{reference} argument:
-The \link[=humActive]{active field} is used as the \code{reference} vector for \code{context()} --- e.g., if \code{open}
-or \code{close} is a \code{character} string, they are matched as regular expressions against the \link[=humActive]{active field}.
-\code{list(Piece, Spine, Path)} is also automatically passed as the \code{groupby} argument to \code{context()}.
-
-When using \code{context()} inside \code{with}/\code{within.humdrumR}, the \code{alignToOpen} argument will have no effect.
-If you want output to align with the right side of each window, use \code{alignLeft = FALSE} as an argument to
-\strong{with}/\strong{within}, not as an argument to \code{context()}.
-The \code{inPlace}, \code{collapse}, \code{sep}, and \code{stripRegex} arguments will have no effect when \code{context()} is used
-as syntactic sugar in a \code{with}/\code{within.humdrumR} call.
-
-As with a \code{subset} expression, you can provide a \code{complement} expression to go along with a \code{context()}.
-(Note that the \code{complement} argument to \code{context()} itself is ignored.)
-The \code{complement} expression will be evaluated on any data points that aren't captured within \emph{any} contextual windows.
-
-Any \code{by} or \code{subset} expressions placed before a \code{context()} expression are evaluated first, in order from left to right.
-This means you can \emph{first} run subset or \code{groupby}, then calculate context within the subset/partition.
-However, any \code{subset} or \code{groupby} expressions that are passed in an argument \emph{after} \code{context()} are ignored.
-}
-
-\section{Plotting parameters}{
-
-
-As mentioned above, plots in within-expressions should (often) be called using the \code{sidefx} argument name.
-When plotting, \code{with}/\code{within.humdrumR} also allows you to specify plotting options inline,
-without having to make a separate call
-to \code{\link[=par]{par()}}. Any \code{\link[=par]{par()}} argument can be specified by providing a named list to the \code{graphics} keyword.
-For example, we can set the plot margins with the \code{mar} argument:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(data, 
-       side = plot(sort(table(Token))), 
-       graphics = list(mar = c(4, 4, 4, 4)))
-
-}\if{html}{\out{</div>}}
-
-The best part is \code{with}/\code{within.humdrumR} will reset \code{par} to it's previous state after its done.
-
-You can also use the syntactic sugar, \code{graphics(parargs = ...)}:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(data,
-       side = plot(sort(nchar(Token))),
-       graphics(mar = c(4, 4, 4, 4)))
-}\if{html}{\out{</div>}}
-}
-
-\section{Splatting}{
-
-
-("Splatting" refers to feeding a function a list/vector of arguments.)
-Sometimes we want to divide our data into pieces (a l\'a \code{partition} option), but
+"Splatting" refers to feeding a function a list/vector of arguments.
+Sometimes we want to divide our data into pieces (a l\'a \link[=groupHumdrum]{group_by()}), but
 rather than applying the same expression to each piece, we want to feed
 the separate pieces as separate arguments to the same function.
-In \code{with}/\code{within.humdrumR} you can use some
+You can use some
 \href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
 to do just this.
 We can index any field in our call with a \code{splat} argument, which must be a \code{Field \%in\% x}.
 For example,
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humdata, list(Token[splat = Spine \%in\% 1:2])) 
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> with(list(Token[splat = Spine \%in\% 1:2]))
 }\if{html}{\out{</div>}}
 
 In this call, the \code{Token} field will be divided into two groups, one where \code{Spine == 1} and the other where
@@ -592,72 +366,243 @@ In this call, the \code{Token} field will be divided into two groups, one where 
 (\code{Spine == 2}) as the second argument.
 Thus, \code{within} translates the previous expression to this:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humdata,
-       list(Token[Spine == 1], Token[Spine == 2]))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> within(list(Token[Spine == 1], Token[Spine == 2]))
+}\if{html}{\out{</div>}}
+
+Splatting can be little weird, because there is nothing to assure that the splatted arguments
+are all the same length, which we usually want (\link{vectorization}).
+For example, in the previous example, there is no guarantee that \code{Token[Spine == 1]} and \code{Token[Spine == 2]} are the same length.
+This just means we should only use splatting if we really understand the groups we are splatting.
+For example, \emph{if} there are \link[=anyPaths]{no spine paths or stops in our data}, \emph{then} we can know that all spines
+have the same number of data records, but only including \strong{all} data records (null \emph{and} non-null).
+So, if I know there are no stops/paths in our data, we can run something like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> within(dataTypes = 'Dd', 
+                  tally(Token[splat = Spine \%in\% 1:2]))
 }\if{html}{\out{</div>}}
 }
 
-\section{Advanced scripting}{
+}
 
+\subsection{Saving expressions for later}{
 
-\code{with.humdrumR} and \code{within.humdrumR} use
-\href{http://adv-r.had.co.nz/Computing-on-the-language.html}{non-standard evaluation}
-of their expressions.
-This is very useful on the command line or in a script running one command at a time.
-However, if you want to more advanced scripting non-standard evaluation can be a problem.
-For example, if you to loop through a list of within-expressions
-or reuse a common combination coor arguments many times.
+In some cases you may find that there are certain arguments expressions that you use repeatedly.
+You can store expressions as variables by "quoting" them: the most common way to
+quote an expression in R is using the \link[base:tilde]{~}, which creates what is called a
+"formula"---essentially a quoted expression.
+You can also quote expressions, using \code{\link[=quote]{quote()}}.
+Once you've quoted an expression you can pass it to
+\code{with()}, \code{within()}, \code{mutate()}, \code{summarize()}, and \code{reframe()}.
 
-Fortunately, R has \emph{formula}, which are a way of capturing ("quoting") expressions into a
-concrete object that you can manipulate. Better yet, \code{with}/\code{within.humdrumR} will
-interpret formulae passed to them as arguments.
-Basically, the right-hand side of any formula is interpreted as an
-expression to evaluate.
-If a formula is passed as a unnamed argument to \code{with}/\code{within}, the left-hand side
-of the formula (if any) is treated as the argument name.
-If you name a formula argument that has a left-hand side, the left-hand side is ignored.
+Image that you have three different datasets (\code{humData1}, \code{humData2}, and \code{humData3}),
+and you'd like to evaluate the expression \code{tally(kern(Token, simple = TRUE))} in all three.
+Use the \code{~} operator to quote and save that expression to variable, then use it with \code{with()}:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{
-with(humdrumR, table(Token), by = Spine)
-with(humdrumR, ~table(Token), by ~ Spine)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{tallyKern <- ~tally(kern(Token, simple = TRUE))
+
+humData1 |> with(tallyKern)
+humData2 |> with(tallyKern)
+humData3 |> with(tallyKern)
 
 }\if{html}{\out{</div>}}
+}
 
-This approach would allows us to, same \code{~table(Token)} or \code{by ~ Spine} as variables,
-allowing us to do things like:
+\subsection{Expanding paths}{
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{
-tabler <- ~table(.)
-byspine <- by ~ Spine
-
-with(humData, tabler, byspine)
-
-}\if{html}{\out{</div>}}
-
-We can even make lists and loop through them:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{bys <- list(~ Spine, ~ Piece, ~ COM)
-
-for (b in bys) with(humData, table(.), by = b)
-
-}\if{html}{\out{</div>}}
-\subsection{Variables}{
-
-Another useful scripting option is to include free variables in your
-within-expressions, which can then be fed in using the \code{variables} argument.
-\code{variables} must be a named list.
-Variables in the within-expression which match a name of from the \code{variables}
-list have that value interpolated.
-This allows us, for example, to run commands like:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{nums <- c(2, 3, 4, 5)
-expression <- ~.^N
-
-for (n in nums) with(humData, expression, variables = list(N = n))
-
-}\if{html}{\out{</div>}}
-
-Each time \code{with} is called, the \code{N} in \code{.^N} is replaced by the current value of \code{n}.
+For data that includes spine paths (which you can check with \code{\link[=anyPaths]{anyPaths()}}),
+some analyses may require that spine paths are treated as contiguous "melodies."
+The \code{\link[=expandPaths]{expandPaths()}} function can be used to "expand" spine paths into new spines.
+The \code{expandPaths} \emph{argument} to \code{with()}/\code{within()} will cause \code{\link[=expandPaths]{expandPaths()}}
+to be run on your data before evaluating your argument expressions.
+After evaluation, the expanded parts of the data are then removed from the output.
 }
 }
 
+\section{Parsing expression results}{
+
+
+The only differences between the \code{with()}, \code{within()}, \code{mutate()}, \code{summarize()}, and \code{reframe()} humdrumR methods
+are what they do with the \emph{results} of expressions passed to them.
+The major difference is that \code{within()}, \code{mutate()}, and \code{reframe()} put results into new \link{fields}
+in a \link[=humdrumRclass]{humdrumR data}, while \code{with()} and \code{summarize()} just return their results in "normal" R.
+The other differences between the functions simply relate to how the \code{recycle} and \code{drop} arguments are used (details below).
+
+The \code{recycle} argument controls how the results of your code are, or aren't, \link[=recycling]{recycled (or padded)}.
+When you write code using your \link[=humdrumRclass]{humdrumR data}'s \code{\link[=fields]{fields()}}
+as input, your results are inspected to see how long they are compared to the length of the input field(s).
+If any of your results are \emph{longer} than the input, you'll get an error message---\code{humdrumR} can't (yet) handle that case.
+If any of your results are \emph{shorter} than the input, the \code{recycle} argument controls what happens to that result.
+There are seven options:
+\itemize{
+\item \code{"no"}: The result is not recycled or padded. For calls to \code{within()}, \code{mutate}, or \code{reframe()}, this option is not allowed.
+\item \code{"yes"}: the result is recycled, no matter how long it is.
+\item \code{"pad"}: the result is padded with \code{NA} values.
+\item \code{"ifscalar"}: if the result is scalar (length 1), it is recycled; otherwise you see an error.
+\item \code{"ifeven"}: if the result length evenly divides the input length, it is recycled; otherwise you see an error.
+\item \code{"never"}: The result is not recycled. If the result does not match the input length, you see an error.
+\item \code{"summarize"}: if the result is not scalar, \emph{even if it matches the input length}, you see an error. The result is not recycled.
+}
+
+The result of padding/recycling also depends on the \code{alignLeft} argument:
+If \code{alignLeft = TRUE}, results are padded to the right: like \code{c(result, NA, NA, ...)};
+If \code{alignLeft = FALSE}, results are padded on the left: like \code{c(..., NA, NA, results)}.
+Recycling is also affected if the result's length does not evenly divide the input length.
+For example, consider a result \code{c(1, 2, 3)} which needs to be recycled to length \code{10}:
+If \code{alignLeft = TRUE}, the result is recycled \code{c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1)};
+If \code{alignLeft = FALSE}, the result is recycled \code{c(3, 1, 2, 3, 1, 2, 3, 1, 2, 3)}.
+\subsection{with() and summarize()}{
+
+The humdrumR \code{with()} and \code{summarize()} methods return "normal" R data objects.
+The only difference between the \code{with()} and \code{summarize()} methods is their default  \code{drop} and \code{recycle} arguments:
+\itemize{
+\item \code{with(..., drop = TRUE, recycle = 'no')}
+\item \code{summarize(..., drop = FALSE, recycle = 'summarize')}
+}
+
+If \code{drop = TRUE}, these methods return whatever your code's result is, with no parsing.
+This can be \emph{any} kind of R data,
+including \link[=vector]{vectors} or objects like \link[=lm]{lm fits}
+or \link[base:table]{tables}.
+If \code{drop = FALSE}, the results will instead be returned in a \code{\link[=data.table]{data.table()}}.
+
+If you are working with \link[=groupHumdrum]{grouped data},
+the \code{drop = FALSE} output (\code{data.table}) will include all grouping columns as well
+as the results of your expressions.
+If \code{drop = TRUE} \emph{and} there is only one result per group, the grouping fields will be
+used to generate names for the output vector.
+}
+
+\subsection{within(), mutate(), and reframe().}{
+
+The humdrumR \code{within()}, \code{mutate()}, and \code{reframe()} methods always return a new \link[=humdrumRclass]{humdrumR data object},
+with new \link{fields} created from your code results.
+The only differences between these methods is their default \code{recycle} argument and the types of \code{recycle} argument they allow:
+\itemize{
+\item \code{within(..., recycle = 'pad')}
+\itemize{
+\item Can accept any \code{recycle} option except \code{"no"}.
+}
+\item \code{mutate(..., recycle = 'ifscalar')}
+\itemize{
+\item Can only accept \code{"ifscalar"} or \code{"never"}.
+}
+\item \code{reframe(..., recycle = 'pad')}
+\itemize{
+\item Can only accept \code{"pad"} or \code{"yes"}.
+}
+}
+}
+
+\subsection{Creating new humdrumR fields}{
+
+When running \code{within()}, \code{mutate()}, or \code{reframe()}, new \code{\link[=fields]{fields()}} are
+added to the output \link[=humdrumRclass]{humdrumR data}.
+These new fields become the \link[=selectedFields]{selected fields} in the output.
+You can explicitly name newly created fields (recommended), or allow \code{humdrumR} to automatically name them (details below).
+When using \code{with(..., drop = FALSE)} or \code{summarize(..., drop = FALSE)}, the column names of the output \link{data.table}
+are determined in the same way.
+
+Note that \code{within()}, \code{mutate()}, and \code{reframe()} will (attempt to) put \emph{any} result back into your
+\link[=humdrumRclass]{humdrumR data}...even if it doesn't make much sense.
+Things will work well with \link[base:vector]{vectors}.
+Atomic vectors are usually the best to work with (i.e., numbers, \code{character} strings, or \code{logical} values),
+but \code{list}s will work well too---just remember that you'll need to treat those fields as lists
+(e.g., you might need to use \code{\link[=lapply]{lapply()}} or \code{\link[=Map]{Map()}} to work with \code{list} fields.)
+Any \emph{non-vector} result will be put into a list as well, padded as needed.
+For example, if you use \code{\link[=lm]{lm()}} to compute a linear-regression in a call to \code{within()}
+the result will be a new field containing a \code{list}, with first element in the
+list being a single \code{lm} fit object, and the rest of the list empty (padded to the length of the field).
+\subsection{Naming new fields}{
+
+If you don't explicitly name the code expressions you provide, the new fields are named
+by capturing the expression code itself as a \code{character} string.
+However, it is generally a better idea to explicitly name your new fields.
+This can be done in two ways:
+\itemize{
+\item Base-R \link[base:with]{within()} style: Use the \verb{<-} assignment operator inside your expression.
+\itemize{
+\item Example: \code{within(humData, Kern <- kern(Token))}.
+}
+\item Tidyverse \link[dplyr:mutate]{mutate()} style: provide the expression as a named argument with \code{=}.
+\itemize{
+\item Example: \code{mutate(humData, Kern = kern(Token))}.
+}
+}
+
+Either style can be used with any of the \code{humdrumR} methods.
+When using \verb{<-}, only top-level assignment will create a new field, which means only one field can be assigned per expression.
+For example,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, 
+       Semits <- semits(Token),
+       Recip <- recip(Token))
+}\if{html}{\out{</div>}}
+
+will create two fields (\code{Semits} and \code{Recip}).
+However,
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData,
+       \{ 
+         Semits <- semits(Token)
+         Recip <- recip(Token)
+        \})
+}\if{html}{\out{</div>}}
+
+will not.
+The \link[=evaluatingExpressions]{result of expressions} grouped by \code{{}} is always the \emph{last} expression in the brackets.
+Thus, the last example above will only create one new field, corresponding to the result of \code{recip(Token)}.
+However, the resulting field won't be called \code{Recip}!
+This is because only \emph{top-level} assignments are used to name an expression:
+To name a multi-expression expression (using \code{{}}), you could do something like this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData,
+       Recip <- \{ 
+         Semits <- semits(Token)
+         recip(Token)
+        \})
+
+}\if{html}{\out{</div>}}
+
+Of course, only the result of \code{recip(Token)} would be saved to \code{Recip},
+so the \code{Semits <- semits(Token)} expression is doing nothing useful here.
+}
+
+}
+
+\subsection{Piped references}{
+
+All argument expressions passed to the \code{with()}/\code{within()} methods are evaluated in order, from left to right,
+so any assignments in a previous expression will be visible to the next expression.
+This means we can, for example, do this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, 
+       Kern <- kern(Token),
+       Kern2 <- paste0(Kern, nchar(Kern)))
+
+}\if{html}{\out{</div>}}
+
+the use of \code{Kern} in the second expression will refer to the \code{Kern} assigned in the previous expression.
+}
+}
+
+\section{Evaluating expressions in groups or windows}{
+
+
+The \code{with()}, \code{within()}, \code{mutate()}, \code{summarize()}, and \code{reframe()} functions all
+work with \link[=groupHumdrum]{grouped} data, or data with \link[=context]{contextual windows} defined.
+When groups or windows are defined, all argument expressions are evaluated independtly
+within each and every group/window.
+Results are then processed (including recycling/padding) within each group/window.
+Finally, the results are then pieced back together in locations corresponding to the
+original data locations.
+Since \link[=groupHumdrum]{groups} are necessarily exhaustive and non-overlapping, the results
+location are easy to understand.
+On the other hand \link[=context]{contextual windows} may overlap, which means and non-scalar results
+could potentially overlap as well;
+in these cases, which result data lands where may be hard to predict.
+}
+
+\seealso{
+{These functions are most useful in combination with the
+\link[=subset.humdrumR]{subset()}, \link[=groupHumdrum]{group_by()}, and \code{\link[=context]{context()}} commands.}
+}

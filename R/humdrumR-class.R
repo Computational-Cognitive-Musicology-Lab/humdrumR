@@ -1929,25 +1929,25 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
       print_tokmat(tokmat, Nmorefiles = Npieces - length(humdrumR), maxRecordsPerFile, maxTokenLength, 
                    screenWidth = screenWidth, showCensorship = view == 'humdrum', syntaxHighlight = syntaxHighlight)
       
-  })
- 
-  
-  if (length(humdrumR) > 1L) {
-      cat('\n')
-      cat('\thumdrumR corpus of', num2print(Npieces), 'pieces',
-          if (Nfiles != Npieces) c('(in', num2word(Nfiles), plural(Nfiles, 'files)', 'file)')))
       
       
-      if (anySubcorpora(humdrumR)) {
-          subnames <- namesSubcorpora(humdrumR)
-          cat(' (', num2word(length(subnames)), 
-              " subcorpora: ", 
-              paste(subnames, collapse = ', '), 
-              ')', sep = '')
+      if (length(humdrumR) > 1L) {
+          cat('\n')
+          cat('\thumdrumR corpus of', num2print(Npieces), 'pieces',
+              if (Nfiles != Npieces) c('(in', num2word(Nfiles), plural(Nfiles, 'files)', 'file)')))
+          
+          
+          if (anySubcorpora(humdrumR)) {
+              subnames <- namesSubcorpora(humdrumR)
+              cat(' (', num2word(length(subnames)), 
+                  " subcorpora: ", 
+                  paste(subnames, collapse = ', '), 
+                  ')', sep = '')
+          }
+          cat('.\n')
+          
       }
-      cat('.\n')
-      
-  }
+  })
   
   ## Fields
   showFields(humdrumR)

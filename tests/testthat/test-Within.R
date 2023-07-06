@@ -168,6 +168,12 @@ test_that("Examples from withinHumdrum docs work", {
   expect_identical(with(chorales, table(lag(Token, 1), lag(Token, 2))), 
                    with(chorales, table(Token[lag = 1:2])))
   
+  
+  expect_identical(with(chorales, 
+                        Kern <- kern(Token),
+                        Kern2 <- paste0(Kern, nchar(Kern))),
+                   with(chorales,
+                        Kern2 <- paste0(kern(Token), nchar(kern(Token)))))
 })
 
 test_that("Assignment and multiple do expressions work correctly in with.humdrumR", {

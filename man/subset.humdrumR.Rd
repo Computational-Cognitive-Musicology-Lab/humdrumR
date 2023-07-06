@@ -4,6 +4,7 @@
 \alias{subset.humdrumR}
 \alias{subset}
 \alias{filter.humdrumR}
+\alias{filter}
 \alias{removeEmptyFiles}
 \alias{removeEmptyPieces}
 \alias{removeEmptySpines}
@@ -54,7 +55,7 @@ Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 
 or any combination of these (e.g., \code{"LIM"}).
 (See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 
-\item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \code{\link[=group_by]{group_by()}}.}}
+\item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \link[=groupHumdrum]{group_by()}.}}
 
 Defaults to \code{NULL}.
 
@@ -62,7 +63,7 @@ Must be \code{NULL}, or \code{character} strings which \link[=partialMatching]{p
 \code{\link[=fields]{fields()}} in the \code{data}.
 
 If not \code{NULL}, these fields are used to group the data.
-If grouping fields have already been set by a call to \code{\link[=group_by]{group_by()}},
+If grouping fields have already been set by a call to \link[=groupHumdrum]{group_by()},
 the \code{.by} argument overrides them.}
 
 \item{removeEmptyPieces}{\emph{\strong{Should empty pieces be removed?}}

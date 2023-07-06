@@ -5,6 +5,10 @@
 
 ### grouping ----
 
+#' Divide humdrumR data into groups
+#'
+#' The [group_by()] method for [humdrumR objects][humdrumRclass].
+#'
 #' @name groupHumdrum
 #' @aliases group_by
 #' @export
@@ -119,21 +123,25 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' The `context()` command can be used to group input data (vectors)
 #' into arbitrary contextual windows.
-#' Unlike the contextual-grouping you can achieve with `group_by`,
-#' `context()` can produce windows that *overlap* or, the opposite case, that don't exhaustively
+#' Unlike [grouping vectors][groupHumdrum],
+#' `context()` windows are always contiguous in the [humdrum table][humTable]
+#' (which can depend on [order][order_by()]), can *overlap*, and don't necesarily exhaustively
 #' divide the data.
-#' The `context()` function should generally be call on 
+#' The `context()` function should generally be called on 
 #' [humdrumR data][humdrumRclass], but it can also be called directly on vectors.
 #'  
 #' @details 
 #' 
-#' `context()` takes an input vector (`x`) and divides it into windows based on
-#' the content of the `reference` vector, which must be the same length as `x`---
-#' by default, `x` is reused as `reference`, so windows are based on the input `x` itself.
+#' The `context()` function takes an input vector (`x`) and divides it into windows based on
+#' the content of the `reference` vector, which must be the same length as `x`.
+#' By default, `x` is reused as `reference`, so windows are based on the input `x` itself.
 #' As a more complex option, `reference` can be a named `list()` or `data.frame` (`nrow == length(x)`)---
 #' the (named) elements of `reference` are then visible to the `open` and `close` arguments (see below).
+#' When `context()` is applied to a [humdrumR data object][humdrumRclass], the entire 
+#' [humdrum table][humTable] is available for reference.
 #'
-#' The `collapse`, `inPlace`, and `complement` arguments how windows are output.
+#' When called directly on
+#' The `collapse`, `inPlace`, and `complement` arguments control how windows are output.
 #' 
 #' + The "complement" refers to elements of the input vector that don't fall inside
 #'   any indicated windows: if `complement = FALSE` (the default), these "outside" values are
@@ -143,7 +151,23 @@ parseContextExpression <- function(expr, other) {
 #' + If `collapse = TRUE`, the windows are collapsed to strings (separated by `sep`), otherwise,
 #'   a `list()` of windows is returned.
 #'
+#' When using `context()` inside `with`/`within.humdrumR`, the `alignToOpen` argument will have no effect.
+#' If you want output to align with the right side of each window, use `alignLeft = FALSE` as an argument to 
+#' **with**/**within**, not as an argument to `context()`.
+#' The `inPlace`, `collapse`, `sep`, and `stripRegex` arguments will have no effect when `context()` is used
+#' as syntactic sugar in a `with`/`within.humdrumR` call.
 #' 
+#' 
+#' As with a `subset` expression, you can provide a `complement` expression to go along with a `context()`.
+#' (Note that the `complement` argument to `context()` itself is ignored.)
+#' The `complement` expression will be evaluated on any data points that aren't captured within *any* contextual windows.
+#' 
+#' 
+#' Any `by` or `subset` expressions placed before a `context()` expression are evaluated first, in order from left to right.
+#' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
+#' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
+
+
 #' @section Defining windows:
 #' 
 #' The system `context()` uses to define/identify windows in the data is quite sophisticated,
@@ -151,7 +175,7 @@ parseContextExpression <- function(expr, other) {
 #' The basic idea is that you must indicate where you want windows to start ("*open*") and 
 #' where you want them to end ("*close*"):
 #' you indicate this using the `open` and `close` arguments.
-#' These arguments simple indicate indices in the input vector;
+#' These arguments simply indicate indices in the input vector;
 #' For example, if we want a window to open at the 4th and 11th indices, 
 #' and close at the 15th and 24th index,
 #' we can write (using the built-in `letters` vector for practice):
@@ -162,7 +186,7 @@ parseContextExpression <- function(expr, other) {
 #' ```
 #' 
 #' This is quite trivial.
-#' However, the `open` and `close` arguments can actually be arbitary expressions
+#' However, the `open` and `close` arguments can actually be arbitary [expressions][evaluatingExpressions]
 #' which do a number of special tricks, including refering to each other.
 #' For example, if either argument includes a call to [hop()],
 #' `hop()` will automatically be applied along the input vector.
@@ -179,7 +203,6 @@ parseContextExpression <- function(expr, other) {
 #' If we give `hop()` different arguments (like `by` or `from`), we can modify this process.
 #' In fact, if we use the default `by` value for `hop()` (`1`), we can use this approach to
 #' create standard N-grams.
-#'
 #'
 #' The minimum and maximum length of windows can be controlled using the `min_length` and `max_length` arguments.
 #' We can also indicate open/closes by providing `logical` vectors (the same length as `x`).
@@ -199,7 +222,7 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' If either `open` or `close` are provided a `character` string, this string is treated
 #' as a regular expression and is matched against the `reference` vector.
-#' For exaple, we could make windows in the alphabet starting or ending on each vowel:
+#' For example, we could make windows in the alphabet starting or ending on each vowel:
 #' 
 #' ```
 #' context(letters, open = '[aeiou]', close = open + 4)
@@ -218,8 +241,8 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' The `open` and `close` arguments have a few more special behaviors.
 #' What if we'd like each of our windows to close right before the next window opens?
-#' We can do this by making the `close` argument to refer to the *next* `open`, by
-#' referring to `nextopen` object:
+#' We can do this by making the `close` argument refer to the *next* `open`, by
+#' referring to the `nextopen` variable:
 #' 
 #' ```
 #' context(letters, open = '[aeiou]', close = nextopen - 1L)
@@ -234,7 +257,7 @@ parseContextExpression <- function(expr, other) {
 #' Notice that when we called `context(letters, open = '[aeiou]', close = nextopen - 1L)`,
 #' the window opening on `"u"` is not returned.
 #' This is because there is no "`nextopen`" open to close on.
-#' We can instead provide an `context()` alternative, using `|` (or):
+#' We can instead provide `context()` an alternative, using `|` (or):
 #' 
 #' ```
 #' context(letters, open = '[aeiou]', close = nextopen - 1L | 26)
@@ -242,7 +265,7 @@ parseContextExpression <- function(expr, other) {
 #' ```
 #' 
 #' What if we don't know exactly how long our input vector is?
-#' Refer to the `end` object:
+#' Refer to the `end` variable:
 #' 
 #' ```
 #' context(letters, open = '[aeiou]', close = nextopen - 1L | end)
@@ -250,7 +273,7 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' @section Nested Windows:
 #' 
-#' A common use case for `context()` is analyzing phrases indicated in music.
+#' A common use-case for `context()` is analyzing phrases indicated in music.
 #' In `**kern`, phrases are indicated with opening (`(`) and close (`)`) parentheses,
 #' which we can capture with regular expressions for `open` and `close`.
 #' Here is an example:
@@ -305,7 +328,7 @@ parseContextExpression <- function(expr, other) {
 #' @section Controlling Overlap:
 #'
 #' There are some other options for controlling how windows can, or cannot, overlap.
-#' Perhaps we'd like to look at every melodic phrase moving from so (dominant) to do (tonic).
+#' Perhaps we'd like to look at every melodic phrase moving from *So* (dominant) to *Do* (tonic).
 #' 
 #' ```
 #' melody <- c('so', 'la', 'ti', 'do', 'so', 'fi', 'so', 'la', 'ti', 're', 'do', 'so', 'la', 're', 'do')
@@ -315,9 +338,9 @@ parseContextExpression <- function(expr, other) {
 #' ```
 #' 
 #' This output is probably not what we want.
-#' Again, `context()` (by default) pairs each opening with the next close *which hasn't already been paird*.
-#' In this case, that means the third so is getting pairs with the third do, 
-#' even though there is another do in between!
+#' Again, `context()` (by default) pairs each opening with the next close *which hasn't already been paired*.
+#' In this case, that means the third *So* is getting pairs with the third *Do*, 
+#' even though there is another *Do* in between!
 #' We might want to try either the `"edge"` or `"none"` options for the `overlap` argument:
 #' 
 #' ````
@@ -326,7 +349,7 @@ parseContextExpression <- function(expr, other) {
 #' ```
 #' 
 #' The `"edge"` option allows the closing edge of windows to share a `close`---in this case,
-#' the second and third so (`open`) are paired with the same do.
+#' the second and third *So* (`open`) are paired with the same *Do*.
 #' On the other hand, with `overlap = "none"`, overlapping windows are simply not allowed, so the third `open` 
 #' simply doesn't get paired with anything.
 #' 
@@ -354,6 +377,10 @@ parseContextExpression <- function(expr, other) {
 #' @param x ***Input data to group into windows.***
 #' 
 #' Must be an atomic vector.
+#'
+#' @param humdrumR ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
 #' 
 #' @param open ***Where to "open" (start) windows.***
 #' 
@@ -483,6 +510,7 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' @export
 context <- function(x, open, close, ...) UseMethod('context')
+#' @rdname context
 #' @export
 context.default <- function(x, open, close, reference = x, 
                     overlap = 'paired', depth = NULL, rightward = TRUE, duplicate_indices = TRUE, 
@@ -527,8 +555,9 @@ context.default <- function(x, open, close, reference = x,
   
 }
 
+#' @rdname context
 #' @export
-context.humdrumR <- function(x, open,  close, 
+context.humdrumR <- function(humdrumR, open,  close, 
                              overlap = 'paired', depth = NULL,
                              rightward = TRUE, duplicate_indices = TRUE, 
                              min_length = 2L, max_length = Inf, 
@@ -545,8 +574,8 @@ context.humdrumR <- function(x, open,  close,
   open  <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
   
-  humtab <- getHumtab(x, 'D')
-  groupFields <- getGroupingFields(x, .by, 'context.humdrumR()') 
+  humtab <- getHumtab(humdrumR, 'D')
+  groupFields <- getGroupingFields(humdrumR, .by, 'context.humdrumR()') 
   
   windowFrame <- findWindows(humtab, open, close, 
                              groupby = humtab[ , union(c('Piece', 'Spine', 'Path'), groupFields), with = FALSE],
@@ -554,9 +583,9 @@ context.humdrumR <- function(x, open,  close,
                              overlap = overlap, depth = depth, rightward = rightward,
                              min_length = min_length, max_length = max_length)
   
-  x@Context <- windowFrame
+  humdrumR@Context <- windowFrame
   
-  x
+  humdrumR
   
 }
 

@@ -276,8 +276,8 @@ Any humdrum data with these records will end up having \code{COM} and \code{OTL}
 
 \subsection{Grouping fields:}{
 
-Grouping fields are special fields which may be created by calls to \code{\link[=group_by]{group_by()}}.
-These fields are deleted by calls to \code{\link[=ungroup]{ungroup()}}.
+Grouping fields are special fields which may be created by calls to \link[=groupHumdrum]{group_by()}.
+These fields are deleted by calls to \link[=groupHumdrum]{ungroup()}.
 These fields are generally hidden/inaccessible to users.
 }
 }
@@ -356,7 +356,7 @@ Can be \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal
 }
 \item \code{GroupedBy}
 \itemize{
-\item A \code{logical} indicating which, if any, fields are currently \link[=withinHumdrum]{grouping} the data.
+\item A \code{logical} indicating which, if any, fields are currently \link[=humGrouping]{grouping} the data.
 }
 }
 
@@ -364,6 +364,16 @@ Using the \code{\link[=names]{names()}} function on a \link[=humdrumRclass]{humd
 get just the field names, the same as \code{fields(humData)$Name}.
 }
 
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+fields(humData)
+
+getHumtab(humData)
+getHumtab(humData, dataTypes = 'D')
+
+}
 \seealso{
 {To actually extract fields from \link{humdrumR data}, see the \code{\link[=pull]{pull()}} family of functions.}
 }

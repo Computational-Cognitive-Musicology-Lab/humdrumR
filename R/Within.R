@@ -71,7 +71,7 @@
 #' If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 #' Each expression can refer variables assigned in the previous expression (examples below).
 #' 
-#' ### Expression Pre-processing
+#' ### Expression pre-processing
 #' 
 #' These functions all do some
 #' pre-processing of expressions arguments before evaluating them.
@@ -229,7 +229,7 @@
 #' #### Splatted arguments
 #' 
 #' "Splatting" refers to feeding a function a list/vector of arguments.
-#' Sometimes we want to divide our data into pieces (a l\'a [group_by]), but
+#' Sometimes we want to divide our data into pieces (a l\'a [group_by()][groupHumdrum]), but
 #' rather than applying the same expression to each piece, we want to feed
 #' the separate pieces as separate arguments to the same function.
 #' You can use some 
@@ -264,7 +264,7 @@
 #'                   tally(Token[splat = Spine %in% 1:2]))
 #' ```
 #'       
-#' ## Saving expressions for later
+#' ### Saving expressions for later
 #' 
 #' In some cases you may find that there are certain arguments expressions that you use repeatedly.
 #' You can store expressions as variables by "quoting" them: the most common way to 
@@ -288,12 +288,19 @@
 #' ```
 #' 
 #' 
-#'        
+#' ### Expanding paths
+#' 
+#' For data that includes spine paths (which you can check with [anyPaths()]),
+#' some analyses may require that spine paths are treated as contiguous "melodies."
+#' The [expandPaths()] function can be used to "expand" spine paths into new spines.
+#' The `expandPaths` *argument* to `with()`/`within()` will cause [expandPaths()]
+#' to be run on your data before evaluating your argument expressions.
+#' After evaluation, the expanded parts of the data are then removed from the output.
 #'
 #' @section Parsing expression results:
 #' 
-#' The main differences between the `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` humdrumR methods
-#' are what they do with the *results* of code passed to them.
+#' The only differences between the `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` humdrumR methods
+#' are what they do with the *results* of expressions passed to them.
 #' The major difference is that `within()`, `mutate()`, and `reframe()` put results into new [fields]
 #' in a [humdrumR data][humdrumRclass], while `with()` and `summarize()` just return their results in "normal" R.
 #' The other differences between the functions simply relate to how the `recycle` and `drop` arguments are used (details below).
@@ -305,7 +312,7 @@
 #' If any of your results are *shorter* than the input, the `recycle` argument controls what happens to that result.
 #' There are seven options:
 #' 
-#' + `"no"`: The result is not recycled. For calls to `within()`, `mutate`, or `reframe()`, this option is not allowed.
+#' + `"no"`: The result is not recycled or padded. For calls to `within()`, `mutate`, or `reframe()`, this option is not allowed.
 #' + `"yes"`: the result is recycled, no matter how long it is.
 #' + `"pad"`: the result is padded with `NA` values.
 #' + `"ifscalar"`: if the result is scalar (length 1), it is recycled; otherwise you see an error.
@@ -330,14 +337,14 @@
 #' + `with(..., drop = TRUE, recycle = 'no')`
 #' + `summarize(..., drop = FALSE, recycle = 'summarize')`
 #'
-#' If `drop = TRUE`, they return whatever your code's result is, with no parsing.
+#' If `drop = TRUE`, these methods return whatever your code's result is, with no parsing.
 #' This can be *any* kind of R data, 
 #' including [vectors][vector] or objects like [lm fits][lm]
-#' or [tables][base::table];
+#' or [tables][base::table].
 #' If `drop = FALSE`, the results will instead be returned in a [data.table()].
 #' 
-#' If you are working with [grouped data][group_by()],
-#' the `drop = FALSE` output (`data.table`) will include all [grouping][group_by()] columns as well
+#' If you are working with [grouped data][groupHumdrum],
+#' the `drop = FALSE` output (`data.table`) will include all grouping columns as well
 #' as the results of your expressions.
 #' If `drop = TRUE` *and* there is only one result per group, the grouping fields will be
 #' used to generate names for the output vector.
@@ -346,7 +353,7 @@
 #' 
 #' The humdrumR `within()`, `mutate()`, and `reframe()` methods always return a new [humdrumR data object][humdrumRclass],
 #' with new [fields] created from your code results.
-#' The only differences between these methods is their default `recycle` argument, and the types of `recycle` argument they allow:
+#' The only differences between these methods is their default `recycle` argument and the types of `recycle` argument they allow:
 #' 
 #' + `within(..., recycle = 'pad')`
 #'   + Can accept any `recycle` option except `"no"`.
@@ -355,27 +362,41 @@
 #' + `reframe(..., recycle = 'pad')`
 #'   + Can only accept `"pad"` or `"yes"`.
 #' 
-#' ### New field names
+#' ### Creating new humdrumR fields
 #' 
-#' When running `within()`, `mutate()`, or `reframe()` new [fields()] are 
+#' When running `within()`, `mutate()`, or `reframe()`, new [fields()] are 
 #' added to the output [humdrumR data][humdrumRclass].
 #' These new fields become the [selected fields][selectedFields] in the output.
-#' You can explicitly name these fields (recommended), or allow `humdrumR` to automatically name them.
+#' You can explicitly name newly created fields (recommended), or allow `humdrumR` to automatically name them (details below).
 #' When using `with(..., drop = FALSE)` or `summarize(..., drop = FALSE)`, the column names of the output [data.table]
 #' are determined in the same way.
+#' 
+#' Note that `within()`, `mutate()`, and `reframe()` will (attempt to) put *any* result back into your 
+#' [humdrumR data][humdrumRclass]...even if it doesn't make much sense.
+#' Things will work well with [vectors][base::vector].
+#' Atomic vectors are usually the best to work with (i.e., numbers, `character` strings, or `logical` values),
+#' but `list`s will work well too---just remember that you'll need to treat those fields as lists 
+#' (e.g., you might need to use [lapply()] or [Map()] to work with `list` fields.)
+#' Any *non-vector* result will be put into a list as well, padded as needed.
+#' For example, if you use [lm()] to compute a linear-regression in a call to `within()` 
+#' the result will be a new field containing a `list`, with first element in the 
+#' list being a single `lm` fit object, and the rest of the list empty (padded to the length of the field).
+#' 
+#' 
+#' #### Naming new fields
 #' 
 #' If you don't explicitly name the code expressions you provide, the new fields are named
 #' by capturing the expression code itself as a `character` string.
 #' However, it is generally a better idea to explicitly name your new fields.
 #' This can be done in two ways:
 #' 
-#' + Base-R [within][base::within] style: Use the `<-` assignment operator inside your expression.
+#' + Base-R [within()][base::within] style: Use the `<-` assignment operator inside your expression.
 #'   + Example: `within(humData, Kern <- kern(Token))`.
-#' + Tidyverse [mutate][dplyr::mutate] style: provide the expression as a named argument with `=`.
+#' + Tidyverse [mutate()][dplyr::mutate] style: provide the expression as a named argument with `=`.
 #'   + Example: `mutate(humData, Kern = kern(Token))`.
 #'   
 #' Either style can be used with any of the `humdrumR` methods.
-#' Only top-level assignment will create a new field, which means only one field can be assigned per expression.
+#' When using `<-`, only top-level assignment will create a new field, which means only one field can be assigned per expression.
 #' For example, 
 #' 
 #' ```
@@ -411,15 +432,16 @@
 #' 
 #' ```
 #' 
-#' Of course, only the result of `recip(Token)` would be saved to `Recip`, so the `Semits <- semits(Token)` expression is doing nothing here.
+#' Of course, only the result of `recip(Token)` would be saved to `Recip`, 
+#' so the `Semits <- semits(Token)` expression is doing nothing useful here.
 #' 
-#' #### Self references
+#' ### Piped references
 #' 
-#' All expressions provided to the `with()`/`within()` methods are evaluated in order, from left to right,
+#' All argument expressions passed to the `with()`/`within()` methods are evaluated in order, from left to right,
 #' so any assignments in a previous expression will be visible to the next expression.
-#' This means we could, for example do this:
+#' This means we can, for example, do this:
 #' 
-#' ```{r}
+#' ```
 #' within(humData, 
 #'        Kern <- kern(Token),
 #'        Kern2 <- paste0(Kern, nchar(Kern)))
@@ -429,192 +451,34 @@
 #' the use of `Kern` in the second expression will refer to the `Kern` assigned in the previous expression.
 #' 
 #' 
+#' @section Evaluating expressions in groups or windows:
 #' 
-#' 
-#' @section Group by:
-#'
-#' `groupby` (e.g., `by`) and `subset` expression control arguments all you to evaluate
-#' your within-expressions within specific subsets of the data.
-#' A `subset` argument can be used to evaluate your within-expression only within a subset of the data.
-#' A `groupby` argument breaks the data into groups,
-#' evaluating the within-expression(s) *separately* within each group.
-#' The results of the grouped evaluations are then returned in a list (`with`) or recombined
-#' into the original data `within`---this is a form of the "split-apply-combine" routine that is 
-#' key to `R` data analysis.
-#' 
-#' `subset` and `groupby` arguments are themselves arbitrary expressions which are evaluated within
-#' the [humdrum table][humTable], so they can (and usually do) refer to fields in the table.
-#' Any `with`/`within.humdrumR` call can include zero, one, *or more* `subset` and/or `groupby` arguments, 
-#' including combinations of both.
-#' If more than one `subset`/`groupy` by argument is included, they are evaluated in order (left to right),
-#' *recursively*: each one evaluated within the partition(s) established by the previous expression.
-#' The normal *within* expression(s) are then, all evaluated within the partition(s) established by the
-#' last  `subset`/`groupby` argument.
-#' The "Advanced" partitioning section below explores this in more detail.
-#' 
-#' ### Apply in subset:
-#'                      
-#' A `subset` argument is an arbitrary expression which identifies a subset of the humdrum data.
-#' `subset` expressions must evaluate to
-#' a single logical vector, 
-#' The `subset` result, if short, will be automatically recycled to the full length of the [humdrum table][humTable].
-#' The within expression(s) are only evaluated where the `subset` argument(s) return `TRUE`.
-#' 
-#'   
-#' In a call to `with`, only the result evaluated where `subset == TRUE` is returned.
-#' However, in a call to `within`, we must decide what to
-#' do with rest of the data: the [complement](https://en.wikipedia.org/wiki/Complement_(set_theory)) 
-#' of the subset.
-#' By default, `within` pads the returned values with null data
-#' where ever `subset == FALSE` (in the complement).
-#' So if you, for example, run the command `within(humData, kern(Token), subset = Spine == 1)`
-#' the new field created by `within` will be filled with `kern` data where `Spine == 1`,
-#'  but the remaining spines (if any) will all by null.
-#'  
-#' If you want to explicitly control what is put into the complement
-#' part of a new field, you can specifying alternate
-#' within-expression(s) to evaluate where `subset == FALSE`.
-#' These must be named `complement`, or the aliases
-#' `rest` or `otherwise` (these are all [partially matched][partialMatching]).
-#' A `complement` expression can only be specified in combination with a `subset` argument,
-#' and must be *in addition* to a normal within-expression.
-#' The idea is that you evaluate the "normal" within-expression where `subset == TRUE`, *or else*
-#' you specify evaluate the `complement` expression.
-#' The results of Complement expressions are always recycled to fill the whole complement (see the "recycle")
-#' 
-#' A common use case for a `complement` expression is to use the within expression to change the data in one spine
-#' but return the data unchanged in other spines.
-#' For example, we could specify `within(humData, kern(Token), subset = Spine == 1, complement = Token)`.
-#' Spine 1 will (as before) have `kern` applied to it.
-#' However, instead of return a new field with null values in the other spine(s),
-#' this call will return the original (unaltered) values from the `Token` field in the other spines.
-#' 
-#' 
-#' 
-#' ### Group by:
-#' 
-#' A `groupby` expression (use `by` for short) partitions your data exhaustively into 
-#' (possibly non-contiguous) groups, and evaluates your within-expression(s) *separately* 
-#' within each group.
-#'  This works the similarly to the `by` argument in 
-#' `[data.table][data.table]`s, the `INDEX` 
-#' argument of `[base][tapply]`, or the `INDICES` argument of `[base][by]`.
-#' Each `groupby` expression must evaluate, within the `humdrumR` data object, to a vector (or a list of vectors 
-#' of equal length) to group the data by.
-#' Each unique combination of values across these vectors becomes one group.
-#' 
-#' Most commonly, the `groupby` expression(s) are simply field(s) in the data: 
-#' for instance, 
-#' 
-#' ```
-#' with(humdata,
-#'      table(Token),
-#'      by = Piece)
-#' ```
-#'
-#' will apply the function `[base][table]` to the `Token` field
-#' *separately* for each piece in the `humdrumR` data. 
-#' However, we can also use more complex expressions like
-#' 
-#' ```
-#' with(humdata,
-#'      table(Token), 
-#'      by = Spine > 3 | Record \%\% 2 == 0)
-#' ```
-#'
-#' which will evaluate the do expression in two groups, one where either the spine number is 
-#' three or less *or* the record number is even, and another group where the opposite is true. 
-#' 
-#' If the `groupby` expression evaluates to a list of grouping vectors,
-#' the within expressions are evaluated across every combination of categories across all the vectors.
-#' Thus,
-#' 
-#' ```
-#' with(humdata, 
-#'      table(Token),
-#'      by = list(Piece, Spine))
-#' ````
-#'
-#' will apply `table` to `Token` across each spine *in* each piece.
-#'
+#' The `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` functions all
+#' work with [grouped][groupHumdrum] data, or data with [contextual windows][context()] defined.
+#' When groups or windows are defined, all argument expressions are evaluated independtly
+#' within each and every group/window.
+#' Results are then processed (including recycling/padding) within each group/window.
+#' Finally, the results are then pieced back together in locations corresponding to the
+#' original data locations.
+#' Since [groups][groupHumdrum] are necessarily exhaustive and non-overlapping, the results
+#' location are easy to understand.
+#' On the other hand [contextual windows][context()] may overlap, which means and non-scalar results
+#' could potentially overlap as well;
+#' in these cases, which result data lands where may be hard to predict.
 #'
 #' 
-#' ### Advanced partitioning:
 #' 
-#' If multiple `groupby` or `subset` expressions, or combinations of the two, are specified,
-#' each is evaluated recursively, in order from left to right.
-#' If `subset` is specified after `groupby`, the `subset` expression is evaluated within each `groupby` group
-#' If `groupby` is specified after `subset`, the grouping `by` expression is evaluated only where `subset == TRUE`.
-#' Thus, if you specify
-#'
-#' ````
-#' within(humdata,
-#'          sd(Semits),
-#'          by = Piece, 
-#'          subset = Semits > mean(Semits))
-#' ```
-#' 
-#' the standard deviation of the `semits` field will be calculated in each piece,
-#' but only where the `semits` field is greater than the mean `semits` value
-#' *within that file*. Contrast this with this call:
-#' 
-#' ```
-#' within(humdata,
-#'          sd(Semits)
-#'          subset = Semits > mean(Semits), 
-#'          by = Piece) 
-#' ```
-#' 
-#' wherein the standard deviation of `semits` is, again, calculated for each piece,
-#' but this time wherever the `semits` field is greater than the mean value *across all the data*.
-#' 
-#' @section Windowing data:
-#' 
-#' `with`/`within.humdrumR` can work in tandem with the `context()` function to evaluate do expressions 
-#' within arbitrary contextual windows.
-#' To do so, simply place a call to `context()` in an unnamed argument to `with`/`within.humdrumR()`;
-#' you must provide `open` and `close` arguments.
-#' The `overlap`, `depth`, `rightward`, `duplicate_indices`, `min_length`, and `max_length` arguments can be used here,
-#' just as they are in a separate call to `context()` --- see the `context()` man page.
-#' Do not give the `context()` command inside a `with`/`within.humdrumR` call a `x` or `reference` argument:
-#' The [active field][humActive] is used as the `reference` vector for `context()` --- e.g., if `open`
-#' or `close` is a `character` string, they are matched as regular expressions against the [active field][humActive].
-#' `list(Piece, Spine, Path)` is also automatically passed as the `groupby` argument to `context()`.
-#' 
-#' 
-#' When using `context()` inside `with`/`within.humdrumR`, the `alignToOpen` argument will have no effect.
-#' If you want output to align with the right side of each window, use `alignLeft = FALSE` as an argument to 
-#' **with**/**within**, not as an argument to `context()`.
-#' The `inPlace`, `collapse`, `sep`, and `stripRegex` arguments will have no effect when `context()` is used
-#' as syntactic sugar in a `with`/`within.humdrumR` call.
-#' 
-#' 
-#' As with a `subset` expression, you can provide a `complement` expression to go along with a `context()`.
-#' (Note that the `complement` argument to `context()` itself is ignored.)
-#' The `complement` expression will be evaluated on any data points that aren't captured within *any* contextual windows.
-#' 
-#' 
-#' Any `by` or `subset` expressions placed before a `context()` expression are evaluated first, in order from left to right.
-#' This means you can *first* run subset or `groupby`, then calculate context within the subset/partition.
-#' However, any `subset` or `groupby` expressions that are passed in an argument *after* `context()` are ignored.
-
-
-#' 
-#' 
-
-#' ```
-#' 
-#' 
-   
 #' @param data ***HumdrumR data.***
 #' 
 #' Must be a [humdrumR data object][humdrumRclass].
 #' 
 #' @param ... ***Any number of expressions to evaluate.*** 
 #'
-#' Unnamed expressions are interpreted as the "main" *within-expressions*. 
-#' Possible *evaluation control arguments* include `by`, `subset`, and `context`.
-#' Other evaluation options can be achieved with `recycle` or `side` arguments.
+#' These expressions can reference [fields()] in the data by name,
+#' as well as variables outside the data.
+#' 
+#' If the expressions are named, the names are used to name new fields
+#' (or column names for `with(..., drop = FALSE)`.
 #' 
 #' @param dataTypes ***Which types of humdrum records to include.***
 #' 
@@ -635,17 +499,29 @@
 #' If grouping fields have already been set by a call to [group_by()][groupHumdrum],
 #' the `.by` argument overrides them.
 #'
-#' @param variables ***A named `list` of values, which are interpolated into the within-expression(s) wherever a variable name matches a named from the list.***
+#' @param variables ***A named `list` of values, to interpolate into your expressions.***
 #' 
+#'  
 #' Defaults to `list()`.
 #' 
-#' Must be `list`.
+#' Must be a named `list`. 
+#' These values are interpolated into the `...` expression arguments wherever 
+#' a variable name matches a name from the list.
 #' 
 #' @param alignLeft ***Should output that is shorter than input be aligned to the left?***
 #'
 #' Defaults to `TRUE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param expandPaths ***Should spine paths be expanded before evaluating expressions?***
+#'
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' If `TRUE`, the [expandPaths()] function is run on the data
+#' before evaluating the expressions.
+#' After evaluation, the expanded locations are removed from the output.
 #' 
 #' @param drop ***Whether to return a simplified data structure.***
 #' 
@@ -654,17 +530,69 @@
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' This argument is conceptually similar to the `drop` argument in R matrices.
-#' If `drop = TRUE`, the output of `with.humdrumR` is simplified as much as possible (trying to return
+#' If `drop = TRUE`, the output of `with()`/`summarize()` is simplified as much as possible (trying to return
 #' the "raw" vector, list, table, etc. within it). If `drop = FALSE`, the result is *always*
-#' a `data.table`. The default value (`drop = TRUE`) is usually what we want because it is more
-#' intuitive, but in more complex code, it can be helpful to set `drop = FALSE` so that 
-#' the output is consistent.
+#' a [data.table]. 
+#' 
+#' @examples
 #' 
 #' 
-#' @return From `within.humdrumR`  a new humdrumR data object.
-#' From `with.humdrumR`, whatever value is returned by the expression or, if `drop = TRUE`,
-#' a `data.table`.
+#' # with/within style:
 #' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData |> with(tally(kern(Token, simple = TRUE), Spine))
+#' 
+#' humData |> within(Kern <- kern(Token), 
+#'                   Recip <- recip(Token),
+#'                   Semits <- semits(Token)) -> humData
+#'                   
+#' humData |> 
+#'     group_by(Spine) |>
+#'     with(mean(Semits))
+#'     
+#' humData |> 
+#'     group_by(Piece, Spine) |>
+#'     with(mean(Semits), drop = FALSE)
+#'     
+#' # tidyverse (dplyr) style:
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData |> mutate(Kern = kern(Token), 
+#'                   Recip = recip(Token),
+#'                   Semits = semits(Token)) -> humData
+#'                   
+#' humData |> 
+#'     group_by(Spine, Bar) |>
+#'     summarize(mean(Semits))
+#'       
+#' # dataTypes argument
+#' 
+#' humData |>
+#'    group_by(Piece, Spine) |>
+#'    within(paste(Token, seq_along(Token)))
+#'    
+#' humData |>
+#'    group_by(Piece, Spine) |>
+#'    mutate(Enumerated = paste(Token, seq_along(Token)),
+#'           dataTypes = 'Dd')
+#'           
+#' # recycle argument
+#' 
+#' humData |>
+#'    group_by(Piece, Bar, Spine) |>
+#'    mutate(BarMean = mean(Semits), recycle = 'ifscalar')
+#'    
+#' humData |>
+#'    group_by(Piece, Bar, Spine) |>
+#'    within(BarMean = mean(Semits), recycle = 'pad')  
+#' 
+#' 
+#' 
+#' 
+#' @seealso {These functions are most useful in combination with the 
+#'  [subset()][subset.humdrumR], [group_by()][groupHumdrum], and [context()] commands.}
 #' @aliases within with
 #' @name withinHumdrum
 NULL
@@ -675,9 +603,9 @@ NULL
 #' @export
 with.humdrumR <- function(data, ..., 
                           dataTypes = 'D',
-                          expandPaths = FALSE,
                           recycle = "no",
                           alignLeft = TRUE,
+                          expandPaths = FALSE,
                           drop = TRUE,
                           .by = NULL,
                           variables = list()) {
@@ -701,7 +629,6 @@ with.humdrumR <- function(data, ...,
     
     result <- result[[max(which(!colnames(result) %in% groupFields))]]
     if (length(result) == 0L) return(result)
-    
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
@@ -959,7 +886,7 @@ concatDoQuos <- function(quosures) {
    rlang::quo({
     {!!!quosures}
     
-    results <- setNames(list(list(list(!!!rlang::syms(assigned)))), assigned) 
+    results <- setNames(lapply(list(!!!rlang::syms(assigned)), \(x) list(list(x))), !!assigned) 
     # Need three lists here, and two for _rowKey_ 
     
     results[['_rowKey_']] <- list(list(`_rowKey_`))
@@ -1510,10 +1437,6 @@ addExclusiveFields <- function(humtab, fields) {
 
 
 
-#' HumdrumR using Tidyverse "verbs"
-#' 
-#' These methods for [dplyr] verbs are all shorthand calls for [with/within/subset.humdrumR()][withHumdrum].
-#' 
 #' @rdname withinHumdrum
 #' @export
 mutate.humdrumR <- function(.data, ..., dataTypes = 'D', recycle = 'ifscalar', alignLeft = TRUE, expandPaths = FALSE, .by = NULL) {
@@ -1559,15 +1482,10 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expa
 ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
   humtab <- getHumtab(data, dataTypes = dataTypes)
   
-  ggplot(humtab, mapping = mapping, ...) + theme_humdrum()
-}
-
-#' @rdname withinHumdrum
-#' @export
-ggplot.humdrum.table <- function(data = NULL, mapping = aes(), ...) {
-  
   ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
 }
+
+
 
 
 ### Treatment of token ----
