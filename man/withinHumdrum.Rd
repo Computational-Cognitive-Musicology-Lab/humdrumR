@@ -10,7 +10,6 @@
 \alias{summarise.humdrumR}
 \alias{reframe.humdrumR}
 \alias{ggplot.humdrumR}
-\alias{ggplot.humdrum.table}
 \title{Working \emph{with} humdrum data fields}
 \usage{
 \method{with}{humdrumR}(
@@ -66,8 +65,6 @@
 )
 
 \method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
-
-\method{ggplot}{humdrum.table}(data = NULL, mapping = aes(), ...)
 }
 \arguments{
 \item{data}{\emph{\strong{HumdrumR data.}}
@@ -145,8 +142,6 @@ for ignoring null data, \link[=lag]{lagging} data, \link[=groupHumdrum]{grouping
 The \code{with()} and \code{within()} functions, which come from \link[=base]{base R}, are the core functions.
 However, the \link{dplyr} "verbs" \code{mutate()}, \code{summarize()}, and \code{reframe()} can be used as well---they
 are equivalent to using \code{with()}/\code{within()} with particular arguments.
-
-These methods for \link{dplyr} verbs are all shorthand calls for \link[=withHumdrum]{with/within/subset.humdrumR()}.
 }
 \section{Overview}{
 
@@ -201,7 +196,7 @@ are \link[=selectedFields]{selected}.
 
 If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 Each expression can refer variables assigned in the previous expression (examples below).
-\subsection{Expression Pre-processing}{
+\subsection{Expression pre-processing}{
 
 These functions all do some
 pre-processing of expressions arguments before evaluating them.
@@ -602,6 +597,64 @@ could potentially overlap as well;
 in these cases, which result data lands where may be hard to predict.
 }
 
+\examples{
+
+
+# with/within style:
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+humData |> with(tally(kern(Token, simple = TRUE), Spine))
+
+humData |> within(Kern <- kern(Token), 
+                  Recip <- recip(Token),
+                  Semits <- semits(Token)) -> humData
+                  
+humData |> 
+    group_by(Spine) |>
+    with(mean(Semits))
+    
+humData |> 
+    group_by(Piece, Spine) |>
+    with(mean(Semits), drop = FALSE)
+    
+# tidyverse (dplyr) style:
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+humData |> mutate(Kern = kern(Token), 
+                  Recip = recip(Token),
+                  Semits = semits(Token)) -> humData
+                  
+humData |> 
+    group_by(Spine, Bar) |>
+    summarize(mean(Semits))
+      
+# dataTypes argument
+
+humData |>
+   group_by(Piece, Spine) |>
+   within(paste(Token, seq_along(Token)))
+   
+humData |>
+   group_by(Piece, Spine) |>
+   mutate(Enumerated = paste(Token, seq_along(Token)),
+          dataTypes = 'Dd')
+          
+# recycle argument
+
+humData |>
+   group_by(Piece, Bar, Spine) |>
+   mutate(BarMean = mean(Semits), recycle = 'ifscalar')
+   
+humData |>
+   group_by(Piece, Bar, Spine) |>
+   within(BarMean = mean(Semits), recycle = 'pad')  
+
+
+
+
+}
 \seealso{
 {These functions are most useful in combination with the
 \link[=subset.humdrumR]{subset()}, \link[=groupHumdrum]{group_by()}, and \code{\link[=context]{context()}} commands.}
