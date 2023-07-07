@@ -78,7 +78,7 @@ humdrumRroot <- system.file(package = 'humdrumR')
 ### groupby ----
 
 autoArgTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',  
-                                  Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'untie', 'hop'), 
+                                  Function = c('mint', 'delta', 'sigma', 'lag', 'ditto', 'ioi', 'sumTies', 'hop'), 
                                   Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path)))),
                        data.table(Argument = 'groupby', Type = 'harmonic',
                                   Function = c('hint', 'sonority'),

@@ -2,12 +2,14 @@
 % Please edit documentation in R/Rhythm.R
 \name{time}
 \alias{time}
-\alias{seconds}
-\alias{ms}
-\alias{dur}
+\alias{seconds.default}
+\alias{seconds.humdrumR}
+\alias{ms.default}
+\alias{ms.humdrumR}
+\alias{dur.default}
 \title{Clock-time representations of duration}
 \usage{
-seconds(
+\method{seconds}{default}(
   x,
   ...,
   BPM = "*M60",
@@ -17,7 +19,10 @@ seconds(
   inPlace = FALSE
 )
 
-ms(
+humData  select(Token) |> seconds() 
+humData |> seconds(Token)
+
+\method{ms}{default}(
   x,
   ...,
   BPM = "*M60",
@@ -27,7 +32,10 @@ ms(
   inPlace = FALSE
 )
 
-dur(
+humData  select(Token) |> ms() 
+humData |> ms(Token)
+
+\method{dur}{default}(
   x,
   ...,
   BPM = "*M60",
@@ -36,7 +44,6 @@ dur(
   days = FALSE,
   months = FALSE,
   years = FALSE,
-  milliseconds = TRUE,
   parseArgs = list(),
   scale = 1,
   unit = 1,
@@ -93,6 +100,14 @@ These functions convert duration values to clock-time representations.
 \code{seconds()} and \code{ms()} output \code{numeric} values.
 \code{dur()} outputs a \code{character} string encoding the humdrum \href{https://www.humdrum.org/rep/dur/index.html}{**dur}
 representation of time.
+
+If \code{seconds()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{ms()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 These functions require a \code{BPM} (beats-per-minute) argument to be specified.

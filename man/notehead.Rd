@@ -2,9 +2,26 @@
 % Please edit documentation in R/Rhythm.R
 \name{notehead}
 \alias{notehead}
+\alias{notehead.default}
+\alias{notehead.humdrumR}
 \title{Note value representation of duration}
 \usage{
-notehead(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+\method{notehead}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> notehead() 
+humData |> notehead(Token)
+humData |> notehead(simple = TRUE)
 }
 \arguments{
 \item{x}{\emph{\strong{An input  vector.}}
@@ -23,12 +40,6 @@ Defaults to an empty \code{list()}.
 
 Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
 
-\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
-
-Defaults to \code{rational(1, 1)}.
-
-Must be \code{numeric} or \link{rational}.}
-
 \item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
 
 Defaults to \code{FALSE}.
@@ -44,6 +55,10 @@ See "Grace notes" section below.}
 \description{
 This function outputs duration information in as traditional \href{https://en.wikipedia.org/wiki/Note_value}{note value}.
 symbols, as in Western notation.
+
+If \code{notehead()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Note-value symbols are simply encoded in \code{character} vectors, since the

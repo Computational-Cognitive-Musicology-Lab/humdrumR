@@ -2,10 +2,13 @@
 % Please edit documentation in R/Rhythm.R
 \name{timeline}
 \alias{timeline}
-\alias{timestamp}
+\alias{timeline.default}
+\alias{timeline.humdrumR}
+\alias{timestamp.default}
+\alias{timestamp.humdrumR}
 \title{Rhythmic timeline of a piece}
 \usage{
-timeline(
+\method{timeline}{default}(
   x,
   start = 0,
   pickup = NULL,
@@ -16,7 +19,10 @@ timeline(
   groupby = list()
 )
 
-timestamp(
+humData  select(Token) |> timeline() 
+humData |> timeline(Token)
+
+\method{timestamp}{default}(
   x,
   BPM = 60,
   start = 0,
@@ -28,6 +34,9 @@ timestamp(
   parseArgs = list(),
   groupby = list()
 )
+
+humData  select(Token) |> timestamp() 
+humData |> timestamp(Token)
 }
 \arguments{
 \item{x}{\emph{\strong{Input rhythm information.}}
@@ -92,6 +101,14 @@ that have unfolded since the beginning of a piece, giving a sense of the timelin
 In \code{music21} this information is described as "offsets"---however,
 we prefer to reserve the words "onset" and "offset" to refer
 to the beginning (attack) and end (release) of rhythmic events.
+
+If \code{timeline()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{timestamp()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Music unfolds over time, and humdrum data typically represents this

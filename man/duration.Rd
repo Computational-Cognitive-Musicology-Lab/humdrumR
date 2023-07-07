@@ -2,12 +2,18 @@
 % Please edit documentation in R/Rhythm.R
 \name{duration}
 \alias{duration}
-\alias{quarters}
+\alias{duration.default}
+\alias{duration.humdrumR}
+\alias{quarters.default}
 \title{Numeric (double) representation of durations}
 \usage{
-duration(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+\method{duration}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 
-quarters(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+humData |> select(Token) |> duration() 
+humData |> duration(Token)
+humData |> duration(simple = TRUE)
+
+\method{quarters}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
 \item{x}{\emph{\strong{An input  vector.}}
@@ -46,6 +52,10 @@ See "Grace notes" section below.}
 }
 \description{
 Output is \code{numeric} (real number).
+
+If \code{duration()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \examples{
 

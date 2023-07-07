@@ -2,9 +2,11 @@
 % Please edit documentation in R/Rhythm.R
 \name{recip}
 \alias{recip}
+\alias{recip.default}
+\alias{recip.humdrumR}
 \title{Reciprocal representation of duration}
 \usage{
-recip(
+\method{recip}{default}(
   x,
   ...,
   sep = "\%",
@@ -13,6 +15,10 @@ recip(
   unit = 1,
   inPlace = FALSE
 )
+
+humData |> select(Token) |> recip() 
+humData |> recip(simple = TRUE)
+humData |> recip(Token, Key = Key)
 }
 \arguments{
 \item{x}{\emph{\strong{An input  vector.}}
@@ -61,6 +67,10 @@ is the "reciprocal" \href{https://www.humdrum.org/rep/recip/index.html}{**recip}
 Representation.
 The \verb{**recip} rhythmic values are often used as a part of \verb{**kern} representation,
 which also includes \link[=kern]{pitch} information and notation details.
+
+If \code{recip()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 \verb{**recip} values are literally the reciprocal of a duration value.
