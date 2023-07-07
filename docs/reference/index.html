@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@
           
           <code><a href="writeHumdrum.html">writeHumdrum()</a></code> 
         </dt>
-        <dd>Write humdrumR data to humdrum files</dd>
+        <dd>Write <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a> to humdrum files</dd>
       </dl></div><div id="" class="section level2">
       
       
@@ -158,24 +158,29 @@
 
       <dl><dt>
           
-          <code><a href="withinHumdrum.html">with(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">within(<i>&lt;humdrumR&gt;</i>)</a></code> 
+          <code><a href="withinHumdrum.html">with(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">within(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">mutate(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">summarise(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">reframe(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="withinHumdrum.html">ggplot(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>with(in)Humdrum</dd>
+        <dd>Working <em>with</em> humdrum data fields</dd>
       </dl><dl><dt>
           
-          <code><a href="subset.humdrumR.html">subset(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="subset.humdrumR.html">clearFilter()</a></code> <code><a href="subset.humdrumR.html">removeEmptyFiles()</a></code> <code><a href="subset.humdrumR.html">removeEmptyPieces()</a></code> <code><a href="subset.humdrumR.html">removeEmptySpines()</a></code> <code><a href="subset.humdrumR.html">removeEmptyPaths()</a></code> <code><a href="subset.humdrumR.html">removeEmptyRecords()</a></code> <code><a href="subset.humdrumR.html">removeEmptyStops()</a></code> 
+          <code><a href="subset.humdrumR.html">subset(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="subset.humdrumR.html">filter(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="subset.humdrumR.html">removeEmptyFiles()</a></code> <code><a href="subset.humdrumR.html">removeEmptyPieces()</a></code> <code><a href="subset.humdrumR.html">removeEmptySpines()</a></code> <code><a href="subset.humdrumR.html">removeEmptyPaths()</a></code> <code><a href="subset.humdrumR.html">removeEmptyRecords()</a></code> <code><a href="subset.humdrumR.html">removeEmptyStops()</a></code> <code><a href="subset.humdrumR.html">removeSubset()</a></code> <code><a href="subset.humdrumR.html">unfilter()</a></code> <code><a href="subset.humdrumR.html">complement()</a></code> 
         </dt>
         <dd>Filter humdrum data</dd>
       </dl><dl><dt>
           
-          <code><a href="indexHumdrum.html">`[`</a></code> <code><a href="indexHumdrum.html">`[`</a></code> <code><a href="indexHumdrum.html">`[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> 
+          <code><a href="indexHumdrum.html">`[`</a></code> <code><a href="indexHumdrum.html">`[`</a></code> <code><a href="indexHumdrum.html">`[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">`[[`</a></code> <code><a href="indexHumdrum.html">index()</a></code> <code><a href="indexHumdrum.html">index2()</a></code> 
         </dt>
         <dd>Indexing humdrumR objects</dd>
       </dl><dl><dt>
           
-          <code><a href="context.html">context()</a></code> 
+          <code><a href="groupHumdrum.html">group_by(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="groupHumdrum.html">ungroup(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="groupHumdrum.html">groups()</a></code> 
         </dt>
-        <dd>Create arbitrary "context" across vectors.</dd>
+        <dd>Divide humdrumR data into groups</dd>
+      </dl><dl><dt>
+          
+          <code><a href="context.html">context()</a></code> <code><a href="context.html">uncontext()</a></code> 
+        </dt>
+        <dd>Group vectors into contextual windows</dd>
       </dl></div><div class="section level2">
       <h2 id="musical-tools">Musical Tools<a class="anchor" aria-label="anchor" href="#musical-tools"></a></h2>
       
@@ -612,7 +617,7 @@
       </dl></div><div class="section level2">
       <h2 id="data-structures">Data Structures<a class="anchor" aria-label="anchor" href="#data-structures"></a></h2>
       
-      <p class="section-desc"></p><p>These are pages describe the data structures of humdrumR—which contain the musical data.</p>
+      <p class="section-desc"></p><p>These pages describe the data structures of humdrumR, and how to query or manipulate them.</p>
 
       
     </div><div id="" class="section level2">
@@ -622,19 +627,24 @@
 
       <dl><dt>
           
-          <code><a href="humdrumRclass.html">is.humdrumR()</a></code> 
+          <code><a href="humdrumRclass.html">is.humdrumR()</a></code> <code><a href="humdrumRclass.html">print(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
         <dd><code>humdrumR</code> class</dd>
       </dl><dl><dt>
           
-          <code><a href="extractTandem.html">extractTandem()</a></code> 
+          <code><a href="tandem.html">tandem()</a></code> 
         </dt>
         <dd>Get tandem interpretation information from humdrum data</dd>
       </dl><dl><dt>
           
-          <code><a href="humActive.html">evalActive()</a></code> <code><a href="humActive.html">getActive()</a></code> <code><a href="humActive.html">getActiveFields()</a></code> <code><a href="humActive.html">setActive()</a></code> <code><a href="humActive.html">setActiveFields()</a></code> <code><a href="humActive.html">`$`(<i>&lt;humdrumR&gt;</i>)</a></code> 
+          <code><a href="pullHumdrum.html">pull_data.table()</a></code> <code><a href="pullHumdrum.html">pull_data.frame()</a></code> <code><a href="pullHumdrum.html">pull_tibble()</a></code> <code><a href="pullHumdrum.html">pull(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="pullHumdrum.html">`$`(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>The "Active expression" of a humdrumR object</dd>
+        <dd>Extract field(s) from <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a></dd>
+      </dl><dl><dt>
+          
+          <code><a href="selectedFields.html">selectedFields()</a></code> <code><a href="selectedFields.html">select(<i>&lt;humdrumR&gt;</i>)</a></code> 
+        </dt>
+        <dd>The "selected" fields of a <a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR object</a></dd>
       </dl><dl><dt>
           
           <code><a href="humCoercion.html">as.vector(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.lines()</a></code> <code><a href="humCoercion.html">as.matrix(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.data.frame(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humCoercion.html">as.matrices()</a></code> <code><a href="humCoercion.html">as.data.frames()</a></code> 
@@ -657,17 +667,22 @@
         <dd>Expand paths into new spines</dd>
       </dl><dl><dt>
           
-          <code><a href="foldHumdrum.html">foldHumdrum()</a></code> <code><a href="foldHumdrum.html">foldPaths()</a></code> <code><a href="foldHumdrum.html">foldStops()</a></code> 
+          <code><a href="cleave.html">cleave()</a></code> <code><a href="cleave.html">pivot_wider(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="cleave.html">cleaveSpines()</a></code> <code><a href="cleave.html">cleavePaths()</a></code> <code><a href="cleave.html">cleaveStops()</a></code> 
         </dt>
-        <dd>"Fold" humdrumR data into new fields</dd>
+        <dd>Align data from separate spines into new fields.</dd>
       </dl><dl><dt>
           
-          <code><a href="foldExclusive.html">foldExclusive()</a></code> 
+          <code><a href="rend.html">rend()</a></code> <code><a href="rend.html">pivot_longer(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>"Fold" exclusive interpretations into new fields</dd>
+        <dd>Separate data fields into new spines.</dd>
       </dl><dl><dt>
           
-          <code><a href="foldGraceNotes.html">foldGraceNotes()</a></code> 
+          <code><a href="combineFields.html">combineFields()</a></code> 
+        </dt>
+        <dd>Combine one or more fields into a new field</dd>
+      </dl><dl><dt>
+          
+          <code><a href="cleaveGraceNotes.html">cleaveGraceNotes()</a></code> 
         </dt>
         <dd>"Fold" grace notes into neighbos</dd>
       </dl><dl><dt>
@@ -679,12 +694,12 @@
           
           <code><a href="humSize.html">nrecord()</a></code> <code><a href="humSize.html">nrow(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ntoken()</a></code> <code><a href="humSize.html">npieces()</a></code> <code><a href="humSize.html">nfiles()</a></code> <code><a href="humSize.html">length(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">ncol(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">dim(<i>&lt;humdrumR&gt;</i>)</a></code> <code><a href="humSize.html">is.empty()</a></code> <code><a href="humSize.html">anyMultiPieceFiles()</a></code> <code><a href="humSize.html">anyPaths()</a></code> <code><a href="humSize.html">anyStops()</a></code> <code><a href="humSize.html">anySubcorpora()</a></code> <code><a href="humSize.html">namesSubcorpora()</a></code> 
         </dt>
-        <dd>humdrumR data size and shape</dd>
+        <dd><a href="https://rdrr.io/pkg/humdrumR/man/humdrumRclass.html" class="external-link">humdrumR data</a> size and shape</dd>
       </dl><dl><dt>
           
-          <code><a href="humTable.html">getHumtab()</a></code> <code><a href="humTable.html">getFields()</a></code> <code><a href="humTable.html">fields()</a></code> 
+          <code><a href="humTable.html">getHumtab()</a></code> <code><a href="humTable.html">fields()</a></code> <code><a href="humTable.html">names(<i>&lt;humdrumR&gt;</i>)</a></code> 
         </dt>
-        <dd>Humdrum tables (and their Fields)</dd>
+        <dd>Humdrum tables (and their "fields")</dd>
       </dl><dl><dt>
           
           <code><a href="struct.html">is.struct()</a></code> 
@@ -693,7 +708,7 @@
       </dl></div><div class="section level2">
       <h2 id="other-functions">Other Functions<a class="anchor" aria-label="anchor" href="#other-functions"></a></h2>
       
-      <p class="section-desc"></p><p>Other useful tools</p>
+      <p class="section-desc"></p><p>Other useful tools.</p>
 
       
     </div><div id="" class="section level2">
@@ -708,7 +723,7 @@
         <dd>Visualize data</dd>
       </dl><dl><dt>
           
-          <code><a href="tally.html">tally()</a></code> <code><a href="tally.html">Ops(<i>&lt;humdrum.table&gt;</i>,<i>&lt;humdrum.table&gt;</i>)</a></code> <code><a href="tally.html">cbind(<i>&lt;humdrum.table&gt;</i>)</a></code> <code><a href="tally.html">rbind(<i>&lt;humdrum.table&gt;</i>)</a></code> 
+          <code><a href="tally.html">tally()</a></code> <code><a href="tally.html">Ops(<i>&lt;humdrum.table&gt;</i>,<i>&lt;humdrum.table&gt;</i>)</a></code> <code><a href="tally.html">cbind(<i>&lt;humdrum.table&gt;</i>)</a></code> <code><a href="tally.html">rbind(<i>&lt;humdrum.table&gt;</i>)</a></code> <code><a href="tally.html">as.data.frame.humdrum.table()</a></code> <code><a href="tally.html">as.data.frame.probabilityDistribution()</a></code> 
         </dt>
         <dd>Tabulate and/or cross-tabulate data</dd>
       </dl></div><div class="section level2">
@@ -853,14 +868,50 @@
 
       <dl><dt>
           
-          <code><a href="humdrumRroot.html">humdrumRroot</a></code> 
+          <code><a href="humdrumR.html">humdrumRroot</a></code> <code><a href="humdrumR.html">humdrumR()</a></code> 
         </dt>
-        <dd><code>humdrumR</code>'s root directory on your machine.</dd>
+        <dd>humdrumR</dd>
       </dl><dl><dt>
           
           <code><a href="partialMatching.html">partialMatching</a></code> 
         </dt>
-        <dd>Partial matching</dd>
+        <dd>What is "partial matching"?</dd>
+      </dl></div><div class="section level2">
+      <h2 id="some-r-basics-lessons">Some R basics lessons<a class="anchor" aria-label="anchor" href="#some-r-basics-lessons"></a></h2>
+      
+      <p class="section-desc"></p><p>Concise descriptions of some important concepts in R coding.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="evaluatingExpressions.html">evaluatingExpressions</a></code> 
+        </dt>
+        <dd>"Evaluating" "Expressions" in "Environments"?</dd>
+      </dl><dl><dt>
+          
+          <code><a href="groupingFactors.html">groupingFactors</a></code> 
+        </dt>
+        <dd>What are "grouping factors"?</dd>
+      </dl><dl><dt>
+          
+          <code><a href="partialMatching.html">partialMatching</a></code> 
+        </dt>
+        <dd>What is "partial matching"?</dd>
+      </dl><dl><dt>
+          
+          <code><a href="recycling.html">recycling</a></code> <code><a href="recycling.html">padding</a></code> 
+        </dt>
+        <dd>What are "recycling" or "padding"?</dd>
+      </dl><dl><dt>
+          
+          <code><a href="vectorization.html">vectorization</a></code> 
+        </dt>
+        <dd>What is "vectorization"?</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

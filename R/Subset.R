@@ -351,6 +351,8 @@ complement <- function(humdrumR) {
     
 }
 
+#' Combine one or more fields into a new field
+#' 
 #' @seealso {You can do similar things using [subset.humdrumR() and complement()][subset.humdrumR]. }
 #' @export
 combineFields <- function(humdrumR, ...) {

@@ -72,6 +72,7 @@ reference:
   - withinHumdrum
   - subset.humdrumR
   - indexHumdrum
+  - groupHumdrum
   - context
 - title: "Musical Tools"
   desc: >
@@ -177,24 +178,26 @@ reference:
   - silbeFormat
 - title: "Data Structures"
   desc: >
-    These are pages describe the data structures of humdrumR---which contain the musical data.
+    These pages describe the data structures of humdrumR, and how to query or manipulate them.
   contents:
   - humdrumRclass
-  - extractTandem
-  - humActive
+  - tandem
+  - pullHumdrum
+  - selectedFields
   - humCoercion
   - humMerge
   - collapseHumdrum
   - expandPaths
-  - foldHumdrum
-  - foldExclusive
-  - foldGraceNotes
+  - cleave
+  - rend
+  - combineFields
+  - cleaveGraceNotes
   - unfoldStops
   - humSize
   - humTable
   - struct
 - title: "Other Functions"
-  desc: "Other useful tools"
+  desc: "Other useful tools."
 - contents: 
   - draw
   - tally
@@ -230,3 +233,12 @@ reference:
   contents:
   - humdrumRroot
   - partialMatching
+- title: "Some R basics lessons"
+  desc: >
+     Concise descriptions of some important concepts in R coding.
+  contents:
+  - evaluatingExpressions
+  - groupingFactors
+  - partialMatching
+  - recycling
+  - vectorization
