@@ -3133,11 +3133,30 @@ makePitchTransformer <- function(deparser, callname,
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name freq
 #' @export 
-freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('Clef'),
-                              extraArgs = alist(tonalHarmonic = 2^(19/12), 
-                                                frequency.reference = 440,
-                                                frequence.reference.note = 'a')) 
+freq.default <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('Clef'),
+                                    extraArgs = alist(tonalHarmonic = 2^(19/12), 
+                                                      frequency.reference = 440,
+                                                      frequence.reference.note = 'a')) 
+#' Apply to humdrumR data
+#' 
+#' If `freq()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> freq() 
+#' humData |> freq(simple = TRUE)
+#' humData |> freq(Token, Key = Key)
+#' 
+#' @rdname freq
+#' @export
+freq.humdrumR <- humdrumRmethod(freq.default)
+#' @export
+freq <- humdrumRgeneric(freq.default)
+
+
 #' Atonal pitch representations
 #' 
 #' These function translates pitch information into basic atonal pitch values:
@@ -3167,13 +3186,45 @@ freq  <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('Clef'),
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name semits
 #' @export 
-semits <- makePitchTransformer(tint2semits, 'semits', 'integer', tandem = c('Clef'))
-
+semits.default <- makePitchTransformer(tint2semits, 'semits', 'integer', tandem = c('Clef'))
+#' Apply to humdrumR data
+#' 
+#' If `semits()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> semits() 
+#' humData |> semits(simple = TRUE)
+#' humData |> semits(Token, Key = Key)
+#' 
+#' @rdname semits
+#' @export
+semits.humdrumR <- humdrumRmethod(semits.default)
+#' @export
+semits <- humdrumRgeneric(semits.default)
 
 #' @rdname semits
 #' @export 
-midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('Clef'))
+midi.default <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('Clef'))
+#' Apply to humdrumR data
+#' 
+#' If `midi()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> midi() 
+#' humData |> midi(simple = TRUE)
+#' humData |> midi(Token, Key = Key)
+#' 
+#' @rdname semits
+#' @export
+midi.humdrumR <- humdrumRmethod(midi.default)
+#' @export
+midi <- humdrumRgeneric(midi.default)
 
 #' @section Cents:
 #'
@@ -3199,9 +3250,24 @@ midi  <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('Clef'))
 #' @inheritParams freq
 #' @rdname semits
 #' @export 
-cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric', 
-                               tandem = c('Clef'), extraArgs = alist(tonalHarmonic = 2^(19/12)))
-
+cents.default <- makePitchTransformer(tint2cents, 'cents', 'numeric', 
+                                        tandem = c('Clef'), extraArgs = alist(tonalHarmonic = 2^(19/12)))
+#' Apply to humdrumR data
+#' 
+#' If `cents()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> cents() 
+#' humData |> cents(simple = TRUE)
+#' humData |> cents(Token, Key = Key)
+#' 
+#' @rdname cents
+#' @export
+cents.humdrumR <- humdrumRmethod(cents.default)
+#' @export
+cents <- humdrumRgeneric(cents.default)
 
 
 #' Representation of atonal pitch classes
@@ -3242,9 +3308,25 @@ cents  <- makePitchTransformer(tint2cents, 'cents', 'numeric',
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name pc
 #' @export 
-pc <- makePitchTransformer(tint2pc, 'pc', 'character', tandem = c('Clef'))
-
+pc.default <- makePitchTransformer(tint2pc, 'pc', 'character', tandem = c('Clef'))
+#' Apply to humdrumR data
+#' 
+#' If `pc()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> pc() 
+#' humData |> pc(simple = TRUE)
+#' humData |> pc(Token, Key = Key)
+#' 
+#' @rdname pc
+#' @export
+pc.humdrumR <- humdrumRmethod(pc.default)
+#' @export
+pc <- humdrumRgeneric(pc.default)
 
 #' Scientific pitch representation
 #' 
@@ -3269,8 +3351,27 @@ pc <- makePitchTransformer(tint2pc, 'pc', 'character', tandem = c('Clef'))
 #' 
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name pitch
 #' @export 
-pitch <- makePitchTransformer(tint2pitch, 'pitch')
+pitch.default <- makePitchTransformer(tint2pitch, 'pitch')
+#' Apply to humdrumR data
+#' 
+#' If `pitch()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> pitch() 
+#' humData |> pitch(simple = TRUE)
+#' humData |> pitch(Token, Key = Key)
+#' 
+#' @rdname pitch
+#' @export
+pitch.humdrumR <- humdrumRmethod(pitch.default)
+#' @export
+pitch <- humdrumRgeneric(pitch.default)
+
+
 
 #' Kern pitch representation
 #' 
@@ -3330,8 +3431,26 @@ pitch <- makePitchTransformer(tint2pitch, 'pitch')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name kern
 #' @export 
-kern <- makePitchTransformer(tint2kern, 'kern') 
+kern.default <- makePitchTransformer(tint2kern, 'kern') 
+#' Apply to humdrumR data
+#' 
+#' If `kern()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> kern() 
+#' humData |> kern(simple = TRUE)
+#' humData |> kern(Token, Key = Key)
+#' 
+#' @rdname kern
+#' @export
+kern.humdrumR <- humdrumRmethod(kern.default)
+#' @export
+kern <- humdrumRgeneric(kern.default)
+
 
 #' Lilypond pitch representation
 #' 
@@ -3356,8 +3475,25 @@ kern <- makePitchTransformer(tint2kern, 'kern')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name lilypond
 #' @export 
-lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
+lilypond.default <- makePitchTransformer(tint2lilypond, 'lilypond') 
+#' Apply to humdrumR data
+#' 
+#' If `lilypond()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> lilypond() 
+#' humData |> lilypond(simple = TRUE)
+#' humData |> lilypond(Token, Key = Key)
+#' 
+#' @rdname lilypond
+#' @export
+lilypond.humdrumR <- humdrumRmethod(lilypond.default)
+#' @export
+lilypond <- humdrumRgeneric(lilypond.default)
 
 #' German-style pitch notation. 
 #' 
@@ -3387,8 +3523,26 @@ lilypond <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name tonh
 #' @export 
-tonh <- makePitchTransformer(tint2tonh, 'tonh')
+tonh.default <- makePitchTransformer(tint2tonh, 'tonh') 
+#' Apply to humdrumR data
+#' 
+#' If `tonh()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> tonh() 
+#' humData |> tonh(simple = TRUE)
+#' humData |> tonh(Token, Key = Key)
+#' 
+#' @rdname tonh
+#' @export
+tonh.humdrumR <- humdrumRmethod(tonh.default)
+#' @export
+tonh <- humdrumRgeneric(tonh.default)
+
 
 #' Helmholtz pitch representation
 #' 
@@ -3410,8 +3564,25 @@ tonh <- makePitchTransformer(tint2tonh, 'tonh')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name helmholtz
 #' @export 
-helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
+helmholtz.default <- makePitchTransformer(tint2helmholtz, 'helmholtz') 
+#' Apply to humdrumR data
+#' 
+#' If `helmholtz()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> helmholtz() 
+#' humData |> helmholtz(simple = TRUE)
+#' humData |> helmholtz(Token, Key = Key)
+#' 
+#' @rdname helmholtz
+#' @export
+helmholtz.humdrumR <- humdrumRmethod(helmholtz.default)
+#' @export
+helmholtz <- humdrumRgeneric(helmholtz.default)
 
 #' Tonal (pitch) interval representation
 #' 
@@ -3434,8 +3605,25 @@ helmholtz <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name interval
 #' @export 
-interval <- makePitchTransformer(tint2interval, 'interval')
+interval.default <- makePitchTransformer(tint2interval, 'interval') 
+#' Apply to humdrumR data
+#' 
+#' If `interval()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> interval() 
+#' humData |> interval(simple = TRUE)
+#' humData |> interval(Token, Key = Key)
+#' 
+#' @rdname interval
+#' @export
+interval.humdrumR <- humdrumRmethod(interval.default)
+#' @export
+interval <- humdrumRgeneric(interval.default)
 
 #' Tonal [scale degree](https://en.wikipedia.org/wiki/Degree_(music)) representation (absolute)
 #' 
@@ -3469,16 +3657,46 @@ interval <- makePitchTransformer(tint2interval, 'interval')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name degree
 #' @export 
-degree <- makePitchTransformer(tint2degree, 'degree', keyed = FALSE)
+degree.default <- makePitchTransformer(tint2degree, 'degree', keyed = FALSE)
+#' Apply to humdrumR data
+#' 
+#' If `degree()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> degree() 
+#' humData |> degree(simple = TRUE)
+#' humData |> degree(Token, Key = Key)
+#' 
+#' @rdname degree
+#' @export
+degree.humdrumR <- humdrumRmethod(degree.default)
+#' @export
+degree <- humdrumRgeneric(degree.default)
 
-
-#' @family {absolute pitch functions}
 #' @family {pitch functions}
 #' @rdname degree
 #' @export 
-deg <- makePitchTransformer(tint2deg, 'deg', keyed = FALSE)
-
+deg.default <- makePitchTransformer(tint2deg, 'deg', keyed = FALSE)
+#' Apply to humdrumR data
+#' 
+#' If `deg()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData  select(Token) |> deg() 
+#' humData |> deg(simple = TRUE)
+#' humData |> deg(Token, Key = Key)
+#' 
+#' @rdname degree
+#' @export
+deg.humdrumR <- humdrumRmethod(deg.default)
+#' @export
+deg <- humdrumRgeneric(deg.default)
 
 #' Relative-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) representation
 #' 
@@ -3501,9 +3719,25 @@ deg <- makePitchTransformer(tint2deg, 'deg', keyed = FALSE)
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name solfa
 #' @export 
-solfa <- makePitchTransformer(tint2solfa, 'solfa', keyed = FALSE)
-
+solfa.default <- makePitchTransformer(tint2solfa, 'solfa', keyed = FALSE)
+#' Apply to humdrumR data
+#' 
+#' If `solfa()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> solfa() 
+#' humData |> solfa(simple = TRUE)
+#' humData |> solfa(Token, Key = Key)
+#' 
+#' @rdname solfa
+#' @export
+solfa.humdrumR <- humdrumRmethod(solfa.default)
+#' @export
+solfa <- humdrumRgeneric(solfa.default)
 
 #' Fixed-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) representation
 #' 
@@ -3527,8 +3761,25 @@ solfa <- makePitchTransformer(tint2solfa, 'solfa', keyed = FALSE)
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name solfg
 #' @export 
-solfg <- makePitchTransformer(tint2solfg, 'solfg')
+solfg.default <- makePitchTransformer(tint2solfg, 'solfg') 
+#' Apply to humdrumR data
+#' 
+#' If `solfg()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> solfg() 
+#' humData |> solfg(simple = TRUE)
+#' humData |> solfg(Token, Key = Key)
+#' 
+#' @rdname solfg
+#' @export
+solfg.humdrumR <- humdrumRmethod(solfg.default)
+#' @export
+solfg <- humdrumRgeneric(solfg.default)
 
 #' Swara representation
 #' 
@@ -3552,9 +3803,25 @@ solfg <- makePitchTransformer(tint2solfg, 'solfg')
 #' @inheritParams pitchFunctions
 #' @inheritSection pitchDeparsing Basic pitch arguments
 #' @inheritSection pitchDeparsing Pitch-Gamut Levels
+#' @name bhatk
 #' @export 
-bhatk <- makePitchTransformer(tint2bhatk, 'bhatk', keyed = FALSE)
-
+bhatk.default <- makePitchTransformer(tint2bhatk, 'bhatk', keyed = FALSE)
+#' Apply to humdrumR data
+#' 
+#' If `bhatk()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> bhatk() 
+#' humData |> bhatk(simple = TRUE)
+#' humData |> bhatk(Token, Key = Key)
+#' 
+#' @rdname bhatk
+#' @export
+bhatk.humdrumR <- humdrumRmethod(bhatk.default)
+#' @export
+bhatk <- humdrumRgeneric(bhatk.default)
 
 #### Partial pitch extractors ----
 
@@ -3646,70 +3913,6 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, e
 #' @export 
 octave <- makePitchTransformer(tint2octave, 'octave', 'integer')
 
-
-### humdrumR methods ----
-
-
-#' @exportS3Method kern default
-#' @exportS3Method kern humdrumR
-humdrumRmethods('kern')
-#' @exportS3Method pitch default
-#' @exportS3Method pitch humdrumR
-humdrumRmethods('pitch')
-#' @exportS3Method lilypond default
-#' @exportS3Method lilypond humdrumR
-humdrumRmethods('lilypond')
-#' @exportS3Method helmholtz default
-#' @exportS3Method helmholtz humdrumR
-humdrumRmethods('helmholtz')
-#' @exportS3Method tonh default
-#' @exportS3Method tonh humdrumR
-humdrumRmethods('tonh')
-#' @exportS3Method interval default
-#' @exportS3Method interval humdrumR
-humdrumRmethods('interval')
-#' @exportS3Method solfa default
-#' @exportS3Method solfa humdrumR
-humdrumRmethods('solfa')
-#' @exportS3Method solfg default
-#' @exportS3Method solfg humdrumR
-humdrumRmethods('solfg')
-#' @exportS3Method degree default
-#' @exportS3Method degree humdrumR
-humdrumRmethods('degree')
-#' @exportS3Method deg default
-#' @exportS3Method deg humdrumR
-humdrumRmethods('deg')
-#' @exportS3Method bhatk default
-#' @exportS3Method bhatk humdrumR
-humdrumRmethods('bhatk')
-#' @exportS3Method step default
-#' @exportS3Method step humdrumR
-humdrumRmethods('step')
-#' @exportS3Method accidental default
-#' @exportS3Method accidental humdrumR
-humdrumRmethods('accidental')
-#' @exportS3Method quality default
-#' @exportS3Method quality humdrumR
-humdrumRmethods('quality')
-#' @exportS3Method octave default
-#' @exportS3Method octave humdrumR
-humdrumRmethods('octave')
-#' @exportS3Method semits default
-#' @exportS3Method semits humdrumR
-humdrumRmethods('semits')
-#' @exportS3Method midi default
-#' @exportS3Method midi humdrumR
-humdrumRmethods('midi')
-#' @exportS3Method cents default
-#' @exportS3Method cents humdrumR
-humdrumRmethods('cents')
-#' @exportS3Method pc default
-#' @exportS3Method pc humdrumR
-humdrumRmethods('pc')
-#' @exportS3Method freq default
-#' @exportS3Method freq humdrumR
-humdrumRmethods('freq')
 
 
 ###################################################################### ###
@@ -4369,7 +4572,7 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
                 ..., Exclusive = NULL, Key = NULL, parseArgs = list()) {
   
   
-  checks(deparser, xnull | xclass('pitchFunction'))
+  checks(deparser, xnull | xinherits('pitchFunction'))
   
   checks(classify, xTF)
   checks(bracket, xTF)
@@ -4420,16 +4623,16 @@ int <- function(x, from = tint(0L, 0L), deparser = interval, incomplete = NULL, 
 
 #' @rdname int
 #' @export 
-mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.function(incomplete),
+mint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.function(incomplete),
                          classify = FALSE, ..., 
                          parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
   
   checks(lag, (xlogical & xmatch(x)) | (xwholenum & xlen1 & xnotzero))
-  checks(deparser, xclass('pitchFunction'))
-  checks(incomplete, xnull | xclass('pitchFunction') | (xatomic & xminlength(1) & 
-           argCheck(\(arg) length(arg) <= abs(lag), 
-                    "must be as short or shorter than the absolute lag",  
-                    \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag))))
+  checks(deparser, xinherits('pitchFunction'))
+  checks(incomplete, xnull |  xinherits('pitchFunction') | (xatomic & xminlength(1) & 
+                                                              argCheck(\(arg) length(arg) <= abs(lag), 
+                                                                       "must be as short or shorter than the absolute lag",  
+                                                                       \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag))))
   checks(bracket, xTF)
   checks(classify, xTF)
   
@@ -4437,7 +4640,7 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = i
   if (is.numeric(lag)) {
     if (lag >= 0L) {
       from <- lag(x, lag, groupby = groupby, orderby = orderby)
-     
+      
     } else {
       from <- x
       x <- lag(from, lag, groupby = groupby, orderby = orderby)
@@ -4457,10 +4660,25 @@ mint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = i
       Exclusive = Exclusive, Key = Key, 
       incomplete = incomplete, bracket = bracket, 
       classify = classify, ...)
- 
+  
   
 }
-
+#' Apply to humdrumR data
+#' 
+#' If `mint()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData  select(Token) |> mint() 
+#' humData |> mint(simple = TRUE)
+#' humData |> mint(Token, Key = Key)
+#' 
+#' @rdname int
+#' @export
+mint.humdrumR <- humdrumRmethod(mint.default)
+#' @export
+mint <- humdrumRgeneric(mint.default)
 
 .mint <- function(X, L, lag, deparser, initial, bracket, parseArgs, Exclusive, Key, ...) {
   Xtint <- do.call('tonalInterval', c(list(X, Exclusive = Exclusive, Key = Key), parseArgs))
@@ -4515,40 +4733,41 @@ mintClass <- function(x, directed = TRUE, skips = TRUE, atonal = FALSE) {
 
 
 #' @rdname int
-#' @export
-hint <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.function(incomplete),
-                 ...,
-                 parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
-
+#' @export 
+hint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bracket = is.function(incomplete),
+                         ...,
+                         parseArgs = list(), Exclusive = NULL, Key = NULL, groupby = list(), orderby = list()) {
+  
   # all checks are conducted by mint, so don't need to repeat them
-  #checks(x, xatomic & xminlength(1))
-  #checks(lag, xwholenumber & xlen1 & xnotzero)
-  #checks(deparser, xclass('function'))
-  #checks(incomplete, xatomic & xminlength(1) & 
-  #        argCheck(\(arg) length(arg) <= abs(lag), 
-  #                 "must be as short or shorter than the absolute lag",  
-  #                 \(arg) paste0(.mismatch(length)(arg), ' and lag == ', lag)))
-  #checks(bracket, xTF)
+  
   
   mint(x, lag = lag, deparser = deparser, incomplete = incomplete, bracket = bracket,
        parseArgs = parseArgs, 
        Exclusive = Exclusive, Key = Key, 
        groupby = groupby, orderby = orderby, ...)
   
-  
- 
 }
+#' Apply to humdrumR data
+#' 
+#' If `hint()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> hint() 
+#' humData |> hint(simple = TRUE)
+#' humData |> hint(Token, Key = Key)
+#' 
+#' @rdname int
+#' @export
+hint.humdrumR <- humdrumRmethod(hint.default)
+#' @export
+hint <- humdrumRgeneric(hint.default)
 
 
-### humdrumR methods ----
 
 
-#' @exportS3Method mint default
-#' @exportS3Method mint humdrumR
-humdrumRmethods('mint')
-#' @exportS3Method hint default
-#' @exportS3Method hint humdrumR
-humdrumRmethods('hint')
+
 
 
 ###################################################################### ### 

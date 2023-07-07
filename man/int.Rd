@@ -2,8 +2,10 @@
 % Please edit documentation in R/Pitch.R
 \name{int}
 \alias{int}
-\alias{mint}
-\alias{hint}
+\alias{mint.default}
+\alias{mint.humdrumR}
+\alias{hint.default}
+\alias{hint.humdrumR}
 \title{Calculate intervals between pitches}
 \usage{
 int(
@@ -19,7 +21,7 @@ int(
   parseArgs = list()
 )
 
-mint(
+\method{mint}{default}(
   x,
   lag = 1,
   deparser = interval,
@@ -34,7 +36,11 @@ mint(
   orderby = list()
 )
 
-hint(
+humData  select(Token) |> mint() 
+humData |> mint(simple = TRUE)
+humData |> mint(Token, Key = Key)
+
+\method{hint}{default}(
   x,
   lag = 1,
   deparser = interval,
@@ -47,6 +53,10 @@ hint(
   groupby = list(),
   orderby = list()
 )
+
+humData |> select(Token) |> hint() 
+humData |> hint(simple = TRUE)
+humData |> hint(Token, Key = Key)
 }
 \arguments{
 \item{x}{\emph{\strong{Input pitch information.}}
@@ -120,6 +130,14 @@ order, but the output is returned in the original order.}
 These functions allow us to calculate intervals between pitches.
 \code{int()} is the most basic form, calculating the interval(s) between two input vectors.
 \code{mint()} and \code{hint()} are special forms for calculating intervals "melodically" or "harmonically," respectively.
+
+If \code{mint()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{hint()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Input vectors \code{x} (and \code{from}) are \link[=tonalInterval]{parsed as pitches} (\link[=tonalIntervaS4]{tonal interval objects}), if possible.

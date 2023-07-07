@@ -2,9 +2,11 @@
 % Please edit documentation in R/Pitch.R
 \name{interval}
 \alias{interval}
+\alias{interval.default}
+\alias{interval.humdrumR}
 \title{Tonal (pitch) interval representation}
 \usage{
-interval(
+\method{interval}{default}(
   x,
   ...,
   generic = FALSE,
@@ -16,6 +18,10 @@ interval(
   gamutArgs = list(),
   inPlace = FALSE
 )
+
+humData |> select(Token) |> interval() 
+humData |> interval(simple = TRUE)
+humData |> interval(Token, Key = Key)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to parse as pitch information.}}
@@ -70,6 +76,10 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 \description{
 This returns the standard representations of \href{https://en.wikipedia.org/wiki/Interval_(music)}{intervals}
 in Western music.
+
+If \code{interval()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

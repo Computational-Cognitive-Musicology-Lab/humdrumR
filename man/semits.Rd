@@ -2,11 +2,14 @@
 % Please edit documentation in R/Pitch.R
 \name{semits}
 \alias{semits}
-\alias{midi}
-\alias{cents}
+\alias{semits.default}
+\alias{semits.humdrumR}
+\alias{midi.default}
+\alias{midi.humdrumR}
+\alias{cents.default}
 \title{Atonal pitch representations}
 \usage{
-semits(
+\method{semits}{default}(
   x,
   ...,
   generic = FALSE,
@@ -19,7 +22,11 @@ semits(
   inPlace = FALSE
 )
 
-midi(
+humData |> select(Token) |> semits() 
+humData |> semits(simple = TRUE)
+humData |> semits(Token, Key = Key)
+
+\method{midi}{default}(
   x,
   ...,
   generic = FALSE,
@@ -32,7 +39,11 @@ midi(
   inPlace = FALSE
 )
 
-cents(
+humData |> select(Token) |> midi() 
+humData |> midi(simple = TRUE)
+humData |> midi(Token, Key = Key)
+
+\method{cents}{default}(
   x,
   ...,
   generic = FALSE,
@@ -111,6 +122,14 @@ semitone (\code{integer}) values. For \code{semits} \code{0} (zero) is middle-C 
 In contrast, the \href{https://en.wikipedia.org/wiki/MIDI}{MIDI pitch values} output by
 \code{midi} place middle-C/unison at \code{60}.
 \code{cents} returns \href{https://en.wikipedia.org/wiki/Cent_(music)}{cents}, one hundredth of a semitone.
+
+If \code{semits()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{midi()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Cents}{
 

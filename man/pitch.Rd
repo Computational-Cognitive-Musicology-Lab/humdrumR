@@ -2,9 +2,11 @@
 % Please edit documentation in R/Pitch.R
 \name{pitch}
 \alias{pitch}
+\alias{pitch.default}
+\alias{pitch.humdrumR}
 \title{Scientific pitch representation}
 \usage{
-pitch(
+\method{pitch}{default}(
   x,
   ...,
   generic = FALSE,
@@ -16,6 +18,10 @@ pitch(
   gamutArgs = list(),
   inPlace = FALSE
 )
+
+humData |> select(Token) |> pitch() 
+humData |> pitch(simple = TRUE)
+humData |> pitch(Token, Key = Key)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to parse as pitch information.}}
@@ -70,6 +76,10 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 \description{
 \href{https://en.wikipedia.org/wiki/Scientific_pitch}{Scientific pitch} is the most standard
 approach to representing pitch in traditional Western music.
+
+If \code{pitch()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -214,7 +224,6 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
-\code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},

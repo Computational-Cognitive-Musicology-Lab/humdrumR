@@ -857,6 +857,8 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' @family {Lagged vector functions}
 #' @export
 ditto <- function(x, ...) UseMethod('ditto')
+class(ditto) <- c('humdrumRmethod', 'function')
+attr(ditto, 'name') <- 'ditto'
 
 #' @rdname ditto
 #' @export

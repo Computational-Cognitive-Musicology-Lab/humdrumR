@@ -2,9 +2,11 @@
 % Please edit documentation in R/Pitch.R
 \name{solfa}
 \alias{solfa}
+\alias{solfa.default}
+\alias{solfa.humdrumR}
 \title{Relative-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation}
 \usage{
-solfa(
+\method{solfa}{default}(
   x,
   ...,
   generic = FALSE,
@@ -16,6 +18,10 @@ solfa(
   gamutArgs = list(),
   inPlace = FALSE
 )
+
+humData |> select(Token) |> solfa() 
+humData |> solfa(simple = TRUE)
+humData |> solfa(Token, Key = Key)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to parse as pitch information.}}
@@ -68,7 +74,9 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-Relative-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation
+If \code{solfa()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

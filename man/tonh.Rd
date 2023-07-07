@@ -2,9 +2,11 @@
 % Please edit documentation in R/Pitch.R
 \name{tonh}
 \alias{tonh}
+\alias{tonh.default}
+\alias{tonh.humdrumR}
 \title{German-style pitch notation.}
 \usage{
-tonh(
+\method{tonh}{default}(
   x,
   ...,
   generic = FALSE,
@@ -16,6 +18,10 @@ tonh(
   gamutArgs = list(),
   inPlace = FALSE
 )
+
+humData |> select(Token) |> tonh() 
+humData |> tonh(simple = TRUE)
+humData |> tonh(Token, Key = Key)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to parse as pitch information.}}
@@ -76,6 +82,10 @@ If \code{S = TRUE}, E-flat (\code{Ees}) will be output as \code{"S"} and A-flat 
 \description{
 Based on the common German system of notating pitches, as encoded in the humdrum
 \href{https://www.humdrum.org/rep/Tonh/index.html}{\verb{**Tonh}} interpretation.
+
+If \code{tonh()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -219,7 +229,6 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
-\code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},
