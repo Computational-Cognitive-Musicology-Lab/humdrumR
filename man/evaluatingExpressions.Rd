@@ -82,3 +82,11 @@ For example, \verb{mean(sqrt(log(x))} is an incomplete expression!
 }
 }
 
+\seealso{
+Other {R lessons.}: 
+\code{\link{groupingFactors}},
+\code{\link{partialMatching}},
+\code{\link{recycling}},
+\code{\link{vectorization}}
+}
+\concept{{R lessons.}}

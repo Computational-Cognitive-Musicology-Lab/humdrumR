@@ -48,8 +48,10 @@ are returned in a matrix, with each row matching a change and each column contai
 value from the associated input vector.}
 }
 \description{
-\code{segments} and \code{changes} are extremely useful functions for finding
+\code{segments()} and \code{changes()} are extremely useful functions for finding
 contiguous "segments" indicated in a vector.
+It can be particularly useful to use \code{segments()} to create
+\link[=groupingFactors]{grouping factors}.
 }
 \section{Changes}{
 

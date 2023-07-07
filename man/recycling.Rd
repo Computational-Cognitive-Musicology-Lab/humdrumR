@@ -64,3 +64,11 @@ on what the function is doing!
 }
 }
 
+\seealso{
+Other {R lessons.}: 
+\code{\link{evaluatingExpressions}},
+\code{\link{groupingFactors}},
+\code{\link{partialMatching}},
+\code{\link{vectorization}}
+}
+\concept{{R lessons.}}

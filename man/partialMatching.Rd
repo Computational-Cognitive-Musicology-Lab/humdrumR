@@ -29,3 +29,11 @@ For example, if added a \code{Dare} column to \code{df}, then \code{df$D} or \co
 You'd need to write at least \code{Dar} or \code{Dat} to get the \code{Dare} and \code{Date} columns respectively.
 }
 
+\seealso{
+Other {R lessons.}: 
+\code{\link{evaluatingExpressions}},
+\code{\link{groupingFactors}},
+\code{\link{recycling}},
+\code{\link{vectorization}}
+}
+\concept{{R lessons.}}

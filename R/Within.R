@@ -455,7 +455,7 @@
 #' 
 #' The `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()` functions all
 #' work with [grouped][groupHumdrum] data, or data with [contextual windows][context()] defined.
-#' When groups or windows are defined, all argument expressions are evaluated independtly
+#' When groups or windows are defined, all argument expressions are evaluated independently
 #' within each and every group/window.
 #' Results are then processed (including recycling/padding) within each group/window.
 #' Finally, the results are then pieced back together in locations corresponding to the
@@ -477,7 +477,7 @@
 #' These expressions can reference [fields()] in the data by name,
 #' as well as variables outside the data.
 #' 
-#' If the expressions are named, the names are used to name new fields
+#' If the expressions are named, the names are used to name the new fields
 #' (or column names for `with(..., drop = FALSE)`.
 #' 
 #' @param dataTypes ***Which types of humdrum records to include.***

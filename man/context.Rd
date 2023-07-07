@@ -510,3 +510,8 @@ chorales |>
 }
 
 }
+\seealso{
+Other {Contextual grouping functions.}: 
+\code{\link{groupHumdrum}}
+}
+\concept{{Contextual grouping functions.}}

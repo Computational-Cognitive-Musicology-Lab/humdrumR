@@ -6,12 +6,128 @@
 \alias{group_by}
 \alias{ungroup.humdrumR}
 \alias{ungroup}
+\alias{groups}
 \title{Divide humdrumR data into groups}
 \usage{
-\method{group_by}{humdrumR}(.data, ..., .add = FALSE)
+\method{group_by}{humdrumR}(.data, ..., .add = TRUE)
 
 \method{ungroup}{humdrumR}(x, ...)
+
+groups(humdrumR, dataTypes = "D")
+}
+\arguments{
+\item{.data, x, humdrumR}{\emph{\strong{HumdrumR data.}}
+
+Must be a \link[=humdrumRclass]{humdrumR data object}.}
+
+\item{...}{\emph{\strong{Any number of expressions to evaluate.}}
+
+These expressions can reference \code{\link[=fields]{fields()}} in the data by name,
+as well as variables outside the data.
+
+If the expressions are named, the names are used to name the new fields.}
+
+\item{.add}{\emph{\strong{Should groups be added to existing groups?}}
+
+Defaults to \code{TRUE}.
+
+Must be a single \code{logical} value: an on/off switch.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}
+
+Defaults to \code{"D"}.
+
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 }
 \description{
-The \code{\link[=group_by]{group_by()}} method for \link[=humdrumRclass]{humdrumR objects}.
+The \code{\link[=group_by]{group_by()}} method for \link[=humdrumRclass]{humdrumR objects}
+is used to define \link[=groupingFactors]{grouping factors} in your data fields.
+Note that groups created by grouping factors 1) are not necessarily contiguous and
+2) always exhaustively partition the data.
+The \code{\link[=context]{context()}} function can be used, as an alternative, to generate groups ("windows")
+which are always contiguous and/or exclude some data.
+
+The \code{ungroup()} function removes grouping from a \link[=humdrumRclass]{humdrumR data object}.
+
+Once groups are created, the \code{groups()} function can be used to tabulate
+the number of tokens in each group, and find their indices in the \link[=humTable]{humdrum table}.
 }
+\details{
+The \code{group_by()} method for \link[=humdrumRclass]{humdrumR objects} takes
+any number of expressions as \code{...} arguments.
+These expressions may simply be \code{character} strings or symbols
+indicating existing \code{\link[=fields]{fields()}} in the data---
+For example, \code{group_by(Piece, Spine)}.
+However, the \link[=expressionEvaluation]{expressions} can also be arbitrary "expression arguments"
+which are passed to \link[=withHumdrum]{within()} to generate new fields for grouping.
+For example, you could group spines into even and odd groups with \code{group_by(Spine \%\% 2)}.
+
+The \code{group_by()} function returns a new \link[=humdrumRclass]{humdrumR data object}
+with grouping fields activated.
+The grouping fields, and the number of groups, are show when the humdrumR data
+is printed.
+The \code{groups()} can be used to gather more information about groups:
+\code{group()} returns a \code{data.table} with one row representing each group,
+the value of each grouping field indicated, and
+with one or more columns indicating the number of tokens of each type in the group
+(the desired types are indicated by the \code{dataTypes} argument).
+
+By default, each call to \code{group_by.humdrumR()} \emph{adds} groups to
+any groups already existing in the data.
+If \code{.add = FALSE}, any preexisting groups are removed before creating new groups.
+Groups can be explicitly removed using \code{ungroup()}.
+
+When \code{.add = TRUE}, each call to \code{group_by()} computes new fields \emph{using} the preexisting groups,
+just like any normal call to \link[=withHumdrum]{within()}.
+This means that you can, in some cases, create different groupings depending on the order
+you create groups.
+For example, imagine we want to divide each piece in our data into two groups:
+all pitches higher than average in one group and all pitches lower than average in the other.
+Consider a \code{humData} corpus with a numeric \code{Semits} field, and we run
+these two different calls:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> 
+   group_by(Piece) |>
+   group_by(Semits > mean(Semits))
+
+humData |>
+   group_by(Semits > mean(Semits)) |>
+   group_by(Piece)
+
+}\if{html}{\out{</div>}}
+
+In the first call, we first group by \code{Piece}, then divide each piece by the \emph{piece's}
+average.
+In the second example, we divide the corpus into two halves based on the \emph{overall}
+(cross-piece) average, \emph{then} we divide it into pieces.
+}
+\examples{
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+humData |> 
+   group_by(Piece, Spine) |>
+   groups()
+
+humData |> 
+   group_by(Piece, Spine \%\% 2) |>
+   groups()
+   
+humData |> 
+   group_by(Piece, Bar) |>
+   mutate(NotesPerBar = length(Token)) |>
+   ungroup()
+   
+humData |> 
+   semits() |>
+   group_by(Piece, Spine) |>
+   with(mean(Semits))
+
+}
+\seealso{
+Other {Contextual grouping functions.}: 
+\code{\link{context}()}
+}
+\concept{{Contextual grouping functions.}}

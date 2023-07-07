@@ -9,6 +9,69 @@ What is "vectorization"?
 \section{Vectorization explained}{
 
 
-Blah blah
+Many R operations/functions are "vectorized," meaning that they take in vectors and output vectors that are the same length.
+This means that we, as programmers, don't need to worry about each element of the vector;
+We can treat a vector like a single object, and R will oblige us.
+For example, we can do math like:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
+2^(0:10) - 1
+
+(1:10) - (10:1)
+
+sqrt(c(5, 10, 16))
+}\if{html}{\out{</div>}}
+
+Or work with strings like:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{paste(1:26, letters, sep = ': ')
+
+paste('Chord', 1:10)
+
+# Regular expressions:
+grepl('[aeiou]', letters)
+
+}\if{html}{\out{</div>}}
+
+Or get logical values:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{2^(0:100) > 50
+
+1:10 \%\% 2 == 0
+
+1:20 \%in\% 2^(0:4)
+
+}\if{html}{\out{</div>}}
+
+Of course, other R functions take in vectors and return totally new vectors (or just scalars).
+Examples:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{
+length(seq(50, 90, by = .2))
+
+length(letters) # letters is a built-in vector which is always there!
+
+sum(c(1, 5, 9))
+mean(c(1, 5, 9))
+max(c(1, 5, 9))
+
+range(c(1, 100, 2, -4))
+which(c(TRUE, FALSE, TRUE, TRUE))
+
+}\if{html}{\out{</div>}}
+
+Vectorization works very well when you are working with vectors that are either 1) all the same length or 2) length 1 (scalar).
+If vectors are different lengths, the shorter one will be "recycled" (repeated) to match the longer one.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{c(0, 5) * 1:10
+}\if{html}{\out{</div>}}
 }
 
+\seealso{
+Other {R lessons.}: 
+\code{\link{evaluatingExpressions}},
+\code{\link{groupingFactors}},
+\code{\link{partialMatching}},
+\code{\link{recycling}}
+}
+\concept{{R lessons.}}

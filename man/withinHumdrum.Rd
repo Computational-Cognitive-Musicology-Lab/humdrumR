@@ -76,7 +76,7 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 These expressions can reference \code{\link[=fields]{fields()}} in the data by name,
 as well as variables outside the data.
 
-If the expressions are named, the names are used to name new fields
+If the expressions are named, the names are used to name the new fields
 (or column names for \code{with(..., drop = FALSE)}.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum records to include.}}
@@ -585,7 +585,7 @@ the use of \code{Kern} in the second expression will refer to the \code{Kern} as
 
 The \code{with()}, \code{within()}, \code{mutate()}, \code{summarize()}, and \code{reframe()} functions all
 work with \link[=groupHumdrum]{grouped} data, or data with \link[=context]{contextual windows} defined.
-When groups or windows are defined, all argument expressions are evaluated independtly
+When groups or windows are defined, all argument expressions are evaluated independently
 within each and every group/window.
 Results are then processed (including recycling/padding) within each group/window.
 Finally, the results are then pieced back together in locations corresponding to the

@@ -179,7 +179,7 @@ NULL
 #' For example, if added a `Dare` column to `df`, then `df$D` or `df$Da` would return `NULL` because they are ambiguous.
 #' You'd need to write at least `Dar` or `Dat` to get the `Dare` and `Date` columns respectively.
 #' 
-#' 
+#' @family {R lessons.}
 #' @name partialMatching
 NULL
 
@@ -256,7 +256,7 @@ NULL
 #' Failing to have properly paired parentheses will often result in incomplete expressions:
 #' For example, `mean(sqrt(log(x))` is an incomplete expression!
 #'
-#' 
+#' @family {R lessons.}
 #' @name evaluatingExpressions
 NULL
 
@@ -318,6 +318,7 @@ NULL
 #' Of course, that may or may not make sense depending
 #' on what the function is doing!
 #' 
+#' @family {R lessons.}
 #' @name recycling
 #' @aliases padding
 NULL
@@ -326,9 +327,113 @@ NULL
 #'
 #' @section Vectorization explained:
 #' 
-#' Blah blah
+#' Many R operations/functions are "vectorized," meaning that they take in vectors and output vectors that are the same length.
+#' This means that we, as programmers, don't need to worry about each element of the vector;
+#' We can treat a vector like a single object, and R will oblige us.
+#' For example, we can do math like:
+#'
+#' ```
+#'
+#' 2^(0:10) - 1
+#'
+#' (1:10) - (10:1)
+#'
+#' sqrt(c(5, 10, 16))
+#' ```
+#'
+#' Or work with strings like:
+#'
+#' ```
+#' paste(1:26, letters, sep = ': ')
+#'
+#' paste('Chord', 1:10)
+#'
+#' # Regular expressions:
+#' grepl('[aeiou]', letters)
 #' 
+#' ```
+#'
+#' Or get logical values:
+#'
+#' ```
+#' 2^(0:100) > 50
+#'
+#' 1:10 %% 2 == 0
+#'
+#' 1:20 %in% 2^(0:4)
+#' 
+#' ```
+#' 
+#' Of course, other R functions take in vectors and return totally new vectors (or just scalars).
+#' Examples:
+#'
+#' ```
+#'
+#' length(seq(50, 90, by = .2))
+#'
+#' length(letters) # letters is a built-in vector which is always there!
+#'
+#' sum(c(1, 5, 9))
+#' mean(c(1, 5, 9))
+#' max(c(1, 5, 9))
+#'
+#' range(c(1, 100, 2, -4))
+#' which(c(TRUE, FALSE, TRUE, TRUE))
+#' 
+#' ```
+#'
+#' Vectorization works very well when you are working with vectors that are either 1) all the same length or 2) length 1 (scalar).
+#' If vectors are different lengths, the shorter one will be "recycled" (repeated) to match the longer one.
+#'
+#' ```
+#' c(0, 5) * 1:10
+#' ```
+#' 
+#' @family {R lessons.}
 #' @name vectorization
+NULL
+
+#' What are "grouping factors"?
+#' 
+#' @section Grouping and "split-apply-combine" explained:
+#' 
+#' The concept of "grouping factors" is widely used in R, allowing
+#' us to quickly *split* datasets ([vector]s or [data.frame]s) into subgroups, 
+#' work with the subgroups independent (*apply* functions to them), 
+#' and then re*combine* them as needed.
+#' Various R functions specify "grouping factors" in a confusing
+#' variety of subtly different ways, usually as function arguments named
+#' things like `INDEX`, `INDICES`, `f`, `by`, or `groupby`.
+#' In `humdrumR`, we adopt the tidyverse [dplyr] approach, using the
+#' `group_by()` function (and/or the `.by` argument).
+#' 
+#' Any [atomic vector][vector] with at least two 
+#' unique values, or "levels", can be used as a grouping factor---generally,
+#' grouping vectors are coerced into [factor]s.
+#' Each unique level in a grouping vector/factor represents a single group.
+#' Any vector, or [data.frame] that is *the same length/height* as the grouping factor
+#' can then be broken into these groups, taking all the indices where the grouping factor
+#' equals each group in turn.
+#' Since we generally try to work with data.frames, which by definition contain a bunch
+#' of vectors that are the same length, we can use any vector/column in a data.frame
+#' to group any of the other vectors, or the rows of the whole data.frame.
+#' 
+#' Most functions allow you to specifiy multiple grouping factors/vectors (so long as they are all
+#' the same length).
+#' The groups are then defined by every *unique combination* of elements in the vectors.
+#' So, for example, if we use the vectors `c('A', 'A', 'A', 'B', 'B', 'B')` and 
+#' `c(1, 1, 2, 2, 3, 3)` as grouping factors, we'll get four groups with levels `1A`, `2A`, `2B`, and `3B`.
+#' 
+#' Note that groups created by grouping factors are *not* neccessarily contiguous.
+#' If we use a vector like `c(1, 1, 2, 2, 1, 1)` as grouping factor, we get two groups: `1` and `2`.
+#' The `1` group would include the 1st, 2nd, 5th, and 6th indices, even though they are 
+#' separated in the grouping factor.
+#' If you *want* contiguous groups you must make them.
+#' The `humdrumR` function [segments()] can be used to generate strictly contiguous grouping factors.
+#' For example, `segments(c(1, 1, 2, 2, 1, 1))` will return `c(1, 1, 2, 2, 3, 3)`.
+#' 
+#' @family {R lessons.}
+#' @name groupingFactors
 NULL
 
 # Options -----

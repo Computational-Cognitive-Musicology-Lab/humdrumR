@@ -7,12 +7,117 @@
 
 #' Divide humdrumR data into groups
 #'
-#' The [group_by()] method for [humdrumR objects][humdrumRclass].
+#' The [group_by()] method for [humdrumR objects][humdrumRclass]
+#' is used to define [grouping factors][groupingFactors] in your data fields.
+#' Note that groups created by grouping factors 1) are not necessarily contiguous and 
+#' 2) always exhaustively partition the data.
+#' The [context()] function can be used, as an alternative, to generate groups ("windows")
+#' which are always contiguous and/or exclude some data.
+#' 
+#' 
+#' @details
+#' 
+#' The `group_by()` method for [humdrumR objects][humdrumRclass] takes 
+#' any number of expressions as `...` arguments.
+#' These expressions may simply be `character` strings or symbols
+#' indicating existing [fields()] in the data---
+#' For example, `group_by(Piece, Spine)`.
+#' However, the [expressions][expressionEvaluation] can also be arbitrary "expression arguments"
+#' which are passed to [within()][withHumdrum] to generate new fields for grouping.
+#' For example, you could group spines into even and odd groups with `group_by(Spine %% 2)`.
+#' 
+#' The `group_by()` function returns a new [humdrumR data object][humdrumRclass]
+#' with grouping fields activated.
+#' The grouping fields, and the number of groups, are show when the humdrumR data
+#' is printed.
+#' The `groups()` can be used to gather more information about groups: 
+#' `group()` returns a `data.table` with one row representing each group,
+#' the value of each grouping field indicated, and
+#' with one or more columns indicating the number of tokens of each type in the group 
+#' (the desired types are indicated by the `dataTypes` argument).
+#' 
+#' By default, each call to `group_by.humdrumR()` *adds* groups to
+#' any groups already existing in the data.
+#' If `.add = FALSE`, any preexisting groups are removed before creating new groups.
+#' Groups can be explicitly removed using `ungroup()`.
+#' 
+#' When `.add = TRUE`, each call to `group_by()` computes new fields *using* the preexisting groups,
+#' just like any normal call to [within()][withHumdrum].
+#' This means that you can, in some cases, create different groupings depending on the order
+#' you create groups.
+#' For example, imagine we want to divide each piece in our data into two groups: 
+#' all pitches higher than average in one group and all pitches lower than average in the other.
+#' Consider a `humData` corpus with a numeric `Semits` field, and we run
+#' these two different calls:
+#' 
+#' ```
+#' humData |> 
+#'    group_by(Piece) |>
+#'    group_by(Semits > mean(Semits))
+#' 
+#' humData |>
+#'    group_by(Semits > mean(Semits)) |>
+#'    group_by(Piece)
+#' 
+#' ```
+#' 
+#' In the first call, we first group by `Piece`, then divide each piece by the *piece's*
+#' average.
+#' In the second example, we divide the corpus into two halves based on the *overall*
+#' (cross-piece) average, *then* we divide it into pieces.
+#' 
+#' @param .data,x,humdrumR ***HumdrumR data.***
+#' 
+#' Must be a [humdrumR data object][humdrumRclass].
+#' 
+#' @param ... ***Any number of expressions to evaluate.*** 
 #'
+#' These expressions can reference [fields()] in the data by name,
+#' as well as variables outside the data.
+#' 
+#' If the expressions are named, the names are used to name the new fields.
+#' 
+#' @param dataTypes ***Which types of humdrum records to include.***
+#' 
+#' Defaults to `"D"`.
+#' 
+#' Must be a single `character` string. Legal values are `'G', 'L', 'I', 'M', 'D', 'd'` 
+#' or any combination of these (e.g., `"LIM"`).
+#' (See the [humdrum table][humTable] documentation **Fields** section for explanation.)
+#'
+#' @param .add ***Should groups be added to existing groups?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a single `logical` value: an on/off switch.
+#'
+#' @examples
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData |> 
+#'    group_by(Piece, Spine) |>
+#'    groups()
+#' 
+#' humData |> 
+#'    group_by(Piece, Spine %% 2) |>
+#'    groups()
+#'    
+#' humData |> 
+#'    group_by(Piece, Bar) |>
+#'    mutate(NotesPerBar = length(Token)) |>
+#'    ungroup()
+#'    
+#' humData |> 
+#'    semits() |>
+#'    group_by(Piece, Spine) |>
+#'    with(mean(Semits))
+#' 
+#' @family {Contextual grouping functions.}
 #' @name groupHumdrum
 #' @aliases group_by
 #' @export
-group_by.humdrumR <- function(.data, ..., .add = FALSE) {
+group_by.humdrumR <- function(.data, ..., .add = TRUE) {
   .data <- uncontextMessage(.data, 'group_by')
   
   if (!.add) .data <- ungroup(.data)
@@ -49,6 +154,10 @@ group_by.humdrumR <- function(.data, ..., .add = FALSE) {
   
 }
 
+#' Remove groups from humdrumR data
+#' 
+#' The `ungroup()` function removes grouping from a [humdrumR data object][humdrumRclass].
+#' 
 #' @rdname groupHumdrum
 #' @aliases ungroup
 #' @export
@@ -66,6 +175,34 @@ ungroup.humdrumR <- function(x, ...) {
   
 }
 
+### group information queries ----
+
+#' Tabulate tokens in groups
+#' 
+#' Once groups are created, the `groups()` function can be used to tabulate 
+#' the number of tokens in each group, and find their indices in the [humdrum table][humTable].
+#' 
+#' @rdname groupHumdrum
+#' @export
+groups <- function(humdrumR, dataTypes = 'D') {
+  checks(humdrumR, xhumdrumR)
+  dataTypes <- setdiff(checkTypes(dataTypes, 'groups'), c('S', 'E'))
+  
+  groupFields <- fields(humdrumR)[GroupedBy == TRUE, Name]
+  humtab <- getHumtab(humdrumR, dataTypes = dataTypes)
+  
+  groupTable <- humtab[ ,
+                        as.list(table(factor(ifelse(Type %in% c('S', 'E'), 'I', Type),
+                                             levels = dataTypes))), 
+                        by = groupFields]
+  
+  if (length(dataTypes) > 1L) groupTable[ , Total := Reduce('+', .SD[ , !colnames(.SD) %in% groupFields, with = FALSE])]
+  
+  groupTable
+   
+  
+  
+}
 
 
 #################################-
@@ -601,6 +738,7 @@ parseContextExpression <- function(expr, other) {
 #' 
 #' @export
 context <- function(x, open, close, ...) UseMethod('context')
+#' @family {Contextual grouping functions.}
 #' @rdname context
 #' @export
 context.default <- function(x, open, close, reference = x, 

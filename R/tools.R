@@ -607,8 +607,10 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 
 #' Identify contiguous segments of data in a vector
 #' 
-#' `segments` and `changes` are extremely useful functions for finding 
+#' `segments()` and `changes()` are extremely useful functions for finding 
 #' contiguous "segments" indicated in a vector.
+#' It can be particularly useful to use `segments()` to create
+#' [grouping factors][groupingFactors].
 #' 
 #' @section Changes:
 #' 

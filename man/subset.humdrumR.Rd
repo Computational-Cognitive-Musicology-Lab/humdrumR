@@ -77,12 +77,14 @@ HumdrumR defines \link[base:subset]{subset()} (base R) and \link[dplyr:filter]{f
 for \link[=humdrumRclass]{humdrumR data}---these two \code{.humdrumR} methods are synonymous,
 working exactly the same.
 They are used to "filter" the contents of the underlying \link[=humTable]{humdrum table}.
-This filtering is (by default) not destructive, allowing you to recover the filtered data
-using \code{removeSubset()} or \code{unfilter()} (which are also synonyms).
 R's standard indexing operators (\verb{[]} and \verb{[[]]}) can also be used to filter data---
 you can read about these indexing options \link[=indexHumdrum]{here}---however,
 the \code{subset()}/\code{filter()} can accomplish much more sophisticated filtering commands than the indexing
 methods.
+
+Filtering with \code{subset()}/\code{filter()} is (by default) not destructive,
+allowing you to recover the filtered data
+using \code{removeSubset()} or \code{unfilter()} (which are also synonyms).
 }
 \details{
 \code{subset()} and \code{filter()} are passed one or more expressions which are using the

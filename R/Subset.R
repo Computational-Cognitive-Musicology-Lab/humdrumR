@@ -8,8 +8,6 @@
 #' for [humdrumR data][humdrumR::humdrumRclass]---these two `.humdrumR` methods are synonymous,
 #' working exactly the same.
 #' They are used to "filter" the contents of the underlying [humdrum table][humTable].
-#' This filtering is (by default) not destructive, allowing you to recover the filtered data
-#' using `removeSubset()` or `unfilter()` (which are also synonyms).
 #' R's standard indexing operators (`[]` and `[[]]`) can also be used to filter data---
 #' you can read about these indexing options [here][indexHumdrum]---however, 
 #' the `subset()`/`filter()` can accomplish much more sophisticated filtering commands than the indexing
@@ -283,7 +281,12 @@ removeEmptyStops <- function(x) {
 
 # Unfiltering humdrumR ----
 
-
+#' Unfilter data
+#' 
+#' Filtering with `subset()`/`filter()` is (by default) not destructive, 
+#' allowing you to recover the filtered data
+#' using `removeSubset()` or `unfilter()` (which are also synonyms).
+#' 
 #' @export
 #' @rdname subset.humdrumR
 removeSubset <- function(humdrumR, complement = NULL) {
