@@ -128,7 +128,7 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   
   subsets <- local({
     groupFields <- getGroupingFields(x, .by, 'subset.humdrumR') 
-    subsets <- rlang::eval_tidy(rlang::quo(with.humdrumR(x, !!!quosures, recycle = 'scalar',
+    subsets <- rlang::eval_tidy(rlang::quo(with.humdrumR(x, !!!quosures, recycle = 'ifscalar',
                                                          dataTypes = !!dataTypes,
                                                          .by = !!.by, drop = FALSE)))
     subsets[ , setdiff(names(subsets), groupFields), with = FALSE]
@@ -192,7 +192,9 @@ nullify <- function(humtab, fields, subset, dataTypes) {
   
   humtab <- humtab[ , !colnames(humtab) %in% fields, with = FALSE]
   
-  do.call('cbind', c(list(humtab), newFields))
+  for (j in seq_along(newFields)) humtab <- cbind(humtab, newFields[[j]])
+ 
+  humtab
 }
 
 ## Null indexing ----

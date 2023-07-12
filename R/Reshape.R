@@ -1061,7 +1061,7 @@ pivot_longer.humdrumR <- function(data, cols, ...) {
 unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
   checks(humdrumR, xhumdrumR)
   if (!anyStops(humdrumR)) return(humdrumR)
-  checks(fromFields, xcharacter & xlen0)
+  checks(fromFields, xcharacter & xlen1)
   
   #
   humtab <- getHumtab(humdrumR, 'D')
