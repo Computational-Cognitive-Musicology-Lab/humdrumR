@@ -1627,11 +1627,12 @@ pullPrintable <- function(humdrumR, fields,
     
     # field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
     field <- Reduce(\(a, b) {
-        ifelse(fieldTable$Type %in% c('I', 'M', 'd', 'S') & a == b, a, .paste(a, b, sep = ''))
+        ifelse(fieldTable$Type %in% c('I', 'M', 'd', 'S') & a == b, a, .paste(a, b, sep = '', na.if = all))
         
     }, fieldTable[, fields, with = FALSE])
     
-    Type <- fieldTable$Type
+    
+    Type <- ifelse(is.na(field) | field == '.', 'd', fieldTable$Type)
     ## Do we need to grab any interpretations from the Token field?
     if (length(useToken) && any(grepl(captureRE(useToken), dataTypes))) {
         # humtab[, !Type %in% c('D', 'd')]

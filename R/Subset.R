@@ -837,7 +837,7 @@ index <- function(x, i, j, drop = TRUE) {
   switch(pat,
          'TRUETRUE' = x,
          'TRUEFALSE' = x[  , j, drop],
-         'FALSETRUE' = if (hasdim(x)) x[i ,  , drop] else x[1],
+         'FALSETRUE' = if (hasdim(x)) x[i ,  , drop] else x[i],
          'FALSEFALSE' = x[i, j, drop])
 }
 

@@ -127,33 +127,80 @@ test_that('Examples from Reshaping vignette work', {
   }
 })
 
-
-
-
-
-# Update Exclusive
-
-test_that("Exclusive is updated by update_Exclusive", {
-  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor00[5-7].*.krn')
+test_that("Examples from cleave() man work", {
+  humData <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor00[5-9].*.krn')
   
-  chorales <- within(chorales,
-                     Semits <- semits(Token),
-                     Pitch <- pitch(Token),
-                     Nchar <- nchar(Token))
+  onetwo <- cleave(humData, Spine = 1:2) 
   
-  # Actual Exclusive field is updated (for analysis)
-  expect_equal(chorales |> select(Token) |> pull(Exclusive) |> unique(), 'kern')
-  expect_equal(chorales |> select(Nchar) |> pull(Exclusive) |> unique(), 'kern')
-  expect_equal(chorales |> select(Semits) |> pull(Exclusive) |> unique(), 'semits')
-  expect_equal(chorales |> select(Pitch) |> pull(Exclusive) |> unique(), 'pitch')
+  expect_equal(ncol(onetwo), 3)
+  expect_equal(getHumtab(onetwo, 'Dd')[Spine == 1 , Spine2],
+               getHumtab(humData, 'Dd')[!is.na(Spine) & Spine == 2, Token])
   
-  # Printout of ** tokens are updated (for printing)
-  expect_equal(chorales |> pullPrintable('Token', 'ED') |> pull(1) |> index(1), '**kern')
-  expect_equal(chorales |> pullPrintable('Nchar', 'ED') |> pull(1) |> index(1), '**kern')
-  expect_equal(chorales |> pullPrintable('Semits', 'ED') |> pull(1) |> index(1), '**semits')
-  expect_equal(chorales |> pullPrintable('Pitch', 'ED') |> pull(1) |> index(1), '**pitch')
+  one234 <- cleave(humData, Spine = 1:4) 
   
-  })
+  expect_equal(ncol(one234), 1)
+  expect_equal(getHumtab(one234, 'Dd')[Spine == 1 , Spine3],
+               getHumtab(humData, 'Dd')[!is.na(Spine) & Spine == 3, Token])
+  expect_equal(getHumtab(one234, 'Dd')[Spine == 1 , Spine4],
+               getHumtab(humData, 'Dd')[!is.na(Spine) & Spine == 4, Token])
+  
+  pairs <- cleave(humData, Spine = 1:2, Spine = 3:4) 
+  
+  expect_equal(ncol(pairs), 2)
+  expect_equal(getHumtab(pairs, 'Dd')[Spine == 1 , `Spine2|4`],
+               getHumtab(humData, 'Dd')[!is.na(Spine) & Spine == 2, Token])
+  expect_equal(getHumtab(pairs, 'Dd')[Spine == 2 , `Spine2|4`],
+               getHumtab(humData, 'Dd')[!is.na(Spine) & Spine == 4, Token])
+  expect_equal(getHumtab(pairs, 'Dd')[Spine == 1 , Token],
+               getHumtab(humData, 'Dd')[!is.na(Spine) & Spine == 1, Token])
+  
+  expect_identical(cleave(humData, Spine = 1:2), cleave(humData, 1:2))
+  
+  #
+  multi <- cleave(humData, list(1:2, 2:3, 3:4, NULL, 1:3))
+  
+  expect_equal(ncol(multi[1]), 3)
+  expect_equal(ncol(multi[2]), 3)
+  expect_equal(ncol(multi[3]), 3)
+  expect_equal(ncol(multi[4]), 4)
+  expect_equal(ncol(multi[5]), 2)
+  
+  expect_true(any(grepl('\\*Ibass\\*Itenor', pullPrintable(multi[1], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_false(any(grepl('\\*Ibass\\*Itenor', pullPrintable(multi[2], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  
+  expect_true(any(grepl('\\*Itenor\\*Ialto', pullPrintable(multi[2], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_false(any(grepl('\\*Itenor\\*Ialto', pullPrintable(multi[3], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  
+  expect_true(any(grepl('\\*Ialto\\*Isoprn', pullPrintable(multi[3], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  
+  expect_true(any(grepl('\\*Ibass\\*Itenor\\*Ialto', pullPrintable(multi[5], field=c('Token', "Spine2|3|4", 'Spine3'), dataTypes='I') |> pull())))
+  
+  
+  # @examples
+  
+  humData <- readHumdrum(humdrumRroot, "HumdrumData/MozartVariations/.*.krn")
+  
+  expect_equal(humData |> cleave(3:4) |> ncol(), 4)
+  
+  paths <- humData |> cleave(Path = 0:1, newFields = 'Ossia')
+  expect_equal(ncol(paths), 4)
+  expect_false(anyPaths(paths))
+  expect_true('Ossia' %in% fields(paths)$Name)
+  
+  expect_identical(humData |> cleavePaths(), cleave(humData, Path = 0:1))
+  
+  
+  exclusive <- humData |> cleave(c('function', 'harm'), newFields = 'Harmony')
+  
+  expect_true('Harmony' %in% fields(exclusive)$Name)
+  expect_identical(exclusive, cleave(humData, 1:2, newFields = 'Harmony'))
+  
+ expect_equal((humData |> cleave(c('kern', 'function', 'harm')) |> getHumtab())[File == 1 & Record == 14 & Spine == 1, paste0(Token, Function, Harm)],
+              '8r2T2I')
+})
+
+
+
 
 # rend ----
 

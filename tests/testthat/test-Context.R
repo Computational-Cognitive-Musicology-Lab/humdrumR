@@ -134,12 +134,6 @@ test_that('context() man examples work', {
    
    
    
-   #' Tabulate tokens in groups
-#' 
-#' Once groups are created, the `groups()` function can be used to tabulate 
-#' the number of tokens in each group, and find their indices in the [humdrum table][humTable].
-#' 
-   
    ####
    
    nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
@@ -181,7 +175,41 @@ test_that('context() man examples work', {
    expect_equal(humdrumR::context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 2),
                 c("((c,d,e)", "(d,e,f))", "((f#,g),g#)"))
   
+   # from @examples
+   expect_equal(context(letters, open = hop(4), close = open + 3),
+                c('a,b,c,d', 'e,f,g,h', 'i,j,k,l', 'm,n,o,p', 'q,r,s,t', 'u,v,w,x'))
+                
+   expect_equal(context(letters, open = "[aeiou]", close = nextopen - 1 | end),
+                c('a,b,c,d', 'e,f,g,h', 'i,j,k,l,m,n', 'o,p,q,r,s,t', 'u,v,w,x,y,z'))
+   
+   expect_equal(context(letters, open = "[aeiou]", close = nextopen - 1 | end, inPlace = TRUE),
+                c('a,b,c,d', NA, NA, NA, 'e,f,g,h', NA, NA, NA,
+                  'i,j,k,l,m,n', NA, NA, NA, NA, NA, 'o,p,q,r,s,t', 
+                  NA, NA, NA, NA, NA, 'u,v,w,x,y,z', NA, NA, NA, NA, NA))
+   
+   expect_equal(context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE),
+                list(c("a", "b", "c", "d"), c("e", "f", "g", "h"), 
+                     c("i", "j", "k", "l", "m", "n"),
+                     c("o", "p", "q", "r", "s", "t"), c("u", "v", "w", "x", "y", "z")))
   
+   # within.humdrumR
+   chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
+   
+   # 4-grams
+   expect_equal(chorales |>
+                   context(open = hop(), open + 3) |>
+                   within(paste(Token, collapse = ',')) |>
+                   as.lines() |> 
+                  index(50),
+                setNames("2GG;,4GG,4GG,4AA\t2B;,4d,4d,4c\t2d;,[4g,8gL],8f#J\t2g;,4b,4b,4cc", '1.50') )
+   
+   # phrases leading to fermatas
+   expect_equal(chorales |>
+                  context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
+                  within(paste(Token, collapse = ','), alignLeft = FALSE) |>
+                  pull() |> index(20),
+                "4b,2dd,4cc,4b,2a,2g;")
+   
 })
 
 test_that("context() output options work right", {

@@ -500,11 +500,13 @@ cleave <- function(humdrumR, ...,
         return(humdrumR)
     }
     
-    humtab[[field]][fromHits & humtab$Type == 'D'] <- NA
+    humtab[[field]][fromHits & humtab$Type == 'D'] <- NA # the spine/whatever isn't removed if a DIFFERENT field is non-null, so need to set it null.
+    humtab$Type[fromHits & humtab$Type == 'D'] <- 'd'
+    # humtab <- humtab[fromHits == FALSE]
     #
     whichMatch <- fromTable[ ,  matches(list(Piece, get(what)), groupDT[ , c('Piece', 'From'), with = FALSE], multi = TRUE)]
     
-    #
+    # change numbers (i.e., change spine numbers)
     fromTable <- do.call('rbind', lapply(1:ncol(whichMatch),
            \(j) {
                i <- whichMatch[, j]
@@ -532,16 +534,17 @@ cleave <- function(humdrumR, ...,
                          }, fromTables, names(fromTables))
  
     newfields <- names(fromTables)
-    mergeFields <- fields(humdrumR, c('S', 'F', 'R'))$Name
+    mergeFields <- setdiff(fields(humdrumR, c('S', 'F', 'R'))$Name,'Type')
     humtab <- Reduce(\(htab, ftab) {
         # htab <- ftab[htab, on = mergeFields]
         htab <- rbind(ftab[htab, on = mergeFields],
                       # This is necessary if the from spines have extra paths or stops,
-                      ftab[!htab, on = setdiff(mergeFields, 'Type')],
+                      ftab[!htab, on = mergeFields],
                       # or vice versa
                       # htab[!ftab, on = mergeFields],
                       fill = TRUE)
-        # 
+        htab[ , Type := ifelse(is.na(Type), i.Type, Type)]
+        htab[ , i.Type := NULL]
         # if (complement) {
             # for (field in newfields) {
                 # na <- is.na(htab[[field]])
@@ -555,7 +558,7 @@ cleave <- function(humdrumR, ...,
  
     
     humtab <- update_humdrumR(humtab, field = c(newfields, fields(humdrumR, 'D')$Name))
-    humtab <- removeNull(humtab, by = c('Piece', what), nullTypes = 'LIMd')
+    humtab <- removeNull(humtab, by = c('Piece', what), nullTypes = 'LIMd') # this is where empty spines are removed, if ALL fields are empty.
     humtab <- update_Dd(humtab, field = newfields)
     
     putHumtab(humdrumR, overwriteEmpty = c()) <- orderHumtab(humtab)
@@ -605,6 +608,8 @@ cleave <- function(humdrumR, ...,
 
 cleaveParseGroups <- function(...) {
   groups <- list(...)
+  groups <- lapply(groups, \(group) ifelse(lengths(group) == 0L, list(integer(0L)), group))
+  
   if (length(groups) == 0L) .stop("The cleave() function requires at least one group of structural locations to cleave together.")
   
   ## what
@@ -699,16 +704,16 @@ cleaveParseGroups_list <- function(groups) {
                                                     "Your list includes invalid names like",
                                                     "{harvard(grep('[1-9][0-9]*', value = TRUE, invert = TRUE, head(unique(names[[1]]), 5)), 'and', quote = TRUE)}.")
   
-  piece <- if (all(unnamed)) {
-    seq_along(groups[[1]])
-  } else {
-    as.integer(names[[1]])
-  }
+
+  
   
   dt <- data.table::rbindlist(lapply(groups, 
                                      \(group) {
+                                       piece <-  if (is.null(names(group))) which(lengths(group) > 0L) else as.integer(names(group))
+                                       group <- group[piece]
+                                       
                                        from <- lapply(group, '[', i = -1L)
-                                       to   <- unlist(lapply(group, '[', i = 1L))
+                                       to   <- sapply(group, '[', i = 1L)
                                        
                                        to <- rep(to, lengths(from))
                                        piece <- rep(piece, lengths(from))
