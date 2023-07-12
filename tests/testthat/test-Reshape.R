@@ -1,21 +1,21 @@
 # cleave ----
 
-test_that('Spine folding works properly', {
-  spine <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_spines.hum')
+test_that('Spine cleaving works properly', {
+  spine <- readHumdrum(humdrumRroot, 'extdata/testfiles/cleave_spines.hum')
   
   
-  folded <- getHumtab(cleave(spine, Spine = c(1, 2), Spine = c(1, 4), newFields =  'silbe'))
+  cleaved <- getHumtab(cleave(spine, Spine = c(1, 2), Spine = c(1, 4), newFields =  'silbe'))
   
-  expect_equal(dim(folded), c(24, 25))
-  if (expect_true(all(c('Token', 'silbe', 'silbe1') %in% colnames(folded)))) {
-    expect_equal(folded[silbe == 'the' & silbe1 == 'a', Token], 'c#')
+  expect_equal(dim(cleaved), c(24, 25))
+  if (expect_true(all(c('Token', 'silbe', 'silbe1') %in% colnames(cleaved)))) {
+    expect_equal(cleaved[silbe == 'the' & silbe1 == 'a', Token], 'c#')
   }
   
 })
 
-test_that('Spine folding works properly when stops are present, and vice versa', {
+test_that('Spine cleaving works properly when stops are present, and vice versa', {
   
-  spinesWithStops <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_stops.hum')
+  spinesWithStops <- readHumdrum(humdrumRroot, 'extdata/testfiles/cleave_stops.hum')
   
   tab1 <- getHumtab(cleave(spinesWithStops, 2:1))
   tab2 <- getHumtab(cleave(spinesWithStops, 1:2))
@@ -37,80 +37,80 @@ test_that('Spine folding works properly when stops are present, and vice versa',
   
 })
 
-test_that("Exclusive (spine) folding works properly", {
+test_that("Exclusive (spine) cleaving works properly", {
   
-  spine <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_spines.hum')
+  spine <- readHumdrum(humdrumRroot, 'extdata/testfiles/cleave_spines.hum')
   
   # parallel (two silbe onto two kern)
-  foldedSilbe <- getHumtab(cleave(spine, c('kern', 'silbe')))
+  cleavedSilbe <- getHumtab(cleave(spine, c('kern', 'silbe')))
   
-  expect_equal(dim(foldedSilbe), c(24, 23))
-  if (expect_true(all(c('Token', 'Silbe') %in% colnames(foldedSilbe)))) {
-    expect_equal(foldedSilbe[ , table(Token, Silbe)]['a', 'These'], 2L)
+  expect_equal(dim(cleavedSilbe), c(24, 23))
+  if (expect_true(all(c('Token', 'Silbe') %in% colnames(cleavedSilbe)))) {
+    expect_equal(cleavedSilbe[ , table(Token, Silbe)]['a', 'These'], 2L)
   }
   
   
   # spreading: one harm onto twokern
-  foldedHarm <- getHumtab(cleave(spine, c('kern', 'harm')))
+  cleavedHarm <- getHumtab(cleave(spine, c('kern', 'harm')))
   
-  expect_equal(dim(foldedHarm), c(32, 23))
-  if (expect_true(all(c('Token', 'Harm') %in% colnames(foldedHarm)))) {
-    expect_equal(foldedHarm[ , table(Token, Harm)]['c#', 'AM'], 2L)
+  expect_equal(dim(cleavedHarm), c(32, 23))
+  if (expect_true(all(c('Token', 'Harm') %in% colnames(cleavedHarm)))) {
+    expect_equal(cleavedHarm[ , table(Token, Harm)]['c#', 'AM'], 2L)
   }
   
   # two parallel moves AND ond spreading move
-  foldedDouble <- getHumtab(cleave(spine , c('kern', 'harm', 'silbe')))
-  expect_equal(dim(foldedDouble), c(16, 25))
-  if (expect_true(all(c('Token', 'Harm', 'Silbe') %in% colnames(foldedDouble)))) {
-    expect_equal(foldedDouble[ , table(Token, Harm, Silbe)]['c#', 'AM', 'These'],1L)
+  cleavedDouble <- getHumtab(cleave(spine , c('kern', 'harm', 'silbe')))
+  expect_equal(dim(cleavedDouble), c(16, 25))
+  if (expect_true(all(c('Token', 'Harm', 'Silbe') %in% colnames(cleavedDouble)))) {
+    expect_equal(cleavedDouble[ , table(Token, Harm, Silbe)]['c#', 'AM', 'These'],1L)
   }
   
   # all moved onto one, including a self move (kern -> kern) 
-  foldedAll <- getHumtab(cleave(spine , 1:5, newFields = c('Silbe1', 'Kern', 'Silbe2', 'Harm')))
-  expect_equal(dim(foldedAll), c(8, 29))
-  if (expect_true(all(c('Token', 'Harm', 'Kern', 'Silbe1', 'Silbe2') %in% colnames(foldedAll)))) {
-    expect_equal(foldedAll[ , paste(Token, Harm, Kern, Silbe1,Silbe2)[6]] , 'd DM f# lyr- cat')
+  cleavedAll <- getHumtab(cleave(spine , 1:5, newFields = c('Silbe1', 'Kern', 'Silbe2', 'Harm')))
+  expect_equal(dim(cleavedAll), c(8, 29))
+  if (expect_true(all(c('Token', 'Harm', 'Kern', 'Silbe1', 'Silbe2') %in% colnames(cleavedAll)))) {
+    expect_equal(cleavedAll[ , paste(Token, Harm, Kern, Silbe1,Silbe2)[6]] , 'd DM f# lyr- cat')
   }
 })
 
-test_that('Path folding works properly', {
+test_that('Path cleaving works properly', {
   
-  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
+  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/cleave_paths.hum')
 
-  foldedPath <- getHumtab(cleavePaths(path))
+  cleavedPath <- getHumtab(cleavePaths(path))
   
   
-  expect_equal(dim(foldedPath), c(28, 23))
-  if (expect_true(all(c('Token', 'Path1') %in% colnames(foldedPath)))) {
-    expect_equal(foldedPath[Stop == 1L, table(Token, Path1)]['c', 'a'], 2L)
+  expect_equal(dim(cleavedPath), c(28, 23))
+  if (expect_true(all(c('Token', 'Path1') %in% colnames(cleavedPath)))) {
+    expect_equal(cleavedPath[Stop == 1L, table(Token, Path1)]['c', 'a'], 2L)
   }
   
   
 })
 
-test_that('Stop folding works properly', {
+test_that('Stop cleaving works properly', {
   
-  stop <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_stops.hum')
+  stop <- readHumdrum(humdrumRroot, 'extdata/testfiles/cleave_stops.hum')
   
-  foldedStop <- getHumtab(cleaveStops(stop))
+  cleavedStop <- getHumtab(cleaveStops(stop))
   
   
-  expect_equal(dim(foldedStop), c(18, 26))
-  if (expect_true(all(c('Token', 'Stop2', 'Stop3') %in% colnames(foldedStop)))) {
-    expect_equal(foldedStop[ , table(Token, Stop2, Stop3)]['b', 'd', 'g#'], 2L)
+  expect_equal(dim(cleavedStop), c(18, 26))
+  if (expect_true(all(c('Token', 'Stop2', 'Stop3') %in% colnames(cleavedStop)))) {
+    expect_equal(cleavedStop[ , table(Token, Stop2, Stop3)]['b', 'd', 'g#'], 2L)
   }
 })
 
-test_that('Stop and path folding work together', {
-  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/fold_paths.hum')
+test_that('Stop and path cleaving work together', {
+  path <- readHumdrum(humdrumRroot, 'extdata/testfiles/cleave_paths.hum')
   
-  foldedPS <- getHumtab(humdrumR:::selectFields(cleaveStops(cleavePaths(path), field = 'Token'), 'Token'), 'D')
-  foldedSP <- getHumtab(humdrumR:::selectFields(cleavePaths(cleaveStops(path), field = 'Token'), 'Token'), 'D')
+  cleavedPS <- getHumtab(humdrumR:::selectFields(cleaveStops(cleavePaths(path), field = 'Token'), 'Token'), 'D')
+  cleavedSP <- getHumtab(humdrumR:::selectFields(cleavePaths(cleaveStops(path), field = 'Token'), 'Token'), 'D')
   
-  expect_equal(foldedPS[, table(Token, Path1)], 
-               foldedSP[, table(Token, Path1)])
-  expect_equal(foldedPS[, table(Token, Stop2)], 
-               foldedSP[, table(Token, Stop2)])
+  expect_equal(cleavedPS[, table(Token, Path1)], 
+               cleavedSP[, table(Token, Path1)])
+  expect_equal(cleavedPS[, table(Token, Stop2)], 
+               cleavedSP[, table(Token, Stop2)])
   
 })
 
@@ -155,5 +155,41 @@ test_that("Exclusive is updated by update_Exclusive", {
   
   })
 
+# rend ----
 
-
+test_that("Test that rend words" , {
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor00[5-7].*.krn')
+  
+  chorales <- within(chorales, Recip <- recip(Token))
+  
+  expect_equal(chorales |> rend(Token, Recip) |> ncol(), 8)
+  
+  
+  chorales |> rend(Token, Recip) |> getHumtab() -> tokrec
+  chorales |> rend(Recip, Token) |> getHumtab() -> rectok
+  
+  
+  expect_equal(tokrec[Spine %in% c(1, 3, 5, 7), Token.Recip], getHumtab(chorales)[!is.na(Spine), Token])
+  expect_equal(rectok[Spine %in% c(2, 4, 6, 8), Recip.Token], getHumtab(chorales)[!is.na(Spine), Token])
+  
+  expect_equal(tokrec[Spine %in% c(2, 4, 6, 8), Token.Recip], getHumtab(chorales)[!is.na(Spine), as.character(Recip)])
+  expect_equal(rectok[Spine %in% c(1, 3, 5, 7), Recip.Token], getHumtab(chorales)[!is.na(Spine), as.character(Recip)])
+  
+  expect_equal(tokrec[Spine %in% c(1, 3, 5, 7), Token.Recip], rectok[Spine %in% c(2, 4, 6, 8), Recip.Token])
+  
+  ##
+  
+  chorales <-  chorales |> select(Token) |> within(Pitch <- pitch(Token))
+  
+  
+  triplerend <- chorales |> rend(Token, Recip, Pitch) 
+  
+  expect_equal(triplerend |> ncol(), 12)
+  
+  expect_equal(getHumtab(triplerend)[Spine %in% c(1, 4, 7, 10), Token.Recip.Pitch], 
+               getHumtab(chorales)[!is.na(Spine), Token])
+  
+  
+  expect_equal(getHumtab(chorales |> rend(Token, Recip, Pitch, fieldName = 'Rended'))[Spine %in% c(2, 5, 8, 11), Rended], 
+               getHumtab(chorales)[!is.na(Spine), as.character(Recip)])
+})

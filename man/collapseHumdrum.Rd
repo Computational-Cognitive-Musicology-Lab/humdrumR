@@ -10,7 +10,7 @@
 collapseHumdrum(
   humdrumR,
   by,
-  collapseField = selectedFields(humdrumR)[1],
+  fields = selectedFields(humdrumR),
   dataTypes = "GLIMDd",
   collapseAtomic = TRUE,
   sep = " "
@@ -18,21 +18,21 @@ collapseHumdrum(
 
 collapseStops(
   humdrumR,
-  collapseField = selectedFields(humdrumR)[1],
+  fields = selectedFields(humdrumR),
   collapseAtomic = TRUE,
   sep = " "
 )
 
 collapsePaths(
   humdrumR,
-  collapseField = selectedFields(humdrumR)[1],
+  fields = selectedFields(humdrumR),
   collapseAtomic = TRUE,
   sep = " "
 )
 
 collapseRecords(
   humdrumR,
-  collapseField = selectedFields(humdrumR)[1],
+  fields = selectedFields(humdrumR),
   collapseAtomic = TRUE,
   sep = " "
 )
@@ -46,15 +46,15 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 Must be \code{character}.
 
-Must be a \code{character} string \link[=partialMatching]{partially} matching the name(s) of a data field(s) in the \code{humdrumR} input.
+Must be \code{character} strings \link[=partialMatching]{partially} matching the name(s) of a \link[=fields]{field(s)} in the \code{humdrumR} input.
 
-Data in the \code{collapseField} will be collapsed within these fields.}
+Data in the \code{fields} will be collapsed within these fields.}
 
-\item{collapseField}{\emph{\strong{The target field in the \code{humdrumR} data to collapse.}}
+\item{fields}{\emph{\strong{The target field(s) in the \code{humdrumR} data to collapse.}}
 
-Defaults to \code{selectedFields(humdrumR)[1]}.
+Defaults to \code{selectedFields(humdrumR)}.
 
-Must be a single \code{character} string.}
+Must be \code{character} strings \link[=partialMatching]{partially} matching the name(s) of a data \link[=fields]{field(s)} in the \code{humdrumR} input.}
 
 \item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to collapse.}}
 

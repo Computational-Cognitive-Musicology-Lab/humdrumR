@@ -975,7 +975,7 @@ cleaveGraceNotes <- function(humdrumR) {
 #' @export
 rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty = FALSE) {
   checks(humdrumR, xhumdrumR)
-  checks(fieldName, xlen1 & xcharnotempty)
+  checks(fieldName, xnull | (xlen1 & xcharnotempty))
   checks(removeRended, xTF)
   checks(rendEmpty, xTF)
   
@@ -1022,7 +1022,7 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
                       }
                       
                       Exclusive.field <- paste0('Exclusive.', field)
-                      if (Exclusive.field %in% Exclusive.fields) {
+                      if (Exclusive.field != 'Exclusive.Token' && Exclusive.field %in% Exclusive.fields) {
                         if (length(setdiff(Exclusive.fields, Exclusive.field))) htab[ , (setdiff(Exclusive.fields, Exclusive.field)) := NULL]
                         colnames(htab)[colnames(htab) == Exclusive.field] <- paste0('Exclusive.', fields[1]) # need to make sure this gets created
                       }
