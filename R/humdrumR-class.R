@@ -1044,7 +1044,9 @@ update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     
     exclusiveFields <- Reduce('|', lapply(paste0('^Exclusive\\.', fields), stringi::stri_detect_regex, str = colnames(hum)))
     if (any(exclusiveFields)) {
-        hum[ , Exclusive := do.call('paste0', hum[ , exclusiveFields, with = FALSE])]
+        hum[ , Exclusive := do.call('.paste', c(hum[ , exclusiveFields, with = FALSE], list(na.if = all)))]
+    } else {
+        hum[ , Exclusive := Exclusive.Token]
     }
     
     
@@ -2267,6 +2269,7 @@ showFields <-  function(humdrumR) {
           ## prep for printing
           fields[ , Name := paste0(ifelse(Selected, '*', ' '), Name)]
           fields[ , Name := stringr::str_pad(Name, width = max(nchar(Name)), side = 'right')]
+          # if (any(diff(fields$Selected) != 1)) fields[ , Name := paste0(Selected, Name)]
           
           fields[ , Print := paste0(Name, ' :: ', Class)]
           

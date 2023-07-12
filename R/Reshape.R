@@ -163,15 +163,15 @@ contractPaths <- function(humtab) {
 #' 
 #' Must be `character`. 
 #' 
-#' Must be a `character` string [partially][partialMatching] matching the name(s) of a data field(s) in the `humdrumR` input.
+#' Must be `character` strings [partially][partialMatching] matching the name(s) of a [field(s)][fields()] in the `humdrumR` input.
 #'
-#' Data in the `collapseField` will be collapsed within these fields.
+#' Data in the `fields` will be collapsed within these fields.
 #' 
-#' @param collapseField ***The target field in the `humdrumR` data to collapse.***
+#' @param fields ***The target field(s) in the `humdrumR` data to collapse.***
 #' 
-#' Defaults to `selectedFields(humdrumR)[1]`.
+#' Defaults to `selectedFields(humdrumR)`.
 #' 
-#' Must be a single `character` string.
+#' Must be `character` strings [partially][partialMatching] matching the name(s) of a data [field(s)][fields()] in the `humdrumR` input.
 #' 
 #' @param dataTypes ***Which types of humdrum record(s) to collapse.***
 #' 
@@ -202,20 +202,20 @@ contractPaths <- function(humtab) {
 #' "folding" data into *new* fields, rather than collapsing it within a field.
 #' @export
 collapseHumdrum <- function(humdrumR, by,
-                            collapseField = selectedFields(humdrumR)[1], 
+                            fields = selectedFields(humdrumR), 
                             dataTypes = 'GLIMDd', 
                             collapseAtomic = TRUE, sep = ' ') {
  
     checks(humdrumR, xhumdrumR)
     by <- fieldMatch(humdrumR, by, 'collapseHumdrum', 'by')
-    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseHumdrum', 'collapseField')
+    fields <- fieldMatch(humdrumR, fields, 'collapseHumdrum', 'fields')
     dataTypes <- checkTypes(dataTypes, 'collapseHumdrum', argname = 'dataTypes')
     checks(collapseAtomic, xTF)
     checks(sep, xcharacter & xlen1)
     
     humtab <- getHumtab(humdrumR, dataTypes)
     
-    humtab <- collapseHumtab(humtab, by = by, collapseField = collapseField, sep = sep, collapseAtomic = collapseAtomic)
+    humtab <- collapseHumtab(humtab, by = by, fields = fields, sep = sep, collapseAtomic = collapseAtomic)
     
     putHumtab(humdrumR, dataTypes) <- humtab
     
@@ -224,32 +224,36 @@ collapseHumdrum <- function(humdrumR, by,
 }
 
 
-collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseAtomic = TRUE, sep = ' ') {
+collapseHumtab <- function(humtab, by, target = humtab, fields, collapseAtomic = TRUE, sep = ' ') {
     if (nrow(target) == 0L) return(humtab)
-    
-    collapser <- switch(paste0(is.list(humtab[[collapseField]]), collapseAtomic),
-                        TRUETRUE   = \(x) paste(unlist(x), collapse = sep),
-                        TRUEFALSE  = \(x) list(list(unlist(x, recursive = FALSE))), # there could be bugs here if we collapse data that is objects.
-                        FALSETRUE  = \(x) paste(x, collapse = sep),
-                        FALSEFALSE = \(x) list(list(x)))
-    
     target <- humtab[unique(target[ , by , with = FALSE]), on = by]
-    collapsed <- rlang::eval_tidy(rlang::expr(target[ , collapser(!!rlang::sym(collapseField)), by = by]))
-    humtab <- humtab[ , .SD[1], by = by]
-
-    collapsed <- collapsed[humtab, on = by, V1]
-    field <- humtab[[collapseField]]
-    if (collapseAtomic) {
+  
+    for (fieldname in fields) {
+      collapser <- switch(paste0(is.list(humtab[[fieldname]]), collapseAtomic),
+                          TRUETRUE   = \(x) .paste(unlist(x), collapse = sep),
+                          TRUEFALSE  = \(x) list(list(unlist(x, recursive = FALSE))), # there could be bugs here if we collapse data that is objects.
+                          FALSETRUE  = \(x) .paste(x, collapse = sep),
+                          FALSEFALSE = \(x) list(list(x)))
+      
+      
+      collapsed <- rlang::eval_tidy(rlang::expr(target[ , collapser(!!rlang::sym(fieldname)), by = by]))
+      humtab <- humtab[ , .SD[1], by = by]
+      
+      collapsed <- collapsed[humtab, on = by, V1]
+      field <- humtab[[fieldname]]
+      if (collapseAtomic) {
         replacements <- !is.na(collapsed) 
         
         if (is.list(field)) field <- sapply(field, collapser)
         
-    } else {
+      } else {
         replacements <- !sapply(collapsed, is.null)
+      }
+      field[replacements] <- collapsed[replacements]
+      humtab[[fieldname]] <- field
+      humtab$Type[replacements] <- 'D'
     }
-    field[replacements] <- collapsed[replacements]
-    humtab[[collapseField]] <- field
-    humtab$Type[replacements] <- 'D'
+    
     
     humtab
     
@@ -258,9 +262,9 @@ collapseHumtab <- function(humtab, by, target = humtab, collapseField, collapseA
 
 #' @rdname collapseHumdrum
 #' @export 
-collapseStops <- function(humdrumR, collapseField = selectedFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapseStops <- function(humdrumR, fields = selectedFields(humdrumR), collapseAtomic = TRUE, sep = ' ') {
     checks(humdrumR, xhumdrumR)
-    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseStops', 'collapseStops')
+    fields <- fieldMatch(humdrumR, fields, 'collapseStops', 'fields')
     checks(collapseAtomic, xTF)
     checks(sep, xcharacter & xlen1)
     
@@ -268,7 +272,7 @@ collapseStops <- function(humdrumR, collapseField = selectedFields(humdrumR)[1],
     humtab <- getHumtab(humdrumR, 'D')
     humtab <- collapseHumtab(humtab, by = c('Piece', 'Spine', 'Path', 'Record'),
                              target = humtab[Stop > 1L & !is.na(Stop)],
-                             collapseField = collapseField,
+                             fields = fields,
                              collapseAtomic = collapseAtomic, sep = sep)
     
     putHumtab(humdrumR, overwriteEmpty = 'D') <- humtab
@@ -280,16 +284,16 @@ collapseStops <- function(humdrumR, collapseField = selectedFields(humdrumR)[1],
 
 #' @rdname collapseHumdrum
 #' @export
-collapsePaths <- function(humdrumR, collapseField = selectedFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapsePaths <- function(humdrumR, fields = selectedFields(humdrumR), collapseAtomic = TRUE, sep = ' ') {
     checks(humdrumR, xhumdrumR)
     checks(collapseAtomic, xTF)
-    collapseField <- fieldMatch(humdrumR, collapseField, 'collapsePaths', 'collapseField')
+    fields <- fieldMatch(humdrumR, fields, 'collapsePaths', 'fields')
     checks(sep, xcharacter & xlen1)
     
     humtab <- getHumtab(humdrumR)
     humtab <- collapseHumtab(humtab, by = c('Piece', 'Spine', 'Record'),
                              target = humtab[Path > 0L & !is.na(Path)],
-                             collapseField = collapseField,
+                             fields = fields,
                              collapseAtomic = collapseAtomic, sep = sep)
     
     putHumtab(humdrumR) <- humtab
@@ -299,15 +303,15 @@ collapsePaths <- function(humdrumR, collapseField = selectedFields(humdrumR)[1],
 
 #' @rdname collapseHumdrum
 #' @export
-collapseRecords <- function(humdrumR, collapseField = selectedFields(humdrumR)[1], collapseAtomic = TRUE, sep = ' ') {
+collapseRecords <- function(humdrumR, fields = selectedFields(humdrumR), collapseAtomic = TRUE, sep = ' ') {
     checks(humdrumR, xhumdrumR)
     checks(collapseAtomic, xTF)
-    collapseField <- fieldMatch(humdrumR, collapseField, 'collapseRecords', 'collapseField')
+    fields <- fieldMatch(humdrumR, fields, 'collapseRecords', 'fields')
     checks(sep, xcharacter & xlen1)
     
     collapseHumdrum(humdrumR, dataTypes = 'GLIMDd', 
                     by = c('Piece', 'Record'),
-                    collapseField = collapseField,
+                    fields = fields,
                     collapseAtomic = collapseAtomic, sep = sep)
 
 }
@@ -491,7 +495,7 @@ cleave <- function(humdrumR, ...,
     fromTable <- humtab[fromHits == TRUE, c(field, 'Exclusive', fields(humdrumR, c('S', 'F', 'R'))$Name), with = FALSE]
     
     if (all(is.na(fromTable[[field]]))) {
-        .warn("Your fromField doesn't have any non-null data where {what} %in% {harvard(unique(groupDT$To)}.",
+        .warn("Your fromField doesn't have any non-null data where {what} %in% {.show_vector(unique(groupDT$To))}.",
               "Your humdrumR data is being returned unchanged.")
         return(humdrumR)
     }
@@ -864,7 +868,7 @@ cleaveStops <- function(humdrumR, field = selectedFields(humdrumR)[1]) {
    stops <- stops[!is.na(stops)] 
    
    if (length(unique(stops)) == 1L) {
-     .warn('No multi-stops to cleave')
+     .warn('No multi-stops to cleave.')
      return(humdrumR)
    } 
 

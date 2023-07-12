@@ -2630,8 +2630,12 @@ matched <- function(x, table, nomatch = NA) {
       sep <- ''
     }
     
-    
-    ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
+    if (is.null(collapse)) {
+      ifelse(nas, fill, do.call('paste', c(args, list(sep = sep))))
+    } else {
+      args <- lapply(args, `[`, i = !nas)
+      do.call('paste', c(args, list(sep = sep, collapse = collapse)))
+    }
 }
 
 
