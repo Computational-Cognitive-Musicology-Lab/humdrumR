@@ -16,6 +16,7 @@
   inPlace = FALSE
 )
 
+## humdrumR S3 method:
 humData |> select(Token) |> recip() 
 humData |> recip(simple = TRUE)
 humData |> recip(Token, Key = Key)

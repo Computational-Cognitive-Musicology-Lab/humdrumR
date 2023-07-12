@@ -5,6 +5,7 @@
 \alias{context.default}
 \alias{context.humdrumR}
 \alias{uncontext}
+\alias{windows}
 \title{Group vectors into contextual windows}
 \usage{
 context(x, open, close, ...)
@@ -43,6 +44,8 @@ context(x, open, close, ...)
 )
 
 uncontext(humdrumR)
+
+windows(humdrumR)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to group into windows.}}
@@ -164,6 +167,13 @@ Unlike \link[=groupHumdrum]{grouping vectors},
 divide the data.
 The \code{context()} function should generally be called on
 \link[=humdrumRclass]{humdrumR data}, but it can also be called directly on vectors.
+
+The \code{uncontext()} function removes contextual windows
+from a \link[=humdrumRclass]{humdrumR data object}.
+
+Once contextual windows are created, the \code{windows()} function can be used to
+view a \link{data.table} representing these windows.
+The \code{Open} and \code{Close} columns indicate row indices in the \link[=humTable]{humdrum table}.
 }
 \details{
 The \code{context()} function determines where contextual windows will begin and end based on
@@ -452,27 +462,27 @@ We might want to try either the \code{"edge"} or \code{"none"} options for the \
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(melody, open = 'so', close = 'do', overlap = 'edge')
 context(melody, open = 'so', close = 'do', overlap = 'none')
-```
+}\if{html}{\out{</div>}}
 
-The `"edge"` option allows the closing edge of windows to share a `close`---in this case,
-the second and third *So* (`open`) are paired with the same *Do*.
-On the other hand, with `overlap = "none"`, overlapping windows are simply not allowed, so the third `open` 
+The \code{"edge"} option allows the closing edge of windows to share a \code{close}---in this case,
+the second and third \emph{So} (\code{open}) are paired with the same \emph{Do}.
+On the other hand, with \code{overlap = "none"}, overlapping windows are simply not allowed, so the third \code{open}
 simply doesn't get paired with anything.
 
 What if you would like to pair windows on their left (opening) edge?
-If you specify `rightward = FALSE`, the overlap argument works backwards (right-to-left) through
-the input vector, starting on each `close` and ending on each `open`.
-By combining `righward = FALSE` with various `overlap` options, you can achieve a lot of windowing 
+If you specify \code{rightward = FALSE}, the overlap argument works backwards (right-to-left) through
+the input vector, starting on each \code{close} and ending on each \code{open}.
+By combining \code{righward = FALSE} with various \code{overlap} options, you can achieve a lot of windowing
 options you might need.
+}
 
-### Repeated indices
+\subsection{Repeated indices}{
 
-Note that if `duplicates_indices = TRUE` (the default) the `open` and `close` arguments can 
+Note that if \code{duplicates_indices = TRUE} (the default) the \code{open} and \code{close} arguments can
 incorporate repeated indices, including multiple matches to a regular expression in the same index.
 This is useful with, for example, nested phrases:
 
-```
-nesting3 <- c('(a', 'b)', '((c', 'd', 'e)',  '(d', 'e', 'f))', '(e', 'f', '((f#', 'g)', 'g#)', 'a)')
+\if{html}{\out{<div class="sourceCode">}}\preformatted{nesting3 <- c('(a', 'b)', '((c', 'd', 'e)',  '(d', 'e', 'f))', '(e', 'f', '((f#', 'g)', 'g#)', 'a)')
 
 context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 1)
 context(nesting3, open = '(', close = ')', overlap = 'nested', depth = 2)

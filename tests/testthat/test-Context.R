@@ -92,11 +92,10 @@ test_that('context() man examples work', {
                   "i,j,k,l", "k,l,m,n", "m,n,o,p", "o,p,q,r", 
                   "q,r,s,t", "s,t,u,v", "u,v,w,x", "w,x,y,z"))
    
-   expect_equal(humdrumR::context(letters,
-                        reference = data.frame(Threes = rep(1:3, length.out = 26),
-                                               Fours = rep(4:1, length.out = 26)),
-                        open = Threes == Fours, close = Fours == 1),
-                c("d,e,f,g,h", "f,g,h,i,j,k,l", "p,q,r,s,t", "r,s,t,u,v,w,x"))
+   expect_equal(humdrumR::context(letters, open = letters %in% c('e', 'j', 'l'), close = open + 2),
+                c('e,f,g', 'j,k,l', 'l,m,n'))
+   
+
 
    expect_equal(humdrumR::context(letters, open = '[aeiou]', close = open + 4),
                 c("a,b,c,d,e", "e,f,g,h,i", "i,j,k,l,m", "o,p,q,r,s", "u,v,w,x,y"))
@@ -109,11 +108,39 @@ test_that('context() man examples work', {
    
    expect_equal(humdrumR::context(letters, open = prevclose + 1, close = '[aeiou]', alignToOpen = FALSE),
                 c("b,c,d,e", "f,g,h,i", "j,k,l,m,n,o", "p,q,r,s,t,u"))
+   
    expect_equal(humdrumR::context(letters, open = '[aeiou]', close = nextopen - 1L | 26),
                 c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t", "u,v,w,x,y,z"))
    
    expect_equal(humdrumR::context(letters, open = '[aeiou]', close = nextopen - 1L | end),
                 c("a,b,c,d", "e,f,g,h", "i,j,k,l,m,n", "o,p,q,r,s,t", "u,v,w,x,y,z"))
+   
+   expect_equal(humdrumR::context(letters, open = '[aeiou]', close = nextopen - 1L | 26) |> toupper(),
+                humdrumR::context(LETTERS, reference = letters, open = '[aeiou]', close = nextopen - 1L | 26))
+  
+   expect_equal(humdrumR::context(letters,
+                                  reference = data.frame(Threes = rep(1:3, length.out = 26),
+                                                         Fours = rep(4:1, length.out = 26)),
+                                  open = Threes == Fours, close = Fours == 1),
+                c("d,e,f,g,h", "f,g,h,i,j,k,l", "p,q,r,s,t", "r,s,t,u,v,w,x"))
+   
+   ####
+   humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-3].*.krn")
+   
+   expect_equal((humData)@Context |> nrow(), 0)
+   cont <- (humData |> context(open = hop(), open + 3))@Context
+   expect_equal(cont |> nrow(), 620)
+   expect_equal(unique(cont[, Close - Open]), 3)
+   
+   
+   
+   #' Tabulate tokens in groups
+#' 
+#' Once groups are created, the `groups()` function can be used to tabulate 
+#' the number of tokens in each group, and find their indices in the [humdrum table][humTable].
+#' 
+   
+   ####
    
    nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
    
@@ -202,21 +229,20 @@ test_that("context() output options work right", {
   
   # examples
   chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
-  x <- within(chorales,
-              paste(Token, collapse = '->'), 
-               context(open = hop(), open + 3))
-  expect_equal(with(x, sum(nchar(Result1))), 40301)
+  expect_equal(chorales |> 
+                 humdrumR::context(hop(), open + 3) |> 
+                 within(Pasted <- paste(Token, collapse = '->')) |> 
+                 uncontext() |> 
+                 with(sum(nchar(Pasted))), 
+               40301)
          
   # phrases leading to fermatas
-  phrases <- with(chorales, 
-                  paste(Token, collapse = ','), 
-                  context(open = 1 | prevclose + 1, close = ';', overlap = 'none'))
+  phrases <- chorales |>
+                humdrumR::context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
+                with(paste(Token, collapse = ','))
   expect_length(phrases, 256)
   expect_equal(unname(phrases[34]), "4e,8f#,4B,8A#,4B,4c#,2.d;")
   
-  chorales <- within(chorales, 
-                     Solfa <- solfa(Token, simple = TRUE),
-                     Duration <- duration(Token))
   
   
   
@@ -229,7 +255,9 @@ test_that('Context vignette examples work',
             beethoven <- readHumdrum(humdrumRroot, 'HumdrumData/BeethovenVariations/.*krn')
             
             beethoven <- subset(beethoven, Exclusive == 'kern' & Stop == 1) |> removeEmptySpines() |> removeEmptyStops()
-            result <- with(beethoven, if (length(Token) == 13) paste0(File, ',', Record), context('(', ')'))
+            result <- beethoven |>
+                        humdrumR::context("(", ")") |>
+                        with(if (length(Token) == 13) paste0(File, ',', Record))
             expect_equal(unname(c(result)), c("9,46", "9,47", "9,48", "9,49", "9,50", "9,52", "9,53", "9,54", "9,55", "9,56", "9,57", "9,58", "9,59"))
             
           })

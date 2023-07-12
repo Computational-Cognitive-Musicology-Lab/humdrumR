@@ -568,7 +568,7 @@ parseContextExpression <- function(expr, other) {
 #' even though there is another *Do* in between!
 #' We might want to try either the `"edge"` or `"none"` options for the `overlap` argument:
 #' 
-#' ````
+#' ```
 #' context(melody, open = 'so', close = 'do', overlap = 'edge')
 #' context(melody, open = 'so', close = 'do', overlap = 'none')
 #' ```
@@ -821,6 +821,11 @@ context.humdrumR <- function(humdrumR, open,  close,
   
 }
 
+#' Remove context
+#'
+#' The `uncontext()` function removes contextual windows
+#' from a [humdrumR data object][humdrumRclass].
+#'
 #' @export
 #' @rdname context
 uncontext <- function(humdrumR) {
@@ -840,6 +845,22 @@ uncontextMessage <- function(humdrumR, func) {
   } else {
     humdrumR
   }
+}
+
+#' View contextual windows
+#' 
+#' Once contextual windows are created, the `windows()` function can be used to
+#' view a [data.table] representing these windows.
+#' The `Open` and `Close` columns indicate row indices in the [humdrum table][humTable].
+#' 
+#' @rdname context
+#' @export
+windows <- function(humdrumR) {
+  windows <- humdrumR@Context
+  windows[ , RevDepth := NULL]
+  windows[ , Length := Close - Open + 1L]
+  windows[]
+  
 }
 
 findWindows <- function(x, open, close = quote(nextopen - 1), ..., 
