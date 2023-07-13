@@ -81,7 +81,9 @@ Thus, \code{rend(humData, 'Solfa')} is equivalent to \code{rend(humData, 'Token'
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 
-humData |> mutate(Recip = recip(Token), Solfa = solfa(Token, simple = TRUE)) -> humData
+humData |> 
+   mutate(Recip = recip(Token), 
+          Solfa = solfa(Token, simple = TRUE)) -> humData
 
 humData |> rend(c('Recip', 'Solfa'))
 

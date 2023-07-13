@@ -1147,7 +1147,7 @@ quarters <- humdrumRgeneric(quarters.default)
 #' @inheritParams rhythmFunctions
 #' @name notehead
 #' @export 
-notehead.default <- makePitchTransformer(tint2notehead, 'notehead') 
+notehead.default <- makeRhythmTransformer(rint2notehead, 'notehead') 
 #' Apply to humdrumR data
 #' 
 #' If `notehead()` is applied to a [humdrumR data class][humdrumRclass]

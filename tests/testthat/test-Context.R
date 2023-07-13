@@ -128,7 +128,7 @@ test_that('context() man examples work', {
    humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-3].*.krn")
    
    expect_equal((humData)@Context |> nrow(), 0)
-   cont <- (humData |> context(open = hop(), open + 3))@Context
+   cont <- (humData |> humdrumR::context(open = hop(), open + 3))@Context
    expect_equal(cont |> nrow(), 620)
    expect_equal(unique(cont[, Close - Open]), 3)
    

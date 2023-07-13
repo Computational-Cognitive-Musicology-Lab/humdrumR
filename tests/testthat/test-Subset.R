@@ -138,7 +138,7 @@ test_that("Unfiltering works", {
 #   
   orig <- getHumtab(chorales)
   cleared <- getHumtab(unfilter(subset(chorales, Spine == 1)))
-  expect_true(all(orig == cleared, na.rm = TRUE))
+  expect_identical(cleared, orig)
 
   # can use subset/complement to achieve ifelse() 
   chorales |> 

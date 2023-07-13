@@ -637,7 +637,7 @@ with.humdrumR <- function(data, ...,
     }
   } else {
     visible <- TRUE
-  } 
+  }
   
   attr(result, 'visible') <- NULL
   
@@ -833,7 +833,8 @@ unformula <- function(quosures) {
            } else {
              if (as.character(rlang::quo_get_expr(quo)[[1]]) %in% c('~', 'quote', 'expression')){ 
                quo <- rlang::as_quosure(eval(rlang::quo_get_expr(quo), 
-                                             rlang::quo_get_env(quo)))
+                                             rlang::quo_get_env(quo)),
+                                        env = rlang::quo_get_env(quo))
              } 
              
            }
@@ -985,12 +986,10 @@ laggedQuo <- function(funcQuosure, humtab) {
     args[[lagorlead]] <- NULL
     
     # do/can we evaluate n now?
-    if (is.symbol(n)) {
-      nchar <- as.character(n)
-      if (!nchar %in% fields && (!is.null(exprA$Environment) && exists(nchar, envir = exprA$Environment))) {
-        n <- eval(n, exprA$Environment)
-      }
-    }
+    n <- try(eval(n, exprA$Environment))
+    if (class(n) == 'try-error') .stop("In your use of '{lagorlead} = ', the expression '{rlang::as_label(n)}' can't be evaluated.",
+                                          "It might refer to undefined variables?")
+    
     
     lagExprs <- lapply(n, \(curn) rlang::expr((!!rlang::sym(lagorlead))(!!!args, n = !!curn)))
     # this SHOULD be expr(), not quo()
@@ -1258,7 +1257,7 @@ parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
   rowKey <- unlist(results[['_rowKey_']], recursive = FALSE)
   results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
   
-  visibleResult <- is.visible(results[[length(results)]][[1]]) # determined by last result
+  visibleResult <- is.visible(results[[length(results)]][[1]][[1]]) # determined by last result
   results[] <- lapply(results, unlist, recursive = FALSE)
   
   

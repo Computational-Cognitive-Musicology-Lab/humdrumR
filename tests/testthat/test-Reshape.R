@@ -165,15 +165,15 @@ test_that("Examples from cleave() man work", {
   expect_equal(ncol(multi[4]), 4)
   expect_equal(ncol(multi[5]), 2)
   
-  expect_true(any(grepl('\\*Ibass\\*Itenor', pullPrintable(multi[1], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
-  expect_false(any(grepl('\\*Ibass\\*Itenor', pullPrintable(multi[2], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_true(any(grepl('\\*Ibass\\*Itenor', humdrumR:::pullPrintable(multi[1], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_false(any(grepl('\\*Ibass\\*Itenor', humdrumR:::pullPrintable(multi[2], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
   
-  expect_true(any(grepl('\\*Itenor\\*Ialto', pullPrintable(multi[2], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
-  expect_false(any(grepl('\\*Itenor\\*Ialto', pullPrintable(multi[3], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_true(any(grepl('\\*Itenor\\*Ialto', humdrumR:::pullPrintable(multi[2], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_false(any(grepl('\\*Itenor\\*Ialto', humdrumR:::pullPrintable(multi[3], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
   
-  expect_true(any(grepl('\\*Ialto\\*Isoprn', pullPrintable(multi[3], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
+  expect_true(any(grepl('\\*Ialto\\*Isoprn', humdrumR:::pullPrintable(multi[3], field=c('Token', "Spine2|3|4"), dataTypes='I') |> pull())))
   
-  expect_true(any(grepl('\\*Ibass\\*Itenor\\*Ialto', pullPrintable(multi[5], field=c('Token', "Spine2|3|4", 'Spine3'), dataTypes='I') |> pull())))
+  expect_true(any(grepl('\\*Ibass\\*Itenor\\*Ialto', humdrumR:::pullPrintable(multi[5], field=c('Token', "Spine2|3|4", 'Spine3'), dataTypes='I') |> pull())))
   
   
   # @examples

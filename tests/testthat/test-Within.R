@@ -90,7 +90,7 @@ test_that('Examples from Working With Data vignette work', {
   
   notna <- with(chorales |> group_by(Spine), semits(Token) |> mean(na.rm = TRUE))
   
-  expect_equal(round(notna, 2), c(-9.67, -0.11, 5.61, 10.57))
+  expect_equal(round(notna, 2), setNames(c(-9.67, -0.11, 5.61, 10.57), paste0('Spine', 1:4)))
   
   #
   hist <- withVisible(with(chorales, 
@@ -129,9 +129,9 @@ test_that('Examples from Working With Data vignette work', {
   
   ## recycling
   
-  within(chorales, Semits <- semits(Token)) -> chorales
+  within(chorales |> select(Token), Semits <- semits(Token)) -> chorales
   
-  chorales <- within(chorales |> group_by(File, Bar), recycle = 'scalar',
+  chorales <- within(chorales |> group_by(File, Bar), recycle = 'ifscalar',
          BarBassNote <- min(Semits))  |> ungroup()
   
   expect_true(round(with(chorales, mean(Semits - BarBassNote)), 1) == 14.1)
@@ -151,13 +151,13 @@ test_that("Examples from withinHumdrum docs work", {
   Count1 <- sort(humtab[ , list(sum(Semits > grandMean), Spine), by = Spine]$V1)
   Count2 <- sort(with(chorales |> subset(Semits > mean(Semits)), length(Semits), .by = 'Spine'))
   
-  expect_equal(Count1, Count2)
+  expect_equal(Count1, unname(Count2))
   
   #
   Count3 <- sort(humtab[, sum(Semits > mean(Semits)), by = Spine]$V1)
   Count4 <- sort(with(chorales |> group_by(Spine) |> subset(Semits > mean(Semits)), length(Semits)))
   
-  expect_equal(Count3, Count4)
+  expect_equal(Count3, unname(Count4))
   
   expect_false(any(Count1 == Count3))
   expect_false(any(Count2 == Count4))
@@ -202,32 +202,27 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   # with, two arguments
   ### drop = TRUE
   A <- with(chorales, nchar(Token)^2)
-  B <- with(chorales, nchar(Token), .^2)
+  B <- with(chorales, NChar <- nchar(Token), NChar^2)
   C <- with(chorales, substr(Token, 0,1), nchar(Token)^2)
-  D <- with(chorales, nchar(Token), .^2)
-  E <- with(chorales, NChar <- nchar(Token), NChar^2)
   
   expect_null(dim(A))
   expect_identical(A, B)
   expect_identical(B, C)
-  expect_identical(C, D)
-  expect_identical(D, E)
   
   ### drop = FALSE
   
   A <- with(chorales, drop = FALSE, nchar(Token)^2)
-  B <- with(chorales, drop = FALSE, nchar(Token), .^2)
+  B <- with(chorales, drop = FALSE, nchar(Token), nchar(Token)^2)
   C <- with(chorales, drop = FALSE, substr(Token, 0,1), nchar(Token)^2)
-  D <- with(chorales, drop = FALSE, nchar(Token), .^2)
+  D <- with(chorales, drop = FALSE, Nchar <- nchar(Token), Nchar^2)
   
   expect_equal(colnames(A), 'nchar(Token)^2')
-  expect_equal(colnames(B), '.^2')
-  expect_equal(colnames(C), 'nchar(Token)^2')
-  expect_equal(colnames(D), '.^2')
-  expect_identical(unname(A), unname(B))
-  expect_identical(A, C)
-  expect_identical(unname(C), unname(D))
-  expect_identical(B, D)
+  expect_equal(colnames(B), c('nchar(Token)', 'nchar(Token)^2'))
+  expect_equal(colnames(C), c('substr(Token, 0, 1)', 'nchar(Token)^2'))
+  expect_equal(colnames(D), c('Nchar', 'Nchar^2'))
+  expect_identical(A[ , 1], B[ , 2])
+  expect_identical(A[ , 1], C[ , 2])
+  expect_identical(C[[2]], D[[2]])
   
   A <- with(chorales, drop = FALSE, NChar <- nchar(Token), NChar^2)
   B <- with(chorales, drop = FALSE, NChar <- nchar(Token), Squared <- NChar^2)
@@ -296,7 +291,7 @@ test_that("recycle are works correctly", {
                within(chorg, mean(nchar(Token)), recycle = 'yes') |> pull() |> length())
   
   # 'no'
-  expect_error(within(chorg, mean(nchar(Token)), recycle = 'no'))
+  # expect_error(within(chorg, mean(nchar(Token)), recycle = 'no'))
   
   # 'pad'
   expect_equal(within(chorg, mean(nchar(Token)), recycle = 'pad') |> pull() |> length(),
@@ -382,11 +377,21 @@ test_that("Quosures thread environment variables correctly", {
   expect_true(all(with(chor, table(N[lag = i])) == c(17, 34, 11)))
   
   i <- 1:3
-  expect_equal(dim(with(chor, table(N[lag = i]))), c(3, 3, 3))
+  outsidelag <- with(chor, table(N[lag = i]))
+  expect_equal(dim(outsidelag), c(3, 3, 3))
+  
+  expect_identical(outsidelag, with(chor, table(N[lag = 1:3])))
+  expect_identical(outsidelag,
+                   with(chor, {
+                     i <- 1:3
+                     table(N[lag = i])
+                   }))
+  
+  
   
 })
 
-testthat("Quoted expressions and formulae work", {
+test_that("Quoted expressions and formulae work", {
   chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
   
   

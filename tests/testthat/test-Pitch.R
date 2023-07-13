@@ -302,8 +302,13 @@ test_that("int, mint, and hint work", {
     
     expect_true(with(chorale |> subset(Spine < 3), all(as.character(Bass) == as.character(Lag))))
     
-    expect_equal(with(chorale, tally(mint(Token))['+M2']), 45)
-    expect_equal(with(chorale, tally(hint(Token, lag = Spine == 4))['-M17']), 7)
+    expect_equal(chorale |> select(Token) |> mint() |> tally() |> index('+M2'), setNames(45, '+M2'))
+    
+    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 4) |> tally() |> index('-M17'), setNames(7L, '-M17'))
+    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 4) |> tally() |> index('-P4'), setNames(9L, '-P4'))
+    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 3) |> tally() |> index('-P4'), setNames(17L, '-P4'))
+    
+    
     
 })
 
@@ -374,4 +379,11 @@ test_that('Factors constructed correctly', {
     expect_identical(kerntab, lilytab)
     
     
+})
+
+test_that('.humdrumR methods work correctly', {
+    chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/chor00[1-3].*krn')
+    
+    expect_identical(chorales |> pitch(simple = TRUE),
+                     chorales |> within(Pitch = pitch(Token, simple = TRUE)))
 })

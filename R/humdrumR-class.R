@@ -1115,7 +1115,7 @@ initFields <- function(humtab, tandemFields) {
     
     humtab[ , Exclusive.Token := Exclusive] # changes this in place
     
-    setorder(fieldTable, Type, Class)
+    setorder(fieldTable, Type, Name)
     fieldTable[ , Selected := as.integer(Name == 'Token')]
     fieldTable[ , GroupedBy := FALSE]
     fieldTable[ , Complement := FALSE]
@@ -1521,7 +1521,14 @@ printableSelectedField <- function(humdrumR,
                                     collapse = TRUE)
     
     humtab <- getHumtab(humdrumR, dataTypes = 'GLIMDd')
-    humtab$Printable <- printableField[[1]]
+    
+    humtab[ , Printable := {
+        print <- character(nrow(humtab))
+        print[Type %in% useToken] <- Token[Type %in% useToken]
+        print[Type %in% dataTypes] <- printableField$Printable
+        print
+    }]
+    
     putHumtab(humdrumR) <- humtab
     
     updateFields(humdrumR)
@@ -1546,7 +1553,7 @@ getGroupingFields <- function(humdrumR, .by = NULL, withFunc = 'within.humdrumR'
 
 
 pullFields <- function(humdrumR, fields, dataTypes = 'D', 
-                       null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis'),
+                       null = 'charNA2dot',
                        drop = FALSE) {
 
     
@@ -1563,15 +1570,14 @@ pullFields <- function(humdrumR, fields, dataTypes = 'D',
     #                                                }
     #                                                field
     #                                            })]
-    
     # decide how NA/null values are shown
     fieldTypes <- fields(humdrumR)[ , Type[match(colnames(selectedTable), Name)]]
     fieldTypes <- lapply(as.list(fieldTypes), 
                          \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
                                                                                       Structure = 'D', Reference = 'G')[fieldType],
-                                                                                    fieldType, length = nrow(selectedTable)))
+                                                                                      fieldType, length = nrow(selectedTable)))
     
-    selectedTable[] <- Map(naDots, selectedTable, types = fieldTypes, null = null)
+    selectedTable[] <- mapply(naDots, selectedTable, fieldTypes, MoreArgs = list(null = null), SIMPLIFY = FALSE)
     
     # return
     if (length(fields) == 1L && drop) selectedTable[[1]] else selectedTable
@@ -1580,14 +1586,14 @@ pullFields <- function(humdrumR, fields, dataTypes = 'D',
 
 
 
-pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
+pullSelectedField <- function(humdrumR, dataTypes = 'D', drop = TRUE, null = 'charNA2dot') {
     fieldInTable <- pullSelectedFields(humdrumR, dataTypes = dataTypes, null = null)[ , 1L, with = FALSE]
     
     if (drop) fieldInTable[[1]] else fieldInTable
     
 }
 
-pullSelectedFields <- function(humdrumR, dataTypes = 'D', null = c('charNA2dot', 'NA2dot', 'dot2NA', 'asis')) {
+pullSelectedFields <- function(humdrumR, dataTypes = 'D', null = 'charNA2dot') {
     
     pullFields(humdrumR, selectedFields(humdrumR), dataTypes = dataTypes, null = null)
     
@@ -1619,7 +1625,7 @@ pullPrintable <- function(humdrumR, fields,
                                              matrix[] <- str_pad(c(matrix), width = max(nchar(matrix)))
                                              field <- paste0('[', do.call('paste', as.data.frame(matrix)),  ']')
                                          }
-                                         field <- gsub('\t\t*', '', field)
+                                         field[fieldTable$Type != 'G'] <- gsub('\t\t*', '', field[fieldTable$Type != 'G'])
                                          field
                                          
                                      })] 
@@ -1654,7 +1660,7 @@ pullPrintable <- function(humdrumR, fields,
     
 
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
-    field <- naDots(field, null, ifelse(is.na(field) | field == '.', 'd', Type))
+    field <- naDots(field, ifelse(is.na(field) | field == '.', 'd', Type), null)
     field[field == ''] <- "'"
     
     
@@ -1760,10 +1766,15 @@ pull_data.table <- function(humdrumR, ..., dataTypes = 'D', null = 'charNA2dot')
     fields <- if (length(exprs)) {
         tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'any', callname = 'pull.humdrumR')
     } else {
-        selectedFields(.data)
+        selectedFields(humdrumR)
     }
     
-    pullFields(humdrumR, fields, dataTypes = dataTypes, null = null)
+    dt <- pullFields(humdrumR, fields, dataTypes = dataTypes, null = null)
+    
+    names <- .names(exprs)
+    if (any(names != '')) names(dt)[names != ''] <- names[names != '']
+    
+    dt
 }
 
 #' @name pullHumdrum
@@ -1857,7 +1868,7 @@ setMethod('$<-', signature = c(x = 'humdrumR'),
 #### pull helpers ----
 
 
-naDots <- function(field, null, types) {
+naDots <- function(field, types, null) {
     if (null == 'asis') return(field)
     na <- is.na(field)
     
@@ -1921,7 +1932,7 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
       Nfiles <- nfiles(humdrumR) # needs to be done before firstLast indexing
       if (Npieces > 2L && firstAndLast) humdrumR <- humdrumR[c(1L, Npieces)]
       
-      if (view == 'score') return(print_score(.humdrumR, maxRecordsPerFile))
+      if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile))
       
       tokmat <- if (view == 'humdrum') {
           tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
@@ -2233,7 +2244,7 @@ padColumns <- function(tokmat, global, maxTokenLength, screenWidth = options('wi
     # collapse to lines
     tokmat[global, -1:-2L] <- ''
     lines <- do.call('paste0', as.data.frame(tokmat))
-    lines[global] <- gsub('\t', ' ', lines[global])
+    # lines[global] <- gsub('\t', ' ', .humdrumRlines[global])
 
     longGlobal <- global & nchar(lines) > screenWidth
     longColumn <- !screen

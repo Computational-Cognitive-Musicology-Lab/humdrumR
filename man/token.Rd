@@ -5,7 +5,7 @@
 \alias{c,token-method}
 \alias{rep.token}
 \alias{unique.token}
-\alias{[,token,ANY,ANY,ANY-method}
+\alias{[,token,ANY,ANY-method}
 \alias{show,token-method}
 \alias{format.token}
 \alias{is.token}
@@ -24,7 +24,7 @@ token(x, Exclusive = NULL, ...)
 
 \method{unique}{token}(x, ...)
 
-\S4method{[}{token,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
+\S4method{[}{token,ANY,ANY}(x, i, j, ..., drop = FALSE)
 
 \S4method{show}{token}(object)
 
