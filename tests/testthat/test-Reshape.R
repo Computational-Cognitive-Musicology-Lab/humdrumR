@@ -240,3 +240,16 @@ test_that("Test that rend words" , {
   expect_equal(getHumtab(chorales |> rend(Token, Recip, Pitch, fieldName = 'Rended'))[Spine %in% c(2, 5, 8, 11), Rended], 
                getHumtab(chorales)[!is.na(Spine), as.character(Recip)])
 })
+
+test_that("Examples from rend() man work", {
+  humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+  
+  humData |> mutate(Recip = recip(Token), Solfa = solfa(Token, simple = TRUE)) -> humData
+  
+  rended <- humData |> rend(c('Recip', 'Solfa'))
+  
+  expect_identical(rended, humData |> select(c('Recip', 'Solfa')) |> rend())
+  
+  expect_equal(getHumtab(humData, 'D')[Spine == 2, as.character(Solfa)], 
+               getHumtab(rended, 'D')[Spine == 4, as.character(Recip.Solfa)])
+})

@@ -1632,7 +1632,7 @@ pullPrintable <- function(humdrumR, fields,
     }, fieldTable[, fields, with = FALSE])
     
     
-    Type <- ifelse(is.na(field) | field == '.', 'd', fieldTable$Type)
+    Type <- fieldTable$Type
     ## Do we need to grab any interpretations from the Token field?
     if (length(useToken) && any(grepl(captureRE(useToken), dataTypes))) {
         # humtab[, !Type %in% c('D', 'd')]
@@ -1654,7 +1654,7 @@ pullPrintable <- function(humdrumR, fields,
     
 
     field <- stringr::str_replace(field, '^\\.[ ,.]*\\.$', '.')
-    field <- naDots(field, null, fieldTable$Type)
+    field <- naDots(field, null, ifelse(is.na(field) | field == '.', 'd', Type))
     field[field == ''] <- "'"
     
     
