@@ -1045,8 +1045,12 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
   
   humtab <- data.table::rbindlist(humtabs, fill = TRUE)
   
+  
   putHumtab(humdrumR) <- humtab
   humdrumR <- updateFields(humdrumR)
+  
+  humdrumR <- reKey(humdrumR)
+  
   selectFields(humdrumR, fieldName)
   
 }

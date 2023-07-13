@@ -6,7 +6,7 @@ test_that('Spine cleaving works properly', {
   
   cleaved <- getHumtab(cleave(spine, Spine = c(1, 2), Spine = c(1, 4), newFields =  'silbe'))
   
-  expect_equal(dim(cleaved), c(24, 25))
+  expect_equal(dim(cleaved), c(24, 26))
   if (expect_true(all(c('Token', 'silbe', 'silbe1') %in% colnames(cleaved)))) {
     expect_equal(cleaved[silbe == 'the' & silbe1 == 'a', Token], 'c#')
   }
@@ -44,7 +44,7 @@ test_that("Exclusive (spine) cleaving works properly", {
   # parallel (two silbe onto two kern)
   cleavedSilbe <- getHumtab(cleave(spine, c('kern', 'silbe')))
   
-  expect_equal(dim(cleavedSilbe), c(24, 23))
+  expect_equal(dim(cleavedSilbe), c(24, 24))
   if (expect_true(all(c('Token', 'Silbe') %in% colnames(cleavedSilbe)))) {
     expect_equal(cleavedSilbe[ , table(Token, Silbe)]['a', 'These'], 2L)
   }
@@ -53,21 +53,21 @@ test_that("Exclusive (spine) cleaving works properly", {
   # spreading: one harm onto twokern
   cleavedHarm <- getHumtab(cleave(spine, c('kern', 'harm')))
   
-  expect_equal(dim(cleavedHarm), c(32, 23))
+  expect_equal(dim(cleavedHarm), c(32, 24))
   if (expect_true(all(c('Token', 'Harm') %in% colnames(cleavedHarm)))) {
     expect_equal(cleavedHarm[ , table(Token, Harm)]['c#', 'AM'], 2L)
   }
   
   # two parallel moves AND ond spreading move
   cleavedDouble <- getHumtab(cleave(spine , c('kern', 'harm', 'silbe')))
-  expect_equal(dim(cleavedDouble), c(16, 25))
+  expect_equal(dim(cleavedDouble), c(16, 26))
   if (expect_true(all(c('Token', 'Harm', 'Silbe') %in% colnames(cleavedDouble)))) {
     expect_equal(cleavedDouble[ , table(Token, Harm, Silbe)]['c#', 'AM', 'These'],1L)
   }
   
   # all moved onto one, including a self move (kern -> kern) 
   cleavedAll <- getHumtab(cleave(spine , 1:5, newFields = c('Silbe1', 'Kern', 'Silbe2', 'Harm')))
-  expect_equal(dim(cleavedAll), c(8, 29))
+  expect_equal(dim(cleavedAll), c(8, 30))
   if (expect_true(all(c('Token', 'Harm', 'Kern', 'Silbe1', 'Silbe2') %in% colnames(cleavedAll)))) {
     expect_equal(cleavedAll[ , paste(Token, Harm, Kern, Silbe1,Silbe2)[6]] , 'd DM f# lyr- cat')
   }
@@ -80,7 +80,7 @@ test_that('Path cleaving works properly', {
   cleavedPath <- getHumtab(cleavePaths(path))
   
   
-  expect_equal(dim(cleavedPath), c(28, 23))
+  expect_equal(dim(cleavedPath), c(28, 24))
   if (expect_true(all(c('Token', 'Path1') %in% colnames(cleavedPath)))) {
     expect_equal(cleavedPath[Stop == 1L, table(Token, Path1)]['c', 'a'], 2L)
   }
@@ -95,7 +95,7 @@ test_that('Stop cleaving works properly', {
   cleavedStop <- getHumtab(cleaveStops(stop))
   
   
-  expect_equal(dim(cleavedStop), c(18, 26))
+  expect_equal(dim(cleavedStop), c(18, 27))
   if (expect_true(all(c('Token', 'Stop2', 'Stop3') %in% colnames(cleavedStop)))) {
     expect_equal(cleavedStop[ , table(Token, Stop2, Stop3)]['b', 'd', 'g#'], 2L)
   }
@@ -121,7 +121,7 @@ test_that('Examples from Reshaping vignette work', {
   
   reshaped <- getHumtab(cleave(reshaping, 1:2), 'D')
   
-  expect_equal(dim(reshaped), c(24, 26))
+  expect_equal(dim(reshaped), c(24, 27))
   if (expect_true(all(c('Token', 'Spine2') %in% colnames(reshaped)))) {
     expect_equal(reshaped[ , table(Token, Spine2)]['4e', 'an'], 1L)
   }

@@ -253,19 +253,14 @@ NULL
 
 
 getColumn <- function(humtab, pad = 'corpus') {
-    
     switch(pad,
            corpus = humtab[  , frank(list(Spine, Path), ties.method = 'dense', na.last = 'keep')],
            piece  = humtab[  , frank(x = list(Spine, Path), ties.method = 'dense', na.last = 'keep'), by = Piece]$V1,
            dont   = {
-               humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
-               column <- humtab[  , list(Column = cumsum(Stop == 1L), `_rowKey_` = `_rowKey_`), by = .(Piece, Record)]
-               setorder(column, `_rowKey_`)
-               
-               column$Column
-               })
-        
-   
+               columns <- humtab[ , list(Column = cumsum(Stop == 1L), `_rowKey_` = `_rowKey_`), by = .(Piece, Record)]
+               setorder(columns, `_rowKey_`)
+               columns$Column
+           })
     
 }
 
@@ -280,6 +275,16 @@ orderHumtab <- function(humtab) {
     # can't sort by lists
     
     setorderv(humtab, cols = orderingcols)
+    
+}
+
+reKey <- function(humdrumR) {
+    
+    humtab <- humdrumR@Humtable
+    humtab <- orderHumtab(humtab)
+    humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
+    
+    humdrumR
     
 }
 
@@ -413,6 +418,8 @@ setMethod('initialize', 'humdrumR',
 
             fieldTable <- initFields(humtab, tandemFields)
             setcolorder(humtab, fieldTable$Name)
+            humtab <- orderHumtab(humtab)
+            humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
             
             .Object@Humtable  <- humtab    
             .Object@Fields    <- fieldTable
@@ -640,7 +647,6 @@ as.matrix.humdrumR <- function(x, dataTypes = 'GLIMDd', padPaths = 'corpus', pad
     i <- data.table::frank(humtab[ , list(Piece, Record)], ties.method = 'dense')
     j <- getColumn(humtab, padPaths)
     j[is.na(j)] <- 1L
-    
     
     field <- pullPrintable(x, selectedFields(x), dataTypes = dataTypes)[[1]]
     if (is.factor(field)) field <- as.character(field) # R does't allow factors in matrices
@@ -1099,7 +1105,7 @@ checkFieldTypes <- function(types, argname, callname, includeSelected = TRUE) {
 }
 
 initFields <- function(humtab, tandemFields) {
-    fields <- colnames(humtab)
+    fields <- setdiff(colnames(humtab), '_rowKey_')
     fieldTable <- data.table(Name = fields, Class = sapply(humtab, class), Type = 'Reference')
     
     fieldTable[ , Type := {
@@ -1147,7 +1153,7 @@ updateFields <- function(humdrumR, selectNew = TRUE) {
     fieldTable <- humdrumR@Fields
     fieldTable <- fieldTable[Name %in% colnames(humtab)] # removes fields that don't exist in humtab
     
-    new <- setdiff(colnames(humtab), fieldTable$Name)
+    new <- setdiff(colnames(humtab), c(fieldTable$Name, '_rowKey_'))
     new <- new[!grepl('^_complement_|Exclusive\\.', new)]
     if (length(new)) {
         fieldTable <- rbind(fieldTable, 

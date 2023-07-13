@@ -619,9 +619,9 @@ with.humdrumR <- function(data, ...,
   
   if (recycle == 'pad') result <- result[humtab[Type %in% dataTypes, list(`_rowKey_`)], on ='_rowKey_'] 
   
-  result[ , `_rowKey_` := NULL][]
-  ### Do we want extract the results from the data.table? 
+  result[ , `_rowKey_` := NULL]
   
+  ### Do we want extract the results from the data.table? 
   if (drop) {
     
     groups <- result[ , groupFields, with = FALSE]
@@ -689,7 +689,6 @@ within.humdrumR <- function(data, ...,
  
   ## put result into new humtab
   newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
-  newhumtab[ , `_rowKey_` := NULL]
   
   #### Put new humtable back into humdrumR object
   newFields <- setdiff(colnames(newhumtab), colnames(humtab))
@@ -698,9 +697,13 @@ within.humdrumR <- function(data, ...,
   newhumtab <- update_humdrumR.data.table(newhumtab, field = c(newFields, overWrote))
   humdrumR@Humtable <- newhumtab
   
+  
   if (length(newFields)) {
     humdrumR <- updateFields(humdrumR)
   }
+  
+  if (nrow(humdrumR@Context) > 0L) humdrumR <- reKey(humdrumR)
+  
   humdrumR
   # update_humdrumR(humdrumR, field = c(newfields, overWrote))
 
@@ -717,7 +720,6 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
   
   humtab <- data.table::copy(getHumtab(humdrumR))
-  humtab[ , `_rowKey_` := seq_len(nrow(humtab))]
   
   # quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
   quosures <- rlang::enquos(...)
