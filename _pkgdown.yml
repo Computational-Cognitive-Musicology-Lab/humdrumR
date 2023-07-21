@@ -19,6 +19,7 @@ articles:
   navbar: Basics
   contents:
   - GettingStarted
+  - DataModel
   - IntroForCoders
 - title: Background
   desc: Background info on humdrum and R
