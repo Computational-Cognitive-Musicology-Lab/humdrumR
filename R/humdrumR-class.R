@@ -1029,8 +1029,8 @@ update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Dd = TRUE , ...) {
 }
 update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Dd = TRUE, ...) {
     
-    if (Exclusive) hum <- update_Exclusive(hum, ...)
-    if (Dd) hum <- update_Dd(hum, ...)
+    if (Exclusive) hum <- update_Exclusive.data.table(hum, ...)
+    if (Dd) hum <- update_Dd.data.table(hum, ...)
     hum
     
 }
@@ -1042,9 +1042,8 @@ update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
     fields <- selectedFields(hum)
-    putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, fields)
+    update_Exclusive.data.table(humtab, fields) # in place
     
-    hum
 }
 update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     
@@ -1054,9 +1053,6 @@ update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     } else {
         hum[ , Exclusive := Exclusive.Token]
     }
-    
-    
-    hum
 }
 
 #
@@ -1065,14 +1061,17 @@ update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, overwriteEmpty = "GLIMDd") <- update_Dd.data.table(humtab, field = field)
-    hum
+    update_Dd.data.table(humtab, field = field) # in place
 }
 update_Dd.data.table <- function(hum, field = 'Token', ...) {
-    null <- nullFields(hum, field)
     
-    hum$Type[hum$Type %in% c('d', 'D')] <-  ifelse(null[hum$Type %in% c('d', 'D')], 'd', 'D')
-    hum
+    hum[Type %in% c('d', 'D'), 
+        Type := {
+            null <- nullFields(.SD, field)
+            
+            ifelse(null, 'd', 'D')
+            
+        }]
 }
 
 is.nullToken <- function(tokens) {
@@ -1258,13 +1257,6 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
 }
 
-fieldsInExpr <- function(humtab, expr) {
-  ## This function identifies which, if any,
-  ## fields in a humtable are referenced in an expression (or rhs for formula).
-  if (is.humdrumR(humtab)) humtab <- getHumtab(humtab)          
-  
-  namesInExpr(colnames(humtab), expr)
-}
 
 fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fields') {
     fields <- fields(humdrumR)$Name
