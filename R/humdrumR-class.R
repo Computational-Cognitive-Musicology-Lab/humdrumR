@@ -269,12 +269,13 @@ getColumn <- function(humtab, pad = 'corpus') {
 
 
 orderHumtab <- function(humtab) {
-    if (nrow(humtab) == 0L) return(humtab)
-    orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') 
+    # if (nrow(humtab) == 0L) return(humtab)
+    # orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') 
     
     # can't sort by lists
     
-    setorderv(humtab, cols = orderingcols)
+    setkey(humtab, File, Piece, Spine, Path, Record, Stop)
+    # setorderv(humtab, cols = orderingcols)
     
 }
 
@@ -1257,6 +1258,13 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
 }
 
+fieldsInExpr <- function(humtab, expr) {
+  ## This function identifies which, if any,
+  ## fields in a humtable are referenced in an expression (or rhs for formula).
+  if (is.humdrumR(humtab)) humtab <- getHumtab(humtab)          
+  
+  namesInExpr(colnames(humtab), expr)
+}
 
 fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fields') {
     fields <- fields(humdrumR)$Name
@@ -1573,7 +1581,7 @@ pullFields <- function(humdrumR, fields, dataTypes = 'D',
     fieldTypes <- lapply(as.list(fieldTypes), 
                          \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
                                                                                       Structure = 'D', Reference = 'G')[fieldType],
-                                                                                      fieldType, length = nrow(selectedTable)))
+                                                                                      fieldType, length.out = nrow(selectedTable)))
     
     selectedTable[] <- mapply(naDots, selectedTable, fieldTypes, MoreArgs = list(null = null), SIMPLIFY = FALSE)
     
@@ -1644,9 +1652,10 @@ pullPrintable <- function(humdrumR, fields,
         
         if (length(tandems)) {
             tandemRE <- knownInterpretations[Name %in% tandems, RE]
-            fill[Type == 'I'] <- fill[Type == 'I']  & Reduce('|', lapply(tandemRE, 
-                                                                         stringi::stri_detect_regex, 
-                                                                         str = fieldTable$Token[Type == 'I'] ))
+            targets <- Type == 'I' & !is.na(fieldTable$Token)
+            fill[targets] <- fill[targets]  & Reduce('|', lapply(tandemRE, 
+                                                                 stringi::stri_detect_regex, 
+                                                                 str = fieldTable$Token[targets]))
         }
         field[fill] <- fieldTable$Token[fill]
     } 

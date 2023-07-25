@@ -1457,13 +1457,14 @@ recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFun
 
 
 addExclusiveFields <- function(humtab, fields) {
-  newcols <- lapply(humtab[ , fields, with = FALSE],
-         \(field) {
+  lapply(fields,
+         \(fieldName) {
+           field <- humtab[[fieldName]]
            exclusive <- getExclusive(field)
            if (!is.null(exclusive)) {
              exclusive <- ifelse(is.na(field), NA_character_, exclusive)
              
-             newFieldName <- paste0('Exclusive.', field)
+             newFieldName <- paste0('Exclusive.', fieldName)
              humtab[ , (newFieldName) := exclusive]
            }
          })
