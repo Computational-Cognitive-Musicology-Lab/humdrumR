@@ -626,31 +626,30 @@ with.humdrumR <- function(data, ...,
                        .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
   
-  if (recycle == 'pad') result <- result[humtab[Type %in% dataTypes, list(`_rowKey_`)], on ='_rowKey_'] 
   
-  result[ , `_rowKey_` := NULL]
+  humtab <- humtab[ , union(newFields, groupFields), with = FALSE]
   
   ### Do we want extract the results from the data.table? 
   if (drop) {
     
-    groups <- result[ , groupFields, with = FALSE]
+    result <- humtab[[tail(newFields, 1L)]]
+    if (length(result) == 0L) return(result)
+    groups <- humtab[ , groupFields, with = FALSE]
     groupNames <- if (length(groups)) do.call('paste', c(Map(groupFields, groups, f = paste0), list(sep = ',')))
     
-    result <- result[[max(which(!colnames(result) %in% groupFields))]]
-    if (length(result) == 0L) return(result)
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
     } else {
       if (!any(duplicated(groupNames))) names(result) <- groupNames
     }
+    
+    attr(result, 'visible') <- NULL
+    if (visible) result else invisible(result)
+    
   } else {
-    visible <- TRUE
+    humtab
   }
-  
-  attr(result, 'visible') <- NULL
-  
-  if (visible) result else invisible(result)
   
 }
 
@@ -909,27 +908,12 @@ quosureParseResult <- function(quosure, recycle, withFunc, alignLeft) {
     result <- rep_len(result, inlen)
     attr(result, 'visible') <- visible
     
-    list(result, orig = seq_len(inlen) >= outlen, inlen / outlen, outlen == 1)
+    list(result, orig = seq_len(inlen) > outlen, inlen / outlen, outlen == 1)
     
     })
   
   rlang::quo_set_env(quosure, env)
   
-}
-
-concatDoQuos <- function(quosures) {
-  assigned <- names(quosures)
-   rlang::quo({
-    {!!!quosures}
-    
-    results <- setNames(lapply(list(!!!rlang::syms(assigned)), \(x) list(list(x))), !!assigned) 
-    # Need three lists here, and two for _rowKey_ 
-    
-    results[['_rowKey_']] <- list(list(`_rowKey_`))
-    
-    results
-    
-    })
 }
 
 ####################### Functions used inside prepareQuo
@@ -1280,77 +1264,6 @@ evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
 
 
 
-parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
-    # this takes a nested list of results with associated
-    # indices and reconstructs the output object.
-  # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
-  
-  grouping <- results[ , groupFields, with = FALSE]
-  rowKey <- unlist(results[['_rowKey_']], recursive = FALSE)
-  results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
-  
-  visibleResult <- is.visible(results[[length(results)]][[1]][[1]]) # determined by last result
-  results[] <- lapply(results, unlist, recursive = FALSE)
-  
-  
-  
-  results <- as.matrix(results) # allows me to lapply across all all at once
-  # results <- do.call('cbind', results)
-  
-  # "objects" are treated like length 1, and not vectorized
-  objects <- array(FALSE, dim(results), dimnames(results))
-  objects[] <- sapply(results, 
-                      \(result) {
-                        length(resultGroup) &&
-                          (is.table(resultGroup) || (is.object(resultGroup) && !is.atomic(resultGroup)))
-                        })
-  
-  # pad results and/or trim rowKey to make them match in size
-  c('results', 'rowKey') %<-% recycleResults(results, objects, rowKey, recycle, alignLeft, withFunc)
-  
-  # need to rbind result groups
-  results <- as.list(as.data.frame(results))
-  objects <- colSums(objects) > 0L
-  
-  groupLengths <- lengths(rowKey)
-  results <- Map(results, objects,
-                 f = \(group, isObject) {
-                   # need to 
-                   # 1) pad results which are shorter than the longest result
-                   # 2) concatinate vectorized results
-                   if (isObject) {
-                     result <- vector('list', sum(groupLengths))
-                     ind <- if (alignLeft) 1L + head(cumsum(c(0L, groupLengths)), -1L) else cumsum(groupLengths)
-                     result[ind] <- group
-                   } else {
-                     if (hasdim(group[[1]])) {
-                       short <- sapply(group, nrow) < groupLengths
-                       group[short] <- Map(group[short], groupLengths[short], f = \(g, n) g[seq_len(n), , drop = FALSE])
-                     } else {
-                       short <- lengths(group) < groupLengths
-                       group[short] <- Map(group[short], groupLengths[short], f = \(g, n) g[seq_len(n)])
-                     }
-                     result <- .unlist(group, recursive = FALSE) 
-                   }
-                   attr(result, 'visible') <- NULL
-                   result
-                   
-                 })
-  
-  arrays <- sapply(results, is.array)
-  result <- as.data.table(results)
-  # arrays are split into new columns
-  # for (array in names(results)[arrays]) {
-    # result[[array]] <- results[[array]]
-  # }
-  
-  result <- cbind(`_rowKey_` = unlist(rowKey), as.data.table(lapply(grouping, rep, lengths(rowKey))), result)
-  
-  attr(result, 'visible') <- visibleResult 
-  
-  result
-    
-}
 
 wrapObjects <- function(result) {
   if (length(result) &&  
@@ -1360,127 +1273,6 @@ wrapObjects <- function(result) {
   } else {
     result
   }
-}
-
-
-recycle_summarize <- function(result) {
-  if (length(result) != 1L) .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
-  result
-}
-
-
-recycle_pad <- function(result, length, alignLeft) {
-  if (alignLeft) result[seq_len(length)] else result[c(setdiff(seq_len(length), seq_along(result)), seq_along(result))]
-}
-
-recycle_ifscalar <- function(result, length, withFunc, alignLeft) {
-  if (!(length(result) == 1L || length(result) == length)) .stop("The {withFunc} command won't recycle these results",
-                                                                 "because the recycle argument is set to 'ifscalar'.",
-                                                                 "Your result is not scalar (length == 1) and does not match the input length.")
-  if (alignLeft) rep(result, length.out = length) else result[rev(rep(rev(seq_along(result)), length.out = length))]
-}
-
-
-recycle_ifeven <- function(result, length, withFunc, alignLeft) {
-  if ((length(result) %% length) != 0) .stop("The {withFunc} command won't recycle these results",
-                                              "because the recycle argument is set to 'ifeven'.",
-                                              "The length of your result does not evenly divide the input length.")
-  
-  if (alignLeft) rep(result, length.out = length) else result[rev(rep(rev(seq_along(result)), length.out = length))]
-}
-
-recycle_yes <- function(result, length, alignLeft) {
-  if (alignLeft) rep(result, length.out = length) else result[rev(rep(rev(seq_along(result)), length.out = length))]
-}
-
-recycle_never <- function(result, length, withFunc) {
-  if (length(result) != length) .stop("The {withFunc} command won't recycle these results",
-                                      "because the recycle argument is set to 'never',",
-                                      "but length of your result does not match the input length.")
-  result
-}
-
-
-recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFunc) {
-  
-  # length of each result group
-  resultLengths <- array(as.integer(objects), dim(objects), dimnames(objects))
-  resultLengths[!objects] <- unlist(lapply(results[!objects], \(result) if (hasdim(result)) nrow(result) else length(result)))
-  
-  keyLengths <- lengths(rowKey)
-  keyLengths <- do.call('cbind', rep(list(keyLengths), ncol(results)))
-  
-  diff <- resultLengths - keyLengths
-  
-  if (any(diff > 0L)) .stop("Sorry, {withFunc}() doesn't currently support expressions",
-                            "which return values that are longer than their input field(s).",
-                            "Your expression has returned results of lengths {harvard(head(resultLengths[diff > 0L], 5), 'and')} evaluated from",
-                            "inputs of length {harvard(head(keyLengths[diff > 0L], 5), 'and')}<, respectively|>.",
-                            ifelse = length(results) > 1L)
-  
-    
-  match  <- diff == 0L
-  scalar <- resultLengths == 1L
-  
-  if (recycle == 'summarize' && !(all(scalar))) .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
-  
-  if (!recycle %in% c('pad', 'summarize', 'no') && any(!match & !objects)) {
-    bad <- !match & switch(recycle,
-                           ifscalar  = resultLengths != 1L,
-                           ifeven    = keyLengths %% resultLengths != 0L,
-                           never     = TRUE,
-                           FALSE)
-    if (any(bad)) .stop("The {withFunc} command won't recycle these results because the recycle argument is set to '{recycle}.'",
-                        switch(recycle, 
-                               ifscalar = "Only scalar (length 1) results will be recycled.",
-                               ifeven = "Only results of a length that evenly divides the input will be recycled."),
-                        "See the 'recycling' section of ?withHumdrum for explanation.")
-    
-    results[!match & !objects] <- Map(results[!match & !objects], keyLengths[!match & !objects], 
-                                      f = \(result, keyLength) {
-                                        i <- if (hasdim(result)) 1:nrow(result) else seq_along(result)
-                                        
-                                        i <- if (alignLeft) { 
-                                          rep(i, length.out = keyLength) 
-                                        } else { 
-                                            rev(rep(rev(i), length.out = keyLength))
-                                          }
-                                        
-                                        if (hasdim(result)) {
-                                          result[i, , drop = FALSE]
-                                        } else {
-                                          result[i]
-                                        }
-                                        
-                                      })
-    resultLengths[!match & !objects] <- keyLengths[!match & !objects]
-  }
-  
-  
-    
-  # to make the (later) padding work, we may need to shorten the rowKey to match the result length
-  maxGroupLength <- apply(resultLengths, 1L, max)
-  keyLengths <- keyLengths[ , 1]
-  keyTrim <- keyLengths > maxGroupLength
-  
-  if (any(keyTrim)) {
-    rowKey[keyTrim] <- Map(rowKey[keyTrim], maxGroupLength[keyTrim], 
-                           f = if (alignLeft) {
-                             \(keys, len) {
-                               keys[seq_len(min(length(keys), max(len, 0L)))]
-                             }
-                           } else {
-                             \(keys, len) {
-                               l <- length(keys)
-                               ind <- (l - len + 1) : l
-                               ind <- ind[ind > 0]
-                               keys[ind]
-                             }
-                           })
-    
-  }
-  list(results = results, rowKey = rowKey)
-  
 }
 
 
