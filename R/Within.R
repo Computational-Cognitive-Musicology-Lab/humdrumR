@@ -719,6 +719,8 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   # new fields are created in place
   visible <- evaluateDoQuo(quosures, humtab, dataTypes, groupFields, humdrumR@Context)
   
+  humtab <- checkRecycling(humtab, recycle, names(quosures), withFunc)
+  
   if (expandPaths) {
     humtab <- humtab[!is.na(ParentPath)]
   }
@@ -768,8 +770,7 @@ prepareQuosures <- function(humtab, quosures, dotField, recycle, variables, with
   # splats
   quosures <- lapply(quosures, splatQuo, fields = colnames(humtab))
   
-  quosures <- Map(quosures, seq_along(quosures) == length(quosures),
-                  f = quosureParseResult, recycle = recycle, withFunc = withFunc, alignLeft = alignLeft)
+  quosures <- lapply(quosures, quosureParseResult, recycle = recycle, withFunc = withFunc, alignLeft = alignLeft)
 
   quosures
 }
@@ -849,44 +850,71 @@ checkOverwrites <- function(quosures, humtab, withFunc) {
   overWrote
 }
 
-
-quosureParseResult <- function(quosure, last, recycle, withFunc, alignLeft) {
-  env <- rlang::quo_get_env(quosure)
-  newquosure <- if (last) rlang::expr(result$value) else quosure
-  
-  # Wrap objects
-  newquosure <- rlang::quo_set_env(rlang::quo(wrapObjects(!!newquosure)), env)
-  
-  # recycle
-  newquosure <- switch(recycle,
-                       summarize = rlang::quo(recycle_summarize(!!newquosure)),
-                       ifscalar  = rlang::quo(recycle_ifscalar(!!newquosure, length(Token), withFunc = !!withFunc, alignLeft = !!alignLeft)),
-                       ifeven    = rlang::quo(recycle_ifeven(!!newquosure, length(Token), withFunc = !!withFunc, alignLeft = !!alignLeft)),
-                       never     = rlang::quo(recycle_never(!!newquosure, length(Token), withFunc = !!withFunc)),
-                       yes       = rlang::quo(recycle_yes(!!newquosure, length(Token), alignLeft = !!alignLeft)),
-                       no        = ,
-                       pad       = rlang::quo(recycle_pad(!!newquosure, length(Token), alignLeft = !!alignLeft))
-  )
-  
-  newquosure <- rlang::quo_set_env(newquosure, env)
-  
-  if (last) {
-    newquosure <- rlang::quo({
-      result <- withVisible(!!quosure)
-      visible <- result$visible
-      result <- !!newquosure
+checkRecycling <- function(humtab, recycle, fields, withFunc) {
+  if (recycle == 'no') {
+    
+    recycled <- Reduce('&', humtab[ , grepl('\\.recycled_$', colnames(humtab)), with = FALSE])
+    humtab <- humtab[!recycled]
+    
+  }  else {
+    
+    for (field in fields) {
+      recycled <- humtab[[paste0('_', field, '.recycled_')]]
+      inOutRatio <- humtab[[paste0('_', field, '.inOutRatio_')]]
+      scalar <- humtab[[paste0('_', field, '.isScalar_')]]
       
-      attr(result, 'visible') <- visible
+      switch(recycle,
+             pad =  humtab[recycled == TRUE, (field) := NA],
+             ifscalar = if (!all(scalar | inOutRatio == 1, na.rm = TRUE)) {
+               .stop("The {withFunc} command won't recycle these results",
+                     "because the recycle argument is set to 'ifscalar'.",
+                     "Your result is not scalar (i.e., length(result) != 1) and does not match the input length.")
+             },
+             summarize = if (!all(scalar, na.rm = TRUE)) {
+               .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
+             },
+             ifeven = if (!all(inOutRatio %% 1 == 0, na.rm = TRUE)) {
+               .stop("The {withFunc} command won't recycle these results",
+                     "because the recycle argument is set to 'ifeven'.",
+                     "The length of your result does not evenly divide the input length.")
+             },
+             never = if (!all(inOutRatio == 1, na.rm = TRUE)) {
+               .stop("The {withFunc} command won't recycle these results",
+                     "because the recycle argument is set to 'never',",
+                     "but length of your result does not match the input length.")
+             })
       
-      result
-      
-      
-      
-    })
-    newquosure <- rlang::quo_set_env(newquosure, env)
+    }
+    
   }
   
-  newquosure
+  humtab[ , grep('\\.(recycled|isScalar|inOutRatio)_$', colnames(humtab), value = TRUE) := NULL]
+  
+  
+  humtab
+}
+
+
+quosureParseResult <- function(quosure, recycle, withFunc, alignLeft) {
+  env <- rlang::quo_get_env(quosure)
+  
+  quosure <- rlang::quo({
+    result <- withVisible(!!quosure)
+    visible <- result$visible
+    result <- wrapObjects(result$value)
+    
+    inlen <- length(Token)
+    outlen <- length(result)
+    
+    result <- rep_len(result, inlen)
+    attr(result, 'visible') <- visible
+    
+    list(result, orig = seq_len(inlen) >= outlen, inlen / outlen, outlen == 1)
+    
+    })
+  
+  rlang::quo_set_env(quosure, env)
+  
 }
 
 concatDoQuos <- function(quosures) {
@@ -1195,7 +1223,8 @@ evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame)
   }
   
   for (assign in names(quosures)) {
-    humtab[Type %in% dataTypes, (assign) := rlang::eval_tidy(quosures[[assign]], data = .SD), by = groupFields]
+    assigned <- c(assign, paste0('_', assign, c('.recycled_', '.inOutRatio_', '.isScalar_')))
+    humtab[Type %in% dataTypes, (assigned) := rlang::eval_tidy(quosures[[assign]], data = .SD), by = groupFields]
   }
  
   if (nrow(windowFrame)) humtab[, contextWindow := NULL]
