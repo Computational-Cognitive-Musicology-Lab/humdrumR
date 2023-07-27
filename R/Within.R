@@ -627,7 +627,7 @@ with.humdrumR <- function(data, ...,
            envir = environment())
   
   
-  humtab <- humtab[ , union(newFields, groupFields), with = FALSE]
+  humtab <- humtab[Type %in% dataTypes, union(newFields, groupFields), with = FALSE]
   
   ### Do we want extract the results from the data.table? 
   if (drop) {
@@ -693,6 +693,11 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   # with.humdrumR and within.humdrumR.
   dataTypes <- checkTypes(dataTypes, withFunc) # use this to index humtab later
   
+  if (nrow(humdrumR@Context) && any(dataTypes != 'D')) .stop("HumdrumR doesn't currently only allows you to apply expressions to contextual windows",
+                                   "in non-null data.",
+                                   "Your humdrumR data has contextual windows defined, but you are calling {withFunc}",
+                                   "with dataTypes = {.show_values(dataTypes)}.")
+  
   if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
   
   humtab <- data.table::copy(getHumtab(humdrumR))
@@ -716,7 +721,9 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
  
   ## Evaluate quosures
   # new fields are created in place
-  visible <- evaluateDoQuo(quosures, humtab, dataTypes, groupFields, humdrumR@Context)
+  humtab <- evaluateDoQuo(quosures, humtab, dataTypes, groupFields, humdrumR@Context)
+  visible <- attr(humtab, 'visible')
+  
   
   humtab <- checkRecycling(humtab, recycle, names(quosures), withFunc)
   
@@ -724,7 +731,9 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
     humtab <- humtab[!is.na(ParentPath)]
   }
   
-  list(humtab = humtab, visible = visible, groupFields = groupFields, newFields = names(quosures))
+  list(humtab = humtab, dataTypes = dataTypes,
+       visible = visible, 
+       groupFields = groupFields, newFields = names(quosures))
 }
 
 
@@ -900,7 +909,7 @@ quosureParseResult <- function(quosure, recycle, withFunc, alignLeft) {
   quosure <- rlang::quo({
     result <- withVisible(!!quosure)
     visible <- result$visible
-    result <- wrapObjects(result$value)
+    result <- humdrumR:::wrapObjects(result$value)
     
     inlen <- length(Token)
     outlen <- length(result)
@@ -1012,7 +1021,7 @@ laggedQuo <- function(funcQuosure, fields) {
     lagExprs <- lapply(n, \(curn) rlang::expr((!!rlang::sym(lagorlead))(!!!args, n = !!curn)))
     # this SHOULD be expr(), not quo()
 
-    exprA$Head <- 'splat'
+    exprA$Head <- if (length(n) > 1L) 'splat' else 'list'
     exprA$Args <- lagExprs
     
     exprA
@@ -1202,59 +1211,27 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
 
 evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame) {
   
+  evaluateWhere <- humtab$Type %in% dataTypes
+  
   if (nrow(windowFrame)) {
     humtab <- windows2groups(humtab, windowFrame)
+    groupFields <- c(groupFields, 'contextWindow')
+    evaluateWhere <- !is.na(humtab$contextWindow)
   }
   
   for (assign in names(quosures)) {
     assigned <- c(assign, paste0('_', assign, c('.recycled_', '.inOutRatio_', '.isScalar_')))
-    humtab[Type %in% dataTypes, (assigned) := rlang::eval_tidy(quosures[[assign]], data = .SD), by = groupFields]
+    humtab[evaluateWhere == TRUE, (assigned) := rlang::eval_tidy(quosures[[assign]], data = .SD), by = groupFields]
   }
  
-  if (nrow(windowFrame)) humtab[, contextWindow := NULL]
+  if (nrow(windowFrame)) {
+    humtab[, contextWindow := NULL]
+  }
   
   # assign is still last assign from loop
-  visible <- attr(humtab[[assign]], 'visible')
-  visible
+  attr(humtab, 'visible') <- attr(humtab[[assign]], 'visible')
+  humtab
 }
-
-
-evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
-  
-  contextQuo <- partQuos$Quo[[1]]
-  
-  windowFrame <- eval(rlang::quo_squash(contextQuo), envir = humtab)
-  
-  result <- if (nrow(windowFrame)) {
-    humtab_extended <- windows2groups(humtab, windowFrame)
-    humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
-  } else {
-    data.table(contextWindow = integer(0L), Result = list(), `_rowKey_` = list())
-  }
-
-  
-  
-  if (!is.null(ordoQuo)) {
-    # notused <- setdiff(seq_len(nrow(humtab)))
-    
-    complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!`_rowKey_` %in% unlist(result[['_rowKey_']])]))
-    complement[ , contextWindow := 0L]
-    
-    if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
-    
-    mismatch <-  !colnames(complement) %in% colnames(result)
-    colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
-    
-    result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
-  }
-  
-  result
-  # doQuo <- rlang::quo_squash(doQuo)
-  # humtab_extended[ , eval(doQuo), by = contextWindow]
-  
-}
-
-
 
 
 

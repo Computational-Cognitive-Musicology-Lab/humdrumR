@@ -6,18 +6,7 @@
 \alias{notehead.humdrumR}
 \title{Note value representation of duration}
 \usage{
-\method{notehead}{default}(
-  x,
-  ...,
-  generic = FALSE,
-  simple = FALSE,
-  octave.relative = FALSE,
-  Key = NULL,
-  transposeArgs = list(),
-  parseArgs = list(),
-  gamutArgs = list(),
-  inPlace = FALSE
-)
+\method{notehead}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 
 humData |> select(Token) |> notehead() 
 humData |> notehead(Token)
@@ -39,6 +28,12 @@ There are also two hidden (advanced) arguments you can specify: \code{memoize} a
 Defaults to an empty \code{list()}.
 
 Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+
+\item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
+
+Defaults to \code{rational(1, 1)}.
+
+Must be \code{numeric} or \link{rational}.}
 
 \item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
 

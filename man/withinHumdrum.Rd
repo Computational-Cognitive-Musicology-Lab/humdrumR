@@ -87,6 +87,15 @@ Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 
 or any combination of these (e.g., \code{"LIM"}).
 (See the \link[=humTable]{humdrum table} documentation \strong{Fields} section for explanation.)}
 
+\item{recycle}{\emph{\strong{How should results be "recycled" (or padded) to relative to the input length?}}
+
+\code{within()} and \code{reframe()} default to \code{"pad"}; \code{mutate()} defaults to \code{"ifscalar"}; \code{with()} defaults to \code{"no"}.
+
+Must be a single \code{character} string.
+The full list of options are \code{"no"}, \code{"yes"}, \code{"pad"}, \code{"ifscalar"}, \code{"ifeven"}, \code{"never"}, and
+\code{"summarize"}, though not all functions accept all options.
+See the \emph{Parsing expression results} section below.}
+
 \item{alignLeft}{\emph{\strong{Should output that is shorter than input be aligned to the left?}}
 
 Defaults to \code{TRUE}.

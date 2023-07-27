@@ -1045,6 +1045,8 @@ update_Exclusive.humdrumR <- function(hum, ...) {
     fields <- selectedFields(hum)
     update_Exclusive.data.table(humtab, fields) # in place
     
+    hum
+    
 }
 update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     
@@ -1063,6 +1065,7 @@ update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FA
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
     update_Dd.data.table(humtab, field = field) # in place
+    hum
 }
 update_Dd.data.table <- function(hum, field = 'Token', ...) {
     

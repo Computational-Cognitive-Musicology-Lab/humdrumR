@@ -213,6 +213,7 @@ dochecks <- function(arg, ...) {
   harvard(arg, conj, FALSE)
 }
 .show_vector <- function(arg, n = 6) {
+  if (is.character(arg)) arg <- quotemark(arg, quoteNA = FALSE)
   if (length(arg) == 0L) {
     glue::glue("{class(arg)[1]}(0).")
   } else {

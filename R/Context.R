@@ -1110,10 +1110,30 @@ windows2groups <- function(dt, windowFrame) {
   # expands overlapping windows into "groups" appropriate for use with data.table[ , , by = group]
   indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
   
-  dt_extended <- dt[unlist(indices)]
-  dt_extended[ , contextWindow := rep(seq_along(indices), lengths(indices))]
   
-  dt_extended
+  dt <- rbind(dt[Type != 'D'], 
+              dt[Type == 'D'][unlist(indices)])
+  dt[Type == 'D', contextWindow := rep(seq_along(indices), lengths(indices))]
+  
+  dt
+  # 
+  # 
+  # 
+  # xindices <- which(dt$Type == 'D')[unlist(indices)]
+  # contextWindow <- rep(seq_along(indices), lengths(indices))[order(xindices)]
+  # xindices <- sort(xindices)
+  # 
+  # allindices <- c(which(dt$Type != 'D'), xindices)
+  # context <- integer(length(allindices))
+  # context[allindices %in% xindices] <- contextWindow
+  # context <- context[order(allindices)]
+  # allindices <- sort(allindices)
+  # 
+  # dt <- dt[allindices]
+  # 
+  # 
+  # dt[, contextWindow := context] 
+  # 
 }
 
 .applyWindows <- function(dt, windowFrame, expr, field = 'Token', ..., 
