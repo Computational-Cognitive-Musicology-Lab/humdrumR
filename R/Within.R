@@ -1214,8 +1214,12 @@ evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame)
   evaluateWhere <- humtab$Type %in% dataTypes
   
   if (nrow(windowFrame)) {
-    humtab <- windows2groups(humtab, windowFrame)
     groupFields <- c(groupFields, 'contextWindow')
+    
+
+    humtab_context <- windows2groups(humtab, windowFrame)
+    humtab <- rbindlist(list(humtab_context, humtab[!humtab_context[!duplicated(contextWindow)], on = '_rowKey_']), fill = TRUE)
+    
     evaluateWhere <- !is.na(humtab$contextWindow)
   }
   
@@ -1225,7 +1229,14 @@ evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame)
   }
  
   if (nrow(windowFrame)) {
+    humtab[ , `_recycled_` := Reduce('&', humtab[ , grepl('\\.recycled_$', colnames(humtab)), with = FALSE])]
+    setorder(humtab, `_recycled_`, contextWindow, na.last = TRUE)
+    
+    humtab <- humtab[!duplicated(`_rowKey_`)]
+    setorder(humtab, `_rowKey_`)
+    humtab[ , `_recycled_` := NULL]
     humtab[, contextWindow := NULL]
+    # humtab <- humtab[is.na(contextWindow) | !duplicated(contextWindow)]
   }
   
   # assign is still last assign from loop

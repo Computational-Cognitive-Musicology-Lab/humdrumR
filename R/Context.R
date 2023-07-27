@@ -764,6 +764,7 @@ context.default <- function(x, open, close, reference = x,
   checks(sep, xcharacter & xlen1)
   checks(stripRegex, xTF)
   
+  
   open  <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
   windowFrame <- findWindows(reference, open, close, 
@@ -787,12 +788,14 @@ context.default <- function(x, open, close, reference = x,
 #' @rdname context
 #' @export
 context.humdrumR <- function(humdrumR, open,  close, 
+                             dataTypes = 'D',
                              overlap = 'paired', depth = NULL,
                              rightward = TRUE, duplicate_indices = TRUE, 
                              min_length = 2L, max_length = Inf, groupby) {
   
   # checks(reference, xmatch(x) | xnrowmatch(x))
   checks(overlap, xplegal(c('paired', 'nested', 'edge', 'none')))
+  dataTypes <- checkTypes(dataTypes, 'context()')
   checks(depth, xnull | (xwholenum & xnotzero))
   checks(rightward, xTF)
   checks(duplicate_indices, xTF)
@@ -802,7 +805,10 @@ context.humdrumR <- function(humdrumR, open,  close,
   open  <- rlang::enexpr(open)
   close <- rlang::enexpr(close)
   
-  humtab <- getHumtab(humdrumR, 'D')
+  humtab <- getHumtab(humdrumR)
+  humtab[ , `_rowKey_` := .I]
+  humtab <- humtab[Type %in% dataTypes]
+  
   
   if (missing(groupby)) groupby <- humtab[ , c('Piece', 'Spine', 'Path'), with = FALSE]
   
@@ -870,7 +876,10 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
                         min_length = 2L, max_length = Inf) {
   
   
-  if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x), field %||% '.')
+  if (!is.data.frame(x)) x <- setNames(data.table::data.table(. = x),  field %||% '.')
+  
+  rowKey <- x$`_rowKey_` %||% seq_len(nrow(x))
+  
   
   open <- parseContextExpression(open, other = quote(close))
   close <- parseContextExpression(close, other = quote(open))
@@ -916,6 +925,8 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
   windowFrame <- windowFrame[Open >= 1L & Open <= nrow(x) & Close >= 1L & Close <= nrow(x)]
   windowFrame <- windowFrame[Reduce('&', lapply(windowFrame, Negate(is.na)))]
   
+  windowFrame <- windowFrame[ , Indices := list(list(rowKey[Open:Close])), by = seq_len(nrow(windowFrame))]
+  
   attr(windowFrame, 'regexes') <- regexes
   attr(windowFrame, 'vector') <- x
   windowFrame
@@ -923,19 +934,6 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
 }
 
 
-print.windows <- function(x) {
-  plot.new()
-  vec <- attr(x, 'vector')[[1]]
-  
-  plot.window(ylim = c(0, max(x$Depth)),xlim = c(0, length(vec)))
-  
-  text(1:length(vec), rep(0, length(vec)), vec)
-  y <- x$Depth
-  y <- as.numeric(make.unique(as.character(y)))
-  graphics::arrows(x$Open, x$Close, y0 = y, y1= y, angle = 90, code = 3)
-  
-  print(x)
-}
 
 ### Window finding rules ----
 
@@ -1105,16 +1103,19 @@ depth <- function(windowFrame, depth = NULL, ...) {
 #                 inPlace = inPlace, openIndex = openIndex)
 # }
 
+humtab2groups <- function(humtab, windowFrame) {
+  
+  
+  D <- humtab[Type == 'D']
+}
 
 windows2groups <- function(dt, windowFrame) {
   # expands overlapping windows into "groups" appropriate for use with data.table[ , , by = group]
-  indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
+  indices <- windowFrame$Indices
   
   
-  dt <- rbind(dt[Type != 'D'], 
-              dt[Type == 'D'][unlist(indices)])
-  dt[Type == 'D', contextWindow := rep(seq_along(indices), lengths(indices))]
-  
+  dt <- dt[unlist(indices)]
+  dt[ , contextWindow := rep(seq_along(indices), lengths(indices))]
   dt
   # 
   # 
@@ -1138,7 +1139,7 @@ windows2groups <- function(dt, windowFrame) {
 
 .applyWindows <- function(dt, windowFrame, expr, field = 'Token', ..., 
                           inPlace = TRUE, complement = TRUE, alignToOpen = TRUE) {
-  indices <- windowFrame[ , list(list(Open:Close)), by = seq_len(nrow(windowFrame))]$V1
+  indices <- windowFrame$Indices
   
   dt_extended <- windows2groups(dt, windowFrame)
   

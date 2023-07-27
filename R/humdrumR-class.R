@@ -2333,7 +2333,7 @@ showWindows <- function(humdrumR) {
         if (overlap) ' (overlapping)', ' contextual windows:\n', 
         sep = '')
         
-        lengths <- windowFrame[ , Close - Open + 1L]
+        lengths <- windowFrame[ , lengths(Indices)]
         quants <- round(c(Shortest = min(lengths), Median = median(lengths), Longest = max(lengths)))
         if (length(unique(quants)) == 1L) {
             cat("\t\tAll windows length ==", quants[1],'\n')
