@@ -703,7 +703,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   humtab <- data.table::copy(getHumtab(humdrumR))
   
   # quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
-  quosures <- rlang::enquos(...)
+  quosures <- Filter(Negate(rlang::quo_is_null), rlang::enquos(...))
   if (length(quosures) == 0L) .stop("In a call to {withFunc}, you must provide an expression to evaluate!")
   
   ### Preparing the "do" quosure
@@ -748,20 +748,9 @@ prepareQuosures <- function(humtab, quosures, dotField, recycle, variables, with
   # This is the main function used by [.withinmHumdrum] to prepare the current
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   
-  # if the targets are lists, Map
-  # quosures <- Map(quosures, usedInExprs, 
-  #                 f = \(quo, curUsed) { 
-  #                   if (any(usedClasses[curUsed] == 'list')) {
-  #                     mapifyQuo(quo, curUsed, depth = 1L) 
-  #                   } else {
-  #                     quo
-  #                   }
-  #                 })
-  
   quosures <- unformula(quosures)
   
   quosures <- quoFieldNames(quosures)
-  
   
   # insert variables
   quosures <- lapply(quosures, interpolateVariablesQuo, variables = variables)
@@ -778,6 +767,7 @@ prepareQuosures <- function(humtab, quosures, dotField, recycle, variables, with
   # splats
   quosures <- lapply(quosures, splatQuo, fields = colnames(humtab))
   
+  # final result parsing (objects, recyclng, visible, etc.)
   quosures <- lapply(quosures, quosureParseResult, recycle = recycle, withFunc = withFunc, alignLeft = alignLeft)
 
   quosures
@@ -906,6 +896,9 @@ checkRecycling <- function(humtab, recycle, fields, withFunc) {
 quosureParseResult <- function(quosure, recycle, withFunc, alignLeft) {
   env <- rlang::quo_get_env(quosure)
   
+  recycledExpr <- if (alignLeft) rlang::expr(seq_len(inlen) > outlen) else rlang::expr(seq_len(inlen) <= (inlen - outlen))
+  repper <- if (alignLeft) rlang::expr(rep_len(result, inlen)) else rlang::expr(rev(rep_len(rev(result), inlen)))
+  
   quosure <- rlang::quo({
     result <- withVisible(!!quosure)
     visible <- result$visible
@@ -914,16 +907,16 @@ quosureParseResult <- function(quosure, recycle, withFunc, alignLeft) {
     inlen <- length(Token)
     outlen <- length(result)
     
-    result <- rep_len(result, inlen)
+    result <- !!repper
     attr(result, 'visible') <- visible
     
-    list(result, orig = seq_len(inlen) > outlen, inlen / outlen, outlen == 1)
+    list(result, !!recycledExpr, inlen / outlen, rep_len(outlen == 1, inlen))
     
     })
-  
   rlang::quo_set_env(quosure, env)
   
 }
+
 
 ####################### Functions used inside prepareQuo
 
@@ -1210,8 +1203,8 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
 
 
 evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame) {
+  usedFields <- namesInExprs(colnames(humtab), quosures)
   
-  evaluateWhere <- humtab$Type %in% dataTypes
   
   if (nrow(windowFrame)) {
     groupFields <- c(groupFields, 'contextWindow')
@@ -1221,11 +1214,17 @@ evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame)
     humtab <- rbindlist(list(humtab_context, humtab[!humtab_context[!duplicated(contextWindow)], on = '_rowKey_']), fill = TRUE)
     
     evaluateWhere <- !is.na(humtab$contextWindow)
+  } else {
+    evaluateWhere <- humtab$Type %in% dataTypes
   }
   
   for (assign in names(quosures)) {
     assigned <- c(assign, paste0('_', assign, c('.recycled_', '.inOutRatio_', '.isScalar_')))
-    humtab[evaluateWhere == TRUE, (assigned) := rlang::eval_tidy(quosures[[assign]], data = .SD), by = groupFields]
+    
+    humtab[evaluateWhere == TRUE,  rlang::eval_tidy(quosures[[assign]], data = .SD), 
+           .SDcols = union(usedFields, groupFields),
+           by = groupFields] -> results
+    humtab[evaluateWhere == TRUE, (assigned) := results[ , c('V1', 'V2', 'V3', 'V4'), with = FALSE]]
   }
  
   if (nrow(windowFrame)) {
@@ -1254,9 +1253,10 @@ evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame)
 
 
 wrapObjects <- function(result) {
-  if (length(result) &&  
+  if (is.null(result) || 
+      (length(result) &&  
       (is.table(result) || 
-       (is.object(result) && !is.atomic(result)))) {
+       (is.object(result) && !is.atomic(result))))) {
     list(result)
   } else {
     result

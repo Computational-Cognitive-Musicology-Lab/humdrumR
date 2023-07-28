@@ -394,7 +394,11 @@ test_that("Quosures thread environment variables correctly", {
 test_that("Quoted expressions and formulae work", {
   chor <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
   
+  # NULL or no args
+  expect_error(chor |> with())
+  expect_error(chor |> with(NULL))
   
+  #
   result1 <- with(chor, mean(nchar(Token)) + 1)
   result2 <- with(chor, ~mean(nchar(Token)) + 1)
   result3 <- with(chor, quote(mean(nchar(Token)) + 1))
