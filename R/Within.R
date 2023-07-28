@@ -721,8 +721,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
  
   ## Evaluate quosures
   # new fields are created in place
-  humtab <- evaluateDoQuo(quosures, humtab, dataTypes, groupFields, humdrumR@Context)
-  visible <- attr(humtab, 'visible')
+  visible <- evaluateDoQuo(quosures, humtab, dataTypes, groupFields, humdrumR@Context)
   
   
   humtab <- checkRecycling(humtab, recycle, names(quosures), withFunc)
@@ -1207,42 +1206,48 @@ evaluateDoQuo <- function(quosures, humtab, dataTypes, groupFields, windowFrame)
   
   
   if (nrow(windowFrame)) {
-    groupFields <- c(groupFields, 'contextWindow')
-    
-
-    humtab_context <- windows2groups(humtab, windowFrame)
-    humtab <- rbindlist(list(humtab_context, humtab[!humtab_context[!duplicated(contextWindow)], on = '_rowKey_']), fill = TRUE)
-    
-    evaluateWhere <- !is.na(humtab$contextWindow)
+    evaluateContextual(quosures, humtab, groupFields, usedFields, windowFrame) 
   } else {
-    evaluateWhere <- humtab$Type %in% dataTypes
+    
+    for (assign in names(quosures)) {
+      assigned <- c(assign, paste0('_', assign, c('.recycled_', '.inOutRatio_', '.isScalar_')))
+      
+      humtab[Type %in% dataTypes,  rlang::eval_tidy(quosures[[assign]], data = .SD), 
+             .SDcols = union(usedFields, groupFields),
+             by = groupFields] -> results
+      humtab[Type %in% dataTypes, (assigned) := results[ , c('V1', 'V2', 'V3', 'V4'), with = FALSE]]
+    } 
+     # assign is still last assign from loop
+     attr(humtab[[assign]], 'visible')
   }
   
-  for (assign in names(quosures)) {
-    assigned <- c(assign, paste0('_', assign, c('.recycled_', '.inOutRatio_', '.isScalar_')))
-    
-    humtab[evaluateWhere == TRUE,  rlang::eval_tidy(quosures[[assign]], data = .SD), 
-           .SDcols = union(usedFields, groupFields),
-           by = groupFields] -> results
-    humtab[evaluateWhere == TRUE, (assigned) := results[ , c('V1', 'V2', 'V3', 'V4'), with = FALSE]]
-  }
- 
-  if (nrow(windowFrame)) {
-    humtab[ , `_recycled_` := Reduce('&', humtab[ , grepl('\\.recycled_$', colnames(humtab)), with = FALSE])]
-    setorder(humtab, `_recycled_`, contextWindow, na.last = TRUE)
-    
-    humtab <- humtab[!duplicated(`_rowKey_`)]
-    setorder(humtab, `_rowKey_`)
-    humtab[ , `_recycled_` := NULL]
-    humtab[, contextWindow := NULL]
-    # humtab <- humtab[is.na(contextWindow) | !duplicated(contextWindow)]
-  }
-  
-  # assign is still last assign from loop
-  attr(humtab, 'visible') <- attr(humtab[[assign]], 'visible')
-  humtab
 }
 
+evaluateContextual <- function(quosures, humtab, groupFields, usedFields, windowFrame) {
+   groupFields <- c(groupFields, 'contextWindow')
+   
+   humtab_context <- windows2groups(humtab, windowFrame)
+   
+   allassigned <- c()
+   for (assign in names(quosures)) {
+     assigned <- c(assign, paste0('_', assign, c('.recycled_', '.inOutRatio_', '.isScalar_')))
+     allassigned <- c(allassigned, assigned)
+     
+     humtab_context[ ,  rlang::eval_tidy(quosures[[assign]], data = .SD), 
+                     .SDcols = union(usedFields, groupFields),
+                     by = groupFields] -> results
+     humtab_context[ , (assigned) := results[ , c('V1', 'V2', 'V3', 'V4'), with = FALSE]]
+   } 
+   
+  
+  #
+    humtab_context[ , `_recycled_` := Reduce('&', humtab_context[ , grepl('\\.recycled_$', colnames(humtab_context)), with = FALSE])]
+    setorder(humtab_context, `_recycled_`, contextWindow, na.last = TRUE)
+    
+    humtab_context <- humtab_context[!duplicated(`_rowKey_`)]
+    humtab[ , (allassigned) := humtab_context[humtab, on = '_rowKey_'][, allassigned, with = FALSE]]
+  
+}
 
 
 #######################################################-
@@ -1266,17 +1271,17 @@ wrapObjects <- function(result) {
 
 
 addExclusiveFields <- function(humtab, fields) {
-  lapply(fields,
-         \(fieldName) {
+  for (fieldName in fields) {
            field <- humtab[[fieldName]]
            exclusive <- getExclusive(field)
            if (!is.null(exclusive)) {
              exclusive <- ifelse(is.na(field), NA_character_, exclusive)
              
              newFieldName <- paste0('Exclusive.', fieldName)
-             humtab[ , (newFieldName) := exclusive]
+             set(humtab, j = newFieldName, value = list(exclusive))
            }
-         })
+    
+  }
 }
 
 
