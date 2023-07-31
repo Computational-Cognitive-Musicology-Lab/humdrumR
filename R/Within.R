@@ -721,7 +721,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
  
   ## Evaluate quosures
   # new fields are created in place
-  visible <- evaluateDoQuo(quosure, humtab, dataTypes, groupFields, humdrumR@Context)
+  visible <- evaluateDoQuo(quosure, humtab, dataTypes, groupFields, humdrumR@Context) 
   
   
   humtab <- checkRecycling(humtab, recycle, newFields, withFunc)
@@ -819,7 +819,7 @@ quoFieldNames <- function(quosures) {
       quoNames[i] <- rlang::as_label(exprA$Args[[1]])
       
       if (i == length(quosures)) {
-        exprA$Args[[2]] <- rlang::quo_set_env(rlang::quo(visible.attr(withVisible(!!exprA$Args[[2]]))), exprA$Environment)
+        exprA$Args[[2]] <- visibleQuo(exprA$Args[[2]], exprA$Environment)
         quosures[[i]] <- unanalyzeExpr(exprA)
       }
       
@@ -827,10 +827,9 @@ quoFieldNames <- function(quosures) {
       if (quoNames[i] == '') quoNames[i] <- rlang::as_label(quosures[[i]])
       
       if (i == length(quosures)) {
-        quosures[[i]] <- rlang::quo_set_env(rlang::quo(!!(rlang::sym(quoNames[i])) <- visible.attr(withVisible(!!quosures[[i]]))), exprA$Environment)
-        
+        quosures[[i]] <- rlang::quo_set_env(rlang::quo(!!(rlang::sym(quoNames[i])) <- !!(visibleQuo(quosures[[i]]))),
+                                            exprA$Environment)
       } else {
-        
         quosures[[i]] <- rlang::quo_set_env(rlang::quo(!!(rlang::sym(quoNames[i])) <- !!quosures[[i]]), exprA$Environment)
       }
     }
@@ -841,6 +840,8 @@ quoFieldNames <- function(quosures) {
   setNames(quosures, quoNames)
   
 }
+
+
 
 checkOverwrites <- function(newFields, humtab, withFunc) {
   overWrote <- intersect(newFields, colnames(humtab))
@@ -918,6 +919,22 @@ concatinateQuosures <- function(quosures, alignLeft) {
   
   attr(quosure, 'newFields') <- names(quosures)
   quosure
+}
+
+
+visibleQuo <- function(quo, env = rlang::quo_get_env(quo)) {
+  
+  quo <- rlang::quo({
+    visibleResult <- withVisible(!!quo)
+    
+    result <- visibleResult$value
+    if (!is.null(result)) attr(result, 'visible') <- visibleResult$visible
+    result
+    
+  })
+  
+  rlang::quo_set_env(quo, env)
+  
 }
 
 parseResults <- function(results, inlen, alignLeft) {
@@ -1252,7 +1269,7 @@ evaluateDoQuo <- function(quosure, humtab, dataTypes, groupFields, windowFrame) 
     
   }
   
-   attr(humtab[[tail(newFields, 1)]], 'visible')
+   attr(humtab[[tail(newFields, 1)]], 'visible') %||% TRUE
 }
 
 evaluateContextual <- function(quosure, humtab, groupFields, usedFields, newFields, windowFrame) {
