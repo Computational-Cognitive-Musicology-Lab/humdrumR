@@ -866,12 +866,8 @@ checkOverwrites <- function(newFields, humtab, withFunc) {
 }
 
 checkRecycling <- function(humtab, recycle, fields, withFunc) {
-  if (recycle == 'no') {
-    
-    recycled <- Reduce('&', humtab[ , grepl('_recycled_$', colnames(humtab)), with = FALSE])
-    humtab <- humtab[!recycled]
-    
-  }  else {
+ 
+  if (recycle != 'no') {
     
     for (field in fields) {
       recycled <- humtab[[paste0(field, '_recycled_')]]
@@ -885,13 +881,13 @@ checkRecycling <- function(humtab, recycle, fields, withFunc) {
                      "because the recycle argument is set to 'ifscalar'.",
                      "Your result is not scalar (i.e., length(result) != 1) and does not match the input length.")
              },
-             summarize = if (!all(scalar, na.rm = TRUE)) {
-               .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
-             },
              ifeven = if (!all(inOutRatio %% 1 == 0, na.rm = TRUE)) {
                .stop("The {withFunc} command won't recycle these results",
                      "because the recycle argument is set to 'ifeven'.",
                      "The length of your result does not evenly divide the input length.")
+             },
+             summarize = if (!all(scalar, na.rm = TRUE)) {
+               .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
              },
              never = if (!all(inOutRatio == 1, na.rm = TRUE)) {
                .stop("The {withFunc} command won't recycle these results",
@@ -903,6 +899,13 @@ checkRecycling <- function(humtab, recycle, fields, withFunc) {
     
   }
   
+  if (recycle %in% c('no', 'summarize')) {
+    
+    recycled <- Reduce('&', humtab[ , grepl('_recycled_$', colnames(humtab)), with = FALSE])
+    humtab <- humtab[!recycled]
+    
+  } 
+
   humtab[ , grep('_(recycled|isScalar|inOutRatio)_$', colnames(humtab), value = TRUE) := NULL]
   
   
@@ -914,7 +917,7 @@ concatinateQuosures <- function(quosures, alignLeft) {
   quosure <- rlang::quo({
     {!!!quosures}
   
-    parseResults(list(!!!(rlang::syms(names(quosures)))), inlen = length(Token), alignLeft = !!alignLeft)
+    c(parseResults(list(!!!(rlang::syms(names(quosures)))), inlen = length(Token), alignLeft = !!alignLeft))
   })
   
   attr(quosure, 'newFields') <- names(quosures)
@@ -1252,38 +1255,40 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
 
 
 evaluateDoQuo <- function(quosure, humtab, dataTypes, groupFields, windowFrame) {
-  usedFields <- namesInExpr(colnames(humtab), quosure)
+  usedFields <- unique(namesInExpr(colnames(humtab), quosure))
   newFields <- attr(quosure, 'newFields') 
   
   
   if (nrow(windowFrame)) {
-    evaluateContextual(quosure, humtab, groupFields, usedFields, newFields, windowFrame) 
+    evaluateContextual(quosure, humtab, usedFields, newFields, windowFrame) 
   } else {
     
-    results <- humtab[Type %in% dataTypes, rlang::eval_tidy(quosure, data = .SD),
-           .SDcols = union(usedFields, groupFields),
-           by = groupFields] 
-    
+    # There is a weird bug that happens only when different groups in data.table evaluate to different types
+    # AND you assign by reference to multiple columns.
     assignTo <- c(t(outer(newFields, c('', '_recycled_', '_inOutRatio_', '_isScalar_'), paste0)))
-    humtab[Type %in% dataTypes, (assignTo) := results[ , setdiff(colnames(results), groupFields), with = FALSE]]
+    humtab[Type %in% dataTypes, (assignTo) := rlang::eval_tidy(quosure, data = .SD),
+           .SDcols = union(usedFields, c('_rowKey_', groupFields)),
+           by = groupFields] 
+    # setorder(results, `_rowKey_`)
+    
+    # humtab[Type %in% dataTypes, (assignTo) := results[ , setdiff(colnames(results), c(groupFields, '_rowKey_')), with = FALSE]]
     
   }
   
    attr(humtab[[tail(newFields, 1)]], 'visible') %||% TRUE
 }
 
-evaluateContextual <- function(quosure, humtab, groupFields, usedFields, newFields, windowFrame) {
-   groupFields <- c(groupFields, 'contextWindow')
+evaluateContextual <- function(quosure, humtab, usedFields, newFields, windowFrame) {
    
    humtab_context <- windows2groups(humtab, windowFrame)
    
    results <- humtab_context[ , rlang::eval_tidy(quosure, data = .SD),
-                             .SDcols = union(usedFields, groupFields),
-                             by = groupFields] 
+                             .SDcols = usedFields,
+                             by = contextWindow] 
    
    assignTo <- c(t(outer(newFields, c('', '_recycled_', '_inOutRatio_', '_isScalar_'), paste0)))
    
-   humtab_context[ , (assignTo) := results[ , setdiff(colnames(results), groupFields), with = FALSE]]
+   humtab_context[ , (assignTo) := results[ , setdiff(colnames(results), 'contextWindow'), with = FALSE]]
    
    
   

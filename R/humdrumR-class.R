@@ -274,8 +274,8 @@ orderHumtab <- function(humtab) {
     
     # can't sort by lists
     
-    setkey(humtab, File, Piece, Spine, Path, Record, Stop)
-    # setorderv(humtab, cols = orderingcols)
+    # setkey(humtab, File, Piece, Spine, Path, Record, Stop)
+    setorder(humtab, File, Piece, Spine, Path, Record, Stop)
     
 }
 
@@ -1064,6 +1064,7 @@ update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
+    
     update_Dd.data.table(humtab, field = field) # in place
     hum
 }
@@ -1076,6 +1077,7 @@ update_Dd.data.table <- function(hum, field = 'Token', ...) {
             ifelse(null, 'd', 'D')
             
         }]
+    setindex(hum, NULL) # data.table is creating auto-index for some reason?
 }
 
 is.nullToken <- function(tokens) {
