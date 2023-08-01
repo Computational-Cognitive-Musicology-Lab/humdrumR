@@ -499,6 +499,15 @@
 #' If grouping fields have already been set by a call to [group_by()][groupHumdrum],
 #' the `.by` argument overrides them.
 #'
+#' @param recycle ***How should results be "recycled" (or padded) to relative to the input length?***
+#' 
+#' `within()` and `reframe()` default to `"pad"`; `mutate()` defaults to `"ifscalar"`; `with()` defaults to `"no"`.
+#' 
+#' Must be a single `character` string.
+#' The full list of options are `"no"`, `"yes"`, `"pad"`, `"ifscalar"`, `"ifeven"`, `"never"`, and 
+#' `"summarize"`, though not all functions accept all options.
+#' See the *Parsing expression results* section below.
+
 #' @param variables ***A named `list` of values, to interpolate into your expressions.***
 #' 
 #'  
@@ -617,31 +626,30 @@ with.humdrumR <- function(data, ...,
                        .by = .by, variables = variables, withFunc = withFunc), 
            envir = environment())
   
-  if (recycle == 'pad') result <- result[humtab[Type %in% dataTypes, list(`_rowKey_`)], on ='_rowKey_'] 
   
-  result[ , `_rowKey_` := NULL]
+  humtab <- humtab[Type %in% dataTypes, union(newFields, groupFields), with = FALSE]
   
   ### Do we want extract the results from the data.table? 
   if (drop) {
     
-    groups <- result[ , groupFields, with = FALSE]
+    result <- humtab[[tail(newFields, 1L)]]
+    if (length(result) == 0L) return(result)
+    groups <- humtab[ , groupFields, with = FALSE]
     groupNames <- if (length(groups)) do.call('paste', c(Map(groupFields, groups, f = paste0), list(sep = ',')))
     
-    result <- result[[max(which(!colnames(result) %in% groupFields))]]
-    if (length(result) == 0L) return(result)
     
     if (is.list(result) && length(result) == 1L) {
       result <- result[[1]]
     } else {
       if (!any(duplicated(groupNames))) names(result) <- groupNames
     }
+    
+    attr(result, 'visible') <- NULL
+    if (visible) result else invisible(result)
+    
   } else {
-    visible <- TRUE
+    humtab
   }
-  
-  attr(result, 'visible') <- NULL
-  
-  if (visible) result else invisible(result)
   
 }
 
@@ -665,48 +673,16 @@ within.humdrumR <- function(data, ...,
                        withFunc = withFunc), 
            envir = environment())
   
-  result <- result[ , !names(result) %in% groupFields, with = FALSE]
+  putHumtab(data) <- humtab
   
-  # any fields getting overwritten
-  overWrote <- setdiff(colnames(result)[colnames(result) %in% colnames(humtab)], '_rowKey_')
-  
-  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
-                          'Exclusive',
-                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
+  data <- updateFields(data)
 
-  #fields(humdrumR, 'S')$Name
-  if (any(bad)) {
-    if ('Token' %in% overWrote[bad]) {
-      .stop("In your call to withinHumdrum, you can't overwrite the 'Token' field.",
-            "This field should always keep the original humdrum data you imported.")
-    }
-    .stop("In your call to withinHumdrum, you can't overwrite structural fields.",
-          ifelse = sum(bad) > 1L, 
-          "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
-          "For a complete list of structural fields, use the command fields(mydata, 'S').")
-  }
+  addExclusiveFields(humtab, newFields) # in place
   
- 
-  ## put result into new humtab
-  newhumtab <- result[humtab[ , !colnames(humtab) %in% overWrote, with = FALSE], on ='_rowKey_'] 
-  
-  #### Put new humtable back into humdrumR object
-  newFields <- setdiff(colnames(newhumtab), colnames(humtab))
-
-  newhumtab <- addExclusiveFields(newhumtab, newFields)
-  newhumtab <- update_humdrumR.data.table(newhumtab, field = c(newFields, overWrote))
-  humdrumR@Humtable <- newhumtab
+  update_humdrumR.data.table(humtab, field = newFields) # in place
   
   
-  if (length(newFields)) {
-    humdrumR <- updateFields(humdrumR)
-  }
-  
-  if (nrow(humdrumR@Context) > 0L) humdrumR <- reKey(humdrumR)
-  
-  humdrumR
-  # update_humdrumR(humdrumR, field = c(newfields, overWrote))
-
+  data
 
 }
 
@@ -717,14 +693,18 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   # with.humdrumR and within.humdrumR.
   dataTypes <- checkTypes(dataTypes, withFunc) # use this to index humtab later
   
+  if (nrow(humdrumR@Context) && any(dataTypes != 'D')) .stop("HumdrumR doesn't currently only allows you to apply expressions to contextual windows",
+                                   "in non-null data.",
+                                   "Your humdrumR data has contextual windows defined, but you are calling {withFunc}",
+                                   "with dataTypes = {.show_values(dataTypes)}.")
+  
   if (expandPaths) humdrumR <- expandPaths(humdrumR, asSpines = FALSE)
   
   humtab <- data.table::copy(getHumtab(humdrumR))
   
   # quoTab <- parseArgs(..., variables = variables, withFunc = withFunc)
-  quosures <- rlang::enquos(...)
+  quosures <- Filter(Negate(rlang::quo_is_null), rlang::enquos(...))
   if (length(quosures) == 0L) .stop("In a call to {withFunc}, you must provide an expression to evaluate!")
-  
   
   ### Preparing the "do" quosure
   fields <- fields(humdrumR)
@@ -733,39 +713,26 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   ##### grouping
   groupFields <- getGroupingFields(humdrumR, .by, withFunc) 
   
-  doQuo  <- prepareDoQuo(humtab, quosures, dotField, recycle, variables)
+  quosure <- prepareQuosures(humtab, quosures, dotField, recycle, variables, withFunc, alignLeft)
+  newFields <- attr(quosure, 'newFields')
   
-  ## Evaluate "do" expression! 
-  result <- evaluateDoQuo(doQuo, humtab[Type %in% dataTypes], groupFields, humdrumR@Context)
-  result <- parseResult(result, groupFields, recycle, alignLeft, withFunc)
+  # Check that structural fields aren't getting overwritten
+  checkOverwrites(newFields, humtab, withFunc)
+ 
+  ## Evaluate quosures
+  # new fields are created in place
+  visible <- evaluateDoQuo(quosure, humtab, dataTypes, groupFields, humdrumR@Context) 
   
   
-  visible <- attr(result, 'visible')
-  attr(result, 'visible') <- NULL
-  if (nrow(result) > 0L) data.table::setorder(result, `_rowKey_`)
-  
-  #### rename unnamed results
-  ## This is done here because if we call `with.humdrumR(drop = FALSE)`
-  ## we want the same colnames as the new fields we would get.
-  result <- renameResults(result, quosures, groupFields, colnames(humtab))
-
-  
-  # "post" stuff
-  # curmfg <- par('mfg')
-  # par(oldpar[!names(oldpar) %in% c('mai', 'mar', 'pin', 'plt', 'pty', 'new')])
-  # par(mfg = curmfg, new = FALSE)
+  humtab <- checkRecycling(humtab, recycle, newFields, withFunc)
   
   if (expandPaths) {
-    result <- result[!humtab[is.na(ParentPath)], on = '_rowKey_']
     humtab <- humtab[!is.na(ParentPath)]
   }
   
-  list(humdrumR = humdrumR, 
-       humtab = humtab,
-       dataTypes = dataTypes,
-       visible = visible,
-       groupFields = groupFields,
-       result = result)
+  list(humtab = humtab, dataTypes = dataTypes,
+       visible = visible, 
+       groupFields = groupFields, newFields = newFields)
 }
 
 
@@ -776,50 +743,34 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
 
 ## Preparing doQuo ----
 
-prepareDoQuo <- function(humtab, quosures, dotField, recycle, variables) {
+prepareQuosures <- function(humtab, quosures, dotField, recycle, variables, withFunc, alignLeft) {
   # This is the main function used by [.withinmHumdrum] to prepare the current
   # do expression argument for application to a [humdrumR][humdrumRclass] object.
   
-  # what fields are used, and what are their classes?
-  # usedInExprs <- lapply(quosures, fieldsInExpr, humtab = humtab)
-  # usedClasses <- vapply(humtab[ , unique(unlist(usedInExprs)), with = FALSE], \(x) class(x)[1], FUN.VALUE = character(1)) 
-  
-  # if the targets are lists, Map
-  # quosures <- Map(quosures, usedInExprs, 
-  #                 f = \(quo, curUsed) { 
-  #                   if (any(usedClasses[curUsed] == 'list')) {
-  #                     mapifyQuo(quo, curUsed, depth = 1L) 
-  #                   } else {
-  #                     quo
-  #                   }
-  #                 })
-  
   quosures <- unformula(quosures)
+  
   quosures <- quoFieldNames(quosures)
   
-  # collapse doQuos to a single doQuo
-  doQuo <- concatDoQuos(quosures)
-  
   # insert variables
-  doQuo <- interpolateVariablesQuo(doQuo, variables)
+  quosures <- lapply(quosures, interpolateVariablesQuo, variables = variables)
   
   # turn . to selected field
-  doQuo <- activateQuo(doQuo, dotField)
+  quosures <- lapply(quosures, activateQuo, dotField = dotField)
   
   # lagged vectors
-  doQuo <- laggedQuo(doQuo, humtab)
+  quosures <- lapply(quosures, laggedQuo, fields = colnames(humtab))
   
   # add in arguments that are already fields
-  doQuo <- autoArgsQuo(doQuo, humtab)
+  quosures <- lapply(quosures, autoArgsQuo, fields = colnames(humtab))
 
   # splats
-  doQuo <- splatQuo(doQuo, humtab)
+  quosures <- lapply(quosures, splatQuo, fields = colnames(humtab))
   
-  
-  # We may have added to the expr, so update what fields (if any) are used in formula
-  attr(doQuo, 'usedFields') <- unique(fieldsInExpr(humtab, doQuo))
+  # final result parsing (objects, recyclng, visible, etc.)
+  concatinateQuosures(quosures, alignLeft)
+  # quosures <- lapply(quosures, quosureParseResult, recycle = recycle, withFunc = withFunc, alignLeft = alignLeft)
 
-  doQuo
+  # quosures
 }
 
 unformula <- function(quosures) {
@@ -846,58 +797,178 @@ unformula <- function(quosures) {
 
 quoFieldNames <- function(quosures) {
   
-  quoTab <- do.call('rbind', 
-                    Map(quosures, .names(quosures), seq_along(quosures) == length(quosures),
-                        f = \(quo, named, islast) {
-                          exprA <- analyzeExpr(quo)
-                          
-                          
-                          if (exprA$Head == '<-') {
-                            assigned <- rlang::as_label(exprA$Args[[1]])
-                            
-                            if (named != '') { # this means we have assignment AND naming
-                              if (named == assigned) {
-                                .warn("You are using '=' AND '<-' at the same time; you only need one or the other.",
-                                      "For example, '{name} = {assign} <-' could just be '{name} ='.")
-                              } else {
-                                bad <- paste0(named, ' = ', assigned, ' <- ...')
-                                .stop("You are using '=' AND '<-' to assign contradictory field names.",
-                                      "For example, '{bad}' is contradictory.")
-                              }
-                            }
-                            
-                            if (islast) exprA$Args[[2]] <- rlang::quo(visible.attr(withVisible(!!exprA$Args[[2]])))
-                            quo <- unanalyzeExpr(exprA)
-                            
-                          } else {
-                            
-                            assigned <- if (named == '') rlang::as_label(quo) else named
-                            quo <- if (islast) rlang::quo(!!assigned <-  visible.attr(withVisible(!!quo))) else rlang::quo(!!assigned <- !!quo)
-                          
-                          }
-                          
-                          data.table(Name = assigned, Quo = list(quo))
-                        }))
+  quoNames <- .names(quosures)
+  
+  for (i in seq_along(quosures)) {
+    exprA <- analyzeExpr(quosures[[i]])
+    if (exprA$Head == '<-') {
+      assigned <- rlang::as_label(exprA$Args[[1]])
+      
+      if (quoNames[i] != '') { # this means we have assignment AND naming
+        if (quoNames[[i]] == assigned) {
+          .warn("You are using '=' AND '<-' at the same time; you only need one or the other.",
+                "For example, '{quoNames[[i]]} = {assigned} <-' could just be '{quoteNames[[i]]} ='.")
+        } else {
+          bad <- paste0(quoNames[[i]], ' = ', assigned, ' <- ...')
+          .stop("You are using '=' AND '<-' to assign contradictory field names.",
+                "For example, '{bad}' is contradictory.")
+        }
+      }
+      
+      # quosures[[i]] <- rlang::new_quosure(exprA$Args[[2]], exprA$Environment)
+      quoNames[i] <- rlang::as_label(exprA$Args[[1]])
+      
+      if (i == length(quosures)) {
+        exprA$Args[[2]] <- visibleQuo(exprA$Args[[2]], exprA$Environment)
+        quosures[[i]] <- unanalyzeExpr(exprA)
+      }
+      
+    } else {
+      if (quoNames[i] == '') quoNames[i] <- rlang::as_label(quosures[[i]])
+      
+      if (i == length(quosures)) {
+        quosures[[i]] <- rlang::quo_set_env(rlang::quo(!!(rlang::sym(quoNames[i])) <- !!(visibleQuo(quosures[[i]]))),
+                                            exprA$Environment)
+      } else {
+        quosures[[i]] <- rlang::quo_set_env(rlang::quo(!!(rlang::sym(quoNames[i])) <- !!quosures[[i]]), exprA$Environment)
+      }
+    }
+    
+  }
   
   
-  setNames(quoTab$Quo, quoTab$Name)
+  setNames(quosures, quoNames)
   
 }
 
-concatDoQuos <- function(quosures) {
-  assigned <- names(quosures)
-   rlang::quo({
-    {!!!quosures}
-    
-    results <- setNames(lapply(list(!!!rlang::syms(assigned)), \(x) list(list(x))), !!assigned) 
-    # Need three lists here, and two for _rowKey_ 
-    
-    results[['_rowKey_']] <- list(list(`_rowKey_`))
-    
-    results
-    
-    })
+
+
+checkOverwrites <- function(newFields, humtab, withFunc) {
+  overWrote <- intersect(newFields, colnames(humtab))
+  
+  bad <- overWrote %in% c('Token', 'Filename', 'Filepath', 'File', 'Label', 'Bar', 'DoubleBar', 'BarLabel', 'Formal',
+                          'Exclusive',
+                          'Piece', 'Spine', 'Path', 'Stop', 'Record', 'DataRecord', 'Global', 'Type')
+  bad <- bad | grepl('^Exclusive\\.', overWrote) | overWrote == '_rowKey_'
+  
+  if (any(bad)) {
+    if ('Token' %in% overWrote[bad]) {
+      .stop("In your call to {withFunc}, you can't overwrite the 'Token' field.",
+            "This field should always keep the original humdrum data you imported.")
+    }
+    .stop("In your call to {withFunc}, you can't overwrite structural fields.",
+          ifelse = sum(bad) > 1L, 
+          "You are attempting to overwrite the {harvard(overWrote[bad], 'and', quote = TRUE)} <fields|field>.",
+          "For a complete list of structural fields, use the command fields(mydata, 'S').")
+  }
+  
+  overWrote
 }
+
+checkRecycling <- function(humtab, recycle, fields, withFunc) {
+ 
+  if (recycle != 'no') {
+    
+    for (field in fields) {
+      recycled <- humtab[[paste0(field, '_recycled_')]]
+      inOutRatio <- humtab[[paste0(field, '_inOutRatio_')]]
+      scalar <- humtab[[paste0(field, '_isScalar_')]]
+      
+      switch(recycle,
+             pad =  humtab[recycled == TRUE, (field) := NA],
+             ifscalar = if (!all(scalar | inOutRatio == 1, na.rm = TRUE)) {
+               .stop("The {withFunc} command won't recycle these results",
+                     "because the recycle argument is set to 'ifscalar'.",
+                     "Your result is not scalar (i.e., length(result) != 1) and does not match the input length.")
+             },
+             ifeven = if (!all(inOutRatio %% 1 == 0, na.rm = TRUE)) {
+               .stop("The {withFunc} command won't recycle these results",
+                     "because the recycle argument is set to 'ifeven'.",
+                     "The length of your result does not evenly divide the input length.")
+             },
+             summarize = if (!all(scalar, na.rm = TRUE)) {
+               .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
+             },
+             never = if (!all(inOutRatio == 1, na.rm = TRUE)) {
+               .stop("The {withFunc} command won't recycle these results",
+                     "because the recycle argument is set to 'never',",
+                     "but length of your result does not match the input length.")
+             })
+      
+    }
+    
+  }
+  
+  if (recycle %in% c('no', 'summarize')) {
+    
+    recycled <- Reduce('&', humtab[ , grepl('_recycled_$', colnames(humtab)), with = FALSE])
+    humtab <- humtab[!recycled]
+    
+  } 
+
+  humtab[ , grep('_(recycled|isScalar|inOutRatio)_$', colnames(humtab), value = TRUE) := NULL]
+  
+  
+  humtab
+}
+
+
+concatinateQuosures <- function(quosures, alignLeft) {
+  quosure <- rlang::quo({
+    {!!!quosures}
+  
+    c(parseResults(list(!!!(rlang::syms(names(quosures)))), inlen = length(Token), alignLeft = !!alignLeft))
+  })
+  
+  attr(quosure, 'newFields') <- names(quosures)
+  quosure
+}
+
+
+visibleQuo <- function(quo, env = rlang::quo_get_env(quo)) {
+  
+  quo <- rlang::quo({
+    visibleResult <- withVisible(!!quo)
+    
+    result <- visibleResult$value
+    if (!is.null(result)) attr(result, 'visible') <- visibleResult$visible
+    result
+    
+  })
+  
+  rlang::quo_set_env(quo, env)
+  
+}
+
+parseResults <- function(results, inlen, alignLeft) {
+  
+  results <- lapply(results, 
+         \(result) {
+           visible <- attr(result, 'visible')
+           
+           result <- wrapObjects(result)
+           
+           outlen <- length(result)
+           
+           if (alignLeft) {
+            result <- rep_len(result, inlen)
+             recycled <- seq_len(inlen) > outlen
+           } else {
+             result <- rev(rep_len(rev(result), inlen))
+             recycled <- seq_len(inlen) <= (inlen - outlen)
+           }
+           
+           attr(result, 'visible') <- visible
+           
+           scalar <- rep_len(outlen == 1L, inlen)
+           
+           list(result, recycled, inlen / outlen, scalar)
+           
+           
+         })
+  do.call('c', results)
+}
+
 
 ####################### Functions used inside prepareQuo
 
@@ -943,12 +1014,12 @@ activateQuo <- function(funcQuosure, dotField) {
 #### Insert exclusive/keyed args where necessary
 
 
-autoArgsQuo <- function(funcQuosure, humtab) {
+autoArgsQuo <- function(funcQuosure, fields) {
   predicate <- \(Head) Head %in% c(autoArgTable$Function, paste0(autoArgTable$Function, '.default'))
   do <- \(exprA) {
     tab <- autoArgTable[(Function == exprA$Head | paste0(Function, '.default') == exprA$Head) & 
                           !Argument %in% names(exprA$Args) &
-                          sapply(Expression, \(expr) length(fieldsInExpr(humtab, expr)) > 0L)]
+                          sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
     args <- setNames(tab$Expression, tab$Argument)
     exprA$Args <- c(exprA$Args, args)
     exprA
@@ -973,8 +1044,7 @@ interpolateVariablesQuo <- function(quo, variables) {
 
 #### Lag/Led vectors ----
 
-laggedQuo <- function(funcQuosure, humtab) {
-  fields <- colnames(humtab)
+laggedQuo <- function(funcQuosure, fields) {
   
   predicate <- \(Head, Args) Head == '[' && any(tolower(names(Args)) %in% c('lag', 'lead')) 
   
@@ -996,7 +1066,7 @@ laggedQuo <- function(funcQuosure, humtab) {
     lagExprs <- lapply(n, \(curn) rlang::expr((!!rlang::sym(lagorlead))(!!!args, n = !!curn)))
     # this SHOULD be expr(), not quo()
 
-    exprA$Head <- 'splat'
+    exprA$Head <- if (length(n) > 1L) 'splat' else 'list'
     exprA$Args <- lagExprs
     
     exprA
@@ -1016,7 +1086,7 @@ laggedQuo <- function(funcQuosure, humtab) {
 # rlang's unquoting operator !!!.
 # humdrumR has another syntactic sugar for this:
 
-splatQuo <- function(funcQuosure, humtab) {
+splatQuo <- function(funcQuosure, fields) {
   # This function takes an expression,
   # and replaces any subexpression of the form `func(splat(x, y, z))`
   # with `func(x, y, z)`.
@@ -1031,7 +1101,7 @@ splatQuo <- function(funcQuosure, humtab) {
     inExprA <- analyzeExpr(exprA$Args[[2]])
     
     if (inExprA$Head != '%in%') .stop('splat expression must use %in%')
-    if (length(fieldsInExpr(humtab, inExprA$Args[[1]])) == 0L) .stop('splat expression must reference an existing field')
+    if (length(namesInExpr(fields, inExprA$Args[[1]])) == 0L) .stop('splat expression must reference an existing field')
     
     inVals <- eval(inExprA$Args[[2]])
     if (!is.atomic(inVals)) .stop('splat %in% expression must be atomic values.')
@@ -1184,64 +1254,52 @@ mapifyQuo <- function(funcQuosure, usedInExpr, depth = 1L) {
 ###########- Applying within.humdrumR's expression to a data.table
 
 
-evaluateDoQuo <- function(doQuo, humtab, groupFields, windowFrame) {
-  usedFields <- union(attr(doQuo, 'usedFields'), groupFields)
+evaluateDoQuo <- function(quosure, humtab, dataTypes, groupFields, windowFrame) {
+  usedFields <- unique(namesInExpr(colnames(humtab), quosure))
+  newFields <- attr(quosure, 'newFields') 
+  
   
   if (nrow(windowFrame)) {
-    humtab <- windows2groups(humtab, windowFrame)
-    usedFields <- c(usedFields, 'contextWindow')
-    groupFields <- c(groupFields, 'contextWindow')
-  }
-  
-  result <- if (length(groupFields)) {
-    humtab[ , rlang::eval_tidy(doQuo, data = .SD), by = groupFields, .SDcols = usedFields]
+    evaluateContextual(quosure, humtab, usedFields, newFields, windowFrame) 
   } else {
-    humtab[ ,  rlang::eval_tidy(doQuo, data = .SD), .SDcols = usedFields] # outputs a data.table this way
+    
+    # There is a weird bug that happens only when different groups in data.table evaluate to different types
+    # AND you assign by reference to multiple columns.
+    assignTo <- c(t(outer(newFields, c('', '_recycled_', '_inOutRatio_', '_isScalar_'), paste0)))
+    humtab[Type %in% dataTypes, (assignTo) := rlang::eval_tidy(quosure, data = .SD),
+           .SDcols = union(usedFields, c('_rowKey_', groupFields)),
+           by = groupFields] 
+    # setorder(results, `_rowKey_`)
+    
+    # humtab[Type %in% dataTypes, (assignTo) := results[ , setdiff(colnames(results), c(groupFields, '_rowKey_')), with = FALSE]]
+    
   }
- 
-  if (nrow(windowFrame)) result[, contextWindow := NULL]
   
-  result 
+   attr(humtab[[tail(newFields, 1)]], 'visible') %||% TRUE
 }
 
-
-evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
+evaluateContextual <- function(quosure, humtab, usedFields, newFields, windowFrame) {
+   
+   humtab_context <- windows2groups(humtab, windowFrame)
+   
+   results <- humtab_context[ , rlang::eval_tidy(quosure, data = .SD),
+                             .SDcols = usedFields,
+                             by = contextWindow] 
+   
+   assignTo <- c(t(outer(newFields, c('', '_recycled_', '_inOutRatio_', '_isScalar_'), paste0)))
+   
+   humtab_context[ , (assignTo) := results[ , setdiff(colnames(results), 'contextWindow'), with = FALSE]]
+   
+   
   
-  contextQuo <- partQuos$Quo[[1]]
-  
-  windowFrame <- eval(rlang::quo_squash(contextQuo), envir = humtab)
-  
-  result <- if (nrow(windowFrame)) {
-    humtab_extended <- windows2groups(humtab, windowFrame)
-    humtab_extended[ , rlang::eval_tidy(doQuo, data = .SD), by = contextWindow]
-  } else {
-    data.table(contextWindow = integer(0L), Result = list(), `_rowKey_` = list())
-  }
-
-  
-  
-  if (!is.null(ordoQuo)) {
-    # notused <- setdiff(seq_len(nrow(humtab)))
+  #
+    humtab_context[ , `_recycled_` := Reduce('&', humtab_context[ , grepl('_recycled_$', colnames(humtab_context)), with = FALSE])]
+    setorder(humtab_context, `_recycled_`, contextWindow, na.last = TRUE)
     
-    complement <- as.data.table(rlang::eval_tidy(ordoQuo, data = humtab[!`_rowKey_` %in% unlist(result[['_rowKey_']])]))
-    complement[ , contextWindow := 0L]
-    
-    if (ncol(complement) > ncol(result)) complement <- complement[ , tail(seq_len(ncol(complement)), ncol(result)), with = FALSE]
-    
-    mismatch <-  !colnames(complement) %in% colnames(result)
-    colnames(complement)[mismatch] <- tail(head(colnames(result), -2L), sum(mismatch))
-    
-    result <- data.table::rbindlist(list(result, complement), use.names = TRUE, fill = TRUE)
-  }
-  
-  result
-  # doQuo <- rlang::quo_squash(doQuo)
-  # humtab_extended[ , eval(doQuo), by = contextWindow]
+    humtab_context <- humtab_context[!duplicated(`_rowKey_`)]
+    humtab[ , (assignTo) := humtab_context[humtab, on = '_rowKey_'][, assignTo, with = FALSE]]
   
 }
-
-
-
 
 
 #######################################################-
@@ -1250,183 +1308,32 @@ evalDoQuo_context <- function(doQuo, humtab, partQuos, ordoQuo) {
 
 
 
-parseResult <- function(results, groupFields, recycle, alignLeft, withFunc) {
-    # this takes a nested list of results with associated
-    # indices and reconstructs the output object.
-  # if (length(result) == 0L || all(lengths(result) == 0L)) return(cbind(as.data.table(result), `_rowKey_` = 0L)[0])
-  
-  grouping <- results[ , groupFields, with = FALSE]
-  rowKey <- unlist(results[['_rowKey_']], recursive = FALSE)
-  results <- results[ , setdiff(names(results), c(groupFields, '_rowKey_')), with = FALSE]
-  
-  visibleResult <- is.visible(results[[length(results)]][[1]][[1]]) # determined by last result
-  results[] <- lapply(results, unlist, recursive = FALSE)
-  
-  
-  
-  results <- as.matrix(results) # allows me to lapply across all all at once
-  # results <- do.call('cbind', results)
-  
-  # "objects" are treated like length 1, and not vectorized
-  objects <- array(FALSE, dim(results), dimnames(results))
-  objects[] <- sapply(results, 
-                      \(resultGroup) {
-                        length(resultGroup) &&
-                          (is.table(resultGroup) || (is.object(resultGroup) && !is.atomic(resultGroup)))
-                        })
-  
-  # pad results and/or trim rowKey to make them match in size
-  c('results', 'rowKey') %<-% recycleResults(results, objects, rowKey, recycle, alignLeft, withFunc)
-  
-  # need to rbind result groups
-  results <- as.list(as.data.frame(results))
-  objects <- colSums(objects) > 0L
-  
-  groupLengths <- lengths(rowKey)
-  results <- Map(results, objects,
-                 f = \(group, isObject) {
-                   # need to 
-                   # 1) pad results which are shorter than the longest result
-                   # 2) concatinate vectorized results
-                   if (isObject) {
-                     result <- vector('list', sum(groupLengths))
-                     ind <- if (alignLeft) 1L + head(cumsum(c(0L, groupLengths)), -1L) else cumsum(groupLengths)
-                     result[ind] <- group
-                   } else {
-                     if (hasdim(group[[1]])) {
-                       short <- sapply(group, nrow) < groupLengths
-                       group[short] <- Map(group[short], groupLengths[short], f = \(g, n) g[seq_len(n), , drop = FALSE])
-                     } else {
-                       short <- lengths(group) < groupLengths
-                       group[short] <- Map(group[short], groupLengths[short], f = \(g, n) g[seq_len(n)])
-                     }
-                     result <- .unlist(group, recursive = FALSE) 
-                   }
-                   attr(result, 'visible') <- NULL
-                   result
-                   
-                 })
-  
-  arrays <- sapply(results, is.array)
-  result <- as.data.table(results)
-  # arrays are split into new columns
-  # for (array in names(results)[arrays]) {
-    # result[[array]] <- results[[array]]
-  # }
-  
-  result <- cbind(`_rowKey_` = unlist(rowKey), as.data.table(lapply(grouping, rep, lengths(rowKey))), result)
-  
-  attr(result, 'visible') <- visibleResult 
-  
-  result
-    
+
+wrapObjects <- function(result) {
+  if (is.null(result) || 
+      (length(result) &&  
+      (is.table(result) || 
+       (is.object(result) && !is.atomic(result))))) {
+    list(result)
+  } else {
+    result
+  }
 }
 
 
-
-recycleResults <- function(results, objects, rowKey, recycle, alignLeft, withFunc) {
-  
-  # length of each result group
-  resultLengths <- array(as.integer(objects), dim(objects), dimnames(objects))
-  resultLengths[!objects] <- unlist(lapply(results[!objects], \(resultGroup) if (hasdim(resultGroup)) nrow(resultGroup) else length(resultGroup)))
-  
-  keyLengths <- lengths(rowKey)
-  keyLengths <- do.call('cbind', rep(list(keyLengths), ncol(results)))
-  
-  diff <- resultLengths - keyLengths
-  
-  if (any(diff > 0L)) .stop("Sorry, {withFunc}() doesn't currently support expressions",
-                            "which return values that are longer than their input field(s).",
-                            "Your expression has returned results of lengths {harvard(head(resultLengths[diff > 0L], 5), 'and')} evaluated from",
-                            "inputs of length {harvard(head(keyLengths[diff > 0L], 5), 'and')}<, respectively|>.",
-                            ifelse = length(results) > 1L)
-  
-    
-  match  <- diff == 0L
-  scalar <- resultLengths == 1L
-  
-  if (recycle == 'summarize' && !(all(scalar))) .stop("When using summarize() on humdrumR data, the result of each expression must be a scalar (length 1).")
-  
-  if (!recycle %in% c('pad', 'summarize', 'no') && any(!match & !objects)) {
-    bad <- !match & switch(recycle,
-                           ifscalar  = resultLengths != 1L,
-                           ifeven    = keyLengths %% resultLengths != 0L,
-                           never     = TRUE,
-                           FALSE)
-    if (any(bad)) .stop("The {withFunc} command won't recycle these results because the recycle argument is set to '{recycle}.'",
-                        switch(recycle, 
-                               ifscalar = "Only scalar (length 1) results will be recycled.",
-                               ifeven = "Only results of a length that evenly divides the input will be recycled."),
-                        "See the 'recycling' section of ?withHumdrum for explanation.")
-    
-    results[!match & !objects] <- Map(results[!match & !objects], keyLengths[!match & !objects], 
-                                      f = \(result, keyLength) {
-                                        i <- if (hasdim(result)) 1:nrow(result) else seq_along(result)
-                                        
-                                        i <- if (alignLeft) { 
-                                          rep(i, length.out = keyLength) 
-                                        } else { 
-                                            rev(rep(rev(i), length.out = keyLength))
-                                          }
-                                        
-                                        if (hasdim(result)) {
-                                          result[i, , drop = FALSE]
-                                        } else {
-                                          result[i]
-                                        }
-                                        
-                                      })
-    resultLengths[!match & !objects] <- keyLengths[!match & !objects]
-  }
-  
-  
-    
-  # to make the (later) padding work, we may need to shorten the rowKey to match the result length
-  maxGroupLength <- apply(resultLengths, 1L, max)
-  keyLengths <- keyLengths[ , 1]
-  keyTrim <- keyLengths > maxGroupLength
-  
-  if (any(keyTrim)) {
-    rowKey[keyTrim] <- Map(rowKey[keyTrim], maxGroupLength[keyTrim], 
-                           f = if (alignLeft) {
-                             \(keys, len) {
-                               keys[seq_len(min(length(keys), max(len, 0L)))]
-                             }
-                           } else {
-                             \(keys, len) {
-                               l <- length(keys)
-                               ind <- (l - len + 1) : l
-                               ind <- ind[ind > 0]
-                               keys[ind]
-                             }
-                           })
-    
-  }
-  list(results = results, rowKey = rowKey)
-  
-}
-
-
-renameResults <- function(result, quosures, groupFields, allFields) {
-  
-  if (any(names(result) == "_Result_")) {
-    names(result)[names(result) == '_Result_'] <- rlang::as_label(quosures[[length(quosures)]])
-  }
-
-  result
-}
 
 addExclusiveFields <- function(humtab, fields) {
-  newcols <- lapply(humtab[ , fields, with = FALSE],
-         \(field) {
+  for (fieldName in fields) {
+           field <- humtab[[fieldName]]
            exclusive <- getExclusive(field)
            if (!is.null(exclusive)) {
-             ifelse(is.na(field), NA_character_, exclusive)
+             exclusive <- ifelse(is.na(field), NA_character_, exclusive)
+             
+             newFieldName <- paste0('Exclusive.', fieldName)
+             set(humtab, j = newFieldName, value = list(exclusive))
            }
-         })
-  names(newcols) <- paste0('Exclusive.', fields)
-  newcols <- Filter(length, newcols)
-  cbind(humtab, as.data.frame(newcols))
+    
+  }
 }
 
 
@@ -1543,3 +1450,9 @@ theme_humdrum <- function() {
 }
 
 
+  
+
+
+ 
+
+          

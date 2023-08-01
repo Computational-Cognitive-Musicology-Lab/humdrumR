@@ -269,12 +269,13 @@ getColumn <- function(humtab, pad = 'corpus') {
 
 
 orderHumtab <- function(humtab) {
-    if (nrow(humtab) == 0L) return(humtab)
-    orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') 
+    # if (nrow(humtab) == 0L) return(humtab)
+    # orderingcols <- c('File', 'Piece', 'Spine', 'Path', 'Record', 'Stop') 
     
     # can't sort by lists
     
-    setorderv(humtab, cols = orderingcols)
+    # setkey(humtab, File, Piece, Spine, Path, Record, Stop)
+    setorder(humtab, File, Piece, Spine, Path, Record, Stop)
     
 }
 
@@ -1029,8 +1030,8 @@ update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Dd = TRUE , ...) {
 }
 update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Dd = TRUE, ...) {
     
-    if (Exclusive) hum <- update_Exclusive(hum, ...)
-    if (Dd) hum <- update_Dd(hum, ...)
+    if (Exclusive) hum <- update_Exclusive.data.table(hum, ...)
+    if (Dd) hum <- update_Dd.data.table(hum, ...)
     hum
     
 }
@@ -1042,9 +1043,10 @@ update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
     fields <- selectedFields(hum)
-    putHumtab(hum, overwriteEmpty = 'ID') <- update_Exclusive.data.table(humtab, fields)
+    update_Exclusive.data.table(humtab, fields) # in place
     
     hum
+    
 }
 update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     
@@ -1054,9 +1056,6 @@ update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     } else {
         hum[ , Exclusive := Exclusive.Token]
     }
-    
-    
-    hum
 }
 
 #
@@ -1065,14 +1064,20 @@ update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FA
     
     if (allFields) field <- fields(hum, 'D')$Name
     humtab <- getHumtab(hum, 'GLIMDd')
-    putHumtab(hum, overwriteEmpty = "GLIMDd") <- update_Dd.data.table(humtab, field = field)
+    
+    update_Dd.data.table(humtab, field = field) # in place
     hum
 }
 update_Dd.data.table <- function(hum, field = 'Token', ...) {
-    null <- nullFields(hum, field)
     
-    hum$Type[hum$Type %in% c('d', 'D')] <-  ifelse(null[hum$Type %in% c('d', 'D')], 'd', 'D')
-    hum
+    hum[Type %in% c('d', 'D'), 
+        Type := {
+            null <- nullFields(.SD, field)
+            
+            ifelse(null, 'd', 'D')
+            
+        }]
+    setindex(hum, NULL) # data.table is creating auto-index for some reason?
 }
 
 is.nullToken <- function(tokens) {
@@ -1581,7 +1586,7 @@ pullFields <- function(humdrumR, fields, dataTypes = 'D',
     fieldTypes <- lapply(as.list(fieldTypes), 
                          \(fieldType) if (fieldType == 'Data') humtab$Type else rep(c(Interpretation = 'I', Formal = 'I',
                                                                                       Structure = 'D', Reference = 'G')[fieldType],
-                                                                                      fieldType, length = nrow(selectedTable)))
+                                                                                      fieldType, length.out = nrow(selectedTable)))
     
     selectedTable[] <- mapply(naDots, selectedTable, fieldTypes, MoreArgs = list(null = null), SIMPLIFY = FALSE)
     
@@ -1652,9 +1657,10 @@ pullPrintable <- function(humdrumR, fields,
         
         if (length(tandems)) {
             tandemRE <- knownInterpretations[Name %in% tandems, RE]
-            fill[Type == 'I'] <- fill[Type == 'I']  & Reduce('|', lapply(tandemRE, 
-                                                                         stringi::stri_detect_regex, 
-                                                                         str = fieldTable$Token[Type == 'I'] ))
+            targets <- Type == 'I' & !is.na(fieldTable$Token)
+            fill[targets] <- fill[targets]  & Reduce('|', lapply(tandemRE, 
+                                                                 stringi::stri_detect_regex, 
+                                                                 str = fieldTable$Token[targets]))
         }
         field[fill] <- fieldTable$Token[fill]
     } 
@@ -2329,7 +2335,7 @@ showWindows <- function(humdrumR) {
         if (overlap) ' (overlapping)', ' contextual windows:\n', 
         sep = '')
         
-        lengths <- windowFrame[ , Close - Open + 1L]
+        lengths <- windowFrame[ , lengths(Indices)]
         quants <- round(c(Shortest = min(lengths), Median = median(lengths), Longest = max(lengths)))
         if (length(unique(quants)) == 1L) {
             cat("\t\tAll windows length ==", quants[1],'\n')

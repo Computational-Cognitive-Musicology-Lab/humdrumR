@@ -2105,6 +2105,7 @@ visible.attr <- function(withV) {
   result
 }
 
+
 is.visible <- function(x) {
   visible <- attr(x, 'visible')
   

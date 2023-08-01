@@ -305,18 +305,22 @@ removeSubset <- function(humdrumR, complement = NULL) {
   for (i in seq_along(dataFields)) {
     if (is.null(complement) && is.na(complementFields[i])) next
     
-    field <- humtab[[dataFields[i]]]
-    replaceWith <- if (is.na(complementFields[i])) humtab[[complement]] else humtab[[complementFields[i]]]
+    replace <- dataFields[i] 
     
-    null <- is.na(field)
+    humtab[ , (replace) := {
+      
+      field <- humtab[[replace]]
+      replaceWith <- if (is.na(complementFields[i])) humtab[[complement]] else humtab[[complementFields[i]]]
+      
+      null <- is.na(field)
+      field[null] <- replaceWith[null]
+      field
+    }]
     
-    field[null] <- replaceWith[null]
-    
-    humtab[[dataFields[i]]] <- field
+    if (!is.na(complementFields[i])) humtab[ , (complementFields[i]) := NULL]
   }
   
   humdrumR@Fields$Complement <- FALSE
-  putHumtab(humdrumR) <- humtab[ , !grepl('_complement_', colnames(humtab)), with = FALSE]
   
   humdrumR <- update_Dd(humdrumR, dataFields)
   
