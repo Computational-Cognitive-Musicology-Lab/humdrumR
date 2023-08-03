@@ -330,22 +330,18 @@ removeEmptyStops <- function(x) {
 removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = NULL) {
   checks(humdrumR, xhumdrumR)
   checks(complement, xnull | (xcharnotempty & xlen1))
-  fields <- fieldMatch(humdrumR, fields, 'removeSubset', 'fields')
+  fields <- fieldMatch(humdrumR, fields, 'removeSubset', 'fields', fieldTypes = 'Data')
   
   
   humtab <- getHumtab(humdrumR)
   fields <- fields(humdrumR)[Name %in% fields]
-  
-  if (any(fields$Type != 'Data')) .stop('removeSubset() can only remove filters from DATA fields.', 
-                                        '{harvard(fields[Type != "Data", Name], "and")} <are not data fields|is not a data field>.',
-                                        ifelse = nrow(fields[Type != 'Data']) > 1)
   
   if (is.null(complement)) {
     fields <- fields[Complement == TRUE]
     fields[ , complementField := paste0('_complement_', Name)]
     
   } else {
-    complement <- fieldMatch(humdrumR, complement, 'removeSubset', 'complement')
+    complement <- fieldMatch(humdrumR, complement, 'removeSubset', 'complement', fieldTypes = 'Data')
     fields[ , complementField := paste0('_complement_', complement)]
   }
   
@@ -382,12 +378,9 @@ unfilter <- removeSubset
 #' @rdname subset.humdrumR
 complement <- function(humdrumR, fields = dataFields(humdrumR)) {
   checks(humdrumR, xhumdrumR)
-  fields <- fieldMatch(humdrumR, fields, 'complement', 'fields')
+  fields <- fieldMatch(humdrumR, fields, 'complement', 'fields', fieldTypes = 'Data')
   
   fields <- fields(humdrumR)[Name %in% fields]
-  if (any(fields$Type != 'Data')) .stop('complement() can only take the complement of filtered DATA fields.', 
-                                        '{harvard(fields[Type != "Data", Name], "and")} <are not data fields|is not a data field>.',
-                                        ifelse = nrow(fields[Type != 'Data']) > 1)
   
   fields <- fields[Complement == TRUE]
   if (nrow(fields) == 0L) {

@@ -1050,7 +1050,7 @@ update_Exclusive.humdrumR <- function(hum, ...) {
 }
 update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     
-    exclusiveFields <- Reduce('|', lapply(paste0('^Exclusive\\.', fields), stringi::stri_detect_regex, str = colnames(hum)))
+    exclusiveFields <- colnames(hum) %in% paste0('Exclusive.', fields)
     if (any(exclusiveFields)) {
         hum[ , Exclusive := do.call('.paste', c(hum[ , exclusiveFields, with = FALSE], list(na.if = all)))]
     } else {
@@ -1273,19 +1273,19 @@ fieldsInExpr <- function(humtab, expr) {
   namesInExpr(colnames(humtab), expr)
 }
 
-fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fields') {
+fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fields', 
+                       fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping')) {
     checks(fieldnames, xcharnotempty, argname = fields, seealso = callfun)
-    fields <- fields(humdrumR)$Name
+    fields <- fields(humdrumR, fieldTypes = fieldTypes)$Name
     target <- pmatch(fieldnames, fields)
     
     
     nomatch <- is.na(target)
-    
     if (all(nomatch)) {
         .stop("In the '{argname}' argument of your call to humdrumR::{callfun},", 
               ifelse = length(fieldnames),
               harvard(fieldnames, 'and', quote = TRUE),
-              '<is not the name of a field|are not names of fields>',
+              '<is not the name of a|are not names of> {tolower(harvard(fieldTypes, "or"))} field<|s>',
               'in your humdrumR object.')
     }
     
@@ -1293,7 +1293,7 @@ fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = '
         .warn('In the "{argname}" argument of your call to humdrumR::{callfun}, ',
               ifelse = length(argname),
               harvard(fieldnames[is.na(target)],  'and'),
-              '<is not the name of a field|are not names of fields>',
+              '<is not the name of a|are not names of> {tolower(harvard(fieldTypes, "or"))} field<|s>',
               'in your humdrumR object.')
         
         target <- target[!nomatch]

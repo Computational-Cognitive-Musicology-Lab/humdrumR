@@ -832,11 +832,49 @@ context.humdrumR <- function(humdrumR, open,  close,
 #' The `uncontext()` function removes contextual windows
 #' from a [humdrumR data object][humdrumRclass].
 #'
+#' @section Complements (removing context):
+#' 
+#' The `uncontext()` command, like the [ungroup()] command, is needed to remove
+#' contextual windows from [humdrumR data][humdrumRclass], so that further calls to 
+#' [within()/mutate()/etc.][withinHumdrum] are not applied in context.
+#' 
+#' The `uncontext()` command can also be used to access data *outside* of contextual windows
+#' by using a `complement` argument, similar to the [unfilter()] function.
+#' The `complement` must be an existing field in the data.
+#' If `uncontext()` is used with a given complement field, the currently
+#' selected data field (unless `Token` is selected) has the contents of the complement
+#' field inserted into it all points outside the contextual windows.
+#' This can be used to keep 
+#' 
+#' @examples 
+#' 
+#' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+#' 
+#' humData |> context(hop(6), open + 2) |> within(paste(Token, collapse = '|')) |> uncontext(complement = 'Token')
+#' 
 #' @export
 #' @rdname context
-uncontext <- function(humdrumR) {
+uncontext <- function(humdrumR, complement = NULL) {
   checks(humdrumR, xhumdrumR)
+  checks(complement, xnull | (xcharnotempty & xlen1))
   
+  if (!is.null(complement)) {
+    field <- fields(humdrumR, 'selected')[1]
+    
+    if (field$Name == 'Token' || field$Type != 'Data') {
+      .warn("uncontext() can only apply a complement when the first selected field is a data field other than Token.",
+            "Contextual windows have been removed, but no complement has been used.")
+    } else {
+      complement <- fieldMatch(humdrumR, complement, 'removeSubset', 'complement', 'Data')
+      
+      humtab <- getHumtab(humdrumR)
+      indices <- unique(unlist(humdrumR@Context$Indices))
+      humtab[-indices, (field$Name) := get(complement)]
+    }
+  
+  }
+    
+
   humdrumR@Context <- humdrumR@Context[0]
   humdrumR
 }

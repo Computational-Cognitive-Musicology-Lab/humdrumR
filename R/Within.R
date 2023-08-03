@@ -842,7 +842,6 @@ quoFieldNames <- function(quosures) {
 }
 
 
-
 checkOverwrites <- function(newFields, humtab, withFunc) {
   overWrote <- intersect(newFields, colnames(humtab))
   
@@ -1066,7 +1065,7 @@ laggedQuo <- function(funcQuosure, fields) {
     lagExprs <- lapply(n, \(curn) rlang::expr((!!rlang::sym(lagorlead))(!!!args, n = !!curn)))
     # this SHOULD be expr(), not quo()
 
-    exprA$Head <- if (length(n) > 1L) 'splat' else 'list'
+    exprA$Head <- if (length(n) > 1L) 'splat' else 'c'
     exprA$Args <- lagExprs
     
     exprA
