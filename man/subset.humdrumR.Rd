@@ -32,14 +32,14 @@ removeEmptyRecords(x)
 
 removeEmptyStops(x)
 
-removeSubset(humdrumR, complement = NULL)
+removeSubset(humdrumR, fields = dataFields(humdrumR), complement = NULL)
 
-unfilter(humdrumR, complement = NULL)
+unfilter(humdrumR, fields = dataFields(humdrumR), complement = NULL)
 
-complement(humdrumR)
+complement(humdrumR, fields = dataFields(humdrumR))
 }
 \arguments{
-\item{x, .data}{\emph{\strong{HumdrumR data.}}
+\item{x, .data, humdrumR}{\emph{\strong{HumdrumR data.}}
 
 Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
@@ -71,6 +71,18 @@ the \code{.by} argument overrides them.}
 Defaults to \code{TRUE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{fields}{\strong{Which fields to unfilter or complement?}
+
+Defaults to all data fields in the \code{humdrumR} data.
+
+Must be \code{character} strings, partially matching data \link[=fields]{field} in the input data.}
+
+\item{complement}{\strong{Which field to use as the subset complement to restore?}
+
+By default \code{NULL}, which means each data field's original complement is used.
+
+Must be a single \code{character} string, partially matching a \link[=fields]{field} in the input data.}
 }
 \description{
 HumdrumR defines \link[base:subset]{subset()} (base R) and \link[dplyr:filter]{filter()} (tidyverse) methods
@@ -146,6 +158,23 @@ the remaining pieces are renumbered from \code{2:10} to \code{1:9}.
 Spine/record renumbering works the same, except it is done independently \emph{within} each piece.
 }
 
+\section{Complements (unfiltering)}{
+
+
+When \code{subset()} is applied, \code{humdrumR} stores the complement of the subset of each data
+field is retained (unless an explicit \code{removeEmpty...()} function is called).
+The \code{removeSubset()} or \code{unfilter()} functions can be used to restore the original data,
+by combining the subset with the complement.
+The \code{fields} argument can be used to control which data fields are unfiltered---by default,
+all data fields are unfiltered.
+
+Normally, each data field is restored with its own complement data.
+However, the \code{complement} argument can be used to specify an field to use as the complement.
+This allows you to, for instance, different parts of separate fields into a single field.
+
+The \code{complement()} function will directly swap the data-field subsets with their complements.
+}
+
 \examples{
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
@@ -159,6 +188,14 @@ humData |> subset(Spine > 1) |> removeEmptySpines()
 # remove odd numbered bars
 
 humData |> group_by(Bar) |> subset(Bar[1] \%\% 2 == 1)
+
+# unfiltering and complement
+
+humData |> filter(Spine \%in\% 1:2) |> complement()
+
+humData |> filter(Spine \%in\% 1:2) |> unfilter()
+
+humData |> filter(Spine \%in\% 1:2) |> solfa() |> unfilter(complement = 'Token')
 
 }
 \seealso{

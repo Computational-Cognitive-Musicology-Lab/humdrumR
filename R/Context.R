@@ -815,7 +815,7 @@ context.humdrumR <- function(humdrumR, open,  close,
   groupFields <- setdiff(getGroupingFields(humdrumR, .by = c(), 'context.humdrumR'), c('Piece', 'Spine', 'Path'))
   if (length(groupFields)) groupby <- cbind(groupby, humtab[ , groupFields, with = FALSE])
   
-  windowFrame <- findWindows(humtab, open, close, 
+  windowFrame <- findWindows(humtab, open, close, field = selectedFields(humdrumR)[1],
                              groupby = groupby,
                              duplicate_indices = duplicate_indices,
                              overlap = overlap, depth = depth, rightward = rightward,

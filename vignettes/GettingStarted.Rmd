@@ -44,7 +44,7 @@ Open an R session and load the `r hm` library using the command `library(humdrum
 
 `r Hm` comes packaged with a small number of humdrum data files just for you to play around with.
 These files are stored in the directory where your computer installed `r hm`, in a subdirectory called "HumdrumData".
-You can move your R session to this folder using R's "set working directory command": `setwd(humdrumRroot)`.
+You can move your R session to this folder using R's "set working directory" command: `setwd(humdrumRroot)`.
 Once you're in the humdrumR directory, you can use the base R `dir` function to see what humdrum data is available to you.
 
 ```{r}
@@ -115,8 +115,8 @@ readHumdrum('HumdrumData/BachChorales/chor0') -> chorales
 ```
 
 Notice that all I've changed is that instead of writing `'chor001.krn'`, I wrote `'chor0'`.
-When we feed the string `'chor0'` to `readHumdrum`, it won't just look for a file called "chor0"; it will read *any* file in that folder whose name contains the sub-string "chor0"---which in this case is all ten files!
-Try printing the new `chorales` object to see how it is different.
+When we feed the string `'chor0'` to `readHumdrum`, it won't just look for a file called "chor0"; it will read *any* file in that folder whose name *contains* the sub-string "chor0"---which in this case is all ten files!
+Try printing the new `chorales` object to see how it is different:
 
 ```{r}
 
@@ -124,18 +124,18 @@ chorales
 
 ```
 
-Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2print(length(chorales)) ` pieces"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
+Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2print(length(chorales)) ` pieces"---and that's nothing: `readHumdrum()` will work just as well reading hundreds or thousands of files!
 Notice that when you print a `r hm` object, `r hm` shows you the beginning of the first file and the end of the last file, as well as telling you how many files there are in total.
 
 
 ---
 
-`readHumdrum` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
+> `readHumdrum()` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
 
 
 # Counting Things
 
-The most fundamental computational musicology method, is simply to count things!
+The most fundamental practice in computational musicology is simply counting things!
 To count the contents of data, we can use the `tally()` function.
 
 ```{r}
@@ -338,7 +338,7 @@ chorales |>
 ```
 
 Each expression is evaluated, and the result is put back in the same place in the humdrum data!
-You'll also notice that in the printout, we see new `Data` fields corresponding to each expression we evaluated.
+You'll also notice that in the printout, we see new data fields corresponding to each expression we evaluated.
 
 If you want, you can pick your own names by using `=` within the `mutate` call.
 For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](PitchAndTonality.html) vignette) to calculate the semitone value for each pitch in the chorales:
@@ -357,6 +357,7 @@ Lets do it again, but save the result in a new field, which we will call `Semits
 ```{r}
 
 chorales |> 
+  select(Token) |>
   mutate(Semits = semits(Token)) -> chorales
 
 chorales

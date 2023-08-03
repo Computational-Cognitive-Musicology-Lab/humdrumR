@@ -68,7 +68,7 @@
 #' the remaining pieces are renumbered from `2:10` to `1:9`.
 #' Spine/record renumbering works the same, except it is done independently *within* each piece.
 #' 
-#' @param x,.data ***HumdrumR data.***
+#' @param x,.data,humdrumR ***HumdrumR data.***
 #' 
 #' Must be a [humdrumR data object][humdrumRclass].
 #' 
@@ -114,6 +114,14 @@
 #' # remove odd numbered bars
 #' 
 #' humData |> group_by(Bar) |> subset(Bar[1] %% 2 == 1)
+#'
+#' # unfiltering and complement
+#' 
+#' humData |> filter(Spine %in% 1:2) |> complement()
+#' 
+#' humData |> filter(Spine %in% 1:2) |> unfilter()
+#' 
+#' humData |> filter(Spine %in% 1:2) |> solfa() |> unfilter(complement = 'Token')
 #' 
 #' @seealso {The [indexing operators][indexHumdrum] `[]` and `[[]]` can be used as shortcuts for common `subset` calls.}
 #' @export
@@ -143,7 +151,7 @@ subset.humdrumR <- function(x, ..., dataTypes = 'D', .by = NULL, removeEmptyPiec
   # and should be treated as FALSE, same as to base::subset() and dplyr::filter()
   
   humtab <- getHumtab(x)
-  humtab <- nullify(humtab, fields(x, 'Data')$Name, subset, dataTypes)
+  humtab <- nullify(humtab, dataFields(x), subset, dataTypes)
   
   putHumtab(x) <- humtab 
   x <- updateFields(x, selectNew = FALSE)
@@ -288,41 +296,76 @@ removeEmptyStops <- function(x) {
 #' Filtering with `subset()`/`filter()` is (by default) not destructive, 
 #' allowing you to recover the filtered data
 #' using `removeSubset()` or `unfilter()` (which are also synonyms).
+#'
+#' @section Complements (unfiltering):
+#' 
+#' When `subset()` is applied, `humdrumR` stores the complement of the subset of each data
+#' field is retained (unless an explicit `removeEmpty...()` function is called).
+#' The `removeSubset()` or `unfilter()` functions can be used to restore the original data,
+#' by combining the subset with the complement.
+#' The `fields` argument can be used to control which data fields are unfiltered---by default,
+#' all data fields are unfiltered.
+#' 
+#' Normally, each data field is restored with its own complement data.
+#' However, the `complement` argument can be used to specify an field to use as the complement.
+#' This allows you to, for instance, different parts of separate fields into a single field.
+#'
+#' The `complement()` function will directly swap the data-field subsets with their complements.
+#' 
+#' 
+#' @param fields **Which fields to unfilter or complement?**
+#' 
+#' Defaults to all data fields in the `humdrumR` data.
+#'
+#' Must be `character` strings, partially matching data [field][fields()] in the input data.
+#' 
+#' @param complement **Which field to use as the subset complement to restore?**
+#' 
+#' By default `NULL`, which means each data field's original complement is used.
+#'
+#' Must be a single `character` string, partially matching a [field][fields()] in the input data.
 #' 
 #' @export
 #' @rdname subset.humdrumR
-removeSubset <- function(humdrumR, complement = NULL) {
-  fields <- fields(humdrumR)
+removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = NULL) {
+  checks(humdrumR, xhumdrumR)
+  checks(complement, xnull | (xcharnotempty & xlen1))
+  fields <- fieldMatch(humdrumR, fields, 'removeSubset', 'fields')
+  
+  
   humtab <- getHumtab(humdrumR)
+  fields <- fields(humdrumR)[Name %in% fields]
   
-  dataFields <- fields[Type == 'Data', Name]
-  complementFields <- fields[Type == 'Data', ifelse(Complement, paste0("_complement_", Name), NA_character_)]
+  if (any(fields$Type != 'Data')) .stop('removeSubset() can only remove filters from DATA fields.', 
+                                        '{harvard(fields[Type != "Data", Name], "and")} <are not data fields|is not a data field>.',
+                                        ifelse = nrow(fields[Type != 'Data']) > 1)
   
-  
-  
-  complement <- if (!is.null(complement)) if (paste0('_complement_', complement) %in% fields$Name) paste0('_complement_', complement) else complement
-  
-  for (i in seq_along(dataFields)) {
-    if (is.null(complement) && is.na(complementFields[i])) next
+  if (is.null(complement)) {
+    fields <- fields[Complement == TRUE]
+    fields[ , complementField := paste0('_complement_', Name)]
     
-    replace <- dataFields[i] 
-    
-    humtab[ , (replace) := {
-      
-      field <- humtab[[replace]]
-      replaceWith <- if (is.na(complementFields[i])) humtab[[complement]] else humtab[[complementFields[i]]]
-      
-      null <- is.na(field)
-      field[null] <- replaceWith[null]
-      field
-    }]
-    
-    if (!is.na(complementFields[i])) humtab[ , (complementFields[i]) := NULL]
+  } else {
+    complement <- fieldMatch(humdrumR, complement, 'removeSubset', 'complement')
+    fields[ , complementField := paste0('_complement_', complement)]
   }
   
-  humdrumR@Fields$Complement <- FALSE
+  fields[ , {
+    
+    field <- humtab[[Name]]
+    complement <- humtab[[complementField]]
+    
+    null <- is.na(field)
+    field[null] <- complement[null]
+    humtab[ , (Name) := field]
+    
+  }, 
+  by = seq_len(nrow(fields))]
+
+  humtab[ , (unique(fields$complementField)) := NULL]
   
-  humdrumR <- update_Dd(humdrumR, dataFields)
+  humdrumR@Fields[Name %in% fields$Name, Complement := FALSE]
+  
+  humdrumR <- update_Dd(humdrumR, fields$Name)
   
   humdrumR
   
@@ -337,21 +380,37 @@ unfilter <- removeSubset
 
 #' @export
 #' @rdname subset.humdrumR
-complement <- function(humdrumR) {
-  fields <- fields(humdrumR)[Type == 'Data' & Complement, Name]
-  if (length(fields) == 0L) return(humdrumR)
+complement <- function(humdrumR, fields = dataFields(humdrumR)) {
+  checks(humdrumR, xhumdrumR)
+  fields <- fieldMatch(humdrumR, fields, 'complement', 'fields')
+  
+  fields <- fields(humdrumR)[Name %in% fields]
+  if (any(fields$Type != 'Data')) .stop('complement() can only take the complement of filtered DATA fields.', 
+                                        '{harvard(fields[Type != "Data", Name], "and")} <are not data fields|is not a data field>.',
+                                        ifelse = nrow(fields[Type != 'Data']) > 1)
+  
+  fields <- fields[Complement == TRUE]
+  if (nrow(fields) == 0L) {
+    .warn("The field<s|> {harvard(fields$Name, 'and')} <have|has> no complement (has not been filterd).",
+          "Your data is returned unchanged.", ifelse = nrow(fields) > 1L)
+    return(humdrumR)
+  }
+  
   
   humtab <- getHumtab(humdrumR)
-  for (field in fields) {
+  fields[ , {
     
-    curField <- humtab[[field]]
-    humtab[[field]] <- humtab[[paste0('_complement_', field)]]
-    humtab[[paste0('_complement_', field)]] <- curField
-  }
+    field <- humtab[[Name]]
+    complementField <- paste0('_complement_', Name)
+    humtab[ , (Name) := humtab[[complementField]]]
+    humtab[ , (complementField) := field]
+    
+    
+  }, by = seq_len(nrow(fields))]
   
   humdrumR@Humtable <- humtab
   
-  humdrumR <- update_Dd(humdrumR, fields)
+  humdrumR <- update_Dd(humdrumR, fields$Name)
   
   humdrumR
     

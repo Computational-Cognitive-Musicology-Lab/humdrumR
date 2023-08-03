@@ -1263,6 +1263,8 @@ fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation
 
 }
 
+dataFields <- function(humdrumR) fields(humdrumR, 'Data')$Name
+
 fieldsInExpr <- function(humtab, expr) {
   ## This function identifies which, if any,
   ## fields in a humtable are referenced in an expression (or rhs for formula).
@@ -1272,8 +1274,10 @@ fieldsInExpr <- function(humtab, expr) {
 }
 
 fieldMatch <- function(humdrumR, fieldnames, callfun = 'fieldMatch', argname = 'fields') {
+    checks(fieldnames, xcharnotempty, argname = fields, seealso = callfun)
     fields <- fields(humdrumR)$Name
     target <- pmatch(fieldnames, fields)
+    
     
     nomatch <- is.na(target)
     

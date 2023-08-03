@@ -34,6 +34,7 @@ context(x, open, close, ...)
   humdrumR,
   open,
   close,
+  dataTypes = "D",
   overlap = "paired",
   depth = NULL,
   rightward = TRUE,
