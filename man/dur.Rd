@@ -2,10 +2,26 @@
 % Please edit documentation in R/Rhythm.R
 \name{dur.humdrumR}
 \alias{dur.humdrumR}
+\alias{dur}
 \title{Apply to humdrumR data}
 \usage{
 humData  select(Token) |> dur() 
 humData |> dur(Token)
+
+dur(
+  x,
+  ...,
+  BPM = "*M60",
+  minutes = FALSE,
+  hours = FALSE,
+  days = FALSE,
+  months = FALSE,
+  years = FALSE,
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
 }
 \description{
 If \code{dur()} is applied to a \link[=humdrumRclass]{humdrumR data class}

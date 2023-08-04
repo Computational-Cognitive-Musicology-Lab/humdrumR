@@ -44,7 +44,7 @@ context(x, open, close, ...)
   groupby
 )
 
-uncontext(humdrumR)
+uncontext(humdrumR, complement = NULL)
 
 windows(humdrumR)
 }
@@ -493,6 +493,22 @@ In some cases, you might want to turn \code{duplicate_indices = FALSE}.
 }
 }
 
+\section{Complements (removing context)}{
+
+
+The \code{uncontext()} command, like the \code{\link[=ungroup]{ungroup()}} command, is needed to remove
+contextual windows from \link[=humdrumRclass]{humdrumR data}, so that further calls to
+\link[=withinHumdrum]{within()/mutate()/etc.} are not applied in context.
+
+The \code{uncontext()} command can also be used to access data \emph{outside} of contextual windows
+by using a \code{complement} argument, similar to the \code{\link[=unfilter]{unfilter()}} function.
+The \code{complement} must be an existing field in the data.
+If \code{uncontext()} is used with a given complement field, the currently
+selected data field (unless \code{Token} is selected) has the contents of the complement
+field inserted into it all points outside the contextual windows.
+This can be used to keep
+}
+
 \examples{
 
 # use the built-in 'letters' vector
@@ -519,6 +535,11 @@ chorales |>
   within(paste(Token, collapse = ','), alignLeft = FALSE)
   
 }
+
+
+humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
+
+humData |> context(hop(6), open + 2) |> within(paste(Token, collapse = '|')) |> uncontext(complement = 'Token')
 
 }
 \seealso{

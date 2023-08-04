@@ -2,11 +2,14 @@
 % Please edit documentation in R/Rhythm.R
 \name{quarters.humdrumR}
 \alias{quarters.humdrumR}
+\alias{quarters}
 \title{Apply to humdrumR data}
 \usage{
 humData  select(Token) |> quarters() 
 humData |> quarters(Token)
 humData |> quarters(simple = TRUE)
+
+quarters(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \description{
 If \code{quarters()} is applied to a \link[=humdrumRclass]{humdrumR data class}

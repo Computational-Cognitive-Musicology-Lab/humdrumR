@@ -3153,6 +3153,7 @@ freq.default <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('C
 #' @rdname freq
 #' @export
 freq.humdrumR <- humdrumRmethod(freq.default)
+#' @rdname freq
 #' @export
 freq <- humdrumRgeneric(freq.default)
 
@@ -3223,6 +3224,7 @@ midi.default <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('C
 #' @rdname semits
 #' @export
 midi.humdrumR <- humdrumRmethod(midi.default)
+#' @rdname semits
 #' @export
 midi <- humdrumRgeneric(midi.default)
 
@@ -3266,6 +3268,7 @@ cents.default <- makePitchTransformer(tint2cents, 'cents', 'numeric',
 #' @rdname cents
 #' @export
 cents.humdrumR <- humdrumRmethod(cents.default)
+#' @rdname cents
 #' @export
 cents <- humdrumRgeneric(cents.default)
 
@@ -3325,6 +3328,7 @@ pc.default <- makePitchTransformer(tint2pc, 'pc', 'character', tandem = c('Clef'
 #' @rdname pc
 #' @export
 pc.humdrumR <- humdrumRmethod(pc.default)
+#' @rdname pc
 #' @export
 pc <- humdrumRgeneric(pc.default)
 
@@ -3368,6 +3372,7 @@ pitch.default <- makePitchTransformer(tint2pitch, 'pitch')
 #' @rdname pitch
 #' @export
 pitch.humdrumR <- humdrumRmethod(pitch.default)
+#' @rdname pitch
 #' @export
 pitch <- humdrumRgeneric(pitch.default)
 
@@ -3448,6 +3453,7 @@ kern.default <- makePitchTransformer(tint2kern, 'kern')
 #' @rdname kern
 #' @export
 kern.humdrumR <- humdrumRmethod(kern.default)
+#' @rdname kern
 #' @export
 kern <- humdrumRgeneric(kern.default)
 
@@ -3492,6 +3498,7 @@ lilypond.default <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' @rdname lilypond
 #' @export
 lilypond.humdrumR <- humdrumRmethod(lilypond.default)
+#' @rdname lilypond
 #' @export
 lilypond <- humdrumRgeneric(lilypond.default)
 
@@ -3540,6 +3547,7 @@ tonh.default <- makePitchTransformer(tint2tonh, 'tonh')
 #' @rdname tonh
 #' @export
 tonh.humdrumR <- humdrumRmethod(tonh.default)
+#' @rdname tonh
 #' @export
 tonh <- humdrumRgeneric(tonh.default)
 
@@ -3581,6 +3589,7 @@ helmholtz.default <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' @rdname helmholtz
 #' @export
 helmholtz.humdrumR <- humdrumRmethod(helmholtz.default)
+#' @rdname helmholtz
 #' @export
 helmholtz <- humdrumRgeneric(helmholtz.default)
 
@@ -3622,6 +3631,7 @@ interval.default <- makePitchTransformer(tint2interval, 'interval')
 #' @rdname interval
 #' @export
 interval.humdrumR <- humdrumRmethod(interval.default)
+#' @rdname interval
 #' @export
 interval <- humdrumRgeneric(interval.default)
 
@@ -3674,6 +3684,7 @@ degree.default <- makePitchTransformer(tint2degree, 'degree', keyed = FALSE)
 #' @rdname degree
 #' @export
 degree.humdrumR <- humdrumRmethod(degree.default)
+#' @rdname degree
 #' @export
 degree <- humdrumRgeneric(degree.default)
 
@@ -3695,6 +3706,7 @@ deg.default <- makePitchTransformer(tint2deg, 'deg', keyed = FALSE)
 #' @rdname degree
 #' @export
 deg.humdrumR <- humdrumRmethod(deg.default)
+#' @rdname degree
 #' @export
 deg <- humdrumRgeneric(deg.default)
 
@@ -3736,6 +3748,7 @@ solfa.default <- makePitchTransformer(tint2solfa, 'solfa', keyed = FALSE)
 #' @rdname solfa
 #' @export
 solfa.humdrumR <- humdrumRmethod(solfa.default)
+#' @rdname solfa
 #' @export
 solfa <- humdrumRgeneric(solfa.default)
 
@@ -3778,6 +3791,7 @@ solfg.default <- makePitchTransformer(tint2solfg, 'solfg')
 #' @rdname solfg
 #' @export
 solfg.humdrumR <- humdrumRmethod(solfg.default)
+#' @rdname solfg
 #' @export
 solfg <- humdrumRgeneric(solfg.default)
 
@@ -3820,6 +3834,7 @@ bhatk.default <- makePitchTransformer(tint2bhatk, 'bhatk', keyed = FALSE)
 #' @rdname bhatk
 #' @export
 bhatk.humdrumR <- humdrumRmethod(bhatk.default)
+#' @rdname bhatk
 #' @export
 bhatk <- humdrumRgeneric(bhatk.default)
 
@@ -4677,6 +4692,7 @@ mint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bra
 #' @rdname int
 #' @export
 mint.humdrumR <- humdrumRmethod(mint.default)
+#' @rdname int
 #' @export
 mint <- humdrumRgeneric(mint.default)
 
@@ -4761,6 +4777,7 @@ hint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bra
 #' @rdname int
 #' @export
 hint.humdrumR <- humdrumRmethod(hint.default)
+#' @rdname int
 #' @export
 hint <- humdrumRgeneric(hint.default)
 

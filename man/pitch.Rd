@@ -22,6 +22,19 @@
 humData |> select(Token) |> pitch() 
 humData |> pitch(simple = TRUE)
 humData |> pitch(Token, Key = Key)
+
+pitch(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to parse as pitch information.}}

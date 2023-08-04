@@ -13,6 +13,8 @@ humData |> select(Token) |> duration()
 humData |> duration(Token)
 humData |> duration(simple = TRUE)
 
+duration(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+
 \method{quarters}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{

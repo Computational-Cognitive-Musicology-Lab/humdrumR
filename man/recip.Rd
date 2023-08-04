@@ -20,6 +20,16 @@
 humData |> select(Token) |> recip() 
 humData |> recip(simple = TRUE)
 humData |> recip(Token, Key = Key)
+
+recip(
+  x,
+  ...,
+  sep = "\%",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{x}{\emph{\strong{An input  vector.}}

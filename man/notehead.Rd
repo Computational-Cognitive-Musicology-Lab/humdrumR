@@ -11,6 +11,8 @@
 humData |> select(Token) |> notehead() 
 humData |> notehead(Token)
 humData |> notehead(simple = TRUE)
+
+notehead(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
 \item{x}{\emph{\strong{An input  vector.}}

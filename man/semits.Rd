@@ -6,6 +6,7 @@
 \alias{semits.humdrumR}
 \alias{midi.default}
 \alias{midi.humdrumR}
+\alias{midi}
 \alias{cents.default}
 \title{Atonal pitch representations}
 \usage{
@@ -42,6 +43,19 @@ humData |> semits(Token, Key = Key)
 humData |> select(Token) |> midi() 
 humData |> midi(simple = TRUE)
 humData |> midi(Token, Key = Key)
+
+midi(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
 
 \method{cents}{default}(
   x,

@@ -4,8 +4,10 @@
 \alias{time}
 \alias{seconds.default}
 \alias{seconds.humdrumR}
+\alias{seconds}
 \alias{ms.default}
 \alias{ms.humdrumR}
+\alias{ms}
 \alias{dur.default}
 \title{Clock-time representations of duration}
 \usage{
@@ -22,6 +24,16 @@
 humData  select(Token) |> seconds() 
 humData |> seconds(Token)
 
+seconds(
+  x,
+  ...,
+  BPM = "*M60",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+
 \method{ms}{default}(
   x,
   ...,
@@ -34,6 +46,16 @@ humData |> seconds(Token)
 
 humData  select(Token) |> ms() 
 humData |> ms(Token)
+
+ms(
+  x,
+  ...,
+  BPM = "*M60",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
 
 \method{dur}{default}(
   x,

@@ -6,6 +6,7 @@
 \alias{timeline.humdrumR}
 \alias{timestamp.default}
 \alias{timestamp.humdrumR}
+\alias{timestamp}
 \title{Rhythmic timeline of a piece}
 \usage{
 \method{timeline}{default}(
@@ -22,6 +23,17 @@
 humData  select(Token) |> timeline() 
 humData |> timeline(Token)
 
+timeline(
+  x,
+  start = 0,
+  pickup = NULL,
+  ...,
+  Exclusive = NULL,
+  threadNA = TRUE,
+  parseArgs = list(),
+  groupby = list()
+)
+
 \method{timestamp}{default}(
   x,
   BPM = 60,
@@ -37,6 +49,19 @@ humData |> timeline(Token)
 
 humData  select(Token) |> timestamp() 
 humData |> timestamp(Token)
+
+timestamp(
+  x,
+  BPM = 60,
+  start = 0,
+  pickup = NULL,
+  minutes = TRUE,
+  ...,
+  Exclusive = NULL,
+  threadNA = TRUE,
+  parseArgs = list(),
+  groupby = list()
+)
 }
 \arguments{
 \item{x}{\emph{\strong{Input rhythm information.}}

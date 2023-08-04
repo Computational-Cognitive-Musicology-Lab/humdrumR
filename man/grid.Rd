@@ -18,6 +18,8 @@
 humData  select(Token) |> grid() 
 humData |> grid(Token)
 
+grid(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+
 togrid(
   x,
   tick = tatum(x),

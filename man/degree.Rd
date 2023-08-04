@@ -6,6 +6,7 @@
 \alias{degree.humdrumR}
 \alias{deg.default}
 \alias{deg.humdrumR}
+\alias{deg}
 \title{Tonal \href{https://en.wikipedia.org/wiki/Degree_(music)}{scale degree} representation (absolute)}
 \usage{
 \method{degree}{default}(
@@ -25,6 +26,19 @@ humData |> select(Token) |> degree()
 humData |> degree(simple = TRUE)
 humData |> degree(Token, Key = Key)
 
+degree(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
 \method{deg}{default}(
   x,
   ...,
@@ -41,6 +55,19 @@ humData |> degree(Token, Key = Key)
 humData  select(Token) |> deg() 
 humData |> deg(simple = TRUE)
 humData |> deg(Token, Key = Key)
+
+deg(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{x}{\emph{\strong{Input data to parse as pitch information.}}

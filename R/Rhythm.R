@@ -1038,6 +1038,7 @@ recip.default <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(se
 #' @rdname recip
 #' @export
 recip.humdrumR <- humdrumRmethod(recip.default)
+#' @rdname recip
 #' @export
 recip <- humdrumRgeneric(recip.default)
 
@@ -1083,6 +1084,7 @@ duration.default <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 #' @rdname duration
 #' @export
 duration.humdrumR <- humdrumRmethod(duration.default)
+#' @rdname duration
 #' @export
 duration <- humdrumRgeneric(duration.default)
 
@@ -1103,6 +1105,7 @@ quarters.default <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' @rdname quarters
 #' @export
 quarters.humdrumR <- humdrumRmethod(quarters.default)
+#' @rdname quarters
 #' @export
 quarters <- humdrumRgeneric(quarters.default)
 
@@ -1162,6 +1165,7 @@ notehead.default <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' @rdname notehead
 #' @export
 notehead.humdrumR <- humdrumRmethod(notehead.default)
+#' @rdname notehead
 #' @export
 notehead <- humdrumRgeneric(notehead.default)
 
@@ -1238,6 +1242,7 @@ seconds.default <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', ext
 #' @rdname time
 #' @export
 seconds.humdrumR <- humdrumRmethod(seconds.default)
+#' @rdname time
 #' @export
 seconds <- humdrumRgeneric(seconds.default)
 
@@ -1257,6 +1262,7 @@ ms.default <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(
 #' @rdname time
 #' @export
 ms.humdrumR <- humdrumRmethod(ms.default)
+#' @rdname time
 #' @export
 ms <- humdrumRgeneric(ms.default)
 
@@ -1281,6 +1287,7 @@ dur.default <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*
 #' @rdname dur
 #' @export
 dur.humdrumR <- humdrumRmethod(dur.default)
+#' @rdname dur
 #' @export
 dur <- humdrumRgeneric(dur.default)
 
@@ -1431,6 +1438,7 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
 #' @rdname ioi
 #' @export
 ioi.humdrumR <- humdrumRmethod(ioi.default)
+#' @rdname ioi
 #' @export
 ioi <- humdrumRgeneric(ioi.default)
 
@@ -1494,6 +1502,7 @@ sumTies.default <- function(x, open = '[', close = ']', ...,
 #' @rdname ioi
 #' @export
 sumTies.humdrumR <- humdrumRmethod(sumTies.default)
+#' @rdname ioi
 #' @export
 sumTies <- humdrumRgeneric(sumTies.default)
 
@@ -1754,6 +1763,7 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' @rdname timeline
 #' @export
 timeline.humdrumR <- humdrumRmethod(timeline.default)
+#' @rdname timeline
 #' @export
 timeline <- humdrumRgeneric(timeline.default)
 
@@ -1785,6 +1795,7 @@ timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = T
 #' @rdname timeline
 #' @export
 timestamp.humdrumR <- humdrumRmethod(timestamp.default)
+#' @rdname timeline
 #' @export
 timestamp <- humdrumRgeneric(timestamp.default)
 
@@ -2137,6 +2148,7 @@ grid.default <- makeRhythmTransformer(rint2grid, 'grid', 'character')
 #' @rdname grid
 #' @export
 grid.humdrumR <- humdrumRmethod(grid.default)
+#' @rdname grid
 #' @export
 grid <- humdrumRgeneric(grid.default)
 

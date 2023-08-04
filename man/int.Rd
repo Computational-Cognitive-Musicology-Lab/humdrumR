@@ -4,8 +4,10 @@
 \alias{int}
 \alias{mint.default}
 \alias{mint.humdrumR}
+\alias{mint}
 \alias{hint.default}
 \alias{hint.humdrumR}
+\alias{hint}
 \title{Calculate intervals between pitches}
 \usage{
 int(
@@ -40,6 +42,21 @@ humData  select(Token) |> mint()
 humData |> mint(simple = TRUE)
 humData |> mint(Token, Key = Key)
 
+mint(
+  x,
+  lag = 1,
+  deparser = interval,
+  incomplete = kern,
+  bracket = is.function(incomplete),
+  classify = FALSE,
+  ...,
+  parseArgs = list(),
+  Exclusive = NULL,
+  Key = NULL,
+  groupby = list(),
+  orderby = list()
+)
+
 \method{hint}{default}(
   x,
   lag = 1,
@@ -57,6 +74,20 @@ humData |> mint(Token, Key = Key)
 humData |> select(Token) |> hint() 
 humData |> hint(simple = TRUE)
 humData |> hint(Token, Key = Key)
+
+hint(
+  x,
+  lag = 1,
+  deparser = interval,
+  incomplete = kern,
+  bracket = is.function(incomplete),
+  ...,
+  parseArgs = list(),
+  Exclusive = NULL,
+  Key = NULL,
+  groupby = list(),
+  orderby = list()
+)
 }
 \arguments{
 \item{x}{\emph{\strong{Input pitch information.}}

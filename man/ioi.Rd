@@ -6,6 +6,7 @@
 \alias{ioi.humdrumR}
 \alias{sumTies.default}
 \alias{sumTies.humdrumR}
+\alias{sumTies}
 \title{Sum "connected" durations}
 \usage{
 \method{ioi}{default}(
@@ -22,10 +23,23 @@
 humData  select(Token) |> ioi() 
 humData |> ioi(Token)
 
+ioi(
+  x,
+  onsets = !grepl("r", x) & !is.na(x) & x != ".",
+  ...,
+  finalOnset = FALSE,
+  groupby = list(),
+  parseArgs = list(),
+  Exclusive = NULL,
+  inPlace = TRUE
+)
+
 \method{sumTies}{default}(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 
 humData  select(Token) |> sumTies() 
 humData |> sumTies(Token)
+
+sumTies(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 }
 \arguments{
 \item{x}{\emph{\strong{Input rhythm information.}}
