@@ -11,6 +11,14 @@ home:
     href: https://ccml.gtcmt.gatech.edu/
   - text: Georgia Tech Center for Music Technology
     href: https://gtcmt.gatech.edu/
+navbar:
+  structure: 
+    left: [news, reference, articles, GUI]
+    right: [github, search]
+  components:
+    GUI:
+      text: GUI
+      href: https://ccml.music.gatech.edu/humdrumR/
 template:
   bootstrap: 5
   bootswatch: flatly

@@ -1196,7 +1196,7 @@ laggedQuo <- function(funcQuosure) {
     if (!is.numeric(n) || any((n %% 1) != 0)) .stop('Invalid [lag = ] lag expression.')
     args$n <- NULL
     
-    lagExprs <- lapply(n, \(curn) rlang::expr(humdrumR::lag(!!!args, n = !!curn)))
+    lagExprs <- lapply(n, \(curn) rlang::expr(lag(!!!args, n = !!curn)))
 
     exprA$Head <- 'splat'
     exprA$Args <- lagExprs
