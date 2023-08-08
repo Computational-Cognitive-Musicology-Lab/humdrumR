@@ -1,10 +1,10 @@
 ---
-title: "The humdrumR Data Model"
+title: "HumdrumR Data Fields"
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{The humdrumR Data Model}
+  %\VignetteIndexEntry{HumdrumR Data Fields}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +15,7 @@ source('vignette_header.R')
 
 ```
 
-# The Data Model
+# The HumdrumR Data Model
 
 To really make use of `r hm`, you need to understand a bit about how humdrum data is represented in the `r hm` package: the `r hm` "**data model**."
 
@@ -278,3 +278,129 @@ Notice that `r hm` prints paths in a way that is more readable than reading humd
 paths are "shifted" over into columns that align.
 This is an option to the function `as.matrix.humdrumR()`.
 
+
+
+
+# Multiple fields
+
+What if we want to study rhythm and pitch (or key, or anything else) at the same time?
+Using the approach we've been using so far, we can only really look at one piece of information at a time.
+However, if we string some of our previous commands together we can make some magic:
+
+```{r}
+chorales |>
+  pitch(simple = TRUE) |>
+  select(Token) |>
+  recip() -> chorales
+
+chorales
+
+```
+
+We called `pitch()` like before, but then we selected `Token`---"Token" is the default data field in `r hm`---the original tokens from your data files you read.
+By calling `select(Token)` we sort of "reset" our selection to the original data.
+We can then call `recip()` to get the rhythm data, and then we assign (`->`) the data back to replace the `chorales` variable---this "saves" what we've done.
+The result is we now have a dataset with *three* "data fields": `r humdrumR:::harvard(fields(chorales, 'Data')$Name, 'and')`.
+We can select any of these three:
+
+```{r}
+
+chorales |> select(Pitch)
+chorales |> select(Recip)
+
+chorales |> select(Pitch, Recip)
+
+```
+
+We can "see" that all three of these data fields are present in our data, at your finger tips.
+
+
+```{r}
+chorales |> 
+  select(Pitch, Recip) |>
+  tally()
+
+```
+
+
+
+```{r}
+chorales |> 
+  select(Pitch, Recip) |>
+  tally() |> 
+  draw()
+
+```
+
+# More Complex Expressions 
+
+So far we've worked with our `r hm` data by applying functions like `pitch()`, `notehead()`, and `tally()` to it.
+We've also seen that we can use `select()` to select which fields in the data to apply our functions to.
+For more complex analyses, or when working with non-`r hm` functions, you'll find that this approach won't be enough!
+We might want to write code that manipulates multiple fields in our data more freely.
+
+These simplest way is by piping our data to the `mutate()` function, which takes a `r hm` object and an expression on its right side.
+
+
+```{r}
+
+chorales |>
+  mutate(Spine + File)
+
+chorales |>
+  mutate(nchar(Token))
+
+chorales |>
+  mutate(paste0(Token, Record))
+
+```
+
+Each expression is evaluated, and the result is put back in the same place in the humdrum data!
+You'll also notice that in the printout, we see new data fields corresponding to each expression we evaluated.
+
+If you want, you can pick your own names by using `=` within the `mutate` call.
+For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](PitchAndTonality.html) vignette) to calculate the semitone value for each pitch in the chorales:
+
+```{r}
+
+chorales |> 
+  mutate(semits(Token))
+
+
+```
+
+It worked!
+Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it use the default name.
+
+```{r}
+
+chorales |> 
+  select(Token) |>
+  mutate(Semits = semits(Token)) -> chorales
+
+chorales
+
+```
+
+There is now a new Data field in our humdrum table, called `Semits`.
+Meanwhile, the original `Token` field is still there, safely unchanged!
+Just like before, we can use `select()` operator to look at our fields:
+
+```{r}
+
+chorales |> select(Token)
+
+chorales |> select(Semits)
+
+```
+
+Whats more, we can use the `Semits` field *just* like any other field:
+
+```{r}
+
+chorales |>
+  mutate(paste0(Token, ' = ', Semits))
+
+
+
+```

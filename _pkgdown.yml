@@ -35,11 +35,10 @@ articles:
   navbar: Basics
   contents:
   - GettingStarted
-  - DataModel
-  - IntroForCoders
+  - DataFields
 - title: Background
   desc: Background info on humdrum and R
-  navbar: R/Humdrum background
+  navbar: R/Background
   contents:
   - HumdrumSyntax
   - RPrimer
