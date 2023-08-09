@@ -2234,6 +2234,8 @@ padColumns <- function(tokmat, global, maxTokenLength, screenWidth = options('wi
     # it also adds "***" where there are too many columns to fit on the screen.
     # Finally it collapses each row to a single line.
 
+    tokmat[] <- stringr::str_replace(tokmat, '\t\t*', ' ')
+    
     toklen <- nchar(tokmat)
     
     lenCol <- sapply(as.data.frame(toklen[!global, ]), max) + 2L
@@ -2260,7 +2262,7 @@ padColumns <- function(tokmat, global, maxTokenLength, screenWidth = options('wi
     # collapse to lines
     tokmat[global, -1:-2L] <- ''
     lines <- do.call('paste0', as.data.frame(tokmat))
-    # lines[global] <- gsub('\t', ' ', .humdrumRlines[global])
+   
 
     longGlobal <- global & nchar(lines) > screenWidth
     longColumn <- !screen

@@ -47,6 +47,7 @@ articles:
   navbar: Data prep
   contents: 
   - ReadWrite
+  - ComplexSyntax
   - Reshaping
   - Filtering
 - title: Analysis

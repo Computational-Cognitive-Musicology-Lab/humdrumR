@@ -147,7 +147,7 @@ chorales |>
 
 ```
 
-Hoh, that's quite a mess! What have we done?
+That's quite a mess! What have we done?
 When we pass our `chorales` data  to `tally()`, tally counted all the unique data tokens (ignoring non-data tokens, like barline and interpretations) in the data.
 There are a *lot* of unique tokens in this data, so it's not super helpful.
 Maybe we'd like to look at just the twenty most common tokens in the `chorales`?

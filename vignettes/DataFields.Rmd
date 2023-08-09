@@ -15,27 +15,31 @@ source('vignette_header.R')
 
 ```
 
+Welcome to "`r Hm` data fields"!
+This article explains how `r hm` encodes different pieces of musical data in the "fields" of a R data.frame.
+Understanding data fields is essential to making effective use of `r hm`.
+
 # The HumdrumR Data Model
 
-To really make use of `r hm`, you need to understand a bit about how humdrum data is represented in the `r hm` package: the `r hm` "**data model**."
-
-The essential thing to understand is how it maps between the [humdrum data syntax](https://humdrum.org) and a R data.table.
+`r Hm` bridges with *data* world of [humdrum](www.humdrum.org) with the *coding and analysis* world of R.
+It does this by mapping between the [humdrum data syntax](https://humdrum.org) and a R *data.frame*.
 
 ![](images/DataModelDiagram.png){width=600px}
 
-To fully understand this, you should start with at least a basic understanding of the humdrum syntax! 
-Read about the syntax at [humdrum.org](humdrum.org) or check out [our vignette](HumdrumSyntax.html "The Humdrum Syntax") on the topic.
+To fully understand any of this, you should start with at least a basic understanding of the humdrum syntax! 
+Read about the syntax at [humdrum.org](humdrum.org) or check out [our article](HumdrumSyntax.html "The Humdrum Syntax") on the topic.
+
+This article only covers how `r hm` handles basic, common humdrum syntax.
+The humdrum syntax includes a few more complex structures---*spine paths* and *multi-stops* (a.k.a., sub-tokens)---which are discussed in our [Complex humdrum syntax](ComplexSyntax.html "Complex humdrum syntax article") article.
 
 ## data.frames
 
-Data.frames are essential to R.
+Data.frames are the heart and soul of R.
 A data.frame is simply a two-dimensional table of named columns.
-Each column is either a vector or list of values, all of which are the same length.
+Each column is a vector of values, all of which are the same length.
 
-`r Hm` makes use of a popular extension of base-R data.frames, the [data.table](https://cran.r-project.org/web/packages/data.table/index.html).
-
-
-In `r hm`, *every* single, individual token in a collection of humdrum-syntax text files is given its own row in a data.frame.
+In `r hm`, every single token in a collection of humdrum-syntax text files is given its own *row* in a data.frame,
+which we call the "**humdrum table**."
 For example, consider this simple, humdrum-syntax file:
 
 
@@ -83,52 +87,78 @@ printquoted(ex1df)
 ```
 
 So what happens when `r hm` reads this file?
-(This file is bundled with `r hm` in the `"humdrumRroot/examples"` directory.)
+(This file is bundled with `r hm` in the `"humdrumRroot/examples"` directory; See the [Getting started](GettingStarted.html "Getting started with humdrumR article") article for an explanation.)
 
 ```{r}
 
-example1 <- readHumdrum('examples/BasicExample.krn')
+example1 <- readHumdrum(humdrumRroot, 'examples/BasicExample.krn')
 
 example1
 ```
 
 We see the same thing we saw earlier, when we were reading real humdrum data from the `"HumdrumData"` folder.
 But what's under the hood?
-We can tell `r hm` that we'd like to see the underlying humdrum table by changing `r hm`'s print options using the `humdrumR()` command.
-Specifically, we can set `view = "table"`:
-
+We can tell `r hm` that we'd like to see the underlying **humdrum table** by explicitly printing the data, and setting `view = "table"`.
+Compare the difference between these two commands:
 
 
 ```{r}
 
-humdrumR(view = 'table')
+example1 |> print(view = "humdrum")
+
+example1 |> print(view = "table")
+
+```
+
+
+When we use `view = "humdrum"`, we see the default `r hm` view of the data in humdrum syntax.
+However, with `view = "table"`, we are show the underling humdrum table.
+We can see that there is one row for *each and every* token, with different columns indicating which `File`, `Spine`, and `Record` each token comes from.
+In `r hm`, we refer to the columns of the humdrum table as **fields**.
+
+---
+
+If you get tired of explicitly using `print()`, you can change `humdrumR`'s default print method using the 
+`humdrum()` *function*, the first argument of which is `view`.
+
+
+```{r}
+humdrumR("data.frame")
+
+example1
+
+humdrumR("humdrum")
+
 example1
 
 ```
 
 
-Use `humdrumR(view = 'humdrum')` to switch back to the humdrum-data view:
+
+## HumdrumR fields
+
+Let's take a look at our humdrum table again.
+To avoid typing `print(view = "table")` over an over, let's set the default `view` option to `table` (see the previous paragraph).
+
 
 ```{r}
-humdrumR('humdrum')
-example1
+humdrumR(view = "table")
 
+example1 
 ```
 
-Since `view` is the first argument of `humdrumR()`, you can just type:
+We see four fields in the table: `Piece`, `Spine`, `Record`, and `Token`.
 
-```{r}
-humdrumR("table")
-```
++ `Token` is the primary data field in all `r hm` data, containing the actual data tokens that originated in the humdrum data files your read.
+  You'll see lots and lots of references to `Token` throughout these articles, and in the `r hm` [documentation](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html "HumdrumR function reference")!
++ `Piece`, `Spine`, and `Record` are "structural fields," indicating where each data token is located in the humdrum syntax.
 
-Ah, now we see that there is one row for *each and every* token.
-There are columns indicating which `File`, `Spine`, and `Record` each token comes from.
-In `r hm`, we refer to these columns as **fields**.
-However, there are actually many more columns/fields in our table!---`r hm` is just showing us a few.
-To learn what fields are in a `r hm` object, use the `fields` command:
+These four fields are just the tip of the iceberg!
+`r Hm` datasets will generally have many more fields---you can see them all listed by using `fields()` commands:
 
 ```{r}
 fields(example1)
+
 ```
 
 We see that there are `r humdrumR:::num2print(length(example1))` fields (columns), and that they are divided into five types of fields: 
@@ -139,268 +169,299 @@ We see that there are `r humdrumR:::num2print(length(example1))` fields (columns
 + Form fields
 + Reference fields
 
-(A good place to read the details about what all the columns means is the *humdrum table* documentation you can get by calling `?humTable`.)
+If you want a detailed explanation of what all these fields are, read the [humdrum table documentation](refrence/humTable.html "Humdrum table documentation"), which you can always get by calling `?humTable`.
 
-
-Let's go back to the Bach chorales dataset we loaded earlier (we saved it as `chorales`):
-
-```{r}
-fields(chorales)
-
-```
-
-The `chorales` corpus has `r nrow(fields(chorales))` fields!---all the same fields as `example1`, but some additional ones.
-These additional fields are interpretation and reference records that didn't appear in our toy `example1`.
-
-----
-
-### Main Fields
-
-The most important fields that are always present in a `r hm` humtable are 1) the `Token` field which contains the original `character` tokens read from the humdrum data; and 2) the "Structural" fields which tell us where in the original humdrum data each token came from.
-The "Structural" fields are what allow `r hm` to (re)construct the original humdrum data---translating between the humdrum-table (`data.table`) and the plain-text humdrum syntax.
+### Selecting fields
 
 What if we want to see some of these other fields?
 We can use the `select()` command to pick which fields we view:
 
 ```{r}
 
-chorales |> select(Token, Spine, COM, Bar)
+example1 |> select(Token, Spine, Key, Bar)
 
 ```
 
-We can also see all fields of a particular type, by specifying one of the types that the [fields()] function 
+We can also see all fields of a particular type, by specifying one of the types that the `fields()` function 
 showed us: for example, `"Data"`, `"Structure"`, or `"Reference"`.
 
 ```{r}
-chorales |> select('Structure')
+example1 |> select('Structure')
+
+```
+
+We can also use [tidyverse select](https://dplyr.tidyverse.org/reference/select.html "dyplr select article") shortcuts, for example, `everything()`:
+
+```{r}
+example1 |> select(everything())
 
 ```
 
 
-We can fully *extract* any field from our `r hm` data using the `$` operator: Just call your `r hm` data object with `$` and the name of a field.
 
+If you call `select()` with no arguments, the `Token` field will be selected.
+The `Token` field is always the starting point of `r hm` analysis, so it is helpful to be able to "reset" by going back to `Token`.
+
+
+---
+
+We can also view all of our fields in the default, humdrum view.
+
+```{r}
+humdrumR(view = "humdrum")
+
+example1 |> select(Token, Key)
+
+```
+
+In the humdrum view, all the selected fields are pasted together (from left to right).
+Don't worry, the fields are still separate in the humdrum table, they are just printed this way!
+Viewing multiple fields in humdrum syntax view can be quite helpful for a small number of fields, but not so much if you are looking at more than 2--3 fields.
+If you want to look at lots of fields at once set `humdrumR(view = "table")`.
+
+
+
+### Accessing fields
+
+Sometimes, we might want to just pull fields out of the `r hm` data table, turning them into "plain" R data.
+The best way to do this is with the `pull()` function.
+
+```{r}
+example1 |> pull(Token)
+
+example1 |> pull(Key)
+
+```
+
+We can also pull fields using the `$` operator: 
 
 ```{r}
 
-example1$Spine
-example1$Record
+example1$Token
 
-example1$Type
-
-example1$Filename
+example1$Key
 
 ```
 
-The "record types" are:
+---
 
-+ `"G"`: global comment (including reference records)
-+ `"L"`: local comment
-+ `"I"`: interpretation
-+ `"M"`: measure (i.e., barlines)
-+ `"D"`: (non-null) data token
-+ `"d"`: null data token (`"."`)
-
-
-
-
-### Stops
-
-In humdrum syntax, multiple tokens can be placed "in the same place" (i.e., same record, same spine) by simply separating them with spaces.
-(This is most commonly used to represent chords in `**kern` data.)
-In `r hm`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a `r hm` humtable.
-Thus, we need the `Stop` field to tell us which stop a token came from!
-In much data, all/most tokens are simply `Stop == 1` (the first position), but if there are more than one tokens in the same record/spine, they will be numbered ascending from one:
-
-Let's look at an example to make sense of this!
-Let's start by looking at our humdrum-data view.
-
-```{r}
-humdrumR('humdrum')
-stops <- readHumdrum('examples/Stops.krn')
-
-stops
-```
-
-
-Here we have a file with chords in the second spine: individual note tokens separated by spaces.
-Now, we can switch back to table view:
-
-```{r}
-humdrumR('table')
-stops
-
-```
-
-You can see that each note of the chords gets its own row, numbered `1`, `2`, and `3` in the `Stop` field!
-
-
-
-### Paths
-
-
-
-Some humdrum data contains "spine paths"---places where a single spine splits into two.
-`r hm` treats spine paths as "subspines" of the main spine which they split from, each one numbered in the `Path` field.
-The starting path (leftmost) is numbered path `0`---in datasets with no spine paths, the `Path` field will be all zeros.
-Other paths are numbered with higher integers.
-
-Let's look at a simple example:
+If you want to pull more than once field, use `pull_data.frame()`:
 
 ```{r}
 
-humdrumR('humdrum')
-paths1 <- readHumdrum('examples/Paths.krn')
-
-paths1
-
-humdrumR('table')
-
-paths1
+example1 |> pull_data.frame(Token, Key)
 
 ```
 
-
-Here is a more complex example:
+You get a "normal" R data.frame!
+(There is also `pull_tibble()` and `pull_data.table()`, if you prefer those packages.)
+You could even pull the entire humdrum table if you really want to work in "normal" R:
 
 ```{r}
 
-paths2 <- readHumdrum('examples/Paths2.krn')
-
-paths2
-
-
-
-
+example1 |> pull_data.frame(everything())
 
 ```
 
-Notice that `r hm` prints paths in a way that is more readable than reading humdrum syntax directly:
-paths are "shifted" over into columns that align.
-This is an option to the function `as.matrix.humdrumR()`.
 
+# Working with Fields
 
+So we have a bunch of "fields"---how to we work with them?
+One option is to "pull" the fields we want out---as explained above in the [accessing fields](DataFields.html#accessing-fields) sections above---and then work with them like any normal R data structures.
+However, `r hm` has a number of useful features that only available when we keep our data wrapped up in the `humdrumR` data object.
+Instead, we can access and manipulate our fields directly within the humdrum table.
 
-
-# Multiple fields
-
-What if we want to study rhythm and pitch (or key, or anything else) at the same time?
-Using the approach we've been using so far, we can only really look at one piece of information at a time.
-However, if we string some of our previous commands together we can make some magic:
+In the following sections, we'll use our `chorales` data again, as we did in our [Getting started with humdrumR](GettingStarted.html "Getting started with humdrumR article") article.
 
 ```{r}
-chorales |>
-  pitch(simple = TRUE) |>
-  select(Token) |>
-  recip() -> chorales
-
-chorales
+readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor0') -> chorales
 
 ```
 
-We called `pitch()` like before, but then we selected `Token`---"Token" is the default data field in `r hm`---the original tokens from your data files you read.
-By calling `select(Token)` we sort of "reset" our selection to the original data.
-We can then call `recip()` to get the rhythm data, and then we assign (`->`) the data back to replace the `chorales` variable---this "saves" what we've done.
-The result is we now have a dataset with *three* "data fields": `r humdrumR:::harvard(fields(chorales, 'Data')$Name, 'and')`.
-We can select any of these three:
+## Humdrum style
 
-```{r}
-
-chorales |> select(Pitch)
-chorales |> select(Recip)
-
-chorales |> select(Pitch, Recip)
-
-```
-
-We can "see" that all three of these data fields are present in our data, at your finger tips.
-
+In our [quick start](GettingStarted.html#quick-start "Getting started with humdrumR article"), we showed you the simplest and most intuitive way to manipulate `r hm` data: simply pipe data directly to any `r hm` function.
 
 ```{r}
 chorales |> 
-  select(Pitch, Recip) |>
+  pitch(simple = TRUE) 
+
+```
+
+
+We call this "humdrum style," because it looks a lot like the way the original [humdrum toolkit](www.humdrum.org "Humdrum main page") works.
+
+---
+
+As we learned in the previous example, there are a bunch of fields in our `chorales` object:
+
+```{r}
+fields(chorales)
+
+```
+
+So when we write something like `chorales |> pitch()`, how does the `pitch()` function know which field to work on?
+It is applied to the first **selected** field, which we learned about [above](DataFields.html#selecting-fields).
+By default, this is the `Token` field, which is what we want!
+
+
+### New fields
+
+Notice that, when we run `chorales |> pitch()`, the printout tells us there are two data fields: the original `Token` and a *new* `Pitch` field!
+That new `Pitch` field can be view/accessed/manipulated just like any other field!
+Any new field is automatically selected, so you can continue the pipe:
+
+```{r}
+chorales |> 
+  pitch(simple = TRUE) |>
   tally()
 
 ```
 
+The `pitch()` function creates a new `Pitch` field, and selects it; the `tally()` function is then applied to the `Pitch` field!
 
+---
+
+When a new field is created, it can immediately by piped to a subsequent command (as we just saw) but it isn't actually *saved* in or data object unless we explicitly assign the result to a variable.
+In many cases we'll want to assign back to the same variable, like so:
 
 ```{r}
 chorales |> 
-  select(Pitch, Recip) |>
-  tally() |> 
-  draw()
+  pitch(simple = TRUE) -> chorales
 
 ```
 
-# More Complex Expressions 
-
-So far we've worked with our `r hm` data by applying functions like `pitch()`, `notehead()`, and `tally()` to it.
-We've also seen that we can use `select()` to select which fields in the data to apply our functions to.
-For more complex analyses, or when working with non-`r hm` functions, you'll find that this approach won't be enough!
-We might want to write code that manipulates multiple fields in our data more freely.
-
-These simplest way is by piping our data to the `mutate()` function, which takes a `r hm` object and an expression on its right side.
-
+We can now, select, access, or manipulate the new `Pitch` field:
 
 ```{r}
+chorales$Pitch
 
-chorales |>
-  mutate(Spine + File)
+chorales |> select(Pitch, Token, Key) |> print(view = "table")
 
-chorales |>
-  mutate(nchar(Token))
-
-chorales |>
-  mutate(paste0(Token, Record))
-
-```
-
-Each expression is evaluated, and the result is put back in the same place in the humdrum data!
-You'll also notice that in the printout, we see new data fields corresponding to each expression we evaluated.
-
-If you want, you can pick your own names by using `=` within the `mutate` call.
-For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](PitchAndTonality.html) vignette) to calculate the semitone value for each pitch in the chorales:
-
-```{r}
-
-chorales |> 
-  mutate(semits(Token))
+chorales |> select(Pitch)
 
 
 ```
 
-It worked!
-Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it use the default name.
+
+### Another new field
+
+So we added a `Pitch` field to our `chorales` data---what if we also wanted a rhythm field?
+Be careful! After our last command, the `Pitch` field is currently selected.
+If we apply a [rhythm function](RhythmAndMeter.html "Rhythm and Meter in humdrumR article") now, it won't work because the `Pitch` field has no rhythm information in it.
+We need to "reset" by selecting the `Token` field again.
+
 
 ```{r}
-
-chorales |> 
-  select(Token) |>
-  mutate(Semits = semits(Token)) -> chorales
+chorales |>
+  select() |>  # this will select Token!
+  duration() -> chorales
+  
 
 chorales
 
 ```
 
-There is now a new Data field in our humdrum table, called `Semits`.
-Meanwhile, the original `Token` field is still there, safely unchanged!
-Just like before, we can use `select()` operator to look at our fields:
+Once you start creating many fields, it can be easy to lose track of which field is selected, which can lead to common errors!
+
+### Multiple fields
+
+Once we get to have more than one field to work with, it gets garder to use the "humdrum style."
+Most `r hm` function wills only pipe the *first* selected field, so it doesn't matter if you select multiple fields.
+However, the `tally()` function can accept multiple fields.
+Now that we've created a `Pitch` *and* `Duration` fields, we can do stuff like:
 
 ```{r}
-
-chorales |> select(Token)
-
-chorales |> select(Semits)
+chorales |> 
+  select(Pitch, Duration) |>
+  tally() 
 
 ```
 
-Whats more, we can use the `Semits` field *just* like any other field:
+
+## Tidy-verse (dplyr) style
+
+The "humdrum style" from the previous section is a wonderful place to start, but it has a few limitations.
+The main one is **it only works with `r hm` functions**.
+If you try to use base-R function like `chorales |> mean()` or a tidyverse function like `chorales |> map()`, you'll get an error.
+What's more, the humdrum style is limited in the complexity of commands you can execute.
+
+To get beyond these limitations, we can instead use functions ("verbs") from the tidyverse [dplyr](https://dplyr.tidyverse.org/articles/dplyr.html "Dyplr Get Started page") package: `mutate()`, `summarize()`, and `reframe()`.
+In a call to these functions, you can freely and access and manipulate any field of your humdrumR data.
+For example:
+
+
 
 ```{r}
 
 chorales |>
-  mutate(paste0(Token, ' = ', Semits))
-
+  mutate(mint(Token))
 
 
 ```
+
+What happened here?
+
+1. The call `mint(Token, simple = TRUE)` is evaluated, using the `Token` field from "inside" the `chorales` data object.
+2. The resulting data ([melodic intervals](reference/int.html "Mint documentation")) is put into a new field, which it calls `mint(Token)`.
+
+Of course, `mint()` is a `r hm` function, so we could do this simple command without using `mutate()`, by calling `chorales |> mint()` in "humdrum style."
+However, by using `mutate()` we can do a few nifty things.
+For one, we can execute more complex commands involving any of our fields:
+
+```{r}
+
+chorales |>
+  mutate(ifelse(Duration > (1/8), 
+                mint(Token), 
+                "NA"))
+
+
+```
+
+
+---
+
+We can use non-`r hm` functions, like `gsub()`, `nchar()`, or `mean()`:
+
+```{r}
+
+chorales |>
+  mutate(gsub('-', 'b', Token))
+
+chorales |>
+  summarize(Token |> nchar() |> mean())
+
+```
+
+
+---
+
+We can choose the names for our new field(s):
+
+```{r}
+
+chorales |>
+  mutate(MelodicIntervals = ifelse(Duration > (1/8), 
+                mint(Token), 
+                "NA"))
+```
+
+---
+
+We can make more than one field at once:
+
+```{r}
+chorales |>
+  mutate(MelodicIntervals = ifelse(Duration > (1/8), 
+                mint(Token), 
+                "NA"),
+         MetricPosition = metsubpos(Token))
+
+
+```
+
+And there are other advantages, which we'll learn about in other articles!
+
+
+
