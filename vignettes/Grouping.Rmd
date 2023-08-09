@@ -1,10 +1,10 @@
 ---
-title: "Working with humdrum data"
+title: "Grouping humdrum data"
 author: "Nathaniel Condit-Schultz"
 date:   "July 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Working with humdrum data}
+  %\VignetteIndexEntry{Grouping humdrum data}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -22,7 +22,7 @@ Once we have [imported humdrum data](ReadWrite.html "Reading and writing humdrum
 we'll be ready to actually work with our data!
 The humdrum data you've imported is stored in a `r hm` data object, which gives us some special tools for working with it.
 
-Let's load some of the prepackaged data, as we learned in the [read/write vignette](ReadWrite.html "Reading and writing humdrum data").
+Let's load our prepackages `chorales` dataset, as we did in our [quick start](GettingStarted.html#quick-start "Getting started with humdrumR article") "Reading and writing humdrum data").
 
 
 ```{r}
