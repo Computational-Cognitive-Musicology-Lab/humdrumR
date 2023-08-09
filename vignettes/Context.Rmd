@@ -16,10 +16,16 @@ editor_options:
 source('vignette_header.R')
 ```
 
+Welcome to "Contextualizing humdrum data"!
+This article explains how `r hm` can be used contextualize musical data.
 When analyzing musical data, we often treat each and every data token as a separate, independent "data point."
 However, in many cases, we want to consider data points *in context*---what other data points are nearby in the data?
 Since the [humdrum syntax](HumdrumSyntax.html) encodes data in temporal order, the "context" usually means either "what is happening before or after this data point?" or "what else is happening at the same time as this this data point?"
 `r Hm` provides a number of ways of analyzing data "in context."
+
+This article, like all of our articles, closely parallels information in `r hm`'s detailed code documentation, which can be found in the "[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#reading-and-writing#manipulating-humdrum-data "HumdrumR function reference, Manipulating humdrum data")" section of the `r hm` [homepage](humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once `r hm` is loaded, using `?context`, `group_by`, or `?withinHumdrum`.
+
 
 # Groupby 
 

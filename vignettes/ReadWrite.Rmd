@@ -14,43 +14,33 @@ source('vignette_header.R')
 ```
 
 Welcome to "Reading and writing data with humdrumR"!
-This document will give you a detailed overview of `r hm`'s data reading and writing functionality.
-This document closely parallels parts of `r hm`'s code documentation;
-within an R session, you can read more concise version the material in this document by calling:
+This article will give you a detailed overview of `r hm`'s data reading and writing functionality.
 
-```{r } 
-library(humdrumR)
+This article, like all of our articles, closely parallels information in `r hm`'s detailed code documentation, which can be found in the "[Reference > Reading and Writing](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#reading-and-writing "HumdrumR function reference, Reading and Writing")" section of the `r hm` [homepage](humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once `r hm` is loaded, using `?readHumdrum` or `?writeHumdrum`.
 
-?readHumdrum
-?writeHumdrum
 
-```
-
--------
-
-> **Note**:
-> `r Hm` is primarily intended to be used for analyzing existing humdrum data, and most users will be reading humdrum data a lot more often than writing it.
-> `r Hm` *is* able to write modified humdrum data back to humdrum-syntax text files, but this is a secondary use-case, and has received relatively little attention/thought in the current version of the package.
 
 # Reading humdrum data
 
 
-The `readHumdrum` function is the gateway to `r hm`: it is the function we use to read humdrum data, encoded in humdrum-syntax text files, into R.
+The `readHumdrum()` function is the gateway to `r hm`: it is the function we use to read humdrum data, encoded in [humdrum-syntax](HumdrumSyntax.html "The humdrum syntax, article") text files, into R.
 
-### Practice Data
+---
 
 In the following examples, we will make use the small number of raw humdrum data files which are included with `r hm`.
 To access these files, we need to navigate to the directory where your computer installed `r hm`---fortunately, `r hm` records where this directory is on your computer in a variable called `humdrumRroot`.
-Once we load the `r hm` library, we just need to set our R "working directory" to that location using the command `setwd`.
+Once we load the `r hm` library, we just need to set our R "working directory" to that location using `setwd()`.
 
 ```{r}
 library(humdrumR)
+
 setwd(humdrumRroot)
 
 ```
 
 
-The humdrum data is stored in a subdirectory called "HumdrumData"---we can look at the contents of this directory using `dir(recursive = TRUE)`:
+The humdrum data is stored in a subdirectory called "`HumdrumData`"---we can look at the contents of this directory using `dir(recursive = TRUE)`:
 
 ```{r}
 
@@ -63,21 +53,19 @@ As we can see, there are `r humdrumR:::num2word(length(dir('HumdrumData')))` dir
 
 ## Targeting files
 
-To use `readHumdrum` we call the function with one (or more) character-string arguments.
+To use `readHumdrum()` we call the function with one (or more) character-string arguments.
 (In the function documentation (`?readHumdrum`), you'll see these arguments called `...`---in R, `...` means *any* number of arguments.)
 These arguments are interpreted as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), and matched against directories and files on your system.
 We call these "**REpath-patterns**," short for Regular Expression directory-path patterns.
 For example, 
 ```{r}
-library(humdrumR)
-setwd(humdrumRroot)
 
 readHumdrum('HumdrumData/BachChorales/chor.*.krn')
 
 ```
 
 uses the REpath-pattern `"HumdrumData/BachChorales/chor.*.krn"` to match all files in the 'HumdrumData/BachChorales' directory whose name matches the regular expression `chor.*.krn`.
-As you can see, the REpath-pattern includes directory (folder) paths (relative or absolute)---using your operating system's appropriate delimiter ("\" for windows, "/" for everybody else)---*and* a pattern for matching file paths.
+As you can see, the REpath-pattern includes directory paths (relative or absolute)---using your operating system's appropriate delimiter ("\" for windows, "/" for everybody else)---*and* a pattern for matching file paths.
 *Each* directory is also treated as a regular expression, possibly matching multiple directories.
 Let's break this down: `r hm` splits your REpath-pattern input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three as regular expressions.
 The first two expressions are used to match directories, while the last expression is used to match files.
@@ -103,7 +91,7 @@ readHumdrum('HumdrumData/.*/.*')
 
 
 > Note: Since `r hm` can read files from multiple directories at once, it is possible that two or more files with the same file name, but in different directories are matched.
-> If this happens, `r hm` identifies each file with enough of it's directory path to make sure they are all unique.
+> If this happens, `r hm` will read both files, but identifies each file with enough of its directory path to make sure you can distinguish them.
 
 ----
 
@@ -127,7 +115,7 @@ What's the advantage of this approach? We'll see in the next section.
 ### Multiple Patterns
 
 Sometimes, expressing all the files you want in a single regular expression is not possible.
-Luckily, `readHumdrum` can accept as many separate patterns you want, just group them into a vector.
+Luckily, `readHumdrum()` can accept as many separate patterns you want, just group them into a vector.
 Instead of writing `readHumdrum('HumdrumData/.*Variations/.*.krn')`, you could be explicit and write 
 
 ```{r}
@@ -144,10 +132,10 @@ readHumdrum('HumdrumData',
 ```
 We get the same result!
 How did this work exactly?
-We've fed three arguments to `readHumdrum`.
+We've fed three arguments to `readHumdrum()`.
 The first and last arguments (`"HumdrumData"` and `".*.krn"`) are length one.
 However, the middle argument (`"...Variations"`) is of length two.
-`readHumdrum` concatenates the three arguments together, making *two* separate REpath-patterns:
+`readHumdrum()` concatenates the three arguments together, making *two* separate REpath-patterns:
 
 ```{r eval = FALSE}
 "HumdrumData/BeethovenVariations/.*.krn"
@@ -183,7 +171,7 @@ Sometimes you want to only read humdrum files which contain particular data.
 For instance, you might want to read only the files in a minor key.
 One option is to read all the files in the corpus then filter out the files you don't want (see the [humdrumR filtering vignette](Filtering.html) to learn how.
 However, in some cases, it can save a lot of time and effort to filter the files you want before parsing them.
-The `contains` argument of `readHumdrum` can be used in just this way!
+The `contains` argument of `readHumdrum()` can be used in just this way!
 The contains argument must be a character vector---each character string is treated as a regular expression, and only files which contain matches to all of these regular expressions will be read.
 Thus, we could only read pieces with minor keys by writing:
 
@@ -196,12 +184,12 @@ readHumdrum('HumdrumData', 'BachChorales', 'chor.*.krn',
 
 ## Finding Files
 
-`readHumdrum` interprets REpath-patterns and finds files using the helper function `findHumdrum`.
-If you are not sure where your humdrum files are, or what pattern you want to use to find them, you might start be using `findHumdrum`.
-`findHumdrum` takes the same input as `readHumdrum`, but doesn't fully parse the input into `r hm`.
+`readHumdrum()` interprets REpath-patterns and finds files using the helper function `findHumdrum()`.
+If you are not sure where your humdrum files are, or what pattern you want to use to find them, you might start be using `findHumdrum()`.
+`findHumdrum()` takes the same input as `readHumdrum()`, but doesn't fully parse the input into `r hm`.
 Instead, it returns a `data.table` containing matching filenames (if any) and raw file content.
 
-If you use the `verbose = TRUE` option for either `findHumdrum` or `readHumdrum`, a complete list of all the matches files will be printed.
+If you use the `verbose = TRUE` option for either `findHumdrum()` or `readHumdrum()`, a complete list of all the matches files will be printed.
 This is useful to check if you are reading the files you *intend* to read.
 
 ### Validation
@@ -218,10 +206,10 @@ Check out the [validateHumdrum][reference/validateHumdrum.html] documentation to
 
 > Note that `validateHumdrum()` does not automatically check if the humdrum *data* is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.
 
-## Reading
+## Reading files
 
-So, what actually happens when we run `readHumdrum`?
-By now, you've seen that `readHumdrum` prints out a few messages describing its process.
+So, what actually happens when we run `readHumdrum()`?
+By now, you've seen that `readHumdrum()` prints out a few messages describing its process.
 
 1. First, the files which match your search patterns (if any) are identified, and their text is read into R.
 2. Next, these files are checked to see if they are valid humdrum files. 
@@ -238,7 +226,7 @@ This includes the true global metadata for files, encoded in humdrum *reference 
 By default, `r hm` parses all reference records in the files it reads, creating a unique field for each reference key. 
 (If there are more than one instance of any given key, they are combined in a string separated by semicolons.)
 If there are a lot of unique reference keys in a dataset, they can end up taking a lot of memory in a humdrum table.
-In these cases, you might find it useful to limit `readHumdrum` to only parsing those reference records which you are actually going to use.
+In these cases, you might find it useful to limit `readHumdrum()` to only parsing those reference records which you are actually going to use.
 This can be accomplished quite easily with the `reference` argument.
 
 The `reference` argument defaults to `"all"`, which means all reference records are parsed.
@@ -320,7 +308,7 @@ knownInterpretations[Type == 'Tandem']
 ```
 
 we see that there are currently `r humdrumR:::num2word(sum(knownInterpretations$Type == 'Tandem'))` classes of tandem interpretations that `humdrumR` recognizes, each associated with a regular expression.
-Thus, if we really apply `readHumdrum` to this file
+Thus, if we really apply `readHumdrum()` to this file
 
 ```
 **kern
@@ -352,7 +340,7 @@ Likewise, we'd get both `TimeSignature` and `BPM` fields.
 
 #### Custom Tandems
 
-`readHumdrum` has a `tandems` argument which allows us take control of the tandem interpretation parsing process.
+`readHumdrum()` has a `tandems` argument which allows us take control of the tandem interpretation parsing process.
 `tandems` is a character vector, defaulting to `known`, which parses all known interpretations into their own fields (following the `knownInterpretations` table).
 We can use `tandems` two ways. 
 1.) We can remove `"known"` from the vector and specify the `Name` of specific tandem interpretations we do want to parse. For instance, if we write `tandem = "Clef"`, 
@@ -366,4 +354,45 @@ We could give this field a name by writing `tandems = c(Fruit = "[Aa]pple|[Bb]an
 (In fact, we can rename known interpretations as well, for instance writing `tandems = c(Meter = "TimeSignature"`.)
 
 If `tandems = NULL`, no tandem interpretations are parsed at all---this can be used to shorten parsing time.
+
+# Writing humdrum data
+
+
+The complement of `readHumdrum()` is, of course, `writeHumdrum()`, which takes a `r hm` data object and writes it to new data files.
+The content of the files which exactly match what is shown to you in the "humdrum" view, when you print `r hm`, so whatever fields are [selected](reference/DataFields.html#selecting-fields Getting started with humdrumR article; selecting fields section") are written to files.
+The only question, then, is what files it writes to.
+
+`writeHumdrum()` takes the original file names (and directories) of the data you read as the starting point for determining output file names.
+The default, is simply to take the original file name and adds the prefix "`humdrumR_`" at the beginning of each file name.
+`writeHumdrum()` has a bunch of arguments (`prefix`, `affix`, `renamer`, and `extension`) which can be used to modify the output file names---see [writeHumdrum](reference/writeHumdrum.html "writeHumdrum documentation") for details.
+
+The `directory` argument can, of course, be used to change the output directory files are written to.
+
+---
+
+Let's say we'd like to write our `chorales` data, but with scale degree data only.
+We'll name these files by adding the affix "_modified," and setting the extension to be ".deg" instead of ".kern."
+
+```{r}
+
+readHumdrum("HumdrumData", "BachChorales", "chor.*.krn") |>
+  mutate(Deg = deg(Token, simple = TRUE)) |>
+  writeHumdrum(prefix = '', affix = '_modified', extension = 'deg')
+
+
+```
+The results are files (in the original directory) names `chor001_modified.deg`, `chor002_modified.deg`, etc.
+
+## Overwriting
+
+Generally, overwriting your original humdrum data is probably a very bad idea (make sure to back up your data!), which is why `writeHumdrum()` generates totally new files by default.
+To avoid accidental overwrites, `writeHumdrum()` will never overwrite files as long as the `overwrite` argument is `FALSE`---which is the default.
+Even if you specify `overwrite = TRUE`, `writeHumdrum()` will ask you to confirm before proceeding.
+
+## !!!EMD
+
+`!!!EMD:` is a humdrum reference code, meaning  "*Document modification description*."
+This code is used is to keep track of modifications to humdrum datasets.
+`r Hm` will, by default, insert an `!!!EMD` record into any files it writes, saying: "Edited using humdrumR, version `r humdrumR_version` on (*current data/time*."
+
 

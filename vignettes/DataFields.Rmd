@@ -19,6 +19,9 @@ Welcome to "`r Hm` data fields"!
 This article explains how `r hm` encodes different pieces of musical data in the "fields" of a R data.frame.
 Understanding data fields is essential to making effective use of `r hm`.
 
+This article, like all of our articles, closely parallels information in `r hm`'s detailed code documentation, which can be found in the "[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#reading-and-writing "HumdrumR function reference, Reading and Writing")" section of the `r hm` [homepage](humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once `r hm` is loaded, using `?fields` or `?withinHumdrum`.
+
 # The HumdrumR Data Model
 
 `r Hm` bridges with *data* world of [humdrum](www.humdrum.org) with the *coding and analysis* world of R.

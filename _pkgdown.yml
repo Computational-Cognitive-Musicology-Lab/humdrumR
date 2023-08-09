@@ -55,7 +55,7 @@ articles:
   navbar: Analysis
   contents:
   - Summary
-  - WorkingWithData
+  - Grouping
   - Context
 - title: Musical Processing
   desc: Functionality for analyzing musical information
