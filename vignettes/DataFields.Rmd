@@ -464,7 +464,14 @@ chorales |>
 
 ```
 
-## Why work within humdrum table?
+## Bsae-R style (With and Within)
+
+In addition to the tidyverse "verbs" `mutate()` and `summarize()`, `r hm` also defines methods of the base-R functions `with` and `within()`.
+These functions work a lot like `mutate()` and `summarize()`, but are more flexible (see [?withHumdrum](reference/withinHumdrum.html "withinHumdrum documentation page") for details).
+The `with()` function is particularly useful, as using it is basically like going `mutate() |> pull()` in one step.
+You will see `with()` and `within()` used in many articles!
+
+## Why work within humdrumR table?
 
 You might be wondering, especially if you already a strong R user, why not just [pull](DataFields.html#accessing-fields "Getting started with humdrumR article; accessing fields section") the data fields out of the `r hm` data and use "normal" base-R, or perhaps tidyverse functions.
 You certainly can do that!
