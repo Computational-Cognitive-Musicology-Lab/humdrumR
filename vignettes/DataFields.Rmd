@@ -382,7 +382,7 @@ chorales |>
 ```
 
 
-### Tidy-verse (dplyr) style
+### Tidyverse style
 
 The "humdrum style" from the previous section is a wonderful place to start, but it has a few limitations.
 The main one is **it only works with `r hm` functions**.
