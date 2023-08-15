@@ -18,31 +18,35 @@ source('vignette_header.R')
 
 # Complex humdrum syntax
 
-The [humdrum syntax](HumdrumSyntax.html "The Humdrum Syntax") includes a few more complex structures: *spine paths* and *multi-stops* (a.k.a., sub-tokens).
+The [humdrum syntax](HumdrumSyntax.html "The Humdrum Syntax") includes a few complex structures: *spine paths* and *multi-stops* (a.k.a., sub-tokens).
 `r Hm` incorporates these complexities into its data model, no problem, but they do make things more complicated, and may require some thought depending on the analyses you are trying to do.
-The model works just as described in the previous sections: *each and every* token, including spine paths and multi-stops, is recorded as a separate *row* in the humdrum table.
+Understanding the how paths/stops are used is not at all necessary if the data you are interested in doesn't include spine paths or multi-stops!
+You can always skip this article and come back to it at a later time.
 
-Understanding the following sections is not at all necessary if the data you are interested in doesn't include spine paths or multi-stops!
-You can always skip this section for now, and come back to it at a later time.
+The way `r hm` incorporates paths/stops is really just an extension of our basic data model, as described in our [Data Fields](DataFields.html "HumdrumR Data Fields article") article.
+You should definitely read and understand that article before reading this one.
+*Each and every* token, including tokens in various spine paths and various multi-stops, is recorded as a separate *row* in the humdrum table.
+
+
 
 
 
 # Spine paths
 
 
-`r Hm` treats spine paths as "sub-spines" of the main spine which they split from, and keeps track of the path in the `Path` field.
+`r Hm` treats spine paths as "sub-spines" of the main spine which they split from, and keeps track of each path (if any) in the `Path` field.
 The starting path (leftmost) is numbered path `0`---in datasets with no spine paths, the `Path` field will be all zeros.
 Other paths are numbered with higher integers.
 
-Let's look at a simple example:
+Let's look at a simple example (found in the `humdrumRroot` example files):
 
 ```{r}
 
-paths1 <- readHumdrum("examples/Paths.krn")
+paths1 <- readHumdrum(humdrumRroot, "examples/Paths.krn")
 
 paths1 |> print(view = "humdrum")
 
-paths1 |. print(view = "table")
+paths1 |> print(view = "table")
 
 ```
 
@@ -61,161 +65,110 @@ Notice that `r hm` prints paths in a way that is more readable than reading humd
 paths are "shifted" over into columns that align.
 This is an option to the function `as.matrix.humdrumR()`.
 
+## Working with Paths
+
+How you work with spine paths depends, as always, on the nature of the data.
+If you are simply doing global counting of notes, for example, tokens in paths might be treated no differently than any other data.
+In some data sets, information in spine paths might not be relevant to your analyses---for example, if the paths are used to store [ossia](https://en.wikipedia.org/wiki/Ossia).
+In other analyses---especially, if you are analyzing data in a linear/melodic way---, incorporating/handling spine paths may be very difficult, with no obviously correct way to do it.
+In fact, many of `r hm`'s standard "lagged" functions---like `ditto()`, `mint()`, and `timeline()`---can give weird results in the presence of spine paths.
+Often, the simplest solution is to simply ignore/remove spine paths from your data.
+Since the `Path` field is numbered starting from `0`, this can be achieved easily by filtering out anywhere where `Path > 0`.
+
+```{r}
+paths1 |> 
+  filter(Path == 0) |>
+  removeEmptyPaths()
+
+```
+
+
+
+### Expanding Paths
+
+
+One way of doing linear/melodic analyses in the presence of spine paths is to "expand" the paths into full spines.
+The `expandPaths()` function will "expand" paths by copying the parts of spines that are shared by multiple paths into separate paths (or spines).
+Observe:
+
+```{r}
+
+paths2 |> expandPaths(asSpines = TRUE)
+
+```
+
+`r Hm`'s [tidyverse methods][withinHumdrum], like `mutate()` and `within()`, also have an `expandPaths` argument.
+If `expandPaths = TRUE`, these functions will expand spine paths, apply their expression, then "unexpand" the paths back to normal.
+Look at the differnce between these two calls:
+
+```{r}
+paths2 |>
+  group_by(Spine, Path) |>
+  mutate(Enumerate = seq_along(Token))
+
+
+paths2 |>
+  group_by(Spine, Path) |>
+  mutate(Enumerate = seq_along(Token), expandPaths = TRUE)
+
+```
+
+Notice how, when we *don't* use `expandPaths`, each path is counted entirely separately from the rest.
 
 
 # Stops
 
 In humdrum syntax, multiple tokens can be placed "in the same place" (i.e., same record, same spine) by simply separating them with spaces.
 (This is most commonly used to represent chords in `**kern` data.)
-In `r hm`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a `r hm` humtable.
+In `r hm`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a `r hm` [humdrum table][humTable].
 Thus, we need the `Stop` field to tell us which stop a token came from!
-In much data, all/most tokens are simply `Stop == 1` (the first position), but if there are more than one tokens in the same record/spine, they will be numbered ascending from one:
+In much data, all/most tokens are simply `Stop == 1` (the first position), but if there are more than one tokens in the same record/spine, they will be numbered ascending from one.
 
 Let's look at an example to make sense of this!
 Let's start by looking at our humdrum-data view.
 
 ```{r}
-humdrumR('humdrum')
-stops <- readHumdrum('examples/Stops.krn')
+stops <- readHumdrum(humdrumRroot, 'examples/Stops.krn')
 
-stops
+stops |> print(view = 'humdrum')
+
+stops |> print(view = 'data.frame')
 ```
 
 
 Here we have a file with chords in the second spine: individual note tokens separated by spaces.
 Now, we can switch back to table view:
-
-```{r}
-humdrumR('table')
-stops
-
-```
-
 You can see that each note of the chords gets its own row, numbered `1`, `2`, and `3` in the `Stop` field!
 
+## Working with Multi-Stops
 
-
-
-# Multiple fields
-
-What if we want to study rhythm and pitch (or key, or anything else) at the same time?
-Using the approach we've been using so far, we can only really look at one piece of information at a time.
-However, if we string some of our previous commands together we can make some magic:
+Working with multi-stops is often even more challenging than working with spine paths.
+How you work with stops depends, as always, on the nature of the data.
+Again, If you are simply doing global counting of notes, for example, tokens in stops might be treated no differently than any other data.
+In other analyses---especially, if you are analyzing data in a linear/melodic way---, incorporating/handling spine paths may be very difficult, with no obviously correct way to do it.
+In fact, many of `r hm`'s standard "lagged" functions---like `ditto()`, `mint()`, and `timeline()`---can give weird results in the presence of stops.
+Often, the simplest solution is to simply ignore/remove stops from your data.
+Since the `Stop` field is numbered starting from `1`, this can be achieved easily by filtering out anywhere where `Stop > 1`.
 
 ```{r}
-chorales |>
-  pitch(simple = TRUE) |>
-  select(Token) |>
-  recip() -> chorales
-
-chorales
+stops |> 
+  filter(Stop == 1) |>
+  removeEmptyStops()
 
 ```
 
-We called `pitch()` like before, but then we selected `Token`---"Token" is the default data field in `r hm`---the original tokens from your data files you read.
-By calling `select(Token)` we sort of "reset" our selection to the original data.
-We can then call `recip()` to get the rhythm data, and then we assign (`->`) the data back to replace the `chorales` variable---this "saves" what we've done.
-The result is we now have a dataset with *three* "data fields": `r humdrumR:::harvard(fields(chorales, 'Data')$Name, 'and')`.
-We can select any of these three:
+<!---
 
-```{r}
-
-chorales |> select(Pitch)
-chorales |> select(Recip)
-
-chorales |> select(Pitch, Recip)
-
-```
-
-We can "see" that all three of these data fields are present in our data, at your finger tips.
+### Unfolding stops
 
 
-```{r}
-chorales |> 
-  select(Pitch, Recip) |>
-  tally()
+One way of doing analyses in the presence of stops is to "unfold" single-tokens to fill out the stops.
+Try the `unfoldStops()` function:
 
-```
+#```{r}
+#stops |> 
+#  unfoldStops()
+#
+#```
 
-
-
-```{r}
-chorales |> 
-  select(Pitch, Recip) |>
-  tally() |> 
-  draw()
-
-```
-
-# More Complex Expressions 
-
-So far we've worked with our `r hm` data by applying functions like `pitch()`, `notehead()`, and `tally()` to it.
-We've also seen that we can use `select()` to select which fields in the data to apply our functions to.
-For more complex analyses, or when working with non-`r hm` functions, you'll find that this approach won't be enough!
-We might want to write code that manipulates multiple fields in our data more freely.
-
-These simplest way is by piping our data to the `mutate()` function, which takes a `r hm` object and an expression on its right side.
-
-
-```{r}
-
-chorales |>
-  mutate(Spine + File)
-
-chorales |>
-  mutate(nchar(Token))
-
-chorales |>
-  mutate(paste0(Token, Record))
-
-```
-
-Each expression is evaluated, and the result is put back in the same place in the humdrum data!
-You'll also notice that in the printout, we see new data fields corresponding to each expression we evaluated.
-
-If you want, you can pick your own names by using `=` within the `mutate` call.
-For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](PitchAndTonality.html) vignette) to calculate the semitone value for each pitch in the chorales:
-
-```{r}
-
-chorales |> 
-  mutate(semits(Token))
-
-
-```
-
-It worked!
-Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it use the default name.
-
-```{r}
-
-chorales |> 
-  select(Token) |>
-  mutate(Semits = semits(Token)) -> chorales
-
-chorales
-
-```
-
-There is now a new Data field in our humdrum table, called `Semits`.
-Meanwhile, the original `Token` field is still there, safely unchanged!
-Just like before, we can use `select()` operator to look at our fields:
-
-```{r}
-
-chorales |> select(Token)
-
-chorales |> select(Semits)
-
-```
-
-Whats more, we can use the `Semits` field *just* like any other field:
-
-```{r}
-
-chorales |>
-  mutate(paste0(Token, ' = ', Semits))
-
-
-
-```
+-->

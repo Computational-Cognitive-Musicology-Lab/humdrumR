@@ -464,7 +464,7 @@ chorales |>
 
 ```
 
-## Bsae-R style (With and Within)
+## Base-R style (With and Within)
 
 In addition to the tidyverse "verbs" `mutate()` and `summarize()`, `r hm` also defines methods of the base-R functions `with` and `within()`.
 These functions work a lot like `mutate()` and `summarize()`, but are more flexible (see [?withHumdrum](reference/withinHumdrum.html "withinHumdrum documentation page") for details).
