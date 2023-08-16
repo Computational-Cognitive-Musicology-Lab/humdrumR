@@ -1,10 +1,10 @@
 ---
-title: "Complex humdrumR syntax"
+title: "Complex humdrum syntax"
 author: "Nathaniel Condit-Schultz"
 date:   "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Complex humdrumR syntax}
+  %\VignetteIndexEntry{Complex humdrum syntax}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,6 +15,8 @@ source('vignette_header.R')
 
 ```
 
+Welcome to "Complex humdrum syntax"!
+This article explains how `r hm` handles spine paths and multi-stop data tokens.
 
 # Complex humdrum syntax
 

@@ -16,6 +16,9 @@ editor_options:
 source('vignette_header.R')
 ```
 
+
+Welcome to "Filtering humdrum data"!
+This article explains how `r hm` can be used find subsets of humdrum data.
 Most humdrum datasets contain a wealth of information: rhythms, pitches, lyrics, etc.
 However, the particular analysis you want to conduct today might not need all that information.
 The first step after [loading humdrum data](ReadWrite.html "Reading and writing humdrum data")

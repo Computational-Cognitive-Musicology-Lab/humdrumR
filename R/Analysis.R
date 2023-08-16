@@ -101,7 +101,7 @@ tally.humdrumR <- function(x, ..., na.rm = FALSE, exclude = NULL) {
     
     
   } else {
-    fields <- pullSelectedFields(x)
+    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
     
     do.call('tally', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
   }
