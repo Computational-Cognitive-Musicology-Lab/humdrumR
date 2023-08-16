@@ -16,47 +16,52 @@ editor_options:
 source('vignette_header.R')
 ```
 
-One of the great strengths of the [humdrum syntax](HumdrumSyntax.html "Intro to the humdrum syntax") is its flexibility---there are lots of ways you can structure your data to conveniently represent musical information.
-However, when it comes time analyze data, we typically want to "reshape" our data into a particular format that is ideal for analysis.
+Welcome to "Shaping humdrum data"!
+This article explains various steps you can, and often need, to take to prepare humdrum datasets for analysis, using `r hm`.
 
-We must determine, given our data *and* our particular research question, what constitutes a *single data observation*.
+One of the great strengths of the [humdrum syntax](HumdrumSyntax.html "Intro to the humdrum syntax") is its flexibility---there are lots of ways you can structure your data to conveniently *represent* musical information.
+However, when it comes time analyze data, we typically want to "reshape" our data into a particular format that is ideal for *analysis*.
+The key idea is this:
+given our data *and* our particular research question, we must determine/decide what constitutes a *single data observation*.
 We want each data observation, or data point, to correspond to one row in our humdrum table.
+Depending on how your humdrum data files are organized, this might not be the case when you first load your data.
+
 In order to shape our data, there are three steps we might need to do to our data:
 
 1.  Removing information we don't want.
 2.  Splitting apart information that is bundled together.
 3.  Pasting together or aligning information that is currently separated.
 
-Consider the following small humdrum file:
+Consider the following small humdrum file, which is bundled with `r hm`.
 
-```{r message=FALSE}
-setwd(humdrumRroot)
-example <- readHumdrum('examples/Reshaping_example.hum')
+```{r}
+example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 example
 
 ```
 
-This file contains seven different pieces of information!
+This file contains (at least) **seven** different pieces of information!
 There are two voices, alto and soprano; Each voice has its rhythm *and* pitch information encoded in its `**kern` spine, plus lyrical information in the next `**silbe` spine.
-In addition, the `**harm` spine indicates the harmony accompanying the vocal parts.
+In addition, the `**harm` spine indicates the harmony accompanying *both* the vocal parts.
+Now, depending on what sorts of analyses we want to perform, we need to decide what combinations of these seven information streams consitute a "data observation."
 
 # Filtering Data
 
-The first step might to remove data we don't need.
+The first step is often to simply remove data we don't need.
 In *this* article, we'll show you the most common, basic, ways you might filter your data.
 For more details about other `r hm` filtering functionality, check out 
-the [data filtering](Filtering.html "Filtering Humdrum Data") article.
+the [data filtering](Filtering.html "Filtering humdrum data article") article.
 
 ## Indexing
 
-For example, if we are studying tonality, we might simply want to ignore the lyric data.
+For example, *if* we are studying tonality, we might simply want to ignore the lyric data.
 These easiest way to do this is to index out spines we don't want, either using numeric indices
 
 ```{r}
 example[[ , c(1,3,5)]]
 ```
 
-or by exclusive interpretation:
+or (probably better) by exclusive interpretation:
 
 ```{r}
 example[[ , c('**kern', '**harm')]]
@@ -66,26 +71,41 @@ example[[ , c('**kern', '**harm')]]
 ## Parsing Token
 
 In this file, the `**kern` spines in our example file include rhythmic data (`**recip`) *and* pitch data.
-If we are just studying tonality, we could extract just the pitch information from the `Token` field, and save it to a new field.
-For example, we can use `kern` to extract the pitch information from `Token`, and put it in a new field---let's call it `Pitch`.
+*If* we are "just" studying tonality, we could extract the pitch information from the `Token` field, and save it to a new field.
+For example, we can use the `kern()` function to extract the pitch information from `Token`, and put it in a new field, which we'll call `Pitch`.
 
 ```{r}
 
-within(example, 
-       kern(Token) -> Pitch) -> example
+example |>
+  mutate(Pitch = kern(Token)) -> example
 
 example
+
 ```
 
-We have a new `Pitch` field, but we can still access the original `Token` field.
-You can see it easily by setting the "active" field back to `Token`:
+Having now isolated the pitch information, we can analyze it.
+(Of course, the rhythm information is still present, in the original `Token` field.)
+
+
+## Other filtering
+
+Of course, there are many other filtering options you might want to do, depending on your research goals.
+Perhaps you only want to study pieces/passages in a flat keys, or only works from a particular time period, etc.
+A common example would be limiting our rhythmic analyses to music in 4/4 time, and perhaps ignoring pickup notes.
+The `TimeSignature` field indicates the time signature, and the `Bar` field can be used as an indicator of pickups at the beginning of pieces, as they are marked `Bar == 0`.
+So for example (using the Bach chorale data):
 
 ```{r}
-example$Token
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+chorales |>
+  filter(Bar > 0 & TimeSignature == 'M4/4') -> chorales
+
+chorales
 
 ```
 
-------------------------------------------------------------------------
+
 
 # Splitting/Separating Data
 
@@ -93,134 +113,171 @@ Humdrum data often packs multiple pieces of information into compact, concise, r
 The classic example, or course, is `**kern` itself which often includes rhythm, pitch, phrasing, beaming, and pitch ornamentation information!
 These tokens are great for reading/writing, but not for analyzing, so we typically want to separate the information we do want.
 
-### Pitch and Rhythm
+### Isolating Pitch and Rhythm
 
 As we've seen, the `**kern` spines in our example file include rhythmic data (`**recip`) *and* pitch data.
-In some cases, we might want to access both pieces of information, but separately.
+In some cases, we might want to access *both* pieces of information, but separately.
 We can separate them by applying different functions to the `Token` field, and saving the output to new fields.
 For example,
 
 ```{r, echo = -1}
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
-within(example, 
-       Pitch <- pitch(Token),
-       Rhythm <- recip(Token)) -> example
-
-
+example |>
+  mutate(Rhythm = recip(Token),
+         Pitch = kern(Token)) -> example
 example
 ```
 
-1.  uses the `pitch` function to extract the pitch information and saves it to a new field which we call `Pitch` and
-2.  uses the `recip` function to extract the rhythm information and saves it to a new field which we call `Rhythm`.
-
--   (Of course, you could choose different names for your new fields, instead of `Pitch` of `Rhythm`.)
-
-We can then use either of these new fields, or both, in any call to `within.humdrumR`, or make them the active fields to see them print:
+Hey, the printout kind of looks the same...but if you look at the bottom you'll see that there are now separte `Pitch` and `Rhythm` fields.
+Since both fields are automatically selected by `mutate()`, we are seeing them both.
+But we could, for example, select one or the other field,
 
 ```{r}
-example$Pitch
+example |> select(Pitch)
 
-example$Rhythm
+example |> select(Rhythm)
 
 ```
 
-------------------------------------------------------------------------
+or run commands using them.
+For example, we could tabulate pitches wherever the rhythmic duration is a quarter note:
 
-# Pasting/Aligning
+```{r}
+example |>
+  filter(Rhythm == '4') |>
+  tally(Pitch)
+
+```
+
+This is only possible because we separated the information which was originally "pasted" together in the `**kern` tokens.
+
+## Rend
+
+What if actually want to move the rhythm and pitch information to separate spines---i.e., into their rows in the humdrum table?
+Use `rend()`:
+
+```{r}
+example |>
+  rend(Rhythm, Pitch)
+
+```
+
+# Cleave (Pasting/Aligning)
 
 The next step might be to align/combine information that is currently separated.
 In many `r hm` datasets, we have multiple pieces of information spread across multiple spines, or in some cases, across spine paths or stops.
-If, given our research question, we need to think of multiple pieces of information as describing a *single data point*, we'll reshape the data.
-For example, in our example file the `**silbe` (lyric) spines associate each syllable with exactly one note in the adjacent `**kern` spines.
+If, given our research question, we need to think of multiple pieces of information as describing a *single data point*, we'll need to reshape the data.
+For example, in our `example` file the `**silbe` (lyric) spines associate each syllable with exactly one note in the adjacent `**kern` spines.
+Currently, by default, each `**kern` token *and* each `**silbe` token are in their own, separate row of the humdrum table.
+We want them in the *same* row.
+In the humdrum syntax view, this means moving the `**silbe` data into the same location as the `**kern` tokens.
 
-## Folding Data
+## Cleaving Spines
 
-The most powerful approach to aligning separated data is by "folding" the information into a new field using the family "folding functions." 
-*Folding* means taking information from one spine, path, or stop, and moving it into a new data field "on top of" another spine.
-This means taking, for example, the data in Spine 2 and putting in a new field in Spine 1.
-
-### Folding Spines
-
-#### Lyrics
+To take separate spines---like `**kern` and `**silbe`---and paste them together, we use `cleave()`; as in "to cleave together."
+Simply run cleave, and tell it which spines to cleave together.
+In our `example` file, the 1st and 3rd spines are `**kern` while the 2nd and 4th spines are `**silbe`, so we can tell `cleave` to cleave together `1:2` and `3:4`:
 
 In our example, we want to align the notes in the `**kern` spines with the syllables in the `**silbe` spine.
-We can do this directly using `foldHumdrum`: use the `fold` argument to indicate which spine to fold, and the `onto` argument to indicate which spine to move it onto.
+We can do this directly using `cleave()`: use the `fold` argument to indicate which spine to fold, and the `onto` argument to indicate which spine to move it onto.
 
 ```{r}
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
-foldHumdrum(example, fold = 2, onto = 1)
+
+example |>
+  cleave(1:2, 3:4)
 
 ```
 
-Notice that the second spine has disappeared, and now there is a new field called `Result1`, in the first (`onto`) spine, but containing the data from the old Spine 2.
-We could do both `**silbe` spines like this:
+It worked! The 1st and 3rd spines have dissappeared, with their content now in the 1st and 3rd spines.
+But notice that the cleave put some data into a new field, which it has called `Spine2|4`.
+We can improve this name using the `newFields` argument:
 
 ```{r}
-foldHumdrum(example, fold = c(2, 4), onto = c(1, 3))
+example |>
+  cleave(1:2, 3:4, newFields = 'Silbe') -> example
+
+example
 
 ```
+
+But, wait, where did the `**kern` and `**sible` data go exactly?
+Well, since the `**kern` spines were the first spines we indicated to `cleave()`, that data stays in the original `Token` field.
+The other spines---which in this case are the `**sible` data---are put into the new field(s).
+See:
+
+```{r}
+example |> select(Token)
+
+example |> select(Silbe)
+
+```
+
+Notice that the fifth spine, which wasn't part of the cleave, is also left untouched in the `Token` field.
+
 
 ------------------------------------------------------------------------
 
 In some datasets, there might be different numbers of `**kern`/`**silbe` spines in different files within the dataset.
-Though `foldHumdrum` *can* handle this case, its usually easier to use the special `foldExclusive` function, which folds based on exclusive interpretation.
-Just specify the `fold` and `onto` arguments as character strings matching the names of exclusive interpretations in your file:
-
-```{r}
-foldExclusive(example, 'silbe', 'kern')
-```
-
-Notice that `foldExclusive` automatically folded both `**sible` spines onto their respective `**kern` spines, and have them a new field name.
-
-#### Harmonic Interval
-
-Let's consider another common use case for "folding" humdrum data.
-Lots of humdrum files have multiple spines of `**kern`.
-In some cases, our research question will lead us to think of each **note**, across all spines, as being individual data points.
-However, if our research question concerns harmonic intervals (combinations of pitches happening at the same time) we might think of each record of multiple pitches as being a *single data observation*.
-In this case, we might want to fold the kern data from one spine, on top of another!
-
-We can do this using `foldHumdrum` as well:
+In these cases, it will be much smarter to pass `cleave()` the names of the exclusive intepretations we want to cleave.
+We should get the same result we got manually before:
 
 ```{r}
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
-kernonly <- example[[ , '**kern']]
-
-kernonly <- foldHumdrum(kernonly, 2, 1, newFieldNames = 'Spine2') 
-
+example |>
+  cleave(c('kern', 'silbe'))
 ```
 
-We could now cross tabulate the two spines of data:
+----
+
+What if we want to study the note combinations that are formed between the two `**kern` spines?
+As they are, this would be hard because the tokens from each spine are all in their own rows.
+However, we could `cleave()` together the two kern spines!
+(We'll also isolate *just* the `**kern` spines for this.)
+
 
 ```{r}
+example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
-with(kernonly, table(Token, Spine2))
+example |>
+  index2( , '**kern') |>
+  kern(simple = TRUE) |>
+  cleave(c(1, 2)) |> 
+  tally()
+  
+
 
 ```
 
-#### Harmony (Spreading Data)
 
-In another common use case, we might have one spine of data which actually describes what is happening in the entire record of data.
-For example, our example's `**harm` spine.
+
+### Multi-cleaving
+
+What about that `**harm` spine in our data.
+Unlike the `**silbe` spines, the `**harm` spine is not "paired up" with the `**kern` spines.
+Rather, the `**harm` actually describes what is happening in the entire *record* of data.
 The chords indicated in this spine are associated with the pitches in both, or either, of the `**kern` spines.
-
-Luckily, if `foldHumdrum` or `foldExclusive` are given more `onto` spines then `fold` spines, the `fold` spine will be duplicated to fill more than one target spines:
+Luckily, `cleave()` will handle this:
 
 ```{r}
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
-foldExclusive(example, 'harm', 'kern') 
+example |>
+  cleave(c('kern', 'harm'))
 
 ```
 
-The harm spine was copied into a new field "on top of" *both* `**kern` spines!
+Data from the `**harm` spine is copied *twice* into a new field "on top of" *both* `**kern` spines!
 
-### Folding Stops and Paths
+## Cleaving Stops and Paths
 
-Though spines the most common structure in humdrum data that you might need to "fold," we can also fold other structures.
+
+Though spines are the most common structure in humdrum data that you might need to "cleave" together, we can also cleave other structures.
 Of course, it depends on what questions you are trying to ask of your data!
+
+### Multi-Stops
 
 Consider this example, with multi-stop chords in a `**kern` spine:
 
@@ -232,44 +289,28 @@ example_stops
 
 By default, `r hm` treats each token (note) in *each* stop as a separate data observation, with its own row in the humdrum table.
 If we are studying harmony, we might want to align those stops "on top" of each other, in different fields.
-Try the `foldStops` function!
+But, we can cleave the stops together, putting them each into their own field!
+
 
 ```{r}
-foldStops(example_stops)
+example_stops |>
+  cleave(Stop = 1:3)
 
 ```
 
-When working with spine paths, it is often less obvious how we should interpret different paths in terms of data observations, but if you want to fold them, you can using `foldPaths`:
+The first stop (`Stop == 1`) is left in the `Token` field, but we get new `Stop2` and `Stop3` fields holding the other stops!
+
+### Spine Paths
+
+When working with spine paths, it is often less obvious how we should interpret different paths in terms of data observations, but if you want to cleave them, you can.
+Don't forget that `Path` is numbered starting from `0`.
 
 ```{r}
 example_paths <- readHumdrum(humdrumRroot, 'examples/Reshaping_example3_paths.hum')
 
-example_paths
+example_paths |>
+  cleave(Path = 0:1)
 
-foldPaths(example_paths)
+
 
 ```
-
-Note that `foldPaths` does something a little bit different: wherever the "folding" path is null (non-existent)
-it copies the data from the base path.
-This means that we get two complete copies of the melody, identical where there is no spine path, but different where there are different paths.
-So we get one melody (in the `Token` field) going `4c 4d 4e 4d 2c 2B` and another melody 
-(in the new `Token_Path` field) going `4c 4d 4e 4f 2g 2g`.
-This option can be used with other folding functions as well, by setting the argument `fillFromField == TRUE`.
-
-### Folding Grace Notes
-
-> This functionality hasn't been implemented yet.
-> Bug us about it!
-
-### Other Folding 
-
-Using `foldHumdrum`, it is also possible to fold other data structures.
-The most obvious example, would be folding consecutive records or bars on top of each other.
-I'm not sure why you would want to!
-To do this, use the `what` argument of `foldHumdrum`.
-
-## Collapsing Data
-
-
-TBA
