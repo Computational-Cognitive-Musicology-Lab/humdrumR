@@ -3061,14 +3061,15 @@ makePitchTransformer <- function(deparser, callname,
                      outputClass = 'tonalInterval')
     
     if (length(transposeArgs) > 0L && is.tonalInterval(parsedTint)) {
+      humdrumRattr(parsedTint) <- NULL
       parsedTint <- do(transpose.tonalInterval, c(list(parsedTint), transposeArgs))
     }
-    
     deparseArgs <- c(list(parsedTint), deparseArgs)
     output <- if (deparse && is.tonalInterval(parsedTint))  do(!!deparser, 
                                                                deparseArgs, 
                                                                memoize = memoize, 
                                                                outputClass = !!outputClass) else parsedTint
+    
     if (deparse && !is.null(output)) {
       output <- if (inPlace) {
         rePlace(output, attr(parsedTint, 'dispatch'))
@@ -4228,7 +4229,6 @@ transpose.tonalInterval <- function(x, by = NULL, from = NULL, to = NULL, ...) {
     
     x$Generic + x$Alteration
   }
-  
   x
 }
 

@@ -32,7 +32,6 @@ NULL
 #' @export
 token <- function(x, Exclusive = NULL, ...) {
   if (is.null(x)) x <- character(0)
-  
   new('token', x, Exclusive = Exclusive, Attributes = list(...))
 }
 
