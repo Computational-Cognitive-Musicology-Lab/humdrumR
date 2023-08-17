@@ -1,3 +1,11 @@
 .text-muted {
    color: black !important;
 }
+
+.navbar {
+	height: 80px !important;
+}
+
+.bg-primary {
+   background-color: #b3a369 !important;
+}
