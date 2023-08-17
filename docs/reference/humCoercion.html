@@ -3,7 +3,7 @@
 without having to rely on humdrumR's with(in).humdrumR functionality.
 Rather, you'd like to just get &quot;normal&quot; R objects out of your humdrum data.
 humdrumR defines a number of functions/methods for &quot;coercing&quot; humdrum data into
-basic R data types."><title>humdrumR coercion — humCoercion • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="humdrumR coercion — humCoercion"><meta property="og:description" content="Many users may wish to work with humdrum data,
+basic R data types."><title>humdrumR coercion — humCoercion • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet"><meta property="og:title" content="humdrumR coercion — humCoercion"><meta property="og:description" content="Many users may wish to work with humdrum data,
 without having to rely on humdrumR's with(in).humdrumR functionality.
 Rather, you'd like to just get &quot;normal&quot; R objects out of your humdrum data.
 humdrumR defines a number of functions/methods for &quot;coercing&quot; humdrum data into
@@ -15,10 +15,10 @@ basic R data types."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
     
 
     <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
-    
+    <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,10 @@ basic R data types."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../news/index.html">News</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="nav-item dropdown">
@@ -34,27 +37,31 @@ basic R data types."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/a
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <h6 class="dropdown-header" data-toc-skip>Basics</h6>
     <a class="dropdown-item" href="../articles/GettingStarted.html">Getting started with humdrumR</a>
-    <a class="dropdown-item" href="../articles/IntroForCoders.html">HumdrumR for coders</a>
+    <a class="dropdown-item" href="../articles/DataFields.html">HumdrumR Data Fields</a>
     <div class="dropdown-divider"></div>
-    <h6 class="dropdown-header" data-toc-skip>R/Humdrum background</h6>
+    <h6 class="dropdown-header" data-toc-skip>R/Background</h6>
     <a class="dropdown-item" href="../articles/HumdrumSyntax.html">The humdrum syntax</a>
     <a class="dropdown-item" href="../articles/RPrimer.html">An R primer for humdrumR users</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Data prep</h6>
-    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing data</a>
+    <a class="dropdown-item" href="../articles/ReadWrite.html">Reading and writing humdrum data</a>
+    <a class="dropdown-item" href="../articles/ComplexSyntax.html">Complex humdrum syntax</a>
     <a class="dropdown-item" href="../articles/Reshaping.html">Shaping humdrum data</a>
     <a class="dropdown-item" href="../articles/Filtering.html">Filtering humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Analysis</h6>
-    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your data</a>
-    <a class="dropdown-item" href="../articles/WorkingWithData.html">Working with humdrum data</a>
-    <a class="dropdown-item" href="../articles/Context.html">Contextualizing data</a>
+    <a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a>
+    <a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a>
+    <a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a>
     <div class="dropdown-divider"></div>
     <h6 class="dropdown-header" data-toc-skip>Musical tools</h6>
     <a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a>
     <a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a>
     <a class="dropdown-item" href="../articles/KeysAndChord.html">Diatonic and tertian sets in humdrumR</a>
   </div>
+</li>
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -118,7 +125,7 @@ basic <code>R</code> data types.</p>
 <dd><p><em><strong>The desired output class.</strong></em></p>
 <p>Defaults to <code>"any"</code>.</p>
 <p>Must be a single <code>character</code> string naming an <a href="https://rdrr.io/r/base/vector.html" class="external-link">atomic vector type</a> to coerce the output to (i.e., <code>logical</code> or <code>numeric</code>).</p>
-<p>If set to <code>"any"</code>, the output type is simply whatever comes out of <code><a href="humActive.html">evalActive()</a></code>, which depends on the class of the underlying <a href="humTable.html">fields</a>.</p></dd>
+<p>If set to <code>"any"</code>, the output type is simply whatever the type of the <a href="selectedFields.html">selected field</a> is.</p></dd>
 
 
 <dt>humdrumR</dt>
@@ -158,12 +165,14 @@ or any combination of these (e.g., <code>"LIM"</code>).
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Generally, coercion works by evaluating a humdrumR object's the
-<a href="humActive.html">active expression</a> and forcing the result to be an atomic vector.
-This process is accomplished by the <code><a href="humActive.html">evalActive()</a></code> command.
-The <a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector(humdrumR)</a> method is essentially a wrapper for <code><a href="humActive.html">evalActive()</a></code>, with the additional
+<a href="selectedFields.html">selected fields</a> and forcing the result to be an atomic vector.
+When multiple field are selected, they are pasted together, separated by <code>", "</code>.
+If a field is not atomic (like a <code>list</code>, or <code>lm</code> object), a concise representation of the
+list or object class is printed.
+The as.vector(humdrumR) has the additional
 option of coercing the resulting vector to a particular type using the <code>mode</code> argument.</p>
 <p>The <a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix(humdrumR)</a> method take things a step further by putting the evaluated
-active expression into a two-dimensional matrix, with rows representing records and columns indicating
+fields into a two-dimensional matrix, with rows representing records and columns indicating
 spine paths (see Padding section below).
 <a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame(humdrumR)</a> first calls <code>as.matrix</code> then converts the matrix to a
 <code>data.frame</code>.

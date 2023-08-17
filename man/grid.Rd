@@ -15,7 +15,7 @@
 \usage{
 \method{grid}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 
-humData  select(Token) |> grid() 
+humData |> select(Token) |> grid() 
 humData |> grid(Token)
 
 grid(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)

@@ -50,7 +50,7 @@
 #' @importFrom rlang %|% %||% 
 #' @importFrom bit64 as.integer64 is.integer64 as.integer64 as.integer64.integer
 #' @importFrom numbers primeFactors
-#' @importFrom data.table data.table rbindlist setorder setorderv setcolorder copy as.data.table is.data.table frank CJ setnames setkey
+#' @importFrom data.table data.table rbindlist setorder setindex set setorderv setcolorder copy as.data.table is.data.table frank CJ setnames setkey
 #' @importFrom scales ContinuousRange
 #' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize
 #' @importFrom tidyselect eval_select

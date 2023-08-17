@@ -20,7 +20,7 @@
   inPlace = TRUE
 )
 
-humData  select(Token) |> ioi() 
+humData |> select(Token) |> ioi() 
 humData |> ioi(Token)
 
 ioi(
@@ -36,7 +36,7 @@ ioi(
 
 \method{sumTies}{default}(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 
-humData  select(Token) |> sumTies() 
+humData |> select(Token) |> sumTies() 
 humData |> sumTies(Token)
 
 sumTies(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)

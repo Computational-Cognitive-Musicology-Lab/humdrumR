@@ -52,7 +52,7 @@ degree(
   inPlace = FALSE
 )
 
-humData  select(Token) |> deg() 
+humData |> select(Token) |> deg() 
 humData |> deg(simple = TRUE)
 humData |> deg(Token, Key = Key)
 

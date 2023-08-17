@@ -3700,7 +3700,7 @@ deg.default <- makePitchTransformer(tint2deg, 'deg', keyed = FALSE)
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> deg() 
+#' humData |> select(Token) |> deg() 
 #' humData |> deg(simple = TRUE)
 #' humData |> deg(Token, Key = Key)
 #' 
@@ -3914,7 +3914,7 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, e
 #' argument.
 #' Other octave labels (like [lilypond()]-style marks) can be used if you set `octave.integer = FALSE`.
 #' 
-#' 
+#' @examples 
 #' \dontrun{
 #' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 #' 
@@ -4685,7 +4685,7 @@ mint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bra
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> mint() 
+#' humData |> select(Token) |> mint() 
 #' humData |> mint(simple = TRUE)
 #' humData |> mint(Token, Key = Key)
 #' 

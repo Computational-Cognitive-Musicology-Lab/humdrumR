@@ -21,7 +21,7 @@ navbar:
       href: news/index.html
     GUI:
       text: GUI
-      href: https://ccml.music.gatech.edu/humdrumR-GUI
+      href: https://ccml.music.gatech.edu/humdrumR
 template:
   includes:
     before_title: <a href="https://gatech.edu"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"/></a> <a href="https://ccml.gtcmt.gatech.edu"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"/></a>
@@ -173,7 +173,7 @@ reference:
   - notehead
   - seconds
   - ioi
-  - untie
+  - sumTies
   - timeline
   - timebase
   - recordDuration

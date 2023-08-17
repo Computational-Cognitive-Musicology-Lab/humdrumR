@@ -5,6 +5,8 @@
 \alias{duration.default}
 \alias{duration.humdrumR}
 \alias{quarters.default}
+\alias{quarters.humdrumR}
+\alias{quarters}
 \title{Numeric (double) representation of durations}
 \usage{
 \method{duration}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
@@ -16,6 +18,12 @@ humData |> duration(simple = TRUE)
 duration(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 
 \method{quarters}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+
+humData |> select(Token) |> quarters() 
+humData |> quarters(Token)
+humData |> quarters(simple = TRUE)
+
+quarters(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
 \item{x}{\emph{\strong{An input  vector.}}
@@ -56,6 +64,10 @@ See "Grace notes" section below.}
 Output is \code{numeric} (real number).
 
 If \code{duration()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{quarters()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
 If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }

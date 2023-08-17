@@ -20,7 +20,7 @@
   groupby = list()
 )
 
-humData  select(Token) |> timeline() 
+humData |> select(Token) |> timeline() 
 humData |> timeline(Token)
 
 timeline(
@@ -47,7 +47,7 @@ timeline(
   groupby = list()
 )
 
-humData  select(Token) |> timestamp() 
+humData |> select(Token) |> timestamp() 
 humData |> timestamp(Token)
 
 timestamp(

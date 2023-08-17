@@ -9,6 +9,8 @@
 \alias{ms.humdrumR}
 \alias{ms}
 \alias{dur.default}
+\alias{dur.humdrumR}
+\alias{dur}
 \title{Clock-time representations of duration}
 \usage{
 \method{seconds}{default}(
@@ -21,7 +23,7 @@
   inPlace = FALSE
 )
 
-humData  select(Token) |> seconds() 
+humData |> select(Token) |> seconds() 
 humData |> seconds(Token)
 
 seconds(
@@ -44,7 +46,7 @@ seconds(
   inPlace = FALSE
 )
 
-humData  select(Token) |> ms() 
+humData |> select(Token) |> ms() 
 humData |> ms(Token)
 
 ms(
@@ -58,6 +60,24 @@ ms(
 )
 
 \method{dur}{default}(
+  x,
+  ...,
+  BPM = "*M60",
+  minutes = FALSE,
+  hours = FALSE,
+  days = FALSE,
+  months = FALSE,
+  years = FALSE,
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> dur() 
+humData |> dur(Token)
+
+dur(
   x,
   ...,
   BPM = "*M60",
@@ -128,6 +148,10 @@ you may use the data's \link[=fields]{fields} as arguments.
 If no field names are specified, the first \link{selectedField} is used as \code{x}.
 
 If \code{ms()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{dur()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
 If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }

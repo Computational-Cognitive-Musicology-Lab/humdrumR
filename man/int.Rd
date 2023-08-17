@@ -38,7 +38,7 @@ int(
   orderby = list()
 )
 
-humData  select(Token) |> mint() 
+humData |> select(Token) |> mint() 
 humData |> mint(simple = TRUE)
 humData |> mint(Token, Key = Key)
 

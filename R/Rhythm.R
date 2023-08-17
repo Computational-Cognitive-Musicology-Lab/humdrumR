@@ -1098,14 +1098,14 @@ quarters.default <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> quarters() 
+#' humData |> select(Token) |> quarters() 
 #' humData |> quarters(Token)
 #' humData |> quarters(simple = TRUE)
 #' 
-#' @rdname quarters
+#' @rdname duration
 #' @export
 quarters.humdrumR <- humdrumRmethod(quarters.default)
-#' @rdname quarters
+#' @rdname duration
 #' @export
 quarters <- humdrumRgeneric(quarters.default)
 
@@ -1236,7 +1236,7 @@ seconds.default <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', ext
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> seconds() 
+#' humData |> select(Token) |> seconds() 
 #' humData |> seconds(Token)
 #' 
 #' @rdname time
@@ -1256,7 +1256,7 @@ ms.default <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> ms() 
+#' humData |> select(Token) |> ms() 
 #' humData |> ms(Token)
 #' 
 #' @rdname time
@@ -1281,13 +1281,13 @@ dur.default <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> dur() 
+#' humData |> select(Token) |> dur() 
 #' humData |> dur(Token)
 #' 
-#' @rdname dur
+#' @rdname time
 #' @export
 dur.humdrumR <- humdrumRmethod(dur.default)
-#' @rdname dur
+#' @rdname time
 #' @export
 dur <- humdrumRgeneric(dur.default)
 
@@ -1432,7 +1432,7 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> ioi() 
+#' humData |> select(Token) |> ioi() 
 #' humData |> ioi(Token)
 #' 
 #' @rdname ioi
@@ -1496,7 +1496,7 @@ sumTies.default <- function(x, open = '[', close = ']', ...,
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> sumTies() 
+#' humData |> select(Token) |> sumTies() 
 #' humData |> sumTies(Token)
 #' 
 #' @rdname ioi
@@ -1757,7 +1757,7 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> timeline() 
+#' humData |> select(Token) |> timeline() 
 #' humData |> timeline(Token)
 #' 
 #' @rdname timeline
@@ -1789,7 +1789,7 @@ timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = T
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> timestamp() 
+#' humData |> select(Token) |> timestamp() 
 #' humData |> timestamp(Token)
 #' 
 #' @rdname timeline
@@ -2142,7 +2142,7 @@ grid.default <- makeRhythmTransformer(rint2grid, 'grid', 'character')
 #' If no field names are specified, the first [selectedField] is used as `x`.
 #'
 #' @usage 
-#' humData  select(Token) |> grid() 
+#' humData |> select(Token) |> grid() 
 #' humData |> grid(Token)
 #' 
 #' @rdname grid
