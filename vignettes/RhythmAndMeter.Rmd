@@ -18,8 +18,8 @@ rhythmFunctions <- humdrumR:::rhythmFunctions
 
 
 
-As a computational musicology toolkit, `r hm`'s tools for analyzing and manipulating pitch data are just about the most important tools in the toolbox.
-For the most part, `r hm`'s pitch tools are focused on the Western notions of rhythm and meter, but the tools can easily be generalized to more diverse notions of rhythm and time.
+As a computational musicology toolkit, `r hm`'s tools for analyzing and manipulating rhythmic (timing) information are just about the most important tools in the toolbox.
+For the most part, `r hm`'s rhythm tools are focused on the Western notions of rhythm and meter, but the tools can easily be generalized to more diverse notions of rhythm and time.
 
 
 # Durations
@@ -75,7 +75,7 @@ recip("𝅘𝅥 𝅭 ")
 
 ----
 
-The complete list of basic pitch functions is: 
+The complete list of basic rhythm (duration) functions is: 
 
 ```{r results = 'asis', echo = FALSE}
 
@@ -100,11 +100,11 @@ You can also call documentation for any individual function, like `?recip`.
 
 ### Rhythm Arguments
 
-The rhythm functions from the previous section have a few shared arguments that they *all* understand: `scale` and `parse(unit)`.
+The rhythm functions from the previous section have a few shared arguments that they *all* understand: `scale` and `unit`.
 
 ### Scale and Unit
 
-The `scale` and `parse(unit)` arguments are conceptually different, but can be used to acheive very similar transformations, so it can be easy to confuse them.
+The `scale` and `unit` arguments are conceptually different, but can be used to achieve very similar transformations, so it can be easy to confuse them.
 The `scale` argument is the easiest to understand: it simply (re)scales the output duration of the function.
 Would you like to [augment](https://en.wikipedia.org/wiki/Augmentation_(music)) durations? Perhaps doubling their length?
 Simply specify `scale = 2`.
@@ -126,26 +126,28 @@ recip(c('8','4','4.','2'), scale = 1/3)
 
 ---
 
-The `unit` argument can be passed to the rhythm input parser by adding and argument `parse(unit = ...)` to a call.
-Rather than transforming the output, this argument controls how the parser interprets the input unit.
+Unlike `scale`, which controls the *output* scale, `unit` controls the input scale.
 This is most useful with numeric values.
-I might get a bunch of duration values as numbers, like `c(1, 1.5, 2, 1, 0.5, 1)`.
+What do we mean by "controls the input scale"?
+Imagine we have a bunch of duration values as numbers, like `c(1, 1.5, 2, 1, 0.5, 1)`.
 But what unit is these numbers counting?
 By default, `r hm` treats them as *whole notes*, so `0.5` is a half note, right?
 However, we might prefer to think of these numbers as units of quarter notes---a very common approach.
-Let's look at how our output would change:
+This is what the `unit` argument is for.
+Because it is an argument for the rhythm parser/interpreter, you must pass `unit` through the `parseArgs` argument, which must be a named list of values:
+
 
 ```{r}
 
 input <- c(1, 1.5, 2, 1, 0.5, 1)
 
 recip(input)
-recip(input, parse(unit = '4'))
+recip(input, parseArgs = list(unit = '4'))
 
 
 ```
 
-As you can see, you could achieve the same difference in output using the `scale` argument (`scale = 1/4`), but the `unit` argument is a little bit of a different way of thinking about it.
+As you can see, you *can* achieve the same difference in output using the `scale` argument (`scale = 1/4`), but the `unit` argument is a little bit of a different way of thinking about it.
 
 ## Special Cases
 
@@ -188,7 +190,7 @@ When used in a call to `with()` or `within()`, `ioi()` will automatically be app
 
 A similar case to inter-onset-intervals are *ties*.
 In `**kern`, the `[`, `_`, and `]` tokens are used to indicate groups of durations that are actually played as a single, longer duration.
-The `untie()` function will automatically sum the durations of tied notes:
+The `sumTies()` function will automatically sum the durations of tied notes:
 
 
 ```{r}
@@ -196,7 +198,7 @@ The `untie()` function will automatically sum the durations of tied notes:
 
 melody <- c('[2d', '8d]', '8d', '8f#', '8g#', '4.a', '[8b-', '2b-_', '4b-]', '4a', '2g#')
 
-untie(melody)
+sumTies(melody)
 
 ```
 
@@ -240,21 +242,27 @@ plot(x = timeline(row),
 
 ---
 
-The `timeline()` function has extra special functionality when working on actual humdrum datasets using `with()` or `within()`.
+The `timeline()` function has extra special functionality when working on actual humdrum datasets.
 It will automatically (unless told not too) calculate timelines separately within each File/Spine/Path of a dataset, ignoring multiple stops.
 For example:
 
 ```{r}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
-within(chorales, timeline(Token))
+chorales |>
+  timeline()
 
 
 ```
 
+So we get a separate timeline for each spine in each piece.
+
+> Note: `timeline()` ignores all multi-stops. 
+> If you have spine paths in your data, you should look into the [expandPaths](ComplexSyntax.html#expanding-paths "Complex syntax article, expanding paths section") options.
+
 ## Controlling the Start
 
-You'll notice that our timelines all start with zero, which makes sense of course.
+You'll notice that our timelines all start from zero, which makes sense of course.
 But in some cases, you might want to have the timeline start at a different value.
 For example, "Row Row Row Your Boat" is a round, so we'd want the second entrance of the round to start at the second measure.
 We can do this with the `start` argument to timeline:
@@ -270,7 +278,7 @@ timeline(row, start = 2)
 ### Pickups
 
 The `pickup` argument gives us another option to control where our timeline starts.
-In many datasets, the first few events in the music are a *anacrusis* or "pick up"; we'd generally like our timeline to start *after* the pickup.
+In many datasets, the first few events in the music are an *anacrusis* or "pick up"; we'd generally like our timeline to start *after* the pickup.
 To make this happen, the `pickup` argument can be passed a `logical` vector which is the same length as the input (`x`): 
 Any `TRUE` values at the beginning of the vector are considered a pickup;
 Thus, the *first* `FALSE` value in the `pickup` vector is chosen as the start of th timeline.
@@ -282,7 +290,7 @@ melody <- c('8c', '8d','2e', '2f','1e')
 ```
 
 but the first two notes are a pickup.
-Since we can see that the pickup has a duration of `.25` (quarte-note), we *could* use the `start` argument to do this:
+Since we can *see* that the pickup has a duration of `.25` (quarter-note), we *could* use the `start` argument to do this:
 
 ```{r}
 timeline(melody, start = -.25)
@@ -307,30 +315,34 @@ So, in our Bach chorales:
 
 ```{r}
 
-within(chorales, timeline(Token, pickup = Bar < 1))
+chorales |>
+  timeline(pickup = Bar < 1)
 
 
 ```
 
 Now the `0` in our timelines corresponds to the first downbeat of each spine, in each file.
-The key advantage is that this will work even if different pieces in the corpus have pickups of different lengths, even if there is *no* pickup.
+The key advantage is that this will work even if different pieces in the corpus have pickups of different lengths, and even if there is *no* pickup.
 
 ### Timestamp
 
 The `timestamp()` function is a special variant of `timeline()` which outputs a timeline in clock-time, using the `dur()` format.
-In order to do this `timestamp()` needs to know a tempo: by default, `with()` and `within()` will pass the `BPM` field from humdrum data (if there is one) to `timestamp()`.
-If the `BPM` argument is not provided, the default is 60 bpm.
+In order to do this `timestamp()` needs to know a tempo: by default, `r hm` will pass the `BPM` field from humdrum data (if there is one) to `timestamp()`.
+If the `BPM` argument is not provided, the default is 60 beats-per-minute.
 
 
 
 # Counting Beats
 
 Ok, the `timeline()` gives us a timeline in whole-note units, giving fractional (decimal) output.
-Often in music, we want to know how many *beats* have ellapsed at a given time, rather than the exact time position.
+Often in music, we want to know how many *beats* have elapsed at a given time, rather than the exact time position.
 For this, use the `count()`, and its `beat` argument.
 The default `beat` is a whole-note, so `count()` will count which whole note you are on:
 
 ```{r}
+row <- c('4c', '4c', '6c', '12d', '4e', '6e','12d', '6e', '12f', '2g', 
+         '12cc', '12cc', '12cc', '12g', '12g', '12g', '12e', '12e', '12e', '12c', '12c', '12c', 
+         '6g','12f', '6e', '12d','2c')
 
 count(row)
 
@@ -385,12 +397,12 @@ subpos(seven8, beat = list(c('4', '4', '4.')), scale = 8)
 
 The `count()` and `subpos()` commands are great if we want count in a single beat/measure unit.
 To take things to the next level(s), we need to consider musical *meter*.
-From the point of view of `r hm`, "meter" is a set of multiple "beat levels" occuring at the same time, with "lower" (faster/shorter) levels nested inside "higher" (slower/longer) levels.
+From the point of view of `r hm`, "meter" is a set of multiple "beat levels" occurring at the same time (in parallel), with "lower" (faster/shorter) levels nested inside "higher" (slower/longer) levels.
 `R Hm` defines a number of useful tools for applying metric analyses to rhythmic data.
 
-## Metric levels
+### Metric levels
 
-The first thing we might want to do, is take a sequence of rhythm durations, and identify which metric level each onset lands on.
+The first thing we might want to do, is take a sequence of rhythm durations and identify which metric level each onset lands on.
 To do this, use `metlev()`:
 
 ```{r}
@@ -402,8 +414,8 @@ metlev(eighths)
 ```
 
 By default, `metlev()` is assuming a duple meter for us---basically 4/4 time---so these eight eighth-notes make one measure of 4/4.
-The first onset lands on the downbeat, coinciding with the highest level in the meter (as defined by default)---this highest level beat is a whole-note, which is why the output is `"1"` ([recip()] notation for a whole-note).
-Every odd eighth-note falls down at the eigth-note beat level, and is labeled `"8"`.
+The first onset lands on the downbeat, coinciding with the highest level in the meter (as defined by default)---this highest level beat is a whole-note, which is why the output is `"1"` (`**recip` notation for a whole-note).
+Every odd eighth-note falls down at the eighth-note beat level, and is labeled `"8"`.
 4/4 beats 2 and 4 (the back beats) fall on the quarter-note level, and labeled `"4"`.
 Finally, beat 3 is on the half-note level (`"2"`).
 
@@ -420,7 +432,25 @@ metlev(eighths, value = FALSE)
 
 The whole-note level is `1` and (in this case) the eighth-note level is `4`.
 
+### Metric position
+
+Along with `metlev()`, `r hm` provides to complementary functions called `metcount()`, `metsubpos()`.
+As you might guess, these are metric parallels of `count()` and `subpos()`.
+The `metcount()` function counts beats at a particular beat level (the `level` argument) *within* the highest level in the meter.
+The `metsubpos()` function calculates the rhythm offset between each onset and the nearest beat in the meter.
+
+
+
+
 ## Controlling meter
 
+You can control the meter used by `metlev()` using the `meter` argument.
+The simplest thing is to pass the meter as a humdrum time-signature interpretation:
 
+```{r}
+eighths <- c('8', '8', '8', '8', '8', '8', '8', '8')
+
+metlev(eighths, meter = 'M3/4')
+
+```
 

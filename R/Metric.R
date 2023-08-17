@@ -444,7 +444,7 @@ tatum.meter <- function(x, deparser = recip) {
 #' @rdname tatum
 #' @export
 tatum.character <- dofunc('x', function(x, deparser = recip) {
-  checks(deparser, xclass('rhythmFunction'))
+  checks(deparser, xinherits('rhythmFunction'))
   
   timesignatures <- grepl('^\\*?M', x)
   rint <- .unlist(c(if (any(timesignatures)) tatum.meter(meter.character(x[timesignatures]), deparser = NULL),
@@ -459,7 +459,7 @@ tatum.character <- dofunc('x', function(x, deparser = recip) {
 #' @rdname tatum
 #' @export
 tatum.numeric <- dofunc('x', function(x, deparser = duration) {  
-  checks(deparser, xclass('rhythmFunction'))
+  checks(deparser, xinherits('rhythmFunction'))
     
   rint <- rhythmInterval(unique(x))
   result <- tatum.rational(rint)
@@ -846,7 +846,7 @@ subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser 
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?subpos", 'the rhythm vignette'))
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
-  checks(deparser, xclass('rhythmFunction'))
+  checks(deparser, xinherits('rhythmFunction'))
   
   scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
   
@@ -883,7 +883,7 @@ subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser 
 scaled_timeline <- function(dur, beat, start, pickup, groupby, callname, sumBeats = FALSE) {
   dur <- rhythmInterval(dur)
   
-  checks(beat, (xatomic | xclass(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
+  checks(beat, (xatomic | xinherits(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
   
   if (is.list(beat)) {
     beat <- rep(beat, length.out = length(dur))
@@ -1147,7 +1147,7 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
   checks(offBeats, xTF)
   checks(value, xTF)
   checks(remainderSubdivides, xTF)
-  checks(deparser, xnull | xclass('rhythmFunction'))
+  checks(deparser, xnull | xinherits('rhythmFunction'))
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
                  remainderSubdivides = remainderSubdivides, callname = 'metlev', ...)
