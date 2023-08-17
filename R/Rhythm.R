@@ -877,10 +877,13 @@ rhythmArgCheck <- function(args, callname) {
   args
 }
 
-makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', extraArgs = list()) {
+makeRhythmTransformer <- function(deparser, callname, outputClass = 'character', 
+                                  tandem = c('TimeSignature', 'Mensuration', 'BPM'),
+                                  extraArgs = list()) {
   # this function will create various rhythm transform functions
   
-  withinFields$Exclusive  <<- c(withinFields$Exclusive, callname)
+  autoArgTable <<- rbind(autoArgTable,
+                         data.table(Argument = 'Exclusive', Type = 'Exclusive', Function = callname, Expression = list(quote(Exclusive))))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -949,6 +952,7 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
         token(output, Exclusive = callname, 
               deparseArgs = deparseArgs[!names(deparseArgs) %in% c('x', 'Exclusive')][-1], 
               factorizer = set.ramut,
+              tandem = tandem,
               parser = rhythmInterval,
               deparser = !!deparser)
 
@@ -1016,8 +1020,27 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' 
 #' @inheritParams rhythmFunctions
 #' 
+#' @name recip
 #' @export 
-recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%'))
+recip.default <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%'))
+#' Apply to humdrumR data
+#' 
+#' If `recip()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' ## humdrumR S3 method:
+#' humData |> select(Token) |> recip() 
+#' humData |> recip(simple = TRUE)
+#' humData |> recip(Token, Key = Key)
+#' 
+#' @rdname recip
+#' @export
+recip.humdrumR <- humdrumRmethod(recip.default)
+#' @rdname recip
+#' @export
+recip <- humdrumRgeneric(recip.default)
 
 #' Numeric (double) representation of durations
 #' 
@@ -1044,15 +1067,47 @@ recip <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(sep = '%')
 #' 
 #' @family {rhythm functions}
 #' @inheritParams rhythmFunctions
+#' @name duration
 #' @export 
-duration  <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
+duration.default <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
+#' Apply to humdrumR data
+#' 
+#' If `duration()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> duration() 
+#' humData |> duration(Token)
+#' humData |> duration(simple = TRUE)
+#' 
+#' @rdname duration
+#' @export
+duration.humdrumR <- humdrumRmethod(duration.default)
+#' @rdname duration
+#' @export
+duration <- humdrumRgeneric(duration.default)
 
 #' @rdname duration
 #' @export 
-quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
-
-
-
+quarters.default <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
+#' Apply to humdrumR data
+#' 
+#' If `quarters()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> quarters() 
+#' humData |> quarters(Token)
+#' humData |> quarters(simple = TRUE)
+#' 
+#' @rdname duration
+#' @export
+quarters.humdrumR <- humdrumRmethod(quarters.default)
+#' @rdname duration
+#' @export
+quarters <- humdrumRgeneric(quarters.default)
 
 #' Note value representation of duration
 #' 
@@ -1093,9 +1148,26 @@ quarters <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 #' @family {rhythm functions}
 #' @inheritParams rhythmFunctions
+#' @name notehead
 #' @export 
-notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
-
+notehead.default <- makeRhythmTransformer(rint2notehead, 'notehead') 
+#' Apply to humdrumR data
+#' 
+#' If `notehead()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> notehead() 
+#' humData |> notehead(Token)
+#' humData |> notehead(simple = TRUE)
+#' 
+#' @rdname notehead
+#' @export
+notehead.humdrumR <- humdrumRmethod(notehead.default)
+#' @rdname notehead
+#' @export
+notehead <- humdrumRgeneric(notehead.default)
 
 #' Clock-time representations of duration
 #'
@@ -1155,22 +1227,69 @@ notehead <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' or how rhythms are [parsed][rhythmParsing] and [deparsed][rhythmDeparsing].
 #' @inheritParams rhythmFunctions
 #' @name time
-#' @export
-seconds <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'))
-
+#' @export 
+seconds.default <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', extraArgs = alist(BPM = '*M60'))
+#' Apply to humdrumR data
+#' 
+#' If `seconds()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> seconds() 
+#' humData |> seconds(Token)
+#' 
 #' @rdname time
 #' @export
-ms <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(BPM = '*M60'))
-
+seconds.humdrumR <- humdrumRmethod(seconds.default)
 #' @rdname time
 #' @export
-dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60', 
-                                                                minutes = FALSE,
-                                                                hours = FALSE,
-                                                                days = FALSE,
-                                                                months = FALSE,
-                                                                years = FALSE,
-                                                                milliseconds = TRUE))
+seconds <- humdrumRgeneric(seconds.default)
+
+#' @rdname time
+#' @export 
+ms.default <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(BPM = '*M60'))
+#' Apply to humdrumR data
+#' 
+#' If `ms()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> ms() 
+#' humData |> ms(Token)
+#' 
+#' @rdname time
+#' @export
+ms.humdrumR <- humdrumRmethod(ms.default)
+#' @rdname time
+#' @export
+ms <- humdrumRgeneric(ms.default)
+
+#' @rdname time
+#' @export 
+dur.default <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60', 
+                                                                        minutes = FALSE,
+                                                                        hours = FALSE,
+                                                                        days = FALSE,
+                                                                        months = FALSE,
+                                                                        years = FALSE))
+#' Apply to humdrumR data
+#' 
+#' If `dur()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> dur() 
+#' humData |> dur(Token)
+#' 
+#' @rdname time
+#' @export
+dur.humdrumR <- humdrumRmethod(dur.default)
+#' @rdname time
+#' @export
+dur <- humdrumRgeneric(dur.default)
 
 ###################################################################### ###
 # Manipulating rhythm intervals ##########################################
@@ -1185,13 +1304,13 @@ dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60',
 #' These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.
 #' `ioi()` adds the duration of [rests](https://en.wikipedia.org/wiki/Rest_(music)) to the previous
 #' non-rest (onset) duration, to create [interonset intervals](https://en.wikipedia.org/wiki/Time_point#Interonset_interval) (IOIs).
-#' `untie()` sums [tied](https://en.wikipedia.org/wiki/Tie_(music)) durations.
+#' `sumTies()` sums [tied](https://en.wikipedia.org/wiki/Tie_(music)) durations.
 #' 
 #' @details 
 #' 
 #' 
 #' Both functions return "collapsed" durations are as null data tokens. 
-#' For example, `untie(c('[4a', '4a]', '2g'))` returns `c('2a', '.', '2g')`, with the second (tied) duration null (`"."`).
+#' For example, `sumTies(c('[4a', '4a]', '2g'))` returns `c('2a', '.', '2g')`, with the second (tied) duration null (`"."`).
 #' 
 #' For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no *next* onset, so there
 #' can't really be a "interonset" interval.
@@ -1255,13 +1374,14 @@ dur <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*M60',
 #'
 #' tokens_withties <- c('2c', '4d', '[4e', '4e]', '8f','[8d#', '4d#]', '4e')
 #' 
-#' untie(tokens_withties) 
+#' sumTies(tokens_withties) 
 #' 
-#' @export
-ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
-                finalOnset = FALSE,
-                groupby = list(), parseArgs = list(), Exclusive = NULL,
-                inPlace = TRUE) {
+#' @name ioi
+#' @export 
+ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ..., 
+                        finalOnset = FALSE,
+                        groupby = list(), parseArgs = list(), Exclusive = NULL,
+                        inPlace = TRUE) {
   
   checks(onsets, xlogical & xmatch(x))
   checks(finalOnset, xTF)
@@ -1304,8 +1424,23 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   humdrumRattr(output) <- list(dispatch = NULL)
   output
   
-  
 }
+#' Apply to humdrumR data
+#' 
+#' If `ioi()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> ioi() 
+#' humData |> ioi(Token)
+#' 
+#' @rdname ioi
+#' @export
+ioi.humdrumR <- humdrumRmethod(ioi.default)
+#' @rdname ioi
+#' @export
+ioi <- humdrumRgeneric(ioi.default)
 
 #' @param open ***How are the beginnings of ties indicated in `x`?***
 #' 
@@ -1320,10 +1455,10 @@ ioi <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
 #' Must be a single `character` string, interpreted as a regular expression.
 #' 
 #' @rdname ioi
-#' @export
-untie <- function(x, open = '[', close = ']', ..., 
-                  groupby = list(), 
-                  inPlace = TRUE) {
+#' @export 
+sumTies.default <- function(x, open = '[', close = ']', ..., 
+                          groupby = list(), 
+                          inPlace = TRUE) {
   checks(inPlace, xTF)
   
   rint <- rhythmInterval(x, ...)
@@ -1354,8 +1489,22 @@ untie <- function(x, open = '[', close = ']', ...,
   output
   
 }
-
-
+#' Apply to humdrumR data
+#' 
+#' If `sumTies()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> sumTies() 
+#' humData |> sumTies(Token)
+#' 
+#' @rdname ioi
+#' @export
+sumTies.humdrumR <- humdrumRmethod(sumTies.default)
+#' @rdname ioi
+#' @export
+sumTies <- humdrumRgeneric(sumTies.default)
 
 
 # minutes <- function(seconds, format = TRUE) {
@@ -1480,7 +1629,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' by placing simultaneous events in the same record, with successive events
 #' in ever higher records---progressing "top down" through the file.
 #' In some humdrum data, only this (implicit) ordering of data over time is present.
-#' The `Record` and `NData` [fields][fields()] capture this ordering in all data parsed by `humdrumR`.
+#' The `Record` and `DataRecord` [fields][fields()] capture this ordering in all data parsed by `humdrumR`.
 #' However, many (probably most) humdrum data files contain at least some information about the relative 
 #' duration of events, representing more detailed information about timing and rhythm.
 #' 
@@ -1589,25 +1738,40 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' 
 #' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
-#' @export
-timeline <- function(x, start = 0, pickup = NULL, ..., 
-                     Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
+#' @name timeline
+#' @export 
+timeline.default <- function(x, start = 0, pickup = NULL, ..., 
+                             Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
-   
+  
   timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timeline')
   
   rint2duration(timerints, ...)
   
- 
-  
 }
+#' Apply to humdrumR data
+#' 
+#' If `timeline()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> timeline() 
+#' humData |> timeline(Token)
+#' 
+#' @rdname timeline
+#' @export
+timeline.humdrumR <- humdrumRmethod(timeline.default)
+#' @rdname timeline
+#' @export
+timeline <- humdrumRgeneric(timeline.default)
 
 
 #' @rdname timeline
-#' @export
-timestamp <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., 
-                      Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
+#' @export 
+timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., 
+                              Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
   seconds <- rint2seconds(rints, BPM = BPM)
@@ -1618,7 +1782,22 @@ timestamp <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ...
   
   
 }
-
+#' Apply to humdrumR data
+#' 
+#' If `timestamp()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> timestamp() 
+#' humData |> timestamp(Token)
+#' 
+#' @rdname timeline
+#' @export
+timestamp.humdrumR <- humdrumRmethod(timestamp.default)
+#' @rdname timeline
+#' @export
+timestamp <- humdrumRgeneric(timestamp.default)
 
 pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) {
   # this does most of work for timestamp and timeline
@@ -1673,18 +1852,18 @@ recordDuration <- function(humdrumR) {
   humdrumR <- .recordDuration(humdrumR)
   
   humdrumR@Humtable[ , ..Timeline.. := NULL]
-  removeFields(humdrumR) <- '..Timeline..'
+  humdrumR <- updateFields(humdrumR)
   
   humdrumR 
 }
 
 .recordDuration <- function(humdrumR) {
   
-  oldActive <- getActive(humdrumR)
+  selectedFields <- selectedFields(humdrumR)
   humtab <- getHumtab(humdrumR, 'LIMDd')
   
   humdrumR <- within(humdrumR, ..Timeline.. <- timeline(.))
-  humdrumR@Active <- oldActive
+  humdrumR <- selectFields(humdrumR, selectedFields)
   
   humdrumR <- within(humdrumR, dataTypes = c('Dd'),
                      fill = ..Timeline.. <- max(c(-1, ..Timeline..), na.rm = TRUE), by = list(File, Record))
@@ -1726,7 +1905,7 @@ timebase <- function(humdrumR, tb = '16') {
   checks(humdrumR, xhumdrumR)
   message('This is an early draft of timebase()...you might encounter errors.')
   
-  oldActive <- getActive(humdrumR)
+  selectedFields <- selectedFields(humdruamR)
   
   tb <- if (is.null(tb)) with(humdrumR, tatum(., deparser = duration)) else duration(tb)
   
@@ -1752,7 +1931,6 @@ timebase <- function(humdrumR, tb = '16') {
                            firstrow <- .SD[1]
                            firstrow$Token <- tb
                            firstrow$Type <- 'I'
-                           firstrow$Null <- FALSE
                            rbind(firstrow, .SD)
                            
                          }, by = list(File, Spine)])
@@ -1761,15 +1939,13 @@ timebase <- function(humdrumR, tb = '16') {
   
   for (field in fields(humdrumR, 'D')$Name) humtab[[field]][humtab$Duplicated] <- NA
   humtab$Type[humtab$Duplicated] <- 'd'
-  humtab$Null[humtab$Duplicated] <- TRUE
   
-  # humtab <- update_Null.data.table(humtab, oldActiveFields)
   putHumtab(humdrumR) <- humtab
-  
-  removeFields(humdrumR) <- c('..Timeline..', 'RecordDuration')
   humdrumR@Humtable[ , c('..Timeline..', 'RecordDuration') := NULL]
-  humdrumR@Active <- oldActive
-  humdrumR
+  humdrumR <- updateFields(humdrumR)
+  
+  selectFields(humdrumR, selectedFields)
+ 
 }
 
 ## Find lag ----
@@ -1956,9 +2132,25 @@ rhythmAlign <- function(x, y) {
 #' @family {rhythm functions}
 #'
 #' @inheritParams rhythmFunctions 
+#' @name grid
+#' @export 
+grid.default <- makeRhythmTransformer(rint2grid, 'grid', 'character')
+#' Apply to humdrumR data
+#' 
+#' If `grid()` is applied to a [humdrumR data class][humdrumRclass]
+#' you may use the data's [fields][fields()] as arguments.
+#' If no field names are specified, the first [selectedField] is used as `x`.
+#'
+#' @usage 
+#' humData |> select(Token) |> grid() 
+#' humData |> grid(Token)
+#' 
 #' @rdname grid
 #' @export
-grid <- makeRhythmTransformer(rint2grid, 'grid', 'character')
+grid.humdrumR <- humdrumRmethod(grid.default)
+#' @rdname grid
+#' @export
+grid <- humdrumRgeneric(grid.default)
 
 ### To grid ----
 

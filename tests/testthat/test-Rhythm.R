@@ -22,7 +22,7 @@ test_that('Basic rhythm functions work', {
 })
 
 
-test_that("ioi and untie work correctly", {
+test_that("ioi and sumTies work correctly", {
   
   # ioi()
   test <- c('4a', '4a', '4b', '4r', '8c', '16r', '8.c~',  '8G', '8A', '4.r')
@@ -39,22 +39,22 @@ test_that("ioi and untie work correctly", {
   
   mc <- readHumdrum(humdrumRroot, 'HumdrumData/RapFlow/.*rap')
   
-  mc <- foldHumdrum(mc[[ , c(1, 6)]], 2, 1, newFieldNames = 'IPA')
+  mc <- cleave(mc[[ , c(1, 6)]], 1:2, newFields = 'IPA')
   mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
   
-  pairs <- with(mc$IOI,  data.frame(IOI, Token))
+  pairs <- with(humdrumR:::selectFields(mc, 'IOI'),  data.frame(IOI, Token))
   expect_true(all(Reduce('>=', lapply(pairs, duration))))
   
-  # untie()
+  # sumTies()
   
   test <- c('4a', '[4a',']8a', NA, '8g','8G','[8a','_2a','4a]','4G')
-  expect_equal(untie(test), c( '4a', '4.a', '.', NA, '8g', '8G', '2..a', '.', '.', '4G' ))
-  expect_equalchar(untie(test, inPlace = FALSE), c( '4', '4.', NA, NA, '8', '8', '2..', NA, NA, '4' ))
+  expect_equal(sumTies(test), c( '4a', '4.a', '.', NA, '8g', '8G', '2..a', '.', '.', '4G' ))
+  expect_equalchar(sumTies(test, inPlace = FALSE), c( '4', '4.', NA, NA, '8', '8', '2..', NA, NA, '4' ))
   
   # both
   test <- c('4a', '[4a',']8a','8g','8r','[8a','_2a','4a]','4r')
-  expect_equal(ioi(untie(test), finalOnset = TRUE), 
-               untie(ioi(test, finalOnset = TRUE)))
+  expect_equal(ioi(sumTies(test), finalOnset = TRUE), 
+               sumTies(ioi(test, finalOnset = TRUE)))
 })
 
 test_that('Examples from rhythm man are correct', {
@@ -69,7 +69,7 @@ test_that('Examples from rhythm man are correct', {
   
   expect_equalchar(recip('4%5', sep ='/'), '4/5')
   
-  expect_equalchar(untie(c('[4a', '4a]', '2g')), 
+  expect_equalchar(sumTies(c('[4a', '4a]', '2g')), 
                c('2a', '.', '2g'))
   
   expect_equal(ioi(c('4.a','8r', '4.a','8r','2a', '2r')),
@@ -125,5 +125,12 @@ test_that("Grid functions work", {
 test_that('Factors work correctly',{
   expect_equal(tally(recip(c('16', '4')))['8'] |> unname(), 0)
   
+})
+
+test_that('.humdrumR methods work correctly', {
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/Chorales/chor00[1-3].*krn')
+  
+  expect_identical(chorales |> recip(scale = 2),
+                   chorales |> within(Recip = recip(Token, scale = 2)))
 })
 

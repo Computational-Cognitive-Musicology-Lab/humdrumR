@@ -2,9 +2,27 @@
 % Please edit documentation in R/Rhythm.R
 \name{ioi}
 \alias{ioi}
-\alias{untie}
+\alias{ioi.default}
+\alias{ioi.humdrumR}
+\alias{sumTies.default}
+\alias{sumTies.humdrumR}
+\alias{sumTies}
 \title{Sum "connected" durations}
 \usage{
+\method{ioi}{default}(
+  x,
+  onsets = !grepl("r", x) & !is.na(x) & x != ".",
+  ...,
+  finalOnset = FALSE,
+  groupby = list(),
+  parseArgs = list(),
+  Exclusive = NULL,
+  inPlace = TRUE
+)
+
+humData |> select(Token) |> ioi() 
+humData |> ioi(Token)
+
 ioi(
   x,
   onsets = !grepl("r", x) & !is.na(x) & x != ".",
@@ -16,7 +34,12 @@ ioi(
   inPlace = TRUE
 )
 
-untie(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
+\method{sumTies}{default}(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
+
+humData |> select(Token) |> sumTies() 
+humData |> sumTies(Token)
+
+sumTies(x, open = "[", close = "]", ..., groupby = list(), inPlace = TRUE)
 }
 \arguments{
 \item{x}{\emph{\strong{Input rhythm information.}}
@@ -76,11 +99,19 @@ Must be a single \code{character} string, interpreted as a regular expression.}
 These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.
 \code{ioi()} adds the duration of \href{https://en.wikipedia.org/wiki/Rest_(music)}{rests} to the previous
 non-rest (onset) duration, to create \href{https://en.wikipedia.org/wiki/Time_point#Interonset_interval}{interonset intervals} (IOIs).
-\code{untie()} sums \href{https://en.wikipedia.org/wiki/Tie_(music)}{tied} durations.
+\code{sumTies()} sums \href{https://en.wikipedia.org/wiki/Tie_(music)}{tied} durations.
+
+If \code{ioi()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{sumTies()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Both functions return "collapsed" durations are as null data tokens.
-For example, \code{untie(c('[4a', '4a]', '2g'))} returns \code{c('2a', '.', '2g')}, with the second (tied) duration null (\code{"."}).
+For example, \code{sumTies(c('[4a', '4a]', '2g'))} returns \code{c('2a', '.', '2g')}, with the second (tied) duration null (\code{"."}).
 
 For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no \emph{next} onset, so there
 can't really be a "interonset" interval.
@@ -102,6 +133,6 @@ ioi(tokens_withrests, finalOnset = TRUE)
 
 tokens_withties <- c('2c', '4d', '[4e', '4e]', '8f','[8d#', '4d#]', '4e')
 
-untie(tokens_withties) 
+sumTies(tokens_withties) 
 
 }

@@ -73,7 +73,7 @@ By default, middle-C is the bottom of the zeroth-octave, but this can be changed
 argument.
 Other octave labels (like \code{\link[=lilypond]{lilypond()}}-style marks) can be used if you set \code{octave.integer = FALSE}.
 }
-\details{
+\examples{
 \dontrun{
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 

@@ -120,24 +120,83 @@ test_that('Filtering vignette examples work', {
                with(chorales, sum(grepl('-', Token))))
   
   # subsetting by
-  barsub <- subset(chorales, fill = any(Token %~% '-'), by = list(File, Bar)) 
+  barsub <- subset(chorales, any(Token %~% '-'), .by = c('File', 'Bar')) 
   expect_equal(with(barsub, nrow(unique(cbind(File,Record)))), 171)
   expect_equal(with(barsub, nrow(unique(cbind(Bar,Record)))), 144)
   
-  barsub2 <- subset(chorales, fill = any(Token %~% '-'), by = list(File, floor(Bar  / 2)))
+  barsub2 <- subset(chorales |> group_by(File, floor(Bar / 2)), any(Token %~% '-')) |> ungroup()
   
-  expect_equal(with(barsub2, nrow(unique(cbind(Bar,Record)))), 162)
-  expect_equal(with(barsub2, nrow(unique(cbind(File,Record)))), 194)
+  expect_equal(with(barsub2, nrow(unique(cbind(Bar, Record)))), 162)
+  expect_equal(with(barsub2, nrow(unique(cbind(File, Record)))), 194)
   
 })
 
 
 test_that("Unfiltering works", {
+#   
+  chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#   
+  orig <- getHumtab(chorales)
+  cleared <- getHumtab(unfilter(subset(chorales, Spine == 1)))
+  expect_identical(cleared, orig)
+
+  # can use subset/complement to achieve ifelse() 
+  chorales |> 
+    semits() |>
+    mutate(Semits2 = ifelse(Spine == 1, Semits + 12, Semits)) |>
+    pull() -> semits1
   
+  chorales |> 
+    semits() |>
+    subset(Spine == 1) |>
+    mutate(Semits2 = Semits + 12) |>
+    unfilter(complement = 'Semits') |>
+    select(Semits2) |>
+    pull() -> semits2
+  
+  expect_true(all(semits1 == semits2))
+  
+  
+  ## with ditto
+  chorales |> kern(simple = TRUE) |> subset(Token %~% '4') -> chorales_sub
+  chorales_sub |>
+    ditto(Kern) |>
+    unfilter() |>
+    select(Kern, 'ditto(Kern)') |>
+    tally() -> tally1
+  
+  chorales |> kern(simple = TRUE) |> with(tally(ditto(Kern, null = Token %!~% '4'))) -> tally2
+    
+  expect_true(all(colSums(tally1[-nrow(tally1), ]) == tally2))
+  
+  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(tally1[nrow(tally1), ]))
+  
+  # complement
+  chorales |> subset(DataRecord %% 2 == 0) -> chorales_sub
+  
+  chorales |> recip() |> tally() -> total
+  chorales_sub |> recip() |> tally() -> sub
+  chorales_sub |> complement() |> recip() |> tally() -> comp
+  
+  expect_true(all(total == (sub + comp)[names(total)]))
+})
+
+
+test_that("Remove empty spines works correctly", {
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
   
-  orig <- getHumtab(chorales)
-  cleared <- getHumtab(clearFilter(subset(chorales, Spine == 1)))
-  expect_true(all(orig == cleared, na.rm = TRUE))
+  sub <- subset(chorales, Spine == 1)
+  
+  expect_true(fields(sub)[Name == 'Token', Complement])
+  expect_equal(dim(getHumtab(chorales)), dim(getHumtab(sub)) - c(0, 1)) # because complement column as been added
+  expect_equal(sub |> with(length(Token)), getHumtab(sub, 'D') |> nrow())
+  expect_true('_complement_Token' %in% colnames(getHumtab(sub)))
+  
+  subr <- removeEmptySpines(sub)
+  expect_false(fields(subr)[Name == 'Token', Complement])
+  expect_equal(dim(getHumtab(subr)),c(getHumtab(sub, 'GLIMDd')[Spine == 1 | is.na(Spine)] |> nrow(),
+                                      ncol(getHumtab(chorales))))
+  
   
 })
+  

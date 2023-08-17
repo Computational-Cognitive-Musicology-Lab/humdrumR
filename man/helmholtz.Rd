@@ -2,8 +2,27 @@
 % Please edit documentation in R/Pitch.R
 \name{helmholtz}
 \alias{helmholtz}
+\alias{helmholtz.default}
+\alias{helmholtz.humdrumR}
 \title{Helmholtz pitch representation}
 \usage{
+\method{helmholtz}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> helmholtz() 
+humData |> helmholtz(simple = TRUE)
+humData |> helmholtz(Token, Key = Key)
+
 helmholtz(
   x,
   ...,
@@ -69,6 +88,10 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 }
 \description{
 \href{https://en.wikipedia.org/wiki/Helmholtz_pitch_notation}{Helmholtz notation}
+
+If \code{helmholtz()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -213,7 +236,6 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
-\code{\link{degree}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},
 \code{\link{pitch}()},

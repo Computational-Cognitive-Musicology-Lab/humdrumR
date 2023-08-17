@@ -2,9 +2,27 @@
 % Please edit documentation in R/Rhythm.R
 \name{timeline}
 \alias{timeline}
+\alias{timeline.default}
+\alias{timeline.humdrumR}
+\alias{timestamp.default}
+\alias{timestamp.humdrumR}
 \alias{timestamp}
 \title{Rhythmic timeline of a piece}
 \usage{
+\method{timeline}{default}(
+  x,
+  start = 0,
+  pickup = NULL,
+  ...,
+  Exclusive = NULL,
+  threadNA = TRUE,
+  parseArgs = list(),
+  groupby = list()
+)
+
+humData |> select(Token) |> timeline() 
+humData |> timeline(Token)
+
 timeline(
   x,
   start = 0,
@@ -15,6 +33,22 @@ timeline(
   parseArgs = list(),
   groupby = list()
 )
+
+\method{timestamp}{default}(
+  x,
+  BPM = 60,
+  start = 0,
+  pickup = NULL,
+  minutes = TRUE,
+  ...,
+  Exclusive = NULL,
+  threadNA = TRUE,
+  parseArgs = list(),
+  groupby = list()
+)
+
+humData |> select(Token) |> timestamp() 
+humData |> timestamp(Token)
 
 timestamp(
   x,
@@ -92,13 +126,21 @@ that have unfolded since the beginning of a piece, giving a sense of the timelin
 In \code{music21} this information is described as "offsets"---however,
 we prefer to reserve the words "onset" and "offset" to refer
 to the beginning (attack) and end (release) of rhythmic events.
+
+If \code{timeline()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{timestamp()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Music unfolds over time, and humdrum data typically represents this
 by placing simultaneous events in the same record, with successive events
 in ever higher records---progressing "top down" through the file.
 In some humdrum data, only this (implicit) ordering of data over time is present.
-The \code{Record} and \code{NData} \link[=fields]{fields} capture this ordering in all data parsed by \code{humdrumR}.
+The \code{Record} and \code{DataRecord} \link[=fields]{fields} capture this ordering in all data parsed by \code{humdrumR}.
 However, many (probably most) humdrum data files contain at least some information about the relative
 duration of events, representing more detailed information about timing and rhythm.
 

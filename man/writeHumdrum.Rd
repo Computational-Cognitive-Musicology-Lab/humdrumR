@@ -77,7 +77,7 @@ as the writing happens.}
 
 \item{EMD}{\emph{\strong{A string to write to a new \verb{!!!EMD:} record in each file.}}
 
-Defaults to "Editing in humdrumR, version X.X.X.XXX, on current data/time."
+Defaults to "Edited using humdrumR, version X.X.X.XXX, on current data/time."
 
 Must be a single \code{character} string.
 
@@ -85,7 +85,7 @@ If \code{NULL}, not appended.}
 }
 \description{
 \code{writeHumdrum} writes \code{humdrumR} data into humdrum-syntax text files.
-The current \link[=humActive]{active expression} is evaluated to generate the humdrum output
+The current \link[=selectedFields]{selected field(s)} are evaluated to generate the humdrum output
 data.
 The written output should match the printout if printing the data in the \code{R} terminal.
 }
@@ -118,7 +118,7 @@ If \code{directory} is \code{NULL}, files are written to their original input di
 
 The \code{EMD} argument specifies a character string to put into a new \code{!!!EMD} reference record
 at the end of each file.
-\code{EMD} records keep track of modifications to humdrum data.
+\code{EMD} (\emph{Document modification description}) records keep track of modifications to humdrum data.
 The default behavior is to print a string indicating the \code{humdrumR} version number and date.
 If \code{EMD} is set to \code{NULL}, it is not appended to the files.
 }

@@ -1,5 +1,5 @@
-url: https://computational-cognitive-musicology-lab.github.io/humdrumR
-home:
+url: https://humdrumR.ccml.gtcmt.gatech.edu
+home: 
   sidebar:
     structure: [links, license, community, citation, authors, dev, toc]
   links:
@@ -16,21 +16,29 @@ navbar:
     left: [news, reference, articles, GUI]
     right: [github, search]
   components:
+    news:
+      text: News
+      href: news/index.html
     GUI:
       text: GUI
-      href: https://ccml.music.gatech.edu/humdrumR/
+      href: https://ccml.music.gatech.edu/humdrumR
 template:
+  includes:
+    before_title: <a href="https://gatech.edu"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"/></a> <a href="https://ccml.gtcmt.gatech.edu"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"/></a>
   bootstrap: 5
   bootswatch: flatly
+  bslib:
+    primary: "#b3a369"
+    pkgdown-nav-height: 100px
 articles:
 - title: Basics
   navbar: Basics
   contents:
   - GettingStarted
-  - IntroForCoders
+  - DataFields
 - title: Background
   desc: Background info on humdrum and R
-  navbar: R/Humdrum background
+  navbar: R/Background
   contents:
   - HumdrumSyntax
   - RPrimer
@@ -39,6 +47,7 @@ articles:
   navbar: Data prep
   contents: 
   - ReadWrite
+  - ComplexSyntax
   - Reshaping
   - Filtering
 - title: Analysis
@@ -46,7 +55,7 @@ articles:
   navbar: Analysis
   contents:
   - Summary
-  - WorkingWithData
+  - Grouping
   - Context
 - title: Musical Processing
   desc: Functionality for analyzing musical information
@@ -63,7 +72,7 @@ reference:
   - validateHumdrum
   - readHumdrum
   - writeHumdrum
-- subtite: "Summarizing"
+- subtitle: "Summarizing"
   contents:
   - humSummary
   - census
@@ -80,6 +89,7 @@ reference:
   - withinHumdrum
   - subset.humdrumR
   - indexHumdrum
+  - groupHumdrum
   - context
 - title: "Musical Tools"
   desc: >
@@ -163,7 +173,7 @@ reference:
   - notehead
   - seconds
   - ioi
-  - untie
+  - sumTies
   - timeline
   - timebase
   - recordDuration
@@ -185,24 +195,26 @@ reference:
   - silbeFormat
 - title: "Data Structures"
   desc: >
-    These are pages describe the data structures of humdrumR---which contain the musical data.
+    These pages describe the data structures of humdrumR, and how to query or manipulate them.
   contents:
   - humdrumRclass
-  - extractTandem
-  - humActive
+  - tandem
+  - pullHumdrum
+  - selectedFields
   - humCoercion
   - humMerge
   - collapseHumdrum
   - expandPaths
-  - foldHumdrum
-  - foldExclusive
-  - foldGraceNotes
+  - cleave
+  - rend
+  - combineFields
+  - cleaveGraceNotes
   - unfoldStops
   - humSize
   - humTable
   - struct
 - title: "Other Functions"
-  desc: "Other useful tools"
+  desc: "Other useful tools."
 - contents: 
   - draw
   - tally
@@ -238,3 +250,12 @@ reference:
   contents:
   - humdrumRroot
   - partialMatching
+- title: "Some R basics lessons"
+  desc: >
+     Concise descriptions of some important concepts in R coding.
+  contents:
+  - evaluatingExpressions
+  - groupingFactors
+  - partialMatching
+  - recycling
+  - vectorization

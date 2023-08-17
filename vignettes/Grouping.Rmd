@@ -1,0 +1,172 @@
+---
+title: "Grouping humdrum data"
+author: "Nathaniel Condit-Schultz"
+date:   "July 2022"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Grouping humdrum data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE, message=FALSE, echo = FALSE }
+source('vignette_header.R')
+
+```
+
+Welcome to "Grouping humdrum data"!
+This article explains functionality `r hm` has to break your data into subgroups, and work with each subgroup separately.
+
+
+In this article, we'll once again work with our prepackaged `chorales` dataset, as we did in our [quick start](GettingStarted.html#quick-start "Getting started with humdrumR article") article.
+
+
+```{r}
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
+
+chorales
+```
+
+
+
+
+# Group-apply-combine
+
+One of the fundamental data analysis techniques in R is the *group-apply-combine* routine.
+We break our data.frames into groups (by row), apply calculations or manipulations to each group independently, and then (optionally) recombine the groups back into a single data.frame.
+For example, if we want know the average pitch height (in MIDI pitch) of the chorales, we could run this command:
+
+```{r}
+chorales |>
+  midi() |>
+  summarize(mean(.))
+
+```
+
+(We use the `summarize()` command because we are only getting *one* (scalar) value.)
+But what if wanted to calculate the mean pitch, for *each* chorale?
+We can use the `group_by()` command:
+
+```{r}
+chorales |>
+  midi() |>
+  group_by(Piece) |>
+  summarize(mean(.))
+
+```
+How does this work?
+The `group_by()` function looks at all the unique values the fields we give it---in this case the `Piece` field---and breaks the humdrum table into groups based on those values.
+So where ever `Piece == 1`, that's a group; wherever `Piece == 2`, that's another group, etc.
+After `group_by()` is applied, the `r hm` dataset is grouped, and any subsequent tidy-commands will automatically applied *within* the groups.
+
+----
+
+Once a `r hm` dataset has been grouped, it will stay grouped until you call `ungroup()` on it!
+
+
+### More complex grouping
+
+If we like, we can pass more than one field to `group_by()`.
+Groups will be formed for every unique *combinations* of values across grouping fields:
+
+```{r}
+chorales |>
+  midi() |>
+  group_by(Piece, Spine) |>
+  summarize(mean(.))
+
+```
+
+You can also create new grouping fields on the fly.F
+For example, what if, instead of groups for four separate voices, we wanted to group bass/tenor and alto/soprano within each piece?
+We could do this:
+
+
+```{r}
+chorales |>
+  midi() |>
+  group_by(Piece, Spine > 2) |>
+  summarize(mean(.))
+
+```
+
+
+----
+
+Grouping isn't just good for calcualting single values.
+We can, for instance, tabulate each group separately:
+
+```{r}
+chorales |>
+  kern(simple = TRUE) |>
+  group_by(Spine) |>
+  tally() 
+
+```
+
+
+
+
+## Common groupings
+
+### By file
+
+It is *very* common in `r hm` analyses that we want to apply commands grouped by piece.
+In most cases, two pieces of music are completely separate entities, so it makes sense to apply calcualtions/manipulations separately to each piece.
+However, `r hm` won't (always) do this for you.
+You might think, "I want to count how many notes occur in each record" and run the command `group_by(Record)`---but watch out!
+Grouping by `Record` will group *all* the records 1s across all the pieces, all the record 2s across all the pieces, etc.
+What you probably want is (`group_by(Piece, Record)`).
+Don't forget to group by piece...unless you are sure you don't want to.
+
+
+### Melodic grouping
+
+In lots of humdrum data, each spine (or at least some spines) in the data represent a musical part of voice.
+We often want isolate each voice, so `group_by(Piece, Spine)` gets used a lot.
+However, watch out for spine paths and multi-stops, if your data has them---you might want something like `group_by(Piece, Spine, Path)`, for example, if you data has spine paths.
+Check out the [complex syntax][ComplexSyntax.html "Complex humdrum syntax article"] for more ideas/options about this.
+
+
+
+
+## Recycling results
+
+
+As [usual](DataFields.html#tidyverse-style "Data fields article, tidyverse style section"), if you use `mutate()` with grouped data, the results of you command will be "recycled"---in this case, to fill *each* group.
+This can be very useful for maintaining vectorization.
+For example, let's say we want to calculate the lowest note in each bar.
+
+
+
+```{r}
+
+chorales |>
+  semits() |>
+  group_by(File, Bar) |>
+  mutate(BarBassNote = min(Semits)) |>
+  ungroup() -> chorales
+
+chorales
+
+```
+
+
+
+What did this command do?
+It looked at every bar in each file and found the lowest note, then "recycled" that note throughout the bar.
+Since the lowset-notes have been recycled, there is one value for each and every note in `Token` so everything is still neatly vectorized.
+This means we can calculate the harmonic interval above each bar's bass note by just going:
+
+```{r}
+
+chorales |>
+  mutate(Semits - BarBassNote) |>
+  pull() |>
+  draw()
+
+```
+

@@ -32,15 +32,15 @@ NULL
 #' @export
 token <- function(x, Exclusive = NULL, ...) {
   if (is.null(x)) x <- character(0)
-  
   new('token', x, Exclusive = Exclusive, Attributes = list(...))
 }
-
 
 
 ## Accessors ####
 
 getExclusive <- function(x) if (inherits(x, 'token')) x@Exclusive
+
+getTandem <- function(x) if (inherits(x, 'token')) x@Attributes$tandem
 
 untoken <- function(x) x@.Data
 
@@ -157,9 +157,27 @@ setMethod('show', 'token',
 #' @rdname token
 #' @export
 format.token <- function(x, ...) {
+  x <- x@.Data
   x[is.na(x)] <- '.'
   x
 }
+
+factorize <- function(token) {
+  factorizer <- token@Attributes$factorizer
+  if (is.null(factorizer)) return(factor(token@.Data))
+  
+  factorizer(token)
+  
+}
+
+
+#' @export
+setMethod('as.factor', 'token', function(x) factorize(x))
+
+
+# #' @export
+#tapply <- rlang::new_function(formals(base::tapply), body = body(base::tapply))
+
 
 ## Logic methods ####
 
@@ -168,6 +186,7 @@ format.token <- function(x, ...) {
 #' @rdname token
 #' @export
 is.token <- function(x) inherits(x, 'token')
+
 
 
 ## Order/relations methods ####

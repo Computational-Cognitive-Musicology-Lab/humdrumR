@@ -2,7 +2,7 @@
 #' Write [humdrumR data][humdrumRclass] to humdrum files
 #' 
 #' `writeHumdrum` writes `humdrumR` data into humdrum-syntax text files.
-#' The current [active expression][humActive] is evaluated to generate the humdrum output
+#' The current [selected field(s)][selectedFields] are evaluated to generate the humdrum output
 #' data.
 #' The written output should match the printout if printing the data in the `R` terminal.
 #' 
@@ -34,7 +34,7 @@
 #' 
 #' The `EMD` argument specifies a character string to put into a new `!!!EMD` reference record
 #' at the end of each file.
-#' `EMD` records keep track of modifications to humdrum data.
+#' `EMD` (*Document modification description*) records keep track of modifications to humdrum data.
 #' The default behavior is to print a string indicating the `humdrumR` version number and date.
 #' If `EMD` is set to `NULL`, it is not appended to the files.
 #' 
@@ -97,7 +97,7 @@
 #' 
 #' @param EMD ***A string to write to a new `!!!EMD:` record in each file.***
 #' 
-#' Defaults to "Editing in humdrumR, version X.X.X.XXX, on current data/time."
+#' Defaults to "Edited using humdrumR, version X.X.X.XXX, on current data/time."
 #' 
 #' Must be a single `character` string.
 #' 
@@ -132,7 +132,7 @@ writeHumdrum <- function(humdrumR,
     cat('Writing humdrum data...\n')
     cat('Determining validity of new filenames...')
     #
-    filenameTable <- getFields(humdrumR, c('File', 'Piece', 'Filepath'), dataTypes = 'GLIMDd')
+    filenameTable <- pullFields(humdrumR, c('File', 'Piece', 'Filepath'), dataTypes = 'GLIMDd')
     filenameTable <- if (separatePieces) {
         filenameTable[ , .SD[1], by = Piece] 
     } else {
@@ -144,7 +144,11 @@ writeHumdrum <- function(humdrumR,
     filenameTable[ , Filename  := basename(Filepath)]
     ## File extensions
     re.ext <- '\\.[A-Za-z0-9]{1,4}$'
-    filenameTable[ , Extension := if (is.null(extension)) stringi::stri_extract_last_regex(Filename, re.ext) else extension]
+    filenameTable[ , Extension := if (is.null(extension)) {
+        stringi::stri_extract_last_regex(Filename, re.ext) 
+        }else {
+        stringi::stri_replace_all_regex(extension, '^\\.*', '.')
+            }]
     filenameTable[ , Filename  := stringi::stri_replace_last_regex(Filename, re.ext, '')]
     
     
@@ -214,7 +218,7 @@ writeHumdrum <- function(humdrumR,
     cat(sep = '', '\nPreparing text...')
     
     # humdrumR <- indexGLIM(humdrumR)
-    humdrumR <- printableActiveField(humdrumR)
+    humdrumR <- printableSelectedField(humdrumR, 'DGLIMDd', 'GLIMd', 'NA2dot')
     lines <- as.lines(humdrumR, dataTypes = 'GLIMDd', padPaths = 'dont')
     filestrs <- tapply(lines, # collapse across files (using names())
                        as.numeric(stringi::stri_extract_first_regex(names(lines), # as.numeric makes them sort numerically

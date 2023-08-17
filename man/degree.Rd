@@ -2,9 +2,30 @@
 % Please edit documentation in R/Pitch.R
 \name{degree}
 \alias{degree}
+\alias{degree.default}
+\alias{degree.humdrumR}
+\alias{deg.default}
+\alias{deg.humdrumR}
 \alias{deg}
 \title{Tonal \href{https://en.wikipedia.org/wiki/Degree_(music)}{scale degree} representation (absolute)}
 \usage{
+\method{degree}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> degree() 
+humData |> degree(simple = TRUE)
+humData |> degree(Token, Key = Key)
+
 degree(
   x,
   ...,
@@ -17,6 +38,23 @@ degree(
   gamutArgs = list(),
   inPlace = FALSE
 )
+
+\method{deg}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> deg() 
+humData |> deg(simple = TRUE)
+humData |> deg(Token, Key = Key)
 
 deg(
   x,
@@ -90,6 +128,14 @@ in the same standard octave scheme as \link[=pitch]{scientific pitch}.
 In the \verb{**deg} representation, the octave of each pitch is indicated \emph{relative to the previous pitch}---
 a \code{"^"} indicates the pitch higher than the previous pitch while a \code{"v"} indicates a pitch lower than
 the previous pitch.
+
+If \code{degree()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{deg()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -262,14 +308,6 @@ Other {pitch functions}:
 \code{\link{step}()},
 \code{\link{tonh}()}
 
-Other {absolute pitch functions}: 
-\code{\link{helmholtz}()},
-\code{\link{kern}()},
-\code{\link{lilypond}()},
-\code{\link{pitch}()},
-\code{\link{solfg}()},
-\code{\link{tonh}()}
-
 Other {pitch functions}: 
 \code{\link{accidental}()},
 \code{\link{bhatk}()},
@@ -288,6 +326,5 @@ Other {pitch functions}:
 \code{\link{step}()},
 \code{\link{tonh}()}
 }
-\concept{{absolute pitch functions}}
 \concept{{pitch functions}}
 \concept{{relative pitch functions}}

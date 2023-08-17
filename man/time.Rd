@@ -2,11 +2,30 @@
 % Please edit documentation in R/Rhythm.R
 \name{time}
 \alias{time}
+\alias{seconds.default}
+\alias{seconds.humdrumR}
 \alias{seconds}
+\alias{ms.default}
+\alias{ms.humdrumR}
 \alias{ms}
+\alias{dur.default}
+\alias{dur.humdrumR}
 \alias{dur}
 \title{Clock-time representations of duration}
 \usage{
+\method{seconds}{default}(
+  x,
+  ...,
+  BPM = "*M60",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> seconds() 
+humData |> seconds(Token)
+
 seconds(
   x,
   ...,
@@ -16,6 +35,19 @@ seconds(
   unit = 1,
   inPlace = FALSE
 )
+
+\method{ms}{default}(
+  x,
+  ...,
+  BPM = "*M60",
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> ms() 
+humData |> ms(Token)
 
 ms(
   x,
@@ -27,6 +59,24 @@ ms(
   inPlace = FALSE
 )
 
+\method{dur}{default}(
+  x,
+  ...,
+  BPM = "*M60",
+  minutes = FALSE,
+  hours = FALSE,
+  days = FALSE,
+  months = FALSE,
+  years = FALSE,
+  parseArgs = list(),
+  scale = 1,
+  unit = 1,
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> dur() 
+humData |> dur(Token)
+
 dur(
   x,
   ...,
@@ -36,7 +86,6 @@ dur(
   days = FALSE,
   months = FALSE,
   years = FALSE,
-  milliseconds = TRUE,
   parseArgs = list(),
   scale = 1,
   unit = 1,
@@ -93,6 +142,18 @@ These functions convert duration values to clock-time representations.
 \code{seconds()} and \code{ms()} output \code{numeric} values.
 \code{dur()} outputs a \code{character} string encoding the humdrum \href{https://www.humdrum.org/rep/dur/index.html}{**dur}
 representation of time.
+
+If \code{seconds()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{ms()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{dur()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 These functions require a \code{BPM} (beats-per-minute) argument to be specified.

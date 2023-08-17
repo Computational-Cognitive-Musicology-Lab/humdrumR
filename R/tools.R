@@ -71,7 +71,7 @@ fargs <- function(func) formals(args(func))
 
 
 `%<-%` <- function(names, values) {
-    names <- as.character(rlang::enexpr(names))[-1]
+    names <- as.character(names)
     if (length(names) > 0L && length(names) != length(values)) stop(call. = FALSE,
                                               "Left side of multiassign (%<-%) operator must be the same length as the right side.")
     
@@ -471,14 +471,7 @@ multimatch <- function(x, table, ...) {
   do.call('cbind', lapply(tables, \(tab) match(x, tab, ...)))
 }
 
-squashGroupby <- function(groupby = list()) {
-  groups <- do.call('paste', groupby) # seems to be fastest option
-  match(groups, unique(groups))
-  # groupby <- as.data.table(groupby)
-  # matches(groupby, unique(groupby))
 
-  
-}
 
 `%ins%` <- function(x, table) !is.na(matches(x, table))
 
@@ -614,8 +607,10 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 
 #' Identify contiguous segments of data in a vector
 #' 
-#' `segments` and `changes` are extremely useful functions for finding 
+#' `segments()` and `changes()` are extremely useful functions for finding 
 #' contiguous "segments" indicated in a vector.
+#' It can be particularly useful to use `segments()` to create
+#' [grouping factors][groupingFactors].
 #' 
 #' @section Changes:
 #' 
@@ -736,6 +731,30 @@ segments <- function(..., first = TRUE, any = TRUE, reverse = FALSE) {
     
 }
 
+squashGroupby <- function(groupby = list()) {
+  groups <- do.call('paste', groupby) # seems to be fastest option
+  match(groups, unique(groups))
+  # groupby <- as.data.table(groupby)
+  # matches(groupby, unique(groupby))
+}
+
+group2segments <- function(x, as.factor = TRUE, ...) {
+  seg <- humdrumR::segments(x, ...)
+  
+  values <- do.call('paste', as.data.frame(attr(seg, 'values')))
+  attr(seg, 'values') <- NULL
+  count <- tapply_inplace(values, values, seq_along)
+  
+  if (as.factor) {
+    structure(seg, class = 'factor', levels = paste0(values, count))
+  } else {
+    data.table(Groups = x, Segments = seg, Count = count[seg])
+  }
+  
+  
+  
+}
+
 #' @export
 #' @rdname segments
 changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALSE) {
@@ -753,9 +772,9 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
                                head(x, -1L) != tail(x, -1L),
                                if (reverse) first))
   changes <- Reduce(if (any) '|' else '&', changes)
+  changes[is.na(changes)] <- FALSE
   
-  
-  values <- do.call('cbind', lapply(xs, '[', !is.na(changes) & changes))
+  values <- do.call('cbind', lapply(xs, '[',  changes))
   rownames(values) <- which(changes)
   
   if (value) {
@@ -790,7 +809,7 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' For matrices, ditto can be applied across columns (`margin == 2`), rows (`margin == 1`), or other dimensions.
 #' 
 #' The `ditto` method for a [humdrumR object][humdrumRclass] simply applies `ditto` to the, by default,
-#' the active field; thus `ditto(humData)` is equivalent to `within(humData, newField <- ditto(.), dataTypes = 'Dd')`.
+#' the selected field; thus `ditto(humData)` is equivalent to `within(humData, newField <- ditto(.), dataTypes = 'Dd')`.
 #' The `field` argument can be used to indicated a different field to apply to. The result of the dittoing
 #' is saved to a new field---the `newField` argument can be used to control what to name the new field.
 #' 
@@ -829,16 +848,6 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' E.g., for a matrix `1` indicates rows, `2` indicates columns.
 #' Where `x` has named dimnames, it can be a character vector selecting dimension names.
 #' 
-#' @param field ***Which field to ditto?***
-#'
-#' Must be a single `character` string.
-#'
-#' Is ([partially matched][partialMatching]) against [fields][humTable] in `x`.
-#'
-#' 
-#' @param newField ***What to name the new (dittoed) field.***
-#'
-#' Defaults to the `field` name appended with `"_ditto"`.
 #' 
 #' Must be a single `character` string.
 #' 
@@ -848,6 +857,8 @@ changes <- function(..., first = TRUE, value = FALSE, any = TRUE, reverse = FALS
 #' @family {Lagged vector functions}
 #' @export
 ditto <- function(x, ...) UseMethod('ditto')
+class(ditto) <- c('humdrumRmethod', 'function')
+attr(ditto, 'name') <- 'ditto'
 
 #' @rdname ditto
 #' @export
@@ -903,17 +914,28 @@ ditto.matrix <- function(x, margin = 2, ...) {
   
 }
 
+
 #' @rdname ditto
 #' @export
-ditto.humdrumR <- function(x, field = getActiveFields(x)[1], ..., newField = paste0(field, '_ditto')) {
-  checks(newField, xcharacter & xlen1)
-  field <- rlang::sym(fieldMatch(x, field, 'ditto.humdrumR', 'field'))
-  newField <- rlang::sym(newField)
-  rlang::eval_tidy(rlang::expr({
-
-      within(x, !!newField <- ditto(!!field, ...), dataTypes = 'Dd')
-
-  }))
+ditto.humdrumR <- function(x, ..., initial = NA, reverse = FALSE) {
+  
+  exprs <- rlang::enexprs(...)
+  
+  if (length(exprs)) {
+    fields <- tidyselect_humdrumRfields(x, exprs, fieldTypes = 'any', callname = 'pull.humdrumR')
+    names <- .names(exprs)
+  } else {
+    fields <- selectedFields(x)
+    names <- character(length(fields))
+    
+  }
+  names(fields)[names == ''] <- paste0('ditto(', fields[names == ''], ')')
+  
+  fields <- lapply(fields, \(field) rlang::expr(ditto.default(!!(rlang::sym(field)), initial = !!initial, reverse = !!reverse)))
+  
+  
+  rlang::eval_tidy(rlang::quo(within(x, !!!fields, dataTypes = 'Dd')))
+  
 }
 
 
@@ -1520,7 +1542,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' The most common use case in humdrum data, is looking at "melodies" within spines.
 #' For this, we want `groupby = list(Piece, Spine, Path)`.
 #' In fact, `humdrumR` [with(in)][withinHumdrum] calls will *automatically* feed these 
-#' three fields as `groupby` arguments to certain functions: `r harvard(byTable[byTable$Type == 'melodic', ]$Function, 'or')`.
+#' three fields as `groupby` arguments to certain functions: `r harvard(autoArgTable[autoArgTable$Type == 'melodic', ]$Function, 'or')`.
 #' So any use of `delta` in a call to [with(in)][withinHumdrum], will automatically calculate the `delta`
 #' in a "melodic" way, within each spine path of each piece.
 #' However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)
@@ -2073,7 +2095,7 @@ deparse.unique <- function(exprs) {
   make.unique(labels)
 }
 
-visible <- function(withV) {
+visible.attr <- function(withV) {
   if (is.null(withV$value)) return(NULL)
   visible <- withV$visible
   result <- withV$value
@@ -2083,32 +2105,13 @@ visible <- function(withV) {
   result
 }
 
-withExpression <- function(expr, predicate, func, applyTo = c('call', 'atomic', 'symbol')) {
-    exprA <- analyzeExpr(expr)
-    output <- NULL
-    if (exprA$Type %in% applyTo) {
-        hit <- do...(predicate, exprA, envir = parent.frame())
-        if (hit) {
-            output <- func(exprA)
-        } 
-    } else {
-        hit <- FALSE
-    }
-    
-    if (exprA$Type == 'call' && !hit) {
-        output <- list()
-        for (i in seq_along(exprA$Args)) {
-            output[[i]] <- Recall(exprA$Args[[i]], 
-                                      func = func, 
-                                      predicate = predicate, 
-                                      applyTo = applyTo)
-        }
-        if (length(output) == 0L || all(lengths(output) == 0L)) output <- NULL
-        
-    }
-    output
-}
 
+is.visible <- function(x) {
+  visible <- attr(x, 'visible')
+  
+  visible %||% TRUE
+  
+}
 
 namesInExprs <- function(names, exprs) {
     unique(unlist(lapply(exprs, namesInExpr, names = names)))
@@ -2128,6 +2131,8 @@ namesInExpr <- function(names, expr, applyTo = 'symbol') {
                   matches
               }))
 }
+
+
 
 substituteName <- function(expr, subs) {
   if (length(subs) == 0) return(expr)
@@ -2252,13 +2257,33 @@ literalizeQuo <- function(quo) {
 }
 
 
-withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE) {
+exprStringMatch <- function(exprs, strings, includeSymbols = FALSE) {
+  
+  hits <- sapply(exprs, is.character)
+  
+  if (includeSymbols) {
+    syms <- !hit & lengths(exprs) == 1L
+    exprs[syms] <- lapply(exprs[syms], as.character)
+    hits <- hits | syms
+  }
+  
+  exprs[hits] <- lapply(exprs[hits], 
+                               \(x) { 
+                                 strings[pmatch(x, strings, nomatch = 0)]
+                                 })
+  
+  exprs
+}
+
+
+withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE, envir = parent.frame()) {
   if (is.null(expr)) return(expr)
   exprA <- analyzeExpr(expr)
   
   if (exprA$Type %in% applyTo) {
-    hit <- do...(predicate, exprA, envir = parent.frame())
+    hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
+      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
       exprA <- func(exprA)
     } 
   } else {
@@ -2270,11 +2295,19 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
     for (i in seq_along(exprA$Args)) {
       # print(exprA$Args[[i]])
       cur <- exprA$Args[[i]]
-      if (!missing(cur) && !is.null(cur)) exprA$Args[[i]] <- Recall(cur, 
-                                                                    func = func, 
-                                                                    predicate = predicate, 
-                                                                    stopOnHit = stopOnHit,
-                                                                    applyTo = applyTo)
+      if (!missing(cur) && !is.null(cur)) {
+        innerEnvir <- switch(exprA$Form,
+                             quosure = ,
+                             formula = exprA$Environment,
+                             envir)
+        
+        exprA$Args[[i]] <- Recall(cur, 
+                                  func = func, 
+                                  predicate = predicate, 
+                                  stopOnHit = stopOnHit,
+                                  applyTo = applyTo,
+                                  envir = innerEnvir)
+      }
     }
     
   }
@@ -2590,13 +2623,17 @@ matched <- function(x, table, nomatch = NA) {
       sep <- ''
     }
     
-    
-    ifelse(nas, fill, do.call('paste', c(args, list(sep = sep, collapse = collapse))))
+    if (is.null(collapse)) {
+      ifelse(nas, fill, do.call('paste', c(args, list(sep = sep))))
+    } else {
+      args <- lapply(args, `[`, i = !nas)
+      do.call('paste', c(args, list(sep = sep, collapse = collapse)))
+    }
 }
 
 
 
-.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame()) {
+.glue <- function(..., ifelse = TRUE, sep = ' ', trim = FALSE, envir = parent.frame(), .open = '{', .close = '}') {
   strs <- unlist(list(...))
   ifelses <- stringr::str_extract_all(strs, '<[^>]*\\|[^>]*>')
   ifelses[lengths(ifelses) > 0L] <- lapply(ifelses[lengths(ifelses) > 0L],
@@ -2619,7 +2656,7 @@ matched <- function(x, table, nomatch = NA) {
   strs, ifelses)
   
   strs <- paste(unlist(strs), collapse = sep)
-  glue::glue(strs, .envir = envir, .sep = sep, trim = trim)
+  glue::glue(strs, .envir = envir, .sep = sep, trim = trim, .open = .open, .close = .close)
 }
 
 harvard <- function(x, conjunction = '', quote = FALSE, quoteNA = FALSE) {
@@ -2686,28 +2723,52 @@ pasteordered <- function(order, ..., sep = '', collapse = TRUE) {
     
 }
 
-
-
-object2str <- function(object) {
-  object <- object[[1]]
-    class <- if (is.atomic(object) && !is.table(object)) 'list' else class(object)
-    switch(class,
-           table = {
-             glue::glue("<table: k={length(object)}, n={num2str(sum(object))}>")
-           },
-           list = {
-             if (length(object) < 5) {
-               glue::glue('list({harvard(unlist(object), quote = is.character(unlist(object)))})')
-             } else {
-               glue::glue('list[{num2str(length(object))}]')
-             }
-             
-           },
-           paste0('<', class, '>')
-            )
-
-        
+list2str <- function(list, null = '.') {
+  
+  output <- rep(null, length(list))
+  isNull <- sapply(list, is.null)
+  output[!isNull] <- sapply(list[!isNull], printable)
+  output
 }
+
+setClassUnion('atomic', c('character', 'factor', 'integer', 'numeric', 'logical'))
+setGeneric('printable', function(x, ...) standardGeneric('printable'))
+setMethod('printable', 'list',
+          function(x) {
+            if (length(x) >= 5 || any(lengths(x) > 1L) || any(sapply(x, Negate(is.vector)))) {
+              paste0('list[', num2str(length(x)), ']')
+            } else {
+              classes <- sapply(x, class)
+              x <- sapply(x, as.character)
+              x[classes %in% c('character', 'factor')] <- quotemark(x[classes %in% c('character', 'factor')])
+              
+              paste0('list(', harvard(x, quote = FALSE), ')')
+            }
+          })
+setMethod('printable', 'atomic',
+          function(x, quotechar = TRUE) {
+            if (quotechar && is.character(x)) x <- quotemark(x)
+            vals <-  if (length(x) < 5) {
+              harvard(x, quote = FALSE)
+            } else {
+              paste0(x[1], ', ..., ', x[length(x)])
+            }
+            paste0(if (length(x)) 'c' else class(x), '(', vals, ')')
+          })
+setMethod('printable', 'array',
+          function(x) {
+            paste0(class(x)[1], '[', paste(dim(x), collapse = ', '), ']')
+          } )
+setMethod('printable', 'table',
+          function(x) {
+            paste0(class(x)[1], '[', paste(dim(x), collapse = ', '), ']')
+          } )
+setMethod('printable', 'token', function(x) printable(x@.Data, quotechar = FALSE))
+setMethod('printable', signature = c(), function(x) paste0('<', paste(class(x), collapse = '/'), '>'))
+
+
+
+
 
 num2str <- function(n, pad = FALSE) if (!is.null(n)) format(n, digits = 3, trim = !pad, zero.print = T, big.mark = ',', justify = 'right')
 
@@ -2766,7 +2827,7 @@ padder <- function(strs, sizes = max(nchar(strs)) + 1) {
 
 
 
-trimTokens <- function(tokmat, max.token.length) {
+trimTokens <- function(tokmat, maxTokenLength) {
     # This function  trims strings that are too long, replacing the last
     # three characters before the cuttoff with "..."
     
@@ -2774,8 +2835,8 @@ trimTokens <- function(tokmat, max.token.length) {
     
     toklen[is.na(toklen)] <- 0L
     
-    toolong <- toklen > max.token.length
-    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, max.token.length)
+    toolong <- toklen > maxTokenLength
+    tokmat[toolong] <- stringi::stri_sub(tokmat[toolong], from = 0L, maxTokenLength)
     tokmat[toolong] <- stringi::stri_replace_last_regex(tokmat[toolong], pattern = '...', replacement = '...') # these two ... are not the same! one is RE other is literal
     tokmat[is.na(tokmat)] <- ''
     
@@ -2848,4 +2909,69 @@ isColor <- function(x) {
     stringr::str_detect(x, '^#([0-9a-f]{6}|[0-9a-f]{8})$') |
     is.na(x) |
     x == 'transparent'
+}
+
+
+
+textstyle <- function(text, fg = "black", bg = NULL, style = 'normal') {
+  # copied from https://github.com/r-lib/testthat/blob/717b02164def5c1f027d3a20b889dae35428b6d7/R/colour-text.r
+  term <- Sys.getenv()["TERM"]
+  colour_terms <- c("xterm-color","xterm-256color", "screen", "screen-256color")
+  
+  if(!any(term %in% colour_terms, na.rm = TRUE)) {
+    return(text)
+  }
+  
+  
+  code <- .fg_colors[tolower(fg)]
+  
+  code[style != 'normal'] <- paste0(.style[style[style != 'normal']], ';', code[style != 'normal'])
+  
+  if (!is.null(bg)) code[bg != ''] <- paste0(code[bg != ''], ';', .bg_colors[tolower(bg[bg != ''])])
+  
+  paste0('\033[', code, 'm', text, '\033[0m')
+}
+
+.style <- c(normal = '0', bold = '1', blur = '2', italic = '3', underline = '4')
+
+.fg_colors <- c(
+  "black" = "30",
+  "blue" = "34",
+  "green" = "32",
+  "cyan" = "36",
+  "red" = "31",
+  "purple" = "35",
+  "yellow" = "33",
+  "white" = "37"
+)
+
+.bg_colors <- c(
+  "black" = "40",
+  "red" = "41",
+  "green" = "42",
+  "brown" = "43",
+  "blue" = "44",
+  "purple" = "45",
+  "cyan" = "46",
+  "light gray" = "47"
+)
+
+syntaxHighlight <- function(token, dataTypes) {
+  # E for exclusive
+  # N for none
+  
+  dataTypes <- rep(dataTypes, length.out = length(token))
+  
+  colors <- c(D = 'yellow', d = 'yellow', E = 'red', N = 'black', n = 'white', E = 'red',
+              I = 'purple', M = 'green', G = 'cyan', L = 'cyan')
+  
+  style <- rep('normal', length(token))
+  style[dataTypes == 'N'] <- 'italic'
+  style[dataTypes == 'M'] <- 'underline'
+  style[dataTypes == 'd'] <- 'blur'
+  
+  textstyle(token, 
+            colors[dataTypes],
+            NULL, #ifelse(dataType == 'M', 'light gray', ''),
+            style)
 }

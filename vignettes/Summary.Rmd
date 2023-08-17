@@ -1,10 +1,10 @@
 ---
-title: "Getting to know your data"
+title: "Getting to know your humdrum data"
 author: "Nathaniel Condit-Schultz"
 date:   "July 2022"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting to know your data}
+  %\VignetteIndexEntry{Getting to know your humdrum data}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -18,18 +18,33 @@ source('vignette_header.R')
 par(mar=c(1,1,1,1))
 ```
 
-Before any data analysis, you should get to know your data.
-For humdrum data, you might want to open some of the data files up in a text-editor, or perhaps drop them into the [Verovio Humdrum Viewer](https://verovio.humdrum.org/).
-After you've [imported your humdrum data into R](ReadWrite.html "Reading and writing humdrum data"), you can easily look at any file in your corpus by [indexing](references/indexHumdrum.html) them like `humData[1]` or `humData[57]`.
-Looking at the "raw" data like this is an important first step; you need to understand the your data before you can fruitfully analyze it.
-However, you can only look at so much data "by eye"---we use computers precisely because they allow us to analyze large amounts of data rapidly.
-The next step is to use `r hm` to get "high-level" summaries of the content of *all* the files in your data.
+Welcome to "Getting to know your humdrum data"!
+This article explains how `r hm` you an find essential metainformation about your data: how much data is there, and how is it structured?
+If you don't understand your data, you won't be able to do intelligent analyses of it.
 
-`r Hm` defines a number of tools to quickly summarize the structure and content of a humdrum dataset.
+This article, like all of our articles, closely parallels information in `r hm`'s detailed code documentation, which can be found in the "[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#summarizing "HumdrumR function reference, Summarizing")" section of the `r hm` [homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once `r hm` is loaded, using `?summary.humdrumR`.
+
+# Know your data
+
+Before *any* data analysis, you should **know your data**.
+What's in the data? How much data is there? How is it formatted and encoded? Are there errors or ambiguities? How was it sampled?
+If you can't answer these questions, you can't make intelligent or useful scholarly inferences using the data.
+
+After you've done your background research and read up on the details of the data you are working with, hopefully answering the questions posed above, there is one more step to do before you really start analysis: inspect (some of) the data.
+The fact that the [humdrum syntax](HumdrumSyntax.html "The humdrum syntax article") is human readable is one of the great strengths of the humdrum ecosystem!
+Open some of the data files up in a text-editor, or perhaps drop them into the [Verovio Humdrum Viewer](https://verovio.humdrum.org/).
+Of course, you can only look at so much data "by eye"---still, its good practice to inspect as much of the data as you can, selecting files at random and skimming through them to see if they look the way you *think* they should look.
+
+## Data summaries
+
+Once your data is [read](ReadWrite.html "Reading and writing humdrum data, article"), the next step is to use `r hm` to get high-level summaries of the content of *all* the files in your data.
+
+`r Hm` defines a number of tools to quickly summarize the structure and content of a humdrum data set.
 One of the most basic functions in R is `summary()`;
-Calling `summary()` on a [humdrumR object](reference/humdrumRclass.html) will print a concise version of the output
-of `r hm`'s [five summary functions](reference/humSummary.html), which are described in detail below.
-Let's load the built-in Bach-chorale dataset, which we'll use throughout this article, and call `summary()`:
+Calling `summary()` on a [humdrumR object](../reference/humdrumRclass.html) will print a concise version of the output
+of `r hm`'s [five summary functions](../reference/humSummary.html), which are described in detail below.
+Let's load our built-in Bach-chorale dataset, which we'll use throughout this article, and call `summary()`:
 
 ```{r}
 setwd(humdrumRroot)
@@ -39,20 +54,19 @@ summary(chorales)
 ```
 
 A lot of information, huh?
-There rest of this article will walk through this output and [the specific functions that generate it](reference/humSummary.html).
+There rest of this article will walk through this output and [the specific functions that generate it](../reference/humSummary.html "humSummary documentation page").
 
 
 # Summarizing Structure
 
 
 The most basic information you'll want about a humdrum dataset is how "big" it is---how much data is there?
-Printing a [humdrumR object](reference/humdrumRclass.html) on the command line will always tell you how many files there are in your data: you can also
-call `length()` to get this number.
+Printing a [humdrumR object](../reference/humdrumRclass.html) on the command line will always tell you how many files there are in your data: you can also call `length()` to get this number.
 The `census()` function, however, gives us much more detail about the size of the data, telling us how many records, tokens, and characters there are:
 
 ```{r}
 
-census(chorales)
+chorales |> census()
 
 
 ```
@@ -67,8 +81,7 @@ The `(per token)` column indicates the average number of characters in each file
 ## Spines and Interpretations
 
 
-To work with humdrum data, you really need to know how many spines (and spine paths) are present in the data, and 
-what interpretations are present.
+To work with humdrum data, you really *need* to know how many spines (and [spine paths](ComplexSyntax.html "Complex syntax article")) are present in the data, and what interpretations are present.
 The `spines()` and `interpretations()` functions give us just this information!
 
 ```{r}
@@ -88,12 +101,11 @@ However, `interpretations()` also tells about the tandem interpretations it reco
 
 The `chorales` dataset is structurally homogeneous, which is generally a *good* thing---it's much easier to analyze this sort of data!
 However, some humdrum datasets are more heterogeneous, which is where `spines()` and `interpretations()` come more in handy.
-Let's switch over to another one of our pre-packaged corpora, the Beethoven/Mozart variations (see the [read/write](articles/ReadWrite.html "Reading and writing humdrum data")):
+Let's switch over to another one of our pre-packaged corpora, the Beethoven/Mozart variations (see the [read/write](ReadWrite.html "Reading and writing humdrum data article")):
 
 ```{r}
-setwd(humdrumRroot)
 
-readHumdrum('HumdrumData/.*Variations/.*.krn') -> variations
+readHumdrum(humdrumRroot, 'HumdrumData/.*Variations/.*.krn') -> variations
 
 spines(variations)
 
@@ -117,7 +129,7 @@ In fact, the "Tallies" at the bottom tells us that all 20 files have the same ex
 
 # Summarizing Metadata
 
-Another question to ask about a dataset is what kind of meta data is encoded in the data's [reference records](articles/HumdrumSyntax.html "The humdrum syntax").
+Another question to ask about a dataset is what kind of meta data is encoded in the data's [reference records](HumdrumSyntax.html "The humdrum syntax").
 The function `reference()` answers this question for us:
 
 
@@ -165,24 +177,28 @@ reference(chorales)[3, ]
 
 The next thing to do, when getting started with a `r hm` data analysis, is too get a sense of the data *content* itself.
 What tokens does our data actually contain?
-R's `unique()`, `table()`, and `sort()` functions are perfect for this.
-We'll need to use the `with.humdrumR()` function to apply these commands to our data's `Token` field---this is more fully explained in the [working with data](articles/WorkingWithData.html "Working with humdrum data") article.
+R's `unique()`, `tally()`, and `sort()` functions are perfect for this.
+We'll need to use the some techniques from the [Data Fields](DataFields.html#working-with-fields "Data fields article") article, so review that if you don't understand the following!
 
 Let's get the unique values, sorted:
 
 ```{r}
 
-with(chorales, unique(Token) |> sort())
+chorales |>
+  with(unique(Token)) |>
+  sort()
 
 
 ```
 
-Unlike `unique()`, `table()` will count each unique value, and we can then sort to see the most common tokens:
+Unlike `unique()`, `tally()` will count each unique value, and we can then sort to see the most common tokens:
 
 
 ```{r}
 
-with(chorales, table(Token) |> sort())
+chorales |>
+  with(tally(Token)) |>
+  sort()
 
 
 ```
@@ -209,24 +225,26 @@ If you [look these up](https://www.humdrum.org/rep/kern/index.html), you'll lear
 [fermatas](https://en.wikipedia.org/wiki/Fermata).
 But how many tokens have these fermatas?
 
-Let's use the [%~% operator](reference/RegexFind.html), which allows us to search for matches to a (regular expression) pattern in a vector.
+Let's use the [%~% operator](../reference/RegexFind.html), which allows us to search for matches to a (regular expression) pattern in a vector.
 In this case, we want to search for `";"` in `Token`.
 `%~%` returns a logical value (`TRUE` or `FALSE`), which we can `sum()` to get a count of all the `TRUE`s:
 
 ```{r}
 
-with(chorales, Token %~% ';' |> sum())
+chorales |>
+  with(Token %~% ';') |>
+  sum()
 
 
 ```
 
 So there are `r humdrumR:::num2print(with(chorales, Token %~% ';' |> sum()))` `;` tokens in the data.
-If we use `within` instead of `with` (and get rid of the `sum()`), we can see where these fermatas appear:
+If we use `within()` (or `mutate()`) instead of `with` (and get rid of the `sum()`), we can see where these fermatas appear:
 
 
 ```{r}
-within(chorales, Token %~% ';')
-
+chorales |>
+  within(Token %~% ';')
 ```
 
 

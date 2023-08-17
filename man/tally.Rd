@@ -5,15 +5,21 @@
 \alias{Ops,humdrum.table,humdrum.table-method}
 \alias{cbind.humdrum.table}
 \alias{rbind.humdrum.table}
+\alias{as.data.frame.humdrum.table}
+\alias{as.data.frame.probabilityDistribution}
 \title{Tabulate and/or cross-tabulate data}
 \usage{
-tally(..., na.rm = FALSE, exclude = NULL)
+tally(..., na.rm, exclude)
 
 \S4method{Ops}{humdrum.table,humdrum.table}(e1, e2)
 
 \method{cbind}{humdrum.table}(...)
 
 \method{rbind}{humdrum.table}(...)
+
+as.data.frame.humdrum.table(x, ...)
+
+as.data.frame.probabilityDistribution(x, ...)
 }
 \description{
 The \code{tally()} function is exactly like R's fundamental \link[base:table]{table()} function,

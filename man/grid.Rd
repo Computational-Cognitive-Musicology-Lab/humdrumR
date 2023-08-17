@@ -2,6 +2,8 @@
 % Please edit documentation in R/Rhythm.R
 \name{grid}
 \alias{grid}
+\alias{grid.default}
+\alias{grid.humdrumR}
 \alias{togrid}
 \alias{fromgrid}
 \alias{fromgrid.matrix}
@@ -11,6 +13,11 @@
 \alias{fromgrid.integer}
 \title{Drum-machine grid representation of rhythmic durations.}
 \usage{
+\method{grid}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+
+humData |> select(Token) |> grid() 
+humData |> grid(Token)
+
 grid(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 
 togrid(
@@ -103,6 +110,10 @@ These functions read and write a sequencer-like representation of rhythm.
 Rhythms are represented as either strings or vectors of "on"/"off" values,
 which indicate where rhythmic onsets occur in a regular time grid.
 For example, \code{"X00X00X0"} or \code{c(1, 0, 0, 1, 0, 0, 1, 0)}.
+
+If \code{grid()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 The \code{grid()} function, is a fully vectorized \link[=rhythmFunctions]{rhythm function}, which translates

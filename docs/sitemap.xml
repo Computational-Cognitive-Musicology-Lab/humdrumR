@@ -1,435 +1,489 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/404.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/404.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Context.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Filtering.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/ComplexSyntax.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/GettingStarted.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Context.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/HumdrumSyntax.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Intervals.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Filtering.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/IntroForCoders.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/GettingStarted.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/KeysAndChord.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Grouping.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Overview.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/PitchAndTonality.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Intervals.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/RPrimer.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/IntroForCoders.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/ReadWrite.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/KeysAndChord.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Reshaping.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Overview.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/RhythmAndMeter.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/PitchAndTonality.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Summary.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/RPrimer.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/Validation.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/ReadWrite.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/WorkingWithData.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Reshaping.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/articles/index.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/RhythmAndMeter.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/authors.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Summary.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/index.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Validation.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/LO5th.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/WorkingWithData.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/REparser.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/RegexFind.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/authors.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/accidental.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/index.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/bhatk.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/news/index.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/bpm2sec.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/LO5th.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/census.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/REparser.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chord.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/RegexFind.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chordDeparsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/accidental.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chordFunctions.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bhatk.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/chordParsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bpm2sec.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/collapseHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/census.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/context.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cents.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/count.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/crossEntropy.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordDeparsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/crossentropy.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordFunctions.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/degree.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/delta.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cleave.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/diatonicSetS4.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cleaveGraceNotes.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/ditto.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/collapseHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/draw.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/combineFields.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/duple.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/duration.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/entropy.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/crossEntropy.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/enum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/crossentropy.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/expand.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/degree.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/expandPaths.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/delta.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/extractTandem.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/figuredBass.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ditto.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/foldExclusive.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/foldGraceNotes.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duple.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/foldHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duration.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/freq.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/gamut.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/enum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/grid.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/evaluatingExpressions.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/harm.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expand.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/helmholtz.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expandPaths.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/hop.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/extractTandem.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humActive.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/figuredBass.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humCoercion.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/foldExclusive.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humMerge.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/foldGraceNotes.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humMeter.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/foldHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humSize.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/freq.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humSummary.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/gamut.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humTable.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/grid.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humWindows.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumDispatch.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupingFactors.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumPitch.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumR.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/helmholtz.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumRclass.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/humdrumRroot.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humActive.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/index.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humCoercion.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/indexHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humMerge.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/int.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humMeter.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/interpretations.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSize.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/interval.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/invert.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/ioi.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humWindows.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/is.major.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumDispatch.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/is.simple.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumPitch.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/kern.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumR.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/key.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/keyDeparsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRroot.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/keyFunctions.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/keyParsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/indexHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/lag.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/lilypond.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/interpretations.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/meter.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/interval.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/metlev.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/invert.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/mutualInfo.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ioi.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/nbeats.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/is.major.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/noteValue.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/is.simple.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/notehead.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/kern.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/octave.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/key.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/p.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyDeparsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/partialMatching.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyFunctions.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pc.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitch.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lag.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchDeparsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lilypond.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/meter.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchParsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/ptable.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutualInfo.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/quality.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/nbeats.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rational.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/noteValue.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/readHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/notehead.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/recip.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/octave.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/recordDuration.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/p.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/reference.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/partialMatching.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/regexConstruction.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pc.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmDeparsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitch.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmFunctions.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchDeparsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmParsing.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchFunctions.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/romanKey.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/romanNumerals.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ptable.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/segments.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pullHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/semits.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/quality.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/sigma.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rational.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/signature.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/silbeFormat.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recip.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/solfa.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recordDuration.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/solfg.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recycling.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/sonority.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/reference.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/spines.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/regexConstruction.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/step.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rend.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/struct.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmDeparsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/subset.humdrumR.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmFunctions.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/syncopation.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmParsing.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tactus.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanKey.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tally.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanNumerals.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tatum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/segments.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertian.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/selectedFields.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tertianSetS4.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/semits.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/time.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/sigma.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/timebase.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/signature.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/timeline.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/silbeFormat.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/token.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfa.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonalIntervalS4.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfg.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/tonh.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/sonority.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/transpose.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/spines.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/unfoldStops.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/step.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/validateHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/struct.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/withinHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/wort.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/syncopation.html</loc>
   </url>
   <url>
-    <loc>https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/writeHumdrum.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tactus.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tally.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tandem.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tatum.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertian.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertianSetS4.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/time.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timebase.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/token.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonalIntervalS4.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonh.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/transpose.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/unfoldStops.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/validateHumdrum.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/vectorization.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/wort.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/writeHumdrum.html</loc>
   </url>
 </urlset>

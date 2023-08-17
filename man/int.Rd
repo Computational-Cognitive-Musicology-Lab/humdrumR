@@ -2,7 +2,11 @@
 % Please edit documentation in R/Pitch.R
 \name{int}
 \alias{int}
+\alias{mint.default}
+\alias{mint.humdrumR}
 \alias{mint}
+\alias{hint.default}
+\alias{hint.humdrumR}
 \alias{hint}
 \title{Calculate intervals between pitches}
 \usage{
@@ -11,7 +15,7 @@ int(
   from = tint(0L, 0L),
   deparser = interval,
   incomplete = NULL,
-  bracket = TRUE,
+  bracket = is.function(incomplete),
   classify = FALSE,
   ...,
   Exclusive = NULL,
@@ -19,12 +23,12 @@ int(
   parseArgs = list()
 )
 
-mint(
+\method{mint}{default}(
   x,
   lag = 1,
   deparser = interval,
   incomplete = kern,
-  bracket = TRUE,
+  bracket = is.function(incomplete),
   classify = FALSE,
   ...,
   parseArgs = list(),
@@ -34,12 +38,49 @@ mint(
   orderby = list()
 )
 
+humData |> select(Token) |> mint() 
+humData |> mint(simple = TRUE)
+humData |> mint(Token, Key = Key)
+
+mint(
+  x,
+  lag = 1,
+  deparser = interval,
+  incomplete = kern,
+  bracket = is.function(incomplete),
+  classify = FALSE,
+  ...,
+  parseArgs = list(),
+  Exclusive = NULL,
+  Key = NULL,
+  groupby = list(),
+  orderby = list()
+)
+
+\method{hint}{default}(
+  x,
+  lag = 1,
+  deparser = interval,
+  incomplete = kern,
+  bracket = is.function(incomplete),
+  ...,
+  parseArgs = list(),
+  Exclusive = NULL,
+  Key = NULL,
+  groupby = list(),
+  orderby = list()
+)
+
+humData |> select(Token) |> hint() 
+humData |> hint(simple = TRUE)
+humData |> hint(Token, Key = Key)
+
 hint(
   x,
   lag = 1,
   deparser = interval,
   incomplete = kern,
-  bracket = TRUE,
+  bracket = is.function(incomplete),
   ...,
   parseArgs = list(),
   Exclusive = NULL,
@@ -75,7 +116,7 @@ Must \code{NULL}, a \link[=pitchFunctions]{pitch function}, or an atomic value o
 
 \item{bracket}{\emph{\strong{Whether to print brackets around \code{incomplete} output.}}
 
-Defaults to \code{TRUE}.
+Defaults to \code{TRUE} if \code{incomplete} is a function, \code{FALSE} otherwise.
 
 Must be a singleton \code{logical} value: an on/off switch.
 
@@ -120,6 +161,14 @@ order, but the output is returned in the original order.}
 These functions allow us to calculate intervals between pitches.
 \code{int()} is the most basic form, calculating the interval(s) between two input vectors.
 \code{mint()} and \code{hint()} are special forms for calculating intervals "melodically" or "harmonically," respectively.
+
+If \code{mint()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+
+If \code{hint()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Input vectors \code{x} (and \code{from}) are \link[=tonalInterval]{parsed as pitches} (\link[=tonalIntervaS4]{tonal interval objects}), if possible.
@@ -285,7 +334,7 @@ specially optimized for this functions.
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
+three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, sumTies, or hop.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

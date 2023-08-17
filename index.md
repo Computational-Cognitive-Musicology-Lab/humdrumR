@@ -19,9 +19,10 @@ Humdrum$_{\mathbb{R}}$ code provides tools for the visualization, manipulation, 
 ### What is humdrum?
 
 Humdrum is a system for computational musicology developed by David Huron.
-The Humdrum "universe" includes two parts: a data format called the [humdrum syntax](http://www.humdrum.org/guide/ch05/) and a musicological software system
+The Humdrum "ecosystem" includes two main parts: a data format called the [humdrum syntax](http://www.humdrum.org/guide/ch05/) and a musicological software system
 called the [humdrum toolkit](http://www.humdrum.org/).
-Humdrum$_{\mathbb{R}}$ is meant as a modernized replacement for the original humdrum toolkit, leveraging
+Another key component of the ecosystem is the [Verovio Humdrum Viewer](http://verovio.humdrum.org/), which is a great way to get to view and edit humdrum data.
+Humdrum$_{\mathbb{R}}$ is a complement to the original humdrum toolkit, leveraging
  the power of R to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
 
 Humdrum$_{\mathbb{R}}$ is mainly used to manipulate and analyze data encoded in the humdrum syntax and/or humdrum interpretations like `**kern`.

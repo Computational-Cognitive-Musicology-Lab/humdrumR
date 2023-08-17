@@ -16,6 +16,9 @@ editor_options:
 source('vignette_header.R')
 ```
 
+
+Welcome to "Filtering humdrum data"!
+This article explains how `r hm` can be used find subsets of humdrum data.
 Most humdrum datasets contain a wealth of information: rhythms, pitches, lyrics, etc.
 However, the particular analysis you want to conduct today might not need all that information.
 The first step after [loading humdrum data](ReadWrite.html "Reading and writing humdrum data")
@@ -35,8 +38,7 @@ chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 # Indexing
 
-The simplest, common, way to filter your data is through *indexing*, which is a common approach in
-programming for selecting subsets of data.
+The simplest, common, way to filter your data is through "indexing," a common means in programming for selecting subsets of data.
 In R, we use the square brackets, `[]`, to index various data objects,
 including basic atomic vectors, data.tables, and lists.
 For example, using brackets I can extract subsets of a vector:
@@ -57,13 +59,19 @@ myname[c(1, 5)]
 Watch out! R actually has **two** different ways of indexing:
 you can use a single pair of matches brackets (`[ ]`) or a double pair (`[[ ]]`).
 If you want a primer on how these two types of indexing are used in normal R
-objects, check out the [R primer](Rbasics.html "Basics of R")---you really don't *need*
+objects, check out the [R primer](RPrimer.html "Basics of R")---you really don't *need*
 to do this before getting into `r hm`, but you might want to eventually.
 
 We can use the single-bracket `[]` or double-bracket `[[]]` commands to index our `r hm` data objects.
-The single-brackets are used to index whole *pieces* in your data.
-The double-brackets are used to index "within" pieces in your data.
+
++ The single-brackets are used to index whole *pieces* in your data.
++ The double-brackets are used to index *within* pieces in your data.
+
 Either type of bracket can accept either `numeric` or `character` vectors to index by.
+
+---
+
+To do indexing in a pipe, using the `index()` (`[]`) and `index2()` commands (`[[]]`).
 
 ## Single-bracket indexing
 
@@ -104,7 +112,7 @@ chorales[6:10]
 ### Character indices (for single-brackets)
 
 If you supply a `r hm` object single-bracket index a `character` string,
-`r Hm` will treat that string as a regular expression and return all the files that
+`r hm` will treat that string as a regular expression and return all the files that
 contain a match to that expression in *any* data token---even if there is only one.
 
 For example, we might be only interested in files that use flat notes.
@@ -123,7 +131,7 @@ Notice that we still get the *whole* files returned to us!
 
 ## Double-bracket indexing
 
-The double-brackets are used to index within pieces in your data.
+The double-brackets are used to index *within* pieces in your data.
 Specifically, if you only want to work with certain spines or records within your pieces.
 The double-brackets apply the same filters separately to each file in the dataset.
 
@@ -275,17 +283,18 @@ chorales[[-1:-20, ]]
 
 
 The indexing commands (previous sections) only get you so far.
-If you want to be more precise about filtering, use the `subset` method for `r hm` data.
-`subset.humdrumR` works exactly like [within.humdrumR](WorkingWithData.html "Working with Humdrum Data").
-However, the expression(s) you give must evaluate to a logical vector (`TRUE` or `FALSE`) of the same length as its input.
-(You will get an error otherwise.)
-`subset.humdrumR` will take your logical result and filter out data which matches `FALSE`.
+If you want to be more precise about filtering, use the tidy-verse `filter()` method for `r hm` data.
+`filter()` works exactly like [mutate.humdrumR](DataFields.html#tidyverse-style "HumdrumR data fields article").
+However, the expression(s) you give must evaluate to a logical vector (`TRUE` or `FALSE`), or you will get an error otherwise.
+`filter()` will take your logical result and filter out data which matches `FALSE`.
 
-We can reproduce the functionality of the `[]` and `[[]]` indexing operators (previous section) using `subset`:
+We can reproduce the functionality of the `[]` and `[[]]` indexing operators (previous section) using `filter()`:
 
 
 ```{r}
-subset(chorales, Spine == 1)
+chorales |>
+  filter(Spine == 1)
+
 
 ```
 
@@ -295,16 +304,20 @@ We'll use Rs modulo command `%%` to separate even and odd numbers (`odd %% 2 == 
 
 ```{r}
 
-subset(chorales, (Record %% 2 == 0) == (Spine %% 2 == 0) )
+chorales |>
+  filter((Record %% 2 == 0) == (Spine %% 2 == 0))
+
 
 ```
 
 Would we ever want to do that? Probably not.
-However, returning to our flats, study, lets grab all the flat notes:
+However, returning to our flats, study, lets grab *all* the flat notes:
 
 ```{r}
 
-subset(chorales, Token %~% '-')
+chorales |>
+  filter(Token %~% '-')
+
 
 
 ```
@@ -315,7 +328,10 @@ But from before, we know that there are a lot more flats in the fourth file (aft
 
 ```{r}
 
-subset(chorales, Token %~% '-')[4]
+chorales |>
+  filter(Token %~% '-') |>
+  index(4)
+
 
 ```
 
@@ -323,17 +339,18 @@ subset(chorales, Token %~% '-')[4]
 ## Subseting by Group
 
 
-Since `subset.humdrumR` makes use of [within.humdrumR], we can use `within.humdrumR`'s other special options, including group `by`.
+Like `mutate()`, `filter()` will evaluate its logical filtering expression within groups created by `group_by()`.
 This can be a useful way to get some context for our searches.
 For example, let's say we want to find flats again, but we want to see the whole *bar* of music that contains a flat.
-We can do this by grouping by the `Bar` field (and the `File` field).
+We can do this by grouping by the `Bar` field (and the `Piece` field, of course).
 We'll want to say "within each bar, if there are *any* flats, return `TRUE` for the *whole* bar, else return `FALSE` for the *whole* bar."
-We can use the `any` function to get *any* match, and the `fill` option to copy the result of `any` to the whole bar.
+By default, `filter()` will [recycle][recycling] scalar results, so if you return a single `TRUE`/`FALSE`, it will be recycled to fill the whole group.
 
 ```{r}
 
-subset(chorales, fill = any(Token %~% '-'), by = list(File, Bar))
-
+chorales |>
+  group_by(Piece, Bar) |>
+  filter(any(Token %~% '-'))
 
 ```
 
@@ -342,24 +359,28 @@ Not enough context for you? Maybe we should group the bars into even-odd pairs:
 
 ```{r}
 
-subset(chorales, fill = any(Token %~% '-'), by = list(File, floor(Bar  / 2)))
+chorales |>
+  group_by(Piece, floor(Bar / 2)) |>
+  filter(any(Token %~% '-'))
+
 
 ```
 
 
 ## Removing vs Filtering
 
-You probably noticed that, unlike the indexing commands `[]` and `[[]]`, `subset` doesn't seem to actually *remove* data that you filter out.
+You probably noticed that, unlike the indexing commands `[]` and `[[]]`, `filter()` doesn't seem to actually *remove* data that you filter out.
 So when we say 
 
 ```{r}
-subset(chorales, Spine == 1)
+chorales |>
+   filter(Spine == 1)
 
 ```
 
 we still have four spines, but spines 2--4 are just emptied.
 This is correct.
-What `subset` actually does is mark filtered data in the `Filter` field of the humdrum table.
+What `filter()` actually does is turn any filtered data points into null (`d`) data points.
 `r Hm` then ignores that data automatically.
 Why do we do this?
 There are several reasons:
@@ -368,16 +389,19 @@ There are several reasons:
    Basically, all those empty spines remind you what you filtered, so it is easier to see if the filter is doing what you *think* it is doing.
    + A clear example of this is when we did `[[ , j]]` indexing for flats (above): when we simply removed the spines with no flats it was hard to tell which spine was which in the result. 
 2. Many filters would break the humdrum syntax if the data was simply removed. If you removed all the tokens that don't  contain flats, the result would be humdrum data with holes in it.
-3. Its possible to undo your filters, using the `clearFilter` command. (Try it.) 
+3. Its possible to undo your filters, using the `unfilter()` command (details [below](Filtering.html#complements)).
 
-Once you've done some filtering with `subset`, if you *want* to get rid of empty parts of the data, you can do so using the commands `removeEmptyFiles`, `removeEmptySpines`, `removeEmptyRecords`, `removeEmptyStops`, or `removeEmptyPaths`.
-By using this commands, we make sure that 1) you explicitly want to remove them and 2) the humdrum syntax is not broken, because whole records/spines/paths/files are removed.
+Once you've done some filtering with `filter()`, if you *want* to get rid of empty parts of the data, you can do so using the commands `removeEmptyFiles()`, `removeEmptySpines()`, `removeEmptyRecords()`,`removeEmptyPaths()`, or `removeEmptyStops()`.
+By using this commands, we make sure that 1) you explicitly want to remove them and 2) the humdrum syntax is not broken, because only whole records/spines/paths/files are removed.
 
 So for our spines example:
 
 ```{r}
 
-subset(chorales, Spine == 1) |> removeEmptySpines()
+chorales |>
+  filter(Spine == 1) |>
+  removeEmptySpines()
+
 
 ```
 
@@ -385,8 +409,98 @@ or for records:
 
 ```{r}
 
-subset(chorales, Record %% 2 == 0) |> removeEmptyRecords()
+chorales |>
+  filter(Record %% 2 == 0) |>
+  removeEmptyRecords()
 
 
 ```
 
+# Complements
+
+When `r hm` filters, it does not completely discard/erase the data.
+The output of `filter()` is a subset of the original data: the *complement* of that subset is retained (but hidden).
+This allows us to restore the filtered data, using `unfilter()`:
+
+
+```{r}
+chorales |>
+  filter(Spine == 1) |>
+  unfilter()
+
+```
+We can also expliticely switch to the complement using the `complement()` command:
+
+```{r}
+chorales |>
+  filter(Spine == 1) |>
+  complement()
+
+```
+
+
+Why would we want to unfilter or complement our data?
+These functions actually allow a number of useful functionality that is not immediately obvious.
+
+#### Example 1
+
+Let's say we want to find and look at the notes leading up to the *third* phrase ending in each chorale?
+We'd first need to count the phrase endings (`;`) in each chorale.
+We could filter our data, and simply `seq_along()` (enumerate) the fermatas in each bar:
+
+```{r}
+chorales |>
+  filter(Token %~% ';') |>
+  group_by(Piece, Spine) |>
+  mutate(FermataN = seq_along(Token)) -> chorales
+
+chorales[1]
+```
+
+Cool!
+We now have a `FermataN` field, showing us the number of each fermata.
+But wait, using filter *removed* most of our tokens, so we can only see the notes during the fermatas, not leading up to them.
+
+```{r}
+chorales |>
+  select(Token)
+
+```
+
+Luckily, we can `unfilter()`, then filter again by bar:
+
+```{r}
+chorales |> 
+  unfilter() |>
+  ungroup() |>
+  group_by(File, Bar) 
+
+```
+
+#### Example 2
+
+What if you wanted to transpose the bass voice an octave higher, but keep the other voices the same?
+Well, we could try:
+
+```{r}
+chorales |>
+  filter(Spine == 1) |>
+  mutate(Transposed = transpose(Token, by = 'P8')) |> 
+  unfilter()
+
+```
+
+
+We successfully unfiltered...but the `Token` field was unfiltered, not our new `Transposed` field.
+This is because the `Tranposed` field has no complement data: it didn't exist until after the filter was applied.
+Luckily, we can tell `unfiltered()` to use a specific complement, using the `complement` argument:
+
+```{r}
+chorales |>
+  filter(Spine == 1) |>
+  mutate(Transposed = transpose(Token, by = 'P8')) |> 
+  unfilter(complement = 'Token')
+
+```
+
+Thus, `unfilter()` can be used to combine the content of different fields into one field!

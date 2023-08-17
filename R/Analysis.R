@@ -58,9 +58,12 @@ setClass('humdrum.table', contains = 'table')
 #' cbind(genericTable, complexTable)
 #' 
 #' @export
-tally <- function(..., 
-                  na.rm = FALSE,
-                  exclude = NULL) {
+tally <- function(..., na.rm, exclude) UseMethod('tally')
+#' @export
+tally.default <- function(..., 
+                          na.rm = FALSE,
+                          exclude = NULL) {
+  
   
   # exprs <- rlang::enexprs(...)
   exprs <- as.list(substitute(list(...)))[-1L]
@@ -75,7 +78,7 @@ tally <- function(...,
                    if (inherits(arg, 'token')) factorize(arg) else arg
                  })
   tab <- do.call(base::table,
-                 c(args, list(exclude = if (na.rm) c(NA, NaN), 
+                 c(args, list(exclude = c(exclude, (if (na.rm) c(NA, NaN))), 
                               useNA = if (na.rm) 'no' else 'ifany', 
                               deparse.level = 0)))
   
@@ -87,6 +90,26 @@ tally <- function(...,
   
   
 }
+
+#' @export
+tally.humdrumR <- function(x, ..., na.rm = FALSE, exclude = NULL) {
+  quos <- rlang::enquos(...)
+  
+  if (length(quos)) {
+    quo <- rlang::quo(with(x, tally(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
+    rlang::eval_tidy(quo)
+    
+    
+  } else {
+    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+    
+    do.call('tally', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
+  }
+  
+  
+  
+}
+
 
 #' @rdname tally
 #' @export
@@ -122,6 +145,14 @@ rbind.humdrum.table <- function(...) {
   
   do.call('rbind', tables)
   
+}
+
+#' @rdname tally
+#' @export
+as.data.frame.humdrum.table <- function(x, ...) {
+  tab <- as.data.frame(S3Part(x), ...)
+  names(tab)[names(tab) == 'Freq'] <- 'Tally'
+  tab
 }
 
 alignTables <- function(tables, funcname = '') {
@@ -160,13 +191,6 @@ alignTables <- function(tables, funcname = '') {
   
 }
 
-factorize <- function(token) {
-  factorizer <- token@Attributes$factorizer
-  if (is.null(factorizer)) return(factor(token@.Data))
-  
-  factorizer(token)
-  
-}
 
 # Probabilities ----
 
@@ -239,6 +263,14 @@ pdist.name <- function(ptab, margin = NULL, func = 'P') {
   
 }
 
+#' @rdname tally
+#' @export
+as.data.frame.probabilityDistribution <- function(x, ...) {
+  tab <- as.data.frame(S3Part(x), ...)
+  names(tab)[names(tab) == 'Freq'] <- 'p'
+  tab
+}
+
 ## p() -----
 
 #' Tabulate and cross proportions
@@ -272,7 +304,7 @@ setMethod('p', c('table'),
 
 
 
-setClassUnion("discrete", members = c('character', 'integer', 'logical', 'token', 'factor'))
+setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor'))
 
 #' @rdname p
 #' @export
@@ -593,7 +625,8 @@ setGeneric('draw', \(x, y,
                      main = '', sub = '',
                      xlab = NULL, ylab = NULL, ...) {
   oldpalette <- palette(flatly)
-  oldpar <- par(family = 'Lato', col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
+  oldpar <- par(family = 'Lato', 
+                col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
                 cex.axis = .7, pch = 16)
   
   on.exit({par(oldpar) ; palette(oldpalette)})
@@ -653,8 +686,6 @@ setMethod('draw', c('numeric', 'numeric'),
 setMethod('draw', c('numeric', 'missing'), 
           \(x, y, col = 3, breaks = 'Sturges', jitter = '', ..., cex = prep_cex(x) * .75, xlim = NULL, ylim = NULL) {
             
-            
-            
             breaks <- hist.default(x, breaks = breaks, plot = FALSE)
             
             xat <- breaks$breaks
@@ -687,8 +718,8 @@ setMethod('draw', c('numeric', 'missing'),
             
             if (length(x) > 1e5) x <- sample(x, 1e5)
             if (grepl('x', jitter)) x <- smartjitter(x)
-            points(x, rnorm(length(x), mean(ylim), diff(range(ylim)) / 20), 
-                   cex = cex , col = rgb(1,0,0, .1), pch = 16, xpd = TRUE)
+            # points(x, rnorm(length(x), mean(ylim), diff(range(ylim)) / 20), 
+                   # cex = cex , col = rgb(1,0,0, .1), pch = 16, xpd = TRUE)
             
             
             list(ylab = 'Proportion')
@@ -727,6 +758,31 @@ setMethod('draw', c('discrete', 'discrete'),
 setMethod('draw', c('discrete', 'missing'),
           function(x, y, ...){ 
             draw(tally(x), ..., xlab = '')
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('token', 'missing'),
+          function(x, y, ...){ 
+            x <- if (is.numeric(x)) untoken(x) else factorize(x)
+            draw(x = x, ..., xlab = '')
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c('missing', 'token'),
+          function(x, y, ...){ 
+            y <- if (is.numeric(y)) untoken(y) else factorize(y)
+            draw( , y = y, ..., xlab = NA)
+          })
+
+#' @rdname draw
+#' @export
+setMethod('draw', c(x = 'token', y = 'token'),
+          function(x, y, ...){ 
+            x <- if (is.numeric(x)) untoken(x) else factorize(x)
+            y <- if (is.numeric(y)) untoken(y) else factorize(y)
+            draw(x, y, ..., xlab = '')
           })
 
 # #' @rdname draw
@@ -864,7 +920,23 @@ setMethod('draw', c('formula'),
             
           })
 
-
+#' @rdname draw
+#' @export
+setMethod('draw', c('humdrumR'),
+          function(x, facet = NULL, ...) {
+            selected <- pullSelectedField(x, null = 'asis')
+            fields <- fields(x)
+            groupFields <- if (length(facet)) {
+              fieldMatch(x, unlist(facet), callfun = 'draw')
+            } else {
+              fields[GroupedBy == TRUE]$Name 
+            }
+            if (length(groupFields)) {
+              facet <- pullFields(x, groupFields)
+            }
+            draw(selected, facet = facet, ...)
+            
+          })
 
 ## draw()'s helpers ----
 
@@ -1009,12 +1081,14 @@ draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xa
   xticks <- if (is.numeric(args$x)) prep_ticks(args$x, log = grepl('x', log), at = xat)
   yticks <- if (is.numeric(args$y)) prep_ticks(args$y, log = grepl('y', log), at = yat)
   args$ylim <- ylim %||% if (!is.null(yticks)) range(yticks)
+  args$xlim <- args$xlim %||% if (!is.null(xticks)) range(xticks)
+  
   
   args$xat <- args$yat <- NA
   
   facetLabels <- unique(as.data.frame(facets))
   facetLabels <- facetLabels[sapply(facetLabels, \(val) length(unique(val)) > 1L)]
-  facetLabels <- do.call('paste', facetLabels)
+  facetLabels <- paste(colnames(facetLabels), do.call('paste', facetLabels))
   
   facets <- squashGroupby(facets)
   args <- lapply(args, \(x) if (length(x) == length(facets)) split(x, f = facets) else rep(list(x), length(layout)))
@@ -1056,14 +1130,14 @@ draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xa
   layout(1)
   plot.window(c(0, 1), c(0, 1))
   par(oma = c(0,0,0,0))
-  if (nrow(layout) > 1) {
-    abline(h = head(seq(0, 1, length.out = nrow(layout) + 1)[-1], -1),
-           lty = 'dashed', col = setalpha(flatly[5], .3))
-  }
-  if (ncol(layout) > 1) {
-    abline(v = head(seq(0, 1, length.out = ncol(layout) + 1)[-1], -1),
-           lty = 'dashed', col = setalpha(flatly[5], .3))
-  }
+  # if (nrow(layout) > 1) {
+  #   abline(h = head(seq(0, 1, length.out = nrow(layout) + 1)[-1], -1),
+  #          lty = 'dashed', col = setalpha(flatly[5], .3))
+  # }
+  # if (ncol(layout) > 1) {
+  #   abline(v = head(seq(0, 1, length.out = ncol(layout) + 1)[-1], -1),
+  #          lty = 'dashed', col = setalpha(flatly[5], .3))
+  # }
   # list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
 }
 
@@ -1124,3 +1198,64 @@ draw_violin <- function(var, breaks = 'Sturges', col = 1, ...) {
 }
 
 
+# Notation viewer ----
+
+toHNP <- function(lines, message) {
+  output <- paste(lines, collapse = '\n')
+  
+  randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
+  message <- gsub("PLUGIN", '<a href="https://plugin.humdrum.org/">humdrum notation plugin</a>', message)
+  
+  html <- .glue(.open = '[[', .close = ']]',
+  '<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js"></script>
+    <script>displayHumdrum({source: "[[randomID]]", autoResize: "true"});</script>
+    </head>
+    <body>
+    <h1>HumdrumR viewer</h1>
+    <p>[[message]]</p>
+    <script id="[[randomID]]" type="text/x-humdrum">[[output]]</script>
+    </body>
+    </html>')
+  
+  
+  tempDir <- tempfile()
+  dir.create(tempDir)
+  htmlFile <- file.path(tempDir, 'index.html')
+  
+  writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
+  
+  getOption('viewer', default = utils::browseURL)(htmlFile)
+  
+}
+
+#' @export
+viewKernTable <- function(table) {
+  df <- as.data.frame(table)
+  df <- df[order(df[[length(df)]], decreasing = TRUE), ]
+  
+  df <- subset(df, df[[length(df)]] > 0)
+  
+  
+  
+  kern <- lapply(as.list(df[1:(ncol(df) -1)]), as.character)
+  # if (length(kern) > 1) {
+    # kern[[1]] <- paste0('(', kern[[1]])
+    # kern[[length(kern)]] <- paste0(kern[[length(kern)]], ')')
+  # }
+  N    <- num2str(df[[length(df)]])
+  
+  kernspine <- do.call('rbind', c(kern, list('=||')))
+  kernspine <- c('**kern', kernspine, '*-')
+  
+  Nspine <- c(do.call('rbind', c(list(N), 
+                                 replicate(length(kern) - 1, list('.'), simplify = T), 
+                                 list('=||'))))
+  Nspine <- c('**cdata', Nspine, '*-')
+  
+  lines <- paste(kernspine, Nspine, sep = '\t')
+  
+  toHNP(lines, "Tabulating kern data and viewing using the PLUGIN.")
+}

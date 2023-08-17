@@ -2,8 +2,27 @@
 % Please edit documentation in R/Pitch.R
 \name{kern}
 \alias{kern}
+\alias{kern.default}
+\alias{kern.humdrumR}
 \title{Kern pitch representation}
 \usage{
+\method{kern}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> kern() 
+humData |> kern(simple = TRUE)
+humData |> kern(Token, Key = Key)
+
 kern(
   x,
   ...,
@@ -72,6 +91,10 @@ Kern (\verb{**kern}) is the most common humdrum interpretation for representing 
 traditional Western scores.
 However! In \link{humdrumR}, the \code{kern} function outputs the \emph{pitch} part of the \verb{**kern} interpretation.
 \verb{**kern} \emph{rhythms} are instead created using the \code{\link[=recip]{recip()}} function.
+
+If \code{kern()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 The pitch part of \verb{**kern} tokens breakdown tonal pitch information as so:
@@ -258,7 +281,6 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
-\code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{lilypond}()},
 \code{\link{pitch}()},

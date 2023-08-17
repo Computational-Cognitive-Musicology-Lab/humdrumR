@@ -23,12 +23,7 @@ ditto(x, ...)
 
 \method{ditto}{matrix}(x, margin = 2, ...)
 
-\method{ditto}{humdrumR}(
-  x,
-  field = getActiveFields(x)[1],
-  ...,
-  newField = paste0(field, "_ditto")
-)
+\method{ditto}{humdrumR}(x, ..., initial = NA, reverse = FALSE)
 }
 \arguments{
 \item{x}{\emph{\strong{A vector.}}
@@ -70,17 +65,7 @@ Defaults to \code{2} (across columns) for \code{matrix} inputs.
 Must be natural number(s).
 
 E.g., for a matrix \code{1} indicates rows, \code{2} indicates columns.
-Where \code{x} has named dimnames, it can be a character vector selecting dimension names.}
-
-\item{field}{\emph{\strong{Which field to ditto?}}
-
-Must be a single \code{character} string.
-
-Is (\link[=partialMatching]{partially matched}) against \link[=humTable]{fields} in \code{x}.}
-
-\item{newField}{\emph{\strong{What to name the new (dittoed) field.}}
-
-Defaults to the \code{field} name appended with \code{"_ditto"}.
+Where \code{x} has named dimnames, it can be a character vector selecting dimension names.
 
 Must be a single \code{character} string.}
 }
@@ -104,7 +89,7 @@ The \code{data.frame} method simply applies \code{ditto} to each column of the \
 For matrices, ditto can be applied across columns (\code{margin == 2}), rows (\code{margin == 1}), or other dimensions.
 
 The \code{ditto} method for a \link[=humdrumRclass]{humdrumR object} simply applies \code{ditto} to the, by default,
-the active field; thus \code{ditto(humData)} is equivalent to \code{within(humData, newField <- ditto(.), dataTypes = 'Dd')}.
+the selected field; thus \code{ditto(humData)} is equivalent to \code{within(humData, newField <- ditto(.), dataTypes = 'Dd')}.
 The \code{field} argument can be used to indicated a different field to apply to. The result of the dittoing
 is saved to a new field---the \code{newField} argument can be used to control what to name the new field.
 }
@@ -128,7 +113,7 @@ specially optimized for this functions.
 The most common use case in humdrum data, is looking at "melodies" within spines.
 For this, we want \code{groupby = list(Piece, Spine, Path)}.
 In fact, \code{humdrumR} \link[=withinHumdrum]{with(in)} calls will \emph{automatically} feed these
-three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, untie, or hop.
+three fields as \code{groupby} arguments to certain functions: mint, delta, sigma, lag, ditto, ioi, sumTies, or hop.
 So any use of \code{delta} in a call to \link[=withinHumdrum]{with(in)}, will automatically calculate the \code{delta}
 in a "melodic" way, within each spine path of each piece.
 However, if you wanted, for instance, to calculate differences across spines (like harmonic intervals)

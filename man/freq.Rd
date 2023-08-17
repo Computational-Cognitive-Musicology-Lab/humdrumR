@@ -2,8 +2,30 @@
 % Please edit documentation in R/Pitch.R
 \name{freq}
 \alias{freq}
+\alias{freq.default}
+\alias{freq.humdrumR}
 \title{Translate pitches to frequency (Hz)}
 \usage{
+\method{freq}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  tonalHarmonic = 2^(19/12),
+  frequency.reference = 440,
+  frequence.reference.note = "a",
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> freq() 
+humData |> freq(simple = TRUE)
+humData |> freq(Token, Key = Key)
+
 freq(
   x,
   ...,
@@ -91,7 +113,9 @@ Defaults to \code{"a"}.
 Can be any \link[=pitchParsing]{parsable pitch representation}; must be length \code{1}.}
 }
 \description{
-Translate pitches to frequency (Hz)
+If \code{freq()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

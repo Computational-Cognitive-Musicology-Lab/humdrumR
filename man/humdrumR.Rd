@@ -3,16 +3,90 @@
 \docType{package}
 \name{humdrumR}
 \alias{humdrumR}
+\alias{humdrumRroot}
 \title{humdrumR}
+\format{
+An object of class \code{character} of length 1.
+}
+\usage{
+humdrumRroot
+
+humdrumR(
+  view,
+  dataTypes,
+  maxRecordsPerFile,
+  maxTokenLength,
+  nullPrint,
+  syntaxHighlight,
+  censorEmptyRecords
+)
+}
+\arguments{
+\item{view}{\emph{\strong{How should humdrumR data be printed?}}
+
+There are three options: \code{"humdrum"}, \code{"score"}, and \code{"table"} (aliases \code{"data.frame"} and \code{"tibble"}).
+These options are \link[=partialMatching]{partially matched}.
+
+Use \code{\link[=select]{select()}} to determine which fields to show.}
+
+\item{dataTypes}{\emph{\strong{Which types of humdrum record(s) to view.}}
+
+Defaults to \code{"GLIMDd"} for \code{as.lines()} and \code{as.matrix()}; \code{"Dd"} for \code{as.data.frame()};
+\code{"LIMDd"} for \code{as.matrices()} and \code{as.data.frames()}.
+
+Must be a single \code{character} string. Legal values are \verb{'G', 'L', 'I', 'M', 'D', 'd'}
+or any combination of these (e.g., \code{"LIM"}).
+(See the \link[=humTable]{humdrum table} documentation for explanation.)}
+
+\item{maxRecordsPerFile}{\emph{\strong{How many records should be shown in each file, when more than one file is present?}}
+
+Defaults to \code{40}.
+
+Can be any positive whole number.}
+
+\item{maxTokenLength}{\emph{\strong{Length at which longer tokens are censored with ...}}
+
+Defaults to \code{16}.
+
+Can be any positive whole number.}
+
+\item{nullPrint}{\emph{\strong{How should null data points print?}}
+
+Default is \code{"NA2dot"}.
+
+Must be a single character string, \link[=partialMatchng]{partially matching} \code{"NA2dot"}, \code{"dot2NA"}, \verb{'charNA2dot"}, or \code{"asis"}.
+\code{"NA2dot"} means all \code{NA} values are converted to \code{"."}; \verb{"dot2NA} means all \code{"."} are converted to \code{NA}; \code{charNA2dot} means \code{NA} values
+in \code{character} vectors are converted to \code{NA}, but not in other atomic types; \code{"asis"} means either \code{NA} or \code{"."} values may print, depending
+on what is in the field.}
+
+\item{syntaxHighlight}{\emph{\strong{Should syntax highlighting (coloring) be used in printout?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton logical value; an on/off switch.}
+
+\item{censorEmptyRecords}{\emph{\strong{Should consecutive records be "censored" (compressed) in printout?}}
+
+Defaults to \code{30}.
+
+Can be any positive whole number, up to \code{Inf}.
+If \code{Inf}, no censoring will occur.}
+}
 \description{
 \code{humdrumR} is a toolkit for the analysis of data encoded in the \href{http://www.humdrum.org/guide/ch05/}{humdrum syntax}.
 The humdrum syntax is an incredibly flexible, and powerful, scheme for encoding musical data.
 Tens of thousands of musical scores (and other musical data) have been encoded in the humdrum syntax, many available online through repositories such as
 \href{http://kern.ccarh.org/}{KernScores}.
-}
-\details{
-\code{humdrumR} is intended as a modernized replacement for the original \href{http://www.humdrum.org/}{humdrum toolkit}, leveraging
+The \code{humdrumR} package is intended as a modernized replacement for the original \href{http://www.humdrum.org/}{humdrum toolkit}, leveraging
 the power of \code{R} to give us unprecedented power to manipulate and analyze humdrum data using concise, expressive syntax.
+
+\code{humdrumRroot} is the path to where the \code{humdrumR} package is install on your machine.
+When you installed \code{humdrumR} a few basic humdrum files were stored here as well,
+in subdirectories \code{examples} and \code{HumdrumData}.
+
+The \code{humdrumR()} \emph{function} is used to set
+global package options within an R session, mostly regarding
+the viewing of \link[=humdrumRclass]{humdrumR datasets}.
 }
 \section{Package design}{
 
@@ -23,9 +97,10 @@ The package \code{humdrumR} has seven main components:
 the \link[=humTable]{humdrum table}.
 \item To create \code{humdrumR} data, a sophisticated humdrum data parser: \link{readHumdrum}.
 \code{humdrumR} data can also be written back to humdrum-syntax text files using \link{writeHumdrum}.
-\item To filter \code{humdrumR} data, we have the \code{\link[=subset.humdrumR]{subset.humdrumR()}} function, which can also be called
-using \code{R}'s standard \link[base:Extract]{indexing operators}: \verb{[]} and \verb{[[]]}.
-\item To manipulate and modify \code{humdrumR} data, we have the \link[=withinHumdrum]{with and within} methods for \code{humdrumR} objects.
+\item To filter \code{humdrumR} data, we have the \link[=subset.humdrumR]{subset()/filter()} functions, as well as methhods for
+\code{R}'s standard \link[base:Extract]{indexing operators} (\verb{[]} and \verb{[[]]}).
+\item To manipulate and modify \code{humdrumR} data, we have the \link[=withinHumdrum]{with and within} methods for \code{humdrumR} objects, and tidyverse
+aliases \code{\link[=mutate]{mutate()}}, \code{\link[=summarise]{summarise()}}, and \code{\link[=reframe]{reframe()}}.
 \item To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
 a useful API we call our \link[=humdrumDispatch]{regular-expression dispatch system}.
 \item Several \link[=humdrumPitch]{modules} for representing and manipulating musical pitch information,
@@ -35,4 +110,26 @@ with a core \link{rhythmInterval} class to represent rhythms.
 }
 }
 
+\section{Package options}{
+
+
+The \code{humdrumR()} function sets general options for the package,
+mostly related to how \link[=humdrumRclass]{humdrumR data objects} are viewed.
+Each argument to the function manipulates a print/package option: for any argument that is
+not used, the option remains in its current setting (i.e., unchanged).
+These package options are all enumerated and explained in the \strong{Arguments} section above.
+}
+
+\examples{
+
+# change default view to table
+humdrumR("table")
+
+humdrumR(view = 'humdrum', maxRecordsPerFile = 50)
+
+# see the humdrumR package directory contents
+dir(humdrumRroot) 
+
+}
+\keyword{datasets}
 \keyword{internal}

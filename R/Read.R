@@ -708,10 +708,8 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     
     
     ## Other general information about tokens
-    humtab[ , Type := parseTokenType(Token)]
+    humtab[ , Type := parseTokenType(Token, E = TRUE, S = TRUE)]
     humtab <- humtab[Type != 'P']
-    humtab[ , Null := Token %in% c('.', '!', '*', '=')]
-    humtab[ , Filter := FALSE]
     humtab[ , Global := is.na(Spine)]
     humtab[ , Pattern := NULL]
     
@@ -722,8 +720,9 @@ readHumdrum <- function(..., recursive = FALSE, contains = NULL, allowDuplicates
     #
     message('Done!\n')
     
-    makeHumdrumR(humtab, pattern = setNames(unique(fileFrame$Pattern), unique(fileFrame$Label)), 
-                 tandemcol = colnames(humtab) %in% colnames(tandemTab))
+    makeHumdrumR(humtab, 
+                 pattern = setNames(unique(fileFrame$Pattern), unique(fileFrame$Label)), 
+                 tandemFields = colnames(tandemTab))
     
     
 }
@@ -742,9 +741,9 @@ parseRecords <- function(records, piece, reference) {
   humtab <- if (length(global) == 1 && is.na(global)) local else rbind(global$Data, local, fill = TRUE)
   
   # Data record numbers
-  humtab$NData <- rep(NA, nrow(humtab))
+  humtab$DataRecord <- rep(NA, nrow(humtab))
   D <- !grepl('^[!=*]', humtab$Token)
-  humtab$NData[D] <- match(humtab$Record[D],  sort(unique(humtab$Record[D])))
+  humtab$DataRecord[D] <- match(humtab$Record[D],  sort(unique(humtab$Record[D])))
   
   #
   humtab <- if (!(length(global) == 1 && is.na(global))) cbind(humtab, global$Table) else humtab
@@ -775,7 +774,7 @@ parseReference <- function(refTable, reference) {
           # This parses a character vector of reference records into
           # a data.table with columns indicating reference keys
           # and rows holdingtheir values
-  if (is.null(reference)) return(NULL)    
+  if (length(reference) == 0L) return(NULL)    
     
   refrecords <- stringr::str_sub(refTable, start = 4L) # rid of !!!
   
@@ -1004,7 +1003,7 @@ separatePieces <- function(fileFrame) {
 #   type
 # }
 
-parseTokenType <- function(spine) {
+parseTokenType <- function(spine, E = FALSE, S = FALSE) {
     # This is called by parseRecords
     # simply categories records by spine type,
     # to create the humdrum tables Type field.
@@ -1017,6 +1016,10 @@ parseTokenType <- function(spine) {
     out[stringi::stri_detect_regex(spine, '^=')] <- 'M'
     out[stringi::stri_detect_regex(spine, '^!')] <- 'L'
     out[stringi::stri_detect_regex(spine, '^!!')] <- 'G'
+    
+    if (E) out[stringi::stri_detect_regex(spine, '^\\*\\*')] <- 'E'
+    if (S) out[stringi::stri_detect_regex(spine, '^\\*[-v^>]|\\*tb')] <- 'S'
+    
     out
 }
 
@@ -1103,7 +1106,7 @@ parseTandem <- function(tandems, known) {
     # and parses these into a table of new Interpretation fields
     # for the humdrum table.
     # Known indicates
-    if (is.null(known) || all(tandems == "", na.rm = TRUE)) return(NULL)
+    if (length(known) == 0L || all(tandems == "", na.rm = TRUE)) return(NULL)
     
     # which are the tandems we want it to recognize
     REs <- getRE(known)
@@ -1213,7 +1216,7 @@ parseTandem <- function(tandems, known) {
 #' [humdrum table docs][humTable]. [readHumdrum()] also preprocesses
 #'  some "known" tandem interpretations. }
 #' @export
-extractTandem <- function(Tandem, regex) {
+tandem <- function(regex, Tandem) {
   
   
   checks(regex, xcharacter & xlen1)

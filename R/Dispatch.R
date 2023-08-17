@@ -720,4 +720,110 @@ print.humdrumDispatch <- function(x) {
 
 
 
+# Humdrum-style function application ----
 
+humdrumRgeneric <- function(default, envir = parent.frame()) {
+  
+  name <- gsub('\\..*', '', rlang::as_label(rlang::enexpr(default)))
+  args <- formals(default)
+  # generic function
+  generic <- rlang::new_function(args,
+                                 rlang::expr(UseMethod(!!name)),
+                                 env = envir)
+  class(generic) <- c('humdrumRmethod', class(default))
+  attr(generic, 'name') <- name
+  
+  generic
+}
+
+humdrumRmethod <- function(default, envir = parent.frame()) {
+  
+  .default <- rlang::enexpr(default)
+  args <- formals(default)
+  name <- gsub('\\..*', '', rlang::as_label(.default))
+  Name <- rlang::sym(stringr::str_to_title(name))
+  
+  # humdrumR method
+  firstArg <- names(args)[1]
+  
+  body <- bquote({
+    quos <- rlang::enquos(...)
+    
+    if (!any(.names(quos) %in% c(.(firstArg), ''))) quos <- c(rlang::quo(.), quos)
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos))))
+  })
+  
+  rlang::new_function(setNames(alist(x = , ... = ), c(firstArg, '...')), env = envir,
+                      body) #rlang::expr(within.humdrumR(!!firstArg, !!Name <- (!!.default)(., !!!subargs))))
+  
+}
+
+humdrumRmethods <- function(name) {
+  # prexisting method becomes .default
+  default <- match.fun(name)
+  envir <- rlang::fn_env(default)
+  
+  args <- formals(default)
+  assign(paste0(name, '.default'), default, parent.frame())
+  
+  # humdrumR method
+  .default <- rlang::sym(paste0(name, '.default'))
+  firstArg <- names(args)[1]
+  Name <- rlang::sym(stringr::str_to_title(name))
+  
+  body <- bquote({
+    quos <- rlang::enquos(...)
+    
+    if (!any(.names(quos) %in% c(.(firstArg), ''))) quos <- c(rlang::quo(.), quos)
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos))))
+  })
+  
+  # subargs <- args[-1]
+  # ldots <- names(subargs) == '...'
+  # if (any(ldots)) {
+  # subargs[[which(ldots)]] <- quote(...)
+  # names(subargs)[which(ldots)] <- ''
+  # }
+  # subargs[!ldots] <- rlang::syms(names(subargs)[!ldots])
+  
+  #### insert "auto args"?
+  # autoArgs <- autoArgTable[Function == name]
+  # subargs[autoArgs$Argument] <- autoArgs$Expression
+  
+  
+  humdrumR <- rlang::new_function(setNames(alist(x = , ... = ), c(firstArg, '...')), env = envir,
+                                  body) #rlang::expr(within.humdrumR(!!firstArg, !!Name <- (!!.default)(., !!!subargs))))
+  
+  assign(paste0(name, '.humdrumR'), humdrumR, parent.frame())
+  
+  
+  # generic function
+  generic <- rlang::new_function(args,
+                                 rlang::expr(UseMethod(!!name)),
+                                 env = envir)
+  class(generic) <- c('humdrumRmethod', class(default))
+  attr(generic, 'name') <- name
+  
+  assign(name, generic, parent.frame())
+  
+}
+
+#' @export
+print.humdrumRmethod <- function(x) {
+  args <- formals(x)
+  args <- sapply(args, deparse)
+  
+  funcname <- attr(x, 'name')
+  
+  args <- ifelse(args == '', names(args), paste0(names(args), ' = ', args))
+  
+  args <- paste(tapply(args, (seq_along(args) - 1) %/% 4, paste, collapse = ', '), 
+                collapse = paste0(',\n', strrep(' ', nchar(funcname) + 1L)))
+  cat(funcname, '(', args, ')', sep = '')
+  
+  cat("\n\nThis function can be applied to vectors or directly to humdrumR data objects.")
+  cat('\n\t\tatomic |> ', funcname, '()', sep = '')
+  cat('\n\t\thumData |> ', funcname, '()', sep = '')
+  
+  
+}

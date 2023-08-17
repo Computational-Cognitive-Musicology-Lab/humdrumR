@@ -2,8 +2,27 @@
 % Please edit documentation in R/Pitch.R
 \name{lilypond}
 \alias{lilypond}
+\alias{lilypond.default}
+\alias{lilypond.humdrumR}
 \title{Lilypond pitch representation}
 \usage{
+\method{lilypond}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> lilypond() 
+humData |> lilypond(simple = TRUE)
+humData |> lilypond(Token, Key = Key)
+
 lilypond(
   x,
   ...,
@@ -72,6 +91,10 @@ This is the representation used to represent (Western tonal) pitches in the \hre
 notation format.
 In \link{humdrumR}, the \code{lilypond} function only relates to the \emph{pitch} part of Lilypond notation:
 Lilypond-like \emph{rhythms} can be creating using the \link{recip} function.
+
+If \code{lilypond()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -216,7 +239,6 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
-\code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{kern}()},
 \code{\link{pitch}()},

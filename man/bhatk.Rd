@@ -2,8 +2,27 @@
 % Please edit documentation in R/Pitch.R
 \name{bhatk}
 \alias{bhatk}
+\alias{bhatk.default}
+\alias{bhatk.humdrumR}
 \title{Swara representation}
 \usage{
+\method{bhatk}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> bhatk() 
+humData |> bhatk(simple = TRUE)
+humData |> bhatk(Token, Key = Key)
+
 bhatk(
   x,
   ...,
@@ -70,6 +89,10 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 \description{
 \href{https://en.wikipedia.org/wiki/Svara}{Swara} are syllabes used to represent scale degrees
 in hindustani music---like solfege.
+
+If \code{bhatk()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

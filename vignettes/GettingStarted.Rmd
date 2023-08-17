@@ -17,29 +17,37 @@ source('vignette_header.R')
 
 
 Welcome to "Getting started with `r hm`"!
-This document will introduce you the basics of `r hm`, so that you can start doing simple analyses of humdrum data.
-(If you aren't sure what `r hm` is or what it can do, checkout the [Overview of humdrumR](Overview.html "Overview of humdrumR") before trying to get started.)
+This article provides a quick introduction to the basics of `r hm`, getting you started loading humdrum data and performing (very) simple analyses of humdrum data.
+Before you continue, make sure `r hm` is installed: [how to install humdrumR](https://humdrumr.ccml.gtcmt.gatech.edu/#installing-humdrum_mathbbr "Installing humdrumR").  
+Once it's installed, you can open an R session and load the library using the command `library(humdrumR)`---now you are ready to rock!
+
+This article, like all of our articles, closely parallels information in `r hm`'s detailed code documentation, which can be found in the "[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html "HumdrumR function reference")" section of the `r hm` [homepage](humdrumR.ccml.gtcmt.gatech.edu).
+Once `r hm` is installed and loaded, the code documentation can also be accessed directly within an R session by using the `?` command, like `?humdrumR`,
+Anywhere in one of our articles where you see a named variable followed by parentheses, like `kern()` or `recip()`, you can call `?kern` or `?recip` to see the corresponding documentation.
+
+
+
+<!--
 This tutorial is aimed at novice or even non-programmers---if you are already a strong coder and want to move things a long a little faster, checkout the [humdrumR for coders](IntroForCoders.html "humdrumR for coders") tutorial instead.
 
-This vignette closely parallels information in `r hm`'s code documentation;
-within an R session, you can find more concise versions of the material in this document by calling:
+-->
 
-```{r}
+
+
+```{r, echo = FALSE}
 library(humdrumR)
-
-?humdrumR
+humdrumR(syntaxHighlight = FALSE)
 
 ```
 
-## Quick Start
+# Quick Start
 
 Let's just dive right in!
-First, make sure `r hm` is installed: [how to install humdrumR](https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR "Getting humdrumR from github").  
-Open an R session and load the `r hm` library using the command `library(humdrumR)`---now you are ready to rock!
 
-`r Hm` comes packaged with a small number of humdrum data files just for you to play around with.
-These files are stored in the directory where your computer installed `r hm`, in a subfolder called "HumdrumData".
-You can move your R session to this folder using R's "set working directory command": `setwd(humdrumRroot)`.
+To illustrate how `r hm` works, we'll need some [humdrum data](HumdrumSyntax.html "The Humdrum Syntax") to work with.
+Fortunately, `r hm` comes packaged with a small number of humdrum data files just for you to play around with.
+These files are stored in the directory where your computer installed `r hm`, in a subdirectory called "`HumdrumData`".
+You can move your R session to this directory using R's "set working directory" command: `setwd(humdrumRroot)`.
 Once you're in the humdrumR directory, you can use the base R `dir` function to see what humdrum data is available to you.
 
 ```{r}
@@ -52,8 +60,8 @@ dir('HumdrumData')
 ```
 
 
-It looks like there are `r humdrumR:::num2word(length(dir('HumdrumData')))` folders of humdrum data available to you.
-Using `dir` again, we can look inside one: let's start with the 'BachChorales' folder.
+It looks like there are `r humdrumR:::num2print(length(dir('HumdrumData')))` directories of humdrum data available to you.
+Using `dir` again, we can look inside one: let's start with the "`BachChorales`" directory.
 
 ```{r}
 
@@ -62,19 +70,18 @@ dir('HumdrumData/BachChorales')
 ```
 
 
-There are `r humdrumR:::num2word(length(dir('HumdrumData/BachChorales')))` files in the folder, named "chor001.krn", "chor002.krn", etc.
-These are simple plain humdrum text files, using the `**kern` interpretation to represent ten chorales by J.S. Bach.
+There are `r humdrumR:::num2print(length(dir('HumdrumData/BachChorales')))` files in the directory, named "`chor001.krn`", "`chor002.krn`", etc.
+These are humdrum plain-text files, representing ten chorales by J.S. Bach; each file contains four spines (columns) of `**kern` data, representing musical pitch and rhythm (among other things).
 Take a minute to find the files in your computer's finder/explorer and open them up with a simple text editor.
 One of the core philosophies of `r hm` is that we maintain a direct, transparent relationship with our symbolic data---so always take the time to look at your data! 
 You can also do this within Rstudio's "Files" pane---in fact, Rstudio will make things extra easy for you because you can (within the Files pane) click "More" > "Go To Working Directory" to quickly find the files.
 
 
 
-
-### Reading humdrum data
+## Reading humdrum data
 
 Now that we've found some humdrum data to look at, let's read it into `r hm`.
-We can do this using `r hm`'s `readHumdrum` command.
+We can do this using `r hm`'s `readHumdrum()` command.
 Try this:
 
 ```{r}
@@ -85,7 +92,7 @@ readHumdrum('HumdrumData/BachChorales/chor001.krn') -> chor1
 
 This command does two things:
 
-1. The `readHumdrum` function will read the "chor001.krn" file into R and create a `r hm` data object from it.
+1. The `readHumdrum()` function will read the "chor001.krn" file into R and create a `r hm` data object from it.
 2. This new object will be saved to a variable called `chor1`. (The name 'chor1' is just a name I chose---you are welcome to give it a different name if you want.)
 
 Once we've created our `chor1` object (or whatever you chose to call it), we can take a quick look at what it is by just typing its name on the command line and pressing enter:
@@ -97,21 +104,22 @@ chor1
 ```
 
 (In R, when you enter something on the command line, R "prints" it out for you to read.)
-The print-out you see shows you the name of the file, the contents of the file, and some stuff about "Data fields" that you will learn about soon.
+The print-out you see shows you the name of the file, the contents of the file, and some stuff about "Data fields" that you will learn about in our [next article](DataFields.html "HumdrumR data fields").
 
 Cool! Still, looking at a single humdrum file is not really that exciting. 
-The whole point of using computers is working with large amounts of data.
+The whole point of using computers is that they allow us to work with large amounts of data.
 Luckily, `r hm` makes this very easy.
 Check out this next command:
 
 ```{r}
 
 readHumdrum('HumdrumData/BachChorales/chor0') -> chorales
+
 ```
 
-Notice that all I've changed is that instead of writing `'chor001.krn'`, I wrote `'chor0'`.
-When we feed the string `'chor0'` to `readHumdrum`, it won't just look for a file called "chor0"; it will read *any* file in that folder whose name contains the substring "chor0"---which in this case is all ten files!
-Try printing the new `chorales` object to see how it is different.
+Instead of writing `'chor001.krn'`, I wrote `'chor0'`.
+When we feed the string `'chor0'` to `readHumdrum()`, it won't just look for a file called "`chor0`"; it will read *any* file in that directory whose name *contains* the sub-string `"chor0"`---which in this case is all ten files!
+Try printing the new `chorales` object to see how it is different:
 
 ```{r}
 
@@ -119,387 +127,148 @@ chorales
 
 ```
 
-Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2word(length(chorales)) ` files"---and that's nothing: `readHumdrum` will work just as well reading hundreds or thousands of files!
+Wow! We've now got a "humdrumR corpus of `r humdrumR:::num2print(length(chorales)) ` pieces"---and that's nothing: `readHumdrum()` will work just as well reading hundreds or thousands of files!
 Notice that when you print a `r hm` object, `r hm` shows you the beginning of the first file and the end of the last file, as well as telling you how many files there are in total.
 
 
 ---
 
-`readHumdrum` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
+> `readHumdrum()` has a number of other cool options which you can read about in more detail in our [humdrumR read/write tutorial](ReadWrite.html "Reading and writing data with humdrumR").
 
 
+## Counting Things
 
-
-# The Data Model
-
-To really make use of `r hm`, you need to understand a bit about how humdrum data is represented in the `r hm` package: the `r hm` "**data model**."
-
-The essential thing to understand is how it maps between the [humdrum data syntax](https://humdrum.org) and a R data.table.
-
-![](images/DataModelDiagram.png){width=600px}
-
-To fully understand this, you should start with at least a basic understanding of the humdrum syntax! 
-Read about the syntax at [humdrum.org](humdrum.org) or check out [our vignette](HumdrumSyntax.html "The Humdrum Syntax") on the topic.
-
-## data.frames
-
-Data.frames are essential to R.
-A data.frame is simply a two-dimensional table of named columns.
-Each column is either a vector or list of values, all of which are the same length.
-
-`r Hm` makes use of a popular extension of base-R data.frames, the [data.table](https://cran.r-project.org/web/packages/data.table/index.html).
-
-
-In `r hm`, *every* single, individual token in a collection of humdrum-syntax text files is given its own row in a data.frame.
-For example, consider this simple, humdrum-syntax file:
-
-
-```{r echo=FALSE, results='none'}
-
-ex1 <- readLines('examples/BasicExample.krn')
-
-rest <- ex1[-1]
-tokens <- c(ex1[1], unlist(strsplit(rest, split = '\t| ')))
-
-##
-ex1df <- as.data.frame(t(stringi::stri_list2matrix(strsplit(rest, '\t'))), stringsAsFactors = FALSE)
-
-cat(' ', sep = '', ex1[1], '\n')
-apply(format.data.frame(ex1df, justify = 'left', width = 30), 1, 
-      function(x) cat(' ', x, sep = '', '\n')) 
-
-
-```
-
-This file contains `r humdrumR:::num2word(length(tokens))` individual tokens.
-To illustrate, here I'll print the same file, but with *each* token bracketed by `<` and `>`:
-
-```{r echo = FALSE}
-
-printquoted <- function(ex) {
-quoted <- ex
-    quoted[] <- lapply(quoted,
-                   function(col) {
-                       col <- strsplit(col, split = ' ')
-                       col <- lapply(col,  function(x) paste0('<', x, '>'))
-                       sapply(col, paste, collapse = ' ')
-                       
-                   })
-
-
-cat('<', ex1[1], '>', '\n', sep ='')
-apply(format.data.frame(quoted, justify = 'left', width = 30), 1, 
-      function(x) cat(x, sep = '', '\n'))
-    invisible(NULL)
-}
-
-printquoted(ex1df)
-
-```
-
-So what happens when `r hm` reads this file?
-(This file is bundled with `r hm` in the `"humdrumRroot/examples"` directory.)
+Once we have some data loaded, the next thing a good computational musicologist does is start counting!
+To count the contents of data, we can use the `tally()` function.
 
 ```{r}
+chorales |> 
+  tally() 
 
-example1 <- readHumdrum('examples/BasicExample.krn')
-
-example1
 ```
 
-We see the same thing we saw earlier, when we were reading real humdrum data from the `"HumdrumData"` folder.
-But what's under the hood?
-To see that, we can use the `getHumtab` function to extract the underlying humdrum table:
+That's quite a mess! What have we done?
+When we pass our `chorales` data  to `tally()`, tally counted all the unique data tokens (ignoring non-data tokens, like barline and interpretations) in the data.
+There are a *lot* of unique tokens in this data, so it's not super helpful.
+Maybe we'd like to look at just the twenty most common tokens in the `chorales`?
+To this, we can pass the tally through to two base R functions, `sort()` and `tail()`:
 
+
+```{r echo=-1}
+chorales |> tally() |> sort() |> tail(n = 1) -> most
+
+chorales |> 
+  tally() |>
+  sort() |>
+  tail(n = 20)
+
+```
+
+Ah, that's more promising! We see that the most common token is a quarter-note E4 (`4e`), which occurs `r humdrumR:::num2print(most)` times.
+
+### Separating pitch and rhythm
+
+To make our tallies more useful, we might want to tally only the pitch or rhythm part of the `**kern` data.
+To do this, we need to to be able to extract the pitch/rhythm from the original `**kern` tokens, which we can do that using `r hm`'s suite of [pitch](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html) and [rhythm](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmFunctions.html) functions.
+For example, let's try the `pitch()` function:
 
 
 ```{r}
-
-humtab <- getHumtab(example1)
-
-humtab
+chorales |> 
+  pitch()
 
 ```
 
-
-Look at that, a `data.table` with `r humdrumR:::num2word(nrow(humtab))` rows!
-One row for *each and every* token.
-In this case, the humdrum data table ("humtable") has `r humdrumR:::num2word(ncol(humtab))` columns!
-The columns are:
+The `pitch()` function takes the original `**kern` tokens, reads the pitch part of each token,
+and translates it to [scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) notation.
+Let's pass *that* to tally:
 
 ```{r}
-colnames(humtab)
+chorales |>
+  pitch() |>
+  tally()
+
 
 ```
 
-In `r hm`, we refer to these columns as **fields**.
-To learn what fields are in a `r hm` object, it is better to call the `fields` command directly on the original `r hm` object:
+Pretty cool, but still quite a big table.
+Maybe we'd like to ignore octave information for now?
+Luckily, `r hm`'s [pitch functions](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html) have a "`simple`" argument, which can be used to ask for only *simple* pitch information (no octave).
 
 ```{r}
-fields(example1)
+chorales |>
+  pitch(simple = TRUE) |>
+  tally() 
+
 ```
 
-We see that there are `r humdrumR:::num2word(ncol(humtab))` fields (humtable columns), and that they are divided into five types of fields: 
+We can make plot of our nice simple-pitch table, using `r hm`'s `draw()` function:
 
-+ Data fields
-+ Structure fields
-+ Interpretation fields
-+ Form fields
-+ Reference fields
-
-(A good place to read the details about what all the columns means is the *humdrum table* documentation you can get by calling `?humTable`.)
-
-
-Let's go back to the Bach chorales dataset we loaded earlier (we saved it as `chorales`):
 
 ```{r}
-fields(chorales)
+chorales |>
+  pitch(simple = TRUE) |>
+  tally() |>
+  draw()
 
 ```
 
-The `chorales` corpus has `r nrow(fields(chorales))` fields!---all the same fields as `example1`, but some additional ones.
-These additional fields are interpretation and reference records that didn't appear in our toy `example1`.
 
-----
-
-### Main Fields
-
-The most important fields that are always present in a `r hm` humtable are 1) the `Token` field which contains the original `character` tokens read from the humdrum data; and 2) the "Structural" fields which tell us where in the original humdrum data each token came from.
-The "Structural" fields are what allow `r hm` to (re)construct the original humdrum data---translating between the humdrum-table (`data.table`) and the plain-text humdrum syntax.
-
-We can inspect any field in our `r hm` data using the `$` operator: Just call your `r hm` data object with `$` and the name of a field.
-Using this, we can see what the content of all those structural fields is!
-The most important are the `Spine`, `Record`, (Record) `Type`, and `File(name)` fields.
+Instead of pitch, we could do the same sort of tallying of rhythm information, for example, using the `notehead()` function:
 
 ```{r}
 
-example1$Spine
-
-# example1$Record
-
-example1$Type
-
-example1$Filename
+chorales |>
+  notehead() |>
+  tally() |>
+  draw()
 
 ```
 
-The "record types" are:
+## Filtering
 
-+ `"G"`: global comment (including reference records)
-+ `"L"`: local comment
-+ `"I"`: interpretation
-+ `"M"`: measure (i.e., barlines)
-+ `"D"`: (non-null) data token
-+ `"d"`: null data token (`"."`)
-
-
-### Stops
-
-In humdrum syntax, multiple tokens can be placed "in the same place" (i.e., same record, same spine) by simply separating them with spaces.
-(This is most commonly used to represent chords in `**kern` data.)
-In `r hm`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a `r hm` humtable.
-Thus, we need the `Stop` field to tell us which stop a token came from!
-In much data, all/most tokens are simply `Stop == 1` (the first position), but if there are more than one tokens in the same record/spine, they will be numbered ascending from one:
-
-Let's look at an example to make sense of this!
+Sometimes, we might only want to look at a subset of our data.
+For example, maybe we only want to tally notes sung by the soprano.
+In the Bach chorale data we are working with, the soprano voice is always in the fourth spine (column).
+We can use the `filter()` function to indicate a subset we'd like to study:
 
 ```{r}
 
-stops <- readHumdrum('examples/Stops.krn')
-
-stops
-```
-
-
-Here we have a file with chords in the second spine: individual note tokens separated by spaces.
-Let's inspect the humtable:
-
-```{r}
-getHumtab(stops)
+chorales |> 
+  pitch(simple = TRUE) |> 
+  filter(Spine == 4) |>
+  tally()
 
 ```
 
-You can see that each note of the chords gets its own row, numbered `1`, `2`, and `3` in the `Stop` field!
-
-
-
-### Paths
-
-
-
-Some humdrum data contains "spine paths"---places where a single spine splits into two.
-`r hm` treats spine paths as "subspines" of the main spine which they split from, each one numbered in the `Path` field.
-The starting path (leftmost) is numbered path `0`---in datasets with no spine paths, the `Path` field will be all zeros.
-Other paths are numbered with higher integers.
-
-Let's look at a simple example:
-
-```{r}
-
-paths1 <- readHumdrum('examples/Paths.krn')
-
-paths1
-
-paths1$Path
-
-getHumtab(paths1)
-
-```
-
-
-Here is a more complex example:
-
-```{r}
-
-paths2 <- readHumdrum('examples/Paths2.krn')
-
-paths2
-
-paths2$Path
-
-getHumtab(paths2)
-
-
-
-```
-
-Notice that `r hm` prints paths in a way that is more readable than reading humdrum syntax directly:
-paths are "shifted" over into columns that align.
-This is an option to the function `as.matrix.humdrumR()`.
-
-
-
-
-# Doing Stuff!
-
-Ok, we've now seen how to read and inspect `r hm` data.
-We've also got some idea of what the humdrum data looks like under the surface: the humdrum table.
-What can we do with it?
-
-When you create a `r hm` corpus object, using `readHumdrum`, this object encapsulates a humdrum-table (`data.table`) object, which is where the data is really stored.
-We've already seen that you can extract that humdrum table directly using `getHumtab`---and if you are already an R pro, you might just want to extract the table an work with it directly.
-However, what the `r hm` object does is give us some convenient ways of working with that table.
-For example, we've already seen that when we print `r hm` objects, they print out as humdrum syntax, which is easier to read than the complex humdrum table!
-But the `r hm` does more!
-
-The main thing `r hm` does is allow us to work with the fields of our humdrum-tables in way that is convenient and powerful.
-First, we create special R "*expressions*" that refer to the humdrum-table's fields.
-For instance, I can write things like:
-
-+ `Spine + File`
-+ `nchar(Token)`
-+ `paste0(Token, Record)`
-
-
-However, we can tell `r hm` to evaluate these expressions using the fields of our humdrum tables.
-These simplest way is using the `within()` function, which takes a `r hm` object and an expression on its right side.
+Let's try something even cooler.
+Notice that, in the chorale data, there are tandem interpretations that look like `*G:` and `*E:`.
+These are indications of the key.
+Anytime you read humdrum data that has these key interpretations, `r hm` will read them into a "field" called `Key`.
+We could, for example, tally all the notes sung when the key is G major like this:
 
 
 ```{r}
 
-within(chorales, Spine + File)
-
-within(chorales,  nchar(Token))
-
-within(chorales,  paste0(Token, Record))
-
-```
-
-Each expression is evaluated, and the result is put back in the same place in the humdrum data!
-You'll also notice that in the printout, there is a new Data field, called `Result1`---this is the default name `r hm` assigns to new fields that you create.
-
-If you want, you can pick your own names by using `<-` within the `within` call.
-For instance, lets use `r hm`'s `semits` function (see the [humdrum pitch](PitchAndTonality.html) vignette) to calculate the semitone value for each pitch in the chorales:
-
-```{r}
-
-within(chorales, semits(Token))
+chorales |>
+  filter(Key == 'G:') |>
+  pitch(simple = TRUE) |>
+  tally()
 
 ```
 
-It worked!
-Lets do it again, but save the result in a new field, which we will call `Semits`---of course, you could give it any name you want, or just let it be called `Result1` if you want!
-
-```{r}
-
-within(chorales, semits(Token) -> Semits) -> chorales
-
-```
-
-There is now a new Data field in our humdrum table, called `Semits`.
-Meanwhile, the original `Token` field is still there, safely unchanged!
-Just like before, we can use the `$` operator to look at our fields:
-
-```{r}
-
-chorales$Token
-
-chorales$Semits
-
-```
-
-Whats more, we can use the `Semits` field *just* like any other field:
-
-```{r}
-
-within(chorales, paste0(Token, ' = ', Semits))
-
-
-```
+Guess what? There are a bunch more "fields" hidden in your `r hm` data object that you can use...and you can make your own!
+Check out our next article, on `r hm`'s data [fields](DataFields.html "HumdrumR data fields"), to learn more.
 
 
 
-## Counting stuff
-
-The most basic step in computational musicology is...counting things!
-R has a fantastic, simple function for tabulating (counting) the elements of vectors: the function `table()`.
-Using `with`, we can easily count what happens in our data:
-
-```{r}
-
-with(chorales, table(Token))
-
-
-```
-
-We get a count of every unique data token in the dataset.
-That's a little messy.
-Let's use `r hm`'s `kern()` function to extract just the simple pitch information, and tabulate that instead:
-
-```{r}
-
-with(chorales, kern(Token, simple = TRUE) |> table())
-
-
-```
-
-Much easier to read...but a plot would be even better.
-R has a good basic function called `barplot()`:
-
-
-```{r}
-
-with(chorales, kern(Token, simple = TRUE) |> table() |> barplot())
-
-
-```
-
-Remember our `Semits` field that we made earlier?
-Maybe we'd like to see a histogram of those values---let's use R's `hist()` function:
-
-
-```{r}
-
-with(chorales, hist(Semits))
-
-
-```
 
 # What next?
 
 You've gotten started, but there is much more to learn!
-To keep learning check out the other articles on the [humdrumR webpage](https://computational-cognitive-musicology-lab.github.io/humdrumR/).
+To keep learning check out the other articles on the [humdrumR homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
 If you want to continue along the path we've started here, the next articles to check out are probably 
+[HumdrumR data fields](DataFields.html "HumdrumR data fields"),
 [Getting to know your data](Summary.html "Getting to know your data"),
 [Filtering humdrum data](Filtering.html "Filtering humdrum data"), and 
 [Working with humdrum data](WorkingWithData.html "Working with humdrum data").
@@ -508,8 +277,7 @@ relevant ideas from the [Pitch and tonality](PitchAndTonality.html "Pitch and to
 and [Rhythm and meter](RhythmAndMeter.html "Rhythm and meter in humdrumR") articles.
 
 If the humdrum data you are working with is complex---e.g., including multiple different exclusive interpretations,
-spine paths, or multi-stops---you'll probably find you need to check out the [Shaping humdrum data](Reshaping.html "Shaping humdrum data") article, which will
-give you tools to deal with with more complex humdrum data sets.
+spine paths, or multi-stops---you'll probably find you need to check out the [Shaping humdrum data](Reshaping.html "Shaping humdrum data") article, which will give you tools to deal with with more complex humdrum data sets.
 
 
 

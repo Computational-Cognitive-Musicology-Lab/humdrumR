@@ -36,7 +36,7 @@ Defaults to \code{"any"}.
 
 Must be a single \code{character} string naming an \link[base:vector]{atomic vector type} to coerce the output to (i.e., \code{logical} or \code{numeric}).
 
-If set to \code{"any"}, the output type is simply whatever comes out of \code{\link[=evalActive]{evalActive()}}, which depends on the class of the underlying \link[=humTable]{fields}.}
+If set to \code{"any"}, the output type is simply whatever the type of the \link[=selectedFields]{selected field} is.}
 
 \item{humdrumR}{\emph{\strong{HumdrumR data.}}
 
@@ -81,13 +81,15 @@ basic \code{R} data types.
 }
 \details{
 Generally, coercion works by evaluating a humdrumR object's the
-\link[=humActive]{active expression} and forcing the result to be an atomic vector.
-This process is accomplished by the \code{\link[=evalActive]{evalActive()}} command.
-The \link[base:vector]{as.vector(humdrumR)} method is essentially a wrapper for \code{\link[=evalActive]{evalActive()}}, with the additional
+\link[=selectedFields]{selected fields} and forcing the result to be an atomic vector.
+When multiple field are selected, they are pasted together, separated by \code{", "}.
+If a field is not atomic (like a \code{list}, or \code{lm} object), a concise representation of the
+list or object class is printed.
+The \link[=humCoercion]{as.vector(humdrumR)} has the additional
 option of coercing the resulting vector to a particular type using the \code{mode} argument.
 
 The \link[base:matrix]{as.matrix(humdrumR)} method take things a step further by putting the evaluated
-active expression into a two-dimensional matrix, with rows representing records and columns indicating
+fields into a two-dimensional matrix, with rows representing records and columns indicating
 spine paths (see Padding section below).
 \link[base:as.data.frame]{as.data.frame(humdrumR)} first calls \code{as.matrix} then converts the matrix to a
 \code{data.frame}.

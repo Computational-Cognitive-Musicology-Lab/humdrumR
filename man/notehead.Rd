@@ -2,8 +2,16 @@
 % Please edit documentation in R/Rhythm.R
 \name{notehead}
 \alias{notehead}
+\alias{notehead.default}
+\alias{notehead.humdrumR}
 \title{Note value representation of duration}
 \usage{
+\method{notehead}{default}(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
+
+humData |> select(Token) |> notehead() 
+humData |> notehead(Token)
+humData |> notehead(simple = TRUE)
+
 notehead(x, ..., parseArgs = list(), scale = 1, unit = 1, inPlace = FALSE)
 }
 \arguments{
@@ -44,6 +52,10 @@ See "Grace notes" section below.}
 \description{
 This function outputs duration information in as traditional \href{https://en.wikipedia.org/wiki/Note_value}{note value}.
 symbols, as in Western notation.
+
+If \code{notehead()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \details{
 Note-value symbols are simply encoded in \code{character} vectors, since the

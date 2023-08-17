@@ -19,7 +19,7 @@ meter(x, ...)
   measure = NULL,
   tactus = NULL,
   tick = "16",
-  fill.levels = "both",
+  fill.levels = "neither",
   subdiv = NULL,
   hyper = NULL,
   tatum = FALSE
@@ -31,7 +31,7 @@ meter(x, ...)
   measure = NULL,
   tactus = NULL,
   tick = "16",
-  fill.levels = "both",
+  fill.levels = "neither",
   hyper = NULL,
   subdiv = NULL,
   tatum = FALSE
@@ -104,20 +104,20 @@ when analyzing meter:
 \item Do you want to count the half-note level, which is "in between" the full measure (whole-note)
 and the tactus quarter-note?
 \item How do you want to treat triplets or other tuplets? What is a piece uses a lot of
-\item Do you want to consider hypermeter, \emph{above} the measure level?
 triplet eighth-notes?
+\item Do you want to consider hypermeter, \emph{above} the measure level?
 }
 
 Fortunately, \code{humdrumR} and the \code{meter()} function give you options to precisely specify
 metric levels.
 The most transparent way is to simply pass \code{meter()} a \code{list} of duration values, like \code{meter(list("1", "4", "8"))}.
 However, \code{meter()} includes a number of helpful arguments that can be used to quickly streamline the process of defining a meter.
-To understand these arguments, lets first clarify some metric defitions used in \code{humdrumR}:
+To understand these arguments, lets first clarify some metric definitions used in \code{humdrumR}:
 \itemize{
 \item \emph{Measure}: The duration of the "measure" of the meter. I.e., the highest metric level, or
 the least common multiple of all levels.
 \item \emph{Hypermeter}: Metric levels above the measure indicated by the time signature.
-\item \emph{Tactus}: The "main,", usually central, level.
+\item \emph{Tactus}: The "main," usually central, level.
 \item \emph{Subdivision}: The level directly below the tactus.
 \item \emph{Tick}: The smallest/fastest metric level. (The "ticks" in the grid.)
 \item \emph{Tatum}: The smallest common denominator between a set of beats/duration.

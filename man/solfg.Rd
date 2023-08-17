@@ -2,8 +2,27 @@
 % Please edit documentation in R/Pitch.R
 \name{solfg}
 \alias{solfg}
+\alias{solfg.default}
+\alias{solfg.humdrumR}
 \title{Fixed-do \href{https://en.wikipedia.org/wiki/Solf\%C3\%A8ge}{Solfege} representation}
 \usage{
+\method{solfg}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> solfg() 
+humData |> solfg(simple = TRUE)
+humData |> solfg(Token, Key = Key)
+
 solfg(
   x,
   ...,
@@ -70,6 +89,10 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 \description{
 Based on the common French system of notating pitches, as encoded in the humdrum
 \href{https://www.humdrum.org/rep/solfg/index.html}{\verb{**solfg}} interpretation.
+
+If \code{solfg()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -214,7 +237,6 @@ To better understand how this function works, read about the \link[=pitchFunctio
 or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{deparsed}.
 
 Other {absolute pitch functions}: 
-\code{\link{degree}()},
 \code{\link{helmholtz}()},
 \code{\link{kern}()},
 \code{\link{lilypond}()},

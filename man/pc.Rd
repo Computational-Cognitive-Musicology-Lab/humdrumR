@@ -2,8 +2,27 @@
 % Please edit documentation in R/Pitch.R
 \name{pc}
 \alias{pc}
+\alias{pc.default}
+\alias{pc.humdrumR}
 \title{Representation of atonal pitch classes}
 \usage{
+\method{pc}{default}(
+  x,
+  ...,
+  generic = FALSE,
+  simple = FALSE,
+  octave.relative = FALSE,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  gamutArgs = list(),
+  inPlace = FALSE
+)
+
+humData |> select(Token) |> pc() 
+humData |> pc(simple = TRUE)
+humData |> pc(Token, Key = Key)
+
 pc(
   x,
   ...,
@@ -86,6 +105,10 @@ If \code{NULL}, \code{"11"} is used with no shorthand.}
 \description{
 As encoded in the humdrum
 \href{https://www.humdrum.org/rep/pc/index.html}{\verb{**pc}} interpretation.
+
+If \code{pc()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

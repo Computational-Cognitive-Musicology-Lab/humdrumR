@@ -62,7 +62,7 @@ solfa(input, inPlace = TRUE)
 ```
 
 
-The cool thing is that each of these functions can read any of the other function's output.
+The cool thing is that each of these functions can read any of the other functions' output.
 So you can do things like:
 
 ```{r}
@@ -115,7 +115,7 @@ You can also call documentation for any individual function, like `?kern`.
 ## Scale degree
 
 Some pitch representations encode [scale degree](https://en.wikipedia.org/wiki/Degree_(music)), which depends on the key.
-We can use the `Key` argument to control how our pitch functions interpet key---either translating *from* degrees to absolute pitches, or vice versa.
+We can use the `Key` argument to control how our pitch functions interpret key---either translating *from* degrees to absolute pitches, or vice versa.
 Pass the `Key` argument a humdrum key interpretation, like `c:` (c minor) or `A-:` (a-flat major).
 
 ```{r}
@@ -146,12 +146,14 @@ Let's load `r hm`'s built-in Bach chorales:
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 ```
-
 These chorales are full of `**kern` data in the (default) `Token` field, which can easily be parsed/translated.
-Maybe we'd like to convert the `**kern` to semitones:
+Maybe we'd like to convert the `**kern` to semitones.
+`r Hm`'s pitch functions can all be used "[humdrum-style](DataFields.html#humdrum-style "HumdrumR data fields article, humdrum-style section"), so using `semits()` is very easy:
 
 ```{r}
-within(chorales, semits(Token))
+
+chorales |>
+  semits()
 
 ```
 
@@ -159,19 +161,23 @@ We could then, for instance, make a histogram of the semitone values:
 
 ```{r}
 
-with(chorales, semits(Token)) |> hist(main = 'Histogram of semits() in 10 chorales')
+chorales |>
+  semits() |>
+  pull() |>
+  hist(main = 'Histogram of semits() in 10 chorales')
 
 ```
 
 ### Keys
 
 The chorale dataset has key information in its built-in `Key` field.
-If we use a pitch function in `with()` or `within()`, they will *automatically* pass the `Key` field as `Key` argument to the function!
-That means if we apply `solfa()`, we will get the correct scale degrees, given the keys in the data:
+If we use a pitch function in humdrum- or -tidy style, the `Key` field is *automatically* passed as a `Key` argument to the function!
+That means if we apply `solfa()`, we will get the correct scale degrees, *given* the keys in the data:
 
 ```{r}
 
-within(chorales, solfa(Token))
+chorales |>
+  solfa(Token)
 
 ```
 
@@ -187,16 +193,14 @@ solfa(c('8gg', '8ff', '4ee', '8dd', '8r', '2cc'))
 
 ```
 
-The rest token, is output as a null (`NA`) value.
+The rest token, is output as a null (`.`) value---this null `.` is actually an R `NA` value.
 In fact, any token in the input which fails to parse as pitch will return as `NA`/`.`.
-For example,
+For example:
 
 ```{r}
 kern(c('C4', 'X', 'E4'))
 
 ```
-
-
 
 
 # Pitch arguments
@@ -208,14 +212,14 @@ The complete list of these pitch arguments can be found in the `?pitchParsing` a
 #### Generic vs Specific pitch
 
 All pitch functions accept logical (`TRUE` or `FALSE`) `generic` and `specific` arguments.
-If `generic == TRUE`, the only generic pitch information is returned.
+If `generic == TRUE`, only generic pitch information is returned.
 This affects different pitch representations in different ways:
 
 + For representations like `kern()`, `pitch()` and `lilypond()`, no accidentals are included in generic output;
 + For `intervals()`, the interval quality is removed;
 + For `solfa`, scale degree four will be "fa", never "fi" (sharp four).
 
-The `specific` argument is simply the opposite of `generic`, so have the choice of indicating `genric = TRUE` or `specific = FALSE`---they are equivalent.
+The `specific` argument is simply the opposite of `generic`, so you have the choice of indicating `genric = TRUE` or `specific = FALSE`---they are equivalent.
 
 ---
 
@@ -246,10 +250,10 @@ This affects different pitch representations in different ways:
 + For `pitch()` and `degree()`, the octave number is removed.
 + For `lilypond()` and `helmholtz()`, the octave marks `'` and `,` are removed.
 + For `solfa()` and `deg()`, the contour indicators (explanation below) `v` and `^` are removed.
-+ For `interval()`, only steps between 1--7 and reterned (i.e., no 10ths).
++ For `interval()`, only steps between 1--7 and returned (i.e., no 10ths).
 
 
-The `compound` argument is simply the opposite of `simple`, so have the choice of indicating `simple = TRUE` or `compound = FALSE`---they are equivalent.
+The `compound` argument is simply the opposite of `simple`, so you have the choice of indicating `simple = TRUE` or `compound = FALSE`---they are equivalent.
 
 ---
 
@@ -278,67 +282,79 @@ interval(input, simple = TRUE)
 
 ### Working with pitch arguments
 
-The `generic` and `simple` arguments useful if you want to tabulate pitch classes, for example:
+The `generic` and `simple` arguments are useful if you want to tabulate pitch classes, for example:
 
 ```{r}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 
-with(chorales, kern(Token, simple = TRUE)) |> table() |> barplot()
+chorales |>
+  kern(simple = TRUE) |>
+  tally() |>
+  draw()
 
 ```
 
 ```{r}
-
-with(chorales, kern(Token, generic = TRUE)) |> table() |> barplot()
-
+chorales |>
+  kern(generic = TRUE) |>
+  tally() |>
+  draw()
 ```
 
 ```{r}
 
-with(chorales, kern(Token, simple = TRUE, generic = TRUE)) |> table() |> barplot()
-
+chorales |>
+  kern(simple = TRUE, generic = TRUE) |>
+  tally() |>
+  draw()
 ```
 
 
 ## Transposition
 
 All of `r hm`'s pitch functions have built-in transposition functionality.
-You can use this functionality by passing arguments to a `transpose()` call, *inside* the pitch function call, like in this example using the `by` argument:
+You can use this functionality by passing a named list of arguments to the `transpose()` function, as the `transposeArgs` argument to the pitch function call, like in this example using the `by` argument:
 
 ```{r}
 
-kern(c('c', 'd', 'e', 'f', 'f#', 'g'), transpose(by = 'M2'))
+kern(c('c', 'd', 'e', 'f', 'f#', 'g'), transposeArgs = list(by = 'M2'))
 
 ```
 
 Another option is to transpose by key.
-You can pass the `transpose()` command a `to` argument.
+You can the `to` argument through to `tranpose()`.
 Let's say we have music in A major that we'd like to transpose *to* C major:
 
 ```{r}
 Amelody <- c('8A', '8B', '4.c#', '16d', '8c#','8f#', '8e', '8d#', '4e')
 
-kern(Amelody, Key = 'A:', transpose(to = 'C:'))
+kern(Amelody, Key = 'A:', transposeArgs = list(to = 'C:'))
 
 ```
 
-So the `Key` argument to `kern()` indicates the key the music is coming from, and the `to` argument in `tranpose()` indicates where to transpose it to.
-Since `with`/`within` calls automatically use `Key` information from a data set, this makes it very easy to, say, transpose all `**kern` tokens in your data to C major:
+So the `Key` argument to `kern()` indicates the key the music is coming from, and the `to` argument in `tranposeArgs` indicates where to transpose it to.
+Since humdrum/tidy functions automatically use `Key` information from a data set, this makes it very easy to, say, transpose all `**kern` tokens in your data to C major:
 
 ```{r}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
-with(chorales, kern(Token, transpose(to = 'C:'), simple = TRUE)) |> table() |> barplot()
+chorales |>
+  kern(simple = TRUE, transposeArgs = list(to = 'C:')) |>
+  tally() |>
+  draw()
 
 ```
 
-This looks exactly like calling `solfa()` itself:
+This looks exactly like calling `solfa()`:
 
 
 ```{r}
+chorales |>
+  solfa(simple = TRUE) |>
+  tally() |>
+  draw()
 
-with(chorales, solfa(Token, simple=T)) |> table() |> barplot()
 ```
 
 
@@ -361,20 +377,22 @@ mint(input)
 
 ```
 
-If you use `mint()` in `with`/`within` call on a `r hm` dataobject, `mint()` will automatically be called within each spine/path in each file (this is accomplished using the `groupby` argument to `mint()`):
+If you use `mint()` in humdrum- or tidy- style on a `r hm` dataobject, `mint()` will automatically be called within each spine/path in each file (this is accomplished using the `groupby` argument to `mint()`):
 
 ```{r}
 
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
-within(chorales, mint(Token))
+chorales |> 
+  mint()
 
 ```
 `mint()` has a number of special options, which you can read about in the manual by checking out `?mint`.
 For now, we'll just show you the `classify` argument, which can be used to classify output intervals as either `Unison`, `Step`, `Skip`, or `Leap`:
 
 ```{r}
-within(chorales, mint(Token, classify = TRUE))
+chorales |>
+  mint(classify = TRUE)
 
 ```
 
@@ -386,22 +404,25 @@ In parallel to `mint()` is `hint()` (harmonic intervals) command.
 `hint()` works just like `mint()` except it calculates intervals from left to right in each record of a file:
 
 ```{r}
-
-within(chorales, hint(Token))
+chorales |>
+  hint()
 
 ```
 
 A special trick is to use the `lag` argument to calculate harmonic intervals all in relation to the same spine.
-For example, you can caculate harmonic intervals between each voice and the bass voice like so:
+For example, you can calculate harmonic intervals between each voice and the bass voice like so:
 
 ```{r}
-within(chorales, hint(Token, lag = Spine == 1))
+
+chorales |>
+  hint(lag = Spine == 1)
 
 ```
 Or, harmonic intervals from the soprano like so:
 
 ```{r}
-within(chorales, hint(Token, lag = Spine == 4))
+chorales |>
+  hint(lag = Spine == 4)
 
 ```
 

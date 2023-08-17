@@ -486,7 +486,7 @@ tset2tonalHarmony <- function(x,
   root      <- if (root) root_func(getRootTint(x), Key = Key, ...) 
   
   quality   <- if (quality) {
-    {quality; root} %<-% tset2triadLabel(x, root, root.case, ...)
+    c("quality", "root") %<-% tset2triadLabel(x, root, root.case, ...)
     quality
   }
  
@@ -1287,7 +1287,8 @@ NULL
 makeChordTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
   
-  withinFields$Key <<- c(withinFields$Key, callname)
+  autoArgTable <<- rbind(autoArgTable, 
+                         data.table(Argument = 'Key', Type = 'Keyed', Function = callname, Expression = list(quote(Key))))
   
   deparser <- rlang::enexpr(deparser)
   callname <- rlang::enexpr(callname)
@@ -1533,7 +1534,24 @@ roman <- makeChordTransformer(tset2roman, 'roman')
 #' @export 
 tertian <- makeChordTransformer(tset2tertian, 'tertian')
 
+### humdrumR methods ----
 
+
+#' @exportS3Method roman default
+#' @exportS3Method roman humdrumR
+humdrumRmethods('roman')
+#' @exportS3Method figuredBass default
+#' @exportS3Method figuredBass humdrumR
+humdrumRmethods('figuredBass')
+#' @exportS3Method harm default
+#' @exportS3Method harm humdrumR
+humdrumRmethods('harm')
+#' @exportS3Method chord default
+#' @exportS3Method chord humdrumR
+humdrumRmethods('chord')
+#' @exportS3Method tertian default
+#' @exportS3Method tertian humdrumR
+humdrumRmethods('tertian')
 
 ###################################################################### ### 
 # Manipulating tertian sets ##############################################

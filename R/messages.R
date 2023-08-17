@@ -57,7 +57,7 @@ checks <- function(arg, argcheck, argname, seealso = c()) {
   if (missing(argname)) argname <- rlang::expr_name(rlang::enexpr(arg))
   callname <- rlang::expr_name(callstack[[1]][[1]])
   
-  seealso <- c(paste0('?', callname), seealso)
+  if (length(seealso) == 0L) seealso <- paste0('?', callname)
   
   messages <- docheck(argcheck, arg, argname)
  
@@ -86,8 +86,8 @@ checks <- function(arg, argcheck, argname, seealso = c()) {
             
   # message()
   # stop(call.=FALSE)
-  .showstack()
-  stop(call. = FALSE, paste0(alert, '\n', messages, seealso))
+  # .showstack()
+  .stop(paste0(alert, '\n', messages, seealso))
   # .stop(paste0(premessage, '\n', messages, seealso))
 }
 
@@ -208,11 +208,12 @@ dochecks <- function(arg, ...) {
   arg <- unique(arg)
   if (is.character(arg)) arg <- quotemark(arg)
   if (length(arg) > n) {
-    arg <- c(arg[1:n], glue::glue('{length(arg) - n} more values.'))
+    arg <- c(arg[1:n], glue::glue('{length(arg) - n} more values'))
   }
   harvard(arg, conj, FALSE)
 }
 .show_vector <- function(arg, n = 6) {
+  if (is.character(arg)) arg <- quotemark(arg, quoteNA = FALSE)
   if (length(arg) == 0L) {
     glue::glue("{class(arg)[1]}(0).")
   } else {
@@ -317,6 +318,9 @@ xwholenum <- xnumber & argCheck(\(arg) all(arg == round(arg)), 'must be whole nu
 xnatural <- xnumber & xmin(0) & xwholenum
 xpnatural <- xnumber & xmin(1) & xwholenum
 
+xposORneg <- argCheck(\(arg)  all(arg >= 0) || all(arg <= 0), "can't mix negative and positive indices", 
+                      \(arg) "'argname' includes {.values(arg[arg > 0])} AND {.values(arg[arg < 0])}")
+
 ### Length -----
 
 
@@ -389,12 +393,12 @@ xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
 
 xlegal <- function(values) {
   argCheck(\(arg) all(arg %in% values), 
-           glue::glue("contains invalid values; valid values are {.values(values)}."),
+           glue::glue("contains invalid values; valid values are {.values(values)}"),
            \(arg) .show_values(arg[!arg %in% values]))
 }
 
 xplegal <- function(values) {
-  xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values)}"),
+  xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values, conj = 'or')}"),
                      \(arg) .show_values(arg[is.na(pmatch(arg, values))]))
 }
 
@@ -417,7 +421,7 @@ xcharclass <- function(chars, single = TRUE) {
   
 }
 
-xrecordtypes <- xcharacter & xminlength(1) & xmaxlength(6) & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd'))), 
+xrecordtypes <- xcharacter & xminlength(1) & xmaxlength(8) & argCheck(\(arg) all(unique(unlist(strsplit(arg, split = '')) %in% c('G', 'L', 'I', 'M', 'D', 'd', 'S', 'E'))), 
                                               glue::glue("must be a string of characters representing humdrum's six record types: {.values(c('G', 'L', 'I', 'M', 'D','d'), conj = 'or')}"),
                                               \(arg) glue::glue("'argname' includes the character(s) {.values(setdiff(unlist(strsplit(arg, split = '')), c('G', 'L', 'I', 'M', 'D', 'd')))}"))
 
@@ -430,10 +434,21 @@ checkTypes <- function(dataTypes, callname, argname = 'dataTypes') {
   # returns dataTypes as a vector of single-characters
   # which is what many functions want to work with
   
-  checks(dataTypes, xrecordtypes)
-  unique(unlist(strsplit(dataTypes, split = '')))
+  checks(dataTypes, xrecordtypes, argname = argname)
+  dataTypes <- unique(unlist(strsplit(dataTypes, split = '')))
+  
+  if (any(dataTypes == 'I')) dataTypes <- union(dataTypes, c('S', 'E'))
+  
+  dataTypes
+  
 }
 
+checkRecycle <- function(recycle, options = c("yes", "no", "pad", "ifscalar", "ifeven", "never", "summarize")) {
+  checks(recycle, xcharacter & xlen1 & xplegal(options))
+  
+  pmatches(recycle, c("yes", "no", "pad", "ifscalar", "ifeven", "never", "summarize"))
+  
+}
 
 ##
 
@@ -473,29 +488,35 @@ is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
   stack <- sapply(stack, paste, collapse = '\n')
   
-  stack <- stack[!grepl('^check|\\.stop\\(', stack)]
+  # stack <- stack[!grepl('^check|\\.stop\\(', stack)]
   # stack <- paste0('  ', strrep(' ', 1:length(stack) * 2), stack)
   
-  cut <- 15
-  stack[-1] <- paste0(' -> ', stack[-1])
-  stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
+  # cut <- 15
+  # stack[-1] <- paste0(' -> ', stack[-1])
+  # stack[nchar(stack) > cut] <- paste0(stack[nchar(stack) > cut], '\n\t')
   # 
-  message('humdrumR error in:')
-  message('\t', stack, sep = '')
+  # message('humdrumR error in:')
+  # message('\t', stack, sep = '')
+  call <- rlang::expr_deparse(sys.calls()[[1]])
   
-  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
+  message <- .glue('\tIn your call', call,'\n\n',
+                   ..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
   
   stop(call. = FALSE, message)
 }
 
+.message <- function(..., ifelse = TRUE, sep = ' ') {
+  message <- .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1), trim = FALSE)
+  message(message, appendLF = FALSE)
+}
 
 .warn <- function(...,  ifelse = TRUE, sep = ' ', immediate. = FALSE) {
   stack <- lapply(head(sys.calls(), -1), rlang::expr_deparse)
   stack <- sapply(stack, paste, collapse = '\n')
   
-  call <- sys.calls()[[1]]
+  call <- rlang::expr_deparse( sys.calls()[[1]])
   
-  warning('In your call ', rlang::expr_deparse(call), ': ',
+  warning('In your call ', call, '\n\n',
           .glue(..., ifelse = ifelse, sep = sep, envir = parent.frame(1)),
           call. = FALSE,
           immediate. = immediate.)
