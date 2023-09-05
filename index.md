@@ -141,7 +141,7 @@ In an R session, type:
 
 ```
 
-devtools::install_github("Computational-Cognitive-Musicology-Lab/humdrumR", build_vignettes = TRUE)
+devtools::install_github("Computational-Cognitive-Musicology-Lab/humdrumR")
 
 ```
 
