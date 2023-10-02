@@ -2,6 +2,7 @@
 % Please edit documentation in R/Analysis.R
 \name{tally}
 \alias{tally}
+\alias{tally.humdrumR}
 \alias{Ops,humdrum.table,humdrum.table-method}
 \alias{cbind.humdrum.table}
 \alias{rbind.humdrum.table}
@@ -9,7 +10,7 @@
 \alias{as.data.frame.probabilityDistribution}
 \title{Tabulate and/or cross-tabulate data}
 \usage{
-tally(..., na.rm, exclude)
+\method{tally}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL)
 
 \S4method{Ops}{humdrum.table,humdrum.table}(e1, e2)
 

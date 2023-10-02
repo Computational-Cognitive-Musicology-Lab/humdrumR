@@ -57,10 +57,26 @@ setClass('humdrum.table', contains = 'table')
 #' 
 #' cbind(genericTable, complexTable)
 #' 
+#' @name tally
 #' @export
-tally <- function(..., na.rm, exclude) UseMethod('tally')
+tally.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL) {
+  quos <- rlang::enquos(...)
+  
+  if (length(quos)) {
+    quo <- rlang::quo(with(x, tally(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
+    rlang::eval_tidy(quo)
+    
+    
+  } else {
+    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+    
+    do.call('tally', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
+  }
+}
+  
+  
 #' @export
-tally.default <- function(..., 
+tally.default <- function(..., sort = FALSE,
                           na.rm = FALSE,
                           exclude = NULL) {
   
@@ -85,31 +101,25 @@ tally.default <- function(...,
   # dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), 'NA', dn))
   names(dimnames(tab)) <- dimnames
   
+  if (sort) {
+    if (length(dimnames) > 1) {
+      for (i in seq_along(dimnames)) {
+        reorder <- order(apply(tab, i, sum), decreasing = TRUE)
+        tab <- apply(tab, seq_along(dimnames)[-i], '[', i = reorder)
+      }
+    } else {
+      tab <- sort(tab, decreasing = TRUE)
+    }
+    
+    class(tab) <- 'table'
+  }
   
   new('humdrum.table', tab)
   
   
 }
 
-#' @export
-tally.humdrumR <- function(x, ..., na.rm = FALSE, exclude = NULL) {
-  quos <- rlang::enquos(...)
   
-  if (length(quos)) {
-    quo <- rlang::quo(with(x, tally(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
-    rlang::eval_tidy(quo)
-    
-    
-  } else {
-    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
-    
-    do.call('tally', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
-  }
-  
-  
-  
-}
-
 
 #' @rdname tally
 #' @export

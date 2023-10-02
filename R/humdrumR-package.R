@@ -52,11 +52,11 @@
 #' @importFrom numbers primeFactors
 #' @importFrom data.table data.table rbindlist setorder setindex set setorderv setcolorder copy as.data.table is.data.table frank CJ setnames setkey
 #' @importFrom scales ContinuousRange
-#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize
+#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize tally 
 #' @importFrom tidyselect eval_select
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type aes geom_bar geom_point
-#' @export summarise select filter mutate pull reframe group_by ungroup summarize
+#' @export summarise select filter mutate pull reframe group_by ungroup summarize tally
 NULL
 
 
