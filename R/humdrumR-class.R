@@ -1619,7 +1619,7 @@ pullPrintable <- function(humdrumR, fields,
                           dataTypes = 'D', null = 'NA2dot',
                           useToken = c('G', 'L', 'I', 'M', 'S', 'E'), collapse = TRUE){
     
-    fieldTable <- pullFields(humdrumR, union(fields, c('Token', 'Type')), dataTypes = dataTypes, null = if (collapse) 'dot2NA' else null)
+    fieldTable <- pullFields(humdrumR, union(fields, c('Type')), dataTypes = dataTypes, null = if (collapse) 'dot2NA' else null)
     
     Exclusives <- Filter(length, lapply(fieldTable[ , fields, with = FALSE], getExclusive))
     tandems <- unlist(unique(lapply(fieldTable, getTandem)))
@@ -1646,7 +1646,7 @@ pullPrintable <- function(humdrumR, fields,
                                      })] 
     if (!collapse) return(fieldTable[ , fields, with = FALSE])                  
     
-    # field <- do.call('.paste', c(fieldTable[, fields, with = FALSE], list(sep = '')))
+    ## collapse == TRUE:
     field <- Reduce(\(a, b) {
         ifelse(fieldTable$Type %in% c('I', 'M', 'd', 'S') & a == b, a, .paste(a, b, sep = '', na.if = all))
         
@@ -1658,15 +1658,16 @@ pullPrintable <- function(humdrumR, fields,
     if (length(useToken) && any(grepl(captureRE(useToken), dataTypes))) {
         # humtab[, !Type %in% c('D', 'd')]
         fill <- Type %in% useToken & (is.na(field) | is.nullToken(field))
+        token <- getHumtab(humdrumR, dataTypes = dataTypes)$Token # get token separately because we always want null = 'asis'
         
         if (length(tandems)) {
             tandemRE <- knownInterpretations[Name %in% tandems, RE]
-            targets <- Type == 'I' & !is.na(fieldTable$Token)
+            targets <- Type == 'I' & !is.na(token)
             fill[targets] <- fill[targets]  & Reduce('|', lapply(tandemRE, 
                                                                  stringi::stri_detect_regex, 
-                                                                 str = fieldTable$Token[targets]))
+                                                                 str = token[targets]))
         }
-        field[fill] <- fieldTable$Token[fill]
+        field[fill] <- token[fill]
     } 
     
     if (length(Exclusives)) {
