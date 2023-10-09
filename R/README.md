@@ -784,7 +784,7 @@ If an argument has not default value, simply omit this paragraph.
 The defaults paragraph should more or less just say "Defaults to `x`", where `x` is some value.
 However, each function manual's "signature" will already list the *literal* value.
 The @param field is a place to put the default in words---like saying "zero" instead of `0`.
-For example, in the `count()` man, I say the `beat` argument "Defaults to a whole-note", rather than `rational(1)`, which is the literal default.
+For example, in the `timecount()` man, I say the `beat` argument "Defaults to a whole-note", rather than `rational(1)`, which is the literal default.
 
 #### Constraints
 

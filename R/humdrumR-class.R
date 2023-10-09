@@ -1333,7 +1333,7 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' In addition to controlling what [fields()] you "see" in the console printout, 
 #' the select fields are the fields that many [humdrumR][humdrumR] functions will automatically
 #' apply themselves to.
-#' For example, if you call [ditto()], [tally()], or [kern()] on a [humdrumR data object][humdrumRclass],
+#' For example, if you call [ditto()], [timecount()], or [kern()] on a [humdrumR data object][humdrumRclass],
 #' these functions will be applied the selected field(s).
 #' (However, most such functions are only applied to the *first* selected field, 
 #' if there is more than one; see their own manuals for details.)
@@ -1412,8 +1412,8 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' 
 #' # effect of selection
 #' 
-#' humData |> select(Token) |> tally()
-#' humData |> select(Spine) |> tally()
+#' humData |> select(Token) |> count()
+#' humData |> select(Spine) |> count()
 #'
 #' @seealso {Use [fields()] to see what fields are available, and how they are ordered.
 #' To actually *extract* fields, see [pullFields()].}

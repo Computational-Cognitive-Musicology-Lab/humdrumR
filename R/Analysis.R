@@ -6,34 +6,34 @@ setClass('humdrum.table', contains = 'table')
 
 #' Tabulate and/or cross-tabulate data
 #' 
-#' The `tally()` function is exactly like R's fundamental [table()][base::table] function,
+#' The `count()` function is exactly like R's fundamental [table()][base::table] function,
 #' except that 1) will give special treatment to humdrumR [token()] data 2)
 #' has more intuitive/simple argument names 3) makes it easier to combine/manipulate
 #' disparate output tables.
 #' 
 #' @details
 #' 
-#' The `tally()` function is essentially a wrapper
+#' The `count()` function is essentially a wrapper
 #' around [base::table()][base::table] function.
 #' However, any [token()] class arguments are treated like [factors()],
 #' calling generating their own levels.
 #' This assures that, for example, pitch data is tabulated in order of pitch height,
 #' and "missing" pitches are counted as zero.
 #' 
-#' `tally()` will, by default, count `NA` values if they are present---if you don't want
+#' `count()` will, by default, count `NA` values if they are present---if you don't want
 #' to count `NA`s, specify `na.rm = TRUE`.
-#' You can also tell `tally()` to exclude (not count) any other arbitrary values you
+#' You can also tell `count()` to exclude (not count) any other arbitrary values you
 #' provide as a vector to the `exclude` argument.
 #' 
 #' 
-#' `tally()` will always give names to the dimensions of the table it creates.
-#' You can specify these names directly as argument names, like `tally(Kern = kern(Token))`;
-#' if you don't specify a name, `tally()` will make up a name(s) based on expression(s) it is tallying.
-#' (Note that `tally()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
+#' `count()` will always give names to the dimensions of the table it creates.
+#' You can specify these names directly as argument names, like `count(Kern = kern(Token))`;
+#' if you don't specify a name, `count()` will make up a name(s) based on expression(s) it is tallying.
+#' (Note that `count()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
 
 #' @section Manipulating humdrum tables:
 #' 
-#' The output of `tally()` is a special form of R `table`, a `humdrum.table`.
+#' The output of `count()` is a special form of R `table`, a `humdrum.table`.
 #' Given two or more `humdrum.table`s, if you apply basic R operators 
 #' (e.g., arithmetic, comparisons) or row/column binding (`cbind`/`rbind`) 
 #' `humdrumR` will align the tables by their dimension-names before
@@ -47,8 +47,8 @@ setClass('humdrum.table', contains = 'table')
 #' generic <- c('c', 'c', 'e', 'g', 'a', 'b', 'b', 'b')
 #' complex <- c('c', 'c#', 'e', 'f', 'g','g#', 'g#', 'a')
 #' 
-#' genericTable   <- tally(generic)
-#' complexTable <- tally(complex)
+#' genericTable   <- count(generic)
+#' complexTable <- count(complex)
 #' 
 #' genericTable
 #' complexTable
@@ -57,26 +57,26 @@ setClass('humdrum.table', contains = 'table')
 #' 
 #' cbind(genericTable, complexTable)
 #' 
-#' @name tally
-#' @export
-tally.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL) {
+#' @name tabulation
+#' @export 
+count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL) {
   quos <- rlang::enquos(...)
   
   if (length(quos)) {
-    quo <- rlang::quo(with(x, tally(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
+    quo <- rlang::quo(with(x, count.default(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
     rlang::eval_tidy(quo)
     
     
   } else {
     fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
     
-    do.call('tally', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
+    do.call('count', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
   }
 }
   
-  
+#' @rdname tabulation
 #' @export
-tally.default <- function(..., sort = FALSE,
+count.default <- function(..., sort = FALSE,
                           na.rm = FALSE,
                           exclude = NULL) {
   
@@ -121,7 +121,7 @@ tally.default <- function(..., sort = FALSE,
 
   
 
-#' @rdname tally
+#' @rdname tabulation
 #' @export
 setMethod('Ops', c('humdrum.table', 'humdrum.table'),
           \(e1, e2) {
@@ -133,7 +133,7 @@ setMethod('Ops', c('humdrum.table', 'humdrum.table'),
             
           })
 
-#' @rdname tally
+#' @rdname tabulation
 #' @export
 cbind.humdrum.table <- function(...) {
   tables <- list(...)
@@ -145,7 +145,7 @@ cbind.humdrum.table <- function(...) {
   
 }
 
-#' @rdname tally
+#' @rdname tabulation
 #' @export
 rbind.humdrum.table <- function(...) {
   tables <- list(...)
@@ -157,7 +157,7 @@ rbind.humdrum.table <- function(...) {
   
 }
 
-#' @rdname tally
+#' @rdname tabulation
 #' @export
 as.data.frame.humdrum.table <- function(x, ...) {
   tab <- as.data.frame(S3Part(x), ...)
@@ -273,7 +273,7 @@ pdist.name <- function(ptab, margin = NULL, func = 'P') {
   
 }
 
-#' @rdname tally
+#' @rdname tabulation
 #' @export
 as.data.frame.probabilityDistribution <- function(x, ...) {
   tab <- as.data.frame(S3Part(x), ...)
@@ -322,7 +322,7 @@ setMethod('p', 'discrete',
           function(x, ..., distribution = NULL, margin = NULL, na.rm = TRUE) {
             checks(distribution, xnull | xclass('probabilityDistribution'))
             
-            if (is.null(distribution)) distribution <- p(tally(x, ..., na.rm = FALSE), margin = margin, na.rm = na.rm)
+            if (is.null(distribution)) distribution <- p(count(x, ..., na.rm = FALSE), margin = margin, na.rm = na.rm)
                 
             
             
@@ -553,7 +553,7 @@ setMethod('mutualInfo', 'table',
 setMethod('mutualInfo', 'discrete',
           function(x, ..., base = 2, na.rm = FALSE) {
             args <- list(x, ...)
-            marginals <- lapply(args, \(arg) p(tally(arg)))
+            marginals <- lapply(args, \(arg) p(count(arg)))
             
             joint <- Reduce('%*%', marginals)
             
@@ -622,7 +622,7 @@ setMethod('crossEntropy', c('probabilityDistribution', 'probabilityDistribution'
 #' + `x` and `y` both numeric: scatter plot.
 #' + `x` numeric by itself: histogram.
 #' + `y` numeric by itself: quantile plot.
-#' + `x` is a [table][tally()]: barplot.
+#' + `x` is a [table][count()]: barplot.
 #' + `y` is numeric, `x` is `character` or `factor`: a violin plot.
 #' 
 #' All the standard arguments to base-R plots can be used to customize plots.
@@ -760,14 +760,14 @@ setMethod('draw', c('missing', 'numeric'),
 #' @export
 setMethod('draw', c('discrete', 'discrete'),
           function(x, y, ...){ 
-            draw(tally(x, y), ...)
+            draw(count(x, y), ...)
             })
 
 #' @rdname draw
 #' @export
 setMethod('draw', c('discrete', 'missing'),
           function(x, y, ...){ 
-            draw(tally(x), ..., xlab = '')
+            draw(count(x), ..., xlab = '')
           })
 
 #' @rdname draw
@@ -799,7 +799,7 @@ setMethod('draw', c(x = 'token', y = 'token'),
 # #' @export
 #setMethod('draw', c('missing', 'discrete'),
 #          function(x, y, ...){ 
-#            output <- draw(tally(y), ...)
+#            output <- draw(count(y), ...)
 #          }) ################ THis can work except the labels are reversed...need to figure that your
 
 #' @rdname draw

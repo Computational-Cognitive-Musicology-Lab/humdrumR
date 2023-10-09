@@ -51,7 +51,7 @@ The "selected" fields play an important role in \link{humdrumR}.
 In addition to controlling what \code{\link[=fields]{fields()}} you "see" in the console printout,
 the select fields are the fields that many \link{humdrumR} functions will automatically
 apply themselves to.
-For example, if you call \code{\link[=ditto]{ditto()}}, \code{\link[=tally]{tally()}}, or \code{\link[=kern]{kern()}} on a \link[=humdrumRclass]{humdrumR data object},
+For example, if you call \code{\link[=ditto]{ditto()}}, \code{\link[=timecount]{timecount()}}, or \code{\link[=kern]{kern()}} on a \link[=humdrumRclass]{humdrumR data object},
 these functions will be applied the selected field(s).
 (However, most such functions are only applied to the \emph{first} selected field,
 if there is more than one; see their own manuals for details.)
@@ -103,8 +103,8 @@ humData |> select(1:3, fieldTypes = 'Structure')
 
 # effect of selection
 
-humData |> select(Token) |> tally()
-humData |> select(Spine) |> tally()
+humData |> select(Token) |> count()
+humData |> select(Spine) |> count()
 
 }
 \seealso{

@@ -1662,7 +1662,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' Another option is to pass the `pickup` argument a logical vector of the same length as the input `x`.
 #' Within each piece/group, any block of `TRUE` values at the *beginning* of the `pickup` vector 
 #' indicate a pickup.
-#' The *first* index where the `pickup` logical is `FALSE` is used as the starting point of the timeline/count;
+#' The *first* index where the `pickup` logical is `FALSE` is used as the starting point of the timeline/timecount;
 #' All the earlier (`pickup == TRUE`) points will be negative numbers, measured backwards from the start index.
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
 #' Thus, a common use for the `pickup` argument is `within(humData, timeline(Token, pickup = Bar < 1)`, which makes the downbeat of
@@ -1736,7 +1736,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' within(B075, timeline(Token))
 #' }
 #' 
-#' @seealso {The [count()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
+#' @seealso {The [timecount()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools
 #' @name timeline
 #' @export 

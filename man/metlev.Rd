@@ -116,7 +116,7 @@ compute the metric position of each rhythmic onset.
 \code{metcount()} counts beats within a measure;
 \code{metsubpos()} measures the distance
 between an onset and the nearest metric beat.
-\code{metcount()} and \code{metsubpos()} parallel the more general \code{count()} and \code{subpos()} functions.
+\code{metcount()} and \code{metsubpos()} parallel the more general \code{timecount()} and \code{subpos()} functions.
 }
 \details{
 Watch out! These \code{met...()} functions require \emph{meter} information and their output is
@@ -246,7 +246,7 @@ which the subposition makes an even subdivision of.
 Another option is to pass the \code{pickup} argument a logical vector of the same length as the input \code{x}.
 Within each piece/group, any block of \code{TRUE} values at the \emph{beginning} of the \code{pickup} vector
 indicate a pickup.
-The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/count;
+The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/timecount;
 All the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
 Thus, a common use for the \code{pickup} argument is \verb{within(humData, timeline(Token, pickup = Bar < 1)}, which makes the downbeat of
@@ -273,6 +273,6 @@ within(chorales, metcount(Token, pickup = Bar < 1, fill.levels = 'below'))
 
 }
 \seealso{
-{The \code{\link[=count]{count()}} and \code{\link[=subpos]{subpos()}} functions are more basic versions of \code{metcount()} and \code{metsubpos()},
+{The \code{\link[=timecount]{timecount()}} and \code{\link[=subpos]{subpos()}} functions are more basic versions of \code{metcount()} and \code{metsubpos()},
 based only on counting a \emph{single} beat level, rather then a hierarchy of beat levels.}
 }

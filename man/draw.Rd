@@ -172,7 +172,7 @@ the base-R graphics functions \code{\link[=plot]{plot()}}, \code{\link[=barplot]
 \item \code{x} and \code{y} both numeric: scatter plot.
 \item \code{x} numeric by itself: histogram.
 \item \code{y} numeric by itself: quantile plot.
-\item \code{x} is a \link[=tally]{table}: barplot.
+\item \code{x} is a \link[=count]{table}: barplot.
 \item \code{y} is numeric, \code{x} is \code{character} or \code{factor}: a violin plot.
 }
 

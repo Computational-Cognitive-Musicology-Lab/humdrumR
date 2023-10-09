@@ -53,7 +53,7 @@ These functions take \code{\link[=meter]{meter()}} objects---or values parseable
 specific levels from the meter.
 \code{tactus()} extracts the tactus of a meter; \code{measure()} extracts the length of the full measure of a meter.
 \code{nbeats()} counts the number of tactus beats in the meter.
-These functions are particularly useful as arguments to the \link[=count]{count and subpos} functions.
+These functions are particularly useful as arguments to the \link[=timecount]{timecount and subpos} functions.
 }
 \details{
 By default, \code{tactus()} and \code{measure()} deparse their output as \code{\link[=recip]{recip()}};

@@ -118,11 +118,11 @@
 #' ```
 #' humData |>
 #'   select(Token) |>
-#'   with(tally(.))
+#'   with(count(.))
 #' 
 #' ```
 #' 
-#' will run [tally()] on the `Token` field.
+#' will run [count()] on the `Token` field.
 #' 
 #' Because new fields created by `within()`/`mutate()`/`reframe()` become the [selected fields][selectedFields]
 #' (details below), the `.` makes it easy to refer to the *last* new field in pipes.
@@ -132,11 +132,11 @@
 #' ```
 #' humData |>
 #'    mutate(kern(Token, simple = TRUE)) |>
-#'    with(tally(.))
+#'    with(count(.))
 #' 
 #' ```
 #' 
-#' the `tally()` function is run on the output of the `mutate(kern(Token, simpe = TRUE))` expression.
+#' the `count()` function is run on the output of the `mutate(kern(Token, simpe = TRUE))` expression.
 #
 #' #### Automatic argument insertion
 #' 
@@ -203,9 +203,9 @@
 #' Thus, *these* two calls are also the same:
 #' 
 #' ```
-#' humData |> with(tally(Token[lag = 1:2]))
+#' humData |> with(count(Token[lag = 1:2]))
 
-#' humData |> with(tally(lag(Token, 1), lag(Token, 2)))
+#' humData |> with(count(lag(Token, 1), lag(Token, 2)))
 #' ```
 #' 
 #' Note that the lagging will also be automatically grouped within the fields `list(Piece, Spine, Path)`,
@@ -261,7 +261,7 @@
 #' 
 #' ```
 #' humData |> within(dataTypes = 'Dd', 
-#'                   tally(Token[splat = Spine %in% 1:2]))
+#'                   count(Token[splat = Spine %in% 1:2]))
 #' ```
 #'       
 #' ### Saving expressions for later
@@ -275,7 +275,7 @@
 #' `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()`.
 #'
 #' Image that you have three different datasets (`humData1`, `humData2`, and `humData3`),
-#' and you'd like to evaluate the expression `tally(kern(Token, simple = TRUE))` in all three.
+#' and you'd like to evaluate the expression `count(kern(Token, simple = TRUE))` in all three.
 #' Use the `~` operator to quote and save that expression to variable, then use it with `with()`:
 #' 
 #' ```
@@ -550,7 +550,7 @@
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
-#' humData |> with(tally(kern(Token, simple = TRUE), Spine))
+#' humData |> with(count(kern(Token, simple = TRUE), Spine))
 #' 
 #' humData |> within(Kern <- kern(Token), 
 #'                   Recip <- recip(Token),
