@@ -640,44 +640,44 @@ nbeats.NULL <- function(x) NULL
 #' 
 #' @section "Beats":
 #' 
-#' The `beat` argument is used to indicate what size of beat you want to count.
-#' The default `beat` is a whole note, equivalent to a measure of `M4/4` time.
-#' The `beat` argument uses the [rhythm parser][rhythmInterval()], so it can understand beat values input in a variety of formats:
-#' thus, you could specify quarter-note beats as either `beat = '4'` or `beat = 0.25`.
-#' The parser also understands how to parse the (full) duration of time signature: for example, `beat = 'M3/4'` would use a dotted-half-note beat (`'2.'`).
+#' The `unit` argument is used to indicate what size of beat you want to count.
+#' The default `unit` is a whole note, equivalent to a measure of `M4/4` time.
+#' The `unit` argument uses the [rhythm parser][rhythmInterval()], so it can understand unit values input in a variety of formats:
+#' thus, you could specify quarter-note units as either `unit = '4'` or `unit = 0.25`.
+#' The parser also understands how to parse the (full) duration of time signature: for example, `unit = 'M3/4'` would use a dotted-half-note unit (`'2.'`).
 #' 
 #' ### Changing meter
 #' 
 #' If your data has changing meters (either between pieces, or within pieces), you can specify
-#' the `beat` argument as a vector which is the same length as `dur`, indicating the
+#' the `unit` argument as a vector which is the same length as `dur`, indicating the
 #' beat size at each moment/index. 
 #' This feature is very easy to use with any dataset that includes time signature interpretations, like `"*M4/4"`;
 #' these interpetations, if present, are automatically [read into][readHumdrum()] a field called `TimeSignature`.
-#' For such a dataset, you can simply pass the `TimeSignature` field to the `beat` argument of `timecount()`, and 
-#' the measures of the piece will be correctly counted (even when changing!): `timecount(x, beat = TimeSignature)`.
-#' Alternatively, you can use the [tactus()] command to extract the tactus beat from a time signature, like `timecount(x, beat = tactus(TimeSignature))`.
+#' For such a dataset, you can simply pass the `TimeSignature` field to the `unit` argument of `timecount()`, and 
+#' the measures of the piece will be correctly counted (even when changing!): `timecount(x, unit = TimeSignature)`.
+#' Alternatively, you can use the [tactus()] command to extract the tactus beat from a time signature, like `timecount(x, unit = tactus(TimeSignature))`.
 #' 
 #' ### Irregular meter
 #' 
 #' Some musical meters consist of a pattern of irregular beats.
 #' For example, the meter `M7/8` is often realized as two "short" beats (two eigth-notes each) and one "long" beat (three eigth-notes), forming a 2 + 2 + 3 pattern.
-#' If we want to count each eighth-note, we can simply specify `beat = '8'` and get the `M7/8` beats counted as c(`1`, `3`, `5`).
-#' However, if we want to count each short *or* long beat as a single unit, we must specify the desired pattern as a `list` of beat durations: for example, `beat = list(c("4", "4", "4."))`.
+#' If we want to count each eighth-note, we can simply specify `unit = '8'` and get the `M7/8` beats counted as c(`1`, `3`, `5`).
+#' However, if we want to count each short *or* long beat as a single unit, we must specify the desired pattern as a `list` of beat durations: for example, `unit = list(c("4", "4", "4."))`.
 #' Let's see what these two cases look like, applied to two `M7/8` measures of straight eighth-notes:
 #' 
 #' ```
 #' rhythm <- rep('8', 14)
 #' 
-#' timecount(rhythm, beat = '8'),
+#' timecount(rhythm, unit = '8'),
 #' 
 #' # output is: 1  2  3  4  5  6  7  8  9 10 11 12 13 14
 #' 
-#' timecount(rhythm, beat = list(c('4', '4', '4.')))
+#' timecount(rhythm, unit = list(c('4', '4', '4.')))
 #' 
 #' # output is: 1 1 2 2 3 3 3 4 4 5 5 6 6 6
 #' ```
 #'
-#' To accommodate changing meters, the `beat` argument can still accept `list` of such patterns, so long as the list is the same length as `dur`.
+#' To accommodate changing meters, the `unit` argument can still accept `list` of such patterns, so long as the list is the same length as `dur`.
 #'
 #' @section Pickups:
 #' 
@@ -703,7 +703,7 @@ nbeats.NULL <- function(x) NULL
 #' Wherever the input can't be parsed as a duration, 
 #' that element is treated as a duration of zero.
 #'             
-#' @param beat ***The size of "beat" (or measure) to count.***
+#' @param unit ***The size of "beat" (or measure) to count.***
 #' 
 #' Defaults to a whole-note (one measure of 4/4 time).
 #' 
@@ -722,7 +722,7 @@ nbeats.NULL <- function(x) NULL
 #' Defaults to `0`.
 #'
 #' Must be a `character` or `numeric` vector; must be length `1` or the same length as `dur`;
-#' The duration of `phase` must be smaller than the smallest duration value in `beat`.
+#' The duration of `phase` must be smaller than the smallest duration value in `unit`.
 #' 
 #' Is parsed as a duration using [rhythmInterval()]; 
 #' If the input can't be parsed as a duration, an error occurs.
@@ -751,14 +751,14 @@ nbeats.NULL <- function(x) NULL
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
-#' show(within(humData, timecount(Token, beat = TimeSignature, pickup = Bar < 1)))
+#' show(within(humData, timecount(Token, unit = TimeSignature, pickup = Bar < 1)))
 #' 
-#' show(within(humData, timecount(Token, beat = tactus(TimeSignature))))
+#' show(within(humData, timecount(Token, unit = tactus(TimeSignature))))
 #'  
 #'   
 #' @seealso {`timecount()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `timecount()` within a metric framework.}
 #' @export
-timecount <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list()) {
+timecount <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
@@ -767,13 +767,13 @@ timecount <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup =
   checks(offBeats, xTF)
   
   
-  scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'timecount')
+  scaled <- scaled_timeline(dur, unit, rational(0L), pickup, groupby, callname = 'timecount')
   
   # phase
   phase_rint <- rhythmInterval(phase) 
   checks(phase_rint, argname = 'phase',
-         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all beats in the 'beat' argument'", 
-                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'beat' includes ", .show_vector(unique(beat)))))
+         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all units in the 'unit' argument'", 
+                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'unit' includes ", .show_vector(unique(unit)))))
   
   phase_rint <- phase_rint / scaled$Scale
   #
@@ -826,20 +826,20 @@ timecount <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup =
 
 #' @rdname timecount
 #' @export
-subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
+subpos <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?subpos", 'the rhythm vignette'))
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
   checks(deparser, xinherits('rhythmFunction'))
   
-  scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
+  scaled <- scaled_timeline(dur, unit, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
   
   # phase
   phase_rint <- rhythmInterval(phase) 
   checks(phase_rint, argname = 'phase',
-         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all beats in the 'beat' argument'", 
-                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'beat' includes ", .show_vector(unique(beat)))))
+         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all units in the 'unit' argument'", 
+                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'unit' includes ", .show_vector(unique(unit)))))
   phase_rint <- phase_rint / scaled$Scale
   
   
@@ -865,14 +865,14 @@ subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser 
   if (is.null(deparser)) timeline else deparser(timeline, ...)
 }
 
-scaled_timeline <- function(dur, beat, start, pickup, groupby, callname, sumBeats = FALSE) {
+scaled_timeline <- function(dur, unit, start, pickup, groupby, callname, sumBeats = FALSE) {
   dur <- rhythmInterval(dur)
   
-  checks(beat, (xatomic | xinherits(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
+  checks(unit, (xatomic | xinherits(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
   
-  if (is.list(beat)) {
-    beat <- rep(beat, length.out = length(dur))
-    uniqueBeats <- valind(beat)
+  if (is.list(unit)) {
+    unit <- rep(unit, length.out = length(dur))
+    uniqueBeats <- valind(unit)
     
     uniqueBeats$values <- lapply(uniqueBeats$values, rhythmInterval)
     
@@ -880,27 +880,27 @@ scaled_timeline <- function(dur, beat, start, pickup, groupby, callname, sumBeat
     
     tatum <- .unlist(lapply(uniqueBeats$values, if(sumBeats) sum else tatum.rational))
     
-    beat <- tatum[uniqueBeats$i]
+    unit <- tatum[uniqueBeats$i]
     
   } else {
     irregular <- logical(length(dur))
-    beat <- rhythmInterval(beat)
-    uniqueBeats <- list(values = beat)
+    unit <- rhythmInterval(unit)
+    uniqueBeats <- list(values = unit)
   }
   
   
-  dur <- dur / beat
+  dur <- dur / unit
   
   timeline <- pathSigma(dur, groupby = groupby, start = start, pickup = pickup, callname = 'timecount')
   
-  c(list(Timeline = timeline, Scale = beat, Irregular = irregular, tatum = tatum), uniqueBeats)
+  c(list(Timeline = timeline, Scale = unit, Irregular = irregular, tatum = tatum), uniqueBeats)
 }
 
 
 #' @rdname timecount
 #' @export
-onbeat <- function(dur, beat = rational(1L), groupby = list(), ...) {
-  subpos(dur, beat = beat, groupby = groupby, deparser = NULL) == rational(0L)
+onbeat <- function(dur, unit = rational(1L), groupby = list(), ...) {
+  subpos(dur, unit = unit, groupby = groupby, deparser = NULL) == rational(0L)
 }
 
 

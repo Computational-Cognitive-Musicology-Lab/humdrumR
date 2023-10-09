@@ -336,15 +336,15 @@ If the `BPM` argument is not provided, the default is 60 beats-per-minute.
 
 Ok, the `timeline()` gives us a timeline in whole-note units, giving fractional (decimal) output.
 Often in music, we want to know how many *beats* have elapsed at a given time, rather than the exact time position.
-For this, use the `count()`, and its `beat` argument.
-The default `beat` is a whole-note, so `count()` will count which whole note you are on:
+For this, use the `timecount()`, and its `unit` argument.
+The default `unit` is a whole-note, so `timecount()` will count which whole note you are on:
 
 ```{r}
 row <- c('4c', '4c', '6c', '12d', '4e', '6e','12d', '6e', '12f', '2g', 
          '12cc', '12cc', '12cc', '12g', '12g', '12g', '12e', '12e', '12e', '12c', '12c', '12c', 
          '6g','12f', '6e', '12d','2c')
 
-count(row)
+timecount(row)
 
 ```
 
@@ -352,19 +352,19 @@ Let's try quarter-notes instead:
 
 ```{r}
 
-count(row, beat = '4')
+timecount(row, unit = '4')
 
 ```
 
-`count()` will even work for irregular beat patterns, which must be entered as a list.
+`timecount()` will even work for irregular beat patterns, which must be entered as a list.
 For example, the meter 7/8 is often played as three beats, with the last beat being longer than the first two: a pattern line `4 4 4.`.
-`count()` can count these irregular beats!
+`timecount()` can count these irregular beats!
 
 ```{r}
 
 seven8 <- c('4', '4', '8','8','8','4','4','4','8','4','4','8','8', '8', '4')
 
-count(seven8, beat = list(c('4', '4', '4.')))
+timecount(seven8, unit = list(c('4', '4', '4.')))
 
 
 ```
@@ -374,7 +374,7 @@ This could be handy for counting subdivisions in swing time!
 
 ### Subposition
 
-The counterpart to `count()` is `subpos()`.
+The counterpart to `timecount()` is `subpos()`.
 When we count beats, some notes don't actually land *on* the beat, but somewhere "inside" the beat---in other words, between beats.
 `subpos()` will tell us how far from the beat each attack is; the unit will be whole-notes, unless
 we pass a `scale` argument to change the scale.
@@ -385,9 +385,9 @@ Let's look at our last few examples again, but using `subpos()`:
 
 subpos(row, scale = 12)
 
-subpos(row, beat = '4', scale = 12)
+subpos(row, unit = '4', scale = 12)
 
-subpos(seven8, beat = list(c('4', '4', '4.')), scale = 8)
+subpos(seven8, unit = list(c('4', '4', '4.')), scale = 8)
 
 
 ```
@@ -395,7 +395,7 @@ subpos(seven8, beat = list(c('4', '4', '4.')), scale = 8)
 
 # Meter
 
-The `count()` and `subpos()` commands are great if we want count in a single beat/measure unit.
+The `timecount()` and `subpos()` commands are great if we want count in a single beat/measure unit.
 To take things to the next level(s), we need to consider musical *meter*.
 From the point of view of `r hm`, "meter" is a set of multiple "beat levels" occurring at the same time (in parallel), with "lower" (faster/shorter) levels nested inside "higher" (slower/longer) levels.
 `R Hm` defines a number of useful tools for applying metric analyses to rhythmic data.
@@ -435,7 +435,7 @@ The whole-note level is `1` and (in this case) the eighth-note level is `4`.
 ### Metric position
 
 Along with `metlev()`, `r hm` provides to complementary functions called `metcount()`, `metsubpos()`.
-As you might guess, these are metric parallels of `count()` and `subpos()`.
+As you might guess, these are metric parallels of `timecount()` and `subpos()`.
 The `metcount()` function counts beats at a particular beat level (the `level` argument) *within* the highest level in the meter.
 The `metsubpos()` function calculates the rhythm offset between each onset and the nearest beat in the meter.
 

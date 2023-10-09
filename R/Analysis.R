@@ -159,9 +159,9 @@ rbind.humdrum.table <- function(...) {
 
 #' @rdname tabulation
 #' @export
-as.data.frame.humdrum.table <- function(x, ...) {
-  tab <- as.data.frame(S3Part(x), ...)
-  names(tab)[names(tab) == 'Freq'] <- 'Tally'
+as.data.frame.humdrum.table <- function(x, ..., responseName = 'n') {
+  tab <- as.data.frame(S3Part(x), ..., responseName = responseName)
+  # names(tab)[names(tab) == 'Freq'] <- 'Tally'
   tab
 }
 

@@ -137,13 +137,13 @@ chorales |>
 
 Another useful contextual group is the beat.
 There will be no automatic "beat" field in our data, so we'll need to make one---obviously, we need to have data with rhythmic information encoded (like `**kern` or `**recip`) to do this!
-We can use the `count()` function to count the beats in our data. 
+We can use the `timecount()` function to count the beats in our data. 
 We could count quarter-notes by setting `beat = '4'`; alternatively, if our data includes time-signature interpretations (like `*M3/4`) we could use the `TimeSignature` field to get the tactus of the meter. 
 Let's try the later and save the result to a new field, which we'll call `Beat` (or anything else you want).
 
 ```{r}
 chorales |> 
-  mutate(Beat = count(Token, beat = tactus(TimeSignature))) -> chorales
+  mutate(Beat = timecount(Token, beat = tactus(TimeSignature))) -> chorales
 
 
 ```
@@ -162,7 +162,7 @@ chorales |>
 ```
 
 
-> Note: If your data includes spine paths, you'll want to set `mutate(count(Token), expandPaths = TRUE, ...)`.
+> Note: If your data includes spine paths, you'll want to set `mutate(timecount(Token), expandPaths = TRUE, ...)`.
 > Count (and similar functions, like `timeline()`) won't work correctly without paths expanded (`?expandPaths`).
 
 # Contextual Windows
