@@ -27,7 +27,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,7 +101,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-08-17</h4>
+            <h4 data-toc-skip class="date">2023-10-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/GettingStarted.Rmd" class="external-link"><code>vignettes/GettingStarted.Rmd</code></a></small>
       <div class="d-none name"><code>GettingStarted.Rmd</code></div>
@@ -447,9 +447,9 @@ tutorial</a>.</p>
 </h3>
 <p>Once we have some data loaded, the next thing a good computational
 musicologist does is start counting! To count the contents of data, we
-can use the <code><a href="../reference/tally.html">tally()</a></code> function.</p>
+can use the <code>count()</code> function.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span> </span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">tally</span>() </span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">count</span>() </span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="sc">&gt;</span>    Token</span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="sc">&gt;</span>        [2d     [2e     [4a     [4A     [4B     [4c     [4d     [4e     [4E     [4f </span>
@@ -529,16 +529,16 @@ can use the <code><a href="../reference/tally.html">tally()</a></code> function.
 <span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a><span class="sc">&gt;</span>       8GGL     8gJ     8GJ     8gL     8GL    8gL]    8GL]   8gnXL   8GnXL </span>
 <span id="cb7-80"><a href="#cb7-80" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">2</span>      <span class="dv">14</span>       <span class="dv">8</span>      <span class="dv">14</span>      <span class="dv">17</span>       <span class="dv">3</span>       <span class="dv">1</span>       <span class="dv">2</span>       <span class="dv">1</span></span></code></pre></div>
 <p>That’s quite a mess! What have we done? When we pass our
-<code>chorales</code> data to <code><a href="../reference/tally.html">tally()</a></code>, tally counted all
-the unique data tokens (ignoring non-data tokens, like barline and
+<code>chorales</code> data to <code>count()</code>, it counted all the
+unique data tokens (ignoring non-data tokens, like barline and
 interpretations) in the data. There are a <em>lot</em> of unique tokens
 in this data, so it’s not super helpful. Maybe we’d like to look at just
 the twenty most common tokens in the <code>chorales</code>? To this, we
-can pass the tally through to two base R functions, <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code>
+can pass the count through to two base R functions, <code><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort()</a></code>
 and <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail()</a></code>:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>chorales <span class="sc">|&gt;</span> </span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">tally</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">count</span>() <span class="sc">|&gt;</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">sort</span>() <span class="sc">|&gt;</span></span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">tail</span>(<span class="at">n =</span> <span class="dv">20</span>)</span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="sc">&gt;</span>    Token</span>
@@ -551,7 +551,7 @@ quarter-note E4 (<code>4e</code>), which occurs 103 times.</p>
 <div class="section level4">
 <h4 id="separating-pitch-and-rhythm">Separating pitch and rhythm<a class="anchor" aria-label="anchor" href="#separating-pitch-and-rhythm"></a>
 </h4>
-<p>To make our tallies more useful, we might want to tally only the
+<p>To make our tallies more useful, we might want to count only the
 pitch or rhythm part of the <code>**kern</code> data. To do this, we
 need to to be able to extract the pitch/rhythm from the original
 <code>**kern</code> tokens, which we can do that using humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>’s suite of <a href="https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html" class="external-link">pitch</a>
@@ -638,10 +638,10 @@ functions. For example, let’s try the <code><a href="../reference/pitch.html">
 <p>The <code><a href="../reference/pitch.html">pitch()</a></code> function takes the original
 <code>**kern</code> tokens, reads the pitch part of each token, and
 translates it to <a href="https://en.wikipedia.org/wiki/Scientific_pitch" class="external-link">scientific
-pitch</a> notation. Let’s pass <em>that</em> to tally:</p>
+pitch</a> notation. Let’s pass <em>that</em> to count:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">pitch</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">tally</span>()</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="fu">count</span>()</span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="sc">&gt;</span>    Pitch</span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="sc">&gt;</span>     C2 C<span class="co">#2 Db2  D2 D#2 Eb2  E2 E#2  F2 F#2 Gb2  G2 G#2 Ab2  A2 A#2 Bb2  B2  C3 C#3 </span></span>
@@ -658,7 +658,7 @@ functions</a> have a “<code>simple</code>” argument, which can be used
 to ask for only <em>simple</em> pitch information (no octave).</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">pitch</span>(<span class="at">simple =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">tally</span>() </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="fu">count</span>() </span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="sc">&gt;</span>    Pitch</span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="sc">&gt;</span>      C  C<span class="co">#  Db   D  D#  Eb   E  E#   F  F#  Gb   G  G#  Ab   A  A#  Bb   B </span></span>
@@ -668,17 +668,17 @@ function:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/tally.html">tally</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="GettingStarted_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
-<p>Instead of pitch, we could do the same sort of tallying of rhythm
+<p>Instead of pitch, we could do the same sort of counting of rhythm
 information, for example, using the <code><a href="../reference/notehead.html">notehead()</a></code>
 function:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/notehead.html">notehead</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/tally.html">tally</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="GettingStarted_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
 </div>
@@ -687,7 +687,7 @@ function:</p>
 <h3 id="filtering">Filtering<a class="anchor" aria-label="anchor" href="#filtering"></a>
 </h3>
 <p>Sometimes, we might only want to look at a subset of our data. For
-example, maybe we only want to tally notes sung by the soprano. In the
+example, maybe we only want to count notes sung by the soprano. In the
 Bach chorale data we are working with, the soprano voice is always in
 the fourth spine (column). We can use the <code><a href="../reference/subset.humdrumR.html">filter()</a></code> function
 to indicate a subset we’d like to study:</p>
@@ -695,7 +695,7 @@ to indicate a subset we’d like to study:</p>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>chorales <span class="sc">|&gt;</span> </span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="fu">pitch</span>(<span class="at">simple =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="fu">filter</span>(Spine <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="fu">tally</span>()</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="fu">count</span>()</span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="sc">&gt;</span>    Pitch</span>
 <span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="sc">&gt;</span>      C  C<span class="co">#  Db   D  D#  Eb   E   F  F#   G  G#  Ab   A  A#  Bb   B </span></span>
@@ -704,13 +704,13 @@ to indicate a subset we’d like to study:</p>
 there are tandem interpretations that look like <code>*G:</code> and
 <code>*E:</code>. These are indications of the key. Anytime you read
 humdrum data that has these key interpretations, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> will read them into a
-“field” called <code>Key</code>. We could, for example, tally all the
+“field” called <code>Key</code>. We could, for example, count all the
 notes sung when the key is G major like this:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a></span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>  <span class="fu">filter</span>(Key <span class="sc">==</span> <span class="st">'G:'</span>) <span class="sc">|&gt;</span></span>
 <span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>  <span class="fu">pitch</span>(<span class="at">simple =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="fu">tally</span>()</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>  <span class="fu">count</span>()</span>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="sc">&gt;</span>    Pitch</span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="sc">&gt;</span>      C  C<span class="co">#   D  D#  Eb   E   F  F#   G  G#  Ab   A  A#  Bb   B </span></span>

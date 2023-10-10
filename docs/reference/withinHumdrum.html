@@ -26,7 +26,7 @@ are equivalent to using with()/within() with particular arguments.'><!-- mathjax
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -331,17 +331,17 @@ to run the same expression many times but with slightly different parameters.</p
 For example, in</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">select</span>(Token) <span class="sc">|&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">tally</span>(.))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">count</span>(.))</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span></code></pre><p></p></div>
-<p>will run <code><a href="tally.html">tally()</a></code> on the <code>Token</code> field.</p>
+<p>will run <code>count()</code> on the <code>Token</code> field.</p>
 <p>Because new fields created by <code>within()</code>/<code>mutate()</code>/<code>reframe()</code> become the <a href="selectedFields.html">selected fields</a>
 (details below), the <code>.</code> makes it easy to refer to the <em>last</em> new field in pipes.
 For example, in</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>   <span class="fu">with</span>(<span class="fu">tally</span>(.))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>   <span class="fu">with</span>(<span class="fu">count</span>(.))</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span></code></pre><p></p></div>
-<p>the <code><a href="tally.html">tally()</a></code> function is run on the output of the <code>mutate(kern(Token, simpe = TRUE))</code> expression.</p>
+<p>the <code>count()</code> function is run on the output of the <code>mutate(kern(Token, simpe = TRUE))</code> expression.</p>
 </div>
 
 <div class="section">
@@ -393,8 +393,8 @@ For example, the following two calls are the same:</p>
 if the indexed object appears within a higher function call,
 each lag is inserted as a <em>separate</em> argument to that call.
 Thus, <em>these</em> two calls are also the same:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">with</span>(<span class="fu">tally</span>(Token[<span class="at">lag =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]))</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">with</span>(<span class="fu">tally</span>(<span class="fu">lag</span>(Token, <span class="dv">1</span>), <span class="fu">lag</span>(Token, <span class="dv">2</span>)))</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">with</span>(<span class="fu">count</span>(Token[<span class="at">lag =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]))</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">with</span>(<span class="fu">count</span>(<span class="fu">lag</span>(Token, <span class="dv">1</span>), <span class="fu">lag</span>(Token, <span class="dv">2</span>)))</span></code></pre><p></p></div>
 <p>Note that the lagging will also be automatically grouped within the fields <code>list(Piece, Spine, Path)</code>,
 which is the default "melodic" structure in most data.
 This assures that a vector is "lagged" from one piece to another, or from one spine to the next.
@@ -434,7 +434,7 @@ For example, <em>if</em> there are <a href="humSize.html">no spine paths or stop
 have the same number of data records, but only including <strong>all</strong> data records (null <em>and</em> non-null).
 So, if I know there are no stops/paths in our data, we can run something like this:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">within</span>(<span class="at">dataTypes =</span> <span class="st">'Dd'</span>, </span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                  <span class="fu">tally</span>(Token[<span class="at">splat =</span> Spine <span class="sc">%in%</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]))</span></code></pre><p></p></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                  <span class="fu">count</span>(Token[<span class="at">splat =</span> Spine <span class="sc">%in%</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]))</span></code></pre><p></p></div>
 </div>
 
 
@@ -452,13 +452,13 @@ You can also quote expressions, using <code><a href="https://rdrr.io/r/base/subs
 Once you've quoted an expression you can pass it to
 <code>with()</code>, <code>within()</code>, <code>mutate()</code>, <code>summarize()</code>, and <code>reframe()</code>.</p>
 <p>Image that you have three different datasets (<code>humData1</code>, <code>humData2</code>, and <code>humData3</code>),
-and you'd like to evaluate the expression <code>tally(kern(Token, simple = TRUE))</code> in all three.
+and you'd like to evaluate the expression <code>count(kern(Token, simple = TRUE))</code> in all three.
 Use the <code>~</code> operator to quote and save that expression to variable, then use it with <code>with()</code>:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>tallyKern <span class="ot">&lt;-</span> <span class="er">~</span><span class="fu">tally</span>(<span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>countKern <span class="ot">&lt;-</span> <span class="er">~</span><span class="fu">count</span>(<span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>humData1 <span class="sc">|&gt;</span> <span class="fu">with</span>(tallyKern)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>humData2 <span class="sc">|&gt;</span> <span class="fu">with</span>(tallyKern)</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>humData3 <span class="sc">|&gt;</span> <span class="fu">with</span>(tallyKern)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>humData1 <span class="sc">|&gt;</span> <span class="fu">with</span>(countKern)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>humData2 <span class="sc">|&gt;</span> <span class="fu">with</span>(countKern)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>humData3 <span class="sc">|&gt;</span> <span class="fu">with</span>(countKern)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span></code></pre><p></p></div>
 </div>
 
@@ -645,7 +645,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpXk1jiY/temp_libpath4c5933cffa0d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -653,7 +653,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">with</span><span class="op">(</span><span class="fu"><a href="tally.html">tally</a></span><span class="op">(</span><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">with</span><span class="op">(</span><span class="fu">count</span><span class="op">(</span><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            Spine</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> kern(Token)  1  2  3  4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          c  12 22  0 16</span>
@@ -708,7 +708,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpXk1jiY/temp_libpath4c5933cffa0d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

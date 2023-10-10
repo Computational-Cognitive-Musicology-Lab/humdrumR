@@ -163,20 +163,20 @@ test_that("Unfiltering works", {
     ditto(Kern) |>
     unfilter() |>
     select(Kern, 'ditto(Kern)') |>
-    tally() -> tally1
+    count() -> count1
   
-  chorales |> kern(simple = TRUE) |> with(tally(ditto(Kern, null = Token %!~% '4'))) -> tally2
+  chorales |> kern(simple = TRUE) |> with(count(ditto(Kern, null = Token %!~% '4'))) -> count2
     
-  expect_true(all(colSums(tally1[-nrow(tally1), ]) == tally2))
+  expect_true(all(colSums(count1[-nrow(count1), ]) == count2))
   
-  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(tally1[nrow(tally1), ]))
+  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(count1[nrow(count1), ]))
   
   # complement
   chorales |> subset(DataRecord %% 2 == 0) -> chorales_sub
   
-  chorales |> recip() |> tally() -> total
-  chorales_sub |> recip() |> tally() -> sub
-  chorales_sub |> complement() |> recip() |> tally() -> comp
+  chorales |> recip() |> count() -> total
+  chorales_sub |> recip() |> count() -> sub
+  chorales_sub |> complement() |> recip() |> count() -> comp
   
   expect_true(all(total == (sub + comp)[names(total)]))
 })

@@ -8,7 +8,7 @@
 \usage{
 timecount(
   dur,
-  beat = rational(1L),
+  unit = rational(1L),
   start = 1L,
   phase = 0,
   pickup = NULL,
@@ -18,7 +18,7 @@ timecount(
 
 subpos(
   dur,
-  beat = rational(1L),
+  unit = rational(1L),
   phase = 0,
   pickup = NULL,
   deparser = duration,
@@ -26,7 +26,7 @@ subpos(
   groupby = list()
 )
 
-onbeat(dur, beat = rational(1L), groupby = list(), ...)
+onbeat(dur, unit = rational(1L), groupby = list(), ...)
 }
 \arguments{
 \item{dur}{\emph{\strong{An input vector of rhythmic durations.}}
@@ -37,7 +37,7 @@ Is parsed using \code{\link[=rhythmInterval]{rhythmInterval()}};
 Wherever the input can't be parsed as a duration,
 that element is treated as a duration of zero.}
 
-\item{beat}{\emph{\strong{The size of "beat" (or measure) to count.}}
+\item{unit}{\emph{\strong{The size of "beat" (or measure) to count.}}
 
 Defaults to a whole-note (one measure of 4/4 time).
 
@@ -56,7 +56,7 @@ Must be a single whole-number value (either \code{numeric} or \code{integer}).}
 Defaults to \code{0}.
 
 Must be a \code{character} or \code{numeric} vector; must be length \code{1} or the same length as \code{dur};
-The duration of \code{phase} must be smaller than the smallest duration value in \code{beat}.
+The duration of \code{phase} must be smaller than the smallest duration value in \code{unit}.
 
 Is parsed as a duration using \code{\link[=rhythmInterval]{rhythmInterval()}};
 If the input can't be parsed as a duration, an error occurs.}
@@ -112,43 +112,43 @@ This could be achieved with a command like \code{timecount(dur, beat = '1', phas
 \section{"Beats"}{
 
 
-The \code{beat} argument is used to indicate what size of beat you want to count.
-The default \code{beat} is a whole note, equivalent to a measure of \code{M4/4} time.
-The \code{beat} argument uses the \link[=rhythmInterval]{rhythm parser}, so it can understand beat values input in a variety of formats:
-thus, you could specify quarter-note beats as either \code{beat = '4'} or \code{beat = 0.25}.
-The parser also understands how to parse the (full) duration of time signature: for example, \code{beat = 'M3/4'} would use a dotted-half-note beat (\code{'2.'}).
+The \code{unit} argument is used to indicate what size of beat you want to count.
+The default \code{unit} is a whole note, equivalent to a measure of \code{M4/4} time.
+The \code{unit} argument uses the \link[=rhythmInterval]{rhythm parser}, so it can understand unit values input in a variety of formats:
+thus, you could specify quarter-note units as either \code{unit = '4'} or \code{unit = 0.25}.
+The parser also understands how to parse the (full) duration of time signature: for example, \code{unit = 'M3/4'} would use a dotted-half-note unit (\code{'2.'}).
 \subsection{Changing meter}{
 
 If your data has changing meters (either between pieces, or within pieces), you can specify
-the \code{beat} argument as a vector which is the same length as \code{dur}, indicating the
+the \code{unit} argument as a vector which is the same length as \code{dur}, indicating the
 beat size at each moment/index.
 This feature is very easy to use with any dataset that includes time signature interpretations, like \code{"*M4/4"};
 these interpetations, if present, are automatically \link[=readHumdrum]{read into} a field called \code{TimeSignature}.
-For such a dataset, you can simply pass the \code{TimeSignature} field to the \code{beat} argument of \code{timecount()}, and
-the measures of the piece will be correctly counted (even when changing!): \code{timecount(x, beat = TimeSignature)}.
-Alternatively, you can use the \code{\link[=tactus]{tactus()}} command to extract the tactus beat from a time signature, like \code{timecount(x, beat = tactus(TimeSignature))}.
+For such a dataset, you can simply pass the \code{TimeSignature} field to the \code{unit} argument of \code{timecount()}, and
+the measures of the piece will be correctly counted (even when changing!): \code{timecount(x, unit = TimeSignature)}.
+Alternatively, you can use the \code{\link[=tactus]{tactus()}} command to extract the tactus beat from a time signature, like \code{timecount(x, unit = tactus(TimeSignature))}.
 }
 
 \subsection{Irregular meter}{
 
 Some musical meters consist of a pattern of irregular beats.
 For example, the meter \code{M7/8} is often realized as two "short" beats (two eigth-notes each) and one "long" beat (three eigth-notes), forming a 2 + 2 + 3 pattern.
-If we want to count each eighth-note, we can simply specify \code{beat = '8'} and get the \code{M7/8} beats counted as c(\code{1}, \code{3}, \code{5}).
-However, if we want to count each short \emph{or} long beat as a single unit, we must specify the desired pattern as a \code{list} of beat durations: for example, \code{beat = list(c("4", "4", "4."))}.
+If we want to count each eighth-note, we can simply specify \code{unit = '8'} and get the \code{M7/8} beats counted as c(\code{1}, \code{3}, \code{5}).
+However, if we want to count each short \emph{or} long beat as a single unit, we must specify the desired pattern as a \code{list} of beat durations: for example, \code{unit = list(c("4", "4", "4."))}.
 Let's see what these two cases look like, applied to two \code{M7/8} measures of straight eighth-notes:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{rhythm <- rep('8', 14)
 
-timecount(rhythm, beat = '8'),
+timecount(rhythm, unit = '8'),
 
 # output is: 1  2  3  4  5  6  7  8  9 10 11 12 13 14
 
-timecount(rhythm, beat = list(c('4', '4', '4.')))
+timecount(rhythm, unit = list(c('4', '4', '4.')))
 
 # output is: 1 1 2 2 3 3 3 4 4 5 5 6 6 6
 }\if{html}{\out{</div>}}
 
-To accommodate changing meters, the \code{beat} argument can still accept \code{list} of such patterns, so long as the list is the same length as \code{dur}.
+To accommodate changing meters, the \code{unit} argument can still accept \code{list} of such patterns, so long as the list is the same length as \code{dur}.
 }
 }
 
@@ -174,9 +174,9 @@ It may be better to use \code{round(timeline())} in cases where you want to do m
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 
-show(within(humData, timecount(Token, beat = TimeSignature, pickup = Bar < 1)))
+show(within(humData, timecount(Token, unit = TimeSignature, pickup = Bar < 1)))
 
-show(within(humData, timecount(Token, beat = tactus(TimeSignature))))
+show(within(humData, timecount(Token, unit = tactus(TimeSignature))))
  
   
 }

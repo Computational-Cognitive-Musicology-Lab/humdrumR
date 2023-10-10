@@ -103,7 +103,7 @@ We can, for instance, tabulate each group separately:
 chorales |>
   kern(simple = TRUE) |>
   group_by(Spine) |>
-  tally() 
+  count() 
 
 ```
 

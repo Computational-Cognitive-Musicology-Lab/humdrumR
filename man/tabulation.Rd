@@ -21,7 +21,7 @@
 
 \method{rbind}{humdrum.table}(...)
 
-as.data.frame.humdrum.table(x, ...)
+as.data.frame.humdrum.table(x, ..., responseName = "n")
 
 as.data.frame.probabilityDistribution(x, ...)
 }

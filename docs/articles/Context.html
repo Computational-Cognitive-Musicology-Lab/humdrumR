@@ -27,7 +27,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -384,16 +384,16 @@ from each note:</p>
 automatic “beat” field in our data, so we’ll need to make one—obviously,
 we need to have data with rhythmic information encoded (like
 <code>**kern</code> or <code>**recip</code>) to do this! We can use the
-<code><a href="../reference/count.html">count()</a></code> function to count the beats in our data. We could
-count quarter-notes by setting <code>beat = '4'</code>; alternatively,
-if our data includes time-signature interpretations (like
+<code><a href="../reference/timecount.html">timecount()</a></code> function to count the beats in our data. We
+could count quarter-notes by setting <code>unit = '4'</code>;
+alternatively, if our data includes time-signature interpretations (like
 <code>*M3/4</code>) we could use the <code>TimeSignature</code> field to
 get the tactus of the meter. Let’s try the later and save the result to
 a new field, which we’ll call <code>Beat</code> (or anything else you
 want).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Beat <span class="op">=</span> <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="va">Token</span>, beat <span class="op">=</span> <span class="fu"><a href="../reference/tactus.html">tactus</a></span><span class="op">(</span><span class="va">TimeSignature</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Beat <span class="op">=</span> <span class="fu"><a href="../reference/timecount.html">timecount</a></span><span class="op">(</span><span class="va">Token</span>, unit <span class="op">=</span> <span class="fu"><a href="../reference/tactus.html">tactus</a></span><span class="op">(</span><span class="va">TimeSignature</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
 <p>We can now group by beat (and piece, of course). Maybe we want to
 know the range of notes in each beat:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -405,9 +405,9 @@ know the range of notes in each beat:</p>
 <p><img src="Context_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
 <blockquote>
 <p>Note: If your data includes spine paths, you’ll want to set
-<code>mutate(count(Token), expandPaths = TRUE, ...)</code>. Count (and
-similar functions, like <code><a href="../reference/timeline.html">timeline()</a></code>) won’t work correctly
-without paths expanded (<code><a href="../reference/expandPaths.html">?expandPaths</a></code>).</p>
+<code>mutate(timecount(Token), expandPaths = TRUE, ...)</code>. Count
+(and similar functions, like <code><a href="../reference/timeline.html">timeline()</a></code>) won’t work
+correctly without paths expanded (<code><a href="../reference/expandPaths.html">?expandPaths</a></code>).</p>
 </blockquote>
 </div>
 </div>
@@ -2911,7 +2911,7 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>beethoven <span class="sc">|&gt;</span></span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>  <span class="fu">context</span>(<span class="st">'('</span>, <span class="st">')'</span>) <span class="sc">|&gt;</span></span>
 <span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">length</span>(Token)) <span class="sc">|&gt;</span> </span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>  <span class="fu">tally</span>()</span>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>  <span class="fu">count</span>()</span>
 <span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="fu">with</span>(<span class="fu">context</span>(beethoven, <span class="st">"("</span>, <span class="st">")"</span>))</span>
 <span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">7</span>  <span class="dv">8</span> <span class="dv">12</span> <span class="dv">13</span> </span>
@@ -2948,8 +2948,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-28"><a href="#cb29-28" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">20</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-29"><a href="#cb29-29" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">21</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-30"><a href="#cb29-30" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">22</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">71</span>                                   <span class="ot">=</span><span class="dv">71</span></span>
-<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">23</span><span class="sc">:</span>                    <span class="er">*^</span>                                     .</span>
-<span id="cb29-32"><a href="#cb29-32" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">24</span><span class="sc">:</span>                     .                 .                   .</span>
+<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">23</span><span class="sc">:</span>                    <span class="er">*^</span>                                     <span class="er">*</span></span>
+<span id="cb29-32"><a href="#cb29-32" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">24</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-33"><a href="#cb29-33" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">25</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-34"><a href="#cb29-34" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">26</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-35"><a href="#cb29-35" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">27</span><span class="sc">:</span>                     .                 .                   .</span>
@@ -2957,8 +2957,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-37"><a href="#cb29-37" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">29</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-38"><a href="#cb29-38" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">30</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-39"><a href="#cb29-39" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">31</span><span class="sc">:</span>                     .                 .                   .</span>
-<span id="cb29-40"><a href="#cb29-40" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">32</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   .</span>
-<span id="cb29-41"><a href="#cb29-41" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">33</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">72</span>                                   <span class="ot">=</span><span class="dv">72</span></span>
+<span id="cb29-40"><a href="#cb29-40" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">32</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   <span class="sc">*</span></span>
+<span id="cb29-41"><a href="#cb29-41" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">33</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">72</span>                                   <span class="ot">=</span><span class="dv">72</span></span>
 <span id="cb29-42"><a href="#cb29-42" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">34</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-43"><a href="#cb29-43" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">35</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-44"><a href="#cb29-44" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">36</span><span class="sc">:</span>                     .                                     .</span>
@@ -2986,8 +2986,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-66"><a href="#cb29-66" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">58</span><span class="sc">:</span>                     .                                  16cc</span>
 <span id="cb29-67"><a href="#cb29-67" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">59</span><span class="sc">:</span>                     .                                16aJJ)</span>
 <span id="cb29-68"><a href="#cb29-68" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">60</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">75</span>                                   <span class="ot">=</span><span class="dv">75</span></span>
-<span id="cb29-69"><a href="#cb29-69" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">61</span><span class="sc">:</span>                    <span class="er">*^</span>                                     .</span>
-<span id="cb29-70"><a href="#cb29-70" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">62</span><span class="sc">:</span>                     .                 .                   .</span>
+<span id="cb29-69"><a href="#cb29-69" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">61</span><span class="sc">:</span>                    <span class="er">*^</span>                                     <span class="er">*</span></span>
+<span id="cb29-70"><a href="#cb29-70" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">62</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-71"><a href="#cb29-71" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">63</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-72"><a href="#cb29-72" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">64</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-73"><a href="#cb29-73" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">65</span><span class="sc">:</span>                     .                 .                   .</span>
@@ -3004,8 +3004,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-84"><a href="#cb29-84" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">76</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-85"><a href="#cb29-85" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">77</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-86"><a href="#cb29-86" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">78</span><span class="sc">:</span>                     .                 .                   .</span>
-<span id="cb29-87"><a href="#cb29-87" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">79</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   .</span>
-<span id="cb29-88"><a href="#cb29-88" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">80</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">77</span>                                   <span class="ot">=</span><span class="dv">77</span></span>
+<span id="cb29-87"><a href="#cb29-87" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">79</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   <span class="sc">*</span></span>
+<span id="cb29-88"><a href="#cb29-88" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">80</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">77</span>                                   <span class="ot">=</span><span class="dv">77</span></span>
 <span id="cb29-89"><a href="#cb29-89" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">81</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-90"><a href="#cb29-90" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">82</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-91"><a href="#cb29-91" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">83</span><span class="sc">:</span>                     .                                     .</span>
@@ -3091,8 +3091,8 @@ we’ve been doing throughout this article?</p>
 <span id="cb30-60"><a href="#cb30-60" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">75</span><span class="sc">:</span>                     .(16eeLL<span class="sc">|</span>16ff<span class="sc">|</span>16ccJJ)</span>
 <span id="cb30-61"><a href="#cb30-61" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">76</span><span class="sc">:</span>                     .                   .</span>
 <span id="cb30-62"><a href="#cb30-62" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">77</span><span class="sc">:</span>                     .                   .</span>
-<span id="cb30-63"><a href="#cb30-63" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">78</span><span class="sc">:</span>               <span class="er">*</span>clefF4                   .</span>
-<span id="cb30-64"><a href="#cb30-64" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">79</span><span class="sc">:</span>                     .                   .</span>
+<span id="cb30-63"><a href="#cb30-63" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">78</span><span class="sc">:</span>               <span class="er">*</span>clefF4                   <span class="sc">*</span></span>
+<span id="cb30-64"><a href="#cb30-64" tabindex="-1"></a><span class="er">&gt;</span>              <span class="dv">79</span><span class="sc">:</span>                     .                   .</span>
 <span id="cb30-65"><a href="#cb30-65" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">80</span><span class="sc">:</span>                     .  (16aLL<span class="sc">|</span>16b<span class="sc">-</span><span class="er">|</span>16gJJ)</span>
 <span id="cb30-66"><a href="#cb30-66" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">81</span><span class="sc">:</span>                     .                   .</span>
 <span id="cb30-67"><a href="#cb30-67" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">82</span><span class="sc">:</span>                     .                   .</span>
@@ -3185,7 +3185,7 @@ similar to the <code>complement</code> argument of
 <span id="cb31-62"><a href="#cb31-62" tabindex="-1"></a><span class="st">&gt;              75:                     .(16eeLL|16ff|16ccJJ)</span></span>
 <span id="cb31-63"><a href="#cb31-63" tabindex="-1"></a><span class="st">&gt;              76:                    8r                   .</span></span>
 <span id="cb31-64"><a href="#cb31-64" tabindex="-1"></a><span class="st">&gt;              77:                     .                   .</span></span>
-<span id="cb31-65"><a href="#cb31-65" tabindex="-1"></a><span class="st">&gt;              78:               *clefF4                   .</span></span>
+<span id="cb31-65"><a href="#cb31-65" tabindex="-1"></a><span class="st">&gt;              78:               *clefF4                   *</span></span>
 <span id="cb31-66"><a href="#cb31-66" tabindex="-1"></a><span class="st">&gt;              79:                    8C                 16r</span></span>
 <span id="cb31-67"><a href="#cb31-67" tabindex="-1"></a><span class="st">&gt;              80:                     .  (16aLL|16b-|16gJJ)</span></span>
 <span id="cb31-68"><a href="#cb31-68" tabindex="-1"></a><span class="st">&gt;              81:                    8r                   .</span></span>
@@ -3229,8 +3229,8 @@ is an example file we can experiment with:</p>
 <span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">14</span><span class="sc">:</span>                   (2b</span>
 <span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">15</span><span class="sc">:</span>                  4a))</span>
 <span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">16</span><span class="sc">:</span>                  ((4e</span>
-<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">17</span><span class="sc">:</span>                     .</span>
-<span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">18</span><span class="sc">:</span>                    4a</span>
+<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">17</span><span class="sc">:</span>                     <span class="er">=</span></span>
+<span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">18</span><span class="sc">:</span>                    4a</span>
 <span id="cb32-22"><a href="#cb32-22" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">19</span><span class="sc">:</span>                    8b</span>
 <span id="cb32-23"><a href="#cb32-23" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">20</span><span class="sc">:</span>                  8cc<span class="co">#</span></span>
 <span id="cb32-24"><a href="#cb32-24" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">21</span><span class="sc">:</span>                  4dd)</span>
@@ -3529,9 +3529,9 @@ the end of one file/spine to the beginning of the next, etc.</p>
 <hr>
 <p><code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code> isn’t the only vectorized function we might want
 to apply to lagged data. Another common example would be
-<code><a href="../reference/tally.html">tally()</a></code>:</p>
+<code>count()</code>:</p>
 <div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
-<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">tally</span>(Kern, Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">1</span>]))</span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">count</span>(Kern, Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">1</span>]))</span>
 <span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
 <span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="fu">c</span>(<span class="fu">lag</span>(Kern, <span class="at">groupby =</span> <span class="fu">list</span>(Piece, Spine, Path), <span class="at">n =</span> <span class="sc">-</span><span class="dv">1</span>))</span>
 <span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a><span class="sc">&gt;</span>    Kern  c c<span class="co"># d-  d d# e-  e e#  f f# g-  g g# a-  a a# b-  b &lt;NA&gt;</span></span>
@@ -3559,7 +3559,7 @@ to apply to lagged data. Another common example would be
 <h3 id="larger-n">Larger N<a class="anchor" aria-label="anchor" href="#larger-n"></a>
 </h3>
 <p>For functions that accept unlimited arguments (<code>...</code>),
-like <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code>, and <code><a href="../reference/tally.html">tally()</a></code>, you can easily
+like <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code>, and <code>count()</code>, you can easily
 extend the principle to create longer n-grams:</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>  <span class="fu">within</span>(<span class="fu">paste</span>(Kern, Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">1</span>], Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">2</span>], <span class="at">sep =</span> <span class="st">'|'</span>))</span>

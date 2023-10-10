@@ -1247,7 +1247,7 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   nbeats <- lengths(levels)
   
   counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), 
-                                    count, 
+                                    timecount, 
                                     pickup = pickup, dur = dur, groupby = groupby))
   counts[counts >= 1L] <- counts[counts >= 1L] - 1L
   

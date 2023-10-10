@@ -182,7 +182,7 @@ reference:
   - tactus
   - nbeats
   - tatum
-  - count
+  - timecount
   - metlev
   - syncopation
 - subtitle: "Lyrics"
@@ -214,7 +214,7 @@ reference:
   desc: "Other useful tools."
 - contents: 
   - draw
-  - tally
+  - tabulation
 - subtitle: "Information theory"
   contents:
   - p

@@ -290,7 +290,7 @@ chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 chorales |>
   kern(simple = TRUE) |>
-  tally() |>
+  count() |>
   draw()
 
 ```
@@ -298,7 +298,7 @@ chorales |>
 ```{r}
 chorales |>
   kern(generic = TRUE) |>
-  tally() |>
+  count() |>
   draw()
 ```
 
@@ -306,7 +306,7 @@ chorales |>
 
 chorales |>
   kern(simple = TRUE, generic = TRUE) |>
-  tally() |>
+  count() |>
   draw()
 ```
 
@@ -341,7 +341,7 @@ chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 chorales |>
   kern(simple = TRUE, transposeArgs = list(to = 'C:')) |>
-  tally() |>
+  count() |>
   draw()
 
 ```
@@ -352,7 +352,7 @@ This looks exactly like calling `solfa()`:
 ```{r}
 chorales |>
   solfa(simple = TRUE) |>
-  tally() |>
+  count() |>
   draw()
 
 ```

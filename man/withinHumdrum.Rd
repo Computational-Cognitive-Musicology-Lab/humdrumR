@@ -402,11 +402,11 @@ Image that you have three different datasets (\code{humData1}, \code{humData2}, 
 and you'd like to evaluate the expression \code{count(kern(Token, simple = TRUE))} in all three.
 Use the \code{~} operator to quote and save that expression to variable, then use it with \code{with()}:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{tallyKern <- ~tally(kern(Token, simple = TRUE))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{countKern <- ~count(kern(Token, simple = TRUE))
 
-humData1 |> with(tallyKern)
-humData2 |> with(tallyKern)
-humData3 |> with(tallyKern)
+humData1 |> with(countKern)
+humData2 |> with(countKern)
+humData3 |> with(countKern)
 
 }\if{html}{\out{</div>}}
 }

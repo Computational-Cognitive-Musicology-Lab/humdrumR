@@ -279,11 +279,11 @@
 #' Use the `~` operator to quote and save that expression to variable, then use it with `with()`:
 #' 
 #' ```
-#' tallyKern <- ~tally(kern(Token, simple = TRUE))
+#' countKern <- ~count(kern(Token, simple = TRUE))
 #' 
-#' humData1 |> with(tallyKern)
-#' humData2 |> with(tallyKern)
-#' humData3 |> with(tallyKern)
+#' humData1 |> with(countKern)
+#' humData2 |> with(countKern)
+#' humData3 |> with(countKern)
 #' 
 #' ```
 #' 
