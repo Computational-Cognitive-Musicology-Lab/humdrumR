@@ -1,9 +1,119 @@
 # Tallies ----
 
+## counts S4 ----
+
+
+### Definition ----
 setClass('text', contains = 'character')
 
-setClass('humdrum.table', contains = 'table')
+setClass('counts', contains = 'data.table') -> count.table
 
+
+#### Methods ----
+
+#' @rdname counts
+#' @export
+setMethod('show', 'counts',
+          \(object) {
+             print(object, topn = 20, nrows = 200)
+          })
+
+
+#' @rdname counts
+#' @export
+merge.counts <- function(x, y) {
+  
+  x <- setNames(as.data.table(x@.Data), colnames(x))
+  y <- setNames(as.data.table(y@.Data), colnames(y))
+  
+  categories <- setdiff(intersect(colnames(x), colnames(y)), 'Count')
+  z <- merge(x, y, by = categories, all = TRUE)
+  
+  z[ , Count.x := ifelse(is.na(Count.x), 0, Count.x)]
+  z[ , Count.y := ifelse(is.na(Count.y), 0, Count.y)]
+  
+  setcolorder(z, colnames(z)[order(grepl('^Count', colnames(z)))])
+  new('counts', z)
+}
+
+#' @rdname counts
+#' @export
+setMethod('+', c('counts', 'counts'),
+          \(e1, e2) {
+            
+            e3 <- data.table::rbindlist(list(e1, e2), fill = TRUE)
+            e3 <- e3[ , list(Count = sum(Count)), by = setdiff(colnames(e3), 'Count')]
+            
+            new('counts', e3)
+            
+          })
+
+#' @rdname counts
+#' @export
+setMethod('-', c('counts', 'counts'),
+          \(e1, e2) {
+            
+            e3 <- merge.counts(e1, e2)
+            e3 <- as.data.table.counts(e3)
+            e3$Count <- e3$Count.x - e3$Count.y
+            
+            e3[ , c('Count.x', 'Count.y') := NULL]
+            new('counts', e3)
+            
+          })
+
+#' @rdname counts
+#' @export
+setMethod('Ops', c('counts', 'counts'),
+          \(e1, e2) {
+            
+            e3 <- merge.counts(e1, e2)
+            e3 <- as.data.table.counts(e3)
+            e3$Count <- callGeneric(e3$Count.x, e3$Count.y)
+            
+            e3[ , c('Count.x', 'Count.y') := NULL]
+            e3[]
+          })
+
+
+
+#' @rdname counts
+#' @export
+sort.counts <- function(x, decreasing = TRUE) {
+  setorderv(x, 'Count', order = if (decreasing) - 1 else 1)
+  x
+  
+}
+
+
+
+#' @rdname counts
+#' @export
+as.data.table.counts <- function(x) {
+  dt <- as.data.table(x@.Data)
+  colnames(dt) <- colnames(x)
+  dt
+}
+
+#' @rdname counts
+#' @export
+as.data.frame.counts <- function(x) {
+  df <- as.data.frame(x@.Data)
+  colnames(df) <- colnames(x)
+  df
+}
+
+
+#' @rdname counts
+#' @export
+as.table.counts <- function(x) {
+  tab <- xtabs(Count~., data = as.data.frame.counts(x))
+  class(tab) <- 'table'
+  tab
+  
+}
+
+## count() methods ----
 #' Tabulate and/or cross-tabulate data
 #' 
 #' The `count()` function is exactly like R's fundamental [table()][base::table] function,
@@ -33,8 +143,8 @@ setClass('humdrum.table', contains = 'table')
 
 #' @section Manipulating humdrum tables:
 #' 
-#' The output of `count()` is a special form of R `table`, a `humdrum.table`.
-#' Given two or more `humdrum.table`s, if you apply basic R operators 
+#' The output of `count()` is a special form of R `table`, a `counts`.
+#' Given two or more `counts`s, if you apply basic R operators 
 #' (e.g., arithmetic, comparisons) or row/column binding (`cbind`/`rbind`) 
 #' `humdrumR` will align the tables by their dimension-names before
 #' doing the operation.
@@ -57,149 +167,67 @@ setClass('humdrum.table', contains = 'table')
 #' 
 #' cbind(genericTable, complexTable)
 #' 
-#' @name tabulation
+#' @name counts
 #' @export 
-count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL) {
+count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE) {
   quos <- rlang::enquos(...)
   
   if (length(quos)) {
-    quo <- rlang::quo(with(x, count.default(!!!quos, na.rm = !!na.rm, exclude = !!exclude)))
+    quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
     rlang::eval_tidy(quo)
     
     
   } else {
     fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
     
-    do.call('count', c(as.list(fields), list(na.rm = na.rm, exclude = exclude)))
+    do.call('count', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, name = name, .drop = .drop)))
   }
 }
   
-#' @rdname tabulation
+#' @rdname counts
 #' @export
 count.default <- function(..., sort = FALSE,
                           na.rm = FALSE,
-                          exclude = NULL) {
+                          exclude = NULL, .drop = FALSE) {
   
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(exclude, xnull | xvector)
+  checks(.drop, xTF)
   
   # exprs <- rlang::enexprs(...)
   exprs <- as.list(substitute(list(...)))[-1L]
   
   args <- list(...)
   dimnames <- .names(args)
-  if (any(dimnames == '')) dimnames[dimnames == ''] <- deparse.unique(exprs[dimnames == ''])
+  if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
   
   
   args <- lapply(args,
                  \(arg) {
                    if (inherits(arg, 'token')) factorize(arg) else arg
                  })
-  tab <- do.call(base::table,
-                 c(args, list(exclude = c(exclude, (if (na.rm) c(NA, NaN))), 
-                              useNA = if (na.rm) 'no' else 'ifany', 
-                              deparse.level = 0)))
   
-  # dimnames(tab) <- lapply(dimnames(tab), \(dn) ifelse(is.na(dn), 'NA', dn))
-  names(dimnames(tab)) <- dimnames
+  if (length(unique(lengths(args))) > 1L) .stop("Can't cross-tabulate these vectors ({harvard(dimnames, 'and')}), because they are different lengths.")
   
-  if (sort) {
-    if (length(dimnames) > 1) {
-      for (i in seq_along(dimnames)) {
-        reorder <- order(apply(tab, i, sum), decreasing = TRUE)
-        tab <- apply(tab, seq_along(dimnames)[-i], '[', i = reorder)
-      }
-    } else {
-      tab <- sort(tab, decreasing = TRUE)
-    }
-    
-    class(tab) <- 'table'
-  }
+  tab <- as.data.table(args)
+  colnames(tab) <- dimnames
   
-  new('humdrum.table', tab)
+  if (na.rm) exclude <- union(exclude, c(NA, NaN))
+  if (!is.null(exclude)) tab <- tab[Reduce('&', lapply(tab, \(col) !col %in% exclude))]
   
+  
+  
+  result <- rlang::eval_tidy(rlang::expr(tab |> count(!!!(rlang::syms(dimnames)), sort = !!sort, name = 'Count', .drop = !!.drop)))
+  
+ 
+  if (is.numeric(sort) && sort < 0) result <- result[nrow(result):1]
+
+  new('counts', result)
   
 }
 
   
-
-#' @rdname tabulation
-#' @export
-setMethod('Ops', c('humdrum.table', 'humdrum.table'),
-          \(e1, e2) {
-            
-            tables <- alignTables(list(e1, e2))
-            e3 <- callNextMethod(tables[[1]], tables[[2]])
-            
-            if (inherits(e3, 'table')) new('humdrum.table',  e3) else e3
-            
-          })
-
-#' @rdname tabulation
-#' @export
-cbind.humdrum.table <- function(...) {
-  tables <- list(...)
-  tables <- Filter(Negate(is.null), tables)
-  
-  tables <- alignTables(tables, 'cbind') 
-  
-  do.call('cbind', tables)
-  
-}
-
-#' @rdname tabulation
-#' @export
-rbind.humdrum.table <- function(...) {
-  tables <- list(...)
-  tables <- Filter(Negate(is.null), tables)
-  
-  tables <- alignTables(tables, 'rbind') 
-  
-  do.call('rbind', tables)
-  
-}
-
-#' @rdname tabulation
-#' @export
-as.data.frame.humdrum.table <- function(x, ..., responseName = 'n') {
-  tab <- as.data.frame(S3Part(x), ..., responseName = responseName)
-  # names(tab)[names(tab) == 'Freq'] <- 'Tally'
-  tab
-}
-
-alignTables <- function(tables, funcname = '') {
-  tables <- lapply(tables, 
-                   \(tab) {
-                     dimnames(tab) <- lapply(dimnames(tab), \(names)ifelse(is.na(names), '_<NA>_', names) ) 
-                     tab})
-  dimnames <- lapply(tables, dimnames)
-  dimensions <- Filter(\(dn) any(dn != ''), lapply(dimnames, names))
-  
-  if (length(unique(lengths(dimnames))) > 1L) .stop("If using {funcname} on humdrum.tables, they must all have the same number of dimensions.")
-  
-  dimnames <- as.data.frame(do.call('rbind', dimnames))
-  dimnames <- lapply(dimnames, \(dim) Reduce('union', dim))
-  
-  
-  allindices <- as.data.frame(do.call('expand.grid', dimnames))
-  
-  empty <- do.call('table', allindices) - 1L
-  
-  dimensions <- Reduce(\(a, b) paste(a, b, sep = '/'), dimensions)
-  names(dimnames(empty)) <- dimensions
-  
-  lapply(tables, 
-         \(tab) {
-           
-           indices <- as.matrix(allindices[Reduce('&', Map(`%in%`, allindices, dimnames(tab))), ])
-           empty[indices] <- tab[indices]
-           
-           dimnames(empty) <- lapply(dimnames(empty), \(names) ifelse(names == '_<NA>_', NA_character_, names))
-           empty
-         })
-  
-  
-  
-  
-}
 
 
 # Probabilities ----
@@ -208,7 +236,7 @@ alignTables <- function(tables, funcname = '') {
 
 
 
-setClass('probabilityDistribution', contains = 'humdrum.table', slots = c(N = 'integer', margin = 'integer'))
+setClass('probabilityDistribution', contains = 'counts', slots = c(N = 'integer', margin = 'integer'))
 
 #' @rdname p
 #' @export
@@ -273,7 +301,7 @@ pdist.name <- function(ptab, margin = NULL, func = 'P') {
   
 }
 
-#' @rdname tabulation
+#' @rdname counts
 #' @export
 as.data.frame.probabilityDistribution <- function(x, ...) {
   tab <- as.data.frame(S3Part(x), ...)
@@ -802,13 +830,21 @@ setMethod('draw', c(x = 'token', y = 'token'),
 #            output <- draw(count(y), ...)
 #          }) ################ THis can work except the labels are reversed...need to figure that your
 
+
+#' @rdname draw
+#' @export
+setMethod('draw', 'counts',
+          function(x, ...) {
+            draw(as.table.counts(x), ...)
+          })
+
 #' @rdname draw
 #' @export
 setMethod('draw', 'table',
           function(x, y, col = 1:nrow(x), log = '', ..., ylim = NULL, yat = NULL, beside = TRUE) {
             yticks <- sort(unique(prep_ticks(ylim %||% c(0, x), log = grepl('y', log), at = yat)))
             if (grepl('y', log)) yticks <- yticks[yticks > 0]
-            if (inherits(x, 'humdrum.table')) x <- S3Part(x)
+            if (inherits(x, 'counts')) x <- S3Part(x)
             names(x)[is.na(names(x))] <- 'NA'
             
             barx <- barplot(x, col = col, log = gsub('x', '', log), beside = beside, axes = FALSE, 
@@ -832,7 +868,7 @@ setMethod('draw', 'probabilityDistribution',
           function(x, y, col = 1:nrow(x), log = '', ..., yat = NULL, beside = TRUE) {
             yticks <- sort(unique(c(0, prep_ticks(c(x), log = grepl('y', log), at = yat))))
             if (grepl('y', log)) yticks <- yticks[yticks > 0]
-            if (inherits(x, 'humdrum.table')) x <- S3Part(x)
+            if (inherits(x, 'counts')) x <- S3Part(x)
             names(x)[is.na(names(x))] <- 'NA'
           
             barx <- barplot(x, col = col, beside = beside, axes = FALSE, 

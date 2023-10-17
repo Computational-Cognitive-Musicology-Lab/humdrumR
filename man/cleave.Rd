@@ -10,7 +10,11 @@
 \usage{
 cleave(humdrumR, ..., field = selectedFields(humdrumR)[1], newFields = NULL)
 
-\method{pivot_wider}{humdrumR}(data, names_from = "Spine", values_from = selectedFields(data)[1])
+pivot_wider.humdrumR(
+  data,
+  names_from = "Spine",
+  values_from = selectedFields(data)[1]
+)
 
 cleaveSpines(humdrumR, field = selectedFields(humdrumR)[1])
 

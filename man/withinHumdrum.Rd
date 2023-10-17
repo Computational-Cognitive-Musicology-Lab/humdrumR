@@ -64,7 +64,7 @@
   .by = NULL
 )
 
-\method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
+ggplot.humdrumR(data = NULL, mapping = aes(), ..., dataTypes = "D")
 }
 \arguments{
 \item{data}{\emph{\strong{HumdrumR data.}}
