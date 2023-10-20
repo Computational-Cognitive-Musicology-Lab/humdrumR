@@ -15,7 +15,7 @@ setClass('counts', contains = 'data.table') -> count.table
 #' @export
 setMethod('show', 'counts',
           \(object) {
-             print(object, topn = 20, nrows = 200)
+             print(as.data.table(object), topn = 50, nrows = 200)
           })
 
 

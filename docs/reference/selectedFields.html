@@ -26,7 +26,7 @@ The selected fields also play other important roles in humdrumR
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -189,7 +189,7 @@ To actually <em>extract</em> fields, see <code>pullFields()</code>.</p></div>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmp0uJ7xf/temp_libpath8924c446d585c/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpLo124u/temp_libpath30abc7e727f26/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -456,47 +456,24 @@ To actually <em>extract</em> fields, see <code>pullFields()</code>.</p></div>
 <span class="r-in"><span><span class="co"># effect of selection</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">count</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Token</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16BBJJ  16C#L 16c#LL  16ccL 16d#JJ  16dJJ 16ddJJ   16eL  2.AA;   2.B;  2.BB; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      1      1      1      1      2      1      2      1      1      1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2.GG;   2.a;    2.b   2.b;  2.c#;    2.d   2.d;   2.e;  2.f#;   2.g;    2B; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      1      1      1      1      1      2      1      1      1      1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    2C;    2D;     2E    2F#   2GG;     2a    2a;     2b    2c#    2c;     2d </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      3      1      1      1      5      3      2      1      1      4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    2d;    2dd     2e    2e;   2f#;     2g    2g;    4.B   4.BB    4.a    4.b </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      4      4      2      1      3      5      2      3      2      1      1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4.dd    4.e   4.ee    4.g     4A    4A#    4AA   4AA#   4AA;     4B    4B- </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      1      1      3     15      1      3      1      3     29      1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4B;    4BB   4BB;    4B]     4C    4C#   4C#;     4D    4D#     4E    4E# </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      3     14      3      1      5      8      1      9      4     20      1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4E;   4EE;    4E]     4F    4F#   4F#;   4F#X   4FF#     4G    4G#   4G#; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      5      2      1      2     15      2      1      2      5      8      3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4G#X;    4GG    4G]     4a    4a#    4a;     4b    4b;     4c    4c#   4c#; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1     11      1     32      4      3     39      7     10     13      2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4c;    4cc   4cc#     4d    4d#   4d#;    4dd   4dd#     4e   4e#;    4e; </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2     13     13     22      6      3     10      2     43      1     10 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    4e]    4ee     4f    4f#   4f#;     4g    4g#   4g#;     8A    8A#    8AA </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      7      4     22      1     15     19      4      3      2      2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   8AAJ   8AAL    8AJ    8AL   8AL]  8AnXL    8BB   8BBJ   8BBL    8BJ    8BL </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      3      2      6      6      1      1      2      1      1      7      7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     8C    8C#   8C#J   8C#L    8CL     8D   8D#J   8D#L    8DJ    8DL    8EJ </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2      1      1      3      3      1      1      2     10      2      6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    8EL   8EL]    8F#   8F#J   8F#L    8FL    8G#   8G#J   8G#L   8GGJ   8GGL </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      7      1      1      4      4      1      2      6      3      1      1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    8GJ    8GL     8a   8a#J    8aJ    8aL     8b    8bJ    8bL   8c#J   8c#L </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      2      3      4      1      5      5      1      5      3      1      5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    8cJ    8cL    8cc  8cc#J  8cc#L   8ccL     8d   8d#J   8d#L    8dJ    8dL </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      6      4      1      1      2      1      4      4      1      7      7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    8dd  8dd#J   8ddJ   8ddL   8dnJ     8e    8eJ    8eL   8eeL    8f#   8f#J </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      1      1      1      1      3      5     17      2      2     16 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   8f#L  8f#L]  8f#XL     8g    8g#   8g#J   8g#L  8g#XJ    8gJ    8gL   8gL] </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      9      1      1      1      1      5      5      1      4      2      2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    [2e    [4A    [4B    [4E    [4G   [4f#    [4g </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      1      1      1      2      1      1      2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Token Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1: 16BBJJ     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2:  16C#L     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3: 16c#LL     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   4:  16ccL     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5: 16d#JJ     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ---             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 190:    [4B     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 191:    [4E     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 192:    [4G     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 193:   [4f#     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 194:    [4g     2</span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">select</span><span class="op">(</span><span class="va">Spine</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">count</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Spine</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1   2   3   4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 284 284 284 284 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Spine Count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1:     1   284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2:     2   284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3:     3   284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4:     4   284</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

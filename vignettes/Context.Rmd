@@ -55,14 +55,11 @@ chorales |>
 
 chorales |>
   group_by(Piece, Record) |>
-  with(sum(!Token %~% 'r')) |> 
-  count()
-  
-
-
+  with(sum(!Token %~% 'r')) |>
+  count() 
 ```
 
-Most records (`r counts['4']` out of `r sum(counts)`) have new notes in all four voices---no surprise for choral music---with *one* onset being the next most common case (`r counts['1']` records).
+Most records (`r table(counts)['4']` out of `r sum(counts)`) have new notes in all four voices---no surprise for choral music---with *one* onset being the next most common case (`r table(counts)['1']` records).
 Note that, when we called `group_by()`, we included `Piece` *and* `Record`.
 Why? Because each piece in the data set repeats the same record numbers---you wouldn't want to count the 17th record from the 3rd chorale together with the 17th record from the 7th chorale, for example.
 When using `group_by()`, you'll almost always want to have `Piece` as a grouping factor.
@@ -90,7 +87,7 @@ We can now group bars (within pieces, once again!), get the minimum (using `whic
 chorales |>
   group_by(Piece, Bar) |>
   with(Kern[which.min(Semits)]) |>
-  count() -> lownotes
+  count() |> table() -> lownotes
 
 chorales |>
   group_by(Piece, Bar) |>

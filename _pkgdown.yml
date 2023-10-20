@@ -214,10 +214,10 @@ reference:
   desc: "Other useful tools."
 - contents: 
   - draw
-  - tabulation
+  - counts
 - subtitle: "Information theory"
   contents:
-  - p
+  - P
   - entropy
   - crossEntropy
   - mutualInfo
