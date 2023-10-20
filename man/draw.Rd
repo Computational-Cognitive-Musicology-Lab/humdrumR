@@ -10,6 +10,7 @@
 \alias{draw,token,missing-method}
 \alias{draw,missing,token-method}
 \alias{draw,token,token-method}
+\alias{draw,counts,ANY-method}
 \alias{draw,table,ANY-method}
 \alias{draw,probabilityDistribution,ANY-method}
 \alias{draw,discrete,numeric-method}
@@ -117,6 +118,18 @@ draw(
 )
 
 \S4method{draw}{token,token}(
+  x,
+  y,
+  col = 2,
+  facet = list(),
+  main = "",
+  sub = "",
+  xlab = NULL,
+  ylab = NULL,
+  ...
+)
+
+\S4method{draw}{counts,ANY}(
   x,
   y,
   col = 2,

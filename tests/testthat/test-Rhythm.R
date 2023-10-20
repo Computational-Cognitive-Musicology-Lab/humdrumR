@@ -123,7 +123,7 @@ test_that("Grid functions work", {
   
 
 test_that('Factors work correctly',{
-  expect_equal(count(recip(c('16', '4')))['8'] |> unname(), 0)
+  expect_equal(table(recip(c('16', '4')))['8'] |> unname(), 0)
   
 })
 

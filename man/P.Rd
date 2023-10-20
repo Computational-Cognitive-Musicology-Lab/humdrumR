@@ -3,26 +3,29 @@
 \name{\%*\%,probabilityDistribution,probabilityDistribution-method}
 \alias{\%*\%,probabilityDistribution,probabilityDistribution-method}
 \alias{show,probabilityDistribution-method}
-\alias{p}
-\alias{p,table-method}
-\alias{p,discrete-method}
-\alias{p,numeric-method}
-\alias{p,missing-method}
+\alias{P}
+\alias{P,counts-method}
+\alias{P,table-method}
+\alias{P,discrete-method}
+\alias{P,numeric-method}
+\alias{P,missing-method}
 \title{Tabulate and cross proportions}
 \usage{
 \S4method{\%*\%}{probabilityDistribution,probabilityDistribution}(x, y)
 
 \S4method{show}{probabilityDistribution}(object)
 
-p(x, ...)
+P(x, ...)
 
-\S4method{p}{table}(x, margin = NULL, na.rm = FALSE)
+\S4method{P}{counts}(x, na.rm = FALSE)
 
-\S4method{p}{discrete}(x, ..., distribution = NULL, margin = NULL, na.rm = TRUE)
+\S4method{P}{table}(x, condition = NULL, na.rm = FALSE)
 
-\S4method{p}{numeric}(x, density = NULL, na.rm = FALSE, ..., bw = "SJ", adjust = 1.5)
+\S4method{P}{discrete}(x, ..., distribution = NULL, margin = NULL, na.rm = TRUE)
 
-\S4method{p}{missing}(x, ..., margin = NULL, na.rm = TRUE)
+\S4method{P}{numeric}(x, density = NULL, na.rm = FALSE, ..., bw = "SJ", adjust = 1.5)
+
+\S4method{P}{missing}(x, ..., margin = NULL, na.rm = TRUE)
 }
 \description{
 Tabulate and cross proportions

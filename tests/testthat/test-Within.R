@@ -35,9 +35,9 @@ test_that('Examples from Working With Data vignette work', {
   #
   kerntab <- with(chorales, 
                   kern(Token) |> 
-                    count())
+                    table(useNA = 'always'))
   
-  if (expect_true(class(kerntab) == 'humdrum.table')) {
+  if (expect_true(class(kerntab) == 'table')) {
     expect_length(kerntab, 73)
     expect_equal(unname(kerntab['dd#']), 4)
     expect_equal(unname(kerntab['DD#']), 0)
@@ -324,8 +324,8 @@ test_that('lag/lead sugar works', {
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
   chorales |> mutate(Kern = kern(Token, simple = TRUE)) -> chorales
   
-  chorales |> with(count(Kern[lag = 0:1], na.rm = TRUE)) -> lag
-  chorales |> with(count(Kern[lead = 0:1], na.rm = TRUE)) -> lead
+  chorales |> with(table(Kern[lag = 0:1])) -> lag
+  chorales |> with(table(Kern[lead = 0:1])) -> lead
   dimnames(lag) <- dimnames(lead) <- NULL
   expect_equal(lag, t(lead))
   

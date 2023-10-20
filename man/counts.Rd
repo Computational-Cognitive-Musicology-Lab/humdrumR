@@ -2,39 +2,79 @@
 % Please edit documentation in R/Analysis.R
 \name{show,counts-method}
 \alias{show,counts-method}
+\alias{merge.counts}
 \alias{+,counts,counts-method}
+\alias{-,counts,counts-method}
+\alias{Ops,counts,counts-method}
+\alias{sort.counts}
+\alias{as.data.table.counts}
 \alias{as.data.frame.counts}
-\alias{tabulation}
+\alias{counts}
 \alias{count.humdrumR}
 \alias{count.default}
+\alias{count.table}
+\alias{table}
+\alias{table,token-method}
+\alias{table,humdrumR-method}
+\alias{as.table.counts}
+\alias{table,counts-method}
 \alias{as.data.frame.probabilityDistribution}
 \title{Tabulate and/or cross-tabulate data}
 \usage{
 \S4method{show}{counts}(object)
 
-\S4method{+}{counts,counts}(e1, e2)
+\method{merge}{counts}(x, y)
 
 \S4method{+}{counts,counts}(e1, e2)
 
-as.data.frame.counts(x, ..., responseName = "n")
+\S4method{-}{counts,counts}(e1, e2)
 
-\method{count}{humdrumR}(
-  x,
+\S4method{Ops}{counts,counts}(e1, e2)
+
+sort.counts(x, decreasing = TRUE)
+
+\method{as.data.table}{counts}(x)
+
+as.data.frame.counts(x)
+
+\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+
+\method{count}{default}(..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+
+\method{count}{table}(..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+
+table(
   ...,
-  sort = FALSE,
-  na.rm = FALSE,
-  exclude = NULL,
-  name = "n",
-  .drop = FALSE
+  exclude = if (useNA == "no") c(NA, NaN),
+  useNA = c("no", "ifany", "always"),
+  dnn = list.names(...),
+  deparse.level = 1
 )
 
-\method{count}{default}(
+\S4method{table}{token}(
   ...,
-  sort = FALSE,
-  na.rm = FALSE,
-  exclude = NULL,
-  name = "n",
-  .drop = FALSE
+  exclude = if (useNA == "no") c(NA, NaN),
+  useNA = "no",
+  dnn = names(list(...)),
+  deparse.level = 1
+)
+
+\S4method{table}{humdrumR}(
+  ...,
+  exclude = if (useNA == "no") c(NA, NaN),
+  useNA = "no",
+  dnn = names(list(...)),
+  deparse.level = 1
+)
+
+\method{as.table}{counts}(x)
+
+\S4method{table}{counts}(
+  ...,
+  exclude = if (useNA == "no") c(NA, NaN),
+  useNA = c("no", "ifany", "always"),
+  dnn = list.names(...),
+  deparse.level = 1
 )
 
 as.data.frame.probabilityDistribution(x, ...)

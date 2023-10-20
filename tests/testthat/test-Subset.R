@@ -163,12 +163,17 @@ test_that("Unfiltering works", {
     ditto(Kern) |>
     unfilter() |>
     select(Kern, 'ditto(Kern)') |>
-    count() -> count1
+    table() -> count1
   
-  chorales |> kern(simple = TRUE) |> with(count(ditto(Kern, null = Token %!~% '4'))) -> count2
+  chorales |> kern(simple = TRUE) |> with(table(ditto(Kern, null = Token %!~% '4'))) -> count2
     
-  expect_true(all(colSums(count1[-nrow(count1), ]) == count2))
+  expect_true(all(colSums(count1) == count2))
   
+  chorales_sub |>
+    ditto(Kern) |>
+    unfilter() |>
+    select(Kern, 'ditto(Kern)') |>
+    table(useNA = 'always') -> count1
   expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(count1[nrow(count1), ]))
   
   # complement
@@ -178,7 +183,7 @@ test_that("Unfiltering works", {
   chorales_sub |> recip() |> count() -> sub
   chorales_sub |> complement() |> recip() |> count() -> comp
   
-  expect_true(all(total == (sub + comp)[names(total)]))
+  expect_true(all(total$Count == (sub + comp)$Count))
 })
 
 
