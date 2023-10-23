@@ -3,7 +3,7 @@
 \name{entropy}
 \alias{entropy}
 \alias{entropy,table-method}
-\alias{entropy,probabilityDistribution-method}
+\alias{entropy,probability.frame-method}
 \alias{entropy,density-method}
 \alias{ic}
 \alias{ic,discrete-method}
@@ -15,7 +15,7 @@ entropy(x, base = 2, ...)
 
 \S4method{entropy}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
 
-\S4method{entropy}{probabilityDistribution}(x, base = 2)
+\S4method{entropy}{probability.frame}(x, base = 2)
 
 \S4method{entropy}{density}(x, base = 2, na.rm = TRUE)
 

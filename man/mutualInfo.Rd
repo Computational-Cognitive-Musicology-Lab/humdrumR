@@ -2,14 +2,14 @@
 % Please edit documentation in R/Analysis.R
 \name{mutualInfo}
 \alias{mutualInfo}
-\alias{mutualInfo,probabilityDistribution-method}
+\alias{mutualInfo,probability.frame-method}
 \alias{mutualInfo,table-method}
 \alias{mutualInfo,discrete-method}
 \title{Calculate Mutual Information of variables}
 \usage{
 mutualInfo(x, ...)
 
-\S4method{mutualInfo}{probabilityDistribution}(x, ..., base = 2)
+\S4method{mutualInfo}{probability.frame}(x, ..., base = 2)
 
 \S4method{mutualInfo}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
 

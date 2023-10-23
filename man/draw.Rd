@@ -10,9 +10,9 @@
 \alias{draw,token,missing-method}
 \alias{draw,missing,token-method}
 \alias{draw,token,token-method}
-\alias{draw,counts,ANY-method}
+\alias{draw,count.frame,ANY-method}
 \alias{draw,table,ANY-method}
-\alias{draw,probabilityDistribution,ANY-method}
+\alias{draw,probability.frame,ANY-method}
 \alias{draw,discrete,numeric-method}
 \alias{draw,list,numeric-method}
 \alias{draw,formula,ANY-method}
@@ -129,7 +129,7 @@ draw(
   ...
 )
 
-\S4method{draw}{counts,ANY}(
+\S4method{draw}{count.frame,ANY}(
   x,
   y,
   col = 2,
@@ -152,7 +152,7 @@ draw(
   beside = TRUE
 )
 
-\S4method{draw}{probabilityDistribution,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
+\S4method{draw}{probability.frame,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
 
 \S4method{draw}{discrete,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
 

@@ -1,30 +1,183 @@
-# Tallies ----
-
-## counts S4 ----
+# S4 Distributions ----
 
 
-### Definition ----
-setClass('text', contains = 'character')
-
-setClass('counts', contains = 'data.table') -> count.table
+## Definitions ----
 
 
-#### Methods ----
+# setClass('text', contains = 'character')
 
-#' @rdname counts
+setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor'))
+
+setClass('count.frame', contains = 'data.table') -> count.frame
+setClass('count.table', contains = 'table') -> count.table
+
+setOldClass('table')
+
+setClass('probability.frame', contains = 'data.table', slots = c(N = 'integer', margin = 'integer'))
+setClass('probability.table', contains = 'table', slots = c(N = 'integer', margin = 'integer'))
+
+
+## Methods ----
+
+### show() ----
+
+
+#' @rdname distributions
 #' @export
-setMethod('show', 'counts',
+setMethod('show', 'count.frame',
           \(object) {
-             print(as.data.table(object), topn = 50, nrows = 200)
+            cat('humdrumR counts\n')
+             print(unframe(object), topn = 10, nrows = 500)
           })
 
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
-merge.counts <- function(x, y) {
+setMethod('show', 'count.table',
+          \(object) {
+            cat('humdrumR counts\n')
+            print(unframe(object))
+          })
+
+#' @rdname distributions
+#' @export
+setMethod('show', 'probability.frame',
+          \(object) {
+            cat('humdrumR probabilities\n')
+            dt <- unframe(object)
+            dt$P <- prettyp(dt$P)
+            print(dt, topn = 100, nrows = 500)
+          })
+
+
+#' @rdname distributions
+#' @export
+setMethod('show', 'probability.table',
+          \(object) {
+            cat('humdrumR probabilities\n')
+            tab <- unframe(object)
+            tab[] <- prettyp(tab)
+            print(tab)
+          })
+
+prettyp <- function(p, digits = 4) {
+  tens <- log10(p) |> floor()
   
-  x <- setNames(as.data.table(x@.Data), colnames(x))
-  y <- setNames(as.data.table(y@.Data), colnames(y))
+  e <- 0
+  if (all(tens <= -3, na.rm = TRUE)) {
+    e <- max(tens + 1, na.rm = TRUE)
+  }
+  
+  zeros <- p == 0
+  p <- p * 10^(-e)
+  p <- format(p, scientific = FALSE)
+  p <- gsub('0*$', '', p)
+  n <- nchar(p) - 2L
+  
+  long <- n > digits & p != 'NA'
+  p[long] <- paste0(substr(p[long], start = 1, stop = digits + 2), '_')
+  
+  p[zeros] <- '.'
+  p <- gsub('^0', '', p)
+  
+  # if (e != 0) p <- paste0(p, ' × 1/10^', -e)
+  if (e != 0) p <- paste0(p, ' ÷ 10^', -e)
+  
+  p
+  
+}
+
+
+### coercion ----
+
+
+unframe <- function(x) {
+  if (inherits(x, 'count.table') || inherits(x, 'probability.table')) {
+    tab <- unclass(x)
+    class(tab) <- 'table'
+    tab
+  } else {
+    dt <- as.data.table(x@.Data)
+    colnames(dt) <- colnames(x)
+    dt
+  }
+}
+
+
+#' @rdname distributions
+#' @export as.data.table.count.frame as.data.table.probability.frame
+as.data.table.count.frame <- as.data.table.probability.frame <- unframe
+
+#' @rdname distributions
+#' @export as.data.frame.count.frame as.data.frame.probability.frame
+as.data.frame.count.frame <- as.data.frame.probabilty.frame <- function(x) as.data.frame(unframe(x))
+
+#' @rdname distributions
+#' @export
+as.data.frame.count.table <- function(x) as.data.frame(x, responseName = 'Count')
+
+#' @rdname distributions
+#' @export
+as.data.table.count.table <- function(x) as.data.table(x, responseName = 'Count')
+
+  
+#' @rdname distributions
+#' @export
+as.data.frame.probability.table <- function(x) as.data.frame(x, responseName = 'P')
+
+#' @rdname distributions
+#' @export
+as.data.table.probability.table <- function(x) as.data.table(x, responseName = 'P')
+
+
+### aliging ----
+
+alignTables <- function(tables, funcname = '', margin = NULL) {
+  tables <- lapply(tables, 
+                   \(tab) {
+                     dn <- dimnames(tab)
+                     null <- sapply(dn, is.null)
+                     dn[null] <- lapply(dim(tab)[null], \(n) paste0(seq_len(n), '___'))
+                     dimnames(tab) <- lapply(dn, \(names) ifelse(is.na(names), '_<NA>_', names) ) 
+                     tab})
+  dimnames <- lapply(tables, dimnames)
+  dimensions <- lapply(dimnames, .names)
+  dimensions <- Reduce(\(a, b) ifelse(a == b, a, paste(a, b, sep = if (nchar(funcname) == 1) funcname else '/')), dimensions)
+  if (length(unique(lengths(dimnames))) > 1L) .stop("If using {funcname} on tables, they must all have the same number of dimensions.")
+  
+  dimnames <- as.list(as.data.frame(do.call('rbind', dimnames)))
+  if (is.null(margin)) margin <- seq_along(dimnames)
+  
+  # dimnames[ margin] <- lapply(dimnames[ margin], \(dim) rep(list(stringr::str_sort(Reduce('union', dim), numeric = TRUE)), length(dim)))
+  dimnames[ margin] <- lapply(dimnames[ margin], \(dim) rep(list(Reduce('union', dim)), length(dim)))
+  dimnames <- as.data.frame(do.call('rbind', dimnames))
+  rownames(dimnames) <- dimensions
+  
+  empties <- lapply(dimnames, \(dn) array(data = 0L, dim = lengths(dn), dimnames = dn))
+  
+  Map(tables, empties,
+      f = \(tab, empty) {
+           
+           # indices <- as.matrix(do.call('expand.grid', c(dimnames(tab), list(stringsAsFactors = FALSE))))
+           indices <- rep(list(rlang::missing_arg()), length(dim(tab)))
+           indices[margin] <- dimnames(tab)[margin]
+           empty[] <- do.call('[<-', c(list(empty), indices, list(value = tab)))
+           # empty[indices] <- tab[indices]
+           
+           dimnames(empty) <- lapply(dimnames(empty), 
+                                     \(names) {
+                                         if (!any(grepl('[0-9]___', names))) ifelse(names == '_<NA>_', NA_character_, names)
+                                       })
+           empty
+         }) 
+  
+}
+
+
+alignFrames <- function(x, y) {
+  
+  x <- unframe(x)
+  y <- unframe(y)
   
   categories <- setdiff(intersect(colnames(x), colnames(y)), 'Count')
   z <- merge(x, y, by = categories, all = TRUE)
@@ -33,42 +186,111 @@ merge.counts <- function(x, y) {
   z[ , Count.y := ifelse(is.na(Count.y), 0, Count.y)]
   
   setcolorder(z, colnames(z)[order(grepl('^Count', colnames(z)))])
-  new('counts', z)
+  new('count.frame', z)
 }
 
-#' @rdname counts
+### arithmetic ----
+
+
 #' @export
-setMethod('+', c('counts', 'counts'),
+cbind.table <- function(...) {
+  args <- list(...)
+  table.i <- which(sapply(args, is.table))
+  tables <- args[table.i]
+  
+  tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(t(tab)) else tab)
+  colnames <- unlist(lapply(tables, \(tab) if (is.null(colnames(tab))) rep('', ncol(tab)) else colnames(tab)))
+  tables <- lapply(tables, `colnames<-`, value = NULL)
+  tables <- alignTables(tables, 'cbind', margin = 1) 
+  
+  args[table.i] <- tables
+  newtab <- do.call('cbind', args)
+  
+  argnames <- rep(.names(args), sapply(args, ncol))
+  colnames(newtab) <- ifelse(argnames == '', colnames, argnames)
+  class(newtab) <- 'table'
+  newtab
+}
+
+#' @export
+rbind.table <- function(...) {
+  args <- list(...)
+  table.i <- which(sapply(args, is.table))
+  tables <- args[table.i]
+  
+  tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(tab) else tab)
+  rownames <- unlist(lapply(tables, \(tab) if (is.null(rownames(tab))) rep('', nrow(tab)) else rownames(tab)))
+  tables <- lapply(tables, `rownames<-`, value = NULL)
+  tables <- alignTables(tables, 'rbind', margin = 2) 
+  
+  args[table.i] <- tables
+  newtab <- do.call('rbind', args)
+  
+  argnames <- rep(.names(args), sapply(args, \(arg) if (length(dim(arg)) == 1L) 1 else nrow(arg)))
+  rownames(newtab) <- ifelse(argnames == '', rownames, argnames)
+
+  class(newtab) <- 'table'
+  newtab
+  
+  
+}
+
+
+#' @export
+Ops.table <- function(e1, e2) {
+  
+  if (inherits(e1, 'table') && inherits(e2, 'table')) {
+    tables <- alignTables(list(e1, e2), .Generic)
+    e1 <- tables[[1]]
+    e2 <- tables[[2]]
+  }
+  
+ 
+  NextMethod(.Generic)
+}
+
+#### table ----
+
+#' @rdname distributions
+#' @export
+setMethod('Arith', c('table', 'table'),
+          \(e1, e2) {
+            print('shit')
+          })
+
+#' @rdname distributions
+#' @export
+setMethod('+', c('count.frame', 'count.frame'),
           \(e1, e2) {
             
             e3 <- data.table::rbindlist(list(e1, e2), fill = TRUE)
             e3 <- e3[ , list(Count = sum(Count)), by = setdiff(colnames(e3), 'Count')]
             
-            new('counts', e3)
+            new('count.frame', e3)
             
           })
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
-setMethod('-', c('counts', 'counts'),
+setMethod('-', c('count.frame', 'count.frame'),
           \(e1, e2) {
             
-            e3 <- merge.counts(e1, e2)
-            e3 <- as.data.table.counts(e3)
+            e3 <- merge.count.frame(e1, e2)
+            e3 <- as.data.table.count.frame(e3)
             e3$Count <- e3$Count.x - e3$Count.y
             
             e3[ , c('Count.x', 'Count.y') := NULL]
-            new('counts', e3)
+            new('count.frame', e3)
             
           })
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
-setMethod('Ops', c('counts', 'counts'),
+setMethod('Ops', c('count.frame', 'count.frame'),
           \(e1, e2) {
             
-            e3 <- merge.counts(e1, e2)
-            e3 <- as.data.table.counts(e3)
+            e3 <- merge.count.frame(e1, e2)
+            e3 <- as.data.table.count.frame(e3)
             e3$Count <- callGeneric(e3$Count.x, e3$Count.y)
             
             e3[ , c('Count.x', 'Count.y') := NULL]
@@ -77,9 +299,9 @@ setMethod('Ops', c('counts', 'counts'),
 
 
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
-sort.counts <- function(x, decreasing = TRUE) {
+sort.count.frame <- function(x, decreasing = TRUE) {
   setorderv(x, 'Count', order = if (decreasing) - 1 else 1)
   x
   
@@ -87,28 +309,23 @@ sort.counts <- function(x, decreasing = TRUE) {
 
 
 
-#' @rdname counts
+
+#' @rdname P
 #' @export
-as.data.table.counts <- function(x) {
-  dt <- as.data.table(x@.Data)
-  colnames(dt) <- colnames(x)
-  dt
-}
-
-#' @rdname counts
-#' @export
-as.data.frame.counts <- function(x) {
-  df <- as.data.frame(x@.Data)
-  colnames(df) <- colnames(x)
-  df
-}
+setMethod('%*%', c('probability.frame', 'probability.frame'),
+          function(x, y) {
+            new('probability.frame', as.table(outer(S3Part(x), S3Part(y), '*')), N = x@N, margin = integer(0L))
+          })
 
 
 
 
+## Constructors ----
 
 
-## count() methods ----
+### count() ----
+
+
 #' Tabulate and/or cross-tabulate data
 #' 
 #' The `count()` function is exactly like R's fundamental [table()][base::table] function,
@@ -138,8 +355,8 @@ as.data.frame.counts <- function(x) {
 
 #' @section Manipulating humdrum tables:
 #' 
-#' The output of `count()` is a special form of R `table`, a `counts`.
-#' Given two or more `counts`s, if you apply basic R operators 
+#' The output of `count()` is a special form of R `table`, a `count.frame`.
+#' Given two or more `count.frame`s, if you apply basic R operators 
 #' (e.g., arithmetic, comparisons) or row/column binding (`cbind`/`rbind`) 
 #' `humdrumR` will align the tables by their dimension-names before
 #' doing the operation.
@@ -162,7 +379,7 @@ as.data.frame.counts <- function(x) {
 #' 
 #' cbind(genericTable, complexTable)
 #' 
-#' @name counts
+#' @name distributions
 #' @export 
 count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE) {
   quos <- rlang::enquos(...)
@@ -171,15 +388,14 @@ count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, 
     quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
     rlang::eval_tidy(quo)
     
-    
   } else {
     fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
     
     do.call('count', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
   }
 }
-  
-#' @rdname counts
+
+#' @rdname distributions
 #' @export
 count.default <- function(..., sort = FALSE,
                           na.rm = FALSE,
@@ -215,14 +431,14 @@ count.default <- function(..., sort = FALSE,
   
   result <- rlang::eval_tidy(rlang::expr(tab |> count(!!!(rlang::syms(dimnames)), sort = !!sort, name = 'Count', .drop = !!.drop)))
   
- 
+  
   if (is.numeric(sort) && sort < 0) result <- result[nrow(result):1]
-
-  new('counts', result)
+  
+  new('count.frame', result)
   
 }
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
 count.table <- function(..., sort = FALSE,
                         na.rm = FALSE,
@@ -231,49 +447,90 @@ count.table <- function(..., sort = FALSE,
   dt <- as.data.table(as.data.frame.table(list(...)[[1]], responseName = 'Count',
                                           stringsAsFactors = FALSE))
   
-  if (sort) dt <- sort.counts(dt, decreasing = sort != -1)
-  new('counts', dt)
+  if (sort) dt <- sort.count.frame(dt, decreasing = sort != -1)
+  new('count.frame', dt)
   
 }
 
-  
 
-## table methods ----
 
-#' @rdname counts
+### table() -----
+
+deparse.names <- function(exprs, deparse.level = 1L) {
+  # exprs <- as.list(substitute(list(...)))[-1L]
+  # if (length(exprs) == 1L && is.list(..1) && !is.null(nm <- names(..1))) 
+    # return(nm)
+  vapply(exprs, \(x) switch(deparse.level + 1, 
+                            "", 
+                            if (is.symbol(x)) as.character(x) else "",
+                            deparse(x, nlines = 1)[1L]),
+         "")
+}
+
+#' @rdname distributions
 #' @export
-setGeneric('table', signature = '...')
+setGeneric('table', signature = 'x',
+           def = function(x, ..., exclude = if (useNA == 'no') c(NA, NaN), useNA = 'no', dnn = NULL, deparse.level = 1) {
+             # this is an approach to making base::table generic, but dispatched on a single x argument.
+             # this is necessary to make it so we can dispatch on x=humdrumR with non-standard evalation of ... 
+             # the hope is that this function behaves exactly like base::table, but its tricky to achieve.
+             # table(x = ..., x=...) will cause an error that doesn't appear in base::table.
+             args <- list(...)
+             
+             if (missing(x)) {
+               if (is.null(dnn)) dnn <- character(length(args))
+               dnn <- ifelse(dnn == '', names(args), dnn)
+               names(args)[1] <- 'x'
+               return(do.call('table', 
+                              c(args, 
+                                list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level))))
+             }
+             exprs <- sys.call()[-1]
+             exprs <- exprs[!.names(exprs) %in% c('exclude', 'useNA', 'dnn', 'deparse.level')]
+             names <- .names(exprs)
+             if (!any(names == 'x')) names[which(names == '')[1]] <- 'x'
+             
+             
+             args <- append(args, list(x = x), which(names == 'x')[1] - 1) # put x into right position (argument order)
+             
+             
+             if (is.null(dnn)) dnn <- character(length(args))
+             dnn <- ifelse(dnn == '', names(args), dnn)
+             dnn <- ifelse(dnn == '' | (dnn == 'x' & .names(exprs) != 'x'), deparse.names(exprs, deparse.level), dnn)
+             
+             args <- lapply(args, factorize)    
+             do.call(base::table, c(args, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
+  }) 
 
 
-#' @rdname counts
-#' @export
-setMethod('table', 'token', 
-          function(..., exclude = if (useNA == 'no') c(NA, NaN),
-                   useNA = 'no', dnn = names(list(...)),
-                   deparse.level = 1) {
+# #' @rdname distributions
+# #' @export
+# setMethod('table', 'token', 
+          # function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
+                   # useNA = 'no', dnn = names(list(...)),
+                   # deparse.level = 1) {
             
-            args <- list(...)
-            args <- lapply(args, factorize)
-            do.call('table', c(args, 
-                               list(exclude = exclude, useNA = useNA, dnn = dnn,
-                                    deparse.level = deparse.level)))
-            
-          })
+            # args <- list(x, ...)
+            # args <- lapply(args, factorize)
+            # tab <-  do.call('table', c(args, 
+                                       # list(exclude = exclude, useNA = useNA, dnn = dnn,
+                                        # deparse.level = deparse.level)))
+            # new('count.table', tab)
+          # })
+
 
 
 #' @export
-#' @rdname counts
+#' @rdname distributions
 setMethod('table', 'humdrumR', 
-          function(..., exclude = if (useNA == 'no') c(NA, NaN),
-                   useNA = 'no', dnn = names(list(...)),
+          function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
+                   useNA = 'no', dnn = NULL,
                    deparse.level = 1) {
-            
-            
-            quos <- rlang::enquos(...)[-1]
-            x <- list(...)[[1]]
-            
+            quos <- rlang::enquos(...)
             if (length(quos)) {
-              quo <- rlang::quo(with(x, table(!!!quos, exclude = !!exclude, useNA = !!useNA, dnn = !!dnn, deparse.level = !!deparse.level)))
+              dnn <- .names(quos)
+              dnn[dnn == ''] <- deparse.names(quos[dnn == ''], deparse.level = deparse.level)
+              quo <- rlang::quo(with(x, table(!!!quos, exclude = exclude, useNA = !!useNA, dnn = dnn)))
               rlang::eval_tidy(quo)
               
               
@@ -285,129 +542,24 @@ setMethod('table', 'humdrumR',
             
           })
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
-as.table.counts <- function(x) {
-  tab <- xtabs(Count~., data = as.data.frame.counts(x))
+as.table.count.frame <- function(x) {
+  tab <- xtabs(Count~., data = unframe(x))
   class(tab) <- 'table'
-  tab
+  new('count.table', tab)
   
 }
 
-#' @rdname counts
+#' @rdname distributions
 #' @export
-setMethod('table', 'counts',
-          function(...) {
-            as.table.counts(list(...)[[1]])
+setMethod('table', 'count.frame',
+          function(x, ...) {
+            as.table.count.frame(x)
             
           })
 
-# Probabilities ----
-
-## probabilityDistribution ----
-
-
-
-setClass('probabilityDistribution', contains = 'table', slots = c(N = 'integer', margin = 'integer'))
-
-#' @rdname P
-#' @export
-setMethod('%*%', c('probabilityDistribution', 'probabilityDistribution'),
-         function(x, y) {
-           new('probabilityDistribution', as.table(outer(S3Part(x), S3Part(y), '*')), N = x@N, margin = integer(0L))
-         })
-
-
-unmargin <- function(pd) {
-  if (length(pd@margin) == 0L) return(pd)
- 
-  marginal <- proportions(pd@N)
-  
-  pd <- sweep(pd, pd@margin, marginal, '*')
-  pd@margin <- integer(0L)
-  pd@N <- sum(pd@N)
-  pd
-  
-}
-
-
-prettyp <- function(p, digits = 4) {
-  tens <- log10(p) |> floor()
-  
-  e <- 0
-  if (all(tens <= -3, na.rm = TRUE)) {
-    e <- max(tens + 1, na.rm = TRUE)
-  }
-  
-  zeros <- p == 0
-  p <- p * 10^(-e)
-  p <- format(p, scientific = FALSE)
-  p <- gsub('0*$', '', p)
-  n <- nchar(p) - 2L
-  
-  long <- n > digits & p != 'NA'
-  p[long] <- paste0(substr(p[long], start = 1, stop = digits + 2), '_')
-  
-  p[zeros] <- '.'
-  p <- gsub('^0', '', p)
-  
-  # if (e != 0) p <- paste0(p, ' × 1/10^', -e)
-  if (e != 0) p <- paste0(p, ' ÷ 10^', -e)
-  
-  p
-  
-}
-
-#' @rdname P
-#' @export
-setMethod('show', 'probabilityDistribution',
-          function(object) {
-            digits <- 4L
-            
-            x <- S3Part(object, strictS3 = TRUE)
-            zeros <- x == 0
-            
-            x[] <- prettyp(x, digits = 4L)
-            
-            # dimension names
-            header <- pdist.name(x, object@margin)
-            
-            # names(dimnames(x)) <- NULL
-            cat('\t\t', header, '\n', sep = '')
-            print(x, quote = FALSE, na.print = '.NA')
-          })
-
-
-pdist.name <- function(ptab, margin = NULL, func = 'P') {
-  dimnames <- names(dimnames(ptab))
-  
-  args <- if (length(margin)) {
-    independent <- dimnames[margin]
-    dependent <- dimnames[-margin]
-    
-    paste0(paste(dependent, collapse = ', '), 
-           ' | ', 
-           paste(independent, collapse = ', '))
-    
-    
-  } else {
-    paste(dimnames, collapse = ', ') 
-  }
-  
-  paste0(func, '(', args, ')')
-  
-}
-
-#' @rdname counts
-#' @export
-as.data.frame.probabilityDistribution <- function(x, ...) {
-  tab <- as.data.frame(S3Part(x), ...)
-  names(tab)[names(tab) == 'Freq'] <- 'p'
-  tab
-}
-
-## P() -----
-
+### P() -----
 
 #' Tabulate and cross proportions
 #' 
@@ -418,7 +570,7 @@ setGeneric('P', function(x, ...) standardGeneric('P'))
 
 #' @rdname P
 #' @export
-setMethod('P', c('counts'),
+setMethod('P', c('count.frame'),
           function(x, na.rm = FALSE) {
             x <- as.data.table(x)
             
@@ -454,21 +606,19 @@ setMethod('P', c('table'),
             
             n <- marginSums(x, margin = condition)
             
-            new('probabilityDistribution', ptab, N = as.integer(n), margin =  as.integer(condition))
+            new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
           })
 
 
-
-setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor'))
 
 #' @rdname P
 #' @export
 setMethod('P', 'discrete',
           function(x, ..., distribution = NULL, margin = NULL, na.rm = TRUE) {
-            checks(distribution, xnull | xclass('probabilityDistribution'))
+            checks(distribution, xnull | xclass('probability.frame'))
             
             if (is.null(distribution)) distribution <- P(count(x, ..., na.rm = FALSE), margin = margin, na.rm = na.rm)
-                
+            
             
             
             ind <- if (na.rm) {
@@ -525,9 +675,89 @@ setMethod('P', 'missing',
 
 
 
-# Information theory ----
 
 
+
+unmargin <- function(pd) {
+  if (length(pd@margin) == 0L) return(pd)
+ 
+  marginal <- proportions(pd@N)
+  
+  pd <- sweep(pd, pd@margin, marginal, '*')
+  pd@margin <- integer(0L)
+  pd@N <- sum(pd@N)
+  pd
+  
+}
+
+
+#' @rdname P
+#' @export
+setMethod('show', 'probability.frame',
+          function(object) {
+            digits <- 4L
+            
+            x <- S3Part(object, strictS3 = TRUE)
+            zeros <- x == 0
+            
+            x[] <- prettyp(x, digits = 4L)
+            
+            # dimension names
+            header <- pdist.name(x, object@margin)
+            
+            # names(dimnames(x)) <- NULL
+            cat('\t\t', header, '\n', sep = '')
+            print(x, quote = FALSE, na.print = '.NA')
+          })
+
+
+pdist.name <- function(ptab, margin = NULL, func = 'P') {
+  dimnames <- names(dimnames(ptab))
+  
+  args <- if (length(margin)) {
+    independent <- dimnames[margin]
+    dependent <- dimnames[-margin]
+    
+    paste0(paste(dependent, collapse = ', '), 
+           ' | ', 
+           paste(independent, collapse = ', '))
+    
+    
+  } else {
+    paste(dimnames, collapse = ', ') 
+  }
+  
+  paste0(func, '(', args, ')')
+  
+}
+
+#' @rdname distributions
+#' @export
+as.data.frame.probability.frame <- function(x, ...) {
+  tab <- as.data.frame(S3Part(x), ...)
+  names(tab)[names(tab) == 'Freq'] <- 'p'
+  tab
+}
+
+## P() -----
+
+
+
+
+# Information Theory ----
+
+## Likelihoods ----
+
+###likelihood() ----
+
+#' @export
+setGeneric('likely', function(x, log, ...) standardGeneric('likely'))
+
+
+## Entropy etc. ----
+
+
+### entropy() ----
 
 #' Calculate Entropy or Information Content of variables 
 #'
@@ -580,7 +810,7 @@ setMethod('entropy', 'table',
   
 #' @rdname entropy
 #' @export
-setMethod('entropy', 'probabilityDistribution',
+setMethod('entropy', 'probability.frame',
           function(x, base = 2) {
             
             joint <- unmargin(x)
@@ -663,7 +893,7 @@ setGeneric('mutualInfo', function(x, ...) standardGeneric('mutualInfo'))
 
 #' @rdname mutualInfo
 #' @export
-setMethod('mutualInfo', 'probabilityDistribution',
+setMethod('mutualInfo', 'probability.frame',
           function(x, ..., base = 2) {
             if (length(dim(x)) < 2L) return(entropy(x, base = base))
             
@@ -726,7 +956,7 @@ setGeneric('crossEntropy', function(distribution1, distribution2, ...) standardG
 
 #' @rdname crossEntropy
 #' @export
-setMethod('crossEntropy', c('probabilityDistribution', 'probabilityDistribution'),
+setMethod('crossEntropy', c('probability.frame', 'probability.frame'),
           function(distribution1, distribution2, base = 2) {
             
             distribution2 <- ifelse(distribution2 == 0L, 0, log(distribution2, base = base))
@@ -950,9 +1180,9 @@ setMethod('draw', c(x = 'token', y = 'token'),
 
 #' @rdname draw
 #' @export
-setMethod('draw', 'counts',
+setMethod('draw', 'count.frame',
           function(x, ...) {
-            draw(as.table.counts(x), ...)
+            draw(as.table.count.frame(x), ...)
           })
 
 #' @rdname draw
@@ -961,7 +1191,7 @@ setMethod('draw', 'table',
           function(x, y, col = 1:nrow(x), log = '', ..., ylim = NULL, yat = NULL, beside = TRUE) {
             yticks <- sort(unique(prep_ticks(ylim %||% c(0, x), log = grepl('y', log), at = yat)))
             if (grepl('y', log)) yticks <- yticks[yticks > 0]
-            if (inherits(x, 'counts')) x <- S3Part(x)
+            if (inherits(x, 'count.frame')) x <- S3Part(x)
             names(x)[is.na(names(x))] <- 'NA'
             
             barx <- barplot(x, col = col, log = gsub('x', '', log), beside = beside, axes = FALSE, 
@@ -981,11 +1211,11 @@ setMethod('draw', 'table',
 
 #' @rdname draw
 #' @export
-setMethod('draw', 'probabilityDistribution',
+setMethod('draw', 'probability.frame',
           function(x, y, col = 1:nrow(x), log = '', ..., yat = NULL, beside = TRUE) {
             yticks <- sort(unique(c(0, prep_ticks(c(x), log = grepl('y', log), at = yat))))
             if (grepl('y', log)) yticks <- yticks[yticks > 0]
-            if (inherits(x, 'counts')) x <- S3Part(x)
+            if (inherits(x, 'count.frame')) x <- S3Part(x)
             names(x)[is.na(names(x))] <- 'NA'
           
             barx <- barplot(x, col = col, beside = beside, axes = FALSE, 
