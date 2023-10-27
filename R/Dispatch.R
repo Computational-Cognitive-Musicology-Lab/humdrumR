@@ -474,7 +474,6 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
   
   dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc)), ]
   
-  
 
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   

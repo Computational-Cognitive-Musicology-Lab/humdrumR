@@ -201,7 +201,7 @@ cbind.table <- function(...) {
   tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(t(tab)) else tab)
   colnames <- unlist(lapply(tables, \(tab) if (is.null(colnames(tab))) rep('', ncol(tab)) else colnames(tab)))
   tables <- lapply(tables, `colnames<-`, value = NULL)
-  tables <- alignTables(tables, 'cbind', margin = 1) 
+  tables <- if (length(tables) > 1L) alignTables(tables, 'cbind', margin = 1) else lapply(tables, unclass)
   
   args[table.i] <- tables
   newtab <- do.call('cbind', args)
@@ -244,9 +244,10 @@ Ops.table <- function(e1, e2) {
     e1 <- tables[[1]]
     e2 <- tables[[2]]
   }
-  
  
-  NextMethod(.Generic)
+  result <- NextMethod(.Generic)
+  class(result) <- 'table'
+  result
 }
 
 #### table ----

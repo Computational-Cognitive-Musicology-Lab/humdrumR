@@ -2,6 +2,8 @@
 % Please edit documentation in R/Metric.R
 \name{metlev}
 \alias{metlev}
+\alias{metcount.default}
+\alias{metcount.humdrumR}
 \alias{metcount}
 \alias{metsubpos}
 \title{Count or measure metric position}
@@ -18,6 +20,20 @@ metlev(
   ...,
   parseArgs = list()
 )
+
+\method{metcount}{default}(
+  dur,
+  meter = duple(5),
+  level = tactus(meter),
+  pickup = NULL,
+  ...,
+  offBeats = TRUE,
+  remainderSubdivides = FALSE,
+  groupby = list(),
+  parseArgs = list()
+)
+
+\method{metcount}{humdrumR}(dur, ...)
 
 metcount(
   dur,

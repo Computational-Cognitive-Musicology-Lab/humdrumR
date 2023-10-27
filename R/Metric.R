@@ -1164,21 +1164,21 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
 
 #' @rdname metlev
 #' @export
-metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL, ...,
-                     offBeats = TRUE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list()) {
+metcount.default <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL,  ...,
+                     offBeats = TRUE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list(), Exclusive = NULL) {
   
   checks(dur, xcharacter | xnumber)
   checks(offBeats, xTF)
   checks(remainderSubdivides, xTF)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?metcount", 'the rhythm vignette'))
   
-  met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
+  met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive, 
                  remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
   
   counts <- met$Counts
   
   
-  if (is.character(level) && any(!level %in% colnames(counts))) {
+  if (is.character(level) && any(!is.na(level) & !level %in% colnames(counts))) {
     .stop("In your call to metcount(), {harvard(unique(level[!level %in% colnames(counts)]), 'and', quote = TRUE)}",
           "<are not names of metric levels|is not a name of a metric level>",
           "in the input meter.",
@@ -1211,6 +1211,12 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL
   mcount
     
 }
+#' @rdname metlev
+#' @export
+metcount.humdrumR <- humdrumRmethod(metcount.default)
+#' @rdname metlev
+#' @export
+metcount <- humdrumRgeneric(metcount.default)
 
 #' @rdname metlev
 #' @export
@@ -1229,16 +1235,17 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 
 
 .metric <- function(dur, meter = duple(5),  groupby = list(), pickup = NULL, ..., 
-                    parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
+                    parseArgs = list(), Exclusive = NULL, remainderSubdivides = TRUE, callname = '.metric') {
+  
   if (length(unique(meter)) > 1L) {
     return(.metrics(dur, meter = meter, pickup = pickup,
-                    groupby = groupby, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
+                    groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive, remainderSubdivides = remainderSubdivides,
                     callname = callname, ...))
   }
   
-  dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
-  
+  dur <- do.call('rhythmInterval', c(list(dur, Exclusive = Exclusive), parseArgs))
   meter <- meter(meter, ...)
+  
   
   timeline <- pathSigma(dur, groupby = groupby, pickup = pickup, start = rational(0), callname = callname)
   
@@ -1249,7 +1256,7 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), 
                                     timecount, 
                                     pickup = pickup, dur = dur, groupby = groupby))
-  counts[counts >= 1L] <- counts[counts >= 1L] - 1L
+  counts[!is.na(counts) & counts >= 1L] <- counts[!is.na(counts) & counts >= 1L] - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
   remainders <- do.call('cbind', lapply(rounded_timelines, \(rt) timeline - rt))
@@ -1287,18 +1294,20 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   onbeat <- lowestLevel > 0L
   
   
-  if (any(!onbeat)) {
+  if (any(!onbeat, na.rm = TRUE)) {
     
-    offbeats <- as.double(remainders[!onbeat , ])
+    offbeat <- !is.na(onbeat) & !onbeat 
+    offbeats <- as.double(remainders[offbeat, ])
     
     if (remainderSubdivides) {
-      subdivide <- do.call('cbind', lapply(as.list(spans), \(span) dur[!onbeat] %divides% span))
+      subdivide <- do.call('cbind', lapply(as.list(spans), \(span) dur[offbeat] %divides% span))
       offbeats[!subdivide] <- max(offbeats)
     }
     
-    lowestLevel[!onbeat] <- max.col(-offbeats, ties.method = 'last')
+    lowestLevel[offbeat] <- max.col(-offbeats, ties.method = 'last')
     
   }
+  
   remainder <- c(remainders[cbind(seq_len(nrow(remainders)), lowestLevel)])
     
   # remove redundant counts
@@ -1316,18 +1325,18 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
        MetLev = lowestLevel)
 }
 
-.metrics <- function(dur, meter = duple(5), pickup = NULL, groupby = list(), ..., 
+.metrics <- function(dur, meter = duple(5), pickup = NULL, groupby = list(), Exclusive = NULL, ..., 
                      parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
   
   uniqmeters <- unique(meter)
-  
   mets <- lapply(seq_along(uniqmeters), 
                 \(i) {
-                  targets <- meter == uniqmeters[i]
+                  targets <- !is.na(meter) & meter == uniqmeters[i]
                   
                   met <- .metric(dur[targets], uniqmeters[i], pickup = if (!is.null(pickup)) pickup[targets],
                                  groupby = lapply(groupby, '[', i = targets),
-                                 parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
+                                 parseArgs = parseArgs, Exclusive = Exclusive[targets],
+                                 remainderSubdivides = remainderSubdivides,
                                  callname = callname, ...)
                   met$Indices <- which(targets)
                   met

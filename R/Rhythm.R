@@ -825,11 +825,12 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #'  
 #' Must be `numeric` or [rational].
 #'   
-#' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
+#' @param Exclusive,parseArgs ***An vector of exclusive interpretations and/or an optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
-#' Defaults to an empty `list()`.
+#' Default to `NULL` and an empty `list()` respectively.
 #' 
-#' Must be a `list` of named arguments to the [rhythm parser][rhythmParsing].
+#' `Exclusive` must be a `character` vector of length 1, or the same length as `x`;
+#' `parseArgs` must  be a `list` of named arguments to the [rhythm parser][rhythmParsing].
 #' 
 #' @param inPlace ***Should non-rhythm information be retained in the output string?***
 #' 
@@ -1826,7 +1827,7 @@ pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) 
   if (!is.null(pickup)) {
     .SD$Pickup <- pickup
     .SD[ , Time := {
-      if (all(!Pickup)) Time else Time - Time[which(!Pickup)[1]]
+      if (all(!Pickup, na.rm = TRUE)) Time else Time - Time[which(!Pickup)[1]]
       }, by = list(Piece, Spine, Path)]
   }
   
