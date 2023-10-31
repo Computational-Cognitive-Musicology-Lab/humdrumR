@@ -30,7 +30,8 @@ metlev(
   offBeats = TRUE,
   remainderSubdivides = FALSE,
   groupby = list(),
-  parseArgs = list()
+  parseArgs = list(),
+  Exclusive = NULL
 )
 
 \method{metcount}{humdrumR}(dur, ...)
@@ -44,7 +45,8 @@ metcount(
   offBeats = TRUE,
   remainderSubdivides = FALSE,
   groupby = list(),
-  parseArgs = list()
+  parseArgs = list(),
+  Exclusive = NULL
 )
 
 metsubpos(

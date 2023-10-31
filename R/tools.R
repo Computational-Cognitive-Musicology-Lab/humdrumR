@@ -1884,7 +1884,7 @@ makeCumulative <- function(n, groupby = list()) {
   if (length(groupby) == 0L) return(n)
   
   diff <- delta.default(n, init = 0L)
-  diff[diff <= 0 & do.call('changes', groupby)] <- 1
+  diff[diff != 1L & do.call('changes', groupby)] <- 1
   # diff[which(!is.na(n))[1]] <- 1
   sigma.default(diff, init = NA)
 }

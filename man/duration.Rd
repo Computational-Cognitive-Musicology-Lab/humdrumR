@@ -36,12 +36,6 @@ Must be \link[=rhythmParsing]{parsable as rhythm infromation}.}
 
 There are also two hidden (advanced) arguments you can specify: \code{memoize} and \code{deparse} (see the details below).}
 
-\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
-
-Defaults to an empty \code{list()}.
-
-Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
-
 \item{scale}{\emph{\strong{A \code{numeric} or \link{rational} value which is used as the output unit of measurement.}}
 
 Defaults to \code{rational(1, 1)}.
