@@ -300,8 +300,8 @@ xrange <- function(min, max) xnumber & argCheck(\(arg) all(arg >= min & arg <= m
                                                 glue::glue("must be between {min} and {max} (inclusive)"),
                                                 \(arg) .show_values(arg[arg > max | arg < min]))
 
-xpositive       <- xnumber & argCheck(\(arg) all(arg > 0), "must be greater than zero", \(arg) .show_values(arg[arg <= 0]))
-xpositiveorzero <- xnumber & argCheck(\(arg) all(arg >= 0), "must be zero or more", \(arg) .show_values(arg[arg < 0]))
+xpositive       <- xnumber & argCheck(\(arg) all(arg > 0, na.rm = TRUE), "must be greater than zero", \(arg) .show_values(arg[arg <= 0]))
+xpositiveorzero <- xnumber & argCheck(\(arg) all(arg >= 0, na.rm = TRUE), "must be zero or more", \(arg) .show_values(arg[arg < 0]))
 
 
 xnegative       <- xnumber & argCheck(\(arg) all(arg > 0), "must be less than zero", \(arg) .show_values(arg[arg <= 0]))
