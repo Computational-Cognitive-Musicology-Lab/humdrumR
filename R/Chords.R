@@ -1026,9 +1026,8 @@ sciQualities2tset <- function(str, inversion = 0L, ...) {
 }
 
 tertian2tset <- function(x, Key = dset(0, 0), ...) {
-  
     REparse(x,
-            makeRE.tertian(..., collapse = FALSE), # makes root, quality, inversion, and incomplete
+            makeRE.tertian(..., collapse = FALSE), # makes tonalChroma, quality, inversion, and incomplete
             toEnv = TRUE) -> parsed
   
     Key <- diatonicSet(Key)

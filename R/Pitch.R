@@ -4247,6 +4247,7 @@ transpose.factor <- transpose.token
 #' @export
 transpose.character <- function(x, by = NULL, from = NULL, to = NULL, ...) {
   x <- tonalInterval.character(x, ...)
+  
   tints <- transpose.tonalInterval(x, by = by, from = from, to = to, ...)
   
   dispatch <- attr(x, 'dispatch')

@@ -712,7 +712,8 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
                                    if (any(abs(change) > 1L)) change <- sign(change)
                                    
                                    altermat <- matrix(0L, nrow = 1, ncol = 7)
-                                   altermat[((which(altered) - mode) %% 7L) + 1L] <- change
+                                   # altermat[((which(altered) - mode) %% 7L) + 1L] <- change
+                                   altermat[((which(altered) - 0) %% 7L) + 1L] <- change
                                      
                                    alterint <- baltern2int(altermat)
                                    c(mode = mode, altered = alterint)
