@@ -402,10 +402,11 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
               
               hits <- !is.na(alter) & alter == 0L
               output[hits] <- (((e1[hits] + 1L) - signature[hits]) %% 7L) - 1 + signature[hits]
-              if (any(!is.na(alter) & alter != 0L)) {
-                  output[!is.na(alter) & alter != 0L] <- {
-                      lof <- t(LO5th(e2[!is.na(alter) & alter != 0L]))
-                      lof[sweep(lof %% 7L, 2, e1[!is.na(alter) & alter != 0L] %% 7L, `==`)]
+              if (any(!is.na(e1) & !is.na(alter) & alter != 0L)) {
+                  notna <- !is.na(e1) & !is.na(alter) & alter != 0L 
+                  output[notna] <- {
+                      lof <- t(LO5th(e2[notna]))
+                      lof[sweep(lof %% 7L, 2, e1[notna] %% 7L, `==`)]
                   }
               }
               
@@ -902,6 +903,10 @@ romanNumeral2dset <- function(x, Key = NULL, flat = '-', sep = '/', ...) {
   }  else {
     dset
   }
+  
+  na <- is.na(dset) & x == ''
+  dset[na] <- Key[na]
+  dset
 }
 
 

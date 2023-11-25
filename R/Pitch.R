@@ -1327,8 +1327,6 @@ tint2tonalChroma <- function(x,
   
   parts <- matched(parts, c( "species", "step", "octave"))
   
-
-  
   # simple part
   step     <- if (step)        tint2step(x, ...) 
   species  <- if (specific)    tint2specifier(x, qualities = qualities, Key = Key, ...)   
