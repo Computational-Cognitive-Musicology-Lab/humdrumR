@@ -507,14 +507,9 @@ dset2alterations <- function(dset, augment = '#', diminish = 'b', ...) {
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
     alterations[] <- c(augment, diminish, "")[match(alterations, c(7, -7, 0))]
 
-    order <- lapply(mode[altered] %% 7L, \(m) ((0L:6L + m) %% 7L) + 1 )
-        
-    labs <- do.call('rbind', lapply(order, \(ord) c('4', '1', '5', '2', '6', '3', '7')[ord]))
-    labs[alterations == ''] <- ''
-
-    alterations[] <- paste0(alterations, labs)
-    
+    alterations[alterations != ''] <-  paste0(alterations[alterations != ''], c('4', '1', '5', '2', '6', '3', '7')[col(alterations)[alterations != '']])
     alterations <- apply(alterations, 1, paste, collapse = '')
+    
     output <- character(length(mode))
     output[altered] <- alterations
     output
@@ -860,7 +855,7 @@ key2dset <- function(x, parts = c('step', 'species', 'mode', 'alterations'),
     signature <- root + mode + minor
     
     ## Alterations
-    alterations <- alteration2trit(alterations, mode + minor) %|% 0
+    alterations <- alteration2trit(alterations, mode) %|% 0
     
     dset <- dset(root, signature, alterations)
     

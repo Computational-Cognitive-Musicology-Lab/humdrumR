@@ -577,6 +577,11 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion'), n = '?')
         res['mode'] <- captureRE(c('phr', 'aeo', 'loc', 'dor'), n = '?')
         
+        if ("alterations" %in% parts){
+          REs["alterations"] <- makeRE.alterations(...) 
+          res["alterations"] <- makeRE.alterations(...) 
+        }
+        
         majors <- cREs(REs[parts[parts %in% names(REs)]])
         minors <- cREs(res[parts[parts %in% names(REs)]])
         
@@ -589,12 +594,11 @@ makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
         REs['colon'] <-  ':?'
         REs['star']  <- '\\*?'
         REs['mode'] <- captureRE(c('mix', 'lyd', 'ion', 'phr', 'aeo', 'loc', 'dor'), n = '?')
+        
+        if ("alterations" %in% parts) REs["alterations"] <- makeRE.alterations(...)
     }
     
     
-    if ("alterations" %in% parts) {
-        REs["alterations"] <- makeRE.alterations(...)
-    }
     
     
     REs <- REs[parts[parts %in% names(REs)]]

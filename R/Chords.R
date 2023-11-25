@@ -579,6 +579,7 @@ tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
                        root_func = tint2romanRoot, 
                        implicitSpecies = TRUE,
                        rootCase = TRUE,
+                       natural = '#',
                        inversion.labels = c('', 'b', 'c', 'd', 'e', 'f', 'g'),
                        inversion = FALSE)
   
