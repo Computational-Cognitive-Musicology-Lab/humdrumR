@@ -13,7 +13,7 @@ StagedInstall: no
 Collate: humdrumR-package.R
          tools.R
 	 Token.R
-         Analysis.R
+         Distributions.R
          messages.R
          Dispatch.R
          humdrumR-class.R
@@ -35,6 +35,7 @@ Collate: humdrumR-package.R
          Rhythm.R
          Metric.R
 	 Lyrics.R
+         Plots.R
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 
