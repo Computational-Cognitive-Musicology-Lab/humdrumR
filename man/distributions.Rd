@@ -2,9 +2,9 @@
 % Please edit documentation in R/Distributions.R
 \name{distributions}
 \alias{distributions}
+\alias{show,distribution-method}
 \alias{print.distribution}
-\alias{[.humdrumR.table}
-\alias{sort.count.frame}
+\alias{sort,distribution-method}
 \alias{+,count.frame,count.frame-method}
 \alias{-,count.frame,count.frame-method}
 \alias{Ops,count.frame,count.frame-method}
@@ -19,11 +19,16 @@
 \alias{P,count.frame-method}
 \title{Distributions}
 \usage{
-\method{print}{distribution}(dist, digits = 1)
+\S4method{show}{distribution}(object)
 
-\method{[}{humdrumR.table}(x, ...)
+\method{print}{distribution}(
+  dist,
+  digits = if (inherits(dist, "probability")) 3 else 1,
+  syntaxHighlight = humdrumRoption("syntaxHighlight"),
+  zeros = "."
+)
 
-sort.count.frame(x, decreasing = TRUE)
+\S4method{sort}{distribution}(x, decreasing = TRUE)
 
 \S4method{+}{count.frame,count.frame}(e1, e2)
 

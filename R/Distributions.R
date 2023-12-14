@@ -4,7 +4,6 @@
 ## Definitions ----
 
 
-# setClass('text', contains = 'character')
 
 
 
@@ -16,19 +15,20 @@
 NULL
 
 
+setClass('distribution', contains = 'data.frame', slots = c(Sort = 'integer'))
+setClass('count', contains = 'distribution')
+setClass('probability', contains = 'distribution', slots = c(N = 'integer'))
+
+
 
 ### Constructors ----
 
-distribution <- function(x, ...) {
+distribution <- function(x, type, ...) {
   df <- as.data.frame(x, ...)
-  class(df) <- c(if ('P' %in% colnames(df)) 'probability' else 'count', 
-                 'distribution', 
-                 class(df))
   
-  attr(df, 'sorted') <- attr(df, 'sorted') %||% 0L
-  
-  df
+  new(if (type == 'N') 'count' else 'probability', new('distribution', df, Sort = 0L), ...)
 }
+
 
 
 humdrumR.table <- function(tab) {
@@ -39,44 +39,60 @@ humdrumR.table <- function(tab) {
 ### Accessors ----
 
 
+dist_type <- function(dist) intersect(colnames(dist), c('N', 'P'))
+getValues <- function(dist) as.data.frame(dist)[ , dist_type(dist)]
+getFactors <- function(dist) as.data.frame(dist)[ , dimnames(dist), drop = FALSE]
 
-dist_type <- function(dist) c(probability = 'P', count = 'N')[class(dist)[1]]
-getNP <- function(dist) as.data.frame(dist)[ , grepl('^[NP][12]*$', colnames(dist)), drop = FALSE]
-getFactors <- function(dist) as.data.frame(dist)[ , !grepl('^[NP][12]*$', colnames(dist)), drop = FALSE]
-
-dimnames.distribution <- function(x) {
-  grep('^[NP][12]*$', colnames(x), value = TRUE, invert = TRUE)
-}
+#' @export
+dimnames.distribution <- function(x) setdiff(colnames(x), c('N', 'P'))
 
 ### print() ----
 
+#' @export
+#' @rdname distributions
+setMethod('show', 'distribution', \(object) print.distribution(object))
 
 #' @export
 #' @rdname distributions
 print.distribution <- function(dist, digits = if (inherits(dist, 'probability')) 3 else 1,
-                               syntaxHighlight = humdrumRoption('syntaxHighlight')) {
+                               syntaxHighlight = humdrumRoption('syntaxHighlight'),
+                               zeros = '.') {
   
   type <- dist_type(dist)
+  message <- paste0('humdrumR ', if (type == 'P') 'probability distribution' else 'count distribution')
+  
   dimnames <- dimnames(dist)
-  sort <- attr(dist, 'sort') 
-  prettier <- if (type == 'N') prettyN else prettyP
-  Ns <- lapply(getNP(dist), prettier, digits = digits)
+  
+  if (nrow(dist) == 0) {
+    message <- paste0(message, ' (empty)')
+    if (syntaxHighlight) message <- syntaxHighlight(message, 'G')
+    cat(message, '\n')
+    return(invisible(dist))
+  }
+  sort <- dist@Sort
+  
+  X <- getValues(dist)
+  
+  X <- if (type == 'P') prettyP(X, digits = digits) else prettyN(X, digits = digits, zeros = zeros)
   
   # do we scale or round?
-  scale <- unique(lapply(Ns, attr, which = 'scale') |> unlist())
-  approx <- Reduce('|', sapply(Ns, attr, which = 'approx'))
+  scale <- attr(X, 'scale')
   
   scale <- if (length(scale) == 1L) {
     if (scale > 0) paste0(' (', c('thousands', 'millions', 'billions', 'trillions')[scale], ')')
   }
-  if (approx) scale <- paste0(scale, ', ~rounded')
   
-  dist <- cbind(as.data.table(getFactors(dist)), as.data.table(Ns))
+  if (attr(X, 'negative') %||% FALSE) scale <- paste0(scale, ' (∃N < 0)')
+  if (attr(X, 'approx')) scale <- paste0(scale, ', ~rounded')
+  message <- paste0(message, scale)
+  
+  dist <- getFactors(dist)
+  dist[[type]] <- X
   
   iswide <- FALSE
   printmat <- (if(sort == -0L && length(dimnames) >= 2L) {
     # check if we can widen
-    wide <- as.matrix(dcast(dist, rlang::new_formula(quote(...), rlang::sym(dimnames[2])), fill = 0, value.var = colnames(Ns)))
+    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(dimnames[2])), fill = 0, value.var = type))
     
     factorcols <- colnames(wide) %in% dimnames
     toprow    <- ifelse( factorcols, colnames(wide), '')
@@ -104,39 +120,46 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
     
   }
   
-  message <- paste0('humdrumR ',
-                    if (type == 'N') 'counts' else 'probabilities',
-                    scale,
-                    '\n')
+
   
   
   if (syntaxHighlight) {
+    
+    syntax <- array('D', dim = dim(printmat))
+    
+    syntax[c(1, nrow(printmat)), ] <- 'N'
+    
     dataCols <- !colnames(printmat) %in% c(dimnames, 'Rank')
     rankCol <- colnames(printmat) == 'Rank'
-    dataRows <- !(1:nrow(printmat)) %in% c(1, nrow(printmat))
-    if (iswide) dataRows <- dataRows &  !(1:nrow(printmat)) %in% c(2, nrow(printmat) - 1L)
     
+    if (iswide) {
+      syntax[c(2, nrow(printmat) - 1L), ] <- 'I' 
+      dataRows <- 3:(nrow(printmat) - 2L)
+    } else {
+      dataRows <- 2:(nrow(printmat) - 1L)
+    }
     
-    printmat[dataRows, dataCols] <- syntaxHighlight(printmat[dataRows, dataCols], 'D')
-    printmat[dataRows, !dataCols & !rankCol] <- syntaxHighlight(printmat[dataRows, !dataCols & !rankCol], 'I')
-    printmat[dataRows, rankCol] <- syntaxHighlight(printmat[dataRows, rankCol], 'E')
-    printmat[!dataRows, ] <- syntaxHighlight(printmat[!dataRows, ], 'N')
+    syntax[dataRows, !dataCols & !rankCol] <- 'I'
+    syntax[dataRows, rankCol] <- 'E'
+    
+    printmat[] <- syntaxHighlight(printmat, syntax)
+    
     
     message <- syntaxHighlight(message, 'G')
   }
 
 
-  cat(message)
+  cat(message, '\n')
   cat(apply(printmat, 1, paste, collapse = '  '), sep = '\n')
-  cat(message)
+  cat(message, '\n')
   invisible(dist)
 }
 
 
 
 
-prettyN <- function(N, digits = 1L) {
-  tens <- ifelse(N == 0, 0, log10(N) |> floor())
+prettyN <- function(N, digits = 1L, zeros = '.') {
+  tens <- ifelse(N == 0, 0, log10(abs(N)) |> floor())
   
   thousands <- pmin(tens %/% 3, 4L)
   thousands[thousands < 0L] <- thousands[thousands < 0L] + 1L
@@ -157,14 +180,17 @@ prettyN <- function(N, digits = 1L) {
   approx <- N != Nround
   
   Nprint <- format(Nround, scientific = FALSE)
-  Nprint <- gsub('^( *)0\\.', '\\1 .', Nprint)
-  Nprint <- gsub('\\.0*$', '', Nprint)
+  Nprint[N != 0] <- gsub('^( *)0\\.', '\\1 .', Nprint[N != 0])
+  Nprint <- gsub('\\.0+$', '', Nprint)
+  Nprint <- gsub('^( *)0( *)$', paste0('\\1', zeros, '\\2'), Nprint)
+
   
   output <- paste0(Nprint, scale, ifelse(approx, '~', ''))
   output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
   
   attr(output, 'scale') <- globalscale
-  attr(output, 'approx') <- any(approx)
+  attr(output, 'approx') <- any(approx, na.rm = TRUE)
+  attr(output, 'negative') <- any(N < 0, na.rm = TRUE)
   
   output
   
@@ -174,10 +200,10 @@ prettyN <- function(N, digits = 1L) {
 prettyP <- function(P, digits = 3) {
   tens <- ifelse(P == 0, 0, log10(P) |> round())
   
-  thousands <- (tens + 1) %/% -3
+  thousands <- (tens - 1) %/% -3
   scale <- min(thousands)
   
-  P <- P * 1000^scale
+  P <- P * 1000^-scale
   
   Pround <- round(P, digits = digits)
   approx <- P != Pround
@@ -199,30 +225,37 @@ prettyP <- function(P, digits = 3) {
 
 ### indexing ----
 
-#' @rdname distributions
 #' @export
-`[.distribution` <- function(x, ...) {
-  result <- NextMethod()
-  class(result) <- class(x)
-  result
-}
+setMethod('[', 'distribution',
+          function(x, i, ...) {
+            
+            if (is.matrix(i) && ncol(i) == 1L && names(dimnames(i))[[1]] == paste(dimnames(x), collapse = '.')) {
+              i <- i[do.call('paste', c(getFactors(x), list(sep = '.'))), , drop = FALSE]
+            }
+            
+            distribution(as.data.frame(x)[i , ], type = dist_type(x))
+             
+          })
+
 
 ### coercion ----
+
+#' @export
 as.data.frame.distribution <- function(x) {
-  class(x) <- c('data.frame')
-  x
+  setNames(as.data.frame(x@.Data), colnames(x))
 }
 
+#' @export
 as.data.table.distribution <- function(x) {
   as.data.table(as.data.frame(x))
 }
 
 as.table.distribution <- function(x) {
+  dimnames <- dimnames(x)
+  type <- dist_type(x)
+  
   x <- as.data.frame(x)
   
-  
-  dimnames <- setdiff(colnames(dist), c('P', 'N'))
-  type <- setdiff(colnames(dist), dimnames)
   
   levels <- lapply(x[ , dimnames], unique)
   
@@ -238,52 +271,57 @@ as.table.distribution <- function(x) {
 
 #' @rdname distributions
 #' @export
-sort.distribution <- function(x, decreasing = TRUE) {
-  type <- dist_type(x)
+setMethod('sort', 'distribution',
+          function(x, decreasing = TRUE) {
+  X <- getValues(x)
   
+  x <- x[order(X, decreasing = decreasing), ]
   
-  
-  ord <- do.call('order', c(as.list(x[colnames(x) == type]), 
-                            list(decreasing = decreasing)))
-  
-  x <- x[ord, ]
-  
-  attr(x, 'sort') <- if (decreasing) -1 else 1
+  x@Sort <- if (decreasing) -1L else 1L
   x
-}
+})
 
 
 ### aligning ----
 
-alignDistributions <- function(d1, d2, funcname = '') {
+alignDistributions <- function(..., funcname = '') {
+  
+  dists <- list(...)
+  dimnames <- lapply(dists, dimnames)
+  if (length(Reduce(\(x, y) if (setequal(x, y)) x, dimnames)) == 0L) .stop("If using {funcname} on distributions, they must all have the same dimension names.")
+  dimnames <- dimnames[[1]]
   
   
-  dimnames1 <- dimnames(d1)
-  dimnames2 <- dimnames(d2)
+  levels <- setNames(lapply(dimnames, 
+                            \(dn) do.call('mergeLevels', lapply(dists, '[[', dn))), 
+                     dimnames)
+  levels <- do.call('expand.grid', levels)
+
   
-  if (!setequal(dimnames1, dimnames2)) .stop("If using {funcname} on distributions, they must all have the same dimensions.")
+  aligned <- lapply(dists, 
+                  \(dist) {
+                    X <- getValues(merge(levels, as.data.frame(dist), all = TRUE))
+                    ifelse(is.na(X), 0, X)
+                    
+                  })
+  names(aligned) <- sapply(dists, dist_type)
   
-  d3 <- merge(d1, d2, by = dimnames1, all = TRUE, suffixes = c('1', '2'))
-  d3[!colnames(d3) %in% union(colnames(d1), colnames(d2))] <- lapply(d3[!colnames(d3) %in% union(colnames(d1), colnames(d2))], 
-                                                                    \(np) ifelse(is.na(np), 0, np))
   
-  
-  levels <- lapply(getFactors(d1), unique)
-  
-  
-  lapply(dimnames1,
-         \(dim) {
-           list(pmin(match(d3[[dim]], d1[[dim]]), 
-                     match(d3[[dim]], d2[[dim]]), 
-                     na.rm = TRUE),
-                d3[[dim]])
-         }) |> unlist(recursive = FALSE) -> orderby
-  
-  d3 <- d3[do.call('order', orderby), order(!colnames(d3) %in% dimnames1)]
-  
-  distribution(d3)
+  list(Levels = levels, X = aligned)
 }
   
+mergeLevels <- function(...) {
+  args <- list(...)
+  newlev <- Reduce(union, args)
+  
+  mini <- do.call('pmin', c(lapply(args, 
+                                   \(arg) {
+                                     match(newlev, arg)
+                                   }), 
+                            list(na.rm = TRUE)))
+  ord <- order(mini, newlev)
+  newlev[ord]
+}
 
 alignTables <- function(tables, funcname = '', margin = NULL) {
   tables <- lapply(tables, 
@@ -339,7 +377,21 @@ alignTables <- function(tables, funcname = '', margin = NULL) {
 }
 
 
+#' @export
+cbind.distribution <- function(...) {
+  args <- list(...)
+  dists <- sapply(args, inherits, what = 'distribution')
+  
+  aligned <- do.call('alignDistributions', args[dists])
+  args[dists] <- aligned$X
+  
+  mat <- do.call('cbind', args)
+  colnames(mat)[dists][colnames(mat)[dists] == ''] <- names(aligned$X)[colnames(mat)[dists] == '']
 
+  rownames(mat) <- do.call('paste', c(aligned$Levels, list(sep = '.')))
+  names(dimnames(mat)) <- c(paste(colnames(aligned$Levels), collapse = '.'), "")
+  mat
+}
 
 
 #' @export
@@ -387,50 +439,84 @@ rbind.humdrumR.table <- function(...) {
   
 }
 
-#' @export
-cbind.distribution <- function(...) {
-  args <- list(...)
-  dists <- sapply(args, inherits, what = 'distribution')
-  
-}
+
 
 ### arithmetic ----
 
+distmat <- function(factors, result, type = 'N') {
+  if (inherits(factors, 'distribution')) factors <- getFactors(factors)
+  mat <- matrix(result, ncol = 1)
+  rownames(mat) <- do.call('paste', c(factors, list(sep = '.')))
+  colnames(mat) <- type
+  names(dimnames(mat)) <- c(paste(colnames(factors), collapse = '.'), '')
+  mat
+}
 
+#' @export
 setMethod('+', c('count', 'count'),
           function(e1, e2) {
+            aligned <- alignDistributions(e1, e2, funcname = '+')
+            
+            df <- aligned$Levels
+            df$N <- callGeneric(aligned$X[[1]], aligned$X[[2]])
+            
+            distribution(df, 'N')
+          })
+
+#' @export
+setMethod('+', c('count', 'integer'),
+          function(e1, e2) {
+            df <- getFactors(e1)
+            df$N <- callGeneric(getValues(e1), e2)
+            
+            distribution(df, 'N')
+          })
+
+#' @export
+setMethod('Ops', c('distribution', 'distribution'),
+          function(e1, e2) {
+            aligned <- alignDistributions(e1, e2, funcname = .Generic)
+            
+            result <- callGeneric(aligned$X[[1]], aligned$X[[2]])
+            distmat(aligned$Levels, result, dist_type(e1))
             
           })
 
-setMethod('*', c('count', 'numeric'),
+
+#' @export
+setMethod('Ops', c('distribution', 'numeric'),
           function(e1, e2) {
-            Ns <- grepl('^N[1-9]?[0-9]*$', colnames(e1)) 
-            e1[Ns] <- lapply(e1[Ns], `+`, e2 = e2)
-            e1
+            
+            result <- callGeneric(getValues(e1), e2)
+            distmat(e1, result)
+
             
           })
 
 #' @export
-Ops.distribution <- function(e1, e2) {
-  if (!inherits(e1, 'distribution')) return(do.call(.Generic, list(e2, e1)))
-  
-    browser()
-  NP1 <- getNP(e1)
-  if (!inherits(e2, 'distribution')) {
-    cbind(getFactors(e1), as.data.frame(lapply(NP1, .Generic, e2 = e2)))
-    
-  } else {
-    
-    NP2 <- getNP(e2)
-    if (length(NP1) != length(NP2)) .stop("Can't do math between distributions when there are multiple distributions")
-    
-    frame <- alignDistributions(e1, e2, .Generic)
-    frame[ , N := do.call(.Generic, list(N.x, N.y))]
-    frame[ , c('N.x', 'N.y') := NULL]
-    
-  }
- 
-}
+setMethod('Math', 'distribution',
+          \(x) {
+            distmat(x, callGeneric(getValues(x)))
+          })
+
+#' @export
+setMethod('Summary', 'distribution',
+          \(x, ..., na.rm = FALSE) {
+            setNames(callGeneric(getValues(x), ..., na.rm), paste(dimnames(x), collapse = '.'))
+          })
+
+
+#' @export
+setMethod('mean', 'distribution',
+          \(x, ..., na.rm = FALSE) {
+            
+            setNames(mean(getValues(x), ..., na.rm), paste(dimnames(x), collapse = '.'))
+          })
+
+
+
+
+
 
 
 
@@ -608,7 +694,7 @@ count.default <- function(..., sort = FALSE,
   
   if (is.numeric(sort) && sort < 0) result <- result[nrow(result):1]
   
-  distribution(result)
+  distribution(result, 'N')
   
 }
 
@@ -764,9 +850,8 @@ setMethod('P', 'formula',
 setMethod('P', 'discrete',
           function(x, ..., condition = NULL, na.rm = TRUE) {
             
-            distribution <- P(count.default(x, ..., na.rm = na.rm))
+            P(count.default(x, ..., na.rm = na.rm))
       
-           makeprobs(distribution)
           })
 
 
@@ -821,20 +906,25 @@ setMethod('P', 'humdrumR',
 
 #' @rdname distributions
 #' @export
-setMethod('P', c('count.frame'),
+setMethod('P', c('count'),
           function(x, ..., .by = NULL, na.rm = FALSE) {
-            if (na.rm) x <- x[!Reduce('|', lapply(x, is.na))]
+            if (na.rm) x <- x[!Reduce('|', lapply(x, getFactors(x))), ]
+            
+            x <- as.data.frame(x)
             
             x$P <- if (is.null(.by)) {
-              x[ , N / sum(N, na.rm = TRUE)]
+              N <- sum(x$N, na.rm = TRUE)
+              x$N / N
             } else {
-              x[ , N / sum(N, na.rm = TRUE), by = .by]$V1
+              ind <- tapply(x$N, x[ , .by])
+              N <- tapply(x$N, ind, sum)
+              
+              x$N / N[ind]
             }
            
-            N <- sum(x$N)
-            x[ , N := NULL]
+            x$N <- NULL
             
-            makeprobs(x, N = N)
+            distribution(x, 'P', N = N)
           })
 
 
