@@ -6,7 +6,7 @@
 
 # setClass('text', contains = 'character')
 
-setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor'))
+
 
 #' Distributions
 #' 
@@ -15,91 +15,185 @@ setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor
 #' @name distributions
 NULL
 
-## Methods ----
+
 
 ### Constructors ----
 
-makecounts <- function(x) {
-  if (is.table(x)) {
-    class(x) <- c('count.table', 'humdrumR.table', class(x))
-  } else {
-    if (is.data.frame(x) || is.matrix(x)) x <- as.data.table(x)
-    class(x) <- c('count.frame', 'humdrumR.frame', class(x))
-    
-  }
-  x
+distribution <- function(x, ...) {
+  df <- as.data.frame(x, ...)
+  class(df) <- c(if ('P' %in% colnames(df)) 'probability' else 'count', 
+                 'distribution', 
+                 class(df))
+  
+  attr(df, 'sorted') <- attr(df, 'sorted') %||% 0L
+  
+  df
 }
 
-makeprobs <- function(x) {
-  if (is.table(x)) {
-    class(x) <- c('probability.table', 'humdrumR.table', class(x))
-  } else {
-    if (is.data.frame(x) || is.matrix(x)) x <- as.data.table(x)
-    class(x) <- c('probability.frame', 'humdrumR.frame',class(x))
-    
-  }
-  x
+
+humdrumR.table <- function(tab) {
+  class(tab) <- unique(c('humdrumR.table', class(tab)))
+  tab
+}
+
+### Accessors ----
+
+
+
+dist_type <- function(dist) c(probability = 'P', count = 'N')[class(dist)[1]]
+getNP <- function(dist) as.data.frame(dist)[ , grepl('^[NP][12]*$', colnames(dist)), drop = FALSE]
+getFactors <- function(dist) as.data.frame(dist)[ , !grepl('^[NP][12]*$', colnames(dist)), drop = FALSE]
+
+dimnames.distribution <- function(x) {
+  grep('^[NP][12]*$', colnames(x), value = TRUE, invert = TRUE)
 }
 
 ### print() ----
 
 
-
-#' @rdname distributions
 #' @export
-print.count.frame <- function(x) {
-  cat('humdrumR counts\n')
-  NextMethod(x, topn = 20, nrows = 500)
-}
-
 #' @rdname distributions
-#' @export
-print.count.table <- function(x) {
-  cat('humdrumR counts\n')
-  NextMethod(x)
-}
-
-#' @rdname distributions
-#' @export
-print.probabability.frame <- function(x) {
-  cat('humdrumR probabilities\n')
-  x[ , P := prettyp(P)]
-  NextMethod(x, topn = 20, nrows = 500)
-}
-
-#' @rdname distributions
-#' @export
-print.probabability.table <- function(x) {
-  cat('humdrumR probabilities\n')
-  x[] <- prettyp(x)
-  NextMethod(x)
-}
-
-
-prettyp <- function(p, digits = 4) {
-  tens <- log10(p) |> floor()
+print.distribution <- function(dist, digits = if (inherits(dist, 'probability')) 3 else 1,
+                               syntaxHighlight = humdrumRoption('syntaxHighlight')) {
   
-  e <- 0
-  if (all(tens <= -3, na.rm = TRUE)) {
-    e <- max(tens + 1, na.rm = TRUE)
+  type <- dist_type(dist)
+  dimnames <- dimnames(dist)
+  sort <- attr(dist, 'sort') 
+  prettier <- if (type == 'N') prettyN else prettyP
+  Ns <- lapply(getNP(dist), prettier, digits = digits)
+  
+  # do we scale or round?
+  scale <- unique(lapply(Ns, attr, which = 'scale') |> unlist())
+  approx <- Reduce('|', sapply(Ns, attr, which = 'approx'))
+  
+  scale <- if (length(scale) == 1L) {
+    if (scale > 0) paste0(' (', c('thousands', 'millions', 'billions', 'trillions')[scale], ')')
+  }
+  if (approx) scale <- paste0(scale, ', ~rounded')
+  
+  dist <- cbind(as.data.table(getFactors(dist)), as.data.table(Ns))
+  
+  iswide <- FALSE
+  printmat <- (if(sort == -0L && length(dimnames) >= 2L) {
+    # check if we can widen
+    wide <- as.matrix(dcast(dist, rlang::new_formula(quote(...), rlang::sym(dimnames[2])), fill = 0, value.var = colnames(Ns)))
+    
+    factorcols <- colnames(wide) %in% dimnames
+    toprow    <- ifelse( factorcols, colnames(wide), '')
+    toprow[length(dimnames)] <- dimnames[2]
+    secondrow <- ifelse(!factorcols, colnames(wide), '')
+    
+    wide <- rbind(toprow, secondrow, wide, secondrow, toprow)
+    wide <- apply(wide, 2, format, justify = 'right')
+    wide <- wide[ , order(match(toprow, colnames(dist), nomatch = 2))]
+    
+    width <- sum(nchar(wide[1, ])) + ncol(wide) * 2
+    
+    iswide <- width < (options('width')$width - 10L)
+    if (iswide) wide
+  })  %||%  apply(rbind(colnames(dist), 
+                        as.matrix(dist), 
+                        colnames(dist)), 
+                  2, format, justify = 'right')
+
+  if (sort != 0L) {
+    rank <- format(c('Rank', seq_len(nrow(printmat) - 2L), 'Rank'), 
+                   justify = 'left')
+    if (sort == 1) rank <- rev(rank)
+    printmat <- cbind(Rank = rank, printmat)
+    
   }
   
-  zeros <- p == 0
-  p <- p * 10^(-e)
-  p <- format(p, scientific = FALSE)
-  p <- gsub('0*$', '', p)
-  n <- nchar(p) - 2L
+  message <- paste0('humdrumR ',
+                    if (type == 'N') 'counts' else 'probabilities',
+                    scale,
+                    '\n')
   
-  long <- n > digits & p != 'NA'
-  p[long] <- paste0(substr(p[long], start = 1, stop = digits + 2), '_')
   
-  p[zeros] <- '.'
-  p <- gsub('^0', '', p)
+  if (syntaxHighlight) {
+    dataCols <- !colnames(printmat) %in% c(dimnames, 'Rank')
+    rankCol <- colnames(printmat) == 'Rank'
+    dataRows <- !(1:nrow(printmat)) %in% c(1, nrow(printmat))
+    if (iswide) dataRows <- dataRows &  !(1:nrow(printmat)) %in% c(2, nrow(printmat) - 1L)
+    
+    
+    printmat[dataRows, dataCols] <- syntaxHighlight(printmat[dataRows, dataCols], 'D')
+    printmat[dataRows, !dataCols & !rankCol] <- syntaxHighlight(printmat[dataRows, !dataCols & !rankCol], 'I')
+    printmat[dataRows, rankCol] <- syntaxHighlight(printmat[dataRows, rankCol], 'E')
+    printmat[!dataRows, ] <- syntaxHighlight(printmat[!dataRows, ], 'N')
+    
+    message <- syntaxHighlight(message, 'G')
+  }
+
+
+  cat(message)
+  cat(apply(printmat, 1, paste, collapse = '  '), sep = '\n')
+  cat(message)
+  invisible(dist)
+}
+
+
+
+
+prettyN <- function(N, digits = 1L) {
+  tens <- ifelse(N == 0, 0, log10(N) |> floor())
   
-  # if (e != 0) p <- paste0(p, ' × 1/10^', -e)
-  if (e != 0) p <- paste0(p, ' ÷ 10^', -e)
+  thousands <- pmin(tens %/% 3, 4L)
+  thousands[thousands < 0L] <- thousands[thousands < 0L] + 1L
   
-  p
+  # scaling (powers of 10^3)
+  scale <- c('', 'k', 'M', 'G', 'P')[1L + abs(thousands)]
+  scale[thousands < 0] <- paste0('/', scale[thousands < 0])
+  N <- N / 1000^thousands
+
+  globalscale <- if (length(unique(scale[N != 0])) == 1L) {
+    globalscale <- unique(thousands[N != 0])
+    scale <- NULL
+    globalscale
+  }
+  
+  # round and format
+  Nround <- round(N, digits = digits)
+  approx <- N != Nround
+  
+  Nprint <- format(Nround, scientific = FALSE)
+  Nprint <- gsub('^( *)0\\.', '\\1 .', Nprint)
+  Nprint <- gsub('\\.0*$', '', Nprint)
+  
+  output <- paste0(Nprint, scale, ifelse(approx, '~', ''))
+  output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+  
+  attr(output, 'scale') <- globalscale
+  attr(output, 'approx') <- any(approx)
+  
+  output
+  
+}
+
+
+prettyP <- function(P, digits = 3) {
+  tens <- ifelse(P == 0, 0, log10(P) |> round())
+  
+  thousands <- (tens + 1) %/% -3
+  scale <- min(thousands)
+  
+  P <- P * 1000^scale
+  
+  Pround <- round(P, digits = digits)
+  approx <- P != Pround
+  
+  Pprint <- format(Pround, scientific = FALSE)
+  Pprint <- gsub('^( *)0\\.', '\\1 .', Pprint)
+  Pprint <- gsub('\\0*$', '', Pprint)
+
+  
+  output <- paste0(Pprint, ifelse(approx, '~', ''))
+  output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+  
+  attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
+  attr(output, 'approx') <- any(approx)
+  
+  output
   
 }
 
@@ -107,28 +201,36 @@ prettyp <- function(p, digits = 4) {
 
 #' @rdname distributions
 #' @export
-`[.humdrumR.table` <- function(x, ...) {
+`[.distribution` <- function(x, ...) {
   result <- NextMethod()
   class(result) <- class(x)
   result
 }
 
 ### coercion ----
-
-as.data.table.count.table <- function(x) {
-  makecounts(as.data.table(as.data.frame.table(x, responseName = 'N')))
+as.data.frame.distribution <- function(x) {
+  class(x) <- c('data.frame')
+  x
 }
 
-as.table.count.frame <- function(x) {
+as.data.table.distribution <- function(x) {
+  as.data.table(as.data.frame(x))
+}
+
+as.table.distribution <- function(x) {
   x <- as.data.frame(x)
   
-  dimnames <- lapply(x[colnames(x) != 'N'], unique)
   
-  tab <- array(dim = lengths(dimnames), dimnames = dimnames)
-  tab[as.matrix(x[colnames(x) != 'N'])] <- x$N
+  dimnames <- setdiff(colnames(dist), c('P', 'N'))
+  type <- setdiff(colnames(dist), dimnames)
   
-  class(tab) <- c('count.table', 'humdrumR.table', 'table')
-  tab
+  levels <- lapply(x[ , dimnames], unique)
+  
+  
+  tab <- array(dim = lengths(dimnames), dimnames = levels)
+  tab[as.matrix(x[ , dimnames])] <- x[[type]]
+  
+  humdrumR.table(tab)
   
 }
 
@@ -136,14 +238,52 @@ as.table.count.frame <- function(x) {
 
 #' @rdname distributions
 #' @export
-sort.count.frame <- function(x, decreasing = TRUE) {
-  setorderv(x, 'N', order = if (decreasing) - 1 else 1)
-  x
+sort.distribution <- function(x, decreasing = TRUE) {
+  type <- dist_type(x)
   
+  
+  
+  ord <- do.call('order', c(as.list(x[colnames(x) == type]), 
+                            list(decreasing = decreasing)))
+  
+  x <- x[ord, ]
+  
+  attr(x, 'sort') <- if (decreasing) -1 else 1
+  x
 }
 
 
 ### aligning ----
+
+alignDistributions <- function(d1, d2, funcname = '') {
+  
+  
+  dimnames1 <- dimnames(d1)
+  dimnames2 <- dimnames(d2)
+  
+  if (!setequal(dimnames1, dimnames2)) .stop("If using {funcname} on distributions, they must all have the same dimensions.")
+  
+  d3 <- merge(d1, d2, by = dimnames1, all = TRUE, suffixes = c('1', '2'))
+  d3[!colnames(d3) %in% union(colnames(d1), colnames(d2))] <- lapply(d3[!colnames(d3) %in% union(colnames(d1), colnames(d2))], 
+                                                                    \(np) ifelse(is.na(np), 0, np))
+  
+  
+  levels <- lapply(getFactors(d1), unique)
+  
+  
+  lapply(dimnames1,
+         \(dim) {
+           list(pmin(match(d3[[dim]], d1[[dim]]), 
+                     match(d3[[dim]], d2[[dim]]), 
+                     na.rm = TRUE),
+                d3[[dim]])
+         }) |> unlist(recursive = FALSE) -> orderby
+  
+  d3 <- d3[do.call('order', orderby), order(!colnames(d3) %in% dimnames1)]
+  
+  distribution(d3)
+}
+  
 
 alignTables <- function(tables, funcname = '', margin = NULL) {
   tables <- lapply(tables, 
@@ -199,30 +339,6 @@ alignTables <- function(tables, funcname = '', margin = NULL) {
 }
 
 
-alignFrames <- function(x, y, funcname = '') {
-  
-  if (length(setdiff(union(colnames(x), colnames(y)), intersect(colnames(x), colnames(y))))) .stop("If using {funcname} on count frames, they must all have the same dimensions.")
-  categories <- setdiff(intersect(colnames(x), colnames(y)), 'N')
-  
-  
-  z <- merge(x, y, by = categories, all = TRUE)
-  z[ , N.x := ifelse(is.na(N.x), 0, N.x)]
-  z[ , N.y := ifelse(is.na(N.y), 0, N.y)]
-  
-  
-  lapply(categories,
-         \(cat) {
-           
-           list(pmin(match(z[[cat]], x[[cat]]), 
-                     match(z[[cat]], y[[cat]]), 
-                     na.rm = TRUE),
-                z[[cat]])
-         }) |> unlist(recursive = FALSE) -> orderby
-  
-  z <- z[do.call('order', orderby)]
-  setcolorder(z, colnames(z)[order(grepl('^N', colnames(z)))])
-  z
-}
 
 
 
@@ -271,48 +387,51 @@ rbind.humdrumR.table <- function(...) {
   
 }
 
-### arithmetic ----
-
 #' @export
-Ops.humdrumR.table <- function(e1, e2) {
-  outputclass <- if (!.Generic %in% c('+', '-')) {
-    'table' 
-  } else {
-    if (all(class(e1) == class(e2))) class(e1) else 'humdrumR.table'  
-    }
+cbind.distribution <- function(...) {
+  args <- list(...)
+  dists <- sapply(args, inherits, what = 'distribution')
   
-  if (inherits(e1, 'table') && inherits(e2, 'table')) {
-    tables <- alignTables(list(e1, e2), .Generic)
-    e1 <- tables[[1]]
-    e2 <- tables[[2]]
-  }
- 
-  result <- NextMethod(.Generic)
-  class(result) <- outputclass
-  result
 }
 
+### arithmetic ----
+
+
+setMethod('+', c('count', 'count'),
+          function(e1, e2) {
+            
+          })
+
+setMethod('*', c('count', 'numeric'),
+          function(e1, e2) {
+            Ns <- grepl('^N[1-9]?[0-9]*$', colnames(e1)) 
+            e1[Ns] <- lapply(e1[Ns], `+`, e2 = e2)
+            e1
+            
+          })
+
 #' @export
-Ops.humdrumR.frame <- function(e1, e2) {
-  outputclass <- if (!.Generic %in% c('+', '-')) {
-    'data.table' 
-  } else {
-    if (all(class(e1) == class(e2))) class(e1) else 'humdrumR.frame'  
-  }
+Ops.distribution <- function(e1, e2) {
+  if (!inherits(e1, 'distribution')) return(do.call(.Generic, list(e2, e1)))
   
-  result <- if (inherits(e1, 'data.table') && inherits(e2, 'data.table')) {
-    frame <- alignFrames(e1, e2, .Generic)
+    browser()
+  NP1 <- getNP(e1)
+  if (!inherits(e2, 'distribution')) {
+    cbind(getFactors(e1), as.data.frame(lapply(NP1, .Generic, e2 = e2)))
+    
+  } else {
+    
+    NP2 <- getNP(e2)
+    if (length(NP1) != length(NP2)) .stop("Can't do math between distributions when there are multiple distributions")
+    
+    frame <- alignDistributions(e1, e2, .Generic)
     frame[ , N := do.call(.Generic, list(N.x, N.y))]
     frame[ , c('N.x', 'N.y') := NULL]
     
-    frame
-  } else {
-    NextMethod(.Generic)
   }
-  
-  class(result) <- outputclass
-  result
+ 
 }
+
 
 
 
@@ -436,7 +555,8 @@ setMethod('%*%', c('probability.frame', 'probability.frame'),
 count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE) {
   quos <- rlang::enquos(...)
   
-  if (length(quos)) {
+  counts <- if (length(quos)) {
+    names(quos) <- sapply(quos, rlang::as_name)
     quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
     rlang::eval_tidy(quo)
     
@@ -445,6 +565,8 @@ count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, 
     
     do.call('count', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
   }
+  
+  counts
 }
 
 #' @rdname distributions
@@ -486,7 +608,7 @@ count.default <- function(..., sort = FALSE,
   
   if (is.numeric(sort) && sort < 0) result <- result[nrow(result):1]
   
-  makecounts(result)
+  distribution(result)
   
 }
 
@@ -495,15 +617,16 @@ count.default <- function(..., sort = FALSE,
 count.table <- function(..., sort = FALSE,
                         na.rm = FALSE,
                         exclude = NULL, .drop = FALSE) {
+  tab <- list(...)[[1]]
+  probs <- any(tab < 1 & tab > 0)
+  dist <- distribution(tab, responseName = if (probs) 'P' else 'N')
   
-  count.frame <- as.data.table.count.table(list(...)[[1]])
+  if (sort) dist <- sort.distribution(count.frame, decreasing = sort != -1)
   
-  if (sort) count.frame <- sort.count.frame(count.frame, decreasing = sort != -1)
-  count.frame
+  dist
   
 }
 
-as.counts <- count.table
 
 
 ### table() -----
@@ -524,8 +647,8 @@ deparse.names <- function(exprs, deparse.level = 1L) {
 setGeneric('table', signature = 'x',
            def = function(x, ..., exclude = if (useNA == 'no') c(NA, NaN), useNA = 'no', dnn = NULL, deparse.level = 1) {
              # this is an approach to making base::table generic, but dispatched on a single x argument.
-             # this is necessary to make it so we can dispatch on x=humdrumR with non-standard evalation of ... 
-             # the hope is that this function behaves exactly like base::table, but its tricky to achieve.
+             # this is necessary to make it so we can dispatch on x=humdrumR with non-standard evaluation of ... 
+             # the hope is that this function behaves exactly like base::table (for non humdrumR classes), but its tricky to achieve.
              # table(x = ..., x=...) will cause an error that doesn't appear in base::table.
              args <- list(...)
              
@@ -538,7 +661,7 @@ setGeneric('table', signature = 'x',
                                 list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level))))
              }
              exprs <- sys.call()[-1]
-             exprs <- exprs[!.names(exprs) %in% c('exclude', 'useNA', 'dnn', 'deparse.level')]
+             exprs <- exprs[!.names(exprs) %in% c('exclude', 'useNA', 'dnn', 'deparse.level', '.drop', 'na.rm')]
              names <- .names(exprs)
              if (!any(names == 'x')) names[which(names == '')[1]] <- 'x'
              
@@ -550,8 +673,12 @@ setGeneric('table', signature = 'x',
              dnn <- ifelse(dnn == '', names(args), dnn)
              dnn <- ifelse(dnn == '' | (dnn == 'x' & .names(exprs) != 'x'), deparse.names(exprs, deparse.level), dnn)
              
-             args <- lapply(args, factorize)    
-             do.call(base::table, c(args, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
+             token <- any(sapply(args, inherits, what = 'token'))
+             args <- lapply(args, factorize)
+             
+             tab <- do.call(base::table, c(args, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
+             
+             if (token) makecounts(tab) else tab
   }) 
 
 
@@ -578,8 +705,9 @@ setMethod('table', 'humdrumR',
           function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
                    useNA = 'no', dnn = NULL,
                    deparse.level = 1) {
+            
             quos <- rlang::enquos(...)
-            if (length(quos)) {
+            tab <- if (length(quos)) {
               dnn <- .names(quos)
               dnn[dnn == ''] <- deparse.names(quos[dnn == ''], deparse.level = deparse.level)
               quo <- rlang::quo(with(x, table(!!!quos, exclude = exclude, useNA = !!useNA, dnn = dnn)))
@@ -591,6 +719,8 @@ setMethod('table', 'humdrumR',
               
               do.call('table', c(as.list(fields), list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
             }
+            
+            makecounts(tab)
             
           })
 
@@ -614,21 +744,97 @@ as.table.count.frame <- function(x) table(x)
 #' 
 #' 
 #' @export
-setGeneric('P', function(x, ...) standardGeneric('P'))
+setGeneric('P', signature = 'x', function(x, ...) standardGeneric('P'))
+
+
+setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor', 'token'))
+
+#' @rdname P
+#' @export
+setMethod('P', 'formula', 
+          function(x, ..., condition = NULL, na.rm = TRUE) {
+            
+            distribution <- P(count.default(x, ..., na.rm = na.rm))
+            
+            makeprobs(distribution)
+          })
+
+#' @rdname P
+#' @export
+setMethod('P', 'discrete',
+          function(x, ..., condition = NULL, na.rm = TRUE) {
+            
+            distribution <- P(count.default(x, ..., na.rm = na.rm))
+      
+           makeprobs(distribution)
+          })
 
 
 #' @rdname P
 #' @export
-setMethod('P', c('count.frame'),
-          function(x, na.rm = FALSE) {
-            x <- as.data.table(x)
+setMethod('P', 'numeric',
+          function(x, na.rm = FALSE, ..., bw = 'SJ', adjust = 1.5) {
             
+            if (!na.rm && any(is.na(x)))  {
+              return(NULL)
+            } else {
+              x <- x[!is.na(x)]
+            }
+            
+            density <- density(x, ..., bw = bw, adjust = adjust)
+            
+            frame <- data.table(X = density$x, P = density$y)
+            makeprobs(frame)
+            
+          })
+
+setMethod('P', 'missing',
+          function(x, ..., margin = NULL, na.rm = TRUE) {
+            args <- list(..., margin = margin, na.rm = na.rm)
+            origname <- names(args)[1]
+            names(args)[1] <- 'x'
+
+            result <- do.call('P', args)
+             
+            if (is.table(result)) names(dimnames(result))[1] <- origname
+            result
+          })
+
+
+#' @rdname distributions
+#' @export 
+setMethod('P', 'humdrumR',
+          function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE) {
+  quos <- rlang::enquos(...)
+   probs <- if (length(quos)) {
+    quo <- rlang::quo(with(x, P(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
+    rlang::eval_tidy(quo)
+    
+  } else {
+    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+    do.call('P', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
+  }
+   
+   makeprobs(probs)
+})
+
+
+#' @rdname distributions
+#' @export
+setMethod('P', c('count.frame'),
+          function(x, ..., .by = NULL, na.rm = FALSE) {
             if (na.rm) x <- x[!Reduce('|', lapply(x, is.na))]
             
-            x$P <- x$Count / sum(x$Count, na.rm = TRUE)
-            x$Count <- NULL
+            x$P <- if (is.null(.by)) {
+              x[ , N / sum(N, na.rm = TRUE)]
+            } else {
+              x[ , N / sum(N, na.rm = TRUE), by = .by]$V1
+            }
+           
+            N <- sum(x$N)
+            x[ , N := NULL]
             
-            x
+            makeprobs(x, N = N)
           })
 
 
@@ -653,77 +859,11 @@ setMethod('P', c('table'),
             ptab <- proportions(x, margin = condition) 
             
             
-            n <- marginSums(x, margin = condition)
+            N <- marginSums(x, margin = condition)
             
-            new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
+            makeprobs(ptab, N = N)
+            # new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
           })
-
-
-
-#' @rdname P
-#' @export
-setMethod('P', 'discrete',
-          function(x, ..., distribution = NULL, margin = NULL, na.rm = TRUE) {
-            checks(distribution, xnull | xclass('probability.frame'))
-            
-            if (is.null(distribution)) distribution <- P(count(x, ..., na.rm = FALSE), margin = margin, na.rm = na.rm)
-            
-            
-            
-            ind <- if (na.rm) {
-              cbind(x, ...)
-            } else {
-              dimnames(distribution) <- lapply(dimnames(distribution), \(dim) ifelse(is.na(dim), '<NA>', dim))
-              ind <- cbind(x, ...)
-              ind[is.na(ind)] <- '<NA>'
-              ind
-            }
-            c(unclass(distribution)[ind])
-          })
-
-
-#' @rdname P
-#' @export
-setMethod('P', 'numeric',
-          function(x, density = NULL, na.rm = FALSE, ..., bw = 'SJ', adjust = 1.5) {
-            checks(density, xnull | xclass('density'))
-            
-            if (!na.rm && any(is.na(x)))  {
-              return(rep_len(NA_real_, length(x)))
-            } else {
-              .x <- x[!is.na(x)]
-            }
-            
-            nuniq <- length(unique(.x))
-            if ((all(is.whole(.x)) && nuniq < 50L)) return(P(as.character(x), margin = margin, na.rm = na.rm))
-            
-            if (is.null(density)) density <- density(.x, ..., bw = bw, adjust = adjust)
-            
-            
-            x[!is.na(x)] <- density$y[closest(.x, density$x, value = FALSE)]
-            
-            x
-            
-          })
-
-#' @rdname P
-#' @export
-setMethod('P', 'missing',
-          function(x, ..., margin = NULL, na.rm = TRUE) {
-            args <- list(..., margin = margin, na.rm = na.rm)
-            origname <- names(args)[1]
-            names(args)[1] <- 'x'
-            
-            result <- do.call('p', args)
-            
-            if (is.table(result)) names(dimnames(result))[1] <- origname
-            result
-          })
-
-
-
-
-
 
 
 
@@ -739,54 +879,6 @@ unmargin <- function(pd) {
   
 }
 
-
-#' @rdname P
-#' @export
-setMethod('show', 'probability.frame',
-          function(object) {
-            digits <- 4L
-            
-            x <- S3Part(object, strictS3 = TRUE)
-            zeros <- x == 0
-            
-            x[] <- prettyp(x, digits = 4L)
-            
-            # dimension names
-            header <- pdist.name(x, object@margin)
-            
-            # names(dimnames(x)) <- NULL
-            cat('\t\t', header, '\n', sep = '')
-            print(x, quote = FALSE, na.print = '.NA')
-          })
-
-
-pdist.name <- function(ptab, margin = NULL, func = 'P') {
-  dimnames <- names(dimnames(ptab))
-  
-  args <- if (length(margin)) {
-    independent <- dimnames[margin]
-    dependent <- dimnames[-margin]
-    
-    paste0(paste(dependent, collapse = ', '), 
-           ' | ', 
-           paste(independent, collapse = ', '))
-    
-    
-  } else {
-    paste(dimnames, collapse = ', ') 
-  }
-  
-  paste0(func, '(', args, ')')
-  
-}
-
-#' @rdname distributions
-#' @export
-as.data.frame.probability.frame <- function(x, ...) {
-  tab <- as.data.frame(S3Part(x), ...)
-  names(tab)[names(tab) == 'Freq'] <- 'p'
-  tab
-}
 
 
 

@@ -163,7 +163,7 @@ format.token <- function(x, ...) {
 }
 
 factorize <- function(token) {
-  if (!inherits(token, 'token')) return(factor(token))
+  if (!inherits(token, 'token')) return(if (is.factor(token)) token else factor(token))
   factorizer <- token@Attributes$factorizer
   if (is.null(factorizer)) return(factor(token@.Data))
   
