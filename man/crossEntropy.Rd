@@ -14,7 +14,7 @@ TBA
 }
 \seealso{
 Other {Information theory functions}: 
-\code{\link{entropy}()},
+\code{\link{ic}()},
 \code{\link{mutualInfo}()}
 }
 \concept{{Information theory functions}}

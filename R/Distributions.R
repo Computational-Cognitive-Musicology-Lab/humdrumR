@@ -17,7 +17,7 @@ NULL
 
 setClass('distribution', contains = 'data.frame', slots = c(Sort = 'integer'))
 setClass('count', contains = 'distribution')
-setClass('probability', contains = 'distribution', slots = c(N = 'integer'))
+setClass('probability', contains = 'distribution', slots = c(N = 'integer', Condition = 'maybecharacter'))
 
 
 
@@ -59,7 +59,8 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
                                zeros = '.') {
   
   type <- dist_type(dist)
-  message <- paste0('humdrumR ', if (type == 'P') 'probability distribution' else 'count distribution')
+  message <- paste0('humdrumR ', 
+                    if (type == 'P') paste0('probability distribution ', Pequation(dist)) else 'count distribution')
   
   dimnames <- dimnames(dist)
   
@@ -156,7 +157,19 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
 }
 
 
-
+Pequation <- function(dist, f = 'P') {
+  dimnames <- dimnames(dist)
+  
+  condition <- dist@Condition 
+  
+  eq <- paste(setdiff(dimnames, condition), collapse = ',')
+  if (!is.null(condition)) {
+    condition <- paste(condition, collapse = ',')
+    eq <- paste0(eq, ' | ', condition)
+  }
+  
+  paste0(f, '(', eq, ')')
+}
 
 prettyN <- function(N, digits = 1L, zeros = '.') {
   tens <- ifelse(N == 0, 0, log10(abs(N)) |> floor())
@@ -211,10 +224,12 @@ prettyP <- function(P, digits = 3) {
   Pprint <- format(Pround, scientific = FALSE)
   Pprint <- gsub('^( *)0\\.', '\\1 .', Pprint)
   Pprint <- gsub('\\0*$', '', Pprint)
+  Pprint[P == 0] <- ' .'
 
   
   output <- paste0(Pprint, ifelse(approx, '~', ''))
   output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+  output <- gsub('\\.000~', '.~   ', output)
   
   attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
   attr(output, 'approx') <- any(approx)
@@ -233,17 +248,38 @@ setMethod('[', 'distribution',
               i <- i[do.call('paste', c(getFactors(x), list(sep = '.'))), , drop = FALSE]
             }
             
-            distribution(as.data.frame(x)[i , ], type = dist_type(x))
+            type <- dist_type(x)
+            if (type == 'P') {
+              distribution(as.data.frame(x)[i , ], type = type, Condition = x@Condition, N = x@N)
+            } else {
+              distribution(as.data.frame(x)[i , ], type = type)
+            }
+            
              
+          })
+
+#' @export
+setMethod('[', c('probability', 'missing', 'character'),
+          function(x, i, j, ...) {
+            
+            N <- x@N
+            x <- unmargin(x)
+            x <- as.data.table(x)
+            
+            x <- as.data.frame(x[ , list(P = sum(P)), by = j])
+            
+            distribution(x, 'P', Condition = NULL, N = N)
+            
           })
 
 
 ### coercion ----
 
 #' @export
-as.data.frame.distribution <- function(x) {
+setMethod('as.data.frame', 'distribution',
+          function(x) {
   setNames(as.data.frame(x@.Data), colnames(x))
-}
+})
 
 #' @export
 as.data.table.distribution <- function(x) {
@@ -300,12 +336,20 @@ alignDistributions <- function(..., funcname = '') {
   
   aligned <- lapply(dists, 
                   \(dist) {
-                    X <- getValues(merge(levels, as.data.frame(dist), all = TRUE))
-                    ifelse(is.na(X), 0, X)
+                    df <- merge(levels, as.data.frame(dist), all = TRUE)
+                    
+                    type <- dist_type(dist)
+                    df[[type]] <-  ifelse(is.na(df[[type]]), 0, df[[type]])
+                    
+                    df
+                    
+                   
                     
                   })
-  names(aligned) <- sapply(dists, dist_type)
   
+  levels <- as.data.frame(aligned[[1]])[, dimnames, drop = FALSE] # not sure why, but the order has changed
+  aligned <- lapply(aligned, getValues)
+  names(aligned) <- sapply(dists, dist_type)
   
   list(Levels = levels, X = aligned)
 }
@@ -476,6 +520,7 @@ setMethod('+', c('count', 'integer'),
 setMethod('Ops', c('distribution', 'distribution'),
           function(e1, e2) {
             aligned <- alignDistributions(e1, e2, funcname = .Generic)
+
             
             result <- callGeneric(aligned$X[[1]], aligned$X[[2]])
             distmat(aligned$Levels, result, dist_type(e1))
@@ -513,7 +558,29 @@ setMethod('mean', 'distribution',
             setNames(mean(getValues(x), ..., na.rm), paste(dimnames(x), collapse = '.'))
           })
 
-
+#' @export
+setMethod('*', c('probability', 'probability'),
+          \(e1, e2) {
+            
+            dimnames1 <- dimnames(e1)
+            dimnames2 <- dimnames(e2)
+            
+            if (length(intersect(dimnames1, dimnames2))) return(callNextMethod(e1, e2))
+            
+            if (length(dimnames1) > 1L || length(dimnames2) > 1L) .stop("Can't cross product probability distributions with more than one dimenion yet.")
+            
+            p1 <- setNames(e1$P, getFactors(e1)[[1]])
+            p2 <- setNames(e2$P, getFactors(e2)[[1]])
+            
+            jointp <- outer(p1, p2, '*')
+            
+            df <- as.data.frame(as.table(jointp))
+            colnames(df) <- c(dimnames1, dimnames2, 'P')
+            
+            distribution(df, 'P', Condition = NULL, N = sum(e1@N, e2@N))
+            
+            
+          })
 
 
 
@@ -764,7 +831,7 @@ setGeneric('table', signature = 'x',
              
              tab <- do.call(base::table, c(args, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
              
-             if (token) makecounts(tab) else tab
+             tab
   }) 
 
 
@@ -837,20 +904,21 @@ setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor
 
 #' @rdname P
 #' @export
-setMethod('P', 'formula', 
-          function(x, ..., condition = NULL, na.rm = TRUE) {
+setMethod('P', 'data.frame', 
+          function(x, formula, ..., na.rm = TRUE) {
             
-            distribution <- P(count.default(x, ..., na.rm = na.rm))
+            lhs <- rlang::expr_name(rlang::f_lhs(formula))
+            rhs <- rlang::expr_name(rlang::f_rhs(formula))
             
-            makeprobs(distribution)
+            do.call('P', c(x[c(lhs, rhs)], list(condition = rhs, ..., na.rm = na.rm)))
+            
           })
 
 #' @rdname P
 #' @export
 setMethod('P', 'discrete',
           function(x, ..., condition = NULL, na.rm = TRUE) {
-            
-            P(count.default(x, ..., na.rm = na.rm))
+            P(count.default(x, ..., na.rm = na.rm), condition = condition)
       
           })
 
@@ -875,13 +943,12 @@ setMethod('P', 'numeric',
 
 setMethod('P', 'missing',
           function(x, ..., margin = NULL, na.rm = TRUE) {
-            args <- list(..., margin = margin, na.rm = na.rm)
+            args <- list(..., na.rm = na.rm)
             origname <- names(args)[1]
             names(args)[1] <- 'x'
 
             result <- do.call('P', args)
-             
-            if (is.table(result)) names(dimnames(result))[1] <- origname
+            names(result)[1] <- origname
             result
           })
 
@@ -890,41 +957,45 @@ setMethod('P', 'missing',
 #' @export 
 setMethod('P', 'humdrumR',
           function(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE) {
-  quos <- rlang::enquos(...)
-   probs <- if (length(quos)) {
-    quo <- rlang::quo(with(x, P(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
-    rlang::eval_tidy(quo)
-    
-  } else {
-    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
-    do.call('P', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
-  }
-   
-   makeprobs(probs)
+            quos <- rlang::enquos(...)
+            
+            probs <- if (length(quos)) {
+              names(quos) <- sapply(quos, rlang::as_name)
+              quo <- rlang::quo(with(x, P(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
+              rlang::eval_tidy(quo)
+              
+            } else {
+              fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+              
+              do.call('P', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
+            }
+            
+            probs
 })
 
 
 #' @rdname distributions
 #' @export
 setMethod('P', c('count'),
-          function(x, ..., .by = NULL, na.rm = FALSE) {
+          function(x, ..., condition = NULL, na.rm = FALSE) {
             if (na.rm) x <- x[!Reduce('|', lapply(x, getFactors(x))), ]
             
             x <- as.data.frame(x)
             
-            x$P <- if (is.null(.by)) {
+            x$P <- if (is.null(condition)) {
               N <- sum(x$N, na.rm = TRUE)
               x$N / N
             } else {
-              ind <- tapply(x$N, x[ , .by])
-              N <- tapply(x$N, ind, sum)
+              conditionvec <- do.call('paste', c(x[condition], list(sep = '.')))
+              N <- c(tapply(x$N, conditionvec, \(x) as.integer(sum(x))))
+              N <- N[unique(conditionvec)] # to match original order
               
-              x$N / N[ind]
+              x$N / N[conditionvec]
             }
            
             x$N <- NULL
             
-            distribution(x, 'P', N = N)
+            distribution(x, 'P', N = N, Condition = condition)
           })
 
 
@@ -951,21 +1022,26 @@ setMethod('P', c('table'),
             
             N <- marginSums(x, margin = condition)
             
-            makeprobs(ptab, N = N)
+            distribution(N, 'P')
             # new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
           })
 
 
 
-unmargin <- function(pd) {
-  if (length(pd@margin) == 0L) return(pd)
- 
-  marginal <- proportions(pd@N)
+unmargin <- function(dist) {
+  if (is.null(dist@Condition)) return(dist)
   
-  pd <- sweep(pd, pd@margin, marginal, '*')
-  pd@margin <- integer(0L)
-  pd@N <- sum(pd@N)
-  pd
+  
+  N <- sum(dist@N)
+  margins <- dist@N / N
+  
+  dist$P <- dist$P * margins[paste(dist[[dist@Condition]])] # paste to deal with NA levels
+  
+  
+  dist@Condition <- NULL
+  dist@N <- N
+  dist
+ 
   
 }
 
@@ -983,8 +1059,11 @@ unmargin <- function(pd) {
 #' @export
 setGeneric('likely', function(x, log, ...) standardGeneric('likely'))
 
+#' @rdname entropy
+#' @export
+setGeneric('ic', function(x, ...) standardGeneric('ic'))
 
-## Entropy etc. ----
+## Entropy . ----
 
 
 ### entropy() ----
@@ -1037,18 +1116,20 @@ setMethod('entropy', 'table',
             setNames(-sum(joint * other), equation)
           })
 
+#' @export
+#' @rdname entropy
+H <- entropy
   
 #' @rdname entropy
 #' @export
-setMethod('entropy', 'probability.frame',
+setMethod('entropy', 'probability',
           function(x, base = 2) {
             
-            joint <- unmargin(x)
+            joint <- unmargin(x)$P
             
-            other <- x
-            other <- ifelse(x == 0L, 0, log(other, base = base)) 
+            other <- ifelse(x$P > 0L, log(x$P, base = base), 0) 
             
-            equation <- pdist.name(joint, x@margin, 'H')
+            equation <- Pequation(x, 'H')
             
             setNames(-sum(joint * other), equation)
           })
@@ -1072,43 +1153,7 @@ setMethod('entropy', 'density',
             
           })
 
-#' @rdname entropy
-#' @export
-setGeneric('ic', function(x, ...) standardGeneric('ic'))
-#' @rdname entropy
-#' @export
-setMethod('ic', 'discrete',
-          function(x, ..., base = 2, distribution = NULL, margin = NULL, na.rm = TRUE) {
-            
-            p <- P(x, distribution = distribution, ..., margin = margin, na.rm = na.rm)
-            
-            -ifelse(p == 0, NA, log(p, base = base))
 
-            
-          })
-
-#' @rdname entropy
-#' @export
-setMethod('ic', 'numeric',
-          function(x, base = 2, density = NULL, ..., na.rm = TRUE) {
-            
-            p <- P(x, density = density, ..., na.rm = na.rm)
-            
-            -ifelse(p == 0, NA, log(p, base = base))
-            
-            
-          })
-
-#' @rdname entropy
-#' @export
-setMethod('ic', 'missing',
-          function(x, base = 2, ..., margin = NULL, na.rm = TRUE) {
-            args <- list(..., base = base, margin = margin, na.rm = na.rm)
-            names(args)[1] <- 'x'
-            do.call('ic', args)
-            
-            
-          })
 
 
 
@@ -1121,23 +1166,27 @@ setMethod('ic', 'missing',
 setGeneric('mutualInfo', function(x, ...) standardGeneric('mutualInfo'))
 
 
+
 #' @rdname mutualInfo
 #' @export
-setMethod('mutualInfo', 'probability.frame',
+setMethod('mutualInfo', 'probability',
           function(x, ..., base = 2) {
-            if (length(dim(x)) < 2L) return(entropy(x, base = base))
+            dimnames <- dimnames(x)
+            if (length(dimnames) != 2L) .stop("Can't calculate mutual information of a single variable.")
             
-            joint <- S3Part(unmargin(x))
+            x <- unmargin(x)
             
-            independentJoint <- outer(rowSums(x), colSums(x), '*')
+            independentjoint <- (x[ , dimnames[1]] * x[ , dimnames[2]])
             
-            logjoint <- ifelse(joint == 0, 0, log(joint, base))
-            logindependent <- ifelse(independentJoint == 0, 0, log(independentJoint, base))
             
-            ratio <- logjoint - logindependent
+            ratio <- x / independentjoint
+            logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
             
-            equation <- pdist.name(joint, x@margin, 'I')
-            setNames(sum(joint * ratio), equation)
+            joint <- setNames(x$P, do.call('paste', c(getFactors(x), list(sep = '.'))))
+            joint <- joint[rownames(logratio)]
+            sum(joint * logratio)
+            
+            
             
           })
 

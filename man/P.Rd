@@ -3,7 +3,7 @@
 \name{\%*\%,probability.frame,probability.frame-method}
 \alias{\%*\%,probability.frame,probability.frame-method}
 \alias{P}
-\alias{P,formula-method}
+\alias{P,data.frame-method}
 \alias{P,discrete-method}
 \alias{P,numeric-method}
 \alias{P,table-method}
@@ -13,7 +13,7 @@
 
 P(x, ...)
 
-\S4method{P}{formula}(x, ..., condition = NULL, na.rm = TRUE)
+\S4method{P}{data.frame}(x, formula, ..., na.rm = TRUE)
 
 \S4method{P}{discrete}(x, ..., condition = NULL, na.rm = TRUE)
 

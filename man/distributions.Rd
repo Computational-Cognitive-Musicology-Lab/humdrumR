@@ -16,7 +16,7 @@
 \alias{table,count.frame-method}
 \alias{as.table.count.frame}
 \alias{P,humdrumR-method}
-\alias{P,count.frame-method}
+\alias{P,count-method}
 \title{Distributions}
 \usage{
 \S4method{show}{distribution}(object)
@@ -66,7 +66,7 @@ table(
 
 \S4method{P}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
 
-\S4method{P}{count.frame}(x, ..., .by = NULL, na.rm = FALSE)
+\S4method{P}{count}(x, ..., condition = NULL, na.rm = FALSE)
 }
 \description{
 HUmdrumR has ways to...
