@@ -15,8 +15,8 @@
 \alias{table,humdrumR-method}
 \alias{table,count.frame-method}
 \alias{as.table.count.frame}
-\alias{P,humdrumR-method}
-\alias{P,count-method}
+\alias{pdist,humdrumR-method}
+\alias{pdist,count-method}
 \title{Distributions}
 \usage{
 \S4method{show}{distribution}(object)
@@ -36,11 +36,11 @@
 
 \S4method{Ops}{count.frame,count.frame}(e1, e2)
 
-\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
-\method{count}{default}(..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+\method{count}{default}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
 
-\method{count}{table}(..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+\method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
 table(
   x,
@@ -64,9 +64,9 @@ table(
 
 \method{as.table}{count.frame}(x)
 
-\S4method{P}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, exclude = NULL, .drop = FALSE)
+\S4method{pdist}{humdrumR}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
 
-\S4method{P}{count}(x, ..., condition = NULL, na.rm = FALSE)
+\S4method{pdist}{count}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
 }
 \description{
 HUmdrumR has ways to...

@@ -217,7 +217,7 @@ reference:
   - counts
 - subtitle: "Information theory"
   contents:
-  - P
+  - pdist
   - entropy
   - crossEntropy
   - mutualInfo
