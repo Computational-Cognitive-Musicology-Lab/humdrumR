@@ -26,7 +26,7 @@ setClass('probability', contains = 'distribution', slots = c(N = 'integer', Cond
 distribution <- function(x, type, ...) {
   df <- as.data.frame(x)
   
-  new(if (type == 'N') 'count' else 'probability', 
+  new(if (type == 'n') 'count' else 'probability', 
       new('distribution', df, Sort = 0L), 
       ...)
 }
@@ -41,12 +41,12 @@ humdrumR.table <- function(tab) {
 ### Accessors ----
 
 
-dist_type <- function(dist) intersect(colnames(dist), c('N', 'P'))
+dist_type <- function(dist) intersect(colnames(dist), c('n', 'p'))
 getValues <- function(dist) as.data.frame(dist)[ , dist_type(dist)]
 getFactors <- function(dist) as.data.frame(dist)[ , dimnames(dist), drop = FALSE]
 
 #' @export
-dimnames.distribution <- function(x) setdiff(colnames(x), c('N', 'P'))
+dimnames.distribution <- function(x) setdiff(colnames(x), c('n', 'p'))
 
 ### print() ----
 
@@ -62,7 +62,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   type <- dist_type(dist)
   message <- paste0('humdrumR ', 
-                    if (type == 'P') paste0('probability distribution ', Pequation(dist)) else 'count distribution')
+                    if (type == 'p') paste0('probability distribution ', Pequation(dist)) else 'count distribution')
   
   dimnames <- dimnames(dist)
   
@@ -76,7 +76,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   X <- getValues(dist)
   
-  X <- if (type == 'P') prettyP(X, digits = digits) else prettyN(X, digits = digits, zeros = zeros)
+  X <- if (type == 'p') prettyP(X, digits = digits) else prettyN(X, digits = digits, zeros = zeros)
   
   # do we scale or round?
   scale <- attr(X, 'scale')
@@ -277,7 +277,7 @@ setMethod('[', 'distribution',
             }
             
             type <- dist_type(x)
-            if (type == 'P') {
+            if (type == 'p') {
               distribution(as.data.frame(x)[i , ], type = type, Condition = x@Condition, N = x@N)
             } else {
               distribution(as.data.frame(x)[i , ], type = type)
@@ -296,7 +296,7 @@ setMethod('[', c('probability', 'missing', 'character'),
             
             x <- as.data.frame(x[ , list(P = sum(P)), by = j])
             
-            distribution(x, 'P', Condition = NULL, N = N)
+            distribution(x, 'p', Condition = NULL, N = N)
             
           })
 
@@ -515,7 +515,7 @@ rbind.humdrumR.table <- function(...) {
 
 ### arithmetic ----
 
-distmat <- function(factors, result, type = 'N') {
+distmat <- function(factors, result, type = 'n') {
   if (inherits(factors, 'distribution')) factors <- getFactors(factors)
   mat <- matrix(result, ncol = 1)
   rownames(mat) <- do.call('paste', c(factors, list(sep = '.')))
@@ -532,7 +532,7 @@ setMethod('+', c('count', 'count'),
             df <- aligned$Levels
             df$N <- callGeneric(aligned$X[[1]], aligned$X[[2]])
             
-            distribution(df, 'N')
+            distribution(df, 'n')
           })
 
 #' @export
@@ -541,7 +541,7 @@ setMethod('+', c('count', 'integer'),
             df <- getFactors(e1)
             df$N <- callGeneric(getValues(e1), e2)
             
-            distribution(df, 'N')
+            distribution(df, 'n')
           })
 
 #' @export
@@ -603,9 +603,9 @@ setMethod('*', c('probability', 'probability'),
             jointp <- outer(p1, p2, '*')
             
             df <- as.data.frame(as.table(jointp))
-            colnames(df) <- c(dimnames1, dimnames2, 'P')
+            colnames(df) <- c(dimnames1, dimnames2, 'p')
             
-            distribution(df, 'P', Condition = NULL, N = sum(e1@N, e2@N))
+            distribution(df, 'p', Condition = NULL, N = sum(e1@N, e2@N))
             
             
           })
@@ -764,10 +764,10 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   
   
   
-  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(dimnames)), name = 'N', .drop = !!.drop)))
+  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(dimnames)), name = 'n', .drop = !!.drop)))
   
   
-  dist <- distribution(result, 'N')
+  dist <- distribution(result, 'n')
   
   if (sort) sort(dist, decreasing = sort != -1) else dist
   
@@ -800,10 +800,10 @@ count.table <- function(..., sort = FALSE,
                         na.rm = FALSE,
                         .drop = FALSE) {
   tab <- list(...)[[1]]
-  type <- if (any(tab < 1 & tab > 0)) 'P' else 'N'
+  type <- if (any(tab < 1 & tab > 0)) 'p' else 'n'
   df <- as.data.frame(tab, responseName = type)
   
-  dist <- if (type == 'P') {
+  dist <- if (type == 'p') {
     distribution(df, type, N = sum(tab), Condition = NULL)
   } else {
     distribution(df, type)
@@ -1059,7 +1059,7 @@ setMethod('pdist', c('table'),
             
             N <- marginSums(x, margin = condition)
             
-            distribution(N, 'P')
+            distribution(N, 'p')
             # new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
           })
 
