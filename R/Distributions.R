@@ -242,16 +242,16 @@ prettyP <- function(P, digits = 3) {
 
 
 prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
-  if (is.integer(x) || all(is.whole(x))) {
-    range <- diff(range(x))
+  levels <- sort(unique(x))
+  if (is.integer(x) || all(is.whole(levels))) {
+    range <- diff(range(levels))
     
     if (range <= maxN) {
-      return(factor(x, levels = min(x) : max(x)))
+      return(factor(x, levels = min(levels) : max(levels)))
     }
-   
-  }
-  if (length(unique(x)) <= (maxN / 2)) {
-    return(factor(x, levels = x))
+    if (length(levels) <= maxN) return(factor(x, levels = levels))
+  } else {
+    if (length(levels) <= (maxN / 2)) return(factor(x, levels = levels))
   }
   
   if (quantiles) {
@@ -262,7 +262,7 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
     breaks <- hist(x, plot = FALSE, ...)$breaks
   }
   
-  cut(x, breaks, include.lowest = TRUE, right = right, dig.lab = 1)
+  cut(x, breaks, include.lowest = TRUE, right = right, dig.lab = 3)
   
 }
 
@@ -733,66 +733,66 @@ setMethod('%*%', c('probability.frame', 'probability.frame'),
 #' 
 #' @name distributions
 #' @export 
-count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE) {
-  quos <- rlang::enquos(...)
+count.default <- function(..., sort = FALSE, na.rm = FALSE,
+                          .drop = FALSE, binArgs = list()) {
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
   
+  args <- list(...)
+  
+  # get the appropriate (dim)names for each argument
+  exprs <- as.list(substitute(list(...)))[-1L]
+  
+  dimnames <- .names(args)
+  if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
+  
+  if (length(unique(lengths(args))) > 1L) .stop("Can't cross-tabulate these vectors ({harvard(dimnames, 'and')}), because they are different lengths.")
+  
+  # factorize arguments as needed
+  args <- lapply(args,
+                 \(arg) {
+                   if (inherits(arg, 'token')) arg <-  factorize(arg) 
+                   if (is.numeric(arg)) do.call('prettyBins', c(list(arg), binArgs)) else arg
+                 })
+  
+  
+  argdf <- as.data.frame(args)
+  colnames(argdf) <- dimnames
+  
+  if (na.rm) argdf <- argdf[Reduce('&', lapply(argdf, \(col) !is.na(col))), , drop = FALSE]
+  
+  
+  
+  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(dimnames)), name = 'N', .drop = !!.drop)))
+  
+  
+  dist <- distribution(result, 'N')
+  
+  if (sort) sort(dist, decreasing = sort != -1) else dist
+  
+  
+  
+}
+
+#' @rdname distributions
+#' @export
+count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  quos <- rlang::enquos(...)
   counts <- if (length(quos)) {
     names(quos) <- sapply(quos, rlang::as_name)
-    quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
+    quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs)))
     rlang::eval_tidy(quo)
     
   } else {
-    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
-    
-    do.call('count', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
+    fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)), null = 'asis')
+    do.call('count.default', c(as.list(fields), list(sort = sort, na.rm = na.rm, .drop = .drop, binArgs = binArgs)))
   }
   
   counts
 }
 
 
-#' @rdname distributions
-#' @export
-count.default <- function(..., sort = FALSE,
-                          na.rm = FALSE,
-                          .drop = FALSE,
-                          binArgs = list()) {
-  checks(sort, xTF | (xwholenum & xlen1))
-  checks(na.rm, xTF)
-  checks(.drop, xTF)
-  
-  # exprs <- rlang::enexprs(...)
-  exprs <- as.list(substitute(list(...)))[-1L]
-  
-  args <- list(...)
-  dimnames <- .names(args)
-  if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
-  
-  
-  args <- lapply(args,
-                 \(arg) {
-                   
-                   if (inherits(arg, 'token')) arg <-  factorize(arg) 
-                   if (is.numeric(arg)) do.call('prettyBins', c(list(arg), binArgs)) else arg
-                 })
-  
-  if (length(unique(lengths(args))) > 1L) .stop("Can't cross-tabulate these vectors ({harvard(dimnames, 'and')}), because they are different lengths.")
-  
-  tab <- as.data.table(args)
-  colnames(tab) <- dimnames
-  
-  if (na.rm) tab <- tab[Reduce('&', lapply(tab, \(col) !is.na(col)))]
-  
-  
-  
-  result <- rlang::eval_tidy(rlang::expr(tab |> count(!!!(rlang::syms(dimnames)), sort = !!sort, name = 'N', .drop = !!.drop)))
-  
-  
-  if (is.numeric(sort) && sort < 0) result <- result[nrow(result):1]
-  
-  distribution(result, 'N')
-  
-}
 
 #' @rdname distributions
 #' @export
