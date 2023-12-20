@@ -231,7 +231,7 @@ prettyP <- function(P, digits = 3, zeros = '.') {
   output <- paste0(Pprint, ifelse(approx, '~', ''))
   maxnchar <- max(nchar(output))
   output <- paste0(output, strrep(' ', maxnchar - nchar(output))) 
-  output <- gsub('\\.000~', '.~   ', output)
+  # output <- gsub(paste0('\\.', strrep('0', digits), '~'), paste0('.~', strrep(' ', digits)), output)
   
   attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', maxnchar - 2L))
   attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
@@ -821,9 +821,12 @@ pexprs <- function(exprs, colnames, condition) {
 setMethod('pdist', 'humdrumR',
           function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             
+            exprs <- rlang::enexprs(...)
+            
             humtab <- getHumtab(x, 'D')
-            if (length(list(...))) {
-              pdist(humtab, ..., condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)
+            if (length(exprs)) {
+              
+              rlang::eval_tidy(rlang::expr(pdist(humtab, !!!exprs, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs)))
             } else {
               selectedFields <- selectedFields(x)
               names(selectedFields) <- selectedFields
@@ -834,18 +837,6 @@ setMethod('pdist', 'humdrumR',
                         list(condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
               
             }
-            
-            
-            # if (length(quos)) {
-              # names(quos) <- sapply(quos, rlang::as_label)
-              # quo <- rlang::quo(with(x, pdist(!!!quos, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop)))
-              # rlang::eval_tidy(quo)
-              
-            # } else {
-              # fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
-              
-              # do.call('pdist', c(as.list(fields), list(sort = sort, na.rm = na.rm, .drop = .drop)))
-            # }
             
           
 })
@@ -902,7 +893,7 @@ unmargin <- function(dist) {
   N <- sum(dist@N)
   margins <- dist@N / N
   
-  dist$P <- dist$P * margins[paste(dist[[dist@Condition]])] # paste to deal with NA levels
+  dist$p <- dist$p * margins[paste(dist[[dist@Condition]])] # paste to deal with NA levels
   
   
   dist@Condition <- NULL
@@ -968,20 +959,8 @@ setGeneric('ic', function(x, ...) standardGeneric('ic'))
 #' 
 #' @family {Information theory functions} 
 #' @export
-setGeneric('entropy', function(x, base = 2, ...) standardGeneric('entropy'))
-#' @rdname entropy
-#' @export
-setMethod('entropy', 'table',
-          function(x, base = 2, margin = NULL, na.rm = FALSE) {
-            
-            joint <- pdist(x, margin = NULL, na.rm = na.rm)
-            
-            other <- pdist(x, margin = margin, na.rm = na.rm)
-            other <- ifelse(x == 0L, 0, log(other, base = base)) 
-            
-            equation <- pdist.name(joint, margin, 'H')
-            setNames(-sum(joint * other), equation)
-          })
+setGeneric('entropy', function(x, ..., base = 2) standardGeneric('entropy'))
+
 
 #' @export
 #' @rdname entropy
@@ -992,9 +971,9 @@ H <- entropy
 setMethod('entropy', 'probability',
           function(x, base = 2) {
             
-            joint <- unmargin(x)$P
+            joint <- unmargin(x)$p
             
-            other <- ifelse(x$P > 0L, log(x$P, base = base), 0) 
+            other <- ifelse(x$p > 0L, log(x$p, base = base), 0) 
             
             equation <- Pequation(x, 'H')
             
@@ -1002,6 +981,13 @@ setMethod('entropy', 'probability',
           })
 
 
+
+#' @rdname entropy
+#' @export
+setMethod('entropy', 'count',
+          function(x, ..., base = 2) {
+           entropy(pdist(x, ...), base = base)
+          })
 
   
 #' @rdname entropy
@@ -1021,9 +1007,28 @@ setMethod('entropy', 'density',
           })
 
 
+#' @rdname entropy
+#' @export
+setMethod('entropy', 'ANY',
+          function(x, ..., base = 2) {
+            entropy(pdist(x, ...), base = base)
+          })
 
 
 
+#' @rdname entropy
+#' @export
+setMethod('entropy', 'table',
+          function(x, base = 2, margin = NULL, na.rm = FALSE) {
+            
+            joint <- pdist(x, margin = NULL, na.rm = na.rm)
+            
+            other <- pdist(x, margin = margin, na.rm = na.rm)
+            other <- ifelse(x == 0L, 0, log(other, base = base)) 
+            
+            equation <- pdist.name(joint, margin, 'H')
+            setNames(-sum(joint * other), equation)
+          })
 
 
 #' Calculate Mutual Information of variables

@@ -3,23 +3,26 @@
 \name{ic}
 \alias{ic}
 \alias{entropy}
-\alias{entropy,table-method}
 \alias{H}
 \alias{entropy,probability-method}
+\alias{entropy,count-method}
 \alias{entropy,density-method}
+\alias{entropy,table-method}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
 ic(x, ...)
 
 entropy(x, base = 2, ...)
 
-\S4method{entropy}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
-
 entropy(x, base = 2, ...)
 
 \S4method{entropy}{probability}(x, base = 2)
 
+\S4method{entropy}{count}(x, base = 2, ...)
+
 \S4method{entropy}{density}(x, base = 2, na.rm = TRUE)
+
+\S4method{entropy}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},

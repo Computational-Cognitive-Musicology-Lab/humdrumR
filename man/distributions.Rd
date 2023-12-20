@@ -5,18 +5,14 @@
 \alias{show,distribution-method}
 \alias{print.distribution}
 \alias{sort,distribution-method}
-\alias{+,count.frame,count.frame-method}
-\alias{-,count.frame,count.frame-method}
-\alias{Ops,count.frame,count.frame-method}
 \alias{count.default}
 \alias{count.humdrumR}
 \alias{count.table}
-\alias{table}
-\alias{table,humdrumR-method}
-\alias{table,count.frame-method}
-\alias{as.table.count.frame}
 \alias{pdist,count-method}
 \alias{pdist,humdrumR-method}
+\alias{table}
+\alias{table,humdrumR-method}
+\alias{table,distribution-method}
 \title{Distributions}
 \usage{
 \S4method{show}{distribution}(object)
@@ -30,17 +26,44 @@
 
 \S4method{sort}{distribution}(x, decreasing = TRUE)
 
-\S4method{+}{count.frame,count.frame}(e1, e2)
+count.default(
+  ...,
+  sort = FALSE,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\S4method{-}{count.frame,count.frame}(e1, e2)
+count.humdrumR(
+  x,
+  ...,
+  sort = FALSE,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\S4method{Ops}{count.frame,count.frame}(e1, e2)
+count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
-\method{count}{default}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
+\S4method{pdist}{count}(
+  x,
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
-
-\method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+\S4method{pdist}{humdrumR}(
+  x,
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
 table(
   x,
@@ -60,27 +83,7 @@ table(
   deparse.level = 1
 )
 
-\S4method{table}{count.frame}(x)
-
-\method{as.table}{count.frame}(x)
-
-\S4method{pdist}{count}(
-  ...,
-  condition = NULL,
-  na.rm = FALSE,
-  sort = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
-
-\S4method{pdist}{humdrumR}(
-  ...,
-  condition = NULL,
-  na.rm = FALSE,
-  sort = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+\S4method{table}{distribution}(x)
 }
 \description{
 HUmdrumR has ways to...
@@ -111,8 +114,8 @@ if you don't specify a name, \code{count()} will make up a name(s) based on expr
 \section{Manipulating humdrum tables}{
 
 
-The output of \code{count()} is a special form of R \code{table}, a \code{count.frame}.
-Given two or more \code{count.frame}s, if you apply basic R operators
+The output of \code{count()} is a special form of R \code{table}, a \code{humdrumR.table}.
+Given two or more \code{humdrumR.table}s, if you apply basic R operators
 (e.g., arithmetic, comparisons) or row/column binding (\code{cbind}/\code{rbind})
 \code{humdrumR} will align the tables by their dimension-names before
 doing the operation.
