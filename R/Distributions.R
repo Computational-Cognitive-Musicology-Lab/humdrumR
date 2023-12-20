@@ -1,5 +1,7 @@
-# S4 Distributions ----
 
+
+
+# S4 Distributions ----
 
 ## Definitions ----
 
@@ -32,11 +34,6 @@ distribution <- function(x, type, ...) {
 }
 
 
-
-humdrumR.table <- function(tab) {
-  class(tab) <- unique(c('humdrumR.table', 'table', class(tab)))
-  tab
-}
 
 ### Accessors ----
 
@@ -348,24 +345,6 @@ as.data.table.distribution <- function(x) {
   as.data.table(as.data.frame(x))
 }
 
-#' @export
-as.table.distribution <- function(x) {
-  levels <- lapply(getFactors(x), unique)
-  dimnames <- dimnames(x)
-  type <- dist_type(x)
-  
-  x <- as.data.frame(x)
-  
-  
-  
-  
-  
-  tab <- array(dim = lengths(levels), dimnames = levels)
-  tab[as.matrix(x[ , dimnames])] <- x[[type]]
-  
-  humdrumR.table(tab)
-  
-}
 
 ### sorting ----
 
@@ -431,59 +410,6 @@ mergeLevels <- function(...) {
   newlev[ord]
 }
 
-alignTables <- function(tables, funcname = '', margin = NULL) {
-  tables <- lapply(tables, 
-                   \(tab) {
-                     dn <- dimnames(tab)
-                     null <- sapply(dn, is.null)
-                     dn[null] <- lapply(dim(tab)[null], \(n) paste0(seq_len(n), '___'))
-                     dimnames(tab) <- lapply(dn, \(names) ifelse(is.na(names), '_<NA>_', names) ) 
-                     tab})
-  olddimnames <- lapply(tables, dimnames)
-  dimensions <- lapply(olddimnames, .names)
-  dimensions <- Reduce(\(a, b) ifelse(a == b, a, paste(a, b, sep = if (nchar(funcname) == 1) funcname else '/')), dimensions)
-  if (length(unique(lengths(olddimnames))) > 1L) .stop("If using {funcname} on tables, they must all have the same number of dimensions.")
-  
-  dimnames <- as.list(as.data.frame(do.call('rbind', olddimnames)))
-  if (is.null(margin)) margin <- seq_along(dimnames)
-  
-  # dimnames[ margin] <- lapply(dimnames[ margin], \(dim) rep(list(stringr::str_sort(Reduce('union', dim), numeric = TRUE)), length(dim)))
-  dimnames[ margin] <- lapply(dimnames[margin], 
-                              \(dim) {
-                                uniondim <- Reduce('union', dim)
-                                
-                                # get order
-                                uniondim <- uniondim[order(do.call('pmin', c(list(na.rm = TRUE), lapply(dim, \(d) match(uniondim, d)))),
-                                                           uniondim)]
-                                
-                                rep(list(uniondim), length(dim))
-                                
-                                })
-  
-  
-  dimnames <- as.data.frame(do.call('rbind', dimnames))
-  rownames(dimnames) <- dimensions
-  
-  empties <- lapply(dimnames, \(dn) array(data = 0L, dim = lengths(dn), dimnames = dn))
-  
-  Map(tables, empties,
-      f = \(tab, empty) {
-           
-           # indices <- as.matrix(do.call('expand.grid', c(dimnames(tab), list(stringsAsFactors = FALSE))))
-           indices <- rep(list(rlang::missing_arg()), length(dim(tab)))
-           indices[margin] <- dimnames(tab)[margin]
-           empty[] <- do.call('[<-', c(list(empty), indices, list(value = tab)))
-           # empty[indices] <- tab[indices]
-           
-           dimnames(empty) <- lapply(dimnames(empty), 
-                                     \(names) {
-                                         if (!any(grepl('[0-9]___', names))) ifelse(names == '_<NA>_', NA_character_, names)
-                                       })
-           empty
-         }) 
-  
-}
-
 
 #' @export
 cbind.distribution <- function(...) {
@@ -501,51 +427,6 @@ cbind.distribution <- function(...) {
   mat
 }
 
-
-#' @export
-cbind.humdrumR.table <- function(...) {
-  args <- list(...)
-  classes <- unique(lapply(args, class))
-  
-  table.i <- which(sapply(args, is.table))
-  tables <- args[table.i]
-  tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(t(tab)) else tab)
-  colnames <- unlist(lapply(tables, \(tab) if (is.null(colnames(tab))) rep('', ncol(tab)) else colnames(tab)))
-  tables <- lapply(tables, `colnames<-`, value = NULL)
-  tables <- if (length(tables) > 1L) alignTables(tables, 'cbind', margin = 1) else lapply(tables, unclass)
-  
-  args[table.i] <- tables
-  newtab <- do.call('cbind', args)
-  
-  argnames <- rep(.names(args), sapply(args, ncol))
-  colnames(newtab) <- ifelse(argnames == '', colnames, argnames)
-  
-  class(newtab) <- if (length(classes) == 1L) classes[[1]] else c('humdrumR.table', 'table')
-  newtab
-}
-
-#' @export
-rbind.humdrumR.table <- function(...) {
-  args <- list(...)
-  table.i <- which(sapply(args, is.table))
-  tables <- args[table.i]
-  
-  tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(tab) else tab)
-  rownames <- unlist(lapply(tables, \(tab) if (is.null(rownames(tab))) rep('', nrow(tab)) else rownames(tab)))
-  tables <- lapply(tables, `rownames<-`, value = NULL)
-  tables <- alignTables(tables, 'rbind', margin = 2) 
-  
-  args[table.i] <- tables
-  newtab <- do.call('rbind', args)
-  
-  argnames <- rep(.names(args), sapply(args, \(arg) if (length(dim(arg)) == 1L) 1 else nrow(arg)))
-  rownames(newtab) <- ifelse(argnames == '', rownames, argnames)
-
-  class(newtab) <- 'table'
-  newtab
-  
-  
-}
 
 
 
@@ -653,57 +534,6 @@ setMethod('*', c('probability', 'probability'),
 
 
 
-#' @rdname distributions
-#' @export
-setMethod('+', c('count.frame', 'count.frame'),
-          \(e1, e2) {
-            
-            e3 <- data.table::rbindlist(list(e1, e2), fill = TRUE)
-            e3 <- e3[ , list(Count = sum(Count)), by = setdiff(colnames(e3), 'Count')]
-            
-            new('count.frame', e3)
-            
-          })
-
-#' @rdname distributions
-#' @export
-setMethod('-', c('count.frame', 'count.frame'),
-          \(e1, e2) {
-            
-            e3 <- merge.count.frame(e1, e2)
-            e3 <- as.data.table.count.frame(e3)
-            e3$Count <- e3$Count.x - e3$Count.y
-            
-            e3[ , c('Count.x', 'Count.y') := NULL]
-            new('count.frame', e3)
-            
-          })
-
-#' @rdname distributions
-#' @export
-setMethod('Ops', c('count.frame', 'count.frame'),
-          \(e1, e2) {
-            
-            e3 <- merge.count.frame(e1, e2)
-            e3 <- as.data.table.count.frame(e3)
-            e3$Count <- callGeneric(e3$Count.x, e3$Count.y)
-            
-            e3[ , c('Count.x', 'Count.y') := NULL]
-            e3[]
-          })
-
-
-
-
-
-
-
-#' @rdname pdist
-#' @export
-setMethod('%*%', c('probability.frame', 'probability.frame'),
-          function(x, y) {
-            new('probability.frame', as.table(outer(S3Part(x), S3Part(y), '*')), N = x@N, margin = integer(0L))
-          })
 
 
 
@@ -743,8 +573,8 @@ setMethod('%*%', c('probability.frame', 'probability.frame'),
 
 #' @section Manipulating humdrum tables:
 #' 
-#' The output of `count()` is a special form of R `table`, a `count.frame`.
-#' Given two or more `count.frame`s, if you apply basic R operators 
+#' The output of `count()` is a special form of R `table`, a `humdrumR.table`.
+#' Given two or more `humdrumR.table`s, if you apply basic R operators 
 #' (e.g., arithmetic, comparisons) or row/column binding (`cbind`/`rbind`) 
 #' `humdrumR` will align the tables by their dimension-names before
 #' doing the operation.
@@ -850,114 +680,6 @@ count.table <- function(..., sort = FALSE,
 }
 
 
-
-### table() -----
-
-deparse.names <- function(exprs, deparse.level = 1L) {
-  # exprs <- as.list(substitute(list(...)))[-1L]
-  # if (length(exprs) == 1L && is.list(..1) && !is.null(nm <- names(..1))) 
-    # return(nm)
-  vapply(exprs, \(x) switch(deparse.level + 1, 
-                            "", 
-                            if (is.symbol(x)) as.character(x) else "",
-                            deparse(x, nlines = 1)[1L]),
-         "")
-}
-
-#' @rdname distributions
-#' @export
-setGeneric('table', signature = 'x',
-           def = function(x, ..., exclude = if (useNA == 'no') c(NA, NaN), useNA = 'no', dnn = NULL, deparse.level = 1) {
-             # this is an approach to making base::table generic, but dispatched on a single x argument.
-             # this is necessary to make it so we can dispatch on x=humdrumR with non-standard evaluation of ... 
-             # the hope is that this function behaves exactly like base::table (for non humdrumR classes), but its tricky to achieve.
-             # table(x = ..., x=...) will cause an error that doesn't appear in base::table.
-             args <- list(...)
-             
-             if (missing(x)) {
-               if (is.null(dnn)) dnn <- character(length(args))
-               dnn <- ifelse(dnn == '', names(args), dnn)
-               names(args)[1] <- 'x'
-               return(do.call('table', 
-                              c(args, 
-                                list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level))))
-             }
-             exprs <- sys.call()[-1]
-             exprs <- exprs[!.names(exprs) %in% c('exclude', 'useNA', 'dnn', 'deparse.level', '.drop', 'na.rm')]
-             names <- .names(exprs)
-             if (!any(names == 'x')) names[which(names == '')[1]] <- 'x'
-             
-             
-             args <- append(args, list(x = x), which(names == 'x')[1] - 1) # put x into right position (argument order)
-             
-             
-             if (is.null(dnn)) dnn <- character(length(args))
-             dnn <- ifelse(dnn == '', names(args), dnn)
-             dnn <- ifelse(dnn == '' | (dnn == 'x' & .names(exprs) != 'x'), deparse.names(exprs, deparse.level), dnn)
-             
-             token <- any(sapply(args, inherits, what = 'token'))
-             args <- lapply(args, factorize)
-             
-             tab <- do.call(base::table, c(args, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
-             
-             tab
-  }) 
-
-
-# #' @rdname distributions
-# #' @export
-# setMethod('table', 'token', 
-          # function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
-                   # useNA = 'no', dnn = names(list(...)),
-                   # deparse.level = 1) {
-            
-            # args <- list(x, ...)
-            # args <- lapply(args, factorize)
-            # tab <-  do.call('table', c(args, 
-                                       # list(exclude = exclude, useNA = useNA, dnn = dnn,
-                                        # deparse.level = deparse.level)))
-            # new('count.table', tab)
-          # })
-
-
-
-#' @export
-#' @rdname distributions
-setMethod('table', 'humdrumR', 
-          function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
-                   useNA = 'no', dnn = NULL,
-                   deparse.level = 1) {
-            
-            quos <- rlang::enquos(...)
-            tab <- if (length(quos)) {
-              dnn <- .names(quos)
-              dnn[dnn == ''] <- deparse.names(quos[dnn == ''], deparse.level = deparse.level)
-              quo <- rlang::quo(with(x, table(!!!quos, exclude = exclude, useNA = !!useNA, dnn = dnn)))
-              rlang::eval_tidy(quo)
-              
-              
-            } else {
-              fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
-              
-              do.call('table', c(as.list(fields), list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
-            }
-            
-            makecounts(tab)
-            
-          })
-
-#' @export
-#' @rdname distributions
-setMethod('table', 'count.frame',
-          function(x) {
-            tab <- xtabs(N ~ . , data = as.data.frame(x))
-            makecounts(tab)
-          })
-
-
-#' @rdname distributions
-#' @export
-as.table.count.frame <- function(x) table(x)
 
 
 ### pdist() -----
@@ -1395,3 +1117,217 @@ setMethod('crossEntropy', c('probability.frame', 'probability.frame'),
 
 
 
+# table() extensions for humdrumR ---- 
+
+
+
+humdrumR.table <- function(tab) {
+  class(tab) <- unique(c('humdrumR.table', 'table', class(tab)))
+  tab
+}
+
+
+#' @export
+cbind.humdrumR.table <- function(...) {
+  args <- list(...)
+  classes <- unique(lapply(args, class))
+  
+  table.i <- which(sapply(args, is.table))
+  tables <- args[table.i]
+  tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(t(tab)) else tab)
+  colnames <- unlist(lapply(tables, \(tab) if (is.null(colnames(tab))) rep('', ncol(tab)) else colnames(tab)))
+  tables <- lapply(tables, `colnames<-`, value = NULL)
+  tables <- if (length(tables) > 1L) alignTables(tables, 'cbind', margin = 1) else lapply(tables, unclass)
+  
+  args[table.i] <- tables
+  newtab <- do.call('cbind', args)
+  
+  argnames <- rep(.names(args), sapply(args, ncol))
+  colnames(newtab) <- ifelse(argnames == '', colnames, argnames)
+  
+  class(newtab) <- if (length(classes) == 1L) classes[[1]] else c('humdrumR.table', 'table')
+  newtab
+}
+
+#' @export
+rbind.humdrumR.table <- function(...) {
+  args <- list(...)
+  table.i <- which(sapply(args, is.table))
+  tables <- args[table.i]
+  
+  tables <- lapply(tables, \(tab) if (length(dim(tab)) == 1) t(tab) else tab)
+  rownames <- unlist(lapply(tables, \(tab) if (is.null(rownames(tab))) rep('', nrow(tab)) else rownames(tab)))
+  tables <- lapply(tables, `rownames<-`, value = NULL)
+  tables <- alignTables(tables, 'rbind', margin = 2) 
+  
+  args[table.i] <- tables
+  newtab <- do.call('rbind', args)
+  
+  argnames <- rep(.names(args), sapply(args, \(arg) if (length(dim(arg)) == 1L) 1 else nrow(arg)))
+  rownames(newtab) <- ifelse(argnames == '', rownames, argnames)
+  
+  class(newtab) <- 'table'
+  newtab
+  
+  
+}
+
+
+
+#' @export
+as.table.distribution <- function(x) {
+  levels <- lapply(getFactors(x), unique)
+  dimnames <- dimnames(x)
+  type <- dist_type(x)
+  
+  x <- as.data.frame(x)
+  x[dimnames] <- lapply(x[dimnames], paste) # forces NA to be strings
+  
+  tab <- array(dim = lengths(levels), dimnames = lapply(levels, paste))
+  tab[do.call('cbind', x[dimnames])] <- x[[type]]
+  dimnames(tab) <- levels
+  
+  humdrumR.table(tab)
+  
+}
+
+alignTables <- function(tables, funcname = '', margin = NULL) {
+  tables <- lapply(tables, 
+                   \(tab) {
+                     dn <- dimnames(tab)
+                     null <- sapply(dn, is.null)
+                     dn[null] <- lapply(dim(tab)[null], \(n) paste0(seq_len(n), '___'))
+                     dimnames(tab) <- lapply(dn, \(names) ifelse(is.na(names), '_<NA>_', names) ) 
+                     tab})
+  olddimnames <- lapply(tables, dimnames)
+  dimensions <- lapply(olddimnames, .names)
+  dimensions <- Reduce(\(a, b) ifelse(a == b, a, paste(a, b, sep = if (nchar(funcname) == 1) funcname else '/')), dimensions)
+  if (length(unique(lengths(olddimnames))) > 1L) .stop("If using {funcname} on tables, they must all have the same number of dimensions.")
+  
+  dimnames <- as.list(as.data.frame(do.call('rbind', olddimnames)))
+  if (is.null(margin)) margin <- seq_along(dimnames)
+  
+  # dimnames[ margin] <- lapply(dimnames[ margin], \(dim) rep(list(stringr::str_sort(Reduce('union', dim), numeric = TRUE)), length(dim)))
+  dimnames[ margin] <- lapply(dimnames[margin], 
+                              \(dim) {
+                                uniondim <- Reduce('union', dim)
+                                
+                                # get order
+                                uniondim <- uniondim[order(do.call('pmin', c(list(na.rm = TRUE), lapply(dim, \(d) match(uniondim, d)))),
+                                                           uniondim)]
+                                
+                                rep(list(uniondim), length(dim))
+                                
+                              })
+  
+  
+  dimnames <- as.data.frame(do.call('rbind', dimnames))
+  rownames(dimnames) <- dimensions
+  
+  empties <- lapply(dimnames, \(dn) array(data = 0L, dim = lengths(dn), dimnames = dn))
+  
+  Map(tables, empties,
+      f = \(tab, empty) {
+        
+        # indices <- as.matrix(do.call('expand.grid', c(dimnames(tab), list(stringsAsFactors = FALSE))))
+        indices <- rep(list(rlang::missing_arg()), length(dim(tab)))
+        indices[margin] <- dimnames(tab)[margin]
+        empty[] <- do.call('[<-', c(list(empty), indices, list(value = tab)))
+        # empty[indices] <- tab[indices]
+        
+        dimnames(empty) <- lapply(dimnames(empty), 
+                                  \(names) {
+                                    if (!any(grepl('[0-9]___', names))) ifelse(names == '_<NA>_', NA_character_, names)
+                                  })
+        empty
+      }) 
+  
+}
+
+
+### table() -----
+
+deparse.names <- function(exprs, deparse.level = 1L) {
+  # exprs <- as.list(substitute(list(...)))[-1L]
+  # if (length(exprs) == 1L && is.list(..1) && !is.null(nm <- names(..1))) 
+  # return(nm)
+  vapply(exprs, \(x) switch(deparse.level + 1, 
+                            "", 
+                            if (is.symbol(x)) as.character(x) else "",
+                            deparse(x, nlines = 1)[1L]),
+         "")
+}
+
+#' @rdname distributions
+#' @export
+setGeneric('table', signature = 'x',
+           def = function(x, ..., exclude = if (useNA == 'no') c(NA, NaN), useNA = 'no', dnn = NULL, deparse.level = 1) {
+             # this is an approach to making base::table generic, but dispatched on a single x argument.
+             # this is necessary to make it so we can dispatch on x=humdrumR with non-standard evaluation of ... 
+             # the hope is that this function behaves exactly like base::table (for non humdrumR classes), but its tricky to achieve.
+             # table(x = ..., x=...) will cause an error that doesn't appear in base::table.
+             args <- list(...)
+             
+             if (missing(x)) {
+               if (is.null(dnn)) dnn <- character(length(args))
+               dnn <- ifelse(dnn == '', names(args), dnn)
+               names(args)[1] <- 'x'
+               return(do.call('table', 
+                              c(args, 
+                                list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level))))
+             }
+             exprs <- sys.call()[-1]
+             exprs <- exprs[!.names(exprs) %in% c('exclude', 'useNA', 'dnn', 'deparse.level', '.drop', 'na.rm')]
+             names <- .names(exprs)
+             if (!any(names == 'x')) names[which(names == '')[1]] <- 'x'
+             
+             
+             args <- append(args, list(x = x), which(names == 'x')[1] - 1) # put x into right position (argument order)
+             
+             
+             if (is.null(dnn)) dnn <- character(length(args))
+             dnn <- ifelse(dnn == '', names(args), dnn)
+             dnn <- ifelse(dnn == '' | (dnn == 'x' & .names(exprs) != 'x'), deparse.names(exprs, deparse.level), dnn)
+             
+             token <- any(sapply(args, inherits, what = 'token'))
+             args <- lapply(args, factorize)
+             
+             tab <- do.call(base::table, c(args, list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
+             
+             tab
+           }) 
+
+
+
+
+#' @export
+#' @rdname distributions
+setMethod('table', 'humdrumR', 
+          function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
+                   useNA = 'no', dnn = NULL,
+                   deparse.level = 1) {
+            
+            quos <- rlang::enquos(...)
+            tab <- if (length(quos)) {
+              dnn <- .names(quos)
+              dnn[dnn == ''] <- deparse.names(quos[dnn == ''], deparse.level = deparse.level)
+              quo <- rlang::quo(with(x, table(!!!quos, exclude = exclude, useNA = !!useNA, dnn = dnn)))
+              rlang::eval_tidy(quo)
+              
+              
+            } else {
+              fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+              
+              do.call('table', c(as.list(fields), list(exclude = exclude, useNA = useNA, dnn = dnn, deparse.level = deparse.level)))
+            }
+            
+            humdrumR.table(tab)
+            
+          })
+
+#' @export
+#' @rdname distributions
+setMethod('table', 'distribution',
+          function(x) {
+            as.table(x)
+          })
