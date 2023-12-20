@@ -8,7 +8,7 @@
 \usage{
 selectedFields(humdrumR)
 
-select.humdrumR(.data, ..., fieldTypes = "any")
+\method{select}{humdrumR}(.data, ..., fieldTypes = "any")
 }
 \arguments{
 \item{humdrumR, .data}{\emph{\strong{HumdrumR data.}}

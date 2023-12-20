@@ -16,7 +16,7 @@ pull_data.frame(humdrumR, ..., dataTypes = "D", null = "charNA2dot")
 
 pull_tibble(humdrumR, ..., dataTypes = "D", null = "charNA2dot")
 
-pull.humdrumR(.data, var, dataTypes = "D", null = "asis")
+\method{pull}{humdrumR}(.data, var, dataTypes = "D", null = "asis")
 
 \S4method{$}{humdrumR}(x, name)
 }

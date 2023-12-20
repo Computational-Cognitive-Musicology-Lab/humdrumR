@@ -157,14 +157,14 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
 }
 
 
-Pequation <- function(dist, f = 'P') {
+Pequation <- function(dist, f = 'P', collapse = ',') {
   dimnames <- dimnames(dist)
   
   condition <- dist@Condition 
   
-  eq <- paste(setdiff(dimnames, condition), collapse = ',')
+  eq <- paste(setdiff(dimnames, condition), collapse = collapse)
   if (!is.null(condition)) {
-    condition <- paste(condition, collapse = ',')
+    condition <- paste(condition, collapse = collapse)
     eq <- paste0(eq, ' | ', condition)
   }
   
@@ -295,7 +295,7 @@ setMethod('[', c('probability', 'missing', 'character'),
             x <- unmargin(x)
             x <- as.data.table(x)
             
-            x <- as.data.frame(x[ , list(P = sum(P)), by = j])
+            x <- as.data.frame(x[ , list(p = sum(p)), by = j])
             
             distribution(x, 'p', Condition = NULL, N = N)
             
@@ -514,8 +514,8 @@ setMethod('*', c('probability', 'probability'),
             
             if (length(dimnames1) > 1L || length(dimnames2) > 1L) .stop("Can't cross product probability distributions with more than one dimenion yet.")
             
-            p1 <- setNames(e1$P, getFactors(e1)[[1]])
-            p2 <- setNames(e2$P, getFactors(e2)[[1]])
+            p1 <- setNames(e1$p, getFactors(e1)[[1]])
+            p2 <- setNames(e2$p, getFactors(e2)[[1]])
             
             jointp <- outer(p1, p2, '*')
             
@@ -897,7 +897,7 @@ setGeneric('likely', function(x, log, ...) standardGeneric('likely'))
 #' @export
 setGeneric('ic', function(x, ...) standardGeneric('ic'))
 
-## Entropy . ----
+## Distributional ----
 
 
 ### entropy() ----
@@ -986,76 +986,92 @@ entropy.density <- function(x, base = 2, na.rm = TRUE) {
 #' @rdname entropy
 #' @export
 entropy.default <- function(..., base = 2) {
-            entropy(pdist( ...), base = base)
+            entropy(pdist(...), base = base)
           }
 
 
+entropies <- function(..., base = 2, conditional = FALSE) {
+  args <- list(...)
+  
+  names <- .names(args)
+  names <- ifelse(names == '', sapply(substitute(list(...))[-1], deparse, nlines = 1L), names)
+  names(args) <- names
+  
+  mat <- matrix(NA_real_, nrow = length(args), ncol = length(args))
+  
+  indices <- expand.grid(i = seq_along(args), j = seq_along(args))
+  if (!conditional) indices <- subset(indices, j >= i)
+  
+  
+  for (k in 1:nrow(indices)) {
+    i <- indices$i[k]
+    j <- indices$j[k]
+    
+
+    
+    mat[i, j] <- if (i == j) {
+      entropy(args[[i]], base = base)
+    } else {
+      do.call('entropy', c(args[c(i, j)], list(condition = if (conditional) names[j])))
+    }
+  }
+  
+  colnames(mat) <- rownames(mat) <- names
+  mat
+}
 
 
-#' Calculate Mutual Information of variables
+### mutualInfo() ----
+
+#' Calculate Entropy or Information Content of variables 
+#'
 #' 
 #' @family {Information theory functions} 
+#' @rdname entropy
 #' @export
-setGeneric('mutualInfo', function(x, ...) standardGeneric('mutualInfo'))
+mutualInfo <- function(..., base = 2) {
+  checks(base, xnumber & xpositive)
+  
+  UseMethod('mutualInfo')
+}
 
 
 
-#' @rdname mutualInfo
+#' @rdname entropy
 #' @export
-setMethod('mutualInfo', 'probability',
-          function(x, ..., base = 2) {
-            dimnames <- dimnames(x)
-            if (length(dimnames) != 2L) .stop("Can't calculate mutual information of a single variable.")
-            
-            x <- unmargin(x)
-            
-            independentjoint <- (x[ , dimnames[1]] * x[ , dimnames[2]])
-            
-            
-            ratio <- x / independentjoint
-            logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
-            
-            joint <- setNames(x$P, do.call('paste', c(getFactors(x), list(sep = '.'))))
-            joint <- joint[rownames(logratio)]
-            sum(joint * logratio)
-            
-            
-            
-          })
+mutualInfo.probability <-  function(x, base = 2) {
+  dimnames <- dimnames(x)
+  if (length(dimnames) != 2L) .stop("Can't calculate mutual information of a single variable.")
+  
+  x <- unmargin(x)
+  
+  independentjoint <- (x[ , dimnames[1]] * x[ , dimnames[2]])
+  
+  ratio <- x / independentjoint
+  logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
+  
+  joint <- setNames(x$p, do.call('paste', c(getFactors(x), list(sep = '.'))))
+  joint <- joint[rownames(logratio)]
+  
+  equation <- Pequation(x, 'I', ';')
+  
+  setNames(sum(joint * logratio, na.rm = TRUE), equation)
+  
+}
 
 
-#' @rdname mutualInfo
+
+
+#' @rdname entropy
 #' @export
-setMethod('mutualInfo', 'table',
-          function(x, base = 2, margin = NULL, na.rm = FALSE) {
-            
-            ptab <- pdist(x, margin = margin, na.rm = na.rm)
-            mutualInfo(ptab, base = base)
-            
-          })
+mutualInfo.default <- function(..., base = 2) {
+  mutualInfo(pdist(...), base = base)
+}
 
-   
-#' @rdname mutualInfo
-#' @export
-setMethod('mutualInfo', 'discrete',
-          function(x, ..., base = 2, na.rm = FALSE) {
-            args <- list(x, ...)
-            marginals <- lapply(args, \(arg) pdist(count(arg)))
-            
-            joint <- Reduce('%*%', marginals)
-            
-            p_observed <- pdist(x, ..., margin = NULL, na.rm = na.rm)
-            p_joint <- pdist(x, ..., distribution = joint, margin = NULL, na.rm = na.rm)
-            
-            p_observed <- ifelse(p_observed == 0, NA_real_, log(p_observed, base = base))
-            p_joint <- ifelse(p_joint == 0, NA_real_, log(p_joint, base = base))
-            
-            p_observed - p_joint
-            
-            
-          
-            
-          })
+
+
+
+
   
 
 

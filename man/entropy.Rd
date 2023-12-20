@@ -5,8 +5,12 @@
 \alias{entropy}
 \alias{H}
 \alias{entropy.probability}
+\alias{entropy.numeric}
 \alias{entropy.density}
 \alias{entropy.default}
+\alias{mutualInfo}
+\alias{mutualInfo.probability}
+\alias{mutualInfo.default}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
 ic(x, ...)
@@ -17,9 +21,17 @@ H(..., base = 2)
 
 \method{entropy}{probability}(x, base = 2)
 
+\method{entropy}{numeric}(x, base = 2, na.rm = TRUE)
+
 \method{entropy}{density}(x, base = 2, na.rm = TRUE)
 
 \method{entropy}{default}(..., base = 2)
+
+mutualInfo(..., base = 2)
+
+\method{mutualInfo}{probability}(x, base = 2)
+
+\method{mutualInfo}{default}(..., base = 2)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},
@@ -51,7 +63,9 @@ By default, the \code{distribution} argument is estimated using \code{\link[=den
 }
 \seealso{
 Other {Information theory functions}: 
-\code{\link{crossEntropy}()},
-\code{\link{mutualInfo}()}
+\code{\link{crossEntropy}()}
+
+Other {Information theory functions}: 
+\code{\link{crossEntropy}()}
 }
 \concept{{Information theory functions}}

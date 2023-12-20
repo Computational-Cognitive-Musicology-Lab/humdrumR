@@ -9,9 +9,9 @@
 \alias{groups}
 \title{Divide humdrumR data into groups}
 \usage{
-group_by.humdrumR(.data, ..., .add = TRUE)
+\method{group_by}{humdrumR}(.data, ..., .add = TRUE)
 
-ungroup.humdrumR(x, ...)
+\method{ungroup}{humdrumR}(x, ...)
 
 groups(humdrumR, dataTypes = "D")
 }

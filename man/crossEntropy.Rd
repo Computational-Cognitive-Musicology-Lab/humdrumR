@@ -14,7 +14,6 @@ TBA
 }
 \seealso{
 Other {Information theory functions}: 
-\code{\link{ic}()},
-\code{\link{mutualInfo}()}
+\code{\link{ic}()}
 }
 \concept{{Information theory functions}}
