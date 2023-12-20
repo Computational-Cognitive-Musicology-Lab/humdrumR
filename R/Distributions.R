@@ -76,7 +76,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   X <- getValues(dist)
   
-  X <- if (type == 'p') prettyP(X, digits = digits) else prettyN(X, digits = digits, zeros = zeros)
+  X <- if (type == 'p') prettyP(X, digits = digits, zeros = zeros) else prettyN(X, digits = digits, zeros = zeros)
   
   # do we scale or round?
   scale <- attr(X, 'scale')
@@ -92,10 +92,11 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   dist <- getFactors(dist)
   dist[[type]] <- X
   
+  # check if we can widen
   iswide <- FALSE
   printmat <- (if(sort == -0L && length(dimnames) >= 2L) {
-    # check if we can widen
-    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(dimnames[2])), fill = 0, value.var = type))
+    
+    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(dimnames[2])), fill = attr(X, 'zerofill'), value.var = type))
     
     factorcols <- colnames(wide) %in% dimnames
     toprow    <- ifelse( factorcols, colnames(wide), '')
@@ -203,6 +204,7 @@ prettyN <- function(N, digits = 1L, zeros = '.') {
   output <- paste0(Nprint, scale, ifelse(approx, '~', ''))
   output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
   
+  attr(output, 'zerofill') <- zeros
   attr(output, 'scale') <- globalscale
   attr(output, 'approx') <- any(approx, na.rm = TRUE)
   attr(output, 'negative') <- any(N < 0, na.rm = TRUE)
@@ -212,7 +214,7 @@ prettyN <- function(N, digits = 1L, zeros = '.') {
 }
 
 
-prettyP <- function(P, digits = 3) {
+prettyP <- function(P, digits = 3, zeros = '.') {
   tens <- ifelse(P == 0, 0, log10(P) |> round())
   
   thousands <- (tens - 1) %/% -3
@@ -226,13 +228,15 @@ prettyP <- function(P, digits = 3) {
   Pprint <- format(Pround, scientific = FALSE)
   Pprint <- gsub('^( *)0\\.', '\\1 .', Pprint)
   Pprint <- gsub('\\0*$', '', Pprint)
-  Pprint[P == 0] <- ' .'
+  Pprint[P == 0] <- paste0(' ', zeros)
 
   
   output <- paste0(Pprint, ifelse(approx, '~', ''))
-  output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+  maxnchar <- max(nchar(output))
+  output <- paste0(output, strrep(' ', maxnchar - nchar(output))) 
   output <- gsub('\\.000~', '.~   ', output)
   
+  attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', maxnchar - 2L))
   attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
   attr(output, 'approx') <- any(approx)
   
@@ -314,7 +318,7 @@ as.matrix.distribution <- function(x, wide = TRUE, ...) {
                     fill = 0, value.var = type))
     
     talldim <- colnames(mat) %in% dimnames 
-    browser()
+    
     rownames(mat) <- do.call('paste', c(as.data.frame(mat[ , talldim, drop = FALSE]), list(sep = '.')))
     mat <- mat[ , !talldim, drop = FALSE]
     names(dimnames(mat)) <- c(paste(dimnames[talldim], collapse = '.'), dimnames[2])
@@ -983,6 +987,9 @@ setMethod('pdist', c('count'),
             
             x <- as.data.frame(x)
             
+            exprs <- rlang::enexprs(...)
+            if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
+            
             x$p <- if (is.null(condition)) {
               n <- sum(x$n, na.rm = TRUE)
               x$n / n
@@ -991,7 +998,7 @@ setMethod('pdist', c('count'),
               n <- c(tapply(x$n, conditionvec, \(x) as.integer(sum(x))))
               n <- n[unique(conditionvec)] # to match original order
               
-              x$n / n[conditionvec]
+              ifelse(n[conditionvec] == 0, 0, x$n / n[conditionvec])
             }
             
             x$n <- NULL
@@ -1004,6 +1011,7 @@ setMethod('pdist', c('count'),
 setMethod('pdist', 'atomictoken',
           function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             args <- list(x, ...)
+            names(args)[1] <- attr(x, 'origname') %||% 'x' # weird threading of variable name through 'missing' method
             
             # get the appropriate (dim)names for each argument
             exprs <- as.list(substitute(args))[-1L]
@@ -1014,8 +1022,7 @@ setMethod('pdist', 'atomictoken',
             
             # if condition is given as separate vector
             conditionName <- deparse(substitute(condition), nlines = 1L)
-            
-            if (is.atomic(condition) && length(condition) == length(args[[1]])) {
+            if (!is.null(condition) && is.atomic(condition) && length(condition) == length(x)) {
               args[[conditionName]] <- condition
               condition <- conditionName
             }
@@ -1035,31 +1042,54 @@ setMethod('pdist', 'data.frame',
           function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             exprs <- rlang::enexprs(...)
             
-            variables <- if (length(exprs) == 0L) {
-              as.list(x)
+            if (length(exprs) == 0L) {
+              args <- as.list(x)
             } else {
-              cols <- c()
-              for (i in seq_along(exprs)) {
-                if (rlang::is_call(exprs[[i]]) && as.character(exprs[[i]][[1]]) %in% c('|', '~')) {
-                  
-                  if (rlang::is_symbol(exprs[[i]][[3]])) condition <- as.character(exprs[[i]][[3]]) 
-                  exprs[[length(exprs) + 1L]] <- exprs[[i]][[3]]
-                  exprs[[i]] <- exprs[[i]][[2]] 
-                  
-                }
-              }
-              rlang::eval_tidy(rlang::quo(list(!!!exprs)), data = x)
+              parsed <- pexprs(exprs, colnames(x), condition)
+              condition <- parsed$Condition 
+              
+              args <- rlang::eval_tidy(rlang::quo(list(!!!(parsed$Exprs))), data = x)
+              names(args) <- names(parsed$Exprs)
             }
             
-            names(exprs) <- sapply(exprs, rlang::as_name)
             
-            do.call('pdist', c(variables, list(condition = condition, na.rm = na.rm)))
+            do.call('pdist', c(args, list(condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
             
           })
 
 
 
-
+pexprs <- function(exprs, colnames, condition) {
+  
+  for (i in seq_along(exprs)) {
+    expr <- exprs[[i]]
+    
+    exprs[[i]] <-  switch(class(expr),
+           integer = ,
+           numeric = rlang::sym(colnames[expr]),
+           character = rlang::sym(expr),
+           formula = ,
+           call = {
+             if (as.character(expr[[1]]) %in% c('|', '~')) {
+               
+               if (rlang::is_symbol(expr[[3]])) condition <- as.character(expr[[3]]) 
+               
+               exprs[[length(exprs) + 1L]] <- expr[[3]]
+               expr[[2]] 
+               
+             } else {
+               expr
+             }
+           },
+           expr)
+   
+  }
+  
+  names(exprs) <- sapply(exprs, rlang::as_label)
+  exprs <- exprs[!duplicated(names(exprs))]
+  
+  list(Exprs = exprs, Condition = condition)
+}
 
 
 
@@ -1068,18 +1098,32 @@ setMethod('pdist', 'data.frame',
 #' @export 
 setMethod('pdist', 'humdrumR',
           function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
-            quos <- rlang::enquos(...)
             
-            if (length(quos)) {
-              names(quos) <- sapply(quos, rlang::as_label)
-              quo <- rlang::quo(with(x, pdist(!!!quos, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop)))
-              rlang::eval_tidy(quo)
-              
+            humtab <- getHumtab(x, 'D')
+            if (length(list(...))) {
+              pdist(humtab, ..., condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)
             } else {
-              fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+              selectedFields <- selectedFields(x)
+              names(selectedFields) <- selectedFields
               
-              do.call('pdist', c(as.list(fields), list(sort = sort, na.rm = na.rm, .drop = .drop)))
+              do.call('pdist', 
+                      c(list(humtab), 
+                        as.list(selectedFields),
+                        list(condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
+              
             }
+            
+            
+            # if (length(quos)) {
+              # names(quos) <- sapply(quos, rlang::as_label)
+              # quo <- rlang::quo(with(x, pdist(!!!quos, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop)))
+              # rlang::eval_tidy(quo)
+              
+            # } else {
+              # fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
+              
+              # do.call('pdist', c(as.list(fields), list(sort = sort, na.rm = na.rm, .drop = .drop)))
+            # }
             
           
 })
@@ -1119,13 +1163,12 @@ setMethod('pdist', c('table'),
 #' @export
 setMethod('pdist', 'missing',
           function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
-            args <- list(..., na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)
+            args <- list(..., condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)
             origname <- names(args)[1]
             names(args)[1] <- 'x'
+            attr(args[[1]], 'origname') <- origname
             
-            result <- do.call('pdist', args)
-            names(result)[1] <- origname
-            result
+            do.call('pdist', args)
           })
 
 
