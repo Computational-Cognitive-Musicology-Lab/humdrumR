@@ -34,7 +34,7 @@ distribution <- function(x, type, ...) {
 
 
 humdrumR.table <- function(tab) {
-  class(tab) <- unique(c('humdrumR.table', class(tab)))
+  class(tab) <- unique(c('humdrumR.table', 'table', class(tab)))
   tab
 }
 
@@ -304,6 +304,36 @@ setMethod('[', c('probability', 'missing', 'character'),
 ### coercion ----
 
 #' @export
+as.matrix.distribution <- function(x, wide = TRUE, ...) {
+  dimnames <- dimnames(x)
+  type <- dist_type(x)
+  
+  if (length(dimnames) >= 2L && wide && x@Sort == -0L) {
+    mat <- as.matrix(dcast(as.data.table(x), 
+                    rlang::new_formula(quote(...), rlang::sym(dimnames[2])), 
+                    fill = 0, value.var = type))
+    
+    talldim <- colnames(mat) %in% dimnames 
+    browser()
+    rownames(mat) <- do.call('paste', c(as.data.frame(mat[ , talldim, drop = FALSE]), list(sep = '.')))
+    mat <- mat[ , !talldim, drop = FALSE]
+    names(dimnames(mat)) <- c(paste(dimnames[talldim], collapse = '.'), dimnames[2])
+    mat <- array(as.numeric(mat), dim = dim(mat), dimnames = dimnames(mat))
+    
+    
+  } else {
+    mat <- matrix(getValues(x), ncol = 1)
+    rownames(mat) <- do.call('paste', c(getFactors(x), list(sep = '.')))
+    names(dimnames(mat)) <- c(paste(dimnames, collapse = '.'), '')
+    colnames(mat) <- type
+  }
+  
+  mat
+ 
+  mat
+}
+
+#' @export
 setMethod('as.data.frame', 'distribution',
           function(x) {
   setNames(as.data.frame(x@.Data), colnames(x))
@@ -314,17 +344,19 @@ as.data.table.distribution <- function(x) {
   as.data.table(as.data.frame(x))
 }
 
+#' @export
 as.table.distribution <- function(x) {
+  levels <- lapply(getFactors(x), unique)
   dimnames <- dimnames(x)
   type <- dist_type(x)
   
   x <- as.data.frame(x)
   
   
-  levels <- lapply(x[ , dimnames], unique)
   
   
-  tab <- array(dim = lengths(dimnames), dimnames = levels)
+  
+  tab <- array(dim = lengths(levels), dimnames = levels)
   tab[as.matrix(x[ , dimnames])] <- x[[type]]
   
   humdrumR.table(tab)
@@ -760,16 +792,13 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   argdf <- as.data.frame(args)
   colnames(argdf) <- dimnames
   
-  if (na.rm) argdf <- argdf[Reduce('&', lapply(argdf, \(col) !is.na(col))), , drop = FALSE]
-  
-  
-  
   result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(dimnames)), name = 'n', .drop = !!.drop)))
   
+  if (na.rm) result <- result[Reduce('&', lapply(result[ , dimnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
   
   dist <- distribution(result, 'n')
   
-  if (sort) sort(dist, decreasing = sort != -1) else dist
+  if (sort) sort(dist, decreasing = sort > 0L) else dist
   
   
   
@@ -780,7 +809,7 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
 count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   quos <- rlang::enquos(...)
   counts <- if (length(quos)) {
-    names(quos) <- sapply(quos, rlang::as_name)
+    names(quos) <- sapply(quos, rlang::as_label)
     quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs)))
     rlang::eval_tidy(quo)
     
@@ -810,7 +839,7 @@ count.table <- function(..., sort = FALSE,
   }
   
   
-  if (sort) dist <- sort.distribution(dist, decreasing = sort != -1)
+  if (sort) dist <- sort.distribution(dist, decreasing = sort > 0L)
   
   dist
   
@@ -929,20 +958,81 @@ as.table.count.frame <- function(x) table(x)
 
 ### pdist() -----
 
+
+
 #' Tabulate and cross proportions
 #' 
 #' 
 #' @export
-setGeneric('pdist', signature = 'x', function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) standardGeneric('pdist'))
+setGeneric('pdist', signature = 'x', function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) standardGeneric('pdist'))
 
+# having x in signature is necassary in order to allow distpatch on x but delayed-evaluation of ...
+# for some methods it makes sense anyway, for others it doesn't and it also necesitates having a weird 'missing' method.
 
 setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor', 'token'))
+
+setClassUnion('atomictoken', members = c('character', 'integer', 'numeric', 'logical', 'factor', 'token'))
+
+#' @rdname distributions
+#' @export
+setMethod('pdist', c('count'),
+          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+            
+            if (na.rm) x <- x[!Reduce('|', lapply(getFactors(x), is.na)), ]
+            if (sort) x <- sort(x, sort > 0L)
+            
+            x <- as.data.frame(x)
+            
+            x$p <- if (is.null(condition)) {
+              n <- sum(x$n, na.rm = TRUE)
+              x$n / n
+            } else {
+              conditionvec <- do.call('paste', c(x[condition], list(sep = '.')))
+              n <- c(tapply(x$n, conditionvec, \(x) as.integer(sum(x))))
+              n <- n[unique(conditionvec)] # to match original order
+              
+              x$n / n[conditionvec]
+            }
+            
+            x$n <- NULL
+            
+            distribution(x, 'p', N = n, Condition = condition)
+          })
+
+#' @rdname pdist
+#' @export
+setMethod('pdist', 'atomictoken',
+          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+            args <- list(x, ...)
+            
+            # get the appropriate (dim)names for each argument
+            exprs <- as.list(substitute(args))[-1L]
+            
+            dimnames <- .names(args)
+            if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
+            names(args) <- dimnames
+            
+            # if condition is given as separate vector
+            conditionName <- deparse(substitute(condition), nlines = 1L)
+            
+            if (is.atomic(condition) && length(condition) == length(args[[1]])) {
+              args[[conditionName]] <- condition
+              condition <- conditionName
+            }
+            
+            
+            count <- do.call('count.default', c(args, list(na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
+            
+            pdist(count, condition = condition)
+            
+          })
+
+
 
 #' @rdname pdist
 #' @export
 setMethod('pdist', 'data.frame', 
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
-            
+          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             exprs <- rlang::enexprs(...)
             
             variables <- if (length(exprs) == 0L) {
@@ -967,79 +1057,40 @@ setMethod('pdist', 'data.frame',
             
           })
 
-#' @rdname pdist
-#' @export
-setMethod('pdist', 'ANY',
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
-            pdist(count.default(x, ..., na.rm = na.rm, binArgs = binArgs), condition = condition)
-      
-          })
 
 
 
 
-setMethod('pdist', 'missing',
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
-            args <- list(..., na.rm = na.rm)
-            origname <- names(args)[1]
-            names(args)[1] <- 'x'
 
-            result <- do.call('pdist', args)
-            names(result)[1] <- origname
-            result
-          })
 
 
 #' @rdname distributions
 #' @export 
 setMethod('pdist', 'humdrumR',
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
+          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             quos <- rlang::enquos(...)
             
-            probs <- if (length(quos)) {
-              names(quos) <- sapply(quos, rlang::as_name)
-              quo <- rlang::quo(with(x, pdist(!!!quos, sort = !!sort, na.rm = !!na.rm, exclude = !!exclude, .drop = !!.drop)))
+            if (length(quos)) {
+              names(quos) <- sapply(quos, rlang::as_label)
+              quo <- rlang::quo(with(x, pdist(!!!quos, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop)))
               rlang::eval_tidy(quo)
               
             } else {
               fields <- pullFields(x, union(selectedFields(x), getGroupingFields(x)))
               
-              do.call('pdist', c(as.list(fields), list(sort = sort, na.rm = na.rm, exclude = exclude, .drop = .drop)))
+              do.call('pdist', c(as.list(fields), list(sort = sort, na.rm = na.rm, .drop = .drop)))
             }
             
-            probs
+          
 })
 
 
-#' @rdname distributions
-#' @export
-setMethod('pdist', c('count'),
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
-            if (na.rm) x <- x[!Reduce('|', lapply(x, getFactors(x))), ]
-            
-            x <- as.data.frame(x)
-            
-            x$P <- if (is.null(condition)) {
-              N <- sum(x$N, na.rm = TRUE)
-              x$N / N
-            } else {
-              conditionvec <- do.call('paste', c(x[condition], list(sep = '.')))
-              N <- c(tapply(x$N, conditionvec, \(x) as.integer(sum(x))))
-              N <- N[unique(conditionvec)] # to match original order
-              
-              x$N / N[conditionvec]
-            }
-           
-            x$N <- NULL
-            
-            distribution(x, 'pdist', N = N, Condition = condition)
-          })
 
 
 #' @rdname pdist
 #' @export
 setMethod('pdist', c('table'),
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
+          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
             
             if (length(dim(x)) == 1L) condition <- NULL
             
@@ -1064,7 +1115,21 @@ setMethod('pdist', c('table'),
           })
 
 
+#' @rdname pdist
+#' @export
+setMethod('pdist', 'missing',
+          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+            args <- list(..., na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)
+            origname <- names(args)[1]
+            names(args)[1] <- 'x'
+            
+            result <- do.call('pdist', args)
+            names(result)[1] <- origname
+            result
+          })
 
+
+            
 unmargin <- function(dist) {
   if (is.null(dist@Condition)) return(dist)
   

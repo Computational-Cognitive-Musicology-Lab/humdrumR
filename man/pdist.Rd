@@ -3,20 +3,48 @@
 \name{\%*\%,probability.frame,probability.frame-method}
 \alias{\%*\%,probability.frame,probability.frame-method}
 \alias{pdist}
+\alias{pdist,atomic-method}
 \alias{pdist,data.frame-method}
-\alias{pdist,ANY-method}
 \alias{pdist,table-method}
 \title{Tabulate and cross proportions}
 \usage{
 \S4method{\%*\%}{probability.frame,probability.frame}(x, y)
 
-pdist(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
+pdist(
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\S4method{pdist}{data.frame}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
+\S4method{pdist}{atomic}(
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\S4method{pdist}{ANY}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
+\S4method{pdist}{data.frame}(
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\S4method{pdist}{table}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
+\S4method{pdist}{table}(
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 }
 \description{
 Tabulate and cross proportions
