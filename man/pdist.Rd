@@ -2,53 +2,9 @@
 % Please edit documentation in R/Distributions.R
 \name{pdist}
 \alias{pdist}
-\alias{pdist,atomictoken-method}
-\alias{pdist,data.frame-method}
-\alias{pdist,table-method}
-\alias{pdist,missing-method}
 \title{Tabulate and cross proportions}
 \usage{
 pdist(
-  x,
-  ...,
-  condition = NULL,
-  na.rm = FALSE,
-  sort = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
-
-\S4method{pdist}{atomictoken}(
-  x,
-  ...,
-  condition = NULL,
-  na.rm = FALSE,
-  sort = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
-
-\S4method{pdist}{data.frame}(
-  x,
-  ...,
-  condition = NULL,
-  na.rm = FALSE,
-  sort = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
-
-\S4method{pdist}{table}(
-  x,
-  ...,
-  condition = NULL,
-  na.rm = FALSE,
-  sort = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
-
-\S4method{pdist}{missing}(
   x,
   ...,
   condition = NULL,

@@ -8,8 +8,11 @@
 \alias{count.default}
 \alias{count.humdrumR}
 \alias{count.table}
-\alias{pdist,count-method}
-\alias{pdist,humdrumR-method}
+\alias{pdist.count}
+\alias{pdist.default}
+\alias{pdist.data.frame}
+\alias{pdist.humdrumR}
+\alias{pdist.table}
 \alias{table}
 \alias{table,humdrumR-method}
 \alias{table,distribution-method}
@@ -26,26 +29,13 @@
 
 \S4method{sort}{distribution}(x, decreasing = TRUE)
 
-count.default(
-  ...,
-  sort = FALSE,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+\method{count}{default}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
 
-count.humdrumR(
-  x,
-  ...,
-  sort = FALSE,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
 
-count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+\method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
-\S4method{pdist}{count}(
+\method{pdist}{count}(
   x,
   ...,
   condition = NULL,
@@ -55,7 +45,16 @@ count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
   binArgs = list()
 )
 
-\S4method{pdist}{humdrumR}(
+\method{pdist}{default}(
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
+
+\method{pdist}{data.frame}(
   x,
   ...,
   condition = NULL,
@@ -64,6 +63,18 @@ count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
   .drop = FALSE,
   binArgs = list()
 )
+
+\method{pdist}{humdrumR}(
+  x,
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
+
+\method{pdist}{table}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
 
 table(
   x,

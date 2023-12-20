@@ -18,13 +18,7 @@
 \usage{
 \method{subset}{humdrumR}(x, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
 
-filter.humdrumR(
-  .data,
-  ...,
-  dataTypes = "D",
-  .by = NULL,
-  removeEmptyPieces = TRUE
-)
+\method{filter}{humdrumR}(.data, ..., dataTypes = "D", .by = NULL, removeEmptyPieces = TRUE)
 
 removeEmptyFiles(x)
 

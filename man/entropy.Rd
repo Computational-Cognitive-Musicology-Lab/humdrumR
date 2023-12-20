@@ -7,20 +7,23 @@
 \alias{entropy,probability-method}
 \alias{entropy,count-method}
 \alias{entropy,density-method}
+\alias{entropy,ANY-method}
 \alias{entropy,table-method}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
 ic(x, ...)
 
-entropy(x, base = 2, ...)
+entropy(x, ..., base = 2)
 
-entropy(x, base = 2, ...)
+entropy(x, ..., base = 2)
 
 \S4method{entropy}{probability}(x, base = 2)
 
-\S4method{entropy}{count}(x, base = 2, ...)
+\S4method{entropy}{count}(x, ..., base = 2)
 
 \S4method{entropy}{density}(x, base = 2, na.rm = TRUE)
+
+\S4method{entropy}{ANY}(x, ..., base = 2)
 
 \S4method{entropy}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
 }

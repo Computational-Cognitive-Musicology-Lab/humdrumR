@@ -690,78 +690,71 @@ count.table <- function(..., sort = FALSE,
 #' 
 #' 
 #' @export
-setGeneric('pdist', signature = 'x', function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) standardGeneric('pdist'))
-
-# having x in signature is necassary in order to allow distpatch on x but delayed-evaluation of ...
-# for some methods it makes sense anyway, for others it doesn't and it also necesitates having a weird 'missing' method.
-
-setClassUnion("discrete", members = c('character', 'integer', 'logical', 'factor', 'token'))
-
-setClassUnion('atomictoken', members = c('character', 'integer', 'numeric', 'logical', 'factor', 'token'))
+pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
+  
+  UseMethod('pdist')
+}
 
 #' @rdname distributions
 #' @export
-setMethod('pdist', c('count'),
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
-            
-            if (na.rm) x <- x[!Reduce('|', lapply(getFactors(x), is.na)), ]
-            if (sort) x <- sort(x, sort > 0L)
-            
-            x <- as.data.frame(x)
-            
-            exprs <- rlang::enexprs(...)
-            if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
-            
-            x$p <- if (is.null(condition)) {
-              n <- sum(x$n, na.rm = TRUE)
-              x$n / n
-            } else {
-              conditionvec <- do.call('paste', c(x[condition], list(sep = '.')))
-              n <- c(tapply(x$n, conditionvec, \(x) as.integer(sum(x))))
-              n <- n[unique(conditionvec)] # to match original order
-              
-              ifelse(n[conditionvec] == 0, 0, x$n / n[conditionvec])
-            }
-            
-            x$n <- NULL
-            
-            distribution(x, 'p', N = n, Condition = condition)
-          })
+pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+  
+  if (na.rm) x <- x[!Reduce('|', lapply(getFactors(x), is.na)), ]
+  if (sort) x <- sort(x, sort > 0L)
+  
+  x <- as.data.frame(x)
+  
+  exprs <- rlang::enexprs(...)
+  if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
+  
+  x$p <- if (is.null(condition)) {
+    n <- sum(x$n, na.rm = TRUE)
+    x$n / n
+  } else {
+    conditionvec <- do.call('paste', c(x[condition], list(sep = '.')))
+    n <- c(tapply(x$n, conditionvec, \(x) as.integer(sum(x))))
+    n <- n[unique(conditionvec)] # to match original order
+    
+    ifelse(n[conditionvec] == 0, 0, x$n / n[conditionvec])
+  }
+  
+  x$n <- NULL
+  
+  distribution(x, 'p', N = n, Condition = condition)
+}
 
-#' @rdname pdist
+#' @rdname distributions
 #' @export
-setMethod('pdist', 'atomictoken',
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
-            args <- list(x, ...)
-            names(args)[1] <- attr(x, 'origname') %||% 'x' # weird threading of variable name through 'missing' method
-            
-            # get the appropriate (dim)names for each argument
-            exprs <- as.list(substitute(args))[-1L]
-            
-            dimnames <- .names(args)
-            if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
-            names(args) <- dimnames
-            
-            # if condition is given as separate vector
-            conditionName <- deparse(substitute(condition), nlines = 1L)
-            if (!is.null(condition) && is.atomic(condition) && length(condition) == length(x)) {
-              args[[conditionName]] <- condition
-              condition <- conditionName
-            }
-            
-            
-            count <- do.call('count.default', c(args, list(na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
-            
-            pdist(count, condition = condition)
-            
-          })
+pdist.default <-  function(..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+  exprs <- as.list(substitute(list(...)))[-1]
+  args <- list(...)
+  
+  # get the appropriate (dim)names for each argument
+  
+  dimnames <- .names(args)
+  if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
+  names(args) <- dimnames
+  
+  # if condition is given as separate vector
+  conditionName <- deparse(substitute(condition), nlines = 1L)
+  if (!is.null(condition) && is.atomic(condition) && length(condition) == length(args[[1]])) {
+    args[[conditionName]] <- condition
+    condition <- conditionName
+  }
+  
+  
+  count <- do.call('count.default', c(args, list(na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
+  
+  pdist(count, condition = condition)
+  
+}
 
-
-
-#' @rdname pdist
+#' @rdname distributions
 #' @export
-setMethod('pdist', 'data.frame', 
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+pdist.data.frame <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             exprs <- rlang::enexprs(...)
             
             if (length(exprs) == 0L) {
@@ -777,8 +770,7 @@ setMethod('pdist', 'data.frame',
             
             do.call('pdist', c(args, list(condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
             
-          })
-
+          }
 
 
 pexprs <- function(exprs, colnames, condition) {
@@ -818,8 +810,7 @@ pexprs <- function(exprs, colnames, condition) {
 
 #' @rdname distributions
 #' @export 
-setMethod('pdist', 'humdrumR',
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             
             exprs <- rlang::enexprs(...)
             
@@ -837,17 +828,14 @@ setMethod('pdist', 'humdrumR',
                         list(condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)))
               
             }
-            
-          
-})
+}
 
 
 
 
-#' @rdname pdist
+#' @rdname distributions
 #' @export
-setMethod('pdist', c('table'),
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
+pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
             
             if (length(dim(x)) == 1L) condition <- NULL
             
@@ -869,20 +857,8 @@ setMethod('pdist', c('table'),
             
             distribution(N, 'p')
             # new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
-          })
+          }
 
-
-#' @rdname pdist
-#' @export
-setMethod('pdist', 'missing',
-          function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
-            args <- list(..., condition = condition, na.rm = na.rm, sort = sort, .drop = .drop, binArgs = binArgs)
-            origname <- names(args)[1]
-            names(args)[1] <- 'x'
-            attr(args[[1]], 'origname') <- origname
-            
-            do.call('pdist', args)
-          })
 
 
             
