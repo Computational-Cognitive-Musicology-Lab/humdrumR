@@ -4,28 +4,22 @@
 \alias{ic}
 \alias{entropy}
 \alias{H}
-\alias{entropy,probability-method}
-\alias{entropy,count-method}
-\alias{entropy,density-method}
-\alias{entropy,ANY-method}
-\alias{entropy,table-method}
+\alias{entropy.probability}
+\alias{entropy.density}
+\alias{entropy.default}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
 ic(x, ...)
 
-entropy(x, ..., base = 2)
+entropy(..., base = 2)
 
-entropy(x, ..., base = 2)
+H(..., base = 2)
 
-\S4method{entropy}{probability}(x, base = 2)
+\method{entropy}{probability}(x, base = 2)
 
-\S4method{entropy}{count}(x, ..., base = 2)
+\method{entropy}{density}(x, base = 2, na.rm = TRUE)
 
-\S4method{entropy}{density}(x, base = 2, na.rm = TRUE)
-
-\S4method{entropy}{ANY}(x, ..., base = 2)
-
-\S4method{entropy}{table}(x, base = 2, margin = NULL, na.rm = FALSE)
+\method{entropy}{default}(..., base = 2)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},

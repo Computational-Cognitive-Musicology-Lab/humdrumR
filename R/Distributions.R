@@ -935,17 +935,20 @@ setGeneric('ic', function(x, ...) standardGeneric('ic'))
 #' 
 #' @family {Information theory functions} 
 #' @export
-setGeneric('entropy', function(x, ..., base = 2) standardGeneric('entropy'))
+entropy <- function(..., base = 2) {
+  checks(base, xnumber & xpositive)
+  
+  UseMethod('entropy')
+}
 
 
-#' @export
 #' @rdname entropy
+#' @export
 H <- entropy
   
 #' @rdname entropy
 #' @export
-setMethod('entropy', 'probability',
-          function(x, base = 2) {
+entropy.probability <-  function(x, base = 2) {
             
             joint <- unmargin(x)$p
             
@@ -954,22 +957,19 @@ setMethod('entropy', 'probability',
             equation <- Pequation(x, 'H')
             
             setNames(-sum(joint * other), equation)
-          })
-
+          }
 
 
 #' @rdname entropy
 #' @export
-setMethod('entropy', 'count',
-          function(x, ..., base = 2) {
-           entropy(pdist(x, ...), base = base)
-          })
+entropy.numeric <- function(x, base = 2, na.rm = TRUE) {
+  entropy(density(x, ...), base = base, na.rm = na.rm)
+}
 
-  
+
 #' @rdname entropy
 #' @export
-setMethod('entropy', 'density',
-          function(x, base = 2, na.rm = TRUE) {
+entropy.density <- function(x, base = 2, na.rm = TRUE) {
             label <- rlang::expr_name(rlang::enexpr(x))
             if (any(is.na(x))) return(NA_real_)
             
@@ -980,31 +980,16 @@ setMethod('entropy', 'density',
             setNames(-sum(log(x$y, base = base) * x$y * dx), equation)
             
             
-          })
+          }
 
 
 #' @rdname entropy
 #' @export
-setMethod('entropy', 'ANY',
-          function(x, ..., base = 2) {
-            entropy(pdist(x, ...), base = base)
-          })
+entropy.default <- function(..., base = 2) {
+            entropy(pdist( ...), base = base)
+          }
 
 
-
-#' @rdname entropy
-#' @export
-setMethod('entropy', 'table',
-          function(x, base = 2, margin = NULL, na.rm = FALSE) {
-            
-            joint <- pdist(x, margin = NULL, na.rm = na.rm)
-            
-            other <- pdist(x, margin = margin, na.rm = na.rm)
-            other <- ifelse(x == 0L, 0, log(other, base = base)) 
-            
-            equation <- pdist.name(joint, margin, 'H')
-            setNames(-sum(joint * other), equation)
-          })
 
 
 #' Calculate Mutual Information of variables
@@ -1097,8 +1082,9 @@ setMethod('crossEntropy', c('probability.frame', 'probability.frame'),
           })
 
 
-
-# table() extensions for humdrumR ---- 
+###################################################
+# table() extensions for humdrumR ---- ###########
+##################################################
 
 
 
