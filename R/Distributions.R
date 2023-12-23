@@ -27,16 +27,19 @@ setClass('probability', contains = 'distribution', slots = c(N = 'integer', Cond
 
 distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
   df <- as.data.frame(x)
-  
   args <- list(new('distribution', df, Sort = Sort))
   
   if (class(type) == 'character') {
     
     args$Class <- if (type == 'p') 'probability' else 'count'
+    if (args$Class == 'probability') {
+      args$N <- N
+      args$Condition <- Condition
+    }
     
   } else { # type must be a distribution
     args$Class <- c(class(type))
-    if (class(type) == 'probability') {
+    if (args$Class == 'probability') {
       args$N <- type@N
       args$Condition <- type@Condition
     }
@@ -581,8 +584,7 @@ setMethod('Summary', 'distribution',
 #' @export
 setMethod('mean', 'distribution',
           \(x, ..., na.rm = FALSE) {
-            
-            setNames(mean(getValues(x), ..., na.rm), paste(dimnames(x), collapse = '.'))
+            setNames(mean(getValues(x), ..., na.rm = na.rm), paste(dimnames(x), collapse = '.'))
           })
 
 #' @export
@@ -951,7 +953,7 @@ unmargin <- function(dist) {
   N <- sum(dist@N)
   margins <- dist@N / N
   
-  dist$p <- dist$p * margins[paste(dist[[dist@Condition]])] # paste to deal with NA levels
+  dist$p <- dist$p * margins[paste(as.data.frame(dist)[[dist@Condition]])] # paste to deal with NA levels
   
   
   dist@Condition <- NULL
@@ -1032,7 +1034,6 @@ H <- entropy
 #' @rdname entropy
 #' @export
 entropy.probability <-  function(q, p, base = 2) {
-            
             if (missing(p) || !inherits(p, 'probability')) {
               expected <- unmargin(q)$p
               observed <- q$p
@@ -1137,17 +1138,19 @@ mutualInfo.probability <-  function(x, base = 2) {
   
   x <- unmargin(x)
   
-  independentjoint <- (x[ , dimnames[1]] * x[ , dimnames[2]])
+  observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
   
-  ratio <- x / independentjoint
+  expected <- (x[ , 1] * x[ , 2])
+  expected <- setNames(expected$p, do.call('paste', c(getLevels(expected), list(sep = '.'))))
+  
+  expected <- expected[names(observed)]
+  
+  ratio <- observed / expected
   logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
-  
-  joint <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
-  joint <- joint[rownames(logratio)]
   
   equation <- Pequation(x, 'I', ';')
   
-  setNames(sum(joint * logratio, na.rm = TRUE), equation)
+  setNames(sum(observed * logratio, na.rm = TRUE), equation)
   
 }
 
