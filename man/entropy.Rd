@@ -61,11 +61,4 @@ The \code{ic()} function only accepts atomic vectors as its main (\code{x}) argu
 be provided a \code{distribution} argument.
 By default, the \code{distribution} argument is estimated using \code{\link[=density]{density()}} (\code{numeric} input) or \code{\link[=table]{table()}} (other input).
 }
-\seealso{
-Other {Information theory functions}: 
-\code{\link{crossEntropy}()}
-
-Other {Information theory functions}: 
-\code{\link{crossEntropy}()}
-}
 \concept{{Information theory functions}}

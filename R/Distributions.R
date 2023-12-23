@@ -25,13 +25,26 @@ setClass('probability', contains = 'distribution', slots = c(N = 'integer', Cond
 
 ### Constructors ----
 
-distribution <- function(x, type, ...) {
+distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
   df <- as.data.frame(x)
   
-  new(if (type == 'n') 'count' else 'probability', 
-      new('distribution', df, Sort = 0L), 
-      ...)
+  args <- list(new('distribution', df, Sort = Sort))
+  
+  if (class(type) == 'character') {
+    
+    args$Class <- if (type == 'p') 'probability' else 'count'
+    
+  } else { # type must be a distribution
+    args$Class <- c(class(type))
+    if (class(type) == 'probability') {
+      args$N <- type@N
+      args$Condition <- type@Condition
+    }
+
+  }
+  do.call('new', args)
 }
+  
 
 
 
@@ -40,7 +53,8 @@ distribution <- function(x, type, ...) {
 
 dist_type <- function(dist) intersect(colnames(dist), c('n', 'p'))
 getValues <- function(dist) as.data.frame(dist)[ , dist_type(dist)]
-getFactors <- function(dist) as.data.frame(dist)[ , dimnames(dist), drop = FALSE]
+getLevels <- function(dist) as.data.frame(dist)[ , dimnames(dist), drop = FALSE]
+
 
 #' @export
 dimnames.distribution <- function(x) setdiff(colnames(x), c('n', 'p'))
@@ -86,7 +100,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   if (attr(X, 'approx')) scale <- paste0(scale, ', ~rounded')
   message <- paste0(message, scale)
   
-  dist <- getFactors(dist)
+  dist <- getLevels(dist)
   dist[[type]] <- X
   
   # check if we can widen
@@ -268,39 +282,107 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
 }
 
 ### indexing ----
+# 
+setMethod('[', c('distribution', 'ANY', 'missing'),
+          function(x, i, drop = FALSE) {
 
-#' @export
-setMethod('[', 'distribution',
-          function(x, i, ...) {
+            df <- as.data.frame(x)[i , ,  drop = FALSE]
+            if (drop) df else distribution(df, x)
+          })
+# 
+setMethod('[', c('distribution', 'missing', 'atomic'),
+          function(x, i, j, drop = FALSE) {
             
-            if (is.matrix(i) && ncol(i) == 1L && names(dimnames(i))[[1]] == paste(dimnames(x), collapse = '.')) {
-              i <- i[do.call('paste', c(getFactors(x), list(sep = '.'))), , drop = FALSE]
-            }
+
+                        x <- unmargin(x)
+                        dimnames <- dimnames(x)
+
+                        j <- if (is.numeric(j)) dimnames[j] else intersect(j, dimnames)
+                        
+                        if (any(is.na(j)) || length(j) == 0L) .stop("Can't index this distribution with non-existent columns.")
+
+                        type <- dist_type(x)
+                        dt <- as.data.table(x)[ , setNames(list(sum(get(type))), type), by = j]
+                        
+                        if (drop) as.data.frame(dt) else distribution(dt, x)
+                        
+
+          })
+
+setMethod('[', c('distribution', 'ANY', 'ANY'),
+          function(x, i, j, drop = FALSE) {
             
-            type <- dist_type(x)
-            if (type == 'p') {
-              distribution(as.data.frame(x)[i , ], type = type, Condition = x@Condition, N = x@N)
-            } else {
-              distribution(as.data.frame(x)[i , ], type = type)
-            }
+            x <- x[i , ]
+            x[ , j, drop = drop]
+          
             
-             
+          })
+
+setMethod('[', c('distribution', 'matrix'),
+          function(x, i, j, cartesian = FALSE, drop = FALSE) {
+            
+            i <- as.list(i)
+            do.call('[[', c(list(x, cartesian = cartesian, drop = drop), i))
+            
           })
 
 #' @export
+setMethod('[[', 'distribution',
+          function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
+            
+            args <- as.list(rlang::enexprs(...))
+            
+            args <- c(list(if (missing(i)) rlang::missing_arg() else i ),
+                      list(if (missing(j)) rlang::missing_arg() else j ),
+                      args)
+            
+            missing <- sapply(args, rlang::is_missing)
+            args[!missing] <- lapply(args[!missing], rlang::eval_tidy)
+            
+        
+            levels <- getLevels(x)
+            if (length(args) > length(levels)) .stop("This distribution only has {num2print(length(levels))} dimensions to index.",
+                                    "You have provided {num2print(length(args))}.")
+            levels <- levels[1:length(args)]
+            
+            args[!missing] <- Map(\(arg, lev) {
+              if (is.numeric(arg)) unique(lev)[arg] else arg
+            } , args[!missing], levels[!missing])
+            
+            i <- if (cartesian) {
+              matches(args[!missing], levels[!missing])
+            } else {
+              Reduce('|', Map(`%in%`, levels[!missing], args[!missing]))
+            }
+           
+            
+            x[i, , drop = drop]
+            
+
+
+
+          })
+
 setMethod('[', c('probability', 'missing', 'character'),
           function(x, i, j, ...) {
-            
+
             N <- x@N
             x <- unmargin(x)
             x <- as.data.table(x)
-            
+
             x <- as.data.frame(x[ , list(p = sum(p)), by = j])
-            
+
             distribution(x, 'p', Condition = NULL, N = N)
-            
+
           })
 
+
+#' @export
+filter.distribution <- function(.data, ..., drop = FALSE) {
+  exprs <- rlang::enquos(...)
+
+  .data[rlang::eval_tidy(exprs[[1]], data = as.data.frame(.data)), , drop = drop]
+}
 
 ### coercion ----
 
@@ -324,7 +406,7 @@ as.matrix.distribution <- function(x, wide = TRUE, ...) {
     
   } else {
     mat <- matrix(getValues(x), ncol = 1)
-    rownames(mat) <- do.call('paste', c(getFactors(x), list(sep = '.')))
+    rownames(mat) <- do.call('paste', c(getLevels(x), list(sep = '.')))
     names(dimnames(mat)) <- c(paste(dimnames, collapse = '.'), '')
     colnames(mat) <- type
   }
@@ -433,7 +515,7 @@ cbind.distribution <- function(...) {
 ### arithmetic ----
 
 distmat <- function(factors, result, type = 'n') {
-  if (inherits(factors, 'distribution')) factors <- getFactors(factors)
+  if (inherits(factors, 'distribution')) factors <- getLevels(factors)
   mat <- matrix(result, ncol = 1)
   rownames(mat) <- do.call('paste', c(factors, list(sep = '.')))
   colnames(mat) <- type
@@ -455,7 +537,7 @@ setMethod('+', c('count', 'count'),
 #' @export
 setMethod('+', c('count', 'integer'),
           function(e1, e2) {
-            df <- getFactors(e1)
+            df <- getLevels(e1)
             df$N <- callGeneric(getValues(e1), e2)
             
             distribution(df, 'n')
@@ -467,8 +549,8 @@ setMethod('Ops', c('distribution', 'distribution'),
             aligned <- alignDistributions(e1, e2, funcname = .Generic)
 
             
-            result <- callGeneric(aligned$X[[1]], aligned$X[[2]])
-            distmat(aligned$Levels, result, dist_type(e1))
+            callGeneric(aligned$X[[1]], aligned$X[[2]])
+            # distmat(aligned$Levels, result, dist_type(e1))
             
           })
 
@@ -477,8 +559,8 @@ setMethod('Ops', c('distribution', 'distribution'),
 setMethod('Ops', c('distribution', 'numeric'),
           function(e1, e2) {
             
-            result <- callGeneric(getValues(e1), e2)
-            distmat(e1, result)
+            callGeneric(getValues(e1), e2)
+            # distmat(e1, result)
 
             
           })
@@ -514,8 +596,8 @@ setMethod('*', c('probability', 'probability'),
             
             if (length(dimnames1) > 1L || length(dimnames2) > 1L) .stop("Can't cross product probability distributions with more than one dimenion yet.")
             
-            p1 <- setNames(e1$p, getFactors(e1)[[1]])
-            p2 <- setNames(e2$p, getFactors(e2)[[1]])
+            p1 <- setNames(e1$p, getLevels(e1)[[1]])
+            p2 <- setNames(e2$p, getLevels(e2)[[1]])
             
             jointp <- outer(p1, p2, '*')
             
@@ -702,7 +784,7 @@ pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop =
 #' @export
 pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
   
-  if (na.rm) x <- x[!Reduce('|', lapply(getFactors(x), is.na)), ]
+  if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
   if (sort) x <- sort(x, sort > 0L)
   
   x <- as.data.frame(x)
@@ -863,7 +945,7 @@ pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, b
 
             
 unmargin <- function(dist) {
-  if (is.null(dist@Condition)) return(dist)
+  if (!inherits(dist, 'probability') || is.null(dist@Condition)) return(dist)
   
   
   N <- sum(dist@N)
@@ -1060,7 +1142,7 @@ mutualInfo.probability <-  function(x, base = 2) {
   ratio <- x / independentjoint
   logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
   
-  joint <- setNames(x$p, do.call('paste', c(getFactors(x), list(sep = '.'))))
+  joint <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
   joint <- joint[rownames(logratio)]
   
   equation <- Pequation(x, 'I', ';')
@@ -1144,7 +1226,7 @@ rbind.humdrumR.table <- function(...) {
 
 #' @export
 as.table.distribution <- function(x) {
-  levels <- lapply(getFactors(x), unique)
+  levels <- lapply(getLevels(x), unique)
   dimnames <- dimnames(x)
   type <- dist_type(x)
   
