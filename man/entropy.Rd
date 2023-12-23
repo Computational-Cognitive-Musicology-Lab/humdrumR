@@ -19,7 +19,7 @@ entropy(..., base = 2)
 
 H(..., base = 2)
 
-\method{entropy}{probability}(x, base = 2)
+\method{entropy}{probability}(q, p, base = 2)
 
 \method{entropy}{numeric}(x, base = 2, na.rm = TRUE)
 

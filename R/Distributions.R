@@ -942,21 +942,31 @@ entropy <- function(..., base = 2) {
 }
 
 
+
 #' @rdname entropy
 #' @export
 H <- entropy
   
 #' @rdname entropy
 #' @export
-entropy.probability <-  function(x, base = 2) {
+entropy.probability <-  function(q, p, base = 2) {
             
-            joint <- unmargin(x)$p
+            if (missing(p) || !inherits(p, 'probability')) {
+              expected <- unmargin(q)$p
+              observed <- q$p
+             } else {
+               # cross entropy of q and p!
+                aligned <- alignDistributions(q, p, funcname = 'entropy')
+                observed <- aligned$X[[1]]
+                expected <- aligned$X[[2]]
+               
+             }
+  
+            observed <- ifelse(observed > 0L, log(observed, base = base), 0) 
             
-            other <- ifelse(x$p > 0L, log(x$p, base = base), 0) 
             
-            equation <- Pequation(x, 'H')
-            
-            setNames(-sum(joint * other), equation)
+            equation <- Pequation(q, 'H')
+            setNames(-sum(expected * observed), equation)
           }
 
 
@@ -1071,31 +1081,6 @@ mutualInfo.default <- function(..., base = 2) {
 
 
 
-
-  
-
-
-#' Calculate cross entropy between two distributions
-#' 
-#' TBA
-#' @family {Information theory functions}
-#' @export
-setGeneric('crossEntropy', function(distribution1, distribution2, ...) standardGeneric('crossEntropy'))
-
-#' @rdname crossEntropy
-#' @export
-setMethod('crossEntropy', c('probability.frame', 'probability.frame'),
-          function(distribution1, distribution2, base = 2) {
-            
-            distribution2 <- ifelse(distribution2 == 0L, 0, log(distribution2, base = base))
-            
-            
-            equation <- paste0('H(', 
-                               pdist.name(distribution1, func = ''), ', ',
-                               pdist.name(distribution2, func = ''))
-            setNames(-sum(distribution1 * distribution2), equation)
-            
-          })
 
 
 ###################################################

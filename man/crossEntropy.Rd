@@ -2,12 +2,12 @@
 % Please edit documentation in R/Distributions.R
 \name{crossEntropy}
 \alias{crossEntropy}
-\alias{crossEntropy,probability.frame,probability.frame-method}
+\alias{crossEntropy,probability,probability-method}
 \title{Calculate cross entropy between two distributions}
 \usage{
-crossEntropy(distribution1, distribution2, ...)
+crossEntropy(qdist, pdist, ...)
 
-\S4method{crossEntropy}{probability.frame,probability.frame}(distribution1, distribution2, base = 2)
+\S4method{crossEntropy}{probability,probability}(qdist, pdist, base = 2)
 }
 \description{
 TBA
