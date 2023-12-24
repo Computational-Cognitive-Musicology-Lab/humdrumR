@@ -56,11 +56,11 @@ distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
 
 dist_type <- function(dist) intersect(colnames(dist), c('n', 'p'))
 getValues <- function(dist) as.data.frame(dist)[ , dist_type(dist)]
-getLevels <- function(dist) as.data.frame(dist)[ , dimnames(dist), drop = FALSE]
+getLevels <- function(dist) as.data.frame(dist)[ , varnames(dist), drop = FALSE]
 
 
 #' @export
-dimnames.distribution <- function(x) setdiff(colnames(x), c('n', 'p'))
+varnames <- function(x) setdiff(colnames(x), c('n', 'p'))
 
 ### print() ----
 
@@ -78,7 +78,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   message <- paste0('humdrumR ', 
                     if (type == 'p') paste0('probability distribution ', Pequation(dist)) else 'count distribution')
   
-  dimnames <- dimnames(dist)
+  varnames <- varnames(dist)
   
   if (nrow(dist) == 0) {
     message <- paste0(message, ' (empty)')
@@ -108,13 +108,13 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   # check if we can widen
   iswide <- FALSE
-  printmat <- (if(sort == -0L && length(dimnames) >= 2L) {
+  printmat <- (if(sort == -0L && length(varnames) >= 2L) {
     
-    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(dimnames[2])), fill = attr(X, 'zerofill'), value.var = type))
+    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(varnames[2])), fill = attr(X, 'zerofill'), value.var = type))
     
-    factorcols <- colnames(wide) %in% dimnames
+    factorcols <- colnames(wide) %in% varnames
     toprow    <- ifelse( factorcols, colnames(wide), '')
-    toprow[length(dimnames)] <- dimnames[2]
+    toprow[length(varnames)] <- varnames[2]
     secondrow <- ifelse(!factorcols, colnames(wide), '')
     
     wide <- rbind(toprow, secondrow, wide, secondrow, toprow)
@@ -147,7 +147,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
     
     syntax[c(1, nrow(printmat)), ] <- 'N'
     
-    dataCols <- !colnames(printmat) %in% c(dimnames, 'Rank')
+    dataCols <- !colnames(printmat) %in% c(varnames, 'Rank')
     rankCol <- colnames(printmat) == 'Rank'
     
     if (iswide) {
@@ -175,11 +175,11 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
 
 
 Pequation <- function(dist, f = 'P', collapse = ',') {
-  dimnames <- dimnames(dist)
+  varnames <- varnames(dist)
   
   condition <- dist@Condition 
   
-  eq <- paste(setdiff(dimnames, condition), collapse = collapse)
+  eq <- paste(setdiff(varnames, condition), collapse = collapse)
   if (!is.null(condition)) {
     condition <- paste(condition, collapse = collapse)
     eq <- paste0(eq, ' | ', condition)
@@ -297,10 +297,10 @@ setMethod('[', c('distribution', 'missing', 'atomic'),
           function(x, i, j, drop = FALSE) {
             
 
-                        x <- unmargin(x)
-                        dimnames <- dimnames(x)
+                        x <- unconditional(x)
+                        varnames <- varnames(x)
 
-                        j <- if (is.numeric(j)) dimnames[j] else intersect(j, dimnames)
+                        j <- if (is.numeric(j)) varnames[j] else intersect(j, varnames)
                         
                         if (any(is.na(j)) || length(j) == 0L) .stop("Can't index this distribution with non-existent columns.")
 
@@ -370,7 +370,7 @@ setMethod('[', c('probability', 'missing', 'character'),
           function(x, i, j, ...) {
 
             N <- x@N
-            x <- unmargin(x)
+            x <- unconditional(x)
             x <- as.data.table(x)
 
             x <- as.data.frame(x[ , list(p = sum(p)), by = j])
@@ -391,26 +391,26 @@ filter.distribution <- function(.data, ..., drop = FALSE) {
 
 #' @export
 as.matrix.distribution <- function(x, wide = TRUE, ...) {
-  dimnames <- dimnames(x)
+  varnames <- varnames(x)
   type <- dist_type(x)
   
-  if (length(dimnames) >= 2L && wide && x@Sort == -0L) {
+  if (length(varnames) >= 2L && wide && x@Sort == -0L) {
     mat <- as.matrix(dcast(as.data.table(x), 
-                    rlang::new_formula(quote(...), rlang::sym(dimnames[2])), 
+                    rlang::new_formula(quote(...), rlang::sym(varnames[2])), 
                     fill = 0, value.var = type))
     
-    talldim <- colnames(mat) %in% dimnames 
+    talldim <- colnames(mat) %in% varnames 
     
     rownames(mat) <- do.call('paste', c(as.data.frame(mat[ , talldim, drop = FALSE]), list(sep = '.')))
     mat <- mat[ , !talldim, drop = FALSE]
-    names(dimnames(mat)) <- c(paste(dimnames[talldim], collapse = '.'), dimnames[2])
+    names(dimnames(mat)) <- c(paste(varnames[talldim], collapse = '.'), varnames[2])
     mat <- array(as.numeric(mat), dim = dim(mat), dimnames = dimnames(mat))
     
     
   } else {
     mat <- matrix(getValues(x), ncol = 1)
     rownames(mat) <- do.call('paste', c(getLevels(x), list(sep = '.')))
-    names(dimnames(mat)) <- c(paste(dimnames, collapse = '.'), '')
+    names(dimnames(mat)) <- c(paste(varnames, collapse = '.'), '')
     colnames(mat) <- type
   }
   
@@ -451,14 +451,14 @@ setMethod('sort', 'distribution',
 alignDistributions <- function(..., funcname = '') {
   
   dists <- list(...)
-  dimnames <- lapply(dists, dimnames)
-  if (length(Reduce(\(x, y) if (setequal(x, y)) x, dimnames)) == 0L) .stop("If using {funcname} on distributions, they must all have the same dimension names.")
-  dimnames <- dimnames[[1]]
+  varnames <- lapply(dists, varnames)
+  if (length(Reduce(\(x, y) if (setequal(x, y)) x, varnames)) == 0L) .stop("If using {funcname} on distributions, they must all have the same dimension names.")
+  varnames <- varnames[[1]]
   
   
-  levels <- setNames(lapply(dimnames, 
+  levels <- setNames(lapply(varnames, 
                             \(dn) do.call('mergeLevels', lapply(dists, '[[', dn))), 
-                     dimnames)
+                     varnames)
   levels <- do.call('expand.grid', levels)
 
   
@@ -475,7 +475,7 @@ alignDistributions <- function(..., funcname = '') {
                     
                   })
   
-  levels <- as.data.frame(aligned[[1]])[, dimnames, drop = FALSE] # not sure why, but the order has changed
+  levels <- as.data.frame(aligned[[1]])[, varnames, drop = FALSE] # not sure why, but the order has changed
   aligned <- lapply(aligned, getValues)
   names(aligned) <- sapply(dists, dist_type)
   
@@ -577,26 +577,26 @@ setMethod('Math', 'distribution',
 #' @export
 setMethod('Summary', 'distribution',
           \(x, ..., na.rm = FALSE) {
-            setNames(callGeneric(getValues(x), ..., na.rm), paste(dimnames(x), collapse = '.'))
+            setNames(callGeneric(getValues(x), ..., na.rm), paste(varnames(x), collapse = '.'))
           })
 
 
 #' @export
 setMethod('mean', 'distribution',
           \(x, ..., na.rm = FALSE) {
-            setNames(mean(getValues(x), ..., na.rm = na.rm), paste(dimnames(x), collapse = '.'))
+            setNames(mean(getValues(x), ..., na.rm = na.rm), paste(varnames(x), collapse = '.'))
           })
 
 #' @export
 setMethod('*', c('probability', 'probability'),
           \(e1, e2) {
             
-            dimnames1 <- dimnames(e1)
-            dimnames2 <- dimnames(e2)
+            varnames1 <- varnames(e1)
+            varnames2 <- varnames(e2)
             
-            if (length(intersect(dimnames1, dimnames2))) return(callNextMethod(e1, e2))
+            if (length(intersect(varnames1, varnames2))) return(callNextMethod(e1, e2))
             
-            if (length(dimnames1) > 1L || length(dimnames2) > 1L) .stop("Can't cross product probability distributions with more than one dimenion yet.")
+            if (length(varnames1) > 1L || length(varnames2) > 1L) .stop("Can't cross product probability distributions with more than one dimenion yet.")
             
             p1 <- setNames(e1$p, getLevels(e1)[[1]])
             p2 <- setNames(e2$p, getLevels(e2)[[1]])
@@ -604,7 +604,7 @@ setMethod('*', c('probability', 'probability'),
             jointp <- outer(p1, p2, '*')
             
             df <- as.data.frame(as.table(jointp))
-            colnames(df) <- c(dimnames1, dimnames2, 'p')
+            colnames(df) <- c(varnames1, varnames2, 'p')
             
             distribution(df, 'p', Condition = NULL, N = sum(e1@N, e2@N))
             
@@ -694,10 +694,10 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   # get the appropriate (dim)names for each argument
   exprs <- as.list(substitute(list(...)))[-1L]
   
-  dimnames <- .names(args)
-  if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
+  varnames <- .names(args)
+  if (any(varnames == '')) varnames[varnames == ''] <- vapply(exprs[varnames == ''], deparse, nlines = 1L, '')
   
-  if (length(unique(lengths(args))) > 1L) .stop("Can't cross-tabulate these vectors ({harvard(dimnames, 'and')}), because they are different lengths.")
+  if (length(unique(lengths(args))) > 1L) .stop("Can't cross-tabulate these vectors ({harvard(varnames, 'and')}), because they are different lengths.")
   
   # factorize arguments as needed
   args <- lapply(args,
@@ -708,11 +708,11 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   
   
   argdf <- as.data.frame(args)
-  colnames(argdf) <- dimnames
+  colnames(argdf) <- varnames
   
-  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(dimnames)), name = 'n', .drop = !!.drop)))
+  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(varnames)), name = 'n', .drop = !!.drop)))
   
-  if (na.rm) result <- result[Reduce('&', lapply(result[ , dimnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
+  if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
   
   dist <- distribution(result, 'n')
   
@@ -794,21 +794,31 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   exprs <- rlang::enexprs(...)
   if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
   
-  x$p <- if (is.null(condition)) {
-    n <- sum(x$n, na.rm = TRUE)
-    x$n / n
-  } else {
-    conditionvec <- do.call('paste', c(x[condition], list(sep = '.')))
-    n <- c(tapply(x$n, conditionvec, \(x) as.integer(sum(x))))
-    n <- n[unique(conditionvec)] # to match original order
-    
-    ifelse(n[conditionvec] == 0, 0, x$n / n[conditionvec])
-  }
+  n <- sum(x$n, na.rm = TRUE)
   
+  x$p <- x$n / n
   x$n <- NULL
   
-  distribution(x, 'p', N = n, Condition = condition)
+  dist <- distribution(x, 'p', N = n)
+  
+  if (!is.null(condition)) dist <- conditionalize(dist, condition = condition)
+  
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
+  
+  dist
+  
 }
+
+#' @rdname distributions
+#' @export
+pdist.probability <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+  exprs <- rlang::enexprs(...)
+  if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
+  
+  if (!is.null(condition)) conditionalize(x, condition) else x
+  
+}
+
 
 #' @rdname distributions
 #' @export
@@ -818,9 +828,9 @@ pdist.default <-  function(..., condition = NULL, na.rm = FALSE, sort = FALSE, .
   
   # get the appropriate (dim)names for each argument
   
-  dimnames <- .names(args)
-  if (any(dimnames == '')) dimnames[dimnames == ''] <- vapply(exprs[dimnames == ''], deparse, nlines = 1L, '')
-  names(args) <- dimnames
+  varnames <- .names(args)
+  if (any(varnames == '')) varnames[varnames == ''] <- vapply(exprs[varnames == ''], deparse, nlines = 1L, '')
+  names(args) <- varnames
   
   # if condition is given as separate vector
   conditionName <- deparse(substitute(condition), nlines = 1L)
@@ -857,37 +867,6 @@ pdist.data.frame <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FA
           }
 
 
-pexprs <- function(exprs, colnames, condition) {
-  
-  for (i in seq_along(exprs)) {
-    expr <- exprs[[i]]
-    
-    exprs[[i]] <-  switch(class(expr),
-           integer = ,
-           numeric = rlang::sym(colnames[expr]),
-           character = rlang::sym(expr),
-           formula = ,
-           call = {
-             if (as.character(expr[[1]]) %in% c('|', '~')) {
-               
-               if (rlang::is_symbol(expr[[3]])) condition <- as.character(expr[[3]]) 
-               
-               exprs[[length(exprs) + 1L]] <- expr[[3]]
-               expr[[2]] 
-               
-             } else {
-               expr
-             }
-           },
-           expr)
-   
-  }
-  
-  names(exprs) <- sapply(exprs, rlang::as_label)
-  exprs <- exprs[!duplicated(names(exprs))]
-  
-  list(Exprs = exprs, Condition = condition)
-}
 
 
 
@@ -924,12 +903,12 @@ pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, b
             if (length(dim(x)) == 1L) condition <- NULL
             
             if (na.rm) {
-              notna <- unname(lapply(dimnames(x), \(dim) !is.na(dim)))
+              notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
               x <- do.call('[', c(list(x), notna))
             }
             
             if (is.character(condition)) {
-              condition <- pmatch(condition, dimnames(x), duplicates.ok = FALSE)
+              condition <- pmatch(condition, varnames(x), duplicates.ok = FALSE)
               condition <- condition[!is.na(condition)]
               if (length(condition) == 0L) condition <- NULL
             }
@@ -945,8 +924,33 @@ pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, b
 
 
 
+conditionalize <- function(pdist, condition) {
+  varnames <- varnames(pdist)
+  if (any(!condition %in% varnames)) .stop("We can only calculate a conditional probability across an existing dimension/factor.",
+                                           "The <conditions|condition> {harvard(setdiff(varnames, condition), 'and')} are not dimensions of the given",
+                                           "distribution ({harvard(varnames, 'and')}).")
+  
+  if (!is.null(pdist@Condition)) {
+    if (setequal(condition, pdist@Condition)) return(pdist)
+    pdist <- unconditional(pdist)
+  }
+  
+  
+  conditionvec <- do.call('paste', c(as.list(pdist)[condition], list(sep = '.')))
+  
+  margin <- c(tapply(pdist$p, conditionvec, sum))
+  margin <- margin[unique(conditionvec)] # to match original order
+  
+  pdist$p <- ifelse(margin[conditionvec] == 0, 0, pdist$p / margin[conditionvec])
+  
+  pdist@Condition <- condition
+  
+  pdist@N <- setNames(as.integer(pdist@N * margin), names(margin))
+  pdist
+  
+}
             
-unmargin <- function(dist) {
+unconditional <- function(dist) {
   if (!inherits(dist, 'probability') || is.null(dist@Condition)) return(dist)
   
   
@@ -961,6 +965,39 @@ unmargin <- function(dist) {
   dist
  
   
+}
+
+
+pexprs <- function(exprs, colnames, condition) {
+  
+  for (i in seq_along(exprs)) {
+    expr <- exprs[[i]]
+    
+    exprs[[i]] <-  switch(class(expr),
+                          integer = ,
+                          numeric = rlang::sym(colnames[expr]),
+                          character = rlang::sym(expr),
+                          formula = ,
+                          call = {
+                            if (as.character(expr[[1]]) %in% c('|', '~')) {
+                              
+                              if (rlang::is_symbol(expr[[3]])) condition <- as.character(expr[[3]]) 
+                              
+                              exprs[[length(exprs) + 1L]] <- expr[[3]]
+                              expr[[2]] 
+                              
+                            } else {
+                              expr
+                            }
+                          },
+                          expr)
+    
+  }
+  
+  names(exprs) <- sapply(exprs, rlang::as_label)
+  exprs <- exprs[!duplicated(names(exprs))]
+  
+  list(Exprs = exprs, Condition = condition)
 }
 
 
@@ -1033,9 +1070,11 @@ H <- entropy
   
 #' @rdname entropy
 #' @export
-entropy.probability <-  function(q, p, base = 2) {
+entropy.probability <-  function(q, p, condition = NULL, base = 2) {
+            if (!is.null(condition)) q <- conditionalize(q, condition)
+  
             if (missing(p) || !inherits(p, 'probability')) {
-              expected <- unmargin(q)$p
+              expected <- unconditional(q)$p
               observed <- q$p
              } else {
                # cross entropy of q and p!
@@ -1133,10 +1172,10 @@ mutualInfo <- function(..., base = 2) {
 #' @rdname entropy
 #' @export
 mutualInfo.probability <-  function(x, base = 2) {
-  dimnames <- dimnames(x)
-  if (length(dimnames) != 2L) .stop("Can't calculate mutual information of a single variable.")
+  varnames <- varnames(x)
+  if (length(varnames) != 2L) .stop("Can't calculate mutual information of a single variable.")
   
-  x <- unmargin(x)
+  x <- unconditional(x)
   
   observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
   
@@ -1230,14 +1269,14 @@ rbind.humdrumR.table <- function(...) {
 #' @export
 as.table.distribution <- function(x) {
   levels <- lapply(getLevels(x), unique)
-  dimnames <- dimnames(x)
+  varnames <- varnames(x)
   type <- dist_type(x)
   
   x <- as.data.frame(x)
-  x[dimnames] <- lapply(x[dimnames], paste) # forces NA to be strings
+  x[varnames] <- lapply(x[varnames], paste) # forces NA to be strings
   
   tab <- array(dim = lengths(levels), dimnames = lapply(levels, paste))
-  tab[do.call('cbind', x[dimnames])] <- x[[type]]
+  tab[do.call('cbind', x[varnames])] <- x[[type]]
   dimnames(tab) <- levels
   
   humdrumR.table(tab)

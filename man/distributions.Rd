@@ -29,11 +29,24 @@
 
 \S4method{sort}{distribution}(x, decreasing = TRUE)
 
-\method{count}{default}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
+count.default(
+  ...,
+  sort = FALSE,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
+count.humdrumR(
+  x,
+  ...,
+  sort = FALSE,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
 \method{pdist}{count}(
   x,
