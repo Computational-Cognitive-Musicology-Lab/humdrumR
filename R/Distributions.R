@@ -290,6 +290,7 @@ setMethod('[', c('distribution', 'ANY', 'missing'),
           function(x, i, drop = FALSE) {
 
             df <- as.data.frame(x)[i , ,  drop = FALSE]
+            
             if (drop) df else distribution(df, x)
           })
 # 
@@ -322,9 +323,11 @@ setMethod('[', c('distribution', 'ANY', 'ANY'),
           })
 
 setMethod('[', c('distribution', 'matrix'),
-          function(x, i, j, cartesian = FALSE, drop = FALSE) {
+          function(x, i, j, cartesian = TRUE, drop = FALSE) {
             
-            i <- as.list(i)
+            i <- as.data.frame(i)
+            names(i) <- NULL
+            
             do.call('[[', c(list(x, cartesian = cartesian, drop = drop), i))
             
           })
@@ -341,6 +344,11 @@ setMethod('[[', 'distribution',
             
             missing <- sapply(args, rlang::is_missing)
             args[!missing] <- lapply(args[!missing], rlang::eval_tidy)
+            
+            if (missing[2] && length(args) == 2L) {
+              args <- args[1L]
+              missing <- missing[1L]
+            }
             
         
             levels <- getLevels(x)
@@ -801,7 +809,7 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   
   dist <- distribution(x, 'p', N = n)
   
-  if (!is.null(condition)) dist <- conditionalize(dist, condition = condition)
+  if (!is.null(condition)) dist <- conditional(dist, condition = condition)
   
   if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
@@ -815,7 +823,7 @@ pdist.probability <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = F
   exprs <- rlang::enexprs(...)
   if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
   
-  if (!is.null(condition)) conditionalize(x, condition) else x
+  if (!is.null(condition)) conditional(x, condition) else x
   
 }
 
@@ -924,7 +932,7 @@ pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, b
 
 
 
-conditionalize <- function(pdist, condition) {
+conditional <- function(pdist, condition) {
   varnames <- varnames(pdist)
   if (any(!condition %in% varnames)) .stop("We can only calculate a conditional probability across an existing dimension/factor.",
                                            "The <conditions|condition> {harvard(setdiff(varnames, condition), 'and')} are not dimensions of the given",
@@ -1009,14 +1017,49 @@ pexprs <- function(exprs, colnames, condition) {
 
 ## Likelihoods ----
 
-###likelihood() ----
+### like() ----
 
 #' @export
-setGeneric('likely', function(x, log, ...) standardGeneric('likely'))
+like <- function(..., distribution) UseMethod('like')
 
-#' @rdname entropy
 #' @export
-setGeneric('ic', function(x, ...) standardGeneric('ic'))
+ic <- function(..., distribution, base = 2) -log(like(..., distribution = distribution), base = base)
+
+#' @export
+like.default <- function(..., distribution) {
+  like.data.frame(data.frame(...), distribution = distribution)
+}
+
+#' @export
+like.data.frame <- function(df, ..., distribution) {
+  
+  if (missing(distribution)) distribution <- do.call('pdist', list(df, ...))
+  
+  colnames <- colnames(df)
+  varnames <- varnames(distribution)
+  
+  if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
+
+  distribution[as.matrix(df), , drop = TRUE]$p
+  
+}
+
+
+#' @export
+pMI <- function(..., distribution, base = 2) {
+  df <- data.frame(...)
+  
+  if (missing(distribution)) distribution <- do.call('pdist', df)
+  
+  independent <- Reduce('*', lapply(varnames(distribution), \(j) distribution[ , j]))
+  
+  ic_observed <- ic(df, distribution = distribution, base = base)
+  ic_independent <- ic(df, distribution = independent, base = base)
+  
+  ic_independent - ic_observed
+  
+}
+
 
 ## Distributional ----
 
@@ -1071,7 +1114,7 @@ H <- entropy
 #' @rdname entropy
 #' @export
 entropy.probability <-  function(q, p, condition = NULL, base = 2) {
-            if (!is.null(condition)) q <- conditionalize(q, condition)
+            if (!is.null(condition)) q <- conditional(q, condition)
   
             if (missing(p) || !inherits(p, 'probability')) {
               expected <- unconditional(q)$p
@@ -1173,18 +1216,19 @@ mutualInfo <- function(..., base = 2) {
 #' @export
 mutualInfo.probability <-  function(x, base = 2) {
   varnames <- varnames(x)
-  if (length(varnames) != 2L) .stop("Can't calculate mutual information of a single variable.")
+  if (length(varnames) < 2L) .stop("Can't calculate mutual information of a single variable.")
   
   x <- unconditional(x)
   
   observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
   
-  expected <- (x[ , 1] * x[ , 2])
-  expected <- setNames(expected$p, do.call('paste', c(getLevels(expected), list(sep = '.'))))
+  independent <- Reduce('*', lapply(varnames, \(j) x[ , j]))
+  # expected <- (x[ , 1] * x[ , 2])
+  independent <- setNames(independent$p, do.call('paste', c(getLevels(independent), list(sep = '.'))))
   
-  expected <- expected[names(observed)]
+  independent <- independent[names(observed)]
   
-  ratio <- observed / expected
+  ratio <- observed / independent
   logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
   
   equation <- Pequation(x, 'I', ';')
@@ -1207,9 +1251,9 @@ mutualInfo.default <- function(..., base = 2) {
 
 
 
-###################################################
+##################################################-
 # table() extensions for humdrumR ---- ###########
-##################################################
+##################################################-
 
 
 

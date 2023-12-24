@@ -9,6 +9,7 @@
 \alias{count.humdrumR}
 \alias{count.table}
 \alias{pdist.count}
+\alias{pdist.probability}
 \alias{pdist.default}
 \alias{pdist.data.frame}
 \alias{pdist.humdrumR}
@@ -29,26 +30,23 @@
 
 \S4method{sort}{distribution}(x, decreasing = TRUE)
 
-count.default(
-  ...,
-  sort = FALSE,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+\method{count}{default}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
 
-count.humdrumR(
-  x,
-  ...,
-  sort = FALSE,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
 
-count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+\method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
 \method{pdist}{count}(
+  x,
+  ...,
+  condition = NULL,
+  na.rm = FALSE,
+  sort = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
+
+\method{pdist}{probability}(
   x,
   ...,
   condition = NULL,
