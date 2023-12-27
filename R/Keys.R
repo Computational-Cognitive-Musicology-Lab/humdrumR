@@ -658,7 +658,7 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
     modes <- list(c(perfect, perfect, major, major, major, major, augment),
                   c(perfect, perfect, major, major, major, major, perfect),
                   c(perfect, perfect, major, major, major, minor, perfect),
-                  c(perfect, perfect, major, minor, major, minor, perfect),
+                  c(perfect, perfect, major, major, minor, minor, perfect),
                   c(perfect, perfect, major, minor, minor, minor, perfect),
                   c(perfect, perfect, minor, minor, minor, minor, perfect),
                   c(perfect, diminish, minor, minor, minor, minor, perfect))
@@ -709,10 +709,13 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
                                    change <- ifelse(which(altered) %in% c(1L, 2L, 7L), # Perfects
                                                     match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
                                                     match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
+                                   
                                    if (any(abs(change) > 1L)) change <- sign(change)
                                    
                                    altermat <- matrix(0L, nrow = 1, ncol = 7)
-                                   altermat[((which(altered) - mode) %% 7L) + 1L] <- change
+                                   # altermat[ , ((which(altered) - mode - 1L) %% 7L) + 1L] <- change
+                                   altered <- which(altered)
+                                   altermat[ , (altered %% 7L) + 1L] <- change
                                      
                                    alterint <- baltern2int(altermat)
                                    c(mode = mode, altered = alterint)

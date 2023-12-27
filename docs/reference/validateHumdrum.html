@@ -14,7 +14,7 @@ Detailed error reports can be generated, pointing to specific problematic record
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -165,7 +165,7 @@ The output looks like this:</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">validateHumdrum</span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B.*.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/BeethovenVariations/B.*.krn' matches 12 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/BeethovenVariations/B.*.krn' matches 12 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Twelve files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating twelve files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -173,21 +173,21 @@ The output looks like this:</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">errorFrame</span> <span class="op">&lt;-</span> <span class="fu">validateHumdrum</span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/InvalidFile.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> eight errors in one files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> zero valid files.</span>
 <span class="r-in"><span><span class="va">errorFrame</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                     Filepath</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: /home/nat/.tmp/RtmpkisqmH/temp_libpath11248629a5765e/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                    Filepath</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: /home/nat/.tmp/RtmpiX5mlT/temp_libpath1a421578a824c/humdrumR/HumdrumData/InvalidFile.krn</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Record                                                 Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:      4 ** and *- records in file are missing or don't add up</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2:     46        mixes data, comment, and data tokens (. . ! 1)</span>

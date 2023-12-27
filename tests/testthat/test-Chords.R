@@ -4,7 +4,8 @@
 test_that("Chord functions return same output, regardless of input.", {
   inputs <- list(tertian = c('CM', 'CMM', 'CMm', 'Cmm', 'FMm', 'FMM', 'Fmm', 'Fm', 'GMM', 'GMm', 'Ao', 'Aom', 'Bom', 'Boo', 'AM/3', 'Amm/3', 'E-MM'),
                  harm = c("I", "I7", "Im7", "im7", "IVm7", "IV7", "ivm7", "iv", "VM7", "V7", "vio", "vio7", "viio7", "viioD7", "VIb", 'vi7b', '-III7'),
-                 roman = c("I", "I7", "Ib7", "ib7", "IVb7", "IV7", "ivb7", "iv", "Vn7", "V7", "vio", "vio7", "viio7", "viiobb7", "VI6", "vi65", '-III7'))
+                 roman = c("I", "I7", "Ib7", "ib7", "IVb7", "IV7", "ivb7", "iv", "Vn7", "V7", "vio", "vio7", "viio7", "viiobb7", "VI6", "vi65", '-III7'),
+                 harte = c('C:maj', 'C:maj7', 'C:7', 'C:min7', 'F:7', 'F:maj7', 'F:min7', 'F:min', 'G:maj7', 'G:7', 'A:dim', 'A:hdim7', 'B:hdim7', 'B:dim7', 'A:maj/3', 'A:min7/b3', 'E-:maj7'))
                  # figuredBass = c("C ", "C 7", "C b7", "C b7b3", "F b7", "F 7", "F b7b3", "F b3", "G #7", "G 7", "A b5", "A 7b5", "B 7", "B ", "C# 6", "C 65"),
                  # chord = c("C", "Cmaj7", "C7", "Cmin7", "F7", "Fmaj7", "Fmin7", "Fmin", "Gmaj7", "G7", "Adim", "Adim7", "Bdim7", "Bdim", "A/C#", "Amin7/C"))
   
@@ -19,6 +20,7 @@ test_that("Chord functions return same output, regardless of input.", {
   expect_allequal(tertian, inputs)
   expect_allequal(harm, inputs)
   expect_allequal(roman, inputs)
+  expect_allequal(harte, inputs)
   # expect_allequal(figuredBass, inputs)
   # expect_allequal(chord, inputs)
   

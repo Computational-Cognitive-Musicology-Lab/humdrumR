@@ -2,9 +2,19 @@
 % Please edit documentation in R/Chords.R
 \name{chord}
 \alias{chord}
+\alias{harte}
 \title{"Pop/Jazz" chord symbols}
 \usage{
 chord(
+  x,
+  ...,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  inPlace = FALSE
+)
+
+harte(
   x,
   ...,
   Key = NULL,
@@ -43,7 +53,14 @@ Defaults to \code{FALSE}.
 Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
-This function outputs a generic "jazz" chord symbol representation of a tonal harmony.
+These functions outputs jazz/pop-style chord symbols.
+There is no universal standard for how to notate such chord symbols, in particular in plain text.
+The \code{chord()} function outputs a chord symbol representation roughly consistent with "standard practices."
+}
+\details{
+For more rigorous, consistent work, we recommend the \href{https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus}{Harte} notation,
+which is the standard used by MIREX, etc.
+The \code{harte()} function will output standard Harte symbols.
 }
 \examples{
 romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')

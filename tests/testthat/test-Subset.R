@@ -163,9 +163,9 @@ test_that("Unfiltering works", {
     ditto(Kern) |>
     unfilter() |>
     select(Kern, 'ditto(Kern)') |>
-    tally() -> tally1
+    with(table(Kern, `ditto(Kern)`, useNA = 'ifany')) -> tally1
   
-  chorales |> kern(simple = TRUE) |> with(tally(ditto(Kern, null = Token %!~% '4'))) -> tally2
+  chorales |> kern(simple = TRUE) |> with(table(ditto(Kern, null = Token %!~% '4'), useNA = 'ifany')) -> tally2
     
   expect_true(all(colSums(tally1[-nrow(tally1), ]) == tally2))
   
@@ -174,9 +174,12 @@ test_that("Unfiltering works", {
   # complement
   chorales |> subset(DataRecord %% 2 == 0) -> chorales_sub
   
-  chorales |> recip() |> tally() -> total
-  chorales_sub |> recip() |> tally() -> sub
-  chorales_sub |> complement() |> recip() |> tally() -> comp
+  levels <- c('1', '16', '2', '2.', '4', '4.', '8', '8.')
+  chorales |> recip() |> with(table(factor(., levels = levels))) -> total
+  chorales_sub |> recip() |> with(table(factor(., levels = levels))) -> sub
+  chorales_sub |> complement() |> recip() |> with(table(factor(., levels = levels))) -> comp
+  
+  
   
   expect_true(all(total == (sub + comp)[names(total)]))
 })

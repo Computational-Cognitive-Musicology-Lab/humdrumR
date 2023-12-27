@@ -543,7 +543,7 @@ makeRE.pc <- function(ten = 'A', eleven = 'B', ...) {
 
 #### REs for diatonic sets ####
 
-makeRE.alterations <- function(..., qualities = FALSE) {
+makeRE.alterations <- function(..., qualities = FALSE, sep = '') {
     # names(alteration.labels) <- gsub('augment', 'sharp', names(alteration.labels))
     # names(alteration.labels) <- gsub('diminish', 'flat', names(alteration.labels))
 
@@ -552,8 +552,8 @@ makeRE.alterations <- function(..., qualities = FALSE) {
                            parts = c("species", "step"), step.signed = FALSE, flat = 'b',
                            step.labels = c(1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13),
                            regexname = 'alterations')
-    
-    paste0('(', makeRE(..., qualities = qualities, quality.required = FALSE), ')*')
+    if (sep != '') sep <- paste0(sep, '?')
+    paste0('(', makeRE(..., qualities = qualities, quality.required = FALSE), sep, ')*')
 }
 
 makeRE.key <- function(..., parts = c("step", "species", "mode", "alterations"),
@@ -680,6 +680,43 @@ makeRE.chord <-  function(..., major = '[Mm]aj', minor = 'min', augment = 'aug',
   
   
   if (collapse) setNames(cREs(REs), 'chord') else REs
+  
+}
+
+makeRE.harte <- function(..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', 
+                         bass.sep = '/', flat = '-', 
+                         collapse = TRUE) {
+  REs <- makeRE.tonalChroma(parts = c("step", "species"), flat = flat,
+                            step.labels = '[A-G]', qualities = FALSE,
+                            step.sign = FALSE, ...)
+  
+  REs$colon <- ':'
+  
+  
+  triads <- c(major, minor, augment, diminish)
+  sevenths <- paste0(c(major, minor, diminish, paste0('h', diminish), paste0(minor, major), ''),
+                     '7')
+  sixths <- paste0(c(major, minor), '6')
+  ninths <- paste0(c(major, minor, ''), 9)
+  sus <- c('sus2', 'sus4')
+  
+  quality <-captureRE(c(triads, sevenths,sixths, ninths, sus))
+  
+  figurations <- paste0('\\(', makeRE.alterations(..., step.labels = 1:13, flat = 'b', sep = ','), '\\)')
+  
+  REs$figqual <- paste0('(', quality, '|', figurations, ')')
+  
+  REs$bass <- paste0('(', bass.sep,
+                     makeRE.tonalChroma(parts = c("species", "step"), flat = 'b',
+                                                       step.labels = 1:13, qualities = FALSE,
+                                                       step.sign = FALSE, ...), 
+                     ')?')
+  
+  REs <- REs[c("tonalChroma", "colon", "figqual", "bass")]
+  
+  
+  
+  if (collapse) setNames(cREs(REs), 'harte') else REs
   
 }
 

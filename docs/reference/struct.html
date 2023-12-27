@@ -10,7 +10,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,7 @@ and it is all taken care of. (To do this, specify <code>contains = "struct"</cod
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
 many of their features are hard-coded into R itself and can't be replicated.
 The most important limitation of <code>struct</code> that you may encounter is that, though <code>struct</code> classes work (ok) in <a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frames</a>,
-<a href="https://Rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.tables</a> and <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibbles</a> will either not work or give strange behaviors if you put <code>struct</code>s into them.</p>
+<a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.tables</a> and <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibbles</a> will either not work or give strange behaviors if you put <code>struct</code>s into them.</p>
     </div>
     <div class="section level2">
     <h2 id="slots">Slots<a class="anchor" aria-label="anchor" href="#slots"></a></h2>

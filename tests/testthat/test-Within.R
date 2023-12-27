@@ -324,8 +324,8 @@ test_that('lag/lead sugar works', {
   chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
   chorales |> mutate(Kern = kern(Token, simple = TRUE)) -> chorales
   
-  chorales |> with(tally(Kern[lag = 0:1], na.rm = TRUE)) -> lag
-  chorales |> with(tally(Kern[lead = 0:1], na.rm = TRUE)) -> lead
+  chorales |> with(table(Kern[lag = 0:1])) -> lag
+  chorales |> with(table(Kern[lead = 0:1])) -> lead
   dimnames(lag) <- dimnames(lead) <- NULL
   expect_equal(lag, t(lead))
   

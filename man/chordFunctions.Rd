@@ -38,11 +38,21 @@ The functions are:
 }
 \details{
 \itemize{
+\item Jazz/Pop
+\itemize{
 \item \code{\link[=chord]{chord()}}
+\item \code{\link[=harte]{harte()}}
+}
+\item Classical
+\itemize{
 \item \code{\link[=figuredBass]{figuredBass()}}
+\item \code{\link[=tertian]{tertian()}}
+\item \emph{Roman Numerals}
+\itemize{
 \item \code{\link[=harm]{harm()}}
 \item \code{\link[=roman]{roman()}}
-\item \code{\link[=tertian]{tertian()}}
+}
+}
 }
 }
 \seealso{

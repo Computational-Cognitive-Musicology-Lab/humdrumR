@@ -468,7 +468,7 @@ tset2tonalHarmony <- function(x,
                               root.case = TRUE,
                               Key = NULL, keyed = FALSE,
                               inversion.labels = NULL,
-                              sep = '', ...) {
+                              collapse = TRUE, sep = '', ...) {
   Key <- diatonicSet(Key)
   
   if (keyed && !is.null(Key)) {
@@ -507,9 +507,12 @@ tset2tonalHarmony <- function(x,
   
   inversion.label <- if (!is.null(inversion.labels)) getInversion(x, inversion.labels = inversion.labels)
   
-  tonalharmony <- pasteordered(parts, root = root, quality = quality, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
+  if (collapse) {
+      pasteordered(parts, root = root, quality = quality, figuration = figuration, inversion = inversion.label, bass = bass, sep = sep)
+  } else {
+      list(root = root, quality = quality, figuration = figuration, inversion = inversion.label, bass = bass)[parts]
+  }
   
-  tonalharmony  
 }
 
 
@@ -626,6 +629,49 @@ tset2chord <- function(x, figurationArgs = c(), major = NULL, ...) {
   if (is.null(major)) chords <- stringr::str_replace(chords, "MAJOR", '')
   
   stringr::str_replace(chords, 'maj7([139]{1,2})', 'maj\\1')
+  
+}
+
+tset2harte <- function(x, Key = NULL, figurationArgs = list(), flat = '-', ...) {
+  
+  Key <- diatonicSet(Key)
+  
+  if (!is.null(Key)) {
+    Key <- rep(Key, length.out = length(x))
+    x[!is.na(Key)] <- x[!is.na(Key)] + getRoot(Key[!is.na(Key)])
+  }
+  
+  root <- getRootTint(x)
+  
+  qualities <- tset2alterations(x, flat = 'b', inversion = FALSE)
+  extensions <- tset2extensions(x, inversion = FALSE, inverted = x@Inversion > 0)
+  extensions <- array(.paste(qualities, extensions), dim = dim(qualities))
+  
+  fig <- apply(extensions, 1, .paste, collapse = ',')
+  
+  fig <- paste0('(', fig, ')')
+  
+  shorthand <- c('3,5' = 'maj', 'b3,5' = 'min', 'b3,b5' = 'dim', '3,#5' = 'aug',
+                 '3,5,7' = 'maj7', 'b3,5,b7' = 'min7', '3,5,b7' = '7', 'b3,b5,b7' = 'hdim7', 'b3,b5,bb7' = 'dim7', 'b3,5,7' = 'minmaj7',
+                 '3,5,6' = 'maj6', 'b3,5,6' = 'min6',
+                 '3,5,7,9' = 'maj9', 'b3,5,b7,9' = 'min9', '3,5,b7,9' = '9',
+                 '5,11' = 'sus4', '5,9' = 'sus2')
+  names(shorthand) <- paste0('(1,', names(shorthand), ')')
+  fig[fig %in% names(shorthand)] <- shorthand[fig[fig %in% names(shorthand)]]
+  
+  
+  
+  root <- tint2simplepitch(root, flat = flat, ...)
+  
+  # bass
+  bass <- local({
+    inverted <- x@Inversion > 0L
+    bass <- character(length(x))
+    bass[inverted] <- paste0('/', extensions[cbind(which(inverted), x@Inversion[inverted] + 1L)])
+    bass
+    
+  })
+  paste0(root, ':', fig, bass)
   
 }
 
@@ -1018,7 +1064,6 @@ sciQualities2tset <- function(str, inversion = 0L, ...) {
   
   dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, ...)
   
-  
   extension <- sapply(stringr::str_locate_all(str, '[^.]'), \(x) sum(as.integer(2L^(x[,  'start'] - 1L))))
   
   tset(dset@Root, dset@Signature, dset@Alteration, extension = extension, inversion = inversion)
@@ -1059,7 +1104,7 @@ figuredBass2tset <- function(x, ...) {
   
   figurations <- parseFiguration(figurations)
   
-  tsets <- .unlist(figurations[,
+  tset <- .unlist(figurations[,
               {
                 tints <- interval2tint(paste0(Accidentals[[1]], Degrees[[1]]), qualities = FALSE)
                 tints <- tints - tints[1]
@@ -1067,11 +1112,11 @@ figuredBass2tset <- function(x, ...) {
                 
                 sciDegrees <- paste(tint2specifier(tints, qualities=T, explicitNaturals = TRUE), collapse = '')
                 list(list(sciQualities2tset(sciDegrees, minor = 'm', diminish = 'd', augment = 'A', major = 'M',
-                                  inversion = inversion) - tints[inversion + 1L]))
+                                            inversion = inversion) - tints[inversion + 1L]))
               },
               by = 1:nrow(figurations)]$V1)
   
-  tsets + bass
+  tset + bass
   
   
 }
@@ -1121,7 +1166,6 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   
   if (any(bass != '')) {
     hasbass <- bass != ''
-    bassint <- integer(sum(hasbass))
     
     bassint <- getFifth(kern2tint(stringr::str_sub(bass[hasbass], start = 2L))) - getFifth(kern2tint(tonalChroma[hasbass]))
     tset@Inversion[hasbass] <- c(0L, 2L, 4L, 6L, 1L, 3L, 5L)[bassint %% 7L + 1L]
@@ -1130,9 +1174,69 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   
   tset
   
+}
+
+harte2tset <- function(x,  ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = '-') {
+  REparse(x,
+          makeRE.harte(..., major = major, minor = minor, augment = augment, diminish = diminish,
+                       flat = flat, collapse = FALSE), # makes tonalChroma, figqual, bass
+          toEnv = TRUE) -> parsed
   
+  # shorthand translation
+  shorthands <- local({ 
+    shorthands <- c(maj = '3,5', min = 'b3,5', aug = '3,#5', dim = 'b3,b5',
+                    '7' = '3,5,b7', maj7 = '3,5,7', min7 = 'b3,5,b7', dim7 = 'b3,b5,bb7', hdim7 = 'b3,b5,b7', minmaj7 = 'b3,5,7',
+                    maj6 = '3,5,6', min6 = 'b3,5,6',
+                    '9' = '3,5,b7,9', maj9 = '3,5,7,9', min9 = 'b3,5,b7,9', 
+                    sus2 = '2,5', sus4 = '4,5')
+    shorthands <- setNames(paste0('(1,', shorthands, ')'), names(shorthands))
+    
+    names(shorthands) <- gsub('maj', major, names(shorthands))
+    names(shorthands) <- gsub('min', minor, names(shorthands))
+    names(shorthands) <- gsub('aug', augment, names(shorthands))
+    names(shorthands) <- gsub('dim', diminish, names(shorthands))
+    
+    shorthands
+    
+    
+  })
+   
+   
+  fig <- figqual
+  fig[!grepl('^\\(', figqual)] <- shorthands[figqual[!grepl('^\\(', figqual)]]
+  
+  # translate fig to tertian
+  fig <- gsub('^\\(1,', '', gsub('\\)$', '', fig))
+  fig <- strsplit(fig, split = ',')
+  tertian <- c('P', rep('.', 6))
+  ind <- c('3' = 2L, '5' = 3L, '7' = 4L,
+           '2' = 5L, '9' = 5L,
+           '4' = 6L, '11' = 6L,
+           '6' = 7L, '13' = 7L)
+  tertian <- sapply(unique(fig),
+         \(fig) {
+           qualities <- tint2specifier(interval2tint(fig, qualities = FALSE, flat = 'b'), qualities = TRUE, explicitNaturals = TRUE)
+           
+           fig <- gsub('[b#]+', '', fig)
+           tertian[ind[fig]] <- qualities
+           paste(tertian, collapse = '')
+           
+         })
+  
+  
+  tset <- sciQualities2tset(tertian, augment = 'A', diminish = 'd')[match(fig, unique(fig))]
+  
+  if (any(bass != '')) {
+    hasbass <- bass != ''
+    
+    tset@Inversion[hasbass] <- ind[gsub('\\/b?', '', bass[hasbass])] - 1L
+    
+  }
+  
+  tset + kern2tint(tonalChroma, flat = flat)
   
 }
+
 ##... Numbers
 
 integer2tset <- function(x) tset(x, x)
@@ -1208,6 +1312,7 @@ tertianSet.integer <- integer2tset
 tertianSet.character <- makeHumdrumDispatcher(list('harm', makeRE.harm,     harm2tset),
                                               list('roman',  makeRE.roman,    roman2tset),
                                               list('figuredBass', makeRE.figuredBass, figuredBass2tset),
+                                              list('harte', makeRE.harte, harte2tset),
                                               list('any',  makeRE.tertian,  tertian2tset),
                                               list('any',  makeRE.chord,    chord2tset),
                                               funcName = 'tertianSet.character',
@@ -1268,11 +1373,15 @@ setAs('tertianSet', 'diatonicSet', function(from) tset(from@Root, from@Signature
 #' These functions can be used to extract and "translate," or otherwise modify, data representing tertian harmony information.
 #' The functions are:
 #' 
-#' + [chord()]
-#' + [figuredBass()]
-#' + [harm()]
-#' + [roman()]
-#' + [tertian()]
+#' + Jazz/Pop
+#'   + [chord()]
+#'   + [harte()]
+#' + Classical
+#'   + [figuredBass()]
+#'   + [tertian()]
+#'   + *Roman Numerals*
+#'     + [harm()]
+#'     + [roman()]
 #' 
 #' @seealso To better understand how these functions work, read about how tertian harmonies are 
 #' [parsed][chordParsing] and [deparsed][chordDeparsing].
@@ -1403,7 +1512,13 @@ NULL
 
 #' "Pop/Jazz" chord symbols
 #' 
-#' This function outputs a generic "jazz" chord symbol representation of a tonal harmony.
+#' These functions outputs jazz/pop-style chord symbols.
+#' There is no universal standard for how to notate such chord symbols, in particular in plain text.
+#' The `chord()` function outputs a chord symbol representation roughly consistent with "standard practices."
+#'
+#' For more rigorous, consistent work, we recommend the [Harte](https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus) notation,
+#' which is the standard used by MIREX, etc.
+#' The `harte()` function will output standard Harte symbols.
 #' 
 #' @examples
 #' romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')
@@ -1419,6 +1534,10 @@ NULL
 #' @inheritParams chordFunctions
 #' @export 
 chord <- makeChordTransformer(tset2chord, 'chord')
+
+#' @rdname chord
+#' @export
+harte <- makeChordTransformer(tset2harte, 'harte')
 
 #' Figured bass representation of harmony
 #' 
