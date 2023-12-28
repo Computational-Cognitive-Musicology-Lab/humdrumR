@@ -1672,6 +1672,9 @@ humdrumRmethods('harm')
 #' @exportS3Method chord default
 #' @exportS3Method chord humdrumR
 humdrumRmethods('chord')
+#' @exportS3Method harte default
+#' @exportS3Method harte humdrumR
+humdrumRmethods('harte')
 #' @exportS3Method tertian default
 #' @exportS3Method tertian humdrumR
 humdrumRmethods('tertian')
