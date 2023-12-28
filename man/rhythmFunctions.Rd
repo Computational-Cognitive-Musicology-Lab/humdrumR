@@ -20,11 +20,12 @@ Defaults to \code{rational(1, 1)}.
 
 Must be \code{numeric} or \link{rational}.}
 
-\item{parseArgs}{\emph{\strong{An optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
+\item{Exclusive, parseArgs}{\emph{\strong{An vector of exclusive interpretations and/or an optional list of arguments passed to the \link[=rhythmParsing]{rhythm parser}.}}
 
-Defaults to an empty \code{list()}.
+Default to \code{NULL} and an empty \code{list()} respectively.
 
-Must be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
+\code{Exclusive} must be a \code{character} vector of length 1, or the same length as \code{x};
+\code{parseArgs} must  be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
 
 \item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}
 

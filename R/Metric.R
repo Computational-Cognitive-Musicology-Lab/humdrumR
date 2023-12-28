@@ -188,7 +188,7 @@ setMethod('initialize',
 
 #' @rdname meter
 #' @export
-meter <- function(x, ...) UseMethod('meter')
+meter <- function(x, ..., measure, tactus, tick, fill.levels, subdiv, hyper, tatum) UseMethod('meter')
 #' @rdname meter
 #' @export
 meter.meter <- function(x, ...) x
@@ -332,7 +332,6 @@ meter2timeSignature <- dofunc('x', function(x) {
 timesignature2meter <- function(x, ..., sep = '/', compound = TRUE) {
   REparse(x, makeRE.timeSignature(sep = sep, collapse = FALSE),
           toEnv = TRUE)
-  
   numerator <- lapply(strsplit(numerator, split = '\\+'), as.integer)
   denominator <- as.integer(denominator)
   
@@ -345,21 +344,26 @@ timesignature2meter <- function(x, ..., sep = '/', compound = TRUE) {
   beats <- Map(rational, numerator, denominator)
   denominator <- as.list(rational(1L, denominator))
   
-  levels <- lapply(list(...), rhythmInterval)
+  unnamed <- list(...)
+  unnamed <- list(.names(unnamed) == '')
+  levels <- lapply(unnamed, rhythmInterval)
+  
   results <- Map(\(den, bts) {
     
     measure <- sum(bts)
-    
-    
     tactus <- if (length(bts) > 1)  bts  else den
     if (compound && 
+        all((measure %/% tactus) > 3L) &&
         all(as.integer64(3L) %divides% bts@Numerator) && 
         all(den@Numerator == as.integer64(1L)) && 
         all(as.integer64(8L) %divides% den@Denominator)) {
       # compound meters
-      tactus <- tactus * 3L
-    } 
-    do.call('meter.rational', list(tactus, ..., measure = measure))
+      do.call('meter.rational', list(tactus * 3L, tactus, ..., measure = measure))
+    } else {
+      do.call('meter.rational', list(tactus, ..., measure = measure))
+    }
+   
+   
     # levels <- c(levels, subdiv)
   }, denominator, beats) 
 
@@ -484,7 +488,7 @@ tatum.NULL <- function(x) NULL
 #' specific levels from the meter.
 #' `tactus()` extracts the tactus of a meter; `measure()` extracts the length of the full measure of a meter.
 #' `nbeats()` counts the number of tactus beats in the meter.
-#' These functions are particularly useful as arguments to the [count and subpos][count()] functions.
+#' These functions are particularly useful as arguments to the [timecount and subpos][timecount()] functions.
 #' 
 #' 
 #' @details 
@@ -594,21 +598,6 @@ nbeats.character <- function(x) unlist(lapply(as.list(meter(x)), nbeats.meter))
 nbeats.NULL <- function(x) NULL
 
  
-#' @export
-beats <- function(x) UseMethod('beats') 
-#' @rdname nbeats
-#' @export
-beats.meter <- function(x) {
-  measure.meter(x, deparser = NULL) %/% tactus.meter(x, deparser = NULL)
-  
-}
-#' @rdname nbeats
-#' @export
-beats.character <- function(x) unlist(lapply(meter(x), beats.meter))
-#' @rdname nbeats
-#' @export
-beats.NULL <- function(x) NULL
-
 
 
 ###################################################################### ###
@@ -623,24 +612,24 @@ beats.NULL <- function(x) NULL
 #' Count beats or measures
 #' 
 #' 
-#' The `count()` function takes a vector of rhythmic duration values and
+#' The `timecount()` function takes a vector of rhythmic duration values and
 #' counts (in the musical sense) the number of *beats* (or *measures*) which have occurred since the starting point, 
 #' associating each rhythmic onsets with a beat.
-#' The `subpos()` function is paired with `count()`, computing how far (in rhythmic time) each onset is from its
+#' The `subpos()` function is paired with `timecount()`, computing how far (in rhythmic time) each onset is from its
 #' associated beat; if `subpos()` returns `0`, this means that an onset is *on* the beat.
 #' Finally, `onbeat()` is simply a convenient shorthand for `subpos() == 0`, returning
 #' a `logical` vector for indicating where onsets fall on or off beat.
 #' 
 #' @details
 #' 
-#' In many basic use cases, using `count()` is essentially the same as using `floor(timeline())`.
-#' However, `count()` gives us a few additional options which add musicological power compared to [timeline()].
-#' (`count()` also starts from `1` not `0`, as [timeline()] does.)
+#' In many basic use cases, using `timecount()` is essentially the same as using `floor(timeline())`.
+#' However, `timecount()` gives us a few additional options which add musicological power compared to [timeline()].
+#' (`timecount()` also starts from `1` not `0`, as [timeline()] does.)
 #' 
 #' The first beat in an input vector is assigned the value of the `start` argument, which defaults to `start = 1L`.
 #' There is no 'zeroth' count, as the first beat occurs at the instant of the starting time---i.e., the first onset in the input vector.
 #' Every rhythmic onset is associated with one beat, but multiple onsets may occur within the same beat---thus
-#' the output of `count()` assigns (rounds) each onset to the previous beat onset.
+#' the output of `timecount()` assigns (rounds) each onset to the previous beat onset.
 #' However, if `offBeats = FALSE`, only onsets that *land* on a beat are counted, with offbeat values returning `NA`.
 #' 
 #' The `phase` controls how offbeat onsets are associated with nearby beats.
@@ -649,50 +638,50 @@ beats.NULL <- function(x) NULL
 #' By default, `phase = 0` so the beat-association boundary lands on the beat: only onsets on or after each beat "belong" to that beat.
 #' If `phase = '8'`, the beat boundary is pushed back to capture one eighth-note *before* the beat itself.
 #' This can be used to, for example, associate the last 3/8s of a measure with the next measure (like pick ups);
-#' This could be achieved with a command like `count(dur, beat = '1', phase = 3/8)`.
+#' This could be achieved with a command like `timecount(dur, beat = '1', phase = 3/8)`.
 #' 
 #'
 #' 
 #' @section "Beats":
 #' 
-#' The `beat` argument is used to indicate what size of beat you want to count.
-#' The default `beat` is a whole note, equivalent to a measure of `M4/4` time.
-#' The `beat` argument uses the [rhythm parser][rhythmInterval()], so it can understand beat values input in a variety of formats:
-#' thus, you could specify quarter-note beats as either `beat = '4'` or `beat = 0.25`.
-#' The parser also understands how to parse the (full) duration of time signature: for example, `beat = 'M3/4'` would use a dotted-half-note beat (`'2.'`).
+#' The `unit` argument is used to indicate what size of beat you want to count.
+#' The default `unit` is a whole note, equivalent to a measure of `M4/4` time.
+#' The `unit` argument uses the [rhythm parser][rhythmInterval()], so it can understand unit values input in a variety of formats:
+#' thus, you could specify quarter-note units as either `unit = '4'` or `unit = 0.25`.
+#' The parser also understands how to parse the (full) duration of time signature: for example, `unit = 'M3/4'` would use a dotted-half-note unit (`'2.'`).
 #' 
 #' ### Changing meter
 #' 
 #' If your data has changing meters (either between pieces, or within pieces), you can specify
-#' the `beat` argument as a vector which is the same length as `dur`, indicating the
+#' the `unit` argument as a vector which is the same length as `dur`, indicating the
 #' beat size at each moment/index. 
 #' This feature is very easy to use with any dataset that includes time signature interpretations, like `"*M4/4"`;
 #' these interpetations, if present, are automatically [read into][readHumdrum()] a field called `TimeSignature`.
-#' For such a dataset, you can simply pass the `TimeSignature` field to the `beat` argument of `count()`, and 
-#' the measures of the piece will be correctly counted (even when changing!): `count(x, beat = TimeSignature)`.
-#' Alternatively, you can use the [tactus()] command to extract the tactus beat from a time signature, like `count(x, beat = tactus(TimeSignature))`.
+#' For such a dataset, you can simply pass the `TimeSignature` field to the `unit` argument of `timecount()`, and 
+#' the measures of the piece will be correctly counted (even when changing!): `timecount(x, unit = TimeSignature)`.
+#' Alternatively, you can use the [tactus()] command to extract the tactus beat from a time signature, like `timecount(x, unit = tactus(TimeSignature))`.
 #' 
 #' ### Irregular meter
 #' 
 #' Some musical meters consist of a pattern of irregular beats.
 #' For example, the meter `M7/8` is often realized as two "short" beats (two eigth-notes each) and one "long" beat (three eigth-notes), forming a 2 + 2 + 3 pattern.
-#' If we want to count each eighth-note, we can simply specify `beat = '8'` and get the `M7/8` beats counted as c(`1`, `3`, `5`).
-#' However, if we want to count each short *or* long beat as a single unit, we must specify the desired pattern as a `list` of beat durations: for example, `beat = list(c("4", "4", "4."))`.
+#' If we want to count each eighth-note, we can simply specify `unit = '8'` and get the `M7/8` beats counted as c(`1`, `3`, `5`).
+#' However, if we want to count each short *or* long beat as a single unit, we must specify the desired pattern as a `list` of beat durations: for example, `unit = list(c("4", "4", "4."))`.
 #' Let's see what these two cases look like, applied to two `M7/8` measures of straight eighth-notes:
 #' 
 #' ```
 #' rhythm <- rep('8', 14)
 #' 
-#' count(rhythm, beat = '8'),
+#' timecount(rhythm, unit = '8'),
 #' 
 #' # output is: 1  2  3  4  5  6  7  8  9 10 11 12 13 14
 #' 
-#' count(rhythm, beat = list(c('4', '4', '4.')))
+#' timecount(rhythm, unit = list(c('4', '4', '4.')))
 #' 
 #' # output is: 1 1 2 2 3 3 3 4 4 5 5 6 6 6
 #' ```
 #'
-#' To accommodate changing meters, the `beat` argument can still accept `list` of such patterns, so long as the list is the same length as `dur`.
+#' To accommodate changing meters, the `unit` argument can still accept `list` of such patterns, so long as the list is the same length as `dur`.
 #'
 #' @section Pickups:
 #' 
@@ -702,7 +691,7 @@ beats.NULL <- function(x) NULL
 #' The *first* index where the `pickup` logical is `FALSE` is used as the location of beat `1`:
 #' all the earlier (`pickup == TRUE`) points will be negative counts, counting backwards from the start.
 #' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
-#' Thus, a common use for the `pickup` argument is `within(humData, count(Token, pickup = Bar < 1)`, which makes the downbeat of
+#' Thus, a common use for the `pickup` argument is `within(humData, timecount(Token, pickup = Bar < 1)`, which makes the downbeat of
 #' the first complete bar `1` the stating point---any notes in pickup bars are give negative counts.
 #' 
 #' **Note that there is never a 'beat zero'.**
@@ -718,7 +707,7 @@ beats.NULL <- function(x) NULL
 #' Wherever the input can't be parsed as a duration, 
 #' that element is treated as a duration of zero.
 #'             
-#' @param beat ***The size of "beat" (or measure) to count.***
+#' @param unit ***The size of "beat" (or measure) to count.***
 #' 
 #' Defaults to a whole-note (one measure of 4/4 time).
 #' 
@@ -737,7 +726,7 @@ beats.NULL <- function(x) NULL
 #' Defaults to `0`.
 #'
 #' Must be a `character` or `numeric` vector; must be length `1` or the same length as `dur`;
-#' The duration of `phase` must be smaller than the smallest duration value in `beat`.
+#' The duration of `phase` must be smaller than the smallest duration value in `unit`.
 #' 
 #' Is parsed as a duration using [rhythmInterval()]; 
 #' If the input can't be parsed as a duration, an error occurs.
@@ -766,29 +755,29 @@ beats.NULL <- function(x) NULL
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
-#' show(within(humData, count(Token, beat = TimeSignature, pickup = Bar < 1)))
+#' show(within(humData, timecount(Token, unit = TimeSignature, pickup = Bar < 1)))
 #' 
-#' show(within(humData, count(Token, beat = tactus(TimeSignature))))
+#' show(within(humData, timecount(Token, unit = tactus(TimeSignature))))
 #'  
 #'   
-#' @seealso {`count()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `count()` within a metric framework.}
+#' @seealso {`timecount()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `timecount()` within a metric framework.}
 #' @export
-count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list()) {
+timecount <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list(), ...) {
   
   checks(dur, xcharacter | xnumber)
   checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
-  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?count", 'the rhythm vignette'))
+  checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?timecount", 'the rhythm vignette'))
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
   checks(offBeats, xTF)
   
   
-  scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'count')
+  scaled <- scaled_timeline(dur, unit, rational(0L), pickup, groupby, callname = 'timecount', ...)
   
   # phase
   phase_rint <- rhythmInterval(phase) 
   checks(phase_rint, argname = 'phase',
-         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all beats in the 'beat' argument'", 
-                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'beat' includes ", .show_vector(unique(beat)))))
+         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all units in the 'unit' argument'", 
+                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'unit' includes ", .show_vector(unique(unit)))))
   
   phase_rint <- phase_rint / scaled$Scale
   #
@@ -839,22 +828,22 @@ count <- function(dur, beat = rational(1L), start = 1L, phase = 0,  pickup = NUL
   mcount
 }
 
-#' @rdname count
+#' @rdname timecount
 #' @export
-subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
+subpos <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?subpos", 'the rhythm vignette'))
   checks(phase, (xnumeric | xcharacter) & (xlen1 | xmatch(dur)))
   checks(deparser, xinherits('rhythmFunction'))
   
-  scaled <- scaled_timeline(dur, beat, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
+  scaled <- scaled_timeline(dur, unit, rational(0L), pickup, groupby, callname = 'subpos', sumBeats = TRUE)
   
   # phase
   phase_rint <- rhythmInterval(phase) 
   checks(phase_rint, argname = 'phase',
-         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all beats in the 'beat' argument'", 
-                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'beat' includes ", .show_vector(unique(beat)))))
+         argCheck(\(arg) all(arg < min(.unlist(scaled$values))), "must be smaller than all units in the 'unit' argument'", 
+                  \(arg) paste0(.show_values(rep(phase, length(scaled$Scale))[arg >= min(.unlist(scaled$values))]), " but 'unit' includes ", .show_vector(unique(unit)))))
   phase_rint <- phase_rint / scaled$Scale
   
   
@@ -880,14 +869,14 @@ subpos <- function(dur, beat = rational(1L), phase = 0, pickup = NULL, deparser 
   if (is.null(deparser)) timeline else deparser(timeline, ...)
 }
 
-scaled_timeline <- function(dur, beat, start, pickup, groupby, callname, sumBeats = FALSE) {
-  dur <- rhythmInterval(dur)
+scaled_timeline <- function(dur, unit, start, pickup, groupby, callname, sumBeats = FALSE, ...) {
+  dur <- rhythmInterval(dur, ...)
   
-  checks(beat, (xatomic | xinherits(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
+  checks(unit, (xatomic | xinherits(c('list', 'rational'))) & (xlen1 | xmatch(dur)))
   
-  if (is.list(beat)) {
-    beat <- rep(beat, length.out = length(dur))
-    uniqueBeats <- valind(beat)
+  if (is.list(unit)) {
+    unit <- rep(unit, length.out = length(dur))
+    uniqueBeats <- valind(unit)
     
     uniqueBeats$values <- lapply(uniqueBeats$values, rhythmInterval)
     
@@ -895,27 +884,27 @@ scaled_timeline <- function(dur, beat, start, pickup, groupby, callname, sumBeat
     
     tatum <- .unlist(lapply(uniqueBeats$values, if(sumBeats) sum else tatum.rational))
     
-    beat <- tatum[uniqueBeats$i]
+    unit <- tatum[uniqueBeats$i]
     
   } else {
     irregular <- logical(length(dur))
-    beat <- rhythmInterval(beat)
-    uniqueBeats <- list(values = beat)
+    unit <- rhythmInterval(unit)
+    uniqueBeats <- list(values = unit)
   }
   
   
-  dur <- dur / beat
+  dur <- dur / unit
   
-  timeline <- pathSigma(dur, groupby = groupby, start = start, pickup = pickup, callname = 'count')
+  timeline <- pathSigma(dur, groupby = groupby, start = start, pickup = pickup, callname = 'timecount')
   
-  c(list(Timeline = timeline, Scale = beat, Irregular = irregular, tatum = tatum), uniqueBeats)
+  c(list(Timeline = timeline, Scale = unit, Irregular = irregular, tatum = tatum), uniqueBeats)
 }
 
 
-#' @rdname count
+#' @rdname timecount
 #' @export
-onbeat <- function(dur, beat = rational(1L), groupby = list(), ...) {
-  subpos(dur, beat = beat, groupby = groupby, deparser = NULL) == rational(0L)
+onbeat <- function(dur, unit = rational(1L), groupby = list(), ...) {
+  subpos(dur, unit = unit, groupby = groupby, deparser = NULL) == rational(0L)
 }
 
 
@@ -950,7 +939,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' `metcount()` counts beats within a measure;
 #' `metsubpos()` measures the distance
 #' between an onset and the nearest metric beat.
-#' `metcount()` and `metsubpos()` parallel the more general `count()` and `subpos()` functions.
+#' `metcount()` and `metsubpos()` parallel the more general `timecount()` and `subpos()` functions.
 #' 
 #' @details 
 #' 
@@ -1083,7 +1072,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' that element is treated as a duration of zero.
 #' 
 #' @inheritParams timeline 
-#' @inheritParams count
+#' @inheritParams timecount
 #' 
 #' @param meter ***The meter(s) to compute levels from.***
 #' 
@@ -1136,7 +1125,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' within(chorales, metcount(Token, pickup = Bar < 1, fill.levels = 'below'))
 #'
-#' @seealso {The [count()] and [subpos()] functions are more basic versions of `metcount()` and `metsubpos()`,
+#' @seealso {The [timecount()] and [subpos()] functions are more basic versions of `metcount()` and `metsubpos()`,
 #' based only on counting a *single* beat level, rather then a hierarchy of beat levels.}
 #' @export
 metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, remainderSubdivides = FALSE, deparser = recip, 
@@ -1179,21 +1168,20 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
 
 #' @rdname metlev
 #' @export
-metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL, ...,
-                     offBeats = TRUE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list()) {
+metcount.default <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL,  ...,
+                     offBeats = TRUE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list(), Exclusive = NULL) {
   
   checks(dur, xcharacter | xnumber)
   checks(offBeats, xTF)
   checks(remainderSubdivides, xTF)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?metcount", 'the rhythm vignette'))
   
-  met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, 
+  met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive, 
                  remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
   
   counts <- met$Counts
   
-  
-  if (is.character(level) && any(!level %in% colnames(counts))) {
+  if (is.character(level) && any(!is.na(level) & !level %in% colnames(counts))) {
     .stop("In your call to metcount(), {harvard(unique(level[!level %in% colnames(counts)]), 'and', quote = TRUE)}",
           "<are not names of metric levels|is not a name of a metric level>",
           "in the input meter.",
@@ -1226,6 +1214,12 @@ metcount <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL
   mcount
     
 }
+#' @rdname metlev
+#' @export
+metcount.humdrumR <- humdrumRmethod(metcount.default)
+#' @rdname metlev
+#' @export
+metcount <- humdrumRgeneric(metcount.default)
 
 #' @rdname metlev
 #' @export
@@ -1244,16 +1238,17 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 
 
 .metric <- function(dur, meter = duple(5),  groupby = list(), pickup = NULL, ..., 
-                    parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
+                    parseArgs = list(), Exclusive = NULL, remainderSubdivides = TRUE, callname = '.metric') {
+  
   if (length(unique(meter)) > 1L) {
     return(.metrics(dur, meter = meter, pickup = pickup,
-                    groupby = groupby, parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
+                    groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive, remainderSubdivides = remainderSubdivides,
                     callname = callname, ...))
   }
   
-  dur <- do.call('rhythmInterval', c(list(dur), parseArgs))
-  
+  dur <- do.call('rhythmInterval', c(list(dur, Exclusive = Exclusive), parseArgs))
   meter <- meter(meter, ...)
+  
   
   timeline <- pathSigma(dur, groupby = groupby, pickup = pickup, start = rational(0), callname = callname)
   
@@ -1262,9 +1257,9 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   nbeats <- lengths(levels)
   
   counts <- do.call('cbind', lapply(lapply(levels, \(l) if (length(l) > 1) list(l) else l), 
-                                    count, 
+                                    timecount, 
                                     pickup = pickup, dur = dur, groupby = groupby))
-  counts[counts >= 1L] <- counts[counts >= 1L] - 1L
+  counts[!is.na(counts) & counts >= 1L] <- counts[!is.na(counts) & counts >= 1L] - 1L
   
   rounded_timelines <- lapply(seq_along(spans), \(i) spans[i] * counts[,i])
   remainders <- do.call('cbind', lapply(rounded_timelines, \(rt) timeline - rt))
@@ -1298,22 +1293,27 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 
   ## figure out remainders
   onbeats <- remainders == rational(0L)
+  # leftmost <- leftmost(onbeats)
+  # lowestLevel <- which(leftmost, arr.ind = TRUE)[ , 'col']
+  
   lowestLevel <- leftmost(onbeats, which = TRUE)[ , 'col']
   onbeat <- lowestLevel > 0L
   
   
-  if (any(!onbeat)) {
+  if (any(!onbeat, na.rm = TRUE)) {
     
-    offbeats <- as.double(remainders[!onbeat , ])
+    offbeat <- !is.na(onbeat) & !onbeat 
+    offbeats <- as.double(remainders[offbeat, ])
     
     if (remainderSubdivides) {
-      subdivide <- do.call('cbind', lapply(as.list(spans), \(span) dur[!onbeat] %divides% span))
+      subdivide <- do.call('cbind', lapply(as.list(spans), \(span) dur[offbeat] %divides% span))
       offbeats[!subdivide] <- max(offbeats)
     }
     
-    lowestLevel[!onbeat] <- max.col(-offbeats, ties.method = 'last')
+    lowestLevel[offbeat] <- max.col(-offbeats, ties.method = 'last')
     
   }
+  
   remainder <- c(remainders[cbind(seq_len(nrow(remainders)), lowestLevel)])
     
   # remove redundant counts
@@ -1328,28 +1328,29 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
        Remainder = remainder, 
        OnBeat = onbeats, 
        Levels = levels,
+       LeftMost = leftmost,
        MetLev = lowestLevel)
 }
 
-.metrics <- function(dur, meter = duple(5), pickup = NULL, groupby = list(), ..., 
+.metrics <- function(dur, meter = duple(5), pickup = NULL, groupby = list(), Exclusive = NULL, ..., 
                      parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
   
   uniqmeters <- unique(meter)
-  
+  uniqmeters <- uniqmeters[!is.na(uniqmeters)]
   mets <- lapply(seq_along(uniqmeters), 
                 \(i) {
-                  targets <- meter == uniqmeters[i]
+                  targets <- !is.na(meter) & meter == uniqmeters[i]
                   
                   met <- .metric(dur[targets], uniqmeters[i], pickup = if (!is.null(pickup)) pickup[targets],
                                  groupby = lapply(groupby, '[', i = targets),
-                                 parseArgs = parseArgs, remainderSubdivides = remainderSubdivides,
+                                 parseArgs = parseArgs, Exclusive = Exclusive[targets],
+                                 remainderSubdivides = remainderSubdivides,
                                  callname = callname, ...)
                   met$Indices <- which(targets)
                   met
                 })
   
   ## get full counts table
-  topLevels <- unique(unlist(lapply(mets, \(met) colnames(met$Count)[1])))
   allCols <- unique(unlist(lapply(mets, \(met) colnames(met$Count))))
   
   
@@ -1359,19 +1360,24 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   onbeats <- matrix(NA, 
                     nrow = length(dur), ncol = length(allCols),
                     dimnames = list(NULL, allCols))
+  topLevels <- integer(length(dur))
   
   for (met in mets) {
     counts[cbind(rep(met$Indices, ncol(met$Counts)), 
                  rep(match(colnames(met$Counts), allCols), each = length(met$Indices)))] <- c(met$Counts)
     onbeats[cbind(rep(met$Indices, ncol(met$OnBeat)), 
                   rep(match(colnames(met$Counts), allCols), each = length(met$Indices)))] <- c(met$OnBeat)
+    topLevels[met$Indices] <- match(colnames(met$Counts)[1], allCols)
   }
   
-  # need to make counts in the same beat accumulate across changes in meter
-  counts[, colnames(counts) %in% topLevels] <- apply(counts[, colnames(counts) %in% topLevels],
-                                                     2,
-                                                     makeCumulative,
-                                                     groupby = c(list(segments(meter)), groupby))
+  # need to make counts in the same (top-level) beats accumulate across changes in meter
+  # so, e.g., M6/4 and M12/8 will sum their "1."s
+  for (toplev in unique(topLevels[topLevels > 0L])) {
+    curTop <- topLevels == toplev
+    counts[curTop, toplev] <- makeCumulative(counts[curTop, toplev],
+                                              groupby = lapply(c(list(segments(meter[toplev])), groupby[colnames(groupby) %in% c('Piece', 'Spine', 'Path')]),
+                                                               '[', i = curTop))
+  }
   
   # levels
   levels <- unique(.unlist(lapply(mets, '[[', 'Levels')))

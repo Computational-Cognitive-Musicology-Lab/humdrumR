@@ -888,13 +888,27 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
 #' @export
 index <- function(x, i, j, drop = TRUE) {
   
-  pat <- paste0(missing(i), missing(j))
+  i <- rlang::enexpr(i)
+  j <- rlang::enexpr(j)
   
-  switch(pat,
-         'TRUETRUE' = x,
-         'TRUEFALSE' = x[  , j, drop],
-         'FALSETRUE' = if (length(dim(x)) > 1L) x[i ,  , drop] else x[i],
-         'FALSEFALSE' = x[i, j, drop])
+  if (missing(i) && missing(j)) return(x)
+  
+  expr <- rlang::expr(x[])
+  if (!missing(i)) expr[[3]] <- i
+  if (!missing(j)) expr[[4]] <- j
+  if (!is.null(dim)) expr$drop <- drop
+  if (inherits(x, 'data.table') && !missing(j)) x$with = FALSE
+  
+  
+  rlang::eval_tidy(expr)
+  # 
+  # pat <- paste0(missing(i), missing(j))
+  # 
+  # switch(pat,
+  #        'TRUETRUE' = x,
+  #        'TRUEFALSE' = x[  , j, drop = drop],
+  #        'FALSETRUE' = if (length(dim(x)) > 1L) x[i ,  , drop = drop] else x[i],
+  #        'FALSEFALSE' = x[i, j, drop = drop])
 }
 
 #' @rdname indexHumdrum

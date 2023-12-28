@@ -30,7 +30,7 @@ If no field names are specified, the first selectedField is used as x."><!-- mat
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -262,7 +262,7 @@ have a (shared) position on the timeline.</p>
 <p>Another option is to pass the <code>pickup</code> argument a logical vector of the same length as the input <code>x</code>.
 Within each piece/group, any block of <code>TRUE</code> values at the <em>beginning</em> of the <code>pickup</code> vector
 indicate a pickup.
-The <em>first</em> index where the <code>pickup</code> logical is <code>FALSE</code> is used as the starting point of the timeline/count;
+The <em>first</em> index where the <code>pickup</code> logical is <code>FALSE</code> is used as the starting point of the timeline/timecount;
 All the earlier (<code>pickup == TRUE</code>) points will be negative numbers, measured backwards from the start index.
 In <code>humdrumR</code>, and datapoints before the first barline record (<code>=</code>) are labeled <code>Bar == 0</code> in the <code>Bar</code> <a href="humTable.html">field</a>.
 Thus, a common use for the <code>pickup</code> argument is <code>within(humData, timeline(Token, pickup = Bar &lt; 1)</code>, which makes the downbeat of
@@ -270,7 +270,7 @@ the first complete bar <code>1</code> the starting point of the timeline---any n
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>The <code><a href="count.html">count()</a></code> and <code><a href="metlev.html">metcount()</a></code> functions provide "higher level" musical interpretations of timeline information.</p></div>
+    <div class="dont-index"><p>The <code><a href="timecount.html">timecount()</a></code> and <code><a href="metlev.html">metcount()</a></code> functions provide "higher level" musical interpretations of timeline information.</p></div>
     </div>
 
     <div class="section level2">

@@ -45,18 +45,18 @@
 #' @importFrom utils combn
 #' @importFrom glue glue glue_collapse
 #' @importFrom abind abind
-#' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub
+#' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub str_sort
 #' @importFrom stringi stri_enc_detect2 stri_read_raw stri_trans_totitle
 #' @importFrom rlang %|% %||% 
 #' @importFrom bit64 as.integer64 is.integer64
 #' @importFrom numbers primeFactors
-#' @importFrom data.table data.table rbindlist setorder setindex set setorderv setcolorder copy as.data.table is.data.table frank CJ setnames setkey
+#' @importFrom data.table data.table rbindlist setorder setindex set setorderv setcolorder copy as.data.table is.data.table frank CJ setnames setkey dcast
 #' @importFrom scales ContinuousRange
-#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize tally 
+#' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize count
 #' @importFrom tidyselect eval_select
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom ggplot2 ggplot update_geom_defaults scale_color_gradientn scale_type aes geom_bar geom_point
-#' @export summarise select filter mutate pull reframe group_by ungroup summarize tally
+#' @export summarise select filter mutate pull reframe group_by ungroup summarize count
 NULL
 
 
@@ -84,7 +84,7 @@ autoArgTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                                   Function = c('hint', 'sonority'),
                                   Expression = list(quote(list(Piece = Piece, Record = Record)))),
                        data.table(Argument = 'groupby', Type = 'structure',       
-                                  Function = c('timeline', 'timestamp', 'count', 'onbeat', 'subpos', 'metlev', 'metcount'),
+                                  Function = c('timeline', 'timestamp', 'timecount', 'onbeat', 'subpos', 'metlev', 'metcount'),
                                   Expression = list(quote(list(Piece = Piece, Spine = Spine, Path = Path, ParentPath = ParentPath, Record = Record, Stop = Stop)))),
                        data.table(Argument = 'orderby', Type = 'harmonic',
                                   Function = 'hint',
@@ -99,7 +99,9 @@ autoArgTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                                   Function = c('mint', 'hint', 'int', 'sonority'),
                                   Expression = list(quote(Key))),
                        data.table(Argument = 'Exclusive', Type = 'Exclusive',
-                                  Function = c('mint', 'hint', 'int'),
+                                  Function = c('mint', 'hint', 'int', 
+                                               'metcount', 'metsubpos', 'metlev', 
+                                               'timecount', 'timeline', 'timestamp'),
                                   Expression = list(quote(Exclusive))),
                        data.table(Argument = 'BPM', Type = 'tempo',
                                   Function = 'timestamp',

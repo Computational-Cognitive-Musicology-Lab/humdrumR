@@ -177,7 +177,7 @@ reference(chorales)[3, ]
 
 The next thing to do, when getting started with a `r hm` data analysis, is too get a sense of the data *content* itself.
 What tokens does our data actually contain?
-R's `unique()`, `tally()`, and `sort()` functions are perfect for this.
+R's `unique()`, `count()`, and `sort()` functions are perfect for this.
 We'll need to use the some techniques from the [Data Fields](DataFields.html#working-with-fields "Data fields article") article, so review that if you don't understand the following!
 
 Let's get the unique values, sorted:
@@ -191,13 +191,13 @@ chorales |>
 
 ```
 
-Unlike `unique()`, `tally()` will count each unique value, and we can then sort to see the most common tokens:
+Unlike `unique()`, `count()` will count each unique value, and we can then sort to see the most common tokens:
 
 
 ```{r}
 
 chorales |>
-  with(tally(Token)) |>
+  with(count(Token)) |>
   sort()
 
 

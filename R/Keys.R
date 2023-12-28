@@ -402,10 +402,11 @@ setMethod('%%', signature = c('integer', 'diatonicSet'),
               
               hits <- !is.na(alter) & alter == 0L
               output[hits] <- (((e1[hits] + 1L) - signature[hits]) %% 7L) - 1 + signature[hits]
-              if (any(!is.na(alter) & alter != 0L)) {
-                  output[!is.na(alter) & alter != 0L] <- {
-                      lof <- t(LO5th(e2[!is.na(alter) & alter != 0L]))
-                      lof[sweep(lof %% 7L, 2, e1[!is.na(alter) & alter != 0L] %% 7L, `==`)]
+              if (any(!is.na(e1) & !is.na(alter) & alter != 0L)) {
+                  notna <- !is.na(e1) & !is.na(alter) & alter != 0L 
+                  output[notna] <- {
+                      lof <- t(LO5th(e2[notna]))
+                      lof[sweep(lof %% 7L, 2, e1[notna] %% 7L, `==`)]
                   }
               }
               
@@ -507,14 +508,9 @@ dset2alterations <- function(dset, augment = '#', diminish = 'b', ...) {
     alterations <- getAlterations(dset)[altered, , drop = FALSE]
     alterations[] <- c(augment, diminish, "")[match(alterations, c(7, -7, 0))]
 
-    order <- lapply(mode[altered] %% 7L, \(m) ((0L:6L + m) %% 7L) + 1 )
-        
-    labs <- do.call('rbind', lapply(order, \(ord) c('4', '1', '5', '2', '6', '3', '7')[ord]))
-    labs[alterations == ''] <- ''
-
-    alterations[] <- paste0(alterations, labs)
-    
+    alterations[alterations != ''] <-  paste0(alterations[alterations != ''], c('4', '1', '5', '2', '6', '3', '7')[col(alterations)[alterations != '']])
     alterations <- apply(alterations, 1, paste, collapse = '')
+    
     output <- character(length(mode))
     output[altered] <- alterations
     output
@@ -713,13 +709,14 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
                                    if (any(abs(change) > 1L)) change <- sign(change)
                                    
                                    altermat <- matrix(0L, nrow = 1, ncol = 7)
-                                   # altermat[ , ((which(altered) - mode - 1L) %% 7L) + 1L] <- change
+
                                    altered <- which(altered)
                                    altermat[ , (altered %% 7L) + 1L] <- change
                                      
                                    alterint <- baltern2int(altermat)
                                    c(mode = mode, altered = alterint)
                                  }) |> do.call(what = 'rbind')
+      
       mode[altered] <- mode_alterations[ , 1]
       alterations[altered] <- mode_alterations[ , 2]
       
@@ -862,7 +859,7 @@ key2dset <- function(x, parts = c('step', 'species', 'mode', 'alterations'),
     signature <- root + mode + minor
     
     ## Alterations
-    alterations <- alteration2trit(alterations, mode + minor) %|% 0
+    alterations <- alteration2trit(alterations, mode) %|% 0
     
     dset <- dset(root, signature, alterations)
     
@@ -909,6 +906,10 @@ romanNumeral2dset <- function(x, Key = NULL, flat = '-', sep = '/', ...) {
   }  else {
     dset
   }
+  
+  na <- is.na(dset) & x == ''
+  dset[na] <- Key[na]
+  dset
 }
 
 

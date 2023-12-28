@@ -163,25 +163,27 @@ test_that("Unfiltering works", {
     ditto(Kern) |>
     unfilter() |>
     select(Kern, 'ditto(Kern)') |>
-    with(table(Kern, `ditto(Kern)`, useNA = 'ifany')) -> tally1
+    table() -> count1
   
-  chorales |> kern(simple = TRUE) |> with(table(ditto(Kern, null = Token %!~% '4'), useNA = 'ifany')) -> tally2
+  chorales |> kern(simple = TRUE) |> with(table(ditto(Kern, null = Token %!~% '4'))) -> count2
     
-  expect_true(all(colSums(tally1[-nrow(tally1), ]) == tally2))
+  expect_true(all(colSums(count1) == count2))
   
-  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(tally1[nrow(tally1), ]))
+  chorales_sub |>
+    ditto(Kern) |>
+    unfilter() |>
+    select(Kern, 'ditto(Kern)') |>
+    table(useNA = 'always') -> count1
+  expect_equal(getHumtab(chorales |> kern(simple = TRUE), 'd') |> nrow(), sum(count1[nrow(count1), ]))
   
   # complement
   chorales |> subset(DataRecord %% 2 == 0) -> chorales_sub
   
-  levels <- c('1', '16', '2', '2.', '4', '4.', '8', '8.')
-  chorales |> recip() |> with(table(factor(., levels = levels))) -> total
-  chorales_sub |> recip() |> with(table(factor(., levels = levels))) -> sub
-  chorales_sub |> complement() |> recip() |> with(table(factor(., levels = levels))) -> comp
+  chorales |> recip() |> count() -> total
+  chorales_sub |> recip() |> count() -> sub
+  chorales_sub |> complement() |> recip() |> count() -> comp
   
-  
-  
-  expect_true(all(total == (sub + comp)[names(total)]))
+  expect_true(all(total == (sub + comp)))
 })
 
 

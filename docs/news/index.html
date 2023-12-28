@@ -10,7 +10,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,18 @@
       <small>Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="7.0.3" id="humdrumr-703">humdrumR 7.0.3<a class="anchor" aria-label="anchor" href="#humdrumr-703"></a></h2>
+<div class="section level4">
+<h4 id="count-and-table-7-0-3">count() and table()<a class="anchor" aria-label="anchor" href="#count-and-table-7-0-3"></a></h4>
+<p>We wanted to use the <code>tally()</code> as humdrumR’s main “count stuff” function. Unfortunately, we found that <code>tally()</code> already exists in <code>dplyr</code> and it (the generic <code>tally</code>) can’t really be extended as we’d like. We’ve reimplemented everything focusing on an extension of the <code><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">dplyr::count()</a></code> function. This also necessitated renaming a <em>our</em> (metric) <code>count()</code> function to <code><a href="../reference/timecount.html">timecount()</a></code>. Our <code>count()</code> method now generates a cool “distribution” table, which is easily to manipulate. This is all mostly working pretty well, but is still a work in progress and not documented.</p>
+<p>We’ve also extended <code><a href="https://rdrr.io/r/base/table.html" class="external-link">base::table()</a></code> to work with humdrumR data, but we’ll be emphasizing using <code>count()</code> in our documentation.</p>
+</div>
+<div class="section level4">
+<h4 id="harte-7-0-3">harte()<a class="anchor" aria-label="anchor" href="#harte-7-0-3"></a></h4>
+<p>We’ve implemented parsing and deparsing of the <a href="https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus" class="external-link">Harte</a> syntax for representing chords. All our chord functions should be able to read harte notation, and there is now a <code><a href="../reference/chord.html">harte()</a></code> function for outputting (deparsing) **harte.</p>
+</div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="7.0.0" id="humdrumr-700">humdrumR 7.0.0<a class="anchor" aria-label="anchor" href="#humdrumr-700"></a></h2>
 <p>HumdrumR 0.7.0.0 includes some pretty major changes from the previous (0.6.x.x) versions. Notably, we have updated the whole package to make it more consistent with the <a href="https://www.tidyverse.org/" class="external-link">Tidy-verse</a>. We’ve also incorporated an option to use humdrumR functions in a super-concise manner which is closely modeled off the original humdrum toolkit. Finally, we have changed humdrumR data objects to behave a little more like “normal” R data.frames (or tibbles), and allowed you to more easily “see” and manipulate your data as a data.frame. Our reference manuals and articles have all been updated to reflect these changes.</p>

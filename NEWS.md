@@ -1,3 +1,23 @@
+# humdrumR 7.0.3
+
+### count() and table()
+
+
+We wanted to use the `tally()` as humdrumR's main "count stuff" function.
+Unfortunately, we found that `tally()` already exists in `dplyr` and it (the generic `tally`) can't really be extended as we'd like.
+We've reimplemented everything focusing on an extension of the `dplyr::count()` function.
+This also necessitated renaming a *our* (metric) `count()` function to `timecount()`.
+Our `count()` method now generates a cool "distribution" table, which is easily to manipulate.
+This is all mostly working pretty well, but is still a work in progress and not documented.
+
+We've also extended `base::table()` to work with humdrumR data, but we'll be emphasizing using `count()` in our documentation.
+
+### harte()
+
+We've implemented parsing and deparsing of the [Harte](https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus) syntax for representing chords.
+All our chord functions should be able to read harte notation, and there is now a `harte()` function for outputting (deparsing) **harte.
+
+
 # humdrumR 7.0.0
 
 

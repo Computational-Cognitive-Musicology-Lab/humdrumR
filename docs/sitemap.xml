@@ -28,16 +28,7 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Intervals.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/IntroForCoders.html</loc>
-  </url>
-  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/KeysAndChord.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Overview.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/PitchAndTonality.html</loc>
@@ -58,12 +49,6 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Summary.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Validation.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/WorkingWithData.html</loc>
-  </url>
-  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/index.html</loc>
   </url>
   <url>
@@ -77,6 +62,9 @@
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/LO5th.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/P.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/REparser.html</loc>
@@ -127,13 +115,10 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/counts.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/crossEntropy.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/crossentropy.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/degree.html</loc>
@@ -143,6 +128,9 @@
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/distributions.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ditto.html</loc>
@@ -172,19 +160,7 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expandPaths.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/extractTandem.html</loc>
-  </url>
-  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/figuredBass.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/foldExclusive.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/foldGraceNotes.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/foldHumdrum.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/freq.html</loc>
@@ -211,9 +187,6 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humActive.html</loc>
-  </url>
-  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humCoercion.html</loc>
   </url>
   <url>
@@ -232,9 +205,6 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humWindows.html</loc>
-  </url>
-  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumDispatch.html</loc>
   </url>
   <url>
@@ -245,9 +215,6 @@
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRroot.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/index.html</loc>
@@ -310,9 +277,6 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/nbeats.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/noteValue.html</loc>
-  </url>
-  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/notehead.html</loc>
   </url>
   <url>
@@ -328,6 +292,9 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pc.html</loc>
   </url>
   <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pdist.html</loc>
+  </url>
+  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitch.html</loc>
   </url>
   <url>
@@ -338,9 +305,6 @@
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchParsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ptable.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pullHumdrum.html</loc>
@@ -430,10 +394,10 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/syncopation.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tactus.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tabulation.html</loc>
   </url>
   <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tally.html</loc>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tactus.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tandem.html</loc>
@@ -452,6 +416,9 @@
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timebase.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timecount.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.html</loc>

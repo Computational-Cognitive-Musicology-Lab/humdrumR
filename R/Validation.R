@@ -102,6 +102,7 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     if (nrow(fileFrame) == 0L) {
         message("No files to validate.")
         fileFrame[ , Valid := logical(0)]
+        fileFrame[ , Errors := vector('list', 0L)]
         return(fileFrame)
     }
     
@@ -145,6 +146,8 @@ isValidHumdrum <- function(fileFrame, errorReport.path = NULL) {
     if (nrow(reports) == 0L) {
         message("all valid.")
         fileFrame[ , Valid := TRUE]
+        fileFrame[ , Errors := replicate(nrow(fileFrame), simplify = FALSE,
+                                         data.table(Filepath = character(0), Record = integer(0), Message = character(0)))]
         return(fileFrame)
     }
     

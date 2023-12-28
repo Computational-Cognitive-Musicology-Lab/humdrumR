@@ -582,8 +582,11 @@ tset2harm <- function(x,  Key = dset(0, 0), figurationArgs = c(), ...) {
                        root_func = tint2romanRoot, 
                        implicitSpecies = TRUE,
                        rootCase = TRUE,
+                       natural = '#',
                        inversion.labels = c('', 'b', 'c', 'd', 'e', 'f', 'g'),
                        inversion = FALSE)
+  
+  Key@Alteration[getMode(Key) == -3L & Key@Alteration == 0L] <- 1L
   
   t2tH(x, figurationArgs = figArgs, Key = Key, ...)
   
@@ -1014,6 +1017,8 @@ harm2tset <- function(x, Key = dset(0,0),
   
   Key <- romanNumeral2dset(stringr::str_sub(of, start = 2L), Key = Key, implicitSpecies = implicitSpecies, ...)
   Key[is.na(Key)] <- dset(0L, 0L)
+  Key@Alteration[getMode(Key) == -3L & Key@Alteration == 0L] <- 1L # change minor to harmonic minor
+  
   root <- tonalChroma2tint(paste0(accidental, toupper(numeral)), useKey = TRUE,
                            parts = c('species', 'step'), qualities = FALSE,
                            implicitSpecies = implicitSpecies,
@@ -1071,9 +1076,8 @@ sciQualities2tset <- function(str, inversion = 0L, ...) {
 }
 
 tertian2tset <- function(x, Key = dset(0, 0), ...) {
-  
     REparse(x,
-            makeRE.tertian(..., collapse = FALSE), # makes root, quality, inversion, and incomplete
+            makeRE.tertian(..., collapse = FALSE), # makes tonalChroma, quality, inversion, and incomplete
             toEnv = TRUE) -> parsed
   
     Key <- diatonicSet(Key)

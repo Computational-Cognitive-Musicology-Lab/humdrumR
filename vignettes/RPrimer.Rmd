@@ -598,7 +598,7 @@ it makes sure that we *keep track* of what data is missing, while keeping our ve
 ## Analysis Functions
 
 + `table()` --- Tabulate all unique values in vector, or cross-tabulate across multiple vectors.
-  + When using `r hm`, you should use the similar [tally()] instead!
+  + When using `r hm`, you should use the similar [count()] instead!
 
 # Useful tricks
 

@@ -27,7 +27,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -154,10 +154,15 @@ each record of the data, and tabulate the results. We’ll look for tokens
 that <em>don’t</em> contain an <code>r</code> (for rest), using a
 regular-expression match <code>%~% 'r'</code> and the negating bang
 (<code>!</code>).</p>
-<pre><code>&gt;    Object of class "humdrum.table"
-&gt;    with(group_by(chorales, Piece, Record))
-&gt;      0   1   2   3   4 
-&gt;      1 211  89  64 462</code></pre>
+<pre><code>&gt;    humdrumR count distribution 
+&gt;    with(group_by(chorales, Piece, Record), sum(!Token %~% "r"))    n
+&gt;                                                               0    1
+&gt;                                                               1  211
+&gt;                                                               2   89
+&gt;                                                               3   64
+&gt;                                                               4  462
+&gt;    with(group_by(chorales, Piece, Record), sum(!Token %~% "r"))    n
+&gt;    humdrumR count distribution</code></pre>
 <p>Most records (462 out of 827) have new notes in all four voices—no
 surprise for choral music—with <em>one</em> onset being the next most
 common case (211 records). Note that, when we called
@@ -188,16 +193,74 @@ to get the lowest value:</p>
 <span>         Kern <span class="op">=</span> <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
 <p>We can now group bars (within pieces, once again!), get the minimum
 (using <code><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min()</a></code>), and tabulate them.</p>
-<pre><code>&gt;    Object of class "humdrum.table"
-&gt;    with(group_by(chorales, Piece, Bar))
-&gt;     CC CC#  DD DD# EE-  EE EE#  FF FF#  GG GG# AA-  AA AA# BB-  BB   C  C#   D  D# 
-&gt;      0   0   1   0   0   6   0   9   3  21   1   3  23   0   7  23   9  15  19   2 
-&gt;     E-   E  E#   F  F#   G  G#  A-   A  A#  B-   B   c  c#   d  d#  e-   e  e#   f 
-&gt;      1  17   1   1   5   4   1   0   4   0   0   0   0   0   0   0   0   0   0   0 
-&gt;     f#   g  g#  a-   a  a#  b-   b  cc cc#  dd dd# ee-  ee ee#  ff ff#  gg gg# aa- 
-&gt;      0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0 
-&gt;     aa aa# bb-  bb 
-&gt;      0   0   0   0</code></pre>
+<pre><code>&gt;    humdrumR count distribution 
+&gt;    with(group_by(chorales, Piece, Bar), Kern[which.min(Semits)])   n
+&gt;                                                               CC   .
+&gt;                                                              CC#   .
+&gt;                                                               DD   1
+&gt;                                                              DD#   .
+&gt;                                                              EE-   .
+&gt;                                                               EE   6
+&gt;                                                              EE#   .
+&gt;                                                               FF   9
+&gt;                                                              FF#   3
+&gt;                                                               GG  21
+&gt;                                                              GG#   1
+&gt;                                                              AA-   3
+&gt;                                                               AA  23
+&gt;                                                              AA#   .
+&gt;                                                              BB-   7
+&gt;                                                               BB  23
+&gt;                                                                C   9
+&gt;                                                               C#  15
+&gt;                                                                D  19
+&gt;                                                               D#   2
+&gt;                                                               E-   1
+&gt;                                                                E  17
+&gt;                                                               E#   1
+&gt;                                                                F   1
+&gt;                                                               F#   5
+&gt;                                                                G   4
+&gt;                                                               G#   1
+&gt;                                                               A-   .
+&gt;                                                                A   4
+&gt;                                                               A#   .
+&gt;                                                               B-   .
+&gt;                                                                B   .
+&gt;                                                                c   .
+&gt;                                                               c#   .
+&gt;                                                                d   .
+&gt;                                                               d#   .
+&gt;                                                               e-   .
+&gt;                                                                e   .
+&gt;                                                               e#   .
+&gt;                                                                f   .
+&gt;                                                               f#   .
+&gt;                                                                g   .
+&gt;                                                               g#   .
+&gt;                                                               a-   .
+&gt;                                                                a   .
+&gt;                                                               a#   .
+&gt;                                                               b-   .
+&gt;                                                                b   .
+&gt;                                                               cc   .
+&gt;                                                              cc#   .
+&gt;                                                               dd   .
+&gt;                                                              dd#   .
+&gt;                                                              ee-   .
+&gt;                                                               ee   .
+&gt;                                                              ee#   .
+&gt;                                                               ff   .
+&gt;                                                              ff#   .
+&gt;                                                               gg   .
+&gt;                                                              gg#   .
+&gt;                                                              aa-   .
+&gt;                                                               aa   .
+&gt;                                                              aa#   .
+&gt;                                                              bb-   .
+&gt;                                                               bb   .
+&gt;    with(group_by(chorales, Piece, Bar), Kern[which.min(Semits)])   n
+&gt;    humdrumR count distribution</code></pre>
 <p>The highest lowest-note-in-bar is A. The most common
 lowest-note-in-bar is AA.</p>
 <hr>
@@ -384,16 +447,16 @@ from each note:</p>
 automatic “beat” field in our data, so we’ll need to make one—obviously,
 we need to have data with rhythmic information encoded (like
 <code>**kern</code> or <code>**recip</code>) to do this! We can use the
-<code><a href="../reference/count.html">count()</a></code> function to count the beats in our data. We could
-count quarter-notes by setting <code>beat = '4'</code>; alternatively,
-if our data includes time-signature interpretations (like
+<code><a href="../reference/timecount.html">timecount()</a></code> function to count the beats in our data. We
+could count quarter-notes by setting <code>unit = '4'</code>;
+alternatively, if our data includes time-signature interpretations (like
 <code>*M3/4</code>) we could use the <code>TimeSignature</code> field to
 get the tactus of the meter. Let’s try the later and save the result to
 a new field, which we’ll call <code>Beat</code> (or anything else you
 want).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>Beat <span class="op">=</span> <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="va">Token</span>, beat <span class="op">=</span> <span class="fu"><a href="../reference/tactus.html">tactus</a></span><span class="op">(</span><span class="va">TimeSignature</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/selectedFields.html">select</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span>Beat <span class="op">=</span> <span class="fu"><a href="../reference/timecount.html">timecount</a></span><span class="op">(</span><span class="va">Token</span>, unit <span class="op">=</span> <span class="fu"><a href="../reference/tactus.html">tactus</a></span><span class="op">(</span><span class="va">TimeSignature</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
 <p>We can now group by beat (and piece, of course). Maybe we want to
 know the range of notes in each beat:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -405,9 +468,9 @@ know the range of notes in each beat:</p>
 <p><img src="Context_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
 <blockquote>
 <p>Note: If your data includes spine paths, you’ll want to set
-<code>mutate(count(Token), expandPaths = TRUE, ...)</code>. Count (and
-similar functions, like <code><a href="../reference/timeline.html">timeline()</a></code>) won’t work correctly
-without paths expanded (<code><a href="../reference/expandPaths.html">?expandPaths</a></code>).</p>
+<code>mutate(timecount(Token), expandPaths = TRUE, ...)</code>. Count
+(and similar functions, like <code><a href="../reference/timeline.html">timeline()</a></code>) won’t work
+correctly without paths expanded (<code><a href="../reference/expandPaths.html">?expandPaths</a></code>).</p>
 </blockquote>
 </div>
 </div>
@@ -2911,11 +2974,23 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>beethoven <span class="sc">|&gt;</span></span>
 <span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>  <span class="fu">context</span>(<span class="st">'('</span>, <span class="st">')'</span>) <span class="sc">|&gt;</span></span>
 <span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">length</span>(Token)) <span class="sc">|&gt;</span> </span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>  <span class="fu">tally</span>()</span>
-<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
-<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="fu">with</span>(<span class="fu">context</span>(beethoven, <span class="st">"("</span>, <span class="st">")"</span>))</span>
-<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">7</span>  <span class="dv">8</span> <span class="dv">12</span> <span class="dv">13</span> </span>
-<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">47</span> <span class="dv">40</span> <span class="dv">18</span>  <span class="dv">3</span>  <span class="dv">9</span>  <span class="dv">2</span>  <span class="dv">1</span></span></code></pre></div>
+<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>  <span class="fu">count</span>()</span>
+<span id="cb28-5"><a href="#cb28-5" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution </span>
+<span id="cb28-6"><a href="#cb28-6" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="fu">with</span>(<span class="fu">context</span>(beethoven, <span class="st">"("</span>, <span class="st">")"</span>), <span class="fu">length</span>(Token))   n</span>
+<span id="cb28-7"><a href="#cb28-7" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">2</span>  <span class="dv">47</span></span>
+<span id="cb28-8"><a href="#cb28-8" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">3</span>  <span class="dv">40</span></span>
+<span id="cb28-9"><a href="#cb28-9" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">4</span>  <span class="dv">18</span></span>
+<span id="cb28-10"><a href="#cb28-10" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">5</span>   .</span>
+<span id="cb28-11"><a href="#cb28-11" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">6</span>   .</span>
+<span id="cb28-12"><a href="#cb28-12" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">7</span>   <span class="dv">3</span></span>
+<span id="cb28-13"><a href="#cb28-13" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">8</span>   <span class="dv">9</span></span>
+<span id="cb28-14"><a href="#cb28-14" tabindex="-1"></a><span class="sc">&gt;</span>                                                    <span class="dv">9</span>   .</span>
+<span id="cb28-15"><a href="#cb28-15" tabindex="-1"></a><span class="sc">&gt;</span>                                                   <span class="dv">10</span>   .</span>
+<span id="cb28-16"><a href="#cb28-16" tabindex="-1"></a><span class="sc">&gt;</span>                                                   <span class="dv">11</span>   .</span>
+<span id="cb28-17"><a href="#cb28-17" tabindex="-1"></a><span class="sc">&gt;</span>                                                   <span class="dv">12</span>   <span class="dv">2</span></span>
+<span id="cb28-18"><a href="#cb28-18" tabindex="-1"></a><span class="sc">&gt;</span>                                                   <span class="dv">13</span>   <span class="dv">1</span></span>
+<span id="cb28-19"><a href="#cb28-19" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="fu">with</span>(<span class="fu">context</span>(beethoven, <span class="st">"("</span>, <span class="st">")"</span>), <span class="fu">length</span>(Token))   n</span>
+<span id="cb28-20"><a href="#cb28-20" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution</span></code></pre></div>
 <p>Most of the slurs are only 2, 3, or 4 notes. But there is one that is
 13! I wonder where that is?</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>beethoven <span class="sc">|&gt;</span></span>
@@ -2948,8 +3023,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-28"><a href="#cb29-28" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">20</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-29"><a href="#cb29-29" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">21</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-30"><a href="#cb29-30" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">22</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">71</span>                                   <span class="ot">=</span><span class="dv">71</span></span>
-<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">23</span><span class="sc">:</span>                    <span class="er">*^</span>                                     .</span>
-<span id="cb29-32"><a href="#cb29-32" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">24</span><span class="sc">:</span>                     .                 .                   .</span>
+<span id="cb29-31"><a href="#cb29-31" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">23</span><span class="sc">:</span>                    <span class="er">*^</span>                                     <span class="er">*</span></span>
+<span id="cb29-32"><a href="#cb29-32" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">24</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-33"><a href="#cb29-33" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">25</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-34"><a href="#cb29-34" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">26</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-35"><a href="#cb29-35" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">27</span><span class="sc">:</span>                     .                 .                   .</span>
@@ -2957,8 +3032,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-37"><a href="#cb29-37" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">29</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-38"><a href="#cb29-38" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">30</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-39"><a href="#cb29-39" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">31</span><span class="sc">:</span>                     .                 .                   .</span>
-<span id="cb29-40"><a href="#cb29-40" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">32</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   .</span>
-<span id="cb29-41"><a href="#cb29-41" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">33</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">72</span>                                   <span class="ot">=</span><span class="dv">72</span></span>
+<span id="cb29-40"><a href="#cb29-40" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">32</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   <span class="sc">*</span></span>
+<span id="cb29-41"><a href="#cb29-41" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">33</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">72</span>                                   <span class="ot">=</span><span class="dv">72</span></span>
 <span id="cb29-42"><a href="#cb29-42" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">34</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-43"><a href="#cb29-43" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">35</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-44"><a href="#cb29-44" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">36</span><span class="sc">:</span>                     .                                     .</span>
@@ -2986,8 +3061,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-66"><a href="#cb29-66" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">58</span><span class="sc">:</span>                     .                                  16cc</span>
 <span id="cb29-67"><a href="#cb29-67" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">59</span><span class="sc">:</span>                     .                                16aJJ)</span>
 <span id="cb29-68"><a href="#cb29-68" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">60</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">75</span>                                   <span class="ot">=</span><span class="dv">75</span></span>
-<span id="cb29-69"><a href="#cb29-69" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">61</span><span class="sc">:</span>                    <span class="er">*^</span>                                     .</span>
-<span id="cb29-70"><a href="#cb29-70" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">62</span><span class="sc">:</span>                     .                 .                   .</span>
+<span id="cb29-69"><a href="#cb29-69" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">61</span><span class="sc">:</span>                    <span class="er">*^</span>                                     <span class="er">*</span></span>
+<span id="cb29-70"><a href="#cb29-70" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">62</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-71"><a href="#cb29-71" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">63</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-72"><a href="#cb29-72" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">64</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-73"><a href="#cb29-73" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">65</span><span class="sc">:</span>                     .                 .                   .</span>
@@ -3004,8 +3079,8 @@ Let’s say we want to get the length of all these slurred groups:</p>
 <span id="cb29-84"><a href="#cb29-84" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">76</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-85"><a href="#cb29-85" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">77</span><span class="sc">:</span>                     .                 .                   .</span>
 <span id="cb29-86"><a href="#cb29-86" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">78</span><span class="sc">:</span>                     .                 .                   .</span>
-<span id="cb29-87"><a href="#cb29-87" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">79</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   .</span>
-<span id="cb29-88"><a href="#cb29-88" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">80</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">77</span>                                   <span class="ot">=</span><span class="dv">77</span></span>
+<span id="cb29-87"><a href="#cb29-87" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">79</span><span class="sc">:</span>                    <span class="er">*</span>v                <span class="sc">*</span>v                   <span class="sc">*</span></span>
+<span id="cb29-88"><a href="#cb29-88" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">80</span><span class="sc">:</span>                   <span class="er">=</span><span class="dv">77</span>                                   <span class="ot">=</span><span class="dv">77</span></span>
 <span id="cb29-89"><a href="#cb29-89" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">81</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-90"><a href="#cb29-90" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">82</span><span class="sc">:</span>                     .                                     .</span>
 <span id="cb29-91"><a href="#cb29-91" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">83</span><span class="sc">:</span>                     .                                     .</span>
@@ -3091,8 +3166,8 @@ we’ve been doing throughout this article?</p>
 <span id="cb30-60"><a href="#cb30-60" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">75</span><span class="sc">:</span>                     .(16eeLL<span class="sc">|</span>16ff<span class="sc">|</span>16ccJJ)</span>
 <span id="cb30-61"><a href="#cb30-61" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">76</span><span class="sc">:</span>                     .                   .</span>
 <span id="cb30-62"><a href="#cb30-62" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">77</span><span class="sc">:</span>                     .                   .</span>
-<span id="cb30-63"><a href="#cb30-63" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">78</span><span class="sc">:</span>               <span class="er">*</span>clefF4                   .</span>
-<span id="cb30-64"><a href="#cb30-64" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">79</span><span class="sc">:</span>                     .                   .</span>
+<span id="cb30-63"><a href="#cb30-63" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">78</span><span class="sc">:</span>               <span class="er">*</span>clefF4                   <span class="sc">*</span></span>
+<span id="cb30-64"><a href="#cb30-64" tabindex="-1"></a><span class="er">&gt;</span>              <span class="dv">79</span><span class="sc">:</span>                     .                   .</span>
 <span id="cb30-65"><a href="#cb30-65" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">80</span><span class="sc">:</span>                     .  (16aLL<span class="sc">|</span>16b<span class="sc">-</span><span class="er">|</span>16gJJ)</span>
 <span id="cb30-66"><a href="#cb30-66" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">81</span><span class="sc">:</span>                     .                   .</span>
 <span id="cb30-67"><a href="#cb30-67" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">82</span><span class="sc">:</span>                     .                   .</span>
@@ -3185,7 +3260,7 @@ similar to the <code>complement</code> argument of
 <span id="cb31-62"><a href="#cb31-62" tabindex="-1"></a><span class="st">&gt;              75:                     .(16eeLL|16ff|16ccJJ)</span></span>
 <span id="cb31-63"><a href="#cb31-63" tabindex="-1"></a><span class="st">&gt;              76:                    8r                   .</span></span>
 <span id="cb31-64"><a href="#cb31-64" tabindex="-1"></a><span class="st">&gt;              77:                     .                   .</span></span>
-<span id="cb31-65"><a href="#cb31-65" tabindex="-1"></a><span class="st">&gt;              78:               *clefF4                   .</span></span>
+<span id="cb31-65"><a href="#cb31-65" tabindex="-1"></a><span class="st">&gt;              78:               *clefF4                   *</span></span>
 <span id="cb31-66"><a href="#cb31-66" tabindex="-1"></a><span class="st">&gt;              79:                    8C                 16r</span></span>
 <span id="cb31-67"><a href="#cb31-67" tabindex="-1"></a><span class="st">&gt;              80:                     .  (16aLL|16b-|16gJJ)</span></span>
 <span id="cb31-68"><a href="#cb31-68" tabindex="-1"></a><span class="st">&gt;              81:                    8r                   .</span></span>
@@ -3229,8 +3304,8 @@ is an example file we can experiment with:</p>
 <span id="cb32-17"><a href="#cb32-17" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">14</span><span class="sc">:</span>                   (2b</span>
 <span id="cb32-18"><a href="#cb32-18" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">15</span><span class="sc">:</span>                  4a))</span>
 <span id="cb32-19"><a href="#cb32-19" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">16</span><span class="sc">:</span>                  ((4e</span>
-<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">17</span><span class="sc">:</span>                     .</span>
-<span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">18</span><span class="sc">:</span>                    4a</span>
+<span id="cb32-20"><a href="#cb32-20" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">17</span><span class="sc">:</span>                     <span class="er">=</span></span>
+<span id="cb32-21"><a href="#cb32-21" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">18</span><span class="sc">:</span>                    4a</span>
 <span id="cb32-22"><a href="#cb32-22" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">19</span><span class="sc">:</span>                    8b</span>
 <span id="cb32-23"><a href="#cb32-23" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">20</span><span class="sc">:</span>                  8cc<span class="co">#</span></span>
 <span id="cb32-24"><a href="#cb32-24" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">21</span><span class="sc">:</span>                  4dd)</span>
@@ -3529,37 +3604,353 @@ the end of one file/spine to the beginning of the next, etc.</p>
 <hr>
 <p><code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code> isn’t the only vectorized function we might want
 to apply to lagged data. Another common example would be
-<code><a href="../reference/tally.html">tally()</a></code>:</p>
+<code>count()</code>:</p>
 <div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
-<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">tally</span>(Kern, Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">1</span>]))</span>
-<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
-<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a><span class="sc">&gt;</span>        <span class="fu">c</span>(<span class="fu">lag</span>(Kern, <span class="at">groupby =</span> <span class="fu">list</span>(Piece, Spine, Path), <span class="at">n =</span> <span class="sc">-</span><span class="dv">1</span>))</span>
-<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a><span class="sc">&gt;</span>    Kern  c c<span class="co"># d-  d d# e-  e e#  f f# g-  g g# a-  a a# b-  b &lt;NA&gt;</span></span>
-<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a><span class="sc">&gt;</span>      c  <span class="dv">34</span>  <span class="dv">1</span> <span class="dv">12</span> <span class="dv">49</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="dv">18</span>  <span class="dv">3</span>  <span class="dv">0</span>  <span class="dv">4</span>  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">9</span>  <span class="dv">0</span> <span class="dv">22</span> <span class="dv">73</span>    <span class="dv">2</span></span>
-<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#  0 13  0 30  5  0  1  1  0 14  0  0  1  0  7  0  0 41    2</span></span>
-<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span> <span class="dv">14</span>  <span class="dv">0</span>  <span class="dv">6</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">5</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">7</span>  <span class="dv">0</span>    <span class="dv">0</span></span>
-<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a><span class="sc">&gt;</span>      d  <span class="dv">61</span> <span class="dv">30</span>  <span class="dv">0</span> <span class="dv">42</span>  <span class="dv">5</span>  <span class="dv">1</span> <span class="dv">67</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span> <span class="dv">25</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">5</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">9</span>    <span class="dv">3</span></span>
-<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#  0  5  0  0  0  0 25  0  0  0  0  0  0  0  0  0  0  7    0</span></span>
-<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>  <span class="dv">3</span>  <span class="dv">0</span>  <span class="dv">9</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">9</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">7</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>    <span class="dv">0</span></span>
-<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a><span class="sc">&gt;</span>      e  <span class="dv">10</span> <span class="dv">11</span>  <span class="dv">0</span> <span class="dv">75</span> <span class="dv">22</span>  <span class="dv">1</span> <span class="dv">64</span>  <span class="dv">2</span> <span class="dv">25</span> <span class="dv">60</span>  <span class="dv">0</span>  <span class="dv">4</span>  <span class="dv">4</span>  <span class="dv">0</span> <span class="dv">32</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="dv">16</span>    <span class="dv">8</span></span>
-<span id="cb40-13"><a href="#cb40-13" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#  0  2  0  0  0  0  1  0  0  5  0  0  0  0  0  0  0  0    0</span></span>
-<span id="cb40-14"><a href="#cb40-14" tabindex="-1"></a><span class="sc">&gt;</span>      f   <span class="dv">7</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">8</span> <span class="dv">33</span>  <span class="dv">0</span> <span class="dv">35</span>  <span class="dv">0</span>  <span class="dv">1</span> <span class="dv">17</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">5</span>  <span class="dv">0</span>  <span class="dv">6</span>  <span class="dv">1</span>    <span class="dv">4</span></span>
-<span id="cb40-15"><a href="#cb40-15" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#  1  4  0  8  1  0 57  3  0 12  0 47 30  0  3  0  0 16    0</span></span>
-<span id="cb40-16"><a href="#cb40-16" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>    <span class="dv">0</span></span>
-<span id="cb40-17"><a href="#cb40-17" tabindex="-1"></a><span class="sc">&gt;</span>      g  <span class="dv">16</span>  <span class="dv">1</span>  <span class="dv">0</span> <span class="dv">13</span>  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">6</span>  <span class="dv">0</span> <span class="dv">22</span> <span class="dv">54</span>  <span class="dv">0</span> <span class="dv">51</span>  <span class="dv">1</span> <span class="dv">10</span> <span class="dv">48</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">6</span>    <span class="dv">6</span></span>
-<span id="cb40-18"><a href="#cb40-18" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#  1  4  0  1  0  0 12  1  0 22  0  0  6  0 55  3  0  1    3</span></span>
-<span id="cb40-19"><a href="#cb40-19" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">7</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">9</span>  <span class="dv">0</span> <span class="dv">15</span>  <span class="dv">2</span>  <span class="dv">0</span>  <span class="dv">7</span>  <span class="dv">0</span>    <span class="dv">0</span></span>
-<span id="cb40-20"><a href="#cb40-20" tabindex="-1"></a><span class="sc">&gt;</span>      a   <span class="dv">5</span>  <span class="dv">2</span>  <span class="dv">0</span> <span class="dv">19</span>  <span class="dv">3</span>  <span class="dv">0</span> <span class="dv">24</span>  <span class="dv">1</span>  <span class="dv">3</span>  <span class="dv">6</span>  <span class="dv">0</span> <span class="dv">62</span> <span class="dv">56</span>  <span class="dv">0</span> <span class="dv">45</span>  <span class="dv">1</span>  <span class="dv">8</span> <span class="dv">77</span>    <span class="dv">6</span></span>
-<span id="cb40-21"><a href="#cb40-21" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#  0  0  0  0  1  0  0  0  0  1  0  0  0  0  0  0  0  9    0</span></span>
-<span id="cb40-22"><a href="#cb40-22" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span> <span class="dv">21</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">7</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">0</span> <span class="dv">11</span>  <span class="dv">9</span>  <span class="dv">0</span>  <span class="dv">9</span>  <span class="dv">0</span>    <span class="dv">0</span></span>
-<span id="cb40-23"><a href="#cb40-23" tabindex="-1"></a><span class="sc">&gt;</span>      b  <span class="dv">55</span> <span class="dv">40</span>  <span class="dv">0</span>  <span class="dv">9</span>  <span class="dv">0</span>  <span class="dv">0</span> <span class="dv">35</span>  <span class="dv">0</span>  <span class="dv">0</span>  <span class="dv">4</span>  <span class="dv">0</span>  <span class="dv">7</span>  <span class="dv">6</span>  <span class="dv">0</span> <span class="dv">93</span>  <span class="dv">7</span>  <span class="dv">0</span> <span class="dv">35</span>    <span class="dv">6</span></span></code></pre></div>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">count</span>(Kern, Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">1</span>]))</span>
+<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution </span>
+<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a><span class="sc">&gt;</span>    Kern  <span class="fu">c</span>(<span class="fu">lag</span>(Kern, <span class="at">groupby =</span> <span class="fu">list</span>(Piece, Spine, Path), <span class="at">n =</span> <span class="sc">-</span><span class="dv">1</span>))   n</span>
+<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         c  <span class="dv">34</span></span>
+<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        c<span class="co">#   1</span></span>
+<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        d<span class="sc">-</span>  <span class="dv">12</span></span>
+<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         d  <span class="dv">49</span></span>
+<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        d<span class="co">#   .</span></span>
+<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        e<span class="sc">-</span>   .</span>
+<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         e   <span class="dv">2</span></span>
+<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        e<span class="co">#   .</span></span>
+<span id="cb40-13"><a href="#cb40-13" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         f  <span class="dv">18</span></span>
+<span id="cb40-14"><a href="#cb40-14" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        f<span class="co">#   3</span></span>
+<span id="cb40-15"><a href="#cb40-15" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-16"><a href="#cb40-16" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         g   <span class="dv">4</span></span>
+<span id="cb40-17"><a href="#cb40-17" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        g<span class="co">#   .</span></span>
+<span id="cb40-18"><a href="#cb40-18" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        a<span class="sc">-</span>   <span class="dv">3</span></span>
+<span id="cb40-19"><a href="#cb40-19" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         a   <span class="dv">9</span></span>
+<span id="cb40-20"><a href="#cb40-20" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        a<span class="co">#   .</span></span>
+<span id="cb40-21"><a href="#cb40-21" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        b<span class="sc">-</span>  <span class="dv">22</span></span>
+<span id="cb40-22"><a href="#cb40-22" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                         b  <span class="dv">73</span></span>
+<span id="cb40-23"><a href="#cb40-23" tabindex="-1"></a><span class="sc">&gt;</span>       c                                                        <span class="cn">NA</span>   <span class="dv">2</span></span>
+<span id="cb40-24"><a href="#cb40-24" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         c   .</span></span>
+<span id="cb40-25"><a href="#cb40-25" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        c#  13</span></span>
+<span id="cb40-26"><a href="#cb40-26" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        d-   .</span></span>
+<span id="cb40-27"><a href="#cb40-27" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         d  30</span></span>
+<span id="cb40-28"><a href="#cb40-28" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        d#   5</span></span>
+<span id="cb40-29"><a href="#cb40-29" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        e-   .</span></span>
+<span id="cb40-30"><a href="#cb40-30" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         e   1</span></span>
+<span id="cb40-31"><a href="#cb40-31" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        e#   1</span></span>
+<span id="cb40-32"><a href="#cb40-32" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         f   .</span></span>
+<span id="cb40-33"><a href="#cb40-33" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        f#  14</span></span>
+<span id="cb40-34"><a href="#cb40-34" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        g-   .</span></span>
+<span id="cb40-35"><a href="#cb40-35" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         g   .</span></span>
+<span id="cb40-36"><a href="#cb40-36" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        g#   1</span></span>
+<span id="cb40-37"><a href="#cb40-37" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        a-   .</span></span>
+<span id="cb40-38"><a href="#cb40-38" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         a   7</span></span>
+<span id="cb40-39"><a href="#cb40-39" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        a#   .</span></span>
+<span id="cb40-40"><a href="#cb40-40" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        b-   .</span></span>
+<span id="cb40-41"><a href="#cb40-41" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                         b  41</span></span>
+<span id="cb40-42"><a href="#cb40-42" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#                                                        NA   2</span></span>
+<span id="cb40-43"><a href="#cb40-43" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         c  <span class="dv">14</span></span>
+<span id="cb40-44"><a href="#cb40-44" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        c<span class="co">#   .</span></span>
+<span id="cb40-45"><a href="#cb40-45" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        d<span class="sc">-</span>   <span class="dv">6</span></span>
+<span id="cb40-46"><a href="#cb40-46" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         d   .</span>
+<span id="cb40-47"><a href="#cb40-47" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        d<span class="co">#   .</span></span>
+<span id="cb40-48"><a href="#cb40-48" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        e<span class="sc">-</span>   <span class="dv">5</span></span>
+<span id="cb40-49"><a href="#cb40-49" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         e   .</span>
+<span id="cb40-50"><a href="#cb40-50" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        e<span class="co">#   .</span></span>
+<span id="cb40-51"><a href="#cb40-51" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         f   <span class="dv">2</span></span>
+<span id="cb40-52"><a href="#cb40-52" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        f<span class="co">#   .</span></span>
+<span id="cb40-53"><a href="#cb40-53" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-54"><a href="#cb40-54" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         g   <span class="dv">1</span></span>
+<span id="cb40-55"><a href="#cb40-55" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        g<span class="co">#   .</span></span>
+<span id="cb40-56"><a href="#cb40-56" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        a<span class="sc">-</span>   .</span>
+<span id="cb40-57"><a href="#cb40-57" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         a   .</span>
+<span id="cb40-58"><a href="#cb40-58" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        a<span class="co">#   .</span></span>
+<span id="cb40-59"><a href="#cb40-59" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                        b<span class="sc">-</span>   <span class="dv">7</span></span>
+<span id="cb40-60"><a href="#cb40-60" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>                                                         b   .</span>
+<span id="cb40-61"><a href="#cb40-61" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         c  <span class="dv">61</span></span>
+<span id="cb40-62"><a href="#cb40-62" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        c<span class="co">#  30</span></span>
+<span id="cb40-63"><a href="#cb40-63" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-64"><a href="#cb40-64" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         d  <span class="dv">42</span></span>
+<span id="cb40-65"><a href="#cb40-65" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        d<span class="co">#   5</span></span>
+<span id="cb40-66"><a href="#cb40-66" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        e<span class="sc">-</span>   <span class="dv">1</span></span>
+<span id="cb40-67"><a href="#cb40-67" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         e  <span class="dv">67</span></span>
+<span id="cb40-68"><a href="#cb40-68" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        e<span class="co">#   .</span></span>
+<span id="cb40-69"><a href="#cb40-69" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         f   <span class="dv">1</span></span>
+<span id="cb40-70"><a href="#cb40-70" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        f<span class="co">#   1</span></span>
+<span id="cb40-71"><a href="#cb40-71" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-72"><a href="#cb40-72" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         g  <span class="dv">25</span></span>
+<span id="cb40-73"><a href="#cb40-73" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        g<span class="co">#   2</span></span>
+<span id="cb40-74"><a href="#cb40-74" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        a<span class="sc">-</span>   .</span>
+<span id="cb40-75"><a href="#cb40-75" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         a   <span class="dv">5</span></span>
+<span id="cb40-76"><a href="#cb40-76" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        a<span class="co">#   .</span></span>
+<span id="cb40-77"><a href="#cb40-77" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        b<span class="sc">-</span>   <span class="dv">1</span></span>
+<span id="cb40-78"><a href="#cb40-78" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                         b   <span class="dv">9</span></span>
+<span id="cb40-79"><a href="#cb40-79" tabindex="-1"></a><span class="sc">&gt;</span>       d                                                        <span class="cn">NA</span>   <span class="dv">3</span></span>
+<span id="cb40-80"><a href="#cb40-80" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         c   .</span></span>
+<span id="cb40-81"><a href="#cb40-81" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        c#   5</span></span>
+<span id="cb40-82"><a href="#cb40-82" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        d-   .</span></span>
+<span id="cb40-83"><a href="#cb40-83" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         d   .</span></span>
+<span id="cb40-84"><a href="#cb40-84" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        d#   .</span></span>
+<span id="cb40-85"><a href="#cb40-85" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        e-   .</span></span>
+<span id="cb40-86"><a href="#cb40-86" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         e  25</span></span>
+<span id="cb40-87"><a href="#cb40-87" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        e#   .</span></span>
+<span id="cb40-88"><a href="#cb40-88" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         f   .</span></span>
+<span id="cb40-89"><a href="#cb40-89" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        f#   .</span></span>
+<span id="cb40-90"><a href="#cb40-90" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        g-   .</span></span>
+<span id="cb40-91"><a href="#cb40-91" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         g   .</span></span>
+<span id="cb40-92"><a href="#cb40-92" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        g#   .</span></span>
+<span id="cb40-93"><a href="#cb40-93" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        a-   .</span></span>
+<span id="cb40-94"><a href="#cb40-94" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         a   .</span></span>
+<span id="cb40-95"><a href="#cb40-95" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        a#   .</span></span>
+<span id="cb40-96"><a href="#cb40-96" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                        b-   .</span></span>
+<span id="cb40-97"><a href="#cb40-97" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#                                                         b   7</span></span>
+<span id="cb40-98"><a href="#cb40-98" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         c   <span class="dv">3</span></span>
+<span id="cb40-99"><a href="#cb40-99" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        c<span class="co">#   .</span></span>
+<span id="cb40-100"><a href="#cb40-100" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        d<span class="sc">-</span>   <span class="dv">9</span></span>
+<span id="cb40-101"><a href="#cb40-101" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         d   <span class="dv">2</span></span>
+<span id="cb40-102"><a href="#cb40-102" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        d<span class="co">#   .</span></span>
+<span id="cb40-103"><a href="#cb40-103" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        e<span class="sc">-</span>   <span class="dv">9</span></span>
+<span id="cb40-104"><a href="#cb40-104" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         e   .</span>
+<span id="cb40-105"><a href="#cb40-105" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        e<span class="co">#   .</span></span>
+<span id="cb40-106"><a href="#cb40-106" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         f   <span class="dv">7</span></span>
+<span id="cb40-107"><a href="#cb40-107" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        f<span class="co">#   .</span></span>
+<span id="cb40-108"><a href="#cb40-108" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-109"><a href="#cb40-109" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         g   <span class="dv">1</span></span>
+<span id="cb40-110"><a href="#cb40-110" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        g<span class="co">#   .</span></span>
+<span id="cb40-111"><a href="#cb40-111" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        a<span class="sc">-</span>   <span class="dv">3</span></span>
+<span id="cb40-112"><a href="#cb40-112" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         a   .</span>
+<span id="cb40-113"><a href="#cb40-113" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        a<span class="co">#   .</span></span>
+<span id="cb40-114"><a href="#cb40-114" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                        b<span class="sc">-</span>   .</span>
+<span id="cb40-115"><a href="#cb40-115" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>                                                         b   .</span>
+<span id="cb40-116"><a href="#cb40-116" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         c  <span class="dv">10</span></span>
+<span id="cb40-117"><a href="#cb40-117" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        c<span class="co">#  11</span></span>
+<span id="cb40-118"><a href="#cb40-118" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-119"><a href="#cb40-119" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         d  <span class="dv">75</span></span>
+<span id="cb40-120"><a href="#cb40-120" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        d<span class="co">#  22</span></span>
+<span id="cb40-121"><a href="#cb40-121" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        e<span class="sc">-</span>   <span class="dv">1</span></span>
+<span id="cb40-122"><a href="#cb40-122" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         e  <span class="dv">64</span></span>
+<span id="cb40-123"><a href="#cb40-123" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        e<span class="co">#   2</span></span>
+<span id="cb40-124"><a href="#cb40-124" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         f  <span class="dv">25</span></span>
+<span id="cb40-125"><a href="#cb40-125" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        f<span class="co">#  60</span></span>
+<span id="cb40-126"><a href="#cb40-126" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-127"><a href="#cb40-127" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         g   <span class="dv">4</span></span>
+<span id="cb40-128"><a href="#cb40-128" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        g<span class="co">#   4</span></span>
+<span id="cb40-129"><a href="#cb40-129" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        a<span class="sc">-</span>   .</span>
+<span id="cb40-130"><a href="#cb40-130" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         a  <span class="dv">32</span></span>
+<span id="cb40-131"><a href="#cb40-131" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        a<span class="co">#   .</span></span>
+<span id="cb40-132"><a href="#cb40-132" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        b<span class="sc">-</span>   .</span>
+<span id="cb40-133"><a href="#cb40-133" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                         b  <span class="dv">16</span></span>
+<span id="cb40-134"><a href="#cb40-134" tabindex="-1"></a><span class="sc">&gt;</span>       e                                                        <span class="cn">NA</span>   <span class="dv">8</span></span>
+<span id="cb40-135"><a href="#cb40-135" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         c   .</span></span>
+<span id="cb40-136"><a href="#cb40-136" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        c#   2</span></span>
+<span id="cb40-137"><a href="#cb40-137" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        d-   .</span></span>
+<span id="cb40-138"><a href="#cb40-138" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         d   .</span></span>
+<span id="cb40-139"><a href="#cb40-139" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        d#   .</span></span>
+<span id="cb40-140"><a href="#cb40-140" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        e-   .</span></span>
+<span id="cb40-141"><a href="#cb40-141" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         e   1</span></span>
+<span id="cb40-142"><a href="#cb40-142" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        e#   .</span></span>
+<span id="cb40-143"><a href="#cb40-143" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         f   .</span></span>
+<span id="cb40-144"><a href="#cb40-144" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        f#   5</span></span>
+<span id="cb40-145"><a href="#cb40-145" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        g-   .</span></span>
+<span id="cb40-146"><a href="#cb40-146" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         g   .</span></span>
+<span id="cb40-147"><a href="#cb40-147" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        g#   .</span></span>
+<span id="cb40-148"><a href="#cb40-148" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        a-   .</span></span>
+<span id="cb40-149"><a href="#cb40-149" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         a   .</span></span>
+<span id="cb40-150"><a href="#cb40-150" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        a#   .</span></span>
+<span id="cb40-151"><a href="#cb40-151" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                        b-   .</span></span>
+<span id="cb40-152"><a href="#cb40-152" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#                                                         b   .</span></span>
+<span id="cb40-153"><a href="#cb40-153" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         c   <span class="dv">7</span></span>
+<span id="cb40-154"><a href="#cb40-154" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        c<span class="co">#   .</span></span>
+<span id="cb40-155"><a href="#cb40-155" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        d<span class="sc">-</span>   <span class="dv">1</span></span>
+<span id="cb40-156"><a href="#cb40-156" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         d   <span class="dv">1</span></span>
+<span id="cb40-157"><a href="#cb40-157" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        d<span class="co">#   .</span></span>
+<span id="cb40-158"><a href="#cb40-158" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        e<span class="sc">-</span>   <span class="dv">8</span></span>
+<span id="cb40-159"><a href="#cb40-159" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         e  <span class="dv">33</span></span>
+<span id="cb40-160"><a href="#cb40-160" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        e<span class="co">#   .</span></span>
+<span id="cb40-161"><a href="#cb40-161" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         f  <span class="dv">35</span></span>
+<span id="cb40-162"><a href="#cb40-162" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        f<span class="co">#   .</span></span>
+<span id="cb40-163"><a href="#cb40-163" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        g<span class="sc">-</span>   <span class="dv">1</span></span>
+<span id="cb40-164"><a href="#cb40-164" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         g  <span class="dv">17</span></span>
+<span id="cb40-165"><a href="#cb40-165" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        g<span class="co">#   .</span></span>
+<span id="cb40-166"><a href="#cb40-166" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        a<span class="sc">-</span>   <span class="dv">2</span></span>
+<span id="cb40-167"><a href="#cb40-167" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         a   <span class="dv">5</span></span>
+<span id="cb40-168"><a href="#cb40-168" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        a<span class="co">#   .</span></span>
+<span id="cb40-169"><a href="#cb40-169" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        b<span class="sc">-</span>   <span class="dv">6</span></span>
+<span id="cb40-170"><a href="#cb40-170" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                         b   <span class="dv">1</span></span>
+<span id="cb40-171"><a href="#cb40-171" tabindex="-1"></a><span class="sc">&gt;</span>       f                                                        <span class="cn">NA</span>   <span class="dv">4</span></span>
+<span id="cb40-172"><a href="#cb40-172" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         c   1</span></span>
+<span id="cb40-173"><a href="#cb40-173" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        c#   4</span></span>
+<span id="cb40-174"><a href="#cb40-174" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        d-   .</span></span>
+<span id="cb40-175"><a href="#cb40-175" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         d   8</span></span>
+<span id="cb40-176"><a href="#cb40-176" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        d#   1</span></span>
+<span id="cb40-177"><a href="#cb40-177" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        e-   .</span></span>
+<span id="cb40-178"><a href="#cb40-178" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         e  57</span></span>
+<span id="cb40-179"><a href="#cb40-179" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        e#   3</span></span>
+<span id="cb40-180"><a href="#cb40-180" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         f   .</span></span>
+<span id="cb40-181"><a href="#cb40-181" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        f#  12</span></span>
+<span id="cb40-182"><a href="#cb40-182" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        g-   .</span></span>
+<span id="cb40-183"><a href="#cb40-183" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         g  47</span></span>
+<span id="cb40-184"><a href="#cb40-184" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        g#  30</span></span>
+<span id="cb40-185"><a href="#cb40-185" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        a-   .</span></span>
+<span id="cb40-186"><a href="#cb40-186" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         a   3</span></span>
+<span id="cb40-187"><a href="#cb40-187" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        a#   .</span></span>
+<span id="cb40-188"><a href="#cb40-188" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                        b-   .</span></span>
+<span id="cb40-189"><a href="#cb40-189" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#                                                         b  16</span></span>
+<span id="cb40-190"><a href="#cb40-190" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         c   .</span>
+<span id="cb40-191"><a href="#cb40-191" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        c<span class="co">#   .</span></span>
+<span id="cb40-192"><a href="#cb40-192" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-193"><a href="#cb40-193" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         d   .</span>
+<span id="cb40-194"><a href="#cb40-194" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        d<span class="co">#   .</span></span>
+<span id="cb40-195"><a href="#cb40-195" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        e<span class="sc">-</span>   .</span>
+<span id="cb40-196"><a href="#cb40-196" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         e   .</span>
+<span id="cb40-197"><a href="#cb40-197" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        e<span class="co">#   .</span></span>
+<span id="cb40-198"><a href="#cb40-198" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         f   <span class="dv">1</span></span>
+<span id="cb40-199"><a href="#cb40-199" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        f<span class="co">#   .</span></span>
+<span id="cb40-200"><a href="#cb40-200" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-201"><a href="#cb40-201" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         g   .</span>
+<span id="cb40-202"><a href="#cb40-202" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        g<span class="co">#   .</span></span>
+<span id="cb40-203"><a href="#cb40-203" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        a<span class="sc">-</span>   .</span>
+<span id="cb40-204"><a href="#cb40-204" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         a   .</span>
+<span id="cb40-205"><a href="#cb40-205" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        a<span class="co">#   .</span></span>
+<span id="cb40-206"><a href="#cb40-206" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                        b<span class="sc">-</span>   .</span>
+<span id="cb40-207"><a href="#cb40-207" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>                                                         b   .</span>
+<span id="cb40-208"><a href="#cb40-208" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         c  <span class="dv">16</span></span>
+<span id="cb40-209"><a href="#cb40-209" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        c<span class="co">#   1</span></span>
+<span id="cb40-210"><a href="#cb40-210" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-211"><a href="#cb40-211" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         d  <span class="dv">13</span></span>
+<span id="cb40-212"><a href="#cb40-212" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        d<span class="co">#   .</span></span>
+<span id="cb40-213"><a href="#cb40-213" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        e<span class="sc">-</span>   <span class="dv">3</span></span>
+<span id="cb40-214"><a href="#cb40-214" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         e   <span class="dv">6</span></span>
+<span id="cb40-215"><a href="#cb40-215" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        e<span class="co">#   .</span></span>
+<span id="cb40-216"><a href="#cb40-216" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         f  <span class="dv">22</span></span>
+<span id="cb40-217"><a href="#cb40-217" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        f<span class="co">#  54</span></span>
+<span id="cb40-218"><a href="#cb40-218" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-219"><a href="#cb40-219" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         g  <span class="dv">51</span></span>
+<span id="cb40-220"><a href="#cb40-220" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        g<span class="co">#   1</span></span>
+<span id="cb40-221"><a href="#cb40-221" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        a<span class="sc">-</span>  <span class="dv">10</span></span>
+<span id="cb40-222"><a href="#cb40-222" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         a  <span class="dv">48</span></span>
+<span id="cb40-223"><a href="#cb40-223" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        a<span class="co">#   .</span></span>
+<span id="cb40-224"><a href="#cb40-224" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        b<span class="sc">-</span>   .</span>
+<span id="cb40-225"><a href="#cb40-225" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                         b   <span class="dv">6</span></span>
+<span id="cb40-226"><a href="#cb40-226" tabindex="-1"></a><span class="sc">&gt;</span>       g                                                        <span class="cn">NA</span>   <span class="dv">6</span></span>
+<span id="cb40-227"><a href="#cb40-227" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         c   1</span></span>
+<span id="cb40-228"><a href="#cb40-228" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        c#   4</span></span>
+<span id="cb40-229"><a href="#cb40-229" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        d-   .</span></span>
+<span id="cb40-230"><a href="#cb40-230" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         d   1</span></span>
+<span id="cb40-231"><a href="#cb40-231" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        d#   .</span></span>
+<span id="cb40-232"><a href="#cb40-232" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        e-   .</span></span>
+<span id="cb40-233"><a href="#cb40-233" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         e  12</span></span>
+<span id="cb40-234"><a href="#cb40-234" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        e#   1</span></span>
+<span id="cb40-235"><a href="#cb40-235" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         f   .</span></span>
+<span id="cb40-236"><a href="#cb40-236" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        f#  22</span></span>
+<span id="cb40-237"><a href="#cb40-237" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        g-   .</span></span>
+<span id="cb40-238"><a href="#cb40-238" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         g   .</span></span>
+<span id="cb40-239"><a href="#cb40-239" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        g#   6</span></span>
+<span id="cb40-240"><a href="#cb40-240" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        a-   .</span></span>
+<span id="cb40-241"><a href="#cb40-241" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         a  55</span></span>
+<span id="cb40-242"><a href="#cb40-242" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        a#   3</span></span>
+<span id="cb40-243"><a href="#cb40-243" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        b-   .</span></span>
+<span id="cb40-244"><a href="#cb40-244" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                         b   1</span></span>
+<span id="cb40-245"><a href="#cb40-245" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#                                                        NA   3</span></span>
+<span id="cb40-246"><a href="#cb40-246" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         c   <span class="dv">2</span></span>
+<span id="cb40-247"><a href="#cb40-247" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        c<span class="co">#   .</span></span>
+<span id="cb40-248"><a href="#cb40-248" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        d<span class="sc">-</span>   <span class="dv">7</span></span>
+<span id="cb40-249"><a href="#cb40-249" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         d   .</span>
+<span id="cb40-250"><a href="#cb40-250" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        d<span class="co">#   .</span></span>
+<span id="cb40-251"><a href="#cb40-251" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        e<span class="sc">-</span>   .</span>
+<span id="cb40-252"><a href="#cb40-252" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         e   .</span>
+<span id="cb40-253"><a href="#cb40-253" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        e<span class="co">#   .</span></span>
+<span id="cb40-254"><a href="#cb40-254" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         f   <span class="dv">3</span></span>
+<span id="cb40-255"><a href="#cb40-255" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        f<span class="co">#   .</span></span>
+<span id="cb40-256"><a href="#cb40-256" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-257"><a href="#cb40-257" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         g   <span class="dv">9</span></span>
+<span id="cb40-258"><a href="#cb40-258" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        g<span class="co">#   .</span></span>
+<span id="cb40-259"><a href="#cb40-259" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        a<span class="sc">-</span>  <span class="dv">15</span></span>
+<span id="cb40-260"><a href="#cb40-260" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         a   <span class="dv">2</span></span>
+<span id="cb40-261"><a href="#cb40-261" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        a<span class="co">#   .</span></span>
+<span id="cb40-262"><a href="#cb40-262" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                        b<span class="sc">-</span>   <span class="dv">7</span></span>
+<span id="cb40-263"><a href="#cb40-263" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>                                                         b   .</span>
+<span id="cb40-264"><a href="#cb40-264" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         c   <span class="dv">5</span></span>
+<span id="cb40-265"><a href="#cb40-265" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        c<span class="co">#   2</span></span>
+<span id="cb40-266"><a href="#cb40-266" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-267"><a href="#cb40-267" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         d  <span class="dv">19</span></span>
+<span id="cb40-268"><a href="#cb40-268" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        d<span class="co">#   3</span></span>
+<span id="cb40-269"><a href="#cb40-269" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        e<span class="sc">-</span>   .</span>
+<span id="cb40-270"><a href="#cb40-270" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         e  <span class="dv">24</span></span>
+<span id="cb40-271"><a href="#cb40-271" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        e<span class="co">#   1</span></span>
+<span id="cb40-272"><a href="#cb40-272" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         f   <span class="dv">3</span></span>
+<span id="cb40-273"><a href="#cb40-273" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        f<span class="co">#   6</span></span>
+<span id="cb40-274"><a href="#cb40-274" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-275"><a href="#cb40-275" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         g  <span class="dv">62</span></span>
+<span id="cb40-276"><a href="#cb40-276" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        g<span class="co">#  56</span></span>
+<span id="cb40-277"><a href="#cb40-277" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        a<span class="sc">-</span>   .</span>
+<span id="cb40-278"><a href="#cb40-278" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         a  <span class="dv">45</span></span>
+<span id="cb40-279"><a href="#cb40-279" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        a<span class="co">#   1</span></span>
+<span id="cb40-280"><a href="#cb40-280" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        b<span class="sc">-</span>   <span class="dv">8</span></span>
+<span id="cb40-281"><a href="#cb40-281" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                         b  <span class="dv">77</span></span>
+<span id="cb40-282"><a href="#cb40-282" tabindex="-1"></a><span class="sc">&gt;</span>       a                                                        <span class="cn">NA</span>   <span class="dv">6</span></span>
+<span id="cb40-283"><a href="#cb40-283" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         c   .</span></span>
+<span id="cb40-284"><a href="#cb40-284" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        c#   .</span></span>
+<span id="cb40-285"><a href="#cb40-285" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        d-   .</span></span>
+<span id="cb40-286"><a href="#cb40-286" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         d   .</span></span>
+<span id="cb40-287"><a href="#cb40-287" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        d#   1</span></span>
+<span id="cb40-288"><a href="#cb40-288" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        e-   .</span></span>
+<span id="cb40-289"><a href="#cb40-289" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         e   .</span></span>
+<span id="cb40-290"><a href="#cb40-290" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        e#   .</span></span>
+<span id="cb40-291"><a href="#cb40-291" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         f   .</span></span>
+<span id="cb40-292"><a href="#cb40-292" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        f#   1</span></span>
+<span id="cb40-293"><a href="#cb40-293" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        g-   .</span></span>
+<span id="cb40-294"><a href="#cb40-294" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         g   .</span></span>
+<span id="cb40-295"><a href="#cb40-295" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        g#   .</span></span>
+<span id="cb40-296"><a href="#cb40-296" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        a-   .</span></span>
+<span id="cb40-297"><a href="#cb40-297" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         a   .</span></span>
+<span id="cb40-298"><a href="#cb40-298" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        a#   .</span></span>
+<span id="cb40-299"><a href="#cb40-299" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                        b-   .</span></span>
+<span id="cb40-300"><a href="#cb40-300" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#                                                         b   9</span></span>
+<span id="cb40-301"><a href="#cb40-301" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         c  <span class="dv">21</span></span>
+<span id="cb40-302"><a href="#cb40-302" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        c<span class="co">#   .</span></span>
+<span id="cb40-303"><a href="#cb40-303" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-304"><a href="#cb40-304" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         d   .</span>
+<span id="cb40-305"><a href="#cb40-305" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        d<span class="co">#   .</span></span>
+<span id="cb40-306"><a href="#cb40-306" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        e<span class="sc">-</span>   <span class="dv">7</span></span>
+<span id="cb40-307"><a href="#cb40-307" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         e   .</span>
+<span id="cb40-308"><a href="#cb40-308" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        e<span class="co">#   .</span></span>
+<span id="cb40-309"><a href="#cb40-309" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         f   .</span>
+<span id="cb40-310"><a href="#cb40-310" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        f<span class="co">#   .</span></span>
+<span id="cb40-311"><a href="#cb40-311" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-312"><a href="#cb40-312" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         g   <span class="dv">3</span></span>
+<span id="cb40-313"><a href="#cb40-313" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        g<span class="co">#   .</span></span>
+<span id="cb40-314"><a href="#cb40-314" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        a<span class="sc">-</span>  <span class="dv">11</span></span>
+<span id="cb40-315"><a href="#cb40-315" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         a   <span class="dv">9</span></span>
+<span id="cb40-316"><a href="#cb40-316" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        a<span class="co">#   .</span></span>
+<span id="cb40-317"><a href="#cb40-317" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                        b<span class="sc">-</span>   <span class="dv">9</span></span>
+<span id="cb40-318"><a href="#cb40-318" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>                                                         b   .</span>
+<span id="cb40-319"><a href="#cb40-319" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         c  <span class="dv">55</span></span>
+<span id="cb40-320"><a href="#cb40-320" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        c<span class="co">#  40</span></span>
+<span id="cb40-321"><a href="#cb40-321" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        d<span class="sc">-</span>   .</span>
+<span id="cb40-322"><a href="#cb40-322" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         d   <span class="dv">9</span></span>
+<span id="cb40-323"><a href="#cb40-323" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        d<span class="co">#   .</span></span>
+<span id="cb40-324"><a href="#cb40-324" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        e<span class="sc">-</span>   .</span>
+<span id="cb40-325"><a href="#cb40-325" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         e  <span class="dv">35</span></span>
+<span id="cb40-326"><a href="#cb40-326" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        e<span class="co">#   .</span></span>
+<span id="cb40-327"><a href="#cb40-327" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         f   .</span>
+<span id="cb40-328"><a href="#cb40-328" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        f<span class="co">#   4</span></span>
+<span id="cb40-329"><a href="#cb40-329" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        g<span class="sc">-</span>   .</span>
+<span id="cb40-330"><a href="#cb40-330" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         g   <span class="dv">7</span></span>
+<span id="cb40-331"><a href="#cb40-331" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        g<span class="co">#   6</span></span>
+<span id="cb40-332"><a href="#cb40-332" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        a<span class="sc">-</span>   .</span>
+<span id="cb40-333"><a href="#cb40-333" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         a  <span class="dv">93</span></span>
+<span id="cb40-334"><a href="#cb40-334" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        a<span class="co">#   7</span></span>
+<span id="cb40-335"><a href="#cb40-335" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        b<span class="sc">-</span>   .</span>
+<span id="cb40-336"><a href="#cb40-336" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                         b  <span class="dv">35</span></span>
+<span id="cb40-337"><a href="#cb40-337" tabindex="-1"></a><span class="sc">&gt;</span>       b                                                        <span class="cn">NA</span>   <span class="dv">6</span></span>
+<span id="cb40-338"><a href="#cb40-338" tabindex="-1"></a><span class="sc">&gt;</span>    Kern  <span class="fu">c</span>(<span class="fu">lag</span>(Kern, <span class="at">groupby =</span> <span class="fu">list</span>(Piece, Spine, Path), <span class="at">n =</span> <span class="sc">-</span><span class="dv">1</span>))   n</span>
+<span id="cb40-339"><a href="#cb40-339" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution</span></code></pre></div>
 <p>We get a transition matrix!</p>
 </div>
 <div class="section level3">
 <h3 id="larger-n">Larger N<a class="anchor" aria-label="anchor" href="#larger-n"></a>
 </h3>
 <p>For functions that accept unlimited arguments (<code>...</code>),
-like <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code>, and <code><a href="../reference/tally.html">tally()</a></code>, you can easily
+like <code><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste()</a></code>, and <code>count()</code>, you can easily
 extend the principle to create longer n-grams:</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>  <span class="fu">within</span>(<span class="fu">paste</span>(Kern, Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">1</span>], Kern[<span class="at">lag =</span> <span class="sc">-</span><span class="dv">2</span>], <span class="at">sep =</span> <span class="st">'|'</span>))</span>

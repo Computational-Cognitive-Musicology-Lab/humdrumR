@@ -118,11 +118,11 @@
 #' ```
 #' humData |>
 #'   select(Token) |>
-#'   with(tally(.))
+#'   with(count(.))
 #' 
 #' ```
 #' 
-#' will run [tally()] on the `Token` field.
+#' will run [count()] on the `Token` field.
 #' 
 #' Because new fields created by `within()`/`mutate()`/`reframe()` become the [selected fields][selectedFields]
 #' (details below), the `.` makes it easy to refer to the *last* new field in pipes.
@@ -132,11 +132,11 @@
 #' ```
 #' humData |>
 #'    mutate(kern(Token, simple = TRUE)) |>
-#'    with(tally(.))
+#'    with(count(.))
 #' 
 #' ```
 #' 
-#' the `tally()` function is run on the output of the `mutate(kern(Token, simpe = TRUE))` expression.
+#' the `count()` function is run on the output of the `mutate(kern(Token, simpe = TRUE))` expression.
 #
 #' #### Automatic argument insertion
 #' 
@@ -203,9 +203,9 @@
 #' Thus, *these* two calls are also the same:
 #' 
 #' ```
-#' humData |> with(tally(Token[lag = 1:2]))
+#' humData |> with(count(Token[lag = 1:2]))
 
-#' humData |> with(tally(lag(Token, 1), lag(Token, 2)))
+#' humData |> with(count(lag(Token, 1), lag(Token, 2)))
 #' ```
 #' 
 #' Note that the lagging will also be automatically grouped within the fields `list(Piece, Spine, Path)`,
@@ -261,7 +261,7 @@
 #' 
 #' ```
 #' humData |> within(dataTypes = 'Dd', 
-#'                   tally(Token[splat = Spine %in% 1:2]))
+#'                   count(Token[splat = Spine %in% 1:2]))
 #' ```
 #'       
 #' ### Saving expressions for later
@@ -275,15 +275,15 @@
 #' `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()`.
 #'
 #' Image that you have three different datasets (`humData1`, `humData2`, and `humData3`),
-#' and you'd like to evaluate the expression `tally(kern(Token, simple = TRUE))` in all three.
+#' and you'd like to evaluate the expression `count(kern(Token, simple = TRUE))` in all three.
 #' Use the `~` operator to quote and save that expression to variable, then use it with `with()`:
 #' 
 #' ```
-#' tallyKern <- ~tally(kern(Token, simple = TRUE))
+#' countKern <- ~count(kern(Token, simple = TRUE))
 #' 
-#' humData1 |> with(tallyKern)
-#' humData2 |> with(tallyKern)
-#' humData3 |> with(tallyKern)
+#' humData1 |> with(countKern)
+#' humData2 |> with(countKern)
+#' humData3 |> with(countKern)
 #' 
 #' ```
 #' 
@@ -550,7 +550,7 @@
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #' 
-#' humData |> with(tally(kern(Token, simple = TRUE), Spine))
+#' humData |> with(count(kern(Token, simple = TRUE), Spine))
 #' 
 #' humData |> within(Kern <- kern(Token), 
 #'                   Recip <- recip(Token),
@@ -1380,78 +1380,3 @@ reframe.humdrumR <- function(.data, ..., dataTypes = 'D', alignLeft = TRUE, expa
 
 
 
-
-## ggplot2  -----
-
-
-#' @rdname withinHumdrum
-#' @export
-ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
-  humtab <- getHumtab(data, dataTypes = dataTypes)
-  
-  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
-}
-
-
-
-
-### Treatment of token ----
-
-#' @export
-scale_type.token <- function(x) if (class(x@.Data) %in% c('integer', 'numeric', 'integer64')) 'continuous' else 'discrete'
-
-
-#' @export
-scale_x_token <- function(..., expand = waiver(), guide = waiver(), position = "bottom") {
-  sc <- ggplot2::discrete_scale(c("x", "xmin", "xmax", "xend"), "position_d", identity, ...,
-                                # limits = c("c", "c#", "d-", "d", "d#", "e-", "e", "e#", "f", "f#", "f##", "g-", "g", "g#", "a-", "a", "a#", "b-", "b", "b#"),
-                                expand = expand, guide = guide, position = position, super = ScaleDiscretePosition)
-  
-  sc$range_c <- scales::ContinuousRange$new()
-  sc
-}
-
-
-
-### humdrumR plot style ----
-
-#### Colors ----
-
-scale_color_humdrum <- ggplot2::scale_fill_manual(values = flatly)
-# scale_color_continuous(type = colorRamp(flatly[2:3]))
-
-options(ggplot2.continuous.fill = ggplot2::scale_color_gradientn(colors = flatly_continuous(100)))
-options(ggplot2.continuous.color = ggplot2::scale_color_gradientn(colours = flatly_continuous(100)))
-options(ggplot2.continuous.colour = ggplot2::scale_color_gradientn(colours = flatly_continuous(100)))
-
-# options(ggplot2.continuous.colour = 'humdrum')
-
-#### Theme ----
-
-
-theme_humdrum <- function() {
-  ggplot2::update_geom_defaults("point", list(size = .5, color = flatly[1], fill = flatly[2]))
-  ggplot2::update_geom_defaults("line", list(size = .5, color = flatly[4], fill = flatly[3]))
-  ggplot2::update_geom_defaults("rect", list(fill = flatly[1]))
-  
-  theme(panel.background = element_blank(), axis.ticks = element_blank(),
-        strip.background = element_blank(), 
-        # panel.border = element_rect(linetype = 'dashed', fill = NA),
-        legend.key = element_rect(fill = NA),
-        title = element_text(family = 'Lato', color = flatly[5], size = 16),
-        plot.title.position = 'plot', plot.title = element_text(hjust = .5),
-        line = element_line(color = flatly[1]),
-        rect = element_rect(color = flatly[2]),
-        text = element_text(family = 'Lato', color = flatly[4]),
-        axis.text = element_text(color = flatly[5], size = 7),
-        axis.title = element_text(color = flatly[4], size = 11)
-        )
-}
-
-
-  
-
-
- 
-
-          

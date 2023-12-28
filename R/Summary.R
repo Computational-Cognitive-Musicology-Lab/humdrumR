@@ -1000,8 +1000,8 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
   
   interpmat <- data.table(Piece = paste0(trimTokens(interps$Filename, 70L), ' [', num2str(seq_along(interps$Filename), pad = TRUE), ']'), 
                           "{X}" = paste0('{', LETTERS[match(interps$ExclusivePat, names(tallies))], '}'), 
-                          interps$Exclusive,
-                          tandems)
+                          unclass(interps$Exclusive),
+                          unclass(tandems))
   nfiles <- nrow(interpmat)
   
   corpusMessage <- paste0('\n###### Interpretation content', if (!showEach) ':\n')

@@ -27,7 +27,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,7 +101,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2023-08-17</h4>
+            <h4 data-toc-skip class="date">2023-12-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RhythmAndMeter.Rmd" class="external-link"><code>vignettes/RhythmAndMeter.Rmd</code></a></small>
       <div class="d-none name"><code>RhythmAndMeter.Rmd</code></div>
@@ -625,53 +625,53 @@ provided, the default is 60 beats-per-minute.</p>
 <p>Ok, the <code><a href="../reference/timeline.html">timeline()</a></code> gives us a timeline in whole-note
 units, giving fractional (decimal) output. Often in music, we want to
 know how many <em>beats</em> have elapsed at a given time, rather than
-the exact time position. For this, use the <code><a href="../reference/count.html">count()</a></code>, and its
-<code>beat</code> argument. The default <code>beat</code> is a
-whole-note, so <code><a href="../reference/count.html">count()</a></code> will count which whole note you are
-on:</p>
+the exact time position. For this, use the <code><a href="../reference/timecount.html">timecount()</a></code>, and
+its <code>unit</code> argument. The default <code>unit</code> is a
+whole-note, so <code><a href="../reference/timecount.html">timecount()</a></code> will count which whole note you
+are on:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>row <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4c'</span>, <span class="st">'4c'</span>, <span class="st">'6c'</span>, <span class="st">'12d'</span>, <span class="st">'4e'</span>, <span class="st">'6e'</span>,<span class="st">'12d'</span>, <span class="st">'6e'</span>, <span class="st">'12f'</span>, <span class="st">'2g'</span>, </span>
 <span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>         <span class="st">'12cc'</span>, <span class="st">'12cc'</span>, <span class="st">'12cc'</span>, <span class="st">'12g'</span>, <span class="st">'12g'</span>, <span class="st">'12g'</span>, <span class="st">'12e'</span>, <span class="st">'12e'</span>, <span class="st">'12e'</span>, <span class="st">'12c'</span>, <span class="st">'12c'</span>, <span class="st">'12c'</span>, </span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>         <span class="st">'6g'</span>,<span class="st">'12f'</span>, <span class="st">'6e'</span>, <span class="st">'12d'</span>,<span class="st">'2c'</span>)</span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="fu">count</span>(row)</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="fu">timecount</span>(row)</span>
 <span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">2</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">3</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">4</span></span></code></pre></div>
 <p>Let’s try quarter-notes instead:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a></span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">count</span>(row, <span class="at">beat =</span> <span class="st">'4'</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">timecount</span>(row, <span class="at">unit =</span> <span class="st">'4'</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>]  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">5</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">6</span>  <span class="dv">7</span>  <span class="dv">9</span>  <span class="dv">9</span>  <span class="dv">9</span> <span class="dv">10</span> <span class="dv">10</span> <span class="dv">10</span> <span class="dv">11</span> <span class="dv">11</span> <span class="dv">11</span> <span class="dv">12</span> <span class="dv">12</span> <span class="dv">12</span> <span class="dv">13</span> <span class="dv">13</span> <span class="dv">14</span></span>
 <span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">26</span>] <span class="dv">14</span> <span class="dv">15</span></span></code></pre></div>
-<p><code><a href="../reference/count.html">count()</a></code> will even work for irregular beat patterns,
+<p><code><a href="../reference/timecount.html">timecount()</a></code> will even work for irregular beat patterns,
 which must be entered as a list. For example, the meter 7/8 is often
 played as three beats, with the last beat being longer than the first
-two: a pattern line <code>4 4 4.</code>. <code><a href="../reference/count.html">count()</a></code> can count
-these irregular beats!</p>
+two: a pattern line <code>4 4 4.</code>. <code><a href="../reference/timecount.html">timecount()</a></code> can
+count these irregular beats!</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a></span>
 <span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>seven8 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'8'</span>,<span class="st">'8'</span>,<span class="st">'8'</span>,<span class="st">'4'</span>,<span class="st">'4'</span>,<span class="st">'4'</span>,<span class="st">'8'</span>,<span class="st">'4'</span>,<span class="st">'4'</span>,<span class="st">'8'</span>,<span class="st">'8'</span>, <span class="st">'8'</span>, <span class="st">'4'</span>)</span>
 <span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="fu">count</span>(seven8, <span class="at">beat =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'4.'</span>)))</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="fu">timecount</span>(seven8, <span class="at">unit =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'4.'</span>)))</span>
 <span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>]  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">3</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">6</span>  <span class="dv">7</span>  <span class="dv">8</span>  <span class="dv">9</span>  <span class="dv">9</span>  <span class="dv">9</span> <span class="dv">10</span></span></code></pre></div>
 <p>This could be handy for counting subdivisions in swing time!</p>
 <div class="section level4">
 <h4 id="subposition">Subposition<a class="anchor" aria-label="anchor" href="#subposition"></a>
 </h4>
-<p>The counterpart to <code><a href="../reference/count.html">count()</a></code> is <code><a href="../reference/count.html">subpos()</a></code>.
+<p>The counterpart to <code><a href="../reference/timecount.html">timecount()</a></code> is <code><a href="../reference/timecount.html">subpos()</a></code>.
 When we count beats, some notes don’t actually land <em>on</em> the
 beat, but somewhere “inside” the beat—in other words, between beats.
-<code><a href="../reference/count.html">subpos()</a></code> will tell us how far from the beat each attack is;
+<code><a href="../reference/timecount.html">subpos()</a></code> will tell us how far from the beat each attack is;
 the unit will be whole-notes, unless we pass a <code>scale</code>
 argument to change the scale. Let’s look at our last few examples again,
-but using <code><a href="../reference/count.html">subpos()</a></code>:</p>
+but using <code><a href="../reference/timecount.html">subpos()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a></span>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">subpos</span>(row, <span class="at">scale =</span> <span class="dv">12</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>]  <span class="dv">0</span>  <span class="dv">3</span>  <span class="dv">6</span>  <span class="dv">8</span>  <span class="dv">9</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">0</span>  <span class="dv">1</span>  <span class="dv">2</span>  <span class="dv">3</span>  <span class="dv">4</span>  <span class="dv">5</span>  <span class="dv">6</span>  <span class="dv">7</span>  <span class="dv">8</span>  <span class="dv">9</span> <span class="dv">10</span> <span class="dv">11</span>  <span class="dv">0</span>  <span class="dv">2</span>  <span class="dv">3</span></span>
 <span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">26</span>]  <span class="dv">5</span>  <span class="dv">6</span></span>
 <span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a></span>
-<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="fu">subpos</span>(row, <span class="at">beat =</span> <span class="st">'4'</span>, <span class="at">scale =</span> <span class="dv">12</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="fu">subpos</span>(row, <span class="at">unit =</span> <span class="st">'4'</span>, <span class="at">scale =</span> <span class="dv">12</span>)</span>
 <span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span></span>
 <span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a></span>
-<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="fu">subpos</span>(seven8, <span class="at">beat =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'4.'</span>)), <span class="at">scale =</span> <span class="dv">8</span>)</span>
+<span id="cb22-11"><a href="#cb22-11" tabindex="-1"></a><span class="fu">subpos</span>(seven8, <span class="at">unit =</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="st">'4'</span>, <span class="st">'4'</span>, <span class="st">'4.'</span>)), <span class="at">scale =</span> <span class="dv">8</span>)</span>
 <span id="cb22-12"><a href="#cb22-12" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="er">**</span><span class="fu">duration</span> (numeric)</span>
 <span id="cb22-13"><a href="#cb22-13" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">2</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">2</span> <span class="dv">0</span></span></code></pre></div>
 </div>
@@ -679,9 +679,9 @@ but using <code><a href="../reference/count.html">subpos()</a></code>:</p>
 <div class="section level2">
 <h2 id="meter">Meter<a class="anchor" aria-label="anchor" href="#meter"></a>
 </h2>
-<p>The <code><a href="../reference/count.html">count()</a></code> and <code><a href="../reference/count.html">subpos()</a></code> commands are great
-if we want count in a single beat/measure unit. To take things to the
-next level(s), we need to consider musical <em>meter</em>. From the
+<p>The <code><a href="../reference/timecount.html">timecount()</a></code> and <code><a href="../reference/timecount.html">subpos()</a></code> commands are
+great if we want count in a single beat/measure unit. To take things to
+the next level(s), we need to consider musical <em>meter</em>. From the
 point of view of humdrum<span class="math inline">\(_{\mathbb{R}}\)</span>, “meter” is a set of
 multiple “beat levels” occurring at the same time (in parallel), with
 “lower” (faster/shorter) levels nested inside “higher” (slower/longer)
@@ -723,9 +723,9 @@ eighth-note level is <code>4</code>.</p>
 </h4>
 <p>Along with <code><a href="../reference/metlev.html">metlev()</a></code>, humdrum<span class="math inline">\(_{\mathbb{R}}\)</span> provides to complementary
 functions called <code><a href="../reference/metlev.html">metcount()</a></code>, <code><a href="../reference/metlev.html">metsubpos()</a></code>. As
-you might guess, these are metric parallels of <code><a href="../reference/count.html">count()</a></code> and
-<code><a href="../reference/count.html">subpos()</a></code>. The <code><a href="../reference/metlev.html">metcount()</a></code> function counts beats
-at a particular beat level (the <code>level</code> argument)
+you might guess, these are metric parallels of <code><a href="../reference/timecount.html">timecount()</a></code>
+and <code><a href="../reference/timecount.html">subpos()</a></code>. The <code><a href="../reference/metlev.html">metcount()</a></code> function counts
+beats at a particular beat level (the <code>level</code> argument)
 <em>within</em> the highest level in the meter. The
 <code><a href="../reference/metlev.html">metsubpos()</a></code> function calculates the rhythm offset between
 each onset and the nearest beat in the meter.</p>

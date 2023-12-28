@@ -35,9 +35,9 @@ test_that('Examples from Working With Data vignette work', {
   #
   kerntab <- with(chorales, 
                   kern(Token) |> 
-                    tally())
+                    table(useNA = 'always'))
   
-  if (expect_true(class(kerntab) == 'humdrum.table')) {
+  if (expect_true(class(kerntab) == 'table')) {
     expect_length(kerntab, 73)
     expect_equal(unname(kerntab['dd#']), 4)
     expect_equal(unname(kerntab['DD#']), 0)

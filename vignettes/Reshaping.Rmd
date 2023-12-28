@@ -146,7 +146,7 @@ For example, we could tabulate pitches wherever the rhythmic duration is a quart
 ```{r}
 example |>
   filter(Rhythm == '4') |>
-  tally(Pitch)
+  count(Pitch)
 
 ```
 
@@ -245,7 +245,7 @@ example |>
   index2( , '**kern') |>
   kern(simple = TRUE) |>
   cleave(c(1, 2)) |> 
-  tally()
+  count()
   
 
 

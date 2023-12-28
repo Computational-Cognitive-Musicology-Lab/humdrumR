@@ -317,11 +317,11 @@ Any new field is automatically selected, so you can continue the pipe:
 ```{r}
 chorales |> 
   pitch(simple = TRUE) |>
-  tally()
+  count()
 
 ```
 
-The `pitch()` function creates a new `Pitch` field, and selects it; the `tally()` function is then applied to the `Pitch` field!
+The `pitch()` function creates a new `Pitch` field, and selects it; the `count()` function is then applied to the `Pitch` field!
 
 ---
 
@@ -371,13 +371,13 @@ Once you start creating many fields, it can be easy to lose track of which field
 
 Once we get to have more than one field to work with, it gets garder to use the "humdrum style."
 Most `r hm` function wills only pipe the *first* selected field, so it doesn't matter if you select multiple fields.
-However, the `tally()` function can accept multiple fields.
+However, the `count()` function can accept multiple fields.
 Now that we've created a `Pitch` *and* `Duration` fields, we can do stuff like:
 
 ```{r}
 chorales |> 
   select(Pitch, Duration) |>
-  tally() 
+  count() 
 
 ```
 

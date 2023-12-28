@@ -51,18 +51,15 @@ We'll look for tokens that *don't* contain an `r` (for rest), using a regular-ex
 chorales |>
   group_by(Piece, Record) |>
   with(sum(!Token %~% 'r')) |> 
-  tally() -> counts
+  count() -> counts
 
 chorales |>
   group_by(Piece, Record) |>
-  with(sum(!Token %~% 'r')) |> 
-  tally()
-  
-
-
+  with(sum(!Token %~% 'r')) |>
+  count() 
 ```
 
-Most records (`r counts['4']` out of `r sum(counts)`) have new notes in all four voices---no surprise for choral music---with *one* onset being the next most common case (`r counts['1']` records).
+Most records (`r table(counts)['4']` out of `r sum(counts)`) have new notes in all four voices---no surprise for choral music---with *one* onset being the next most common case (`r table(counts)['1']` records).
 Note that, when we called `group_by()`, we included `Piece` *and* `Record`.
 Why? Because each piece in the data set repeats the same record numbers---you wouldn't want to count the 17th record from the 3rd chorale together with the 17th record from the 7th chorale, for example.
 When using `group_by()`, you'll almost always want to have `Piece` as a grouping factor.
@@ -90,12 +87,12 @@ We can now group bars (within pieces, once again!), get the minimum (using `whic
 chorales |>
   group_by(Piece, Bar) |>
   with(Kern[which.min(Semits)]) |>
-  tally() -> lownotes
+  count() |> table() -> lownotes
 
 chorales |>
   group_by(Piece, Bar) |>
   with(Kern[which.min(Semits)]) |>
-  tally()
+  count()
 
 
 ```
@@ -137,13 +134,13 @@ chorales |>
 
 Another useful contextual group is the beat.
 There will be no automatic "beat" field in our data, so we'll need to make one---obviously, we need to have data with rhythmic information encoded (like `**kern` or `**recip`) to do this!
-We can use the `count()` function to count the beats in our data. 
-We could count quarter-notes by setting `beat = '4'`; alternatively, if our data includes time-signature interpretations (like `*M3/4`) we could use the `TimeSignature` field to get the tactus of the meter. 
+We can use the `timecount()` function to count the beats in our data. 
+We could count quarter-notes by setting `unit = '4'`; alternatively, if our data includes time-signature interpretations (like `*M3/4`) we could use the `TimeSignature` field to get the tactus of the meter. 
 Let's try the later and save the result to a new field, which we'll call `Beat` (or anything else you want).
 
 ```{r}
-chorales |> 
-  mutate(Beat = count(Token, beat = tactus(TimeSignature))) -> chorales
+chorales |> select(Token) |>
+  mutate(Beat = timecount(Token, unit = tactus(TimeSignature))) -> chorales
 
 
 ```
@@ -162,7 +159,7 @@ chorales |>
 ```
 
 
-> Note: If your data includes spine paths, you'll want to set `mutate(count(Token), expandPaths = TRUE, ...)`.
+> Note: If your data includes spine paths, you'll want to set `mutate(timecount(Token), expandPaths = TRUE, ...)`.
 > Count (and similar functions, like `timeline()`) won't work correctly without paths expanded (`?expandPaths`).
 
 # Contextual Windows
@@ -461,7 +458,7 @@ Let's say we want to get the length of all these slurred groups:
 beethoven |>
   context('(', ')') |>
   with(length(Token)) |> 
-  tally()
+  count()
 
 ```
 
@@ -629,11 +626,11 @@ from the end of one file/spine to the beginning of the next, etc.
 ----
 
 `paste()` isn't the only vectorized function we might want to apply to lagged data.
-Another common example would be `tally()`:
+Another common example would be `count()`:
 
 ```{r}
 chorales |>
-  with(tally(Kern, Kern[lag = -1]))
+  with(count(Kern, Kern[lag = -1]))
 
 ```
 
@@ -641,7 +638,7 @@ We get a transition matrix!
 
 ## Larger N
 
-For functions that accept unlimited arguments (`...`), like `paste()`, and `tally()`, you can easily extend the principle to create longer n-grams:
+For functions that accept unlimited arguments (`...`), like `paste()`, and `count()`, you can easily extend the principle to create longer n-grams:
 
 ```{r}
 chorales |>

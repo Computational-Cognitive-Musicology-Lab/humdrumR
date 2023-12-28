@@ -27,7 +27,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -325,28 +325,31 @@ instance, tabulate each group separately:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">kern</span>(<span class="at">simple =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="fu">group_by</span>(Spine) <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="fu">tally</span>() </span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="sc">&gt;</span>    Object of class <span class="st">"humdrum.table"</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="sc">&gt;</span>        Spine</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">&gt;</span>    Kern   <span class="dv">1</span>   <span class="dv">2</span>   <span class="dv">3</span>   <span class="dv">4</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="sc">&gt;</span>      c   <span class="dv">62</span>  <span class="dv">83</span>  <span class="dv">19</span>  <span class="dv">68</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#  32  34  12  37</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>  <span class="dv">16</span>  <span class="dv">12</span>   <span class="dv">0</span>   <span class="dv">7</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="sc">&gt;</span>      d   <span class="dv">72</span>  <span class="dv">88</span>  <span class="dv">43</span>  <span class="dv">50</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#  12   4  16   5</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>  <span class="dv">16</span>  <span class="dv">11</span>   <span class="dv">3</span>   <span class="dv">4</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="sc">&gt;</span>      e   <span class="dv">92</span>  <span class="dv">79</span> <span class="dv">121</span>  <span class="dv">42</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#   4   1   3   0</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="sc">&gt;</span>      f   <span class="dv">38</span>  <span class="dv">15</span>  <span class="dv">50</span>  <span class="dv">18</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#  49  35  84  14</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>   <span class="dv">0</span>   <span class="dv">1</span>   <span class="dv">0</span>   <span class="dv">0</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="sc">&gt;</span>      g   <span class="dv">65</span>  <span class="dv">39</span>  <span class="dv">90</span>  <span class="dv">43</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#  19  31  44  15</span></span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>  <span class="dv">10</span>   <span class="dv">6</span>  <span class="dv">14</span>  <span class="dv">15</span></span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="sc">&gt;</span>      a   <span class="dv">80</span>  <span class="dv">76</span>  <span class="dv">69</span>  <span class="dv">93</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#   2   4   3   2</span></span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>  <span class="dv">19</span>  <span class="dv">17</span>   <span class="dv">9</span>  <span class="dv">15</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="sc">&gt;</span>      b   <span class="dv">62</span>  <span class="dv">85</span>  <span class="dv">35</span> <span class="dv">115</span></span></code></pre></div>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="fu">count</span>() </span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution </span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="sc">&gt;</span>    Kern  Spine               </span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">1</span>    <span class="dv">2</span>    <span class="dv">3</span>    <span class="dv">4</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="sc">&gt;</span>       c     <span class="dv">62</span>   <span class="dv">83</span>   <span class="dv">19</span>   <span class="dv">68</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="sc">&gt;</span>      c<span class="co">#     32   34   12   37</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="sc">-</span>     <span class="dv">16</span>   <span class="dv">12</span>    .    <span class="dv">7</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="sc">&gt;</span>       d     <span class="dv">72</span>   <span class="dv">88</span>   <span class="dv">43</span>   <span class="dv">50</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="sc">&gt;</span>      d<span class="co">#     12    4   16    5</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="sc">-</span>     <span class="dv">16</span>   <span class="dv">11</span>    <span class="dv">3</span>    <span class="dv">4</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="sc">&gt;</span>       e     <span class="dv">92</span>   <span class="dv">79</span>  <span class="dv">121</span>   <span class="dv">42</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="sc">&gt;</span>      e<span class="co">#      4    1    3    .</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="sc">&gt;</span>       f     <span class="dv">38</span>   <span class="dv">15</span>   <span class="dv">50</span>   <span class="dv">18</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="sc">&gt;</span>      f<span class="co">#     49   35   84   14</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="sc">-</span>      .    <span class="dv">1</span>    .    .</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="sc">&gt;</span>       g     <span class="dv">65</span>   <span class="dv">39</span>   <span class="dv">90</span>   <span class="dv">43</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="sc">&gt;</span>      g<span class="co">#     19   31   44   15</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="sc">-</span>     <span class="dv">10</span>    <span class="dv">6</span>   <span class="dv">14</span>   <span class="dv">15</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="sc">&gt;</span>       a     <span class="dv">80</span>   <span class="dv">76</span>   <span class="dv">69</span>   <span class="dv">93</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="sc">&gt;</span>      a<span class="co">#      2    4    3    2</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="sc">&gt;</span>      b<span class="sc">-</span>     <span class="dv">19</span>   <span class="dv">17</span>    <span class="dv">9</span>   <span class="dv">15</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="sc">&gt;</span>       b     <span class="dv">62</span>   <span class="dv">85</span>   <span class="dv">35</span>  <span class="dv">115</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">1</span>    <span class="dv">2</span>    <span class="dv">3</span>    <span class="dv">4</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="sc">&gt;</span>    Kern  Spine               </span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="common-groupings">Common groupings<a class="anchor" aria-label="anchor" href="#common-groupings"></a>

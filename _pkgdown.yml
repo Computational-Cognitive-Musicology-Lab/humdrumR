@@ -181,7 +181,7 @@ reference:
   - tactus
   - nbeats
   - tatum
-  - count
+  - timecount
   - metlev
   - syncopation
 - subtitle: "Lyrics"
@@ -213,12 +213,11 @@ reference:
   desc: "Other useful tools."
 - contents: 
   - draw
-  - tally
+  - distributions
 - subtitle: "Information theory"
   contents:
-  - p
+  - pdist
   - entropy
-  - crossEntropy
   - mutualInfo
 - subtitle: "Numeric values"
   contents:

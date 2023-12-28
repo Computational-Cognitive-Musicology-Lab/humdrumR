@@ -592,7 +592,7 @@ setMethod('[', c(x = 'struct'),
                   
                   match_size(i = i, j = j, toEnv = TRUE)
                   
-                  if (any(i < 0 | j < 0)) stop(call. = FALSE, "Can't do cartesian indexing with negative indices.")
+                  if (any(i < 0 | j < 0, na.rm = TRUE)) stop(call. = FALSE, "Can't do cartesian indexing with negative indices.")
                   
                   i.internal <- humvectorI(i, x)
                   i.internal <- split(i.internal, rep(1:length(i), length.out = length(i.internal)))

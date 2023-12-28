@@ -173,7 +173,7 @@ have a (shared) position on the timeline.
 Another option is to pass the \code{pickup} argument a logical vector of the same length as the input \code{x}.
 Within each piece/group, any block of \code{TRUE} values at the \emph{beginning} of the \code{pickup} vector
 indicate a pickup.
-The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/count;
+The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/timecount;
 All the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
 In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
 Thus, a common use for the \code{pickup} argument is \verb{within(humData, timeline(Token, pickup = Bar < 1)}, which makes the downbeat of
@@ -193,6 +193,6 @@ within(B075, timeline(Token))
 
 }
 \seealso{
-{The \code{\link[=count]{count()}} and \code{\link[=metcount]{metcount()}} functions provide "higher level" musical interpretations of timeline information.}
+{The \code{\link[=timecount]{timecount()}} and \code{\link[=metcount]{metcount()}} functions provide "higher level" musical interpretations of timeline information.}
 }
 \concept{rhythm analysis tools}

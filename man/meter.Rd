@@ -9,7 +9,7 @@
 \alias{meter.character}
 \title{Musical Meter in humdrumR}
 \usage{
-meter(x, ...)
+meter(x, ..., measure, tactus, tick, fill.levels, subdiv, hyper, tatum)
 
 \method{meter}{meter}(x, ...)
 
