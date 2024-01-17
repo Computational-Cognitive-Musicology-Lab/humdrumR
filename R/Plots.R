@@ -37,7 +37,7 @@ setGeneric('draw', \(x, y,
                      main = '', sub = '',
                      xlab = NULL, ylab = NULL, ...) {
   oldpalette <- palette(flatly)
-  oldpar <- par(family = 'Lato', 
+  oldpar <- par(family = 'Helvetica', 
                 col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
                 cex.axis = .7, pch = 16)
   
@@ -62,8 +62,8 @@ setGeneric('draw', \(x, y,
     outer <- output$outer %||% FALSE
     xlab <- xlab %||% (output$xlab %||% xexpr)
     ylab <- ylab %||% (output$ylab %||% yexpr)
-    
-    mtext(xlab, 1, line = 2.5, outer = outer)
+    if (sys.nframe() < 2)  mtext(xlab, 1, line = 2.5, outer = outer)
+   
     mtext(ylab, 2, line = 3, outer = outer, las = if (nchar(ylab) > 3) 3 else 1)
     
     if (!is.null(attr(col, 'levels'))) legend('topleft', horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
@@ -788,11 +788,11 @@ theme_humdrum <- function() {
         strip.background = element_blank(), 
         # panel.border = element_rect(linetype = 'dashed', fill = NA),
         legend.key = element_rect(fill = NA),
-        title = element_text(family = 'Lato', color = flatly[5], size = 16),
+        title = element_text(family = 'Helvetica', color = flatly[5], size = 16),
         plot.title.position = 'plot', plot.title = element_text(hjust = .5),
         line = element_line(color = flatly[1]),
         rect = element_rect(color = flatly[2]),
-        text = element_text(family = 'Lato', color = flatly[4]),
+        text = element_text(family = 'Helvetica', color = flatly[4]),
         axis.text = element_text(color = flatly[5], size = 7),
         axis.title = element_text(color = flatly[4], size = 11)
         )
