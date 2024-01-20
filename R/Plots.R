@@ -32,224 +32,228 @@
 #' 
 #' 
 #' @export
-setGeneric('draw', \(x, y, 
-                     col = 2, facet = list(), 
-                     main = '', sub = '',
-                     xlab = NULL, ylab = NULL, ...) {
+draw <- function(x, y, facet = list(), ..., 
+                 xlab = NULL, ylab = NULL, 
+                 axes = 1:4,
+                 main = '', sub = '', 
+                 par = list(family = 'Helvetica', col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, cex.axis =.7, pch = 16)) {
   oldpalette <- palette(flatly)
-  oldpar <- par(family = 'Helvetica', 
-                col = 4, col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2,
-                cex.axis = .7, pch = 16)
+  oldpar <- par(par)
   
   on.exit({par(oldpar) ; palette(oldpalette)})
   
   # xlab and ylab
   xexpr <- deparse1(substitute(x)) 
   yexpr <- deparse1(substitute(y)) 
-  if (xexpr == 'missing') xexpr <- 'x'
-  if (yexpr == 'missing') yexpr <- 'y'
+  if (xexpr == '') xexpr <- 'x'
+  if (yexpr == '') yexpr <- 'y'
   
-  col <- prep_col(col)
-  if (length(facet)) {
+  output <- if (length(facet)) {
     if (!is.list(facet)) facet <- list(facet)
     par(mar = c(1, 1, 1, 1), oma = c(5, 5, 5, 5))
-    draw_facets(facet, x = if (!missing(x)) x, y = if (!missing(y)) y, col = col, xlab = '', ylab = '', ...)
+    draw_facets(facet, xlab = '', ylab = '', ...)
   } else {
-    output <- standardGeneric('draw')
-    # plot.window(c(0,1), c(0, 1))
-    title(main = main, sub = sub)
-    
-    outer <- output$outer %||% FALSE
-    xlab <- xlab %||% (output$xlab %||% xexpr)
-    ylab <- ylab %||% (output$ylab %||% yexpr)
-    if (sys.nframe() < 2)  mtext(xlab, 1, line = 2.5, outer = outer)
-   
-    mtext(ylab, 2, line = 3, outer = outer, las = if (nchar(ylab) > 3) 3 else 1)
-    
-    if (!is.null(attr(col, 'levels'))) legend('topleft', horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
-                                              col = sort(unique(col)), legend = attr(col, 'levels'))
+    .draw(x = if (!missing(x)) x, y = if (!missing(y)) y, ...)
   }
- 
-})
+  
+  title(main = main, sub = sub)
+  output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
+  output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+  
+  if (length(output$axes)) humaxes(output$axes[side %in% axes])
+  
+  Map(output$axisNames, 1:4, f = \(label, side) if (!is.null(label)) mtext(label, side, las = if (nchar(label) > 3 && side %% 2 == 0) 3 else 1))
+  
+  # if (!is.null(attr(col, 'levels'))) legend('topleft', horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
+                                            # col = sort(unique(col)), legend = attr(col, 'levels'))
+  
+}
+  
+setGeneric('.draw', def =  \(x, y,  ...) standardGeneric('.draw'))
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('numeric', 'numeric'), 
-          \(x, y, col = 3, log = '', jitter = 'xy', 
-            xlim = NULL, ylim = NULL, xat = NULL, yat = NULL, cex = prep_cex(x),  ...) {
+#### .draw numeric ----
+
+setMethod('.draw', c('numeric', 'numeric'), 
+          \(x, y, col = 3, log = '', jitter = '', 
+            xlim = NULL, ylim = NULL, cex = prep_cex(x), quantiles = c(), ...) {
+            
+            
+         
+            
+            
+            output <- canvas(x = x, xlim = xlim, 
+                             y = y, ylim = ylim,
+                             log = log)
+            
+            draw_quantiles(1, x, quantiles)
+            draw_quantiles(2, y, quantiles)
             
             
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
             
-            xat <- prep_ticks(xlim %||% x, log = grepl('x', log), at = xat)
-            yat <- prep_ticks(ylim %||% y, log = grepl('y', log), at = yat)
-            
-            canvas(log = log, 
-                   xlim = xlim %||% range(x),
-                   ylim = ylim %||% range(y),
-                   xat = xat, yat = yat, ...)
             points(x, y, col = col, cex = cex, ...)
+            
+            
+            output
             
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('numeric', 'missing'), 
-          \(x, y, col = 3, breaks = 'Sturges', jitter = '', ..., cex = prep_cex(x) * .75, xlim = NULL, ylim = NULL) {
+setMethod('.draw', c('numeric', 'NULL'), 
+          \(x, y, col = 3, log = '', jitter = '', xlim = NULL, ylim = NULL,
+            breaks = 'Sturges', cex = prep_cex(x) * .75, quantiles = c(), ...) {
             
-            breaks <- hist.default(x, breaks = breaks, plot = FALSE)
-            
-            xat <- breaks$breaks
-            while(length(xat) > 20) {xat <- xat[seq(1, length(xat), by = 2)]}
-            
-            ylim <- ylim %||%  c(0, 1)
-            yat <- pretty(ylim)
-            canvas(log = '', 
-                   xlim = xlim %||% range(breaks$breaks), 
-                   ylim = ylim, xat = xat,
-                   yat = yat, ylabels = format(paste(yat * 100, '%')))
+            histogram <- hist.default(x, breaks = breaks, plot = FALSE)
+            prob <- histogram$density * diff(histogram$breaks)
             
             
-            countaxis <- unique(round(pretty(c(0, sum(breaks$counts) * max(ylim)), n = 10L, min.n = 5L)))
-            # humaxis(4, at = countaxis / sum(breaks$counts), labels = num2str(countaxis))
-            # mtext('Counts', 4, las = 3, line = 2)
+            ylim <- ylim %||% c(0, 2^(ceiling(log( max(prob), 2)) + 1)) # 1, .5, .25, .125, etc.
+            output <- canvas(x = x, xlim = xlim %||%range(histogram$breaks), 
+                             y = prob[prob > 0], ylim = ylim, 
+                             log = log)
             
-            prob <- breaks$density
-            prob <- prob / sum(prob)
-            Map(head(breaks$breaks, -1), tail(breaks$breaks, -1), prob,
+            draw_quantiles(1, x, quantiles)
+            
+            # actual plot ov polygons
+            ymin <- min(output$window$ylim[[1]])
+            Map(head(histogram$breaks, -1), tail(histogram$breaks, -1), prob,
                 f = \(x0, x1, p) {
-                  polygon(c(x0, x0, x1, x1), c(0, p, p, 0), col = setalpha(col, .2), border = NA)
+                  polygon(c(x0, x0, x1, x1), c(ymin, p, p, ymin), col = setalpha(col, .2), border = NA)
                   
                   graphics::segments(x0, p, x1, p, col = col)
                 })
             
-            graphics::segments(breaks$breaks, 0, breaks$breaks, pmax(c(prob, 0), c(0, prob)), 
-                               col = setalpha(col, .4))
+            # lines between polygons:
+            graphics::segments(histogram$breaks, 0, histogram$breaks, pmax(c(prob, 0), c(0, prob)),
+                               col = setalpha(col, .3))
             
+            # prepare ticks
             
-            if (length(x) > 1e5) x <- sample(x, 1e5)
-            if (grepl('x', jitter)) x <- smartjitter(x)
-            # points(x, rnorm(length(x), mean(ylim), diff(range(ylim)) / 20), 
-                   # cex = cex , col = rgb(1,0,0, .1), pch = 16, xpd = TRUE)
+            ## x
+            x.ticks <- histogram$breaks
+            while(length(x.ticks) > 20L) {
+              x.ticks <- x.ticks[seq(1, length(x.ticks), by = 2)]
+            }
+            output$axes[side == 1, ticks := x.ticks]
             
+            ## y
+            output$axes[side == 2, ticks := setNames(ticks[[1]], format(paste0(ticks[[1]] * 100, '%')))]
+              
+              
+            ## counts (side 4)
+            count.ticks <- unique(round(pretty(c(0, sum(histogram$counts) * output$axes[side == 2, ticks[[1]]]), n = 10L, min.n = 5L)))
+            count.ticks <- structure(count.ticks / sum(histogram$counts), names = count.ticks)
+            output$axes <- rbind(output$axes,
+                                 data.table(side = 4, ticks = list(count.ticks), line = 0))
+        
             
-            list(ylab = 'Proportion')
+            output$axisNames[c(2,4)] <- list('Proportion', 'Count')
+            output
+            
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('missing', 'numeric'),
-          function(x, y, col = 3, log = '', jitter = '', ..., cex = prep_cex(y), yat = NULL, quantiles = c(.025, .25, .5, .75, .975)) {
+setMethod('.draw', c('NULL', 'numeric'),
+          function(x, y, log = '', xlim = NULL, ylim = NULL, ..., quantiles = c(.25, .5, .75)) {
             
             
-            yat <- prep_ticks(y, log = grepl('y', log), at = yat)
+            output <- canvas(x = c(0, 1), xlim = xlim, 
+                             y = y, ylim = ylim , 
+                             log = gsub('x', '', log))
             
-            canvas(log = gsub('x', '', log), xlim = c(0, 1), ylim = range(yat), 
-                   xat = seq(0, 1, .1), xlabels = c(('0.0'), seq(.1, .9, .1), '1.0'),
-                   yat = yat)
+            output$axisNames[[1]] <- 'Quantile'
+            
+            draw_quantiles(2, y, quantiles = quantiles)
             
             
+            y <- sort(y)
+            x <- seq(0, 1, length.out = length(y))
             
-            draw_quantile(y, ymin = min(yat), jitter = grepl('y', jitter), quantiles = quantiles,
-                          ..., col = col, cex = cex)
+            points(x = x, y = y, ...)
             
-            list(xlab = 'Quantile')
+            
+            output
           })
 
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('discrete', 'discrete'),
+#### .draw discrete ----
+
+
+setMethod('.draw', c('table', NULL),
+          function(x, y, log = '', ylim = NULL, col = NULL,  ..., beside = TRUE) {
+            if (length(dim(x)) == 1L) x <- as.table(rbind(x))
+            if (is.null(col)) col <- flatly_continuous(nrow(x))
+            dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
+            
+            space <- if (beside) c(0, 0) else 1
+            barx <- barplot(x, col = col, log = gsub('x', '', log), space = space,
+                            names.arg = logical(length(x)),
+                            ylab = '', xlab = '',
+                            beside = beside, axes = FALSE, 
+                            ylim = ylim ,
+                            border = rgb(.2,.2,.2,.2), ...)
+            
+            
+            if (length(dim(x)) > 1) {
+              legend('right', legend = rownames(x), fill = col, 
+                     border = NA, bty = 'n', xpd = TRUE, cex = .6)
+            }
+            list(x.ticks = colMeans(barx), x.labels = colnames(x),
+                 ylab = if (is.integer(x)) 'Counts' else 'N')
+          })
+
+
+
+setMethod('.draw', c('discrete', 'discrete'),
           function(x, y, ...){ 
-            draw(count(x, y), ...)
+            .draw(count(x, y), ...)
             })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('discrete', 'missing'),
+setMethod('.draw', c('discrete', 'missing'),
           function(x, y, ...){ 
-            draw(count(x), ..., xlab = '')
+            .draw(count(x), ..., xlab = '')
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('token', 'missing'),
+setMethod('.draw', c('token', 'missing'),
           function(x, y, ...){ 
             x <- if (is.numeric(x)) untoken(x) else factorize(x)
-            draw(x = x, ..., xlab = '')
+            .draw(x = x, ..., xlab = '')
           })
 
-#' @rdname draw
-#' @export
 setMethod('draw', c('missing', 'token'),
           function(x, y, ...){ 
             y <- if (is.numeric(y)) untoken(y) else factorize(y)
-            draw( , y = y, ..., xlab = NA)
+            .draw( , y = y, ..., xlab = NA)
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c(x = 'token', y = 'token'),
+setMethod('.draw', c(x = 'token', y = 'token'),
           function(x, y, ...){ 
             x <- if (is.numeric(x)) untoken(x) else factorize(x)
             y <- if (is.numeric(y)) untoken(y) else factorize(y)
-            draw(x, y, ..., xlab = '')
+            .draw(x, y, ..., xlab = '')
           })
 
-# #' @rdname draw
-# #' @export
-#setMethod('draw', c('missing', 'discrete'),
-#          function(x, y, ...){ 
-#            output <- draw(count(y), ...)
-#          }) ################ THis can work except the labels are reversed...need to figure that your
+setMethod('draw', c('missing', 'discrete'),
+         function(x, y, ...){
+           output <- draw(count(y), ...)
+         })
 
 
-#' @rdname draw
-#' @export
-setMethod('draw', 'count',
+setMethod('.draw', 'count',
           function(x, ...) {
             draw(as.table.distribution(x), ...)
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', 'table',
-          function(x, y, col = 1:nrow(x), log = '', ..., ylim = NULL, yat = NULL, beside = TRUE) {
-            yticks <- sort(unique(prep_ticks(ylim %||% c(0, x), log = grepl('y', log), at = yat)))
-            if (grepl('y', log)) yticks <- yticks[yticks > 0]
-            if (inherits(x, 'count.frame')) x <- S3Part(x)
-            names(x)[is.na(names(x))] <- 'NA'
-            
-            barx <- barplot(x, col = col, log = gsub('x', '', log), beside = beside, axes = FALSE, 
-                            ylim = ylim %||% range(yticks),
-                            border = NA, ...)
-            
-            humaxis(2, at = yticks)
-            
-            if (length(dim(x)) > 1) {
-              legend(x = max(barx), y = max(yticks), legend = rownames(x), fill = col, 
-                     border = NA, bty='n', xpd = TRUE, cex = .6)
-            }
-            
-            list(ylab = if (is.integer(x)) 'Counts' else 'N')
-          })
 
-
-#' @rdname draw
-#' @export
-setMethod('draw', 'humdrumR.table',
+setMethod('.draw', 'humdrumR.table',
           function(x, ...) {
             class(x) <- class(x)[-1]
-            draw(x, ...)
+            .draw(x, ...)
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', 'probability',
+setMethod('.draw', 'probability',
           function(x, y, col = 1:nrow(x), log = '', ..., yat = NULL, beside = TRUE) {
-            yticks <- sort(unique(c(0, prep_ticks(c(x), log = grepl('y', log), at = yat))))
-            if (grepl('y', log)) yticks <- yticks[yticks > 0]
+            y.ticks <- sort(unique(c(0, auto_ticks(c(x), log = grepl('y', log), at = yat))))
+            if (grepl('y', log)) y.ticks <- y.ticks[y.ticks > 0]
             if (inherits(x, 'count.frame')) x <- S3Part(x)
             names(x)[is.na(names(x))] <- 'NA'
           
@@ -257,11 +261,11 @@ setMethod('draw', 'probability',
                             ylim = c(0, 1),
                             border = NA, ...)
             
-            yticks <- seq(0, 1, .1)
-            humaxis(2, at = yticks, labels = c('0.0', seq(.1, .9, .1), '1.0'))
+            y.ticks <- seq(0, 1, .1)
+            humaxis(2, at = y.ticks, labels = c('0.0', seq(.1, .9, .1), '1.0'))
             
             if (length(dim(x)) > 1) {
-              legend(x = max(barx), y = max(yticks), legend = colnames(x), fill = col, 
+              legend(x = max(barx), y = max(y.ticks), legend = colnames(x), fill = col, 
                      border = NA, bty='n', xpd = TRUE, cex = .6)
             }
             
@@ -270,17 +274,13 @@ setMethod('draw', 'probability',
 
 
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('discrete', 'numeric'),
+setMethod('.draw', c('discrete', 'numeric'),
           function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
-            draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
+            .draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
             list(xlab = NULL, ylab = NULL)
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('list', 'numeric'),
+setMethod('.draw', c('list', 'numeric'),
           function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
             
             layout <- prep_layout(x)
@@ -291,27 +291,27 @@ setMethod('draw', c('list', 'numeric'),
               
             })
             
-            yticks <- prep_ticks(y, log = grepl('y', log), at = yat)
-            ylim <- range(yticks)
+            y.ticks <- auto_ticks(y, log = grepl('y', log), at = yat)
+            ylim <- range(y.ticks)
             y <- split(y, f = x)
             
-            xticks <- seq(0, 1, .1)
-            xlabels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
+            x.ticks <- seq(0, 1, .1)
+            x.labels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
             
             xuniq <- unique(as.data.frame(x))
             xuniq <- xuniq[sapply(xuniq, \(val) length(unique(val)) > 1L)]
             grouplabels <- do.call('paste', xuniq)
             for (k in c(layout)) {
-              ytick <- if (k %in% layout[, 1]) yticks 
+              ytick <- if (k %in% layout[, 1]) y.ticks 
               if (k %in% layout[nrow(layout), ]) {
-                xtick <- xticks 
-                xlabel <- xlabels
+                xtick <- x.ticks 
+                xlabel <- x.labels
               } else {
                 xtick <- xlabel <- NULL
               }
               
               canvas(log = gsub('x', '', log), 
-                     xlim = c(0, 1), xat = xtick, xlabels = xlabel,
+                     xlim = c(0, 1), xat = xtick, x.labels = xlabel,
                      ylim = ylim, yat = ytick)
               
               if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
@@ -323,22 +323,20 @@ setMethod('draw', c('list', 'numeric'),
           })
 
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('formula'),
+setMethod('.draw', c('formula'),
           function(x, y, col = 2, xlab = NULL, ylab = NULL, data = NULL, ...) {
             
             vars <- model.frame(x, data = data)
             
             if (ncol(vars) == 1L) {
-              draw(vars[[1]], col = col, ..., xlab = xlab %||% names(vars), ylab = ylab)
+              .draw(vars[[1]], col = col, ..., xlab = xlab %||% names(vars), ylab = ylab)
             } else {
               
               if (ncol(vars) > 2) {
                 
               }
               
-              draw(vars[[2]], vars[[1]], col = col, ...,
+              .draw(vars[[2]], vars[[1]], col = col, ...,
                    xlab = xlab %||% names(vars)[2],
                    ylab = ylab %||% names(vars)[1])
             } 
@@ -348,9 +346,7 @@ setMethod('draw', c('formula'),
             
           })
 
-#' @rdname draw
-#' @export
-setMethod('draw', c('humdrumR'),
+setMethod('.draw', c('humdrumR'),
           function(x, facet = NULL, ...) {
             selected <- pullSelectedField(x, null = 'asis')
             fields <- fields(x)
@@ -362,7 +358,7 @@ setMethod('draw', c('humdrumR'),
             if (length(groupFields)) {
               facet <- pullFields(x, groupFields)
             }
-            draw(selected, facet = facet, ...)
+            .draw(selected, facet = facet, ...)
             
           })
 
@@ -408,7 +404,10 @@ prep_col <- function(col, alpha = 1) {
     if ( length(unique(col)) > 10) {
       col <- col - min(col, na.rm = TRUE)
       col <- col / max(col, na.rm = TRUE)
-      col <- flatlyramp(col, alpha = alpha)
+      
+      uniqcols <- sort(unique(col))
+      
+      col <- flatly_continuous(col, alpha = alpha)
     } else {
       col <- match(col, unique(col))
     }
@@ -451,26 +450,7 @@ prep_layout <- function(facets) {
   mat
 }
 
-prep_ticks <- function(x, log = TRUE, at = NULL) {
-  if (any(is.na(at))) return(NULL)
-  if (is.null(x)) x <- seq(0, 1, .1)
-  
-  if (log && is.null(at)) {
-    if (any(x <= 0)) .stop("You can't draw a variable on a logarithmic scale",
-                           "if it includes negative numbers or zeros.")
-    
-    ticks <- pretty(log10(x), n = 10L, min.n = 5L) 
-    labels <- 10^ticks
-    scale <- floor(ticks)
-    scale <- ifelse(scale >= 2, scale - 1, scale)
-    scale <- 10^scale
-    ticks <- unique(round(labels / scale) * scale)
-    
-    
-  } else {
-    ticks <- at %||% pretty(x, n = 10L, min.n = 5L)
-  }
-}
+
 
 setalpha <- function(col, alpha = 1) {
   rgba <- col2rgb(col, alpha = TRUE) / 255
@@ -479,37 +459,106 @@ setalpha <- function(col, alpha = 1) {
 }
 
 
-humaxis <- function(side, tick = FALSE, las = 1, ...) axis(side, tick = FALSE, las = 1, ...)
 
-canvas <- function(log = '', xlim = NULL, ylim = NULL, xat = NULL, yat = NULL,
-                   xlabels = num2str(xat), ylabels = num2str(yat),
-                   ...) {
-  plot.new()
-  plot.window(xlim = xlim %||% (xat %||% c(0, 1)), 
-              ylim = ylim %||% (yat %||% c(0, 1)), log = log)
+logcheck <- function(log, x = '', y = '') {
+  badx <- grepl('x', log, fixed = TRUE) && any(x <= 0)
+  bady <- grepl('y', log, fixed = TRUE) && any(y <= 0)
   
-  if (!is.null(xat)) humaxis(1, at = xat, labels = xlabels, line = -1)
-  if (!is.null(yat)) humaxis(2, at = yat, labels = ylabels)
+  if (badx || bady) {
+    bad <- .paste(if (badx) 'x', if (bady) 'y', sep = ' and ')
+    .stop("You've specified draw(..., log = '{log}') but your {bad} numbers include zero or negative numbers.",
+          "These can't be drawn on a log scale.")
+    
+  }
+  
+}
+
+humaxes <- function(axesframe) {
+  do.call('Map', c(list(humaxis), axesframe))
+}
+
+humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis')) {
+  # this function attempts to draw axis labels that always fit on the screen
+  # but never overlap
+  las <- 1
+  sides <- side %% 2 == 0L
+  
+  labels <- names(ticks) %||% ticks
+  
+  dist <- local({
+    if (par('ylog') && sides || (par('xlog') && !sides)) {
+      ticks <- ticks
+      10 ^ pmin(c(Inf, diff(ticks)), 
+                c(diff(ticks), Inf))
+    } else {
+      pmin(c(Inf, diff(ticks)), 
+           c(diff(ticks), Inf))
+    } })
+  if (!sides) {
+    widths <- strwidth(labels, cex = cex)
+    toowide <- widths > dist
+    if (any(toowide))las <- (las + 2) %% 4
+  } else {
+    toowide <- FALSE
+  }
+
+  if (sides || any(toowide)) {
+    heights <- strheight(labels, cex = cex)
+    tootall <- heights*1.5 > dist
+    if (any(tootall) && cex > .3) return(Recall(side, ticks, line, cex = cex * .9))
+  }
+
+  
+  axis(side, ticks, labels, line = line, las = las, tick = FALSE, cex.axis = cex, gap.axis = .1)
+  
+  
+ 
+  
+  
+}
+
+canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
+  logcheck(log, x, y)
+
+  xlim <- xlim %||% range(x) 
+  ylim <- ylim %||% range(y) 
+  
+  if (grepl('x', log, fixed = TRUE) && xlim[1] <= 0) xlim[1] <- min(x) / 2
+  if (grepl('y', log, fixed = TRUE) && ylim[1] <= 0) ylim[1] <- min(y) / 2
+  
+  plot.new()
+  plot.window(xlim = xlim, ylim = ylim, log = log)
+  
+  axes <- data.table(side = 1:2,
+                     ticks = list(axTicks(1, log = grepl('x', log)),
+                                  axTicks(2, log = grepl('y', log))),
+                     line = 0L)
+  
+  window <- data.table(Screen = as.integer(screen()),
+                       xlim = list(xlim), ylim = list(ylim),
+                       log = log)
+  
+  list(window = window, axes = axes, axisNames = vector('list', 4))
 }
 
 ### draw_x ----
 
 
-draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xat = NULL, yat = NULL, log = '') {
+draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, x.ticks = NULL, xat = NULL, yat = NULL, log = '') {
   layout <- prep_layout(facets)
   on.exit(layout(1))
   # 
-  # prep_ticks()
+  # auto_ticks()
   args <- list(...)
   if (is.null(args$x)) args$x <- NULL
   if (is.null(args$y)) args$y <- NULL
   
-  args$xlim <- xlim %||% if (!is.null(xticks)) range(xticks)
+  args$xlim <- xlim %||% if (!is.null(x.ticks)) range(x.ticks)
   
-  xticks <- if (is.numeric(args$x)) prep_ticks(args$x, log = grepl('x', log), at = xat)
-  yticks <- if (is.numeric(args$y)) prep_ticks(args$y, log = grepl('y', log), at = yat)
-  args$ylim <- ylim %||% if (!is.null(yticks)) range(yticks)
-  args$xlim <- args$xlim %||% if (!is.null(xticks)) range(xticks)
+  x.ticks <- if (is.numeric(args$x)) auto_ticks(args$x, log = grepl('x', log), at = xat)
+  y.ticks <- if (is.numeric(args$y)) auto_ticks(args$y, log = grepl('y', log), at = yat)
+  args$ylim <- ylim %||% if (!is.null(y.ticks)) range(y.ticks)
+  args$xlim <- args$xlim %||% if (!is.null(x.ticks)) range(x.ticks)
   
   
   args$xat <- args$yat <- NA
@@ -523,33 +572,33 @@ draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xa
   args <- lapply(1:length(layout), \(i) lapply(args, '[[', i = i))
   
 
-  # yticks <- prep_ticks(y, 
-  # ylim <- range(yticks)
+  # y.ticks <- auto_ticks(y, 
+  # ylim <- range(y.ticks)
   # y <- split(y, f = x)
   # 
-  # xticks <- seq(0, 1, .1)
-  # xlabels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
+  # x.ticks <- seq(0, 1, .1)
+  # x.labels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
   # 
 
   
   for (k in c(layout)) {
    
     # if (k %in% layout[nrow(layout), ]) {
-    # xtick <- xticks
-    # xlabel <- xlabels
+    # xtick <- x.ticks
+    # xlabel <- x.labels
     # } else {
     # xtick <- xlabel <- NULL
     # }
     
     # canvas(log = gsub('x', '', log), 
-    #        xlim = c(0, 1), xat = xtick, xlabels = xlabel,
+    #        xlim = c(0, 1), xat = xtick, x.labels = xlabel,
     #        ylim = ylim, yat = ytick)
     do.call('draw', args[[k]])
     if (k %in% layout[, 1]) {
-      if (!is.null(yticks)) humaxis(2, at = yticks)
+      if (!is.null(y.ticks)) humaxis(2, at = y.ticks)
     }
     if (k %in% layout[nrow(layout), ]) {
-      if (!is.null(xticks)) humaxis(1, at = xticks)
+      if (!is.null(x.ticks)) humaxis(1, at = x.ticks)
     }
     
     if (length(layout) > 1L) mtext(facetLabels[k], 3, line = -1)
@@ -569,37 +618,37 @@ draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, xticks = NULL, xa
   # list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
 }
 
-draw_quantile <- function(var, ymin, col = 1, jitter = FALSE,
-                          quantiles = c(.025, .25, .5, .75, .975), na.rm = FALSE, ...) {
-  if (length(col) == length(var)) col <- col[order(var)]
+draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), ...) {
   
-  coor <- sort(var)
-  
-  if (jitter) coor <- smartjitter(coor)
-  othercoor <- seq(0, 1, length.out = length(coor))
-  
-  
-  quants <- quantile(coor, prob = quantiles)
-  
-  mean <- mean(var)
-  polygon(x = c(0, 0, 1, 1), y = c(ymin,  mean, mean, ymin), col = setalpha(col, alpha = .2), border = NA)
-  
-  graphics::segments(x0 = 0, y0 = quants, x1 = quantiles, y1 = quants, lty = 'dashed', lwd = .5)
-  
-  annotes <- lapply(quantiles * 100, 
-                    \(q) {
-                      if (q > 50) {
-                        q <- 100 - q
-                        bquote({frac(.(q), 100)} %up% "")
-                      } else {
-                        bquote({frac(.(q), 100)} %down% "" )
+  if (length(quantiles)) {
+    checks(quantiles, xnumeric & xrange(0, 1))
+    
+    sides <- side %% 2 == 0
+    quants <- quantile(var, prob = quantiles)
+    
+    
+    lineArgs <- list(quants, lty = 'dashed', lwd = .3, col = rgb(0, 0, 0, .5))
+    names(lineArgs)[1] <- if (sides) 'h' else 'v'
+    do.call('abline', lineArgs)
+    
+    annotes <- lapply(quantiles * 100, 
+                      \(q) {
+                        arrow <- switch(paste0(q > 50, sides),
+                                        TRUETRUE  = quote(`%up%`),
+                                        TRUEFALSE = quote(`%->%`),
+                                        FALSETRUE = quote(`%down%`),
+                                        FALSEFALSE = quote(`%<-%`))
                         
-                      }})
+                        if (q > 50) q <- 100 - q
+                        q <- paste0(round(q, 1), '%')
+                        
+                        bquote(.(arrow)(.(q), ''))
                           
-                          
-  text(x = 0.02, y = quants, labels = as.expression(annotes), #paste0(quantiles*100, '%'), 
-       cex = .4, pos = 2, xpd = TRUE)
-  points(x = othercoor, y = coor, col = col, ...)
+                        })
+    
+    axis(side, quants, labels = as.expression(annotes), cex.axis = .4, xpd = TRUE, line = -.5, tick = FALSE, las = 1)
+  }
+
 }
 
 draw_violin <- function(var, breaks = 'Sturges', col = 1, ...) {
