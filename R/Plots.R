@@ -170,22 +170,32 @@ setMethod('.draw', c('numeric', 'NULL'),
           })
 
 setMethod('.draw', c('NULL', 'numeric'),
-          function(x, y, log = '', xlim = NULL, ylim = NULL, ..., quantiles = c(.25, .5, .75)) {
+          function(x, y, log = '', xlim = NULL, ylim = NULL, ..., quantiles = c(.25, .5, .75),
+                    violin = FALSE) {
             
             
-            output <- canvas(x = c(0, 1), xlim = xlim, 
+            output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
+                             xlim = xlim, 
                              y = y, ylim = ylim , 
                              log = gsub('x', '', log))
             
-            output$axisNames[[1]] <- 'Quantile'
+            if (violin) {
+              draw_violins(list(y), horiz = FALSE, ..., quantiles = quantiles)
+              output$axisNames[[1]] <- 'Density'
+              output$axes <- output$axes[side == 2L]
+            } else {
+              output$axisNames[[1]] <- 'Quantile'
+              draw_quantiles(2, y, quantiles = quantiles)
+              y <- sort(y)
+              x <- seq(0, 1, length.out = length(y))
+              
+              points(x = x, y = y, ...)
+            }
+           
             
-            draw_quantiles(2, y, quantiles = quantiles)
             
             
-            y <- sort(y)
-            x <- seq(0, 1, length.out = length(y))
-            
-            points(x = x, y = y, ...)
+           
             
             
             output
@@ -893,21 +903,21 @@ draw_violins <- function(vars, horiz = FALSE, smooth = TRUE, conditional = FALSE
       Coor[I == i, polygon(X, I - Y * .5, border = NA, col = 3)]
       if (mean) points(mean(vars[[i]]), i, pch = 3, cex = 1.4, lwd = 1.5, col = 4)
     
-      maxy <- par('usr')[2]
+      maxy <- par('usr')[1]
       arrows(y0 = i - .5, y1 = i + .5,
              x0 = maxy, x1 = maxy,
              code = 3, length = .1, angle = 90, lty = 'dashed')
-      text(maxy, i, Coor[I == i, unique(Yscale)], pos = 4, cex = .7, xpd = TRUE)
+      text(maxy, i, Coor[I == i, unique(Yscale)], pos = 2, cex = .7, xpd = TRUE)
     } else {
       Coor[I == i, polygon(I + Y * .5, X, border = NA, col = 3)]
       Coor[I == i, polygon(I - Y * .5, X, border = NA, col = 3)]
       if (mean) points(i, mean(vars[[i]]), pch = 3, cex = 1.4, lwd = 1.5, col = 4)
       
-      maxy <- par('usr')[4]
+      maxy <- par('usr')[3]
       arrows(x0 = i - .5, x1 = i + .5,
              y0 = maxy, y1 = maxy,
              code = 3, length = .1, angle = 90, lty = 'dashed')
-      text(i, maxy, Coor[I == i, unique(Yscale)], pos = 3, cex = .5, xpd = TRUE)
+      text(i, maxy, Coor[I == i, unique(Yscale)], pos = 1, cex = .5, xpd = TRUE)
     }
       if (!global_quantiles) draw_quantiles(if (horiz) 1 else 2, vars[[i]], quantiles, limits = c(i - .5, i + .5))
     
