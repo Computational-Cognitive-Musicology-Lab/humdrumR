@@ -1,5 +1,5 @@
 
-
+setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'))
 
 # S4 Distributions ----
 
