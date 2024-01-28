@@ -70,7 +70,7 @@ draw <- function(x, y, facet = list(), ...,
   if (length(output$axes)) humaxes(output$axes[side %in% axes])
   
   Map(output$axisNames, 1:4, f = \(label, side) if (!is.null(label)) mtext(label,  side,  line = 2,
-                                                                           las = if (nchar(label) > 3 && side %% 2 == 0) 3 else 1))
+                                                                           las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3 else 1))
   
   # if (!is.null(attr(col, 'levels'))) legend('topleft', horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
                                             # col = sort(unique(col)), legend = attr(col, 'levels'))
@@ -87,7 +87,7 @@ setGeneric('.draw', def =  \(x, y,  ...) standardGeneric('.draw'))
 
 setMethod('.draw', c('numeric', 'numeric'), 
           \(x, y, log = '', jitter = '', 
-            quantiles = c(),
+            quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
             col = 3, cex =.7, ...) {
             
@@ -116,6 +116,21 @@ setMethod('.draw', c('numeric', 'numeric'),
             
             points(x, y, col = col, cex = cex, ...)
             
+            if (lm) {
+              fit <- stats::lm(y ~ x)
+              
+              xseq <-  seq(output$window$xlim[[1]][1], 
+                           output$window$xlim[[1]][2], length.out = 300L)
+              conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
+              
+              points(xseq, conf[ , 1], type = 'l', lwd = .5, col = 'black')
+              points(xseq, conf[ , 2], type = 'l', lwd = .5, lty = 'dashed', col = 'black')
+              points(xseq, conf[ , 3], type = 'l', lwd = .5, lty = 'dashed', col = 'black')
+              
+              legend('topleft', bty = 'n', lwd = .5, col = 'black', text.col = 'black', cex = .8,
+                     legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
+                                          b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
+            }
             
             output
             
@@ -192,7 +207,7 @@ setMethod('.draw', c('numeric', 'NULL'),
 
 setMethod('.draw', c('NULL', 'numeric'),
           function(x, y, log = '', 
-                   violin = FALSE,
+                   violin = FALSE, showNormal = FALSE,
                    quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
                    col = 1, pch = 16, ...) {
@@ -209,7 +224,9 @@ setMethod('.draw', c('NULL', 'numeric'),
               draw_violins(list(y), horiz = FALSE, ..., col = col, quantiles = quantiles)
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
+              
             } else {
+              
               col <- prep_col(col, y, ..., pch = pch)
               if (length(col) == length(y)) col <- col[order(y)]
                
@@ -218,15 +235,18 @@ setMethod('.draw', c('NULL', 'numeric'),
               x <- seq(0, 1, length.out = length(y))
               points(x = x, y = y, col = col, ...)
               
+              if (showNormal) {
+                points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
+                                     lwd = .5, lty = 'dashed', xpd = TRUE)
+                
+                legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
+                       col = 'black', text.col = 'black', cex = .8, 
+                       legend = quote(N(mu[y], sigma[y])) )
+              }
+              
               output$axisNames[[1]] <- 'Quantile'
             }
            
-            
-            
-            
-           
-            
-            
             output
           })
 
