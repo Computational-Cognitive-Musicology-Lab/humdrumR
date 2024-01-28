@@ -26,15 +26,21 @@
 #' 
 #' 
 #' @export
-draw <- function(x, y, facet = list(), ..., 
+draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
-                 axes = 1:4,
+                 axes = 1:4, legend = TRUE,
                  main = '', sub = '') {
   oldpalette <- palette(flatly)
   oldpar <- par(family = 'Helvetica', col = 1, pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
                 cex.axis =.7, mar = c(5, 5, 5, 5))
   # this changes defaults for my draw(), but they can still be overriden by ...
   on.exit({par(oldpar) ; palette(oldpalette)})
+  
+  
+  checks(legend, xTF)
+  checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
+  checks(main, xatomic & xlen1)
+  checks(sub, xatomic & xlen1)
   
 
   # xlab and ylab
@@ -55,25 +61,24 @@ draw <- function(x, y, facet = list(), ...,
     ylab <- ylab %||% formula$ylab
   } 
    
-  output <- if (length(facet)) {
-    if (!is.list(facet)) facet <- list(facet)
-    par(mar = c(1, 1, 1, 1), oma = c(5, 5, 5, 5))
-    draw_facets(x, y, facet, xlab = '', ylab = '', ...)
-  } else {
-    .draw(x, y, ...)
-  }
+  if (length(facets)) {
+    if (!is.list(facets)) facets <- list(facets)
+    par(mar = c(2, 3, 1, 1), oma = c(5, 5, 5, 5))
+    return(draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
+                       main = main, sub = sub, 
+                       axes = axes, legend = legend,
+                       xexpr = xexpr, yexpr = yexpr))
+  } 
+  output <- .draw(x, y, ...)
   
   title(main = main, sub = sub)
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
-  if (length(output$axes)) humaxes(output$axes[side %in% axes])
+  humaxes(output$axes, output$axisNames, axes)
   
-  Map(output$axisNames, 1:4, f = \(label, side) if (!is.null(label)) mtext(label,  side,  line = 2,
-                                                                           las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3 else 1))
-  
-  # if (!is.null(attr(col, 'levels'))) legend('topleft', horiz = TRUE, xpd = TRUE, pch = 16, cex = .8, bty = 'n',
-                                            # col = sort(unique(col)), legend = attr(col, 'levels'))
+ 
+  if (legend && length(output$col)) output$col$legend()
   
   return(invisible(output))
 }
@@ -89,7 +94,7 @@ setMethod('.draw', c('numeric', 'numeric'),
           \(x, y, log = '', jitter = '', 
             quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
-            col = 3, cex =.7, ...) {
+            col = 1, alpha = .5, cex =.7, ...) {
             
             if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
               .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -102,19 +107,14 @@ setMethod('.draw', c('numeric', 'numeric'),
                              y = y, ylim = ylim,
                              log = log)
             
-            if (!(length(col) == 1L || length(col) == length(y))) {
-              .stop("To draw this plot, the col(or) argument must be length one, or the same length as the input vectors.")
-            }
-            col <- prep_col(col, y, ...)
-            
+            col <- prep_col(col, y, alpha = alpha, ...)
             draw_quantiles(1, x, quantiles)
             draw_quantiles(2, y, quantiles)
             
             
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
-            
-            points(x, y, col = col, cex = cex, ...)
+            points(x, y, col = col$col, cex = cex, ...)
             
             if (lm) {
               fit <- stats::lm(y ~ x)
@@ -132,6 +132,7 @@ setMethod('.draw', c('numeric', 'numeric'),
                                           b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
             }
             
+            output$col <- col
             output
             
           })
@@ -158,9 +159,9 @@ setMethod('.draw', c('numeric', 'NULL'),
             # actual plot of polygons
             cols <- prep_col(col, x, alpha = alpha, ...)
             ymin <- min(output$window$ylim[[1]])
-            probs <- if (is.factor(cols) && length(cols) == length(x)) {
+            probs <- if (length(cols$col) == length(x)) {
               hists <- tapply(x, col, hist, breaks = histogram$breaks, plot = FALSE, simplify = FALSE)
-              cols <- levels(cols)
+              cols$col <- unique(cols$col)
               proportions <- proportions(table(col))
               
               Map(\(h, p) h$density * diff(h$breaks)[1] * if (conditional) 1 else p, hists, proportions)
@@ -179,7 +180,7 @@ setMethod('.draw', c('numeric', 'NULL'),
               # lines between polygons:
               graphics::segments(histogram$breaks, 0, histogram$breaks, pmax(c(p, 0), c(0, p)),
                                  col = c)
-            }, probs, cols)
+            }, probs, cols$col)
           
             # prepare ticks
             ## x
@@ -201,6 +202,8 @@ setMethod('.draw', c('numeric', 'NULL'),
         
             
             output$axisNames[c(2,4)] <- list('Proportion', 'Count')
+            
+            output$col <- cols
             output
             
           })
@@ -221,19 +224,19 @@ setMethod('.draw', c('NULL', 'numeric'),
             if (violin) {
               
               col <- prep_col(col, 1, ...)
-              draw_violins(list(y), horiz = FALSE, ..., col = col, quantiles = quantiles)
+              draw_violins(list(y), horiz = FALSE, ..., col = col$col, quantiles = quantiles)
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
               
             } else {
               
               col <- prep_col(col, y, ..., pch = pch)
-              if (length(col) == length(y)) col <- col[order(y)]
+              if (length(col$col) == length(y)) col$col <- col$col[order(y)]
                
               draw_quantiles(2, y, quantiles = quantiles)
               y <- sort(y)
               x <- seq(0, 1, length.out = length(y))
-              points(x = x, y = y, col = col, ...)
+              points(x = x, y = y, col = col$col, ...)
               
               if (showNormal) {
                 points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
@@ -247,6 +250,7 @@ setMethod('.draw', c('NULL', 'numeric'),
               output$axisNames[[1]] <- 'Quantile'
             }
            
+            output$col <- col
             output
           })
 
@@ -281,7 +285,7 @@ setMethod('.draw', c('matrix', 'NULL'),
             
             ylim <- ylim %||% c(0, if (type == 'beside') max(x) else max(colSums(x)))
             
-            col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, col_legend = FALSE, ...)
+            col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, ...)
             
             barx <- barplot(x, col = if (type == 'stacked' ) rev(col) else col, log = gsub('x', '', log), space = space,
                             axisnames = FALSE,
@@ -523,6 +527,7 @@ setMethod('.draw', c('discrete', 'numeric'),
           })
 
 
+
 ### .draw() discrete ~ numeric ----
 
 
@@ -562,83 +567,120 @@ setMethod('.draw', c('numeric', 'discrete'),
             
           })
 
+## draw_facets ----
 
-### draw_x ----
 
-
-draw_facets <- function(facets, ..., xlim = NULL, ylim = NULL, x.ticks = NULL, xat = NULL, yat = NULL, log = '') {
-  layout <- prep_layout(facets)
-  on.exit(layout(1))
-  # 
-  # auto_ticks()
-  args <- list(...)
-  if (is.null(args$x)) args$x <- NULL
-  if (is.null(args$y)) args$y <- NULL
+draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = '', 
+                        xlab = NULL, ylab = NULL,
+                        axes = 1:4, legend = TRUE,
+                        col = 1,
+                        main = '', sub = '') {
   
-  args$xlim <- xlim %||% if (!is.null(x.ticks)) range(x.ticks)
+  if (length(facets) > 2L) .stop("The draw() functon can't handle more than two faceting variables.",
+                                 "You have provided {num2print(length(facet))}.")
   
-  x.ticks <- if (is.numeric(args$x)) auto_ticks(args$x, log = grepl('x', log), at = xat)
-  y.ticks <- if (is.numeric(args$y)) auto_ticks(args$y, log = grepl('y', log), at = yat)
-  args$ylim <- ylim %||% if (!is.null(y.ticks)) range(y.ticks)
-  args$xlim <- args$xlim %||% if (!is.null(x.ticks)) range(x.ticks)
+  vecsize <- max(length(x), length(y))
+  if (!all(lengths(facets) == vecsize)) {
+    .stop('Facets variables must be vectors of the same length as the x/y plotting variables.')
+  }
   
-  
-  args$xat <- args$yat <- NA
-  
-  facetLabels <- unique(as.data.frame(facets))
-  facetLabels <- facetLabels[sapply(facetLabels, \(val) length(unique(val)) > 1L)]
-  facetLabels <- paste(colnames(facetLabels), do.call('paste', facetLabels))
-  
-  facets <- squashGroupby(facets)
-  args <- lapply(args, \(x) if (length(x) == length(facets)) split(x, f = facets) else rep(list(x), length(layout)))
-  args <- lapply(1:length(layout), \(i) lapply(args, '[[', i = i))
+  oldpar <- par(oma = c(2, 3, 2, 3), mar = c(0, 0, 0, 0))
+  on.exit({
+    layout(1)
+    title(main, sub, outer = TRUE, line = 0)
+    par(oldpar)
+    })
   
   
-  # y.ticks <- auto_ticks(y, 
-  # ylim <- range(y.ticks)
-  # y <- split(y, f = x)
-  # 
-  # x.ticks <- seq(0, 1, .1)
-  # x.labels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
-  # 
+  # determine overall xlim ylim etc (output)
+  output <- .draw(x, y, ..., col = col)
+  
+  output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
+  output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+  
+  args <- list(x = x, y = y, ..., col = output$col$col,
+               xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]],
+               log = output$window$log)
   
   
-  for (k in c(layout)) {
+  # Determine layout
+  table <- do.call('table', facets)
+  lay <- array(seq_along(table), dim = dim(table))
+  layout(lay)
+  
+  
+  if (length(facets) == 1L) {
+    left.side   <- right.side <- table > 0L
+    top.side    <- seq_along(table) == 1L
+    bottom.side <- seq_along(table) == length(table)
+  } else {
+    .table <- table > 0
+    left.side   <- leftmost(.table)
+    right.side  <- rightmost(.table)
+    top.side    <- topmost(.table)
+    bottom.side <- bottommost(.table)
     
-    # if (k %in% layout[nrow(layout), ]) {
-    # xtick <- x.ticks
-    # xlabel <- x.labels
-    # } else {
-    # xtick <- xlabel <- NULL
-    # }
+  }
+               
+  if (length(facets) == 1L) {
+    left.mar   <- right.mar <- table >= 0
+    top.mar    <- seq_along(table) == 1L
+    bottom.mar <- seq_along(table) == length(table)
+  } else {
+    left.mar   <- col(table) == 1L
+    right.mar  <- col(table) == ncol(table)
+    top.mar    <- row(table) == 1L
+    bottom.mar <- row(table) == nrow(table)
     
-    # canvas(log = gsub('x', '', log), 
-    #        xlim = c(0, 1), xat = xtick, x.labels = xlabel,
-    #        ylim = ylim, yat = ytick)
-    do.call('draw', args[[k]])
-    if (k %in% layout[, 1]) {
-      if (!is.null(y.ticks)) humaxis(2, at = y.ticks)
-    }
-    if (k %in% layout[nrow(layout), ]) {
-      if (!is.null(x.ticks)) humaxis(1, at = x.ticks)
-    }
-    
-    if (length(layout) > 1L) mtext(facetLabels[k], 3, line = -1)
-    # draw_violin(y[[k]], breaks = breaks)
+  }
+  
+  mar <- c(outside = 5, inside = .5)
+  # plot each screen
+  for (n in lay) {
+      cur <- lay == n
+      curlevels <- Map('[', dimnames(table), which(cur, arr.ind = TRUE))
+      
+      # set margins
+      margin <- c(bottom.mar[cur], left.mar[cur], top.mar[cur], right.mar[cur])
+      margin <- ifelse(margin, mar['outside'], mar['inside'])
+      par(mar = margin)
+      
+      
+      # prepare args and draw
+      if (table[cur] > 0) {
+        facet_ind <- Reduce('&', Map('==', curlevels, facets))
+        curargs <- lapply(args, \(arg) if (length(arg) == vecsize) arg[facet_ind] else arg)
+        
+        do.call('.draw', curargs) # actual draw of plot
+        
+        sides <- c(bottom.side[cur], left.side[cur], top.side[cur], right.side[cur])
+        lapply(which(!sides), border)
+        
+        # # axes 
+        curaxes <- intersect(which(sides), axes)
+        humaxes(output$axes, 
+                ifelse(1:4 %in% curaxes, output$axisNames, vector('list', 4L)),
+                curaxes)
+      } else {
+        plot.new() # only needed for writing facet levels in margins
+      }
+      
+      # facet levels
+      if (left.mar[cur]) mtext(curlevels[[1]], side = 2, font = 2,
+                               outer = FALSE, col = 'black',
+                               line = 5, las = 1)
+      if (length(curlevels) > 1L && bottom.mar[cur]) mtext(curlevels[[2]], side = 1, font = 2,
+                                                           outer = FALSE, col = 'black',
+                                                           line = 5, las = 1)
+      
+      
   }
   layout(1)
-  plot.window(c(0, 1), c(0, 1))
-  par(oma = c(0,0,0,0))
-  # if (nrow(layout) > 1) {
-  #   abline(h = head(seq(0, 1, length.out = nrow(layout) + 1)[-1], -1),
-  #          lty = 'dashed', col = setalpha(flatly[5], .3))
-  # }
-  # if (ncol(layout) > 1) {
-  #   abline(v = head(seq(0, 1, length.out = ncol(layout) + 1)[-1], -1),
-  #          lty = 'dashed', col = setalpha(flatly[5], .3))
-  # }
-  # list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
+  if (legend && length(output$col)) output$col$legend()
 }
+
+## draw_x ----
+
 
 draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), limits = NULL, ...) {
   
@@ -769,7 +811,8 @@ draw_heat <- function(tab, log = '', ...) {
   plot.new()
   plot.window(xlim, ylim, log = log)
   
-  col <- array(prep_col(c(b), c(b), ..., pch = NULL), dim = dim(tab))
+  col <- prep_col(c(b), c(b), ..., pch = NULL)
+  colarray <- array(col$col, dim = dim(tab))
   
   Map(\(i, j, c) {
     polygon(c(i, i, i - 1, i - 1), 
@@ -777,7 +820,7 @@ draw_heat <- function(tab, log = '', ...) {
             col = c,
             border = rgb(.1, .1, .1, .1), lwd = .3)
     
-  }, col(tab), nrow(tab) + 1L - row(tab), col)
+  }, col(tab), nrow(tab) + 1L - row(tab), colarray)
   
   axes <- data.table(side = 1:2,
                      ticks = list(setNames(1:ncol(tab) - .5, colnames(tab)),
@@ -797,6 +840,30 @@ draw_heat <- function(tab, log = '', ...) {
 
 
 ## draw()'s helpers ----
+
+shrinklim <- function(lim, scale = .8) {
+  ((lim - mean(lim)) * scale) + mean(lim)
+}
+
+border <- function(side, scale = .8) {
+  coor <- par('usr')
+  
+  
+  x <- switch(as.character(side),
+              "1" = , "3" = shrinklim(coor[1:2], scale),
+              "2" = coor[c(1, 1)],
+              "4" = coor[c(2, 2)])
+  
+  y <- switch(as.character(side),
+              "1" = coor[c(3, 3)],
+              "3" = coor[c(4, 4)],
+              "2" = , "4" = shrinklim(coor[3:4], scale))
+  
+  graphics::segments(x0 = x[1], x1 = x[2],
+                     y0 = y[1], y1 = y[2], col = setalpha('grey50', .35),
+                     lwd = .5, lty = 'longdash')
+  
+}
 
 xy_formula <- function(form) {
   lhs <- rlang::f_lhs(form)
@@ -830,8 +897,17 @@ logcheck <- function(log, x = '', y = '') {
   
 }
 
-humaxes <- function(axesframe) {
-  do.call('Map', c(list(humaxis), axesframe))
+humaxes <- function(axesframe, axisNames, axes = 1:4) {
+  if (length(axesframe)) do.call('Map', c(list(humaxis), axesframe[side %in% axes]))
+  
+  Map(axisNames, 1:4, f = \(label, side) {
+    if (!is.null(label)) {
+      mtext(label,  side,  line = 2,
+            las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else 
+              1)
+    } })
+  
+  
 }
 
 humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis')) {
@@ -928,13 +1004,10 @@ smartjitter <- function(x) {
 #### prep_col ----
 
 
-prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast = FALSE, 
-                                col_legend = TRUE, ...) {
+prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast = FALSE, ...) {
   checks(col, xlen1 | xmatch(categories))
   checks(contrast, xTF, seealso = c('?draw'))
-  checks(col_legend, xTF, seealso = c('?draw'))
   checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
-  
   col <- if (all(isColor(col))) {
     setalpha(col, alpha)
   } else {
@@ -945,21 +1018,21 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
     }
   }
   
-  if (col_legend) legend_col_discrete(categories, col, pch)
-  col
+  list(col = col,
+       legend = \(pos = 'right') legend_col_discrete(categories, col, pch, pos = pos))
 }
 
 setGeneric('prep_col', 
-           useAsDefault = function(col, var, pch, alpha, contrast, col_legend, ncontinuous, ...) rep(col, length.out = n), # if there is no method
-           function(col, var, pch = 16, alpha = 1, contrast = FALSE, col_legend = TRUE, ncontinuous = 100, ...) { 
+           useAsDefault = function(col, var, pch, alpha, contrast, ncontinuous, ...) rep(col, length.out = n), # if there is no method
+           function(col, var, pch = 16, alpha = 1, contrast = FALSE, ncontinuous = 100, ...) { 
+            if (is.list(col) && names(col)[1] == 'col') col <- col$col
              
             checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
             checks(contrast, xTF, seealso = c('?draw'))
-            checks(col_legend, xTF, seealso = c('?draw'))
             checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
             checks(ncontinuous, xlen1 & xnatural & xmin(50), seealso = c('?draw')) 
             
-             if (length(col) == 1L || any(isColor(col))) return(setalpha(col, alpha))
+             if (length(col) == 1L || any(isColor(as.character(col)))) return(list(col = setalpha(col, alpha), legend = force))
              
              standardGeneric('prep_col')
              
@@ -967,34 +1040,36 @@ setGeneric('prep_col',
 
 
 setMethod('prep_col', c('discrete'),
-          function(col, var, pch = 16, alpha = 1, contrast = FALSE, col_legend = TRUE, ...) {
+          function(col, var, pch = 16, alpha = 1, contrast = FALSE, ...) {
             categories <- sort(unique(col))
             if (is.integer(col) && length(categories) > 10L) return(prep_col(as.numeric(col), var, 
-                                                                            alpha = alpha, pch, contrast = FALSE, col_legend = col_legend))
+                                                                             alpha = alpha, pch, contrast = FALSE))
             
             palette <- flatly_scale(length(categories), alpha = alpha, contrast = contrast)
             col <- palette[match(col, categories)]
             
-            if (col_legend) legend_col_discrete(categories, palette, pch)
-            factor(col)
+            list(col = col,
+                 legend = \(pos = 'right')  legend_col_discrete(categories, palette, pch, pos = pos))
           })
 
 setMethod('prep_col', c('numeric'),
-          function(col, var, pch = NULL, alpha = 1, col_legend = TRUE, ncontinuous = 100L, ...) {
+          function(col, var, pch = NULL, alpha = 1, ncontinuous = 100L, ...) {
+            if (length(unique(col)) < 6) return(prep_col(factor(col),
+                                                         var, alpha = alpha, contrast = FALSE))
             breaks <- seq(min(col), max(col), length.out = ncontinuous)
             
             palette <- flatly_scale(ncontinuous, alpha = alpha)
             cols <- palette[as.integer(cut(col, breaks = breaks, include.lowest = TRUE))]
             
-            if (col_legend) legend_col_continuous(col, palette, pch = pch)
             
-            cols
+            list(col = cols,
+                 legend = \(pos) legend_col_continuous(col, palette, pch = pch))
           })
 
 
 
-legend_col_discrete <- function(categories, palette, pch) {
-  legend('right', TRUE, legend = categories, col = palette, 
+legend_col_discrete <- function(categories, palette, pch, pos = 'right') {
+  legend(pos, TRUE, legend = categories, col = palette, 
          inset = -.2, xpd = TRUE,
          pch = pch[1], bty = 'n')
 }
@@ -1011,7 +1086,7 @@ legend_col_continuous <- function(var, palette, pch = NULL) {
   ydiff <- diff(y)[1] / 2
   
   xpos <- par('usr')[1:2]
-  xpos <- xpos[1] + diff(xpos) * c(1.05, 1.1)
+  xpos <- xpos[1] + diff(xpos) * c(1.2, 1.3)
   
   if (is.null(pch)) {
     for(i in seq_along(y)) {
@@ -1037,9 +1112,10 @@ prep_cex <- function(x) {
   pmax(1 - log(l, 1000000), .1 )
 }
 
+#### prep_layout
 
 prep_layout <- function(facets) {
-  
+  browser()
   if (length(facets) > 2) {
     facets[[2]] <- squashGroupby(facets[-1])
     facets <- facets[1:2]

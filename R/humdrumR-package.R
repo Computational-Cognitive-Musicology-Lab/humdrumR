@@ -597,7 +597,7 @@ flatly <- c('#18BC9C', '#3498DB', '#F39C12', '#E74C3C', '#2C3E50')
 
 flatly_scale <- function(n, alpha = 1, contrast = FALSE) {
   
-  if (n <= 5L) return(setalpha(flatly[1:n], alpha))
+  if (n <= 5L) return(setalpha(flatly[1:n], alpha = alpha))
   
   col <- setalpha(colorRampPalette(flatly)(n), alpha = alpha)
   if (contrast) col <- col[c(matrix(c(seq_along(col), if (n %% 2 == 1) NA), nrow = 2, byrow = TRUE))]
