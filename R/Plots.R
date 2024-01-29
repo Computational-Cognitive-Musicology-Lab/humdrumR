@@ -1115,7 +1115,7 @@ legend_col_continuous <- function(var, palette, pch = NULL) {
 
 prep_cex <- function(x, y, cex = NULL, col, ...) {
   size <- max(length(x), length(y))
-  checks(cex, xnull | ((xlen1 & xpositive) | xlength(size)), seealso = '?draw')
+  checks(cex, xnull | (xpositive & (xlen1 | xlength(size))), seealso = '?draw')
  
   
   output <- list(cex = cex)
@@ -1124,14 +1124,35 @@ prep_cex <- function(x, y, cex = NULL, col, ...) {
     
   } else {
     if (length(cex) == size) {
-      cexrange <- range(cex)
-      vallegend <- format(seq(cexrange[1], cexrange[2], length.out = 10), big.mark = ',', digits = 2)
+      val_legend <- 2^seq(log(min(cex), 2), log(max(cex), 2), length.out = 9)
       
-      cex <- sqrt(cex - min(cex))
-      cex <- 2.9 * (cex / max(cex))
-      output$cex <- cex + .1
-      output$legend <- \(pos = 'right') legend(pos, inset = -.1, col = col[1], pch = 16, legend = vallegend, pt.cex = seq(.1,3, length.out = 10),
-                                        text.col = 'black', xpd = TRUE, bty = 'n')
+      cex <- sqrt(cex) 
+      
+      maxPowers <- 6
+      logrange <- diff(range(log(cex)))
+      power <- max(2, ceiling(exp(logrange / maxPowers)))
+      
+      if (power > 2) {
+        .message("In draw(cex = ), your largest cex value is {round(exp(logrange)^2)} times greater than the smallest value.",
+                 "To plot this, we must understate the differences between points.",
+                 "When comparing the point in this plot, a doubling of area corresponds to multiplying the value",
+                 "by {num2print(power)}.")
+        cex <- 2^log(cex, power)
+      }
+      
+      
+      # scale to center on .5
+
+      scale <- exp(mean(log(cex))) 
+      cex_legend <- sqrt(val_legend) / scale
+      cex <- cex / scale
+      
+        
+      output$cex <- cex 
+      output$legend <- \(pos = 'right') legend(pos, inset = -.1, col = col[1], pch = 16, 
+                                               legend = format(val_legend, big.mark = ',', digits = 2), 
+                                               pt.cex = cex_legend,
+                                               text.col = 'black', xpd = TRUE, bty = 'n')
     } 
   }
   
