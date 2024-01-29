@@ -70,7 +70,6 @@ draw <- function(x, y, facets = list(), ...,
                        xexpr = xexpr, yexpr = yexpr))
   } 
   output <- .draw(x, y, ...)
-  
   title(main = main, sub = sub)
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
@@ -78,7 +77,10 @@ draw <- function(x, y, facets = list(), ...,
   humaxes(output$axes, output$axisNames, axes)
   
  
-  if (legend && length(output$col)) output$col$legend()
+  if (legend) {
+    if (!is.null(output$col$legend)) output$col$legend()
+    if (!is.null(output$cex$legend)) output$cex$legend()
+  } 
   
   return(invisible(output))
 }
@@ -94,7 +96,7 @@ setMethod('.draw', c('numeric', 'numeric'),
           \(x, y, log = '', jitter = '', 
             quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
-            col = 1, alpha = .5, cex =.7, ...) {
+            col = 1, alpha = .5, cex = NULL, ...) {
             
             if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
               .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -107,14 +109,14 @@ setMethod('.draw', c('numeric', 'numeric'),
                              y = y, ylim = ylim,
                              log = log)
             
-            col <- prep_col(col, y, alpha = alpha, ...)
+            output$col <- prep_col(col, y, alpha = alpha, ...)
+            output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, ...)
             draw_quantiles(1, x, quantiles)
             draw_quantiles(2, y, quantiles)
             
-            
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
-            points(x, y, col = col$col, cex = cex, ...)
+            points(x, y, col = output$col$col, cex = output$cex$cex, ...)
             
             if (lm) {
               fit <- stats::lm(y ~ x)
@@ -132,7 +134,7 @@ setMethod('.draw', c('numeric', 'numeric'),
                                           b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
             }
             
-            output$col <- col
+
             output
             
           })
@@ -213,7 +215,7 @@ setMethod('.draw', c('NULL', 'numeric'),
                    violin = FALSE, showNormal = FALSE,
                    quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
-                   col = 1, pch = 16, ...) {
+                   col = 1, alpha = .8, cex = NULL, pch = 16, ...) {
             
             checks(violin, xTF)
             output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
@@ -223,20 +225,21 @@ setMethod('.draw', c('NULL', 'numeric'),
             
             if (violin) {
               
-              col <- prep_col(col, 1, ...)
-              draw_violins(list(y), horiz = FALSE, ..., col = col$col, quantiles = quantiles)
+              output$col <- prep_col(col, 1, alpha = alpha, ...)
+              draw_violins(list(y), horiz = FALSE, ..., col = output$col$col, quantiles = quantiles)
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
               
             } else {
               
-              col <- prep_col(col, y, ..., pch = pch)
-              if (length(col$col) == length(y)) col$col <- col$col[order(y)]
+              output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch)
+              output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, ...)
+              if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
                
               draw_quantiles(2, y, quantiles = quantiles)
               y <- sort(y)
               x <- seq(0, 1, length.out = length(y))
-              points(x = x, y = y, col = col$col, ...)
+              points(x = x, y = y, col = output$col$col, cex = output$cex$cex, ...)
               
               if (showNormal) {
                 points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
@@ -250,7 +253,6 @@ setMethod('.draw', c('NULL', 'numeric'),
               output$axisNames[[1]] <- 'Quantile'
             }
            
-            output$col <- col
             output
           })
 
@@ -573,7 +575,7 @@ setMethod('.draw', c('numeric', 'discrete'),
 draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = '', 
                         xlab = NULL, ylab = NULL,
                         axes = 1:4, legend = TRUE,
-                        col = 1,
+                        col = 1, cex = NULL,
                         main = '', sub = '') {
   
   if (length(facets) > 2L) .stop("The draw() functon can't handle more than two faceting variables.",
@@ -593,12 +595,12 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   
   
   # determine overall xlim ylim etc (output)
-  output <- .draw(x, y, ..., col = col)
+  output <- .draw(x, y, ..., col = col, cex = cex)
   
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
-  args <- list(x = x, y = y, ..., col = output$col$col,
+  args <- list(x = x, y = y, ..., col = output$col$col, cex = output$cex$cex,
                xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]],
                log = output$window$log)
   
@@ -676,7 +678,10 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       
   }
   layout(1)
-  if (legend && length(output$col)) output$col$legend()
+  if (legend) {
+    if (!is.null(output$col$legend)) output$col$legend()
+    if (!is.null(output$cex$legend)) output$cex$legend()
+  }
 }
 
 ## draw_x ----
@@ -1025,18 +1030,18 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
 setGeneric('prep_col', 
            useAsDefault = function(col, var, pch, alpha, contrast, ncontinuous, ...) rep(col, length.out = n), # if there is no method
            function(col, var, pch = 16, alpha = 1, contrast = FALSE, ncontinuous = 100, ...) { 
-            if (is.list(col) && names(col)[1] == 'col') col <- col$col
+             if (is.list(col) && names(col)[1] == 'col') col <- col$col
              
-            checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
-            checks(contrast, xTF, seealso = c('?draw'))
-            checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
-            checks(ncontinuous, xlen1 & xnatural & xmin(50), seealso = c('?draw')) 
-            
-             if (length(col) == 1L || any(isColor(as.character(col)))) return(list(col = setalpha(col, alpha), legend = force))
+             checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
+             checks(contrast, xTF, seealso = c('?draw'))
+             checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
+             checks(ncontinuous, xlen1 & xnatural & xmin(50), seealso = c('?draw')) 
+             
+             if (length(col) == 1L || any(isColor(as.character(col)))) return(list(col = setalpha(col, alpha)))
              
              standardGeneric('prep_col')
              
-             })
+           })
 
 
 setMethod('prep_col', c('discrete'),
@@ -1106,10 +1111,45 @@ legend_col_continuous <- function(var, palette, pch = NULL) {
 
 #### prep_cex ----
 
-prep_cex <- function(x) {
-  l <- length(x)
+
+
+prep_cex <- function(x, y, cex = NULL, col, ...) {
+  size <- max(length(x), length(y))
+  checks(cex, xnull | ((xlen1 & xpositive) | xlength(size)), seealso = '?draw')
+ 
   
-  pmax(1 - log(l, 1000000), .1 )
+  output <- list(cex = cex)
+  if (is.null(cex)) {
+    output$cex <- cex_density(x, y)
+    
+  } else {
+    if (length(cex) == size) {
+      cexrange <- range(cex)
+      vallegend <- format(seq(cexrange[1], cexrange[2], length.out = 10), big.mark = ',', digits = 2)
+      
+      cex <- sqrt(cex - min(cex))
+      cex <- 2.9 * (cex / max(cex))
+      output$cex <- cex + .1
+      output$legend <- \(pos = 'right') legend(pos, inset = -.1, col = col[1], pch = 16, legend = vallegend, pt.cex = seq(.1,3, length.out = 10),
+                                        text.col = 'black', xpd = TRUE, bty = 'n')
+    } 
+  }
+  
+  output
+  
+}
+
+cex_density <- function(x, y) {
+  vars <- Filter(length, list(x, y))
+  
+  cuts <- lapply(vars, cut, breaks = if (length(vars) == 1L) 100 else 10)
+  
+  # forced to be between 1 and 250
+  maxdensity <- min(floor(log10(max(do.call('table', cuts)))), 4)
+
+  1 - (maxdensity * .225)
+  
+  
 }
 
 #### prep_layout
