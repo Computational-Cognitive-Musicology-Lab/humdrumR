@@ -406,11 +406,11 @@ setMethod('.draw', 'probability',
 
 
 
-setMethod('.draw', c('discrete', 'numeric'),
-          function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
-            .draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
-            list(xlab = NULL, ylab = NULL)
-          })
+# setMethod('.draw', c('discrete', 'numeric'),
+#           function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
+#             .draw(list(1, factor(x)), y, col = col, log = log, breaks = breaks, ..., yat = yat)
+#             list(xlab = NULL, ylab = NULL)
+#           })
 
 setMethod('.draw', c('list', 'numeric'),
           function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
@@ -506,7 +506,6 @@ setMethod('.draw', c('discrete', 'numeric'),
                    col = NULL) {
             
             categories <- sort(unique(x))
-            
             if (is.integer(x) && length(categories) > 25L) {
               return(.draw(as.numeric(x), y, log = log, 
                            xlim = xlim, ylim = ylim, ..., quantiles = quantiles))
@@ -517,9 +516,9 @@ setMethod('.draw', c('discrete', 'numeric'),
                              y = y, ylim = ylim , 
                              log = gsub('y', '', log))
             
-            col <- prep_col_categories(col %||% categories, categories, ...)
+            output$col <- prep_col_categories(col %||% categories, categories, ...)
             
-            draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = col, ...,
+            draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = output$col$col, ...,
                          mean = mean, quantiles = quantiles, global_quantiles = global_quantiles)
             
             # output$axisNames[[1]] <- 'Density'
@@ -553,14 +552,14 @@ setMethod('.draw', c('numeric', 'discrete'),
             if (center) tab <- sweep(tab, 1, rowMeans(tab), '-')
             
             output <- canvas(x, xlim, range(tab), ylim, log = gsub('y', '', log))
-            col <- prep_col_categories(col %||% categories, categories, alpha = alpha, ...)
+            output$col <- prep_col_categories(col %||% categories, categories, alpha = alpha, ...)
             
             if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
             
             for (j in 1:(ncol(tab) - 1L)) {
               polygon(c(breaks, rev(breaks)), 
                       c(0, tab[ , j], rev(tab[ , j + 1]), 0), 
-                      col = col[j],
+                      col = output$col$col[j],
                       border = FALSE)
             }
             
