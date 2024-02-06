@@ -30,10 +30,13 @@ draw <- function(x, y, facets = list(), ...,
                  xlab = NULL, ylab = NULL, 
                  axes = 1:4, legend = TRUE,
                  main = '', sub = '') {
-  oldpalette <- palette(flatly)
+  
+  
+  # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
   oldpar <- par(family = 'Helvetica', col = 1, pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
                 cex.axis =.7, mar = c(5, 5, 5, 5))
-  # this changes defaults for my draw(), but they can still be overriden by ...
+  do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0]) 
+  oldpalette <- palette(flatly)
   on.exit({par(oldpar) ; palette(oldpalette)})
   
   
@@ -90,7 +93,7 @@ draw <- function(x, y, facets = list(), ...,
 setGeneric('.draw', def =  \(x, y,  ...) standardGeneric('.draw'))
 
 
-### draw numeric ----
+### draw() numeric ----
 
 setMethod('.draw', c('numeric', 'numeric'), 
           \(x, y, log = '', jitter = '', 
@@ -258,29 +261,30 @@ setMethod('.draw', c('NULL', 'numeric'),
 
 
 
-### draw discrete ----
+### draw() discrete ----
+
+
 
 setMethod('.draw', c('table', 'NULL'),
-          function(x, y, ...) {
-            .draw(unclass(x), y, ...)
-          })
-
-setMethod('.draw', c('matrix', 'NULL'),
           function(x, y, log = '', 
                    beside = NULL, heat = length(dim(x) == 2L) && length(x) > 80L,
                    ylim = NULL, 
                    col = NULL,  alpha = .9, ...) { 
-            if (!is.numeric(x[1, 1])) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
-            
+            if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
             dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
             
-            # if table is one dimensional, make it a single-column matrix
-            if (length(dim(x)) == 1L) x <- cbind(x)
-            if (dim(x)[1] == 1L) x <- t(x)
+            # if table is one dimensional, add col dimension
+            if (length(dim(x)) == 1L)  {
+              dn <- dimnames(x)
+              dim(x) <- c(dim(x), 1L)
+              
+              dimnames(x) <- c(dn, list(''))
+            }
+            
             
             if (heat) return(draw_heat(x, log = log, ...))
-            
               
+            if (dim(x)[1] == 1L) x <- t(x)
             
             type <- if (is.null(beside)) 'both' else { if (beside) 'beside' else 'stacked'}
             space <- if (type == 'stacked') .5 else c(0, 1 + nrow(x) %/% 8) 
@@ -289,7 +293,7 @@ setMethod('.draw', c('matrix', 'NULL'),
             
             col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, ...)
             
-            barx <- barplot(x, col = if (type == 'stacked' ) rev(col) else col, log = gsub('x', '', log), space = space,
+            barx <- barplot(x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), space = space,
                             axisnames = FALSE,
                             ylab = '', xlab = '',
                             beside = type != 'stacked', axes = FALSE, 
@@ -297,12 +301,12 @@ setMethod('.draw', c('matrix', 'NULL'),
                             border = rgb(.2,.2,.2,.2), ...)
             
             if (type == 'both') {
-              barplot(x[nrow(x):1, ], col = setalpha(rev(col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
+              barplot(x[nrow(x):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
                       names.arg = logical(ncol(x)), axes = FALSE,
                       add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
             }
             
-            legend_col_discrete(rownames(x), col, ..., pch = 15)
+            legend_col_discrete(rownames(x), col$col, ..., pch = 15)
             
             # axes
             proportions <- pretty(ylim / sum(x), n = 10L, min.n = 5L)
@@ -332,77 +336,33 @@ setMethod('.draw', c('matrix', 'NULL'),
             axisNames <- vector('list', 4L)
             axisNames[c(2,4)] <- c('Proportion', if (is.integer(x)) 'Count' else 'N')
             
-            list(axes = axes, window = window, axisNames = axisNames)
+            list(axes = axes, window = window, axisNames = axisNames, col = col)
           })
 
-setMethod('.draw', c('discrete', 'discrete'),
+
+
+setMethod('.draw', c('count', 'NULL'),
+          function(x, y, ...) {
+            .draw(as.table(x), NULL, ...)
+          })
+
+
+setMethod('.draw', c('discrete', 'NULL'),
           function(x, y, ...){ 
-            .draw(count(x, y), ...)
+            .draw(table(x, deparse.level = 2L), NULL, ...)
             })
 
-setMethod('.draw', c('discrete', 'missing'),
+
+setMethod('.draw', c('NULL', 'discrete'),
           function(x, y, ...){ 
-            .draw(count(x), ..., xlab = '')
+            .draw(table(y, deparse.level = 2L) |> t(), NULL, ...)
           })
-
-setMethod('.draw', c('token', 'missing'),
+setMethod('.draw', c('discrete', 'discrete'),
           function(x, y, ...){ 
-            x <- if (is.numeric(x)) untoken(x) else factorize(x)
-            .draw(x = x, ..., xlab = '')
-          })
-
-setMethod('draw', c('missing', 'token'),
-          function(x, y, ...){ 
-            y <- if (is.numeric(y)) untoken(y) else factorize(y)
-            .draw( , y = y, ..., xlab = NA)
-          })
-
-setMethod('.draw', c(x = 'token', y = 'token'),
-          function(x, y, ...){ 
-            x <- if (is.numeric(x)) untoken(x) else factorize(x)
-            y <- if (is.numeric(y)) untoken(y) else factorize(y)
-            .draw(x, y, ..., xlab = '')
-          })
-
-setMethod('draw', c('missing', 'discrete'),
-         function(x, y, ...){
-           output <- draw(count(y), ...)
-         })
-
-
-setMethod('.draw', 'count',
-          function(x, ...) {
-            draw(as.table.distribution(x), ...)
+            .draw(table(x, y, deparse.level = 2L), NULL, ...)
           })
 
 
-setMethod('.draw', 'humdrumR.table',
-          function(x, ...) {
-            class(x) <- class(x)[-1]
-            .draw(x, ...)
-          })
-
-setMethod('.draw', 'probability',
-          function(x, y, col = 1:nrow(x), log = '', ..., yat = NULL, beside = TRUE) {
-            y.ticks <- sort(unique(c(0, auto_ticks(c(x), log = grepl('y', log), at = yat))))
-            if (grepl('y', log)) y.ticks <- y.ticks[y.ticks > 0]
-            if (inherits(x, 'count.frame')) x <- S3Part(x)
-            names(x)[is.na(names(x))] <- 'NA'
-          
-            barx <- barplot(x, col = col, beside = beside, axes = FALSE, 
-                            ylim = c(0, 1),
-                            border = NA, ...)
-            
-            y.ticks <- seq(0, 1, .1)
-            humaxis(2, at = y.ticks, labels = c('0.0', seq(.1, .9, .1), '1.0'))
-            
-            if (length(dim(x)) > 1) {
-              legend(x = max(barx), y = max(y.ticks), legend = colnames(x), fill = col, 
-                     border = NA, bty='n', xpd = TRUE, cex = .6)
-            }
-            
-            list(ylab = 'Probability')
-          })
 
 
 
@@ -495,7 +455,7 @@ setMethod('.draw', c('humdrumR'),
           })
 
 
-### .draw() numeric ~ discrete ----
+### draw() numeric ~ discrete ----
 
 
 setMethod('.draw', c('discrete', 'numeric'),
@@ -529,7 +489,7 @@ setMethod('.draw', c('discrete', 'numeric'),
 
 
 
-### .draw() discrete ~ numeric ----
+### draw() discrete ~ numeric ----
 
 
 setMethod('.draw', c('numeric', 'discrete'),
@@ -815,7 +775,7 @@ draw_heat <- function(tab, log = '', ...) {
   plot.new()
   plot.window(xlim, ylim, log = log)
   
-  col <- prep_col(c(b), c(b), ..., pch = NULL)
+  col <- prep_col(c(tab), c(tab), ..., pch = NULL)
   colarray <- array(col$col, dim = dim(tab))
   
   Map(\(i, j, c) {
@@ -838,7 +798,7 @@ draw_heat <- function(tab, log = '', ...) {
   axisNames <-  vector('list', 4L)
   if (names(dimnames(tab))[1] != '') axisNames[[1]] <- names(dimnames(tab))[1]
   if (names(dimnames(tab))[2] != '') axisNames[[2]] <- names(dimnames(tab))[2]
-  list(window = window, axes = axes, axisNames = axisNames)
+  list(window = window, axes = axes, axisNames = axisNames, col = col)
 }
 
 

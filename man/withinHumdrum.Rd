@@ -35,7 +35,7 @@
   variables = list()
 )
 
-\method{mutate}{humdrumR}(
+mutate.humdrumR(
   .data,
   ...,
   dataTypes = "D",
@@ -45,7 +45,7 @@
   .by = NULL
 )
 
-\method{summarise}{humdrumR}(
+summarise.humdrumR(
   .data,
   ...,
   dataTypes = "D",
@@ -54,7 +54,7 @@
   .by = NULL
 )
 
-\method{reframe}{humdrumR}(
+reframe.humdrumR(
   .data,
   ...,
   dataTypes = "D",
@@ -64,7 +64,7 @@
   .by = NULL
 )
 
-\method{ggplot}{humdrumR}(data = NULL, mapping = aes(), ..., dataTypes = "D")
+ggplot.humdrumR(data = NULL, mapping = aes(), ..., dataTypes = "D")
 }
 \arguments{
 \item{data}{\emph{\strong{HumdrumR data.}}

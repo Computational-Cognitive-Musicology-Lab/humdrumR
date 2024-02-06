@@ -2,187 +2,19 @@
 % Please edit documentation in R/Plots.R
 \name{draw}
 \alias{draw}
-\alias{draw,numeric,numeric-method}
-\alias{draw,numeric,missing-method}
-\alias{draw,missing,numeric-method}
-\alias{draw,discrete,discrete-method}
-\alias{draw,discrete,missing-method}
-\alias{draw,token,missing-method}
-\alias{draw,missing,token-method}
-\alias{draw,token,token-method}
-\alias{draw,count,ANY-method}
-\alias{draw,table,ANY-method}
-\alias{draw,humdrumR.table,ANY-method}
-\alias{draw,probability,ANY-method}
-\alias{draw,discrete,numeric-method}
-\alias{draw,list,numeric-method}
-\alias{draw,formula,ANY-method}
-\alias{draw,humdrumR,ANY-method}
 \title{Visualize data}
 \usage{
 draw(
   x,
   y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{numeric,numeric}(
-  x,
-  y,
-  col = 3,
-  log = "",
-  jitter = "xy",
-  xlim = NULL,
-  ylim = NULL,
-  xat = NULL,
-  yat = NULL,
-  cex = prep_cex(x),
-  ...
-)
-
-\S4method{draw}{numeric,missing}(
-  x,
-  y,
-  col = 3,
-  breaks = "Sturges",
-  jitter = "",
+  facets = list(),
   ...,
-  cex = prep_cex(x) * 0.75,
-  xlim = NULL,
-  ylim = NULL
-)
-
-\S4method{draw}{missing,numeric}(
-  x,
-  y,
-  col = 3,
-  log = "",
-  jitter = "",
-  ...,
-  cex = prep_cex(y),
-  yat = NULL,
-  quantiles = c(0.025, 0.25, 0.5, 0.75, 0.975)
-)
-
-\S4method{draw}{discrete,discrete}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
   xlab = NULL,
   ylab = NULL,
-  ...
-)
-
-\S4method{draw}{discrete,missing}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
+  axes = 1:4,
+  legend = TRUE,
   main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{token,missing}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{missing,token}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{token,token}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{count,ANY}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{table,ANY}(
-  x,
-  y,
-  col = 1:nrow(x),
-  log = "",
-  ...,
-  ylim = NULL,
-  yat = NULL,
-  beside = TRUE
-)
-
-\S4method{draw}{humdrumR.table,ANY}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{probability,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
-
-\S4method{draw}{discrete,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
-
-\S4method{draw}{list,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
-
-\S4method{draw}{formula,ANY}(x, y, col = 2, xlab = NULL, ylab = NULL, data = NULL, ...)
-
-\S4method{draw}{humdrumR,ANY}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
+  sub = ""
 )
 }
 \description{
