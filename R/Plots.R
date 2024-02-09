@@ -149,13 +149,21 @@ setMethod('.draw', c('numeric', 'NULL'),
             xlim = NULL, ylim = NULL,
             col = 3, alpha = .2, cex = .7, ...) {
             
+            if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1) {
+              breaks <- quantile(x, sort(unique(c(0, quantiles, 1))))
+              names(breaks) <- format(breaks, digits = 3)
+            }  
+            
+              
             histogram <- hist.default(x, breaks = breaks, plot = FALSE)
-            prob <- histogram$density * diff(histogram$breaks)
+            
+            prob <- histogram$density
+            if (histogram$equidist) prob <- prob * diff(histogram$breaks) # height is proportion (same as area)
             
             
             ylim <- ylim %||% c(0, 2^(ceiling(log( max(prob), 2)) + 1)) # 1, .5, .25, .125, etc.
             output <- canvas(x = x, xlim = xlim %||%range(histogram$breaks), 
-                             y = prob[prob > 0], ylim = ylim, 
+                             y = prob[prob > 0] , ylim = ylim, 
                              log = log)
             
             draw_quantiles(1, x, quantiles)
@@ -206,7 +214,8 @@ setMethod('.draw', c('numeric', 'NULL'),
                                  data.table(side = 4, ticks = list(count.ticks), line = 0))
         
             
-            output$axisNames[c(2,4)] <- list('Proportion', 'Count')
+            output$axisNames[c(2,4)] <- list(if (histogram$equidist) 'Proportion' else 'Density', 
+                                             'Count')
             
             output$col <- cols
             output
@@ -667,26 +676,18 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
     }
     do.call(graphics::segments, lineArgs)
     
-    annotes <- lapply(quantiles * 100, 
-                      \(q) {
-                        arrow <- switch(paste0(q > 50, sides),
-                                        TRUETRUE  = quote(`%up%`),
-                                        TRUEFALSE = quote(`%->%`),
-                                        FALSETRUE = quote(`%down%`),
-                                        FALSEFALSE = quote(`%<-%`))
-                        
-                        if (q > 50) q <- 100 - q
-                        q <- paste0(round(q, 1), '%')
-                        
-                        bquote(.(arrow)(.(q), ''))
-                        
-                      })
     
-    switch(side,
-           text(quants, limits[1], as.expression(annotes), cex = .4, xpd = TRUE),
-           text(limits[1], quants, as.expression(annotes), cex = .4, xpd = TRUE),
-           text(quants, limits[2], as.expression(annotes), cex = .4, xpd = TRUE),
-           text(limits[2], quants, as.expression(annotes), cex = .4, xpd = TRUE))
+   q <- paste0(round(quantiles       * 100, 1), '%')
+   p <- paste0(round((1 - quantiles) * 100, 1), '%')
+    
+   if (sides) {
+     text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), cex = .4, xpd = TRUE)
+     text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),   cex = .4, xpd = TRUE)
+   } else {
+     text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), cex = .4, xpd = TRUE)
+     text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), cex = .4, xpd = TRUE)
+   }
+    
     
   }
   
