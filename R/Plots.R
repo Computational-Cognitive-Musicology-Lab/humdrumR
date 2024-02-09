@@ -149,7 +149,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             xlim = NULL, ylim = NULL,
             col = 3, alpha = .2, cex = .7, ...) {
             
-            if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1) {
+            if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1 && length(quantiles)) {
               breaks <- quantile(x, sort(unique(c(0, quantiles, 1))))
               names(breaks) <- format(breaks, digits = 3)
             }  
@@ -701,6 +701,11 @@ draw_violins <- function(vars, smooth = TRUE, conditional = FALSE,
                          breaks = "Sturges", kernel = 'gaussian', bw = 'nrd0', ...,
                          col = 1) {
   vars <- lapply(vars, \(v) v[!is.na(v)])
+  
+  if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1 && length(quantiles)) {
+    breaks <- quantile(unlist(vars), sort(unique(c(0, quantiles, 1))))
+    names(breaks) <- format(breaks, digits = 3)
+  }  
   
   if (!smooth) x <- hist.default(unlist(vars), breaks = breaks, plot = FALSE)$breaks
   
