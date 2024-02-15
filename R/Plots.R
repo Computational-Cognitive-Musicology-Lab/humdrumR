@@ -1,4 +1,7 @@
 
+
+
+
 # draw() ----
 
 
@@ -324,16 +327,16 @@ setMethod('.draw', c('table', 'NULL'),
             axes <- data.table(side = c(2, 4),
                                ticks = list(proportions,
                                             unique(round(axTicks(2, log = grepl('y', log, fixed = TRUE))))),
-                               line = 0L)
+                               line = 1L)
             
             if (ncol(x) > 1) axes <- rbind(axes,
                                            data.table(side = 1,
                                                       ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(x))),
-                                                      line = as.integer(type != 'stacked')))
+                                                      line = 1 + as.integer(type != 'stacked')))
             if (type != 'stacked' && nrow(x) > 1L && length(x) < 100) axes <- rbind(axes,
                                                               data.table(side = c(1),
                                                                          ticks = list(setNames(c(barx), rownames(x)[row(barx)])),
-                                                                         line = 0))
+                                                                         line = 1))
             
             
             window <- data.table(Screen = as.integer(screen()),
@@ -681,11 +684,15 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
    p <- paste0(round((1 - quantiles) * 100, 1), '%')
     
    if (sides) {
-     text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), cex = .4, xpd = TRUE)
-     text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),   cex = .4, xpd = TRUE)
+     text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
+          cex = .4, xpd = TRUE, adj = c(1, .5))
+     text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
+          cex = .4, xpd = TRUE, adj = c(0, 5))
    } else {
-     text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), cex = .4, xpd = TRUE)
-     text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), cex = .4, xpd = TRUE)
+     text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
+          cex = .4, xpd = TRUE, adj = c(.5, 1))
+     text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), 
+          cex = .4, xpd = TRUE, adj = c(.5, 0))
    }
     
     
@@ -872,9 +879,8 @@ humaxes <- function(axesframe, axisNames, axes = 1:4) {
   
   Map(axisNames, 1:4, f = \(label, side) {
     if (!is.null(label)) {
-      mtext(label,  side,  line = 2,
-            las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else 
-              1)
+      mtext(label,  side,  line = 3,
+            las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
     } })
   
   
@@ -935,7 +941,7 @@ canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
   axes <- data.table(side = 1:2,
                      ticks = list(axTicks(1, log = grepl('x', log)),
                                   axTicks(2, log = grepl('y', log))),
-                     line = 0L)
+                     line = 1L)
   
   window <- data.table(Screen = as.integer(screen()),
                        xlim = list(xlim), ylim = list(ylim),
@@ -966,6 +972,35 @@ smartjitter <- function(x) {
   
   x[!is.na(x)] <- .x
   x
+}
+
+
+# lines
+# 0 -> quantile labels
+# 1 -> axis labels
+# 2 -> second axis ticks
+# 3 -> xaxis labels
+# 4 -> legend / sub title
+# 5 -> title
+
+axis.lines <- function() {
+  cexs <- par(c('cex.axis', 'cex.lab', 'cex.sub'))
+  
+  lines <- cumsum(c(0.5, unlist(cexs))) 
+  names(lines) <- c(names(lines)[-1], 'mar')
+  lines <- as.list(lines)
+  
+  par(mar = rep(lines$mar, 4))
+  plot(1:10, type='n', axes= FALSE, xlab='', ylab='')
+  box()
+  mtext(1:10, 1, at = 1:10, line = lines$cex.axis, cex = cexs$cex.axis, padj = 1)
+  mtext(1:10, 2, at = 1:10, line = lines$cex.axis, cex = cexs$cex.axis)
+  mtext('Y', side = 2, line = lines$cex.lab, cex = cexs$cex.lab)
+  mtext('X', side = 1, line = lines$cex.lab, cex = cexs$cex.lab, padj = 1)
+  
+  mtext('Main', line = lines$cex.sub, cex = cexs$cex.sub)
+  mtext('Sub', side = 1, line = lines$cex.sub, cex = cexs$cex.sub, padj=1)
+lines
 }
 
 ### argument preppers ----
