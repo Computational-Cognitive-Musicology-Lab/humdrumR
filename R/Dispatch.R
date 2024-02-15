@@ -629,7 +629,7 @@ makeDispatchDF <- function(...) {
 
 #' @rdname humdrumDispatch
 #' @export
-makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClass = 'character', args = alist(), memoize = TRUE) {
+makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClass = 'character', args = alist(), memoize = TRUE, dispatch.attr = TRUE) {
 
   dispatchDF <- makeDispatchDF(...)
                        
@@ -666,6 +666,8 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
        ...)
     
     if (!(!!outputClass) %in% class(result)) result <- as(result, !!outputClass)
+    
+    if (!(!!dispatch.attr)) attr(result, 'dispatch') <- NULL
     
     result
   })
