@@ -2069,7 +2069,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' @param Exclusive ***An exclusive interpretation to guide parsing of the input.***
 #' 
-#' Must be `character`; must be either length `1` or `length(x)`.
+#' Must be `NULL`, or a `character` vector which is either length `1` or `length(x)`.
 #'      
 #' @examples 
 #' 

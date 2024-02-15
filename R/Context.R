@@ -215,7 +215,7 @@ groups <- function(humdrumR, dataTypes = 'D') {
 
 
 
-parseContextExpression <- function(expr, other) {
+parseContextExpression <- function(expr, other, parseOpenClose) {
   if (is.null(expr)) expr <- quote('.')
   
   expr <- withinExpression(expr, applyTo = 'call', stopOnHit = TRUE,
@@ -918,9 +918,9 @@ findWindows <- function(x, open, close = quote(nextopen - 1), ...,
   
   rowKey <- x$`_rowKey_` %||% seq_len(nrow(x))
   
-  
   open <- parseContextExpression(open, other = quote(close))
   close <- parseContextExpression(close, other = quote(open))
+
   regexes <- union(attr(open, 'regexes'), attr(close, 'regexes'))
   if (!is.null(field)) {
     open  <- substituteName(open, list('.' = rlang::sym(field)))
