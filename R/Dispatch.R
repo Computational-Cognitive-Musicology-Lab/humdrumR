@@ -487,6 +487,8 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
       args <- c(list(x), list(...))
       args[lengths(args) == length(args[[1]])] <- lapply(args[lengths(args) == length(args[[1]])], '[', i = hits)
       
+      if ('groupby' %in% names(args)) args$groupby <- lapply(args$groupby, '[', i = hits)
+      
       result[hits] <- if (regexApply && !is.na(dispatchDF$regex[[i]])) {
         REapply(args[[1]], dispatchDF$regex[[i]], dispatchDF$method[[i]], inPlace = inPlace, args = args[-1], outputClass = outputClass) 
         } else {
@@ -627,7 +629,7 @@ makeDispatchDF <- function(...) {
 
 #' @rdname humdrumDispatch
 #' @export
-makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClass = 'character', args = alist()) {
+makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClass = 'character', args = alist(), memoize = TRUE) {
 
   dispatchDF <- makeDispatchDF(...)
                        
@@ -657,7 +659,7 @@ makeHumdrumDispatcher <- function(..., funcName = 'humdrum-dispatch', outputClas
   ##################################################### #
   body <- rlang::expr({
     args <- list(!!!formalSymbols)
-    result <- do(!!dispatcher, outputClass = !!outputClass, 
+    result <- do(!!dispatcher, outputClass = !!outputClass, memoize = !!memoize,
                  args = c(args,  
                    list(..., dispatchDF = dispatchDF, 
                         regexApply = !!regexApply, outputClass = !!outputClass, funcName = !!funcName)),
