@@ -311,9 +311,15 @@ readTextFiles <- function(fpaths) {
     if (length(fpaths) == 0L) return(character(0))
     
     raw <- lapply(fpaths, stringi::stri_read_raw)
-    enc <- data.table::rbindlist(lapply(stringi::stri_enc_detect2(raw), head, n = 1))
+    enc <- data.table::rbindlist(lapply(stringi::stri_enc_detect(raw), head, n = 1))
     
-    text <- !is.na(enc$Encoding) & enc$Confidence >= 0.75
+    # text <- !is.na(enc$Encoding) & enc$Confidence >= 0.75
+    text <- stringi::stri_enc_isascii(raw) |
+      stringi::stri_enc_isutf16be(raw) |
+      stringi::stri_enc_isutf16le(raw) |
+      stringi::stri_enc_isutf32be(raw) |
+      stringi::stri_enc_isutf16le(raw) |
+      stringi::stri_enc_isutf8(raw)
     
     files <- unlist(Map(stringi::stri_encode, raw[text], enc$Encoding[text]))
     
