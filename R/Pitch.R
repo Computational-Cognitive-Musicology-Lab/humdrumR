@@ -408,7 +408,7 @@ setMethod('+', signature = c('tonalInterval', 'numeric'),
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval.character(e1, memoize = FALSE)
+              e1 <- tonalInterval.character(e1)
               
               e3 <- e1 + e2
               dispatch <- attr(e1, 'dispatch')

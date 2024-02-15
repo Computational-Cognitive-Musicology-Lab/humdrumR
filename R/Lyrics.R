@@ -36,7 +36,7 @@ silbe2wort <- function(x, sep = '-', keep.sep = TRUE, number.syllables = FALSE, 
   wort
 }
 
-#' Paste sylllables together into words 
+#' Paste syllables together into words 
 #'
 #' Most humdrum datasets which include lyrics, include them in a `**silbe` spine, representing each syllable from the lyrics on
 #' one so they line up with notes in the music.
