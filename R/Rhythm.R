@@ -1387,20 +1387,26 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   checks(onsets, xlogical & xmatch(x))
   checks(finalOnset, xTF)
   checks(inPlace, xTF)
+  if (!is.list(groupby)) groupby <- list(groupby)
   
-  rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  na <- is.na(x) | x == '.'
+  bounds <- (if (length(groupby)) do.call('changes', groupby) else seq_along(x) == 1)[!na]
+  
+  rint <- do.call('rhythmInterval', c(list(x[!na], Exclusive = Exclusive[!na]), parseArgs))
   dispatch <- attr(rint, 'dispatch')
   
+  onsets <- onsets[!na]
   if (any(!onsets)) {
-    duration <- rint2duration(rint)
-    windowFrame <- findWindows(x, open = which(onsets),
-                               close = which(!onsets),
-                               groupby = groupby,
-                               rightward = FALSE, overlap = 'none')
-    duration <- windowsSum(duration, windowFrame, na.rm = TRUE)
-    rint <- duration2rint(duration)
+    # duration <- rint2duration(rint)
+    
+    newdur <- diff(c(cumsum(c(rational(0), head(rint, -1)))[which(onsets | bounds)],
+                     sum(rint)))
+    newdur <- newdur[which(onsets | bounds) %in% which(onsets)]
+    
+    rint[!onsets] <- rational(NA)
+    rint[onsets] <- newdur
+    # rint <- duration2rint(duration)
   }
-  
   
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
@@ -1414,16 +1420,17 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   
   if (!finalOnset) {
     if (length(groupby)) {
-      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- NA
-      
+      maxes <- unlist(tapply(seq_along(x)[onsets], lapply(groupby, '[', onsets), max))
+      output[maxes] <- NA
     } else {
-      output[max(which(onsets), na.rm = TRUE)] <- NA
-      
+      output[max(which(onsets))] <- NA
     }
   }
-  
+
   humdrumRattr(output) <- list(dispatch = NULL)
-  output
+  
+  x[!na] <- output
+  x
   
 }
 #' Apply to humdrumR data
@@ -1447,13 +1454,13 @@ ioi <- humdrumRgeneric(ioi.default)
 #' 
 #' Defaults to `[`.
 #' 
-#' Must be a single `character` string, interpreted as a regular expression.
+#' Must be a single, non-empty `character` string, interpreted as a regular expression, or a `logical` of the same length as `x`.
 #'
 #' @param close ***How are the ends of ties indicated in `x`?***
 #' 
 #' Defaults to `]`.
 #' 
-#' Must be a single `character` string, interpreted as a regular expression.
+#' Must be a single, non-empty `character` string, interpreted as a regular expression, or a `logical` of the same length as `x`.
 #' 
 #' @rdname ioi
 #' @export 
@@ -1461,34 +1468,44 @@ sumTies.default <- function(x, open = '[', close = ']', ...,
                           groupby = list(), 
                           inPlace = TRUE) {
   checks(inPlace, xTF)
+  checks(open, (xcharnotempty & xlen1) | (xlogical & xmatch(x)))
+  checks(close, (xcharnotempty & xlen1) | (xlogical & xmatch(x)))
+  if (!is.list(groupby)) groupby <- list(groupby)
   
-  rint <- rhythmInterval(x, ...)
+  na <- is.na(x) | x == '.'
+  
+  rint <- rhythmInterval(x[!na], ...)
   dispatch <- attr(rint, 'dispatch')
   
-  windows <- findWindows(x, open, close, groupby = groupby, overlap = 'nested')
+  openl <- grepl('[', x, fixed = TRUE)
+  closel <- grepl(']', x, fixed = TRUE)
   
-  if (nrow(windows)) {
-    duration <- rint2duration(rint)
-    duration <- windowsSum(duration, windows)
-    rint <- duration2rint(duration)
-  }
+  opencloses <- checkOpenClosePairs(openl, closel, groupby, 'sumTies', 
+                                    if (is.character(open) && is.character(close)) c(open, close))
   
+  openl <- openl[!na]
+  closel <- closel[!na]
+  
+  cumrint <- head(cumsum(c(rational(0), rint)), -1L)
+  
+  newrint <- rational(rep(NA, sum(!na)))
+  newrint[openl] <- (cumrint[closel] - cumrint[openl]) + rint[closel]
+  newrint[opencloses$outside[!na]] <- rint[opencloses$outside[!na]]
+  rint <- newrint
+
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
-  
-  null <- unlist(Map(":", windows$Open + 1L, windows$Close))
   
   if (inPlace) {
     output <- rePlace(as.character(output), dispatch)
-    if (is.character(open)) output <- stringr::str_remove(output, 
+    if (is.character(open)) output <- stringr::str_remove(output,
                                                           if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
-    output[null] <- '.'
-  } else {
-    output[null] <- NA
-  }
+    output[is.na(output)] <- '.'
+  } 
   humdrumRattr(output) <- list(dispatch = NULL)
+
+  x[!na] <- output
   
-  output
-  
+  x
 }
 #' Apply to humdrumR data
 #' 
