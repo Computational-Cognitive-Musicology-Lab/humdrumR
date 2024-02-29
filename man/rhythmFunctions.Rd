@@ -24,7 +24,7 @@ Must be \code{numeric} or \link{rational}.}
 
 Default to \code{NULL} and an empty \code{list()} respectively.
 
-\code{Exclusive} must be a \code{character} vector of length 1, or the same length as \code{x};
+\code{Exclusive} must be \code{NULL}, or a \code{character} vector of either length 1 or length(x);
 \code{parseArgs} must  be a \code{list} of named arguments to the \link[=rhythmParsing]{rhythm parser}.}
 
 \item{inPlace}{\emph{\strong{Should non-rhythm information be retained in the output string?}}

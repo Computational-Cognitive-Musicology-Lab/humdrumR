@@ -35,7 +35,9 @@ makeHumdrumDispatcher(
   ...,
   funcName = "humdrum-dispatch",
   outputClass = "character",
-  args = alist()
+  args = alist(),
+  memoize = TRUE,
+  dispatch.attr = TRUE
 )
 
 \method{print}{humdrumDispatch}(x)

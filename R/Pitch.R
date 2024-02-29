@@ -408,7 +408,7 @@ setMethod('+', signature = c('tonalInterval', 'numeric'),
 
 setMethod('+', signature = c('character', 'tonalInterval'),
           function(e1, e2) {
-              e1 <- tonalInterval.character(e1, memoize = FALSE)
+              e1 <- tonalInterval.character(e1)
               
               e3 <- e1 + e2
               dispatch <- attr(e1, 'dispatch')
@@ -2069,7 +2069,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' @param Exclusive ***An exclusive interpretation to guide parsing of the input.***
 #' 
-#' Must be `character`; must be either length `1` or `length(x)`.
+#' Must be `NULL`, or a `character` vector which is either length `1` or `length(x)`.
 #'      
 #' @examples 
 #' 

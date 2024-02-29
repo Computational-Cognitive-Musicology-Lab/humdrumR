@@ -1453,7 +1453,7 @@ makeChordTransformer <- function(deparser, callname, outputClass = 'character', 
     deparse <- args...$deparse %||% TRUE
     
     # Parse
-    parsedTset <- do(tertianSet, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'tertianSet')
+    parsedTset <- do(tertianSet, c(list(x), parseArgs), memoize = memoize, outputClass = 'tertianSet')
     if (length(transposeArgs) > 0L && is.tertianSet(parsedTset)) {
       parsedTset <- do(transpose.tertianSet, c(list(parsedTset), transposeArgs))
     }

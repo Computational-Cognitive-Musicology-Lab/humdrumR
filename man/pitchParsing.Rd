@@ -31,7 +31,7 @@ tonalInterval(...)
 \arguments{
 \item{Exclusive}{\emph{\strong{An exclusive interpretation to guide parsing of the input.}}
 
-Must be \code{character}; must be either length \code{1} or \code{length(x)}.}
+Must be \code{NULL}, or a \code{character} vector which is either length \code{1} or \code{length(x)}.}
 
 \item{str}{\emph{\strong{The input vector.}}
 

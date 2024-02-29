@@ -2,36 +2,102 @@
 % Please edit documentation in R/Lyrics.R
 \name{wort}
 \alias{wort}
-\title{Extract words from syllables}
+\alias{wort.character}
+\alias{wort.humdrumR}
+\title{Paste sylllables together into words}
 \usage{
-wort(silbe, nullTokens = TRUE, keepSilbe = FALSE, indices = FALSE)
+\method{wort}{character}(
+  x,
+  ...,
+  sep = "-",
+  keep.sep = TRUE,
+  number.syllables = FALSE,
+  groupby = list(),
+  Exclusive = NULL,
+  multiDispatch = FALSE
+)
+
+humData |> select(Token) |> wort() 
+humData |> wort(Token)
+
+wort(
+  x,
+  ...,
+  sep = "-",
+  keep.sep = TRUE,
+  number.syllables = FALSE,
+  groupby = list(),
+  Exclusive = NULL,
+  multiDispatch = FALSE
+)
 }
 \arguments{
-\item{nullTokens}{\emph{\strong{Whether null tokens will replace empty spaces where syllables have moved to combine with others to make a word.}}
+\item{x}{\emph{\strong{A vector of exclusive intepretations to control dispatch.}}
+
+Defaults to \code{NULL}.
+
+Must be \code{NULL}, or a \code{character} vector which is either length \code{1} or \code{length(x)}.}
+
+\item{sep}{\strong{What separator is in input and/or output.}
+
+Defaults to \code{"-"}.
+
+Must be a single, non-empty \code{character} string.}
+
+\item{keep.sep}{\strong{Should syllable separators be kept in output?}
 
 Defaults to \code{TRUE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{keepSilbe}{\emph{\strong{Whether the user wants to save silbe format in the output in case needed for back translation later or other uses.}}
+\item{number.syllables}{\emph{\strong{Should output show words with numbered syllables?}}
 
 Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{indices}{\emph{\strong{Whether the linguistics version of the word will be printed.}}
+\item{groupby}{\strong{Optional vectors to group words within.}
 
-Defaults to \code{FALSE}.
+Defaults to \code{list()}.
 
-Must be a singleton \code{logical} value: an on/off switch.}
-
-\item{data}{\emph{\strong{The data to be transformed.}}
-
-Must be \code{character}.}
-}
-\value{
-the transformed data
+Must be a \code{list}; every element of the list must be length \code{length(x)}.}
 }
 \description{
-Transform humdrumR's syllabic form of lyrics into complete words, where each row will contain either one word or a null data token.
+Most humdrum datasets which include lyrics, include them in a \verb{**silbe} spine, representing each syllable from the lyrics on
+one so they line up with notes in the music.
+Syllables from multi-syllabic words are connected with \code{-} markers at the end of the first syllable, beginning of the last syllable
+and both beginning and end of medial syllables.
+The \code{wort()} command translates this syllable representation to words, simply collapsing them together.
+The resulting word is aligned with the first syllable of each word in \verb{**silbe}.
+
+If \code{wort()} is applied to a \link[=humdrumRclass]{humdrumR data class}
+you may use the data's \link[=fields]{fields} as arguments.
+If no field names are specified, the first \link{selectedField} is used as \code{x}.
+}
+\details{
+If a non-null \code{Exclusive} argument is provided, \code{wort()} will only apply where \code{Exclusive == "silbe"}.
+When used in a \code{\link[=withinHumdrum]{withinHumdrum()}} call, \code{wort()} will by automally passed the \code{Exclusive} field from the humdrum
+data, as well as \code{groupby = list(Piece, Spine, Path)}, so that words are not collapsed across pieces/spines/paths.
+The output of \code{wort()} is always the same length as the input.
+Any collapsed syllables are replaced by the \verb{**silbe} melisma marker, \code{"_"}.
+If \code{number.syllables = TRUE}, the whole word is repeated for each syllable, but with each numbered
+in square brackets: e.g., \verb{c("yesterday[1], "yesterday[2]", "yesterday[3]", "yesterday[4]")}. This
+format is seen a lot in computational linguistics.
+
+By default, the syllable separators are retained in the collapsed output: this makes it possible to recreate the syllables if
+necessary.
+Any mid-word melismas (indicated by \code{"_"}) are kept collapsed as well, for the same reason.
+However, if \code{keep.sep = TRUE}, seperators (and mid-word melismas) are removed, making the function non invertible (you can't easily get
+back to the syllables).
+}
+\examples{
+
+wort(c('now', 'let', 'me', 'wel-', '-come', 'ev-', '-ery-', '-bo-','-dy', 'to', 'the', 'wild', 'wild', 'west'))
+
+wort(c('now', 'let', 'me', 'wel-', '-come', 'ev-', '-ery-', '-bo-','-dy', 'to', 'the', 'wild', 'wild', 'west'), 
+     keep.sep = FALSE)
+
+wort(c('now', 'let', 'me', 'wel-', '-come', 'ev-', '-ery-', '-bo-','-dy', 'to', 'the', 'wild', 'wild', 'west'),
+     keep.sep = FALSE, number.syllables = TRUE)
+
 }

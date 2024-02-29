@@ -829,7 +829,7 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' 
 #' Default to `NULL` and an empty `list()` respectively.
 #' 
-#' `Exclusive` must be a `character` vector of length 1, or the same length as `x`;
+#' `Exclusive` must be `NULL`, or a `character` vector of either length 1 or length(x);
 #' `parseArgs` must  be a `list` of named arguments to the [rhythm parser][rhythmParsing].
 #' 
 #' @param inPlace ***Should non-rhythm information be retained in the output string?***

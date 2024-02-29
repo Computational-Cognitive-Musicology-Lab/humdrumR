@@ -188,7 +188,6 @@ reference:
   desc: "Lyrics and text functions."
   contents:
   - wort
-  - silbeFormat
 - title: "Data Structures"
   desc: >
     These pages describe the data structures of humdrumR, and how to query or manipulate them.
