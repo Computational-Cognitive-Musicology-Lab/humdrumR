@@ -1824,7 +1824,7 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
     if (is.null(x)) return(NULL)
     checks(x, xnumber | xclass('tonalInterval'))
     checks(lag, xwholenum & xlen1 & xnotzero)
-    checks(skip, xnull | xclass('function'))
+    checks(skip, xnull | (xlogical & xmatch(x)) | xclass('function'))
     checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) & 
              argCheck(\(arg) length(arg) <= abs(lag), 
                       "must be as short or shorter than the absolute lag",  
@@ -1839,7 +1839,8 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
       x <- rev(x)
       right <- !right
     }
-    skip <- if (is.null(skip)) logical(length(x)) else skip(x)
+    if (is.null(skip)) skip <- logical(length(x))
+    if (is.function(skip)) skip <- skip(x)
     #
     if (right)  {
       skip_pad <- c(skip, logical(abs(lag)))

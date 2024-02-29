@@ -72,6 +72,9 @@ test_that('Multiple filters works as it should', {
   expect_identical(chorales[6:10][2], chorales[7])
   expect_identical(chorales[[ , 3:4]][[, 2]], chorales[[, 4]])
   
+  expect_identical(chorales |> filter(nchar(Token) == 2 & Record %% 2 == 0) |> pull(),
+                   chorales |> filter(nchar(Token) == 2) |> filter(Record %% 2== 0) |> pull())
+  
 })
 
 
