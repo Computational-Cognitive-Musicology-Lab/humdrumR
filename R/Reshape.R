@@ -998,10 +998,17 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
   
   fieldName <- fieldName %||% paste(fields, collapse = '.')
   
-  spines <- humtab[ , list(Field = fields, nonNull = sapply(.SD, \(field) any(!is.na(field)))), by = list(Piece, Spine), .SDcols = fields]
+  spines <- humtab[ , {
+    nonNull <- sapply(.SD, \(field) any(!is.na(field)))
+    if (!any(nonNull)) nonNull[1] <- TRUE
+           
+    list(Field = fields, nonNull = nonNull)
+    
+    }, by = list(Piece, Spine), .SDcols = fields]
+  
   if (!rendEmpty) {
-    spines[ , newSpine := cumsum(nonNull | (!nonNull & !duplicated(Spine))), by = Piece]
-    spines <- spines[nonNull == TRUE |  (!nonNull & !duplicated(cbind(Piece, Spine)))]
+    spines[ , newSpine := cumsum(nonNull), by = Piece]
+    spines <- spines[nonNull == TRUE]
   } else {
     spines[ , newSpine := seq_along(nonNull), by = Piece]
   }

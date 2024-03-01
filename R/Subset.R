@@ -338,7 +338,7 @@ removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = N
   fields <- fieldMatch(humdrumR, fields, 'removeSubset', 'fields', fieldTypes = 'Data')
   
   
-  humtab <- getHumtab(humdrumR)
+  humtab <- data.table::copy(getHumtab(humdrumR))
   fields <- fields(humdrumR)[Name %in% fields]
   
   if (is.null(complement)) {
@@ -366,6 +366,7 @@ removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = N
   
   humdrumR@Fields[Name %in% fields$Name, Complement := FALSE]
   
+  putHumtab(humdrumR) <- humtab
   humdrumR <- update_Dd(humdrumR, fields$Name)
   
   humdrumR
