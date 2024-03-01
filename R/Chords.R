@@ -1399,7 +1399,8 @@ NULL
 
 makeChordTransformer <- function(deparser, callname, outputClass = 'character', removeArgs = NULL, extraArgs = alist()) {
   # this function will create various pitch transform functions
-  
+  autoArgTable <<- rbind(autoArgTable,
+                         data.table(Argument = 'Exclusive', Type = 'Exclusive', Function = callname, Expression = list(quote(Exclusive))))
   autoArgTable <<- rbind(autoArgTable, 
                          data.table(Argument = 'Key', Type = 'Keyed', Function = callname, Expression = list(quote(Key))))
   

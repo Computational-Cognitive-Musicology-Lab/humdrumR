@@ -989,8 +989,10 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
           # humtab <- rbind(humdrumR@Humtable[!Type %in% overwriteTypes], value, fill = TRUE) 
           # This works the same as the whole forloop bs bellow, but it breaks with token...which only matters for $<-
           
-          
           oldhumtab <- humdrumR@Humtable[!Type %in% overwriteTypes]
+          
+          erasedCol <- setdiff(colnames(oldhumtab), colnames(value))
+          if (length(erasedCol)) oldhumtab[ , (erasedCol) := NULL]
           
           newcol <- setdiff(colnames(value), colnames(oldhumtab))
           for(col in newcol) {
