@@ -687,9 +687,9 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
                                  \(qualities) {
                                    qualities <- escape(qualities)
                                    hits <- qualities == modes[1L:length(qualities), ]
-                                   
                                    # only want to alter 1 5 or 3 as last resort
                                    if (any(hits[1, ])) hits[ , !hits[1, ]] <- FALSE
+                                   # hits[c(2, 5), ] <- hits[c(2, 5), ] * 1.5 # greater weight to 3rd and 5th
                                    if (any(hits[2, ])) hits[ , !hits[2, ]] <- FALSE
                                    if (any(hits[5, ])) hits[ , !hits[5, ]] <- FALSE
                                    

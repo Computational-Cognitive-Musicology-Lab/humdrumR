@@ -757,7 +757,10 @@ triad2sciQuality <- function(triad, extensionQualities, incomplete,
                          })
   
   extensionQualities[col(extensionQualities) <= 3L & extensionQualities == '.'] <- triadQualities[col(extensionQualities) <= 3L & extensionQualities == '.']
-  extensionQualities[ , 2L:3L] <- triadQualities[ , 2L:3L]
+  
+  extensionQualities[extensionQualities[ , 2] == '', 2] <- triadQualities[extensionQualities[ , 2] == '' , 2]
+  extensionQualities[extensionQualities[ , 3] == '', 3] <- triadQualities[extensionQualities[ , 3] == '' , 3]
+  extensionQualities[extensionQualities[ , 4] == '', 4] <- '.'
   
   apply(extensionQualities, 1L, paste, collapse = '')
   
@@ -780,7 +783,8 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, quali
     alterations <- specifier2tint(acc, step, qualities = qualities,  
                                   Key = dset(0L, m - r), implicitSpecies = TRUE, ...)
     
-    qualities <- tint2specifier(step + alterations, qualities = TRUE, ...)
+    qualities <- tint2specifier(step + alterations, qualities = TRUE, explicitNaturals = TRUE, ...)
+    qualities[acc == ''] <- ''
     
     dots[1L + ((deg - 1L) %/% 2L)] <- qualities
     dots
@@ -915,7 +919,7 @@ figurationFill <- function(species, third, step, Explicit, ...) {
                new = !newthird %in% third, Explicit = FALSE)
 }
 
-parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALSE, ...) {
+parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALSE, inverting = TRUE, ...) {
   
   # str[str == ''] <- '35'
   
@@ -934,10 +938,14 @@ parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALS
            
            if (!any(parsedfig$step == '1')) parsedfig <- rbind(parsedfig, data.table(species = '', step = '1', Explicit = FALSE)) 
            
-           
            ## 
            parsedfig[ , step := as.integer(step)]
-           parsedfig[ , third := steps2thirds(step, integer(length(step)))]
+           if (inverting) {
+             parsedfig[ , third := steps2thirds(step, integer(length(step)))]
+           } else {
+             parsedfig[ , third := (step - 1L) %/% 2L]
+           }
+           
            #
            parsedfig <- parsedfig[!duplicated(third)]
            inversion <- parsedfig[step %in% c(1L, 8L, 15L), third[1]]
@@ -1029,7 +1037,7 @@ harm2tset <- function(x, Key = dset(0,0),
   figArgs <- list(diminish = 'D', augment = 'A', qualities = TRUE)
   figArgs[names(figurationArgs)] <- figurationArgs
   
-  figurations <- do.call('parseFiguration', c(list(figurations), figArgs))
+  figurations <- do.call('parseFiguration', c(list(figurations, inverting = FALSE), figArgs))
   ### quality of degress
   # extension qualities
   qualities <- do.call('extensions2qualities',
