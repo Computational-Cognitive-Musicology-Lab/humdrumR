@@ -649,77 +649,47 @@ NULL
 qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE, 
                             major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', ...) {
     
+    xmat <- do.call('rbind', strsplit(x, split = ''))
+    if (steporder != 1L) xmat <- xmat[ ,  order(seq(0, by = steporder, length.out = 7L) %% 7L), drop = FALSE]
     
-    # modes are the 7 13th-chord/modes in L05th order
-    modes <- list(c(perfect, perfect, major, major, major, major, augment),
-                  c(perfect, perfect, major, major, major, major, perfect),
-                  c(perfect, perfect, major, major, major, minor, perfect),
-                  c(perfect, perfect, major, major, minor, minor, perfect),
-                  c(perfect, perfect, major, minor, minor, minor, perfect),
-                  c(perfect, perfect, minor, minor, minor, minor, perfect),
-                  c(perfect, diminish, minor, minor, minor, minor, perfect))
-
-    modes_int <- 1L:-5L
-    names(modes) <- names(modes_int) <- sapply(modes, paste, collapse = '')
+    altmat <- array(0L, dim = dim(xmat))
+    altmat[xmat == augment] <- 7L
+    altmat[col(xmat) %in% c(1, 2, 7) & xmat == diminish] <- -7L
+    altmat[col(xmat) %in% 3:6 & xmat == diminish] <- -14L
+    altmat[col(xmat) %in% 3:6 & xmat == minor] <- -7L
+    altmat[xmat == '.'] <- NA
     
-    modes_int <- modes_int[c(2,3,5,4,1,6,7)] # reorder to prefer mixo > major >  minor, etc.     
-    modes <- modes[names(modes_int)]
+    altmat <- sweep(altmat, 2, 0:6, '+')
     
-    ####
-    if (steporder != 1L) {
-      x <- strsplit(x, split = '')
-      ord <- order(seq(0, by = steporder, length.out = 7L) %% 7L)
-      x <- sapply(x, \(s) paste(s[ord], collapse = ''))
+    min <- colMins(altmat, na.rm = TRUE)
+    max <- colMaxs(altmat, na.rm = TRUE)
+    span <- max - min
+    
+    altered <- span > 7L
+    
+    mode <- alterations <- integer(length(x))
+    
+    if (any(!altered)) {
+      # minor modes
+      mode[!altered & min == -3L] <- ifelse(max[!altered & min == -3L] <= 2L, -3L, -2L) # prioritize minor over dorian
+      mode[!altered & min <  -3L] <- min[!altered & min < -3L] + 1L
+      
+      # majormodes
+      mode[!altered & max == 6L] <- 1L # lydian
+      mode[!altered & min == -2L] <- -1L # mixolydian
+      
     }
-    
-    mode <- modes_int[x]
-    if (allow_partial) {
-      mode[is.na(mode)] <- sapply(paste0('^', x[is.na(mode)]), 
-                                  \(x) modes_int[which(stringr::str_detect(names(modes_int), escape(x)))[1]], USE.NAMES = FALSE)
-    } 
-    alterations <- integer(length(x))
-    if (any(is.na(mode))) {
-      altered <- is.na(mode)
-      quality.labels <- escape(c(diminish, minor, perfect, major, augment)) # reorder for rank
-      modes <- do.call('cbind', modes)
+    if (any(altered)) {
+      means <- floor(rowMeans(altmat[altered, , drop = FALSE], na.rm = TRUE))
       
-      mode_alterations <- lapply(strsplit(x[altered], split = ''),
-                                 \(qualities) {
-                                   qualities <- escape(qualities)
-                                   hits <- qualities == modes[1L:length(qualities), ]
-                                   # only want to alter 1 5 or 3 as last resort
-                                   if (any(hits[1, ])) hits[ , !hits[1, ]] <- FALSE
-                                   # hits[c(2, 5), ] <- hits[c(2, 5), ] * 1.5 # greater weight to 3rd and 5th
-                                   if (any(hits[2, ])) hits[ , !hits[2, ]] <- FALSE
-                                   if (any(hits[5, ])) hits[ , !hits[5, ]] <- FALSE
-                                   
-                                   # which is closest mode
-                                   pick <- which.max(colSums(hits))
-                                   mode <- modes_int[pick] 
-                                   #
-                                   altered <- !hits[, pick] & (!allow_partial | qualities != '.')
-                                   supposedtobe <- modes[altered, pick]
-                                   actual <- qualities[altered]
-                                     
-                                   # what direction are they altered?
-                                   change <- ifelse(which(altered) %in% c(1L, 2L, 7L), # Perfects
-                                                    match(actual, quality.labels[-c(2, 4)]) - match(supposedtobe, quality.labels[-c(2, 4)]), # no M or m
-                                                    match(actual, quality.labels[-3]) - match(supposedtobe, quality.labels[-3])) # no P
-                                   
-                                   if (any(abs(change) > 1L)) change <- sign(change)
-                                   
-                                   altermat <- matrix(0L, nrow = 1, ncol = 7)
-
-                                   altered <- which(altered)
-                                   altermat[ , (altered %% 7L) + 1L] <- change
-                                     
-                                   alterint <- baltern2int(altermat)
-                                   c(mode = mode, altered = alterint)
-                                 }) |> do.call(what = 'rbind')
+      mode[altered] <- ifelse(means > 0, 
+                              ifelse(rowSums(altmat[altered, , drop = FALSE] == 6L, na.rm = TRUE), 
+                                     1L, 0L), # only do lydian if #4 is present
+                              pmax(means, -6L))
       
-      mode[altered] <- mode_alterations[ , 1]
-      alterations[altered] <- mode_alterations[ , 2]
-      
+      alters <- sweep(altmat[altered, , drop = FALSE], 1, mode[altered] - 1L, '-') %/% 7
+      alters[is.na(alters)] <- 0L
+      alterations[altered] <- baltern2int(alters[ , c(7, 1:6), drop = FALSE])
     }
     
     dset(root = 0, signature = mode, alterations = alterations )

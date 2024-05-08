@@ -783,8 +783,8 @@ extensions2qualities <- function(root, figurations, triadalts, Key = NULL, quali
     alterations <- specifier2tint(acc, step, qualities = qualities,  
                                   Key = dset(0L, m - r), implicitSpecies = TRUE, ...)
     
-    qualities <- tint2specifier(step + alterations, qualities = TRUE, explicitNaturals = TRUE, ...)
-    qualities[acc == ''] <- ''
+    qualities <- tint2specifier(step + alterations, qualities = TRUE, explicitNaturals = FALSE, ...)
+    qualities[acc == '' & deg %in% c(3, 5)] <- '' # if the accidental isn't explicit, we want to leave it blank here, so later functions can fill it in
     
     dots[1L + ((deg - 1L) %/% 2L)] <- qualities
     dots

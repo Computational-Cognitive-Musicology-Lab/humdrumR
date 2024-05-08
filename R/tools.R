@@ -1277,7 +1277,16 @@ find2Dlayout <- function(n) {
 
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
+colMaxs <- function(x, na.rm = TRUE, ties.method = 'first') {
+  if (na.rm) x[is.na(x)] <- -Inf
+  
+  x[cbind(seq_len(nrow(x)), max.col(x, ties.method = ties.method))]
+  
+}
 
+colMins <- function(x, na.rm = TRUE, ties.method = 'first') {
+  -colMaxs(-x, na.rm = na.rm, ties.method = ties.method)
+}
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
