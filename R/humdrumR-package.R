@@ -38,7 +38,6 @@
 #' These package options are all enumerated and explained in the **Arguments** section above.
 #' 
 #' @keywords internal
-#' @docType package
 #' @name humdrumR
 #' @importFrom MASS fractions
 #' @importFrom combinat permn
