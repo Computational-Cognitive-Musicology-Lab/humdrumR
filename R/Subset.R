@@ -338,7 +338,7 @@ removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = N
   fields <- fieldMatch(humdrumR, fields, 'removeSubset', 'fields', fieldTypes = 'Data')
   
   
-  humtab <- getHumtab(humdrumR)
+  humtab <- data.table::copy(getHumtab(humdrumR))
   fields <- fields(humdrumR)[Name %in% fields]
   
   if (is.null(complement)) {
@@ -366,6 +366,7 @@ removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = N
   
   humdrumR@Fields[Name %in% fields$Name, Complement := FALSE]
   
+  putHumtab(humdrumR) <- humtab
   humdrumR <- update_Dd(humdrumR, fields$Name)
   
   humdrumR
@@ -583,14 +584,14 @@ combineFields <- function(humdrumR, ...) {
 #' this example, only the kern spines (if there are any) are indexed!
 #' 
 #' 
-#' @section removeEmpty:
+#' @section drop:
 #' 
-#' The `removeEmpty` argument to any humdrumR indexing controls whether
+#' The `drop` argument to any humdrumR indexing controls whether
 #' filtered data is completely removed from the data, or simply set to null 
 #' This means the filtered data can be recovered using [unfilter()] (see the [subset()/filter()][subset.humdrumR()]
 #' docs for an explanation).
-#' By default, piece-indexing and spine-indexing have `removeEmpty = TRUE`,
-#' but record-indexing defaults to `removeEmpty = FALSE`.
+#' By default, piece-indexing and spine-indexing have `drop = TRUE`,
+#' but record-indexing defaults to `drop = FALSE`.
 #' 
 #' 
 #' 
@@ -621,7 +622,7 @@ combineFields <- function(humdrumR, ...) {
 #' 
 #' # find all records that use a flat 3
 #' humData[['b3', ]]
-#' humData[['b3', removeEmpty = TRUE]]
+#' humData[['b3', drop = TRUE]]
 #' 
 #' # Exclusive interpretation indexing
 #' humData[[deg = 1]]
@@ -677,10 +678,10 @@ setMethod('[',
 #' @export
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'numeric'),
-          function(x, i, removeEmpty = TRUE) {
+          function(x, i, drop = TRUE) {
               i <- numericIndexCheck(i)
               
-              if (removeEmpty) {
+              if (drop) {
                 humtab <- getHumtab(x)
                 
                 targets <- humtab[ , sort(unique(Piece))[i]]
@@ -706,10 +707,10 @@ setMethod('[',
 #' @export
 setMethod('[',
           signature = c(x = 'humdrumR', i = 'character'),
-          function(x, i, removeEmpty = TRUE) {
+          function(x, i, drop = TRUE) {
             x <- subset(x, any(. %~l% !!i), .by = 'Piece')
             
-            if (removeEmpty) x <- removeEmptyPieces(x)
+            if (drop) x <- removeEmptyPieces(x)
             
             x
           })
@@ -726,10 +727,10 @@ setMethod('[',
 #' @usage humData[[x:y]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'), 
-          function(x, i, j, removeEmpty = TRUE) {
+          function(x, i, j, drop = TRUE) {
             
             i <- numericIndexCheck(i)    
-            if (removeEmpty) {
+            if (drop) {
               humtab <- getHumtab(x)
               
               humtab <- if (all(i > 0L)) {
@@ -758,10 +759,10 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'numeric', j = 'missing'),
 #' @usage humData[[ , x:y]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'), 
-          function(x, j, removeEmpty = TRUE) {
+          function(x, j, drop = TRUE) {
               j <- numericIndexCheck(j, 'j')    
               
-              if (removeEmpty) {
+              if (drop) {
                 humtab <- getHumtab(x)
                 humtab <- humtab[is.na(Spine) | Spine %in% sort(unique(Spine))[j]]
                 # sort(unique(Spine))[j] is needed so that negative indices are used!
@@ -788,12 +789,12 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'numeric'),
 #' @usage humData[['regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'character', j = 'missing'), 
-function(x, i, removeEmpty = FALSE) {
+function(x, i, drop = FALSE) {
     # gets any record which contains match
   
     x <- subset(x, Record %in% unique(Record[. %~l% !!i]), .by = 'Piece', dataTypes = "D")
     
-    if (removeEmpty) x <- removeEmptyRecords(x)
+    if (drop) x <- removeEmptyRecords(x)
     
     removeEmptyPieces(x)
 })
@@ -803,7 +804,7 @@ function(x, i, removeEmpty = FALSE) {
 #' @usage humData[[ , 'regex']]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'), 
-          function(x, j, removeEmpty = TRUE) {
+          function(x, j, drop = TRUE) {
             #gets any spine which contains match
             
             exclusive <- all(grepl('^\\*\\*', j))
@@ -814,7 +815,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
               expr <- substituteName(expr, list(. = quote(Exclusive)))
             }
             
-            if (removeEmpty && exclusive) {
+            if (drop && exclusive) {
               humtab <- getHumtab(x)
               hits <- rlang::eval_tidy(rlang::expr(humtab[ , !!expr, by = Piece]))$V1
               humtab <- humtab[hits == TRUE]
@@ -822,7 +823,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
               
             } else {
               x <- rlang::eval_tidy(rlang::expr(subset(x, !!expr, .by = 'Piece', dataTypes = 'D')))
-              if (removeEmpty) x <- removeEmptySpines(x)
+              if (drop) x <- removeEmptySpines(x)
             }
             removeEmptyPieces(x)
 
@@ -840,11 +841,11 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'character'),
 #' @usage humData[[x:y, l:m]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'), 
-          function(x, i, j, removeEmpty = FALSE) {
+          function(x, i, j, drop = FALSE) {
             x <- x[[ , j]]
             x <- x[[i, ]]
             
-            if (removeEmpty) x <- removeEmptyRecords(removeEmptySpines(x))
+            if (drop) x <- removeEmptyRecords(removeEmptySpines(x))
             x
           })
 
@@ -858,7 +859,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'ANY', j = 'ANY'),
 #' @usage humData[[ , , regex]]
 #' @export
 setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'), 
-          function(x, i, j, ..., removeEmpty = TRUE) {
+          function(x, i, j, ..., drop = TRUE) {
            
             ldots <- list(...)
             names(ldots) <- gsub('^\\**', '', names(ldots))
@@ -876,7 +877,7 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
                 }
                 Spine %in% keepSpines
               })
-              if (removeEmpty) x <- removeEmptySpines(x)
+              if (drop) x <- removeEmptySpines(x)
             }
             
             

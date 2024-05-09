@@ -745,7 +745,7 @@ setMethod('[<-', c(x = 'struct', i = 'missing', j = 'ANY', value = 'struct'),
 
 
 setMethod('[<-', c(x = 'struct', i = 'ANY', j = 'ANY', value = 'struct'),
-          function(x, i, j, value, cartesian = FALSE) {
+          function(x, i, j, cartesian = FALSE, value) {
               checkSame(x, value, '[ i, j]<-')
               
               if (!hasdim(x)) .stop("You can't do a j (column-wise) assignment to {class(x)} object with no dimensions!")

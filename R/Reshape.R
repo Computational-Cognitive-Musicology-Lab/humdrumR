@@ -921,7 +921,7 @@ cleaveGraceNotes <- function(humdrumR) {
 #' However, if `rendEmpty` is set to `TRUE`, 
 #' *all* spines will be rended even if empty (all null data).
 #' 
-#' Note that, since differnt fields may be different data types, `rend()` will generally coerce the result to `character`.
+#' Note that, since different fields may be different data types, `rend()` will generally coerce the result to `character`.
 #' 
 #' ### Fields
 #' 
@@ -986,19 +986,25 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
   checks(removeRended, xTF)
   checks(rendEmpty, xTF)
   
-  humtab <- getHumtab(humdrumR, 'IMDd')
+  humtab <- getHumtab(humdrumR, 'LIMDd')
   
   exprs <- rlang::enexprs(...)
   fields <- if (length(exprs)) tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'Data', callname = 'rend()') else selectedFields(humdrumR)
   
   if (length(fields) == 1L) {
-    if (fields == 'Token') .stop("You haven't provide rend() and fields besides Token. You can't rend Token form itself.")
+    if (fields == 'Token') .stop("You haven't provide rend() and fields besides Token. You can't rend Token from itself.")
     fields <- unique(c('Token', fields))
   }
   
   fieldName <- fieldName %||% paste(fields, collapse = '.')
   
-  spines <- humtab[ , list(Field = fields, nonNull = sapply(.SD, \(field) any(!is.na(field)))), by = list(Piece, Spine), .SDcols = fields]
+  spines <- humtab[ , {
+    nonNull <- sapply(.SD, \(field) any(!is.na(field)))
+    if (!any(nonNull)) nonNull[1] <- TRUE
+           
+    list(Field = fields, nonNull = nonNull)
+    
+    }, by = list(Piece, Spine), .SDcols = fields]
   
   if (!rendEmpty) {
     spines[ , newSpine := cumsum(nonNull), by = Piece]
@@ -1044,9 +1050,8 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
                     })
   
   humtab <- data.table::rbindlist(humtabs, fill = TRUE)
+  putHumtab(humdrumR, overwriteEmpty = 'LIMDd') <- humtab
   
-  
-  putHumtab(humdrumR) <- humtab
   humdrumR <- updateFields(humdrumR)
   
   humdrumR <- reKey(humdrumR)
