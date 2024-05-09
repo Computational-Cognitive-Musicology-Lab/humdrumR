@@ -72,6 +72,7 @@ setMethod('show', 'distribution', \(object) print.distribution(object))
 #' @rdname distributions
 print.distribution <- function(dist, digits = if (inherits(dist, 'probability')) 3 else 1,
                                syntaxHighlight = humdrumRoption('syntaxHighlight'),
+                               printZeros = FALSE,
                                zeros = '.') {
   
   type <- dist_type(dist)
@@ -89,6 +90,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   sort <- dist@Sort
   
   X <- getValues(dist)
+  zero <- X == 0
   
   X <- if (type == 'p') prettyP(X, digits = digits, zeros = zeros) else prettyN(X, digits = digits, zeros = zeros)
   
@@ -108,7 +110,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   # check if we can widen
   iswide <- FALSE
-  printmat <- (if(sort == -0L && length(varnames) >= 2L) {
+  printmat <- (if(sort == 0L && length(varnames) >= 2L) {
     
     wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(varnames[2])), fill = attr(X, 'zerofill'), value.var = type))
     
@@ -126,10 +128,11 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
     iswide <- width < (options('width')$width - 10L)
     if (iswide) wide
   })  %||%  apply(rbind(colnames(dist), 
-                        as.matrix(dist), 
+                        as.matrix(if (printZeros) dist else dist[!zero, , drop = FALSE]), 
                         colnames(dist)), 
                   2, format, justify = 'right')
 
+  
   if (sort != 0L) {
     rank <- format(c('Rank', seq_len(nrow(printmat) - 2L), 'Rank'), 
                    justify = 'left')
@@ -137,10 +140,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
     printmat <- cbind(Rank = rank, printmat)
     
   }
-  
 
-  
-  
   if (syntaxHighlight) {
     
     syntax <- array('D', dim = dim(printmat))
@@ -762,7 +762,7 @@ count.table <- function(..., sort = FALSE,
   }
   
   
-  if (sort) dist <- sort.distribution(dist, decreasing = sort > 0L)
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
   dist
   
