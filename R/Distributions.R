@@ -29,23 +29,21 @@ distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
   df <- as.data.frame(x)
   args <- list(new('distribution', df, Sort = Sort))
   
-  if (class(type) == 'character') {
-    
-    args$Class <- if (type == 'p') 'probability' else 'count'
-    if (args$Class == 'probability') {
-      args$N <- N
-      args$Condition <- Condition
+  if (class(type) != 'character') {
+    type <- class(type)[1]
+    if (class(type) == 'probability') {
+      N <- type@N
+      Condition <- type@Condition
     }
-    
-  } else { # type must be a distribution
-    args$Class <- c(class(type))
-    if (args$Class == 'probability') {
-      args$N <- type@N
-      args$Condition <- type@Condition
-    }
-
+   
   }
-  do.call('new', args)
+    
+  if (type == 'p') {
+    new('probability', df, N = N, Condition = Condition, Sort = Sort)
+  } else {
+    new('count', df, Sort = Sort)
+  }
+
 }
   
 
@@ -72,7 +70,8 @@ setMethod('show', 'distribution', \(object) print.distribution(object))
 #' @rdname distributions
 print.distribution <- function(dist, digits = if (inherits(dist, 'probability')) 3 else 1,
                                syntaxHighlight = humdrumRoption('syntaxHighlight'),
-                               printZeros = FALSE,
+                               wide = TRUE,
+                               printZeros = TRUE,
                                zeros = '.') {
   
   type <- dist_type(dist)
@@ -110,7 +109,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   # check if we can widen
   iswide <- FALSE
-  printmat <- (if(sort == 0L && length(varnames) >= 2L) {
+  printmat <- (if(wide && sort == 0L && length(varnames) >= 2L) {
     
     wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(varnames[2])), fill = attr(X, 'zerofill'), value.var = type))
     
@@ -752,7 +751,7 @@ count.table <- function(..., sort = FALSE,
                         na.rm = FALSE,
                         .drop = FALSE) {
   tab <- list(...)[[1]]
-  type <- if (any(tab < 1 & tab > 0)) 'p' else 'n'
+  type <- if(all(tab <= 1 & tab >= 0) && any(!tab %in% c(0, 1))) 'p' else 'n'
   df <- as.data.frame(tab, responseName = type)
   
   dist <- if (type == 'p') {
@@ -904,36 +903,52 @@ pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE
 #' @rdname distributions
 #' @export
 pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
-            
-            if (length(dim(x)) == 1L) condition <- NULL
-            
-            if (na.rm) {
-              notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
-              x <- do.call('[', c(list(x), notna))
-            }
-            
-            if (is.character(condition)) {
-              condition <- pmatch(condition, varnames(x), duplicates.ok = FALSE)
-              condition <- condition[!is.na(condition)]
-              if (length(condition) == 0L) condition <- NULL
-            }
-            
-            ptab <- proportions(x, margin = condition) 
-            
-            
-            N <- marginSums(x, margin = condition)
-            
-            distribution(N, 'p')
-            # new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
-          }
+  
+  if (length(dim(x)) == 1L) condition <- NULL
+  
+  varnames <- names(dimnames(x))
+  
+  if (na.rm) {
+    notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
+    x <- do.call('[', c(list(x), notna))
+  }
+  
+  if (is.character(condition)) {
+    margin <- pmatch(condition, varnames, duplicates.ok = FALSE)
+    if (length(margin) == 0L) {
+      margin <- condition <- NULL
+    } else {
+      condition <- condition[!is.na(margin)]
+      margin <- margin[!is.na(margin)]
+    }
+    
+    
+  } else {
+    margin <- condition
+    if (!is.null(condition)) condition <- varnames[margin]
+  }
+  
+  ptab <- proportions(x, margin = margin) 
+  
+  pdist <- distribution(as.data.frame(ptab, responseName = 'p'), 
+                        'p',
+                        Condition = condition,
+                        N = c(marginSums(x, margin = condition)))
+  
+  
+  if (sort) dist <- sort(pdist, decreasing = sort > 0L)
+  
+  pdist
+  
+}
 
 
 
 conditional <- function(pdist, condition) {
   varnames <- varnames(pdist)
   if (any(!condition %in% varnames)) .stop("We can only calculate a conditional probability across an existing dimension/factor.",
-                                           "The <conditions|condition> {harvard(setdiff(varnames, condition), 'and')} are not dimensions of the given",
-                                           "distribution ({harvard(varnames, 'and')}).")
+                                           "The <conditions|condition> {harvard(setdiff(condition, varnames), 'and')} <are not dimensions|is not a dimension> of the given",
+                                           "distribution (the dimensions are {harvard(varnames, 'and')}).", ifelse = length(setdiff(condition, varnames)) > 1)
   
   if (!is.null(pdist@Condition)) {
     if (setequal(condition, pdist@Condition)) return(pdist)
