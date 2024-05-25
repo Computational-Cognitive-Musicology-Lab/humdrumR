@@ -21,7 +21,7 @@
 #' + `x` and `y` both numeric: scatter plot.
 #' + `x` numeric by itself: histogram.
 #' + `y` numeric by itself: quantile plot.
-#' + `x` is a [table][count()]: barplot.
+#' + `x` is a [table][count()]: barplot or heatmap.
 #' + `y` is numeric, `x` is `character` or `factor`: a violin plot.
 #' 
 #' `draw()` is simply a wrapper built on top of R's "base" plotting system.
@@ -159,8 +159,8 @@ setMethod('.draw', c('numeric', 'numeric'),
                              y = y, ylim = ylim,
                              log = log)
             
-            output$col <- prep_col(col, y, alpha = alpha, ...)
-            output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, ...)
+            output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
+            output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
             draw_quantiles(1, x, quantiles)
             draw_quantiles(2, y, quantiles)
             
@@ -217,7 +217,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             
             
             # actual plot of polygons
-            cols <- prep_col(col, x, alpha = alpha, ...)
+            cols <- prep_col(col, x, alpha = alpha, log = log, ...)
             ymin <- min(output$window$ylim[[1]])
             probs <- if (length(cols$col) == length(x)) {
               hists <- tapply(x, col, hist, breaks = histogram$breaks, plot = FALSE, simplify = FALSE)
@@ -284,15 +284,15 @@ setMethod('.draw', c('NULL', 'numeric'),
             
             if (violin) {
               
-              output$col <- prep_col(col, 1, alpha = alpha, ...)
+              output$col <- prep_col(col, 1, alpha = alpha, log = log, ...)
               draw_violins(list(y), horiz = FALSE, ..., col = output$col$col, quantiles = quantiles)
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
               
             } else {
               
-              output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch)
-              output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, ...)
+              output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
+              output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
               if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
                
               draw_quantiles(2, y, quantiles = quantiles)
@@ -347,7 +347,7 @@ setMethod('.draw', c('table', 'NULL'),
             
             ylim <- ylim %||% c(0, if (type == 'beside') max(x) else max(colSums(x)))
             
-            col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, ...)
+            col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, log = log, ...)
             
             barx <- barplot(x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), space = space,
                             axisnames = FALSE,
@@ -532,7 +532,7 @@ setMethod('.draw', c('discrete', 'numeric'),
                              y = y, ylim = ylim , 
                              log = gsub('y', '', log))
             
-            output$col <- prep_col_categories(col %||% categories, categories, ...)
+            output$col <- prep_col_categories(col %||% categories, categories, log = log, ...)
             
             draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = output$col$col, ...,
                          mean = mean, quantiles = quantiles, global_quantiles = global_quantiles)
@@ -568,7 +568,7 @@ setMethod('.draw', c('numeric', 'discrete'),
             if (center) tab <- sweep(tab, 1, rowMeans(tab), '-')
             
             output <- canvas(x, xlim, range(tab), ylim, log = gsub('y', '', log))
-            output$col <- prep_col_categories(col %||% categories, categories, alpha = alpha, ...)
+            output$col <- prep_col_categories(col %||% categories, categories, alpha = alpha, log = log, ...)
             
             if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
             
@@ -832,7 +832,7 @@ draw_heat <- function(tab, log = '', ...) {
   plot.new()
   plot.window(xlim, ylim, log = log)
   
-  col <- prep_col(c(tab), c(tab), ..., pch = NULL)
+  col <- prep_col(c(tab), c(tab), log = log, ..., pch = NULL)
   colarray <- array(col$col, dim = dim(tab))
   
   Map(\(i, j, c) {
@@ -1053,10 +1053,11 @@ lines
 #### prep_col ----
 
 
-prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast = FALSE, ...) {
+prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast = FALSE, log = '', ...) {
   checks(col, xlen1 | xmatch(categories))
   checks(contrast, xTF, seealso = c('?draw'))
   checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
+  
   col <- if (all(isColor(col))) {
     setalpha(col, alpha)
   } else {
@@ -1068,12 +1069,12 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
   }
   
   list(col = col,
-       legend = \(pos = 'right') legend_col_discrete(categories, col, pch, pos = pos))
+       legend = \(pos = 'right') legend_col_discrete(categories, col, pch, pos = pos, log = log))
 }
 
 setGeneric('prep_col', 
-           useAsDefault = function(col, var, pch, alpha, contrast, ncontinuous, ...) rep(col, length.out = n), # if there is no method
-           function(col, var, pch = 16, alpha = 1, contrast = FALSE, ncontinuous = 100, ...) { 
+           useAsDefault = function(col, var, pch, alpha, contrast, ncontinuous, log, ...) rep(col, length.out = n), # if there is no method
+           function(col, var, pch = 16, alpha = 1, contrast = FALSE, ncontinuous = 100, log = '', ...) { 
              if (is.list(col) && names(col)[1] == 'col') col <- col$col
              
              checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
@@ -1092,7 +1093,7 @@ setMethod('prep_col', c('discrete'),
           function(col, var, pch = 16, alpha = 1, contrast = FALSE, ...) {
             categories <- sort(unique(col))
             if (is.integer(col) && length(categories) > 10L) return(prep_col(as.numeric(col), var, 
-                                                                             alpha = alpha, pch, contrast = FALSE))
+                                                                             alpha = alpha, pch, contrast = FALSE, log = log))
             
             palette <- flatly_scale(length(categories), alpha = alpha, contrast = contrast)
             col <- palette[match(col, categories)]
@@ -1102,7 +1103,7 @@ setMethod('prep_col', c('discrete'),
           })
 
 setMethod('prep_col', c('numeric'),
-          function(col, var, pch = NULL, alpha = 1, ncontinuous = 100L, ...) {
+          function(col, var, pch = NULL, alpha = 1, ncontinuous = 100L, log = '', ...) {
             if (length(unique(col)) < 6) return(prep_col(factor(col),
                                                          var, alpha = alpha, contrast = FALSE))
             breaks <- seq(min(col), max(col), length.out = ncontinuous)
@@ -1112,7 +1113,7 @@ setMethod('prep_col', c('numeric'),
             
             
             list(col = cols,
-                 legend = \(pos) legend_col_continuous(col, palette, pch = pch))
+                 legend = \(pos) legend_col_continuous(col, palette, log = log, ...))
           })
 
 
@@ -1123,7 +1124,7 @@ legend_col_discrete <- function(categories, palette, pch, pos = 'right') {
          pch = pch[1], bty = 'n')
 }
 
-legend_col_continuous <- function(var, palette, pch = NULL) {
+legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, log = '') {
   
   yrange <- par('usr')[3:4]
   yrange <- ((yrange - mean(yrange)) * .9) + mean(yrange)
@@ -1132,22 +1133,30 @@ legend_col_continuous <- function(var, palette, pch = NULL) {
   yticks <- seq(yrange[1], yrange[2], length.out = length(ticks))
   
   y <- seq(yrange[1], yrange[2], length.out = length(palette))
-  ydiff <- diff(y)[1] / 2
-  
+  # if (grepl('y', log)) {
+  #   yticks <- 10^yticks
+  #   y <- 10^y
+  # }
   xpos <- par('usr')[1:2]
-  xpos <- xpos[1] + diff(xpos) * c(1.2, 1.3)
+  # if (grepl('x', log)) xpos <- 10^xpos
+  xpos <- xpos[1] + diff(xpos) * c(1.1, 1.12, 1.09)
   
-  if (is.null(pch)) {
+  on.exit({par(xlog = grepl('x', log), ylog = grepl('y', log))})
+  par(xlog = FALSE, ylog = FALSE)
+  
+  if (smooth_legend) {
+    ydiff <- diff(y) / 2
     for(i in seq_along(y)) {
-      polygon(c(xpos[1], xpos[2], xpos[2], xpos[1]),
-              y[i] + c(ydiff, ydiff, -ydiff, -ydiff),
+      polygon(c(xpos[3], xpos[2], xpos[2], xpos[3]),
+              y[i] + c(ydiff[i], ydiff[i], -ydiff[max(1L, i - 1)], -ydiff[max(1L, i - 1)]),
               col = palette[i], xpd = TRUE, border = NA)
     } 
   } else {
     points(rep(xpos[1], length(y)), y, pch = pch, col = palette, xpd = TRUE)
   }
- 
-  text(xpos[if (is.null(pch)) 2 else 1], yticks, ticks, pos = 4, cex = .4, xpd = TRUE)
+  
+  text(xpos[1], yticks, ticks, pos = 4, cex = .4, xpd = TRUE)
+  
   
   
 }
