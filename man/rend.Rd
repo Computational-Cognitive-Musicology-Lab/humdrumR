@@ -7,7 +7,7 @@
 \usage{
 rend(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty = FALSE)
 
-pivot_longer.humdrumR(data, cols, ...)
+\method{pivot_longer}{humdrumR}(data, cols, ...)
 }
 \arguments{
 \item{humdrumR}{\emph{\strong{HumdrumR data.}}
@@ -63,7 +63,7 @@ if would not be rended into two spines.
 However, if \code{rendEmpty} is set to \code{TRUE},
 \emph{all} spines will be rended even if empty (all null data).
 
-Note that, since differnt fields may be different data types, \code{rend()} will generally coerce the result to \code{character}.
+Note that, since different fields may be different data types, \code{rend()} will generally coerce the result to \code{character}.
 \subsection{Fields}{
 
 When you rend fields, a new field is generated.

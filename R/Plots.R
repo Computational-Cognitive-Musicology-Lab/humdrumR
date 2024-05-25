@@ -7,8 +7,8 @@
 
 #' Visualize data
 #' 
-#' The `draw()` function is humdrumR's goto plotting function.
-#' `draw()` can make a variety of graphs, depending on the type of data you give it.
+#' The `draw()` function is humdrumR's go-to plotting function.
+#' `draw()` will make a variety of graphs, depending on the type of data you give it.
 #' For the most part, `draw()` is simply a stylish, easy to use wrapper around
 #' the base-R graphics functions [plot()], [barplot()], and [hist()].
 #' 
@@ -24,21 +24,65 @@
 #' + `x` is a [table][count()]: barplot.
 #' + `y` is numeric, `x` is `character` or `factor`: a violin plot.
 #' 
-#' All the standard arguments to base-R plots can be used to customize plots.
-#' See [par()] for a full list.
+#' `draw()` is simply a wrapper built on top of R's "base" plotting system.
+#' This means that all the standard arguments to base-R plots can be used to customize plots 
+#' (See [par()] for a full list) or add to them (for example, using [points()] or [mtext()]).
+#' However, `draw()` has a number of special additional features, including easily plotting "facets" 
+#' (dividing data into multiple plots).
+#' Anything that `draw()` does can be done using normal base-R plotting functions ([plot()], [barplot()], etc.),
+#' but `draw()` makes making good looking plots faster and easier.
+#' 
+#' The following arguments are the main arguments used with `draw()`, 
+#' though not all arguments will have an effect in all types of plots.
+#' 
+#' + Base R:
+#'   + `x`: left/right position.
+#'   + `y`: up/down position.
+#'   + `col`: color.
+#'     + `humdrumR` implements a custom color scheme, 
+#'        which can be accessed by using whole number values for `col`.
+#'   + `cex`: point size.
+#'   + `log`: draw on log scale?
+#' + `draw()` specific:
+#'   + `alpha`: control transparency.
+#'   + `quantiles`: mark distribution quantiles.
+#'   + `facets`: divide the data into multiple plots.
+#'
+#' Specific methods also have additional arguments.
+#'
+#' ### Scatter Plot
+#' 
+#' If both `x` and `y` are real numbers ([numeric()] in R), a scatter plot is drawn.
+#' These vectors should be the same length, but if one of them is `length == 1`,
+#' all the points will simply be drawn in a line at that value.
+#' 
+#' + **Coloring points** (`col` arg)
+#'   + If a single `col` value is provided, all points are draw this color.
+#'   + If the `col` value is the same length as `x` and `y`, a scale of colors (either discrete of continuos)
+#'     is generated to match the values this variable takes.
+#'   + A legend is drawn.
+#' + **Point size** (`cex` arg)
+#'   + If a single `cex` value is provided, all points are drawn the same size.
+#'   + If the `cex` value is numeric and the same length as `x` and `y`, 
+#'     a scale of sizes is generated to match the values this variable takes.
+#'     This auto-sizing should scale with the area of the points.
+#'   + A legend is drawn.
+#' 
+#' 
 #' 
 #' 
 #' @export
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
                  axes = 1:4, legend = TRUE,
-                 main = '', sub = '') {
+                 main = '', sub = '', col = 1, cex = 1) {
   
   
   # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
-  oldpar <- par(family = 'Helvetica', col = 1, pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
+  oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
                 cex.axis =.7, mar = c(5, 5, 5, 5))
-  do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0]) 
+  
+  do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0])
   oldpalette <- palette(flatly)
   on.exit({par(oldpar) ; palette(oldpalette)})
   
@@ -75,7 +119,7 @@ draw <- function(x, y, facets = list(), ...,
                        axes = axes, legend = legend,
                        xexpr = xexpr, yexpr = yexpr))
   } 
-  output <- .draw(x, y, ...)
+  output <- .draw(x, y, ..., col = col, cex = cex)
   title(main = main, sub = sub)
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
@@ -687,7 +731,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
      text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
           cex = .4, xpd = TRUE, adj = c(1, .5))
      text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
-          cex = .4, xpd = TRUE, adj = c(0, 5))
+          cex = .4, xpd = TRUE, adj = c(0, .5))
    } else {
      text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
           cex = .4, xpd = TRUE, adj = c(.5, 1))
