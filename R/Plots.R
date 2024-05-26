@@ -44,6 +44,7 @@
 #'   + `cex`: point size.
 #'   + `log`: draw on log scale?
 #' + `draw()` specific:
+#'   + `square`: Should the plot be forced to be square?
 #'   + `alpha`: control transparency.
 #'   + `quantiles`: mark distribution quantiles.
 #'   + `facets`: divide the data into multiple plots.
@@ -74,13 +75,13 @@
 #' @export
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
-                 axes = 1:4, legend = TRUE,
+                 axes = 1:4, legend = TRUE, square = TRUE,
                  main = '', sub = '', col = 1, cex = 1) {
   
   
   # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
   oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
-                cex.axis =.7, mar = c(5, 5, 5, 5))
+                cex.axis =.7, mar = c(5, 5, 5, 5), pty = if(square) 's' else 'm')
   
   do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0])
   oldpalette <- palette(flatly)
@@ -115,7 +116,8 @@ draw <- function(x, y, facets = list(), ...,
     if (!is.list(facets)) facets <- list(facets)
     par(mar = c(2, 3, 1, 1), oma = c(5, 5, 5, 5))
     return(draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
-                       main = main, sub = sub, 
+                       main = main, sub = sub,
+                       col = col, cex = cex,
                        axes = axes, legend = legend,
                        xexpr = xexpr, yexpr = yexpr))
   } 
@@ -128,8 +130,12 @@ draw <- function(x, y, facets = list(), ...,
   
  
   if (legend) {
-    if (!is.null(output$col$legend)) output$col$legend()
-    if (!is.null(output$cex$legend)) output$cex$legend()
+    line <- 1
+    if (!is.null(output$col$legend)) {
+      output$col$legend(line = line)
+      line <- line + 3
+    }
+    if (!is.null(output$cex$legend)) output$cex$legend(line = line)
   } 
   
   return(invisible(output))
@@ -693,10 +699,15 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       
   }
   layout(1)
+  
   if (legend) {
-    if (!is.null(output$col$legend)) output$col$legend()
-    if (!is.null(output$cex$legend)) output$cex$legend()
-  }
+    line <- -2
+    if (!is.null(output$col$legend)) {
+      output$col$legend(line = line)
+      line <- line + 3
+    }
+    if (!is.null(output$cex$legend)) output$cex$legend(line = line)
+  } 
 }
 
 ## draw_x ----
@@ -861,6 +872,21 @@ draw_heat <- function(tab, log = '', ...) {
 
 
 ## draw()'s helpers ----
+
+line2user <- function(line, side, outer = FALSE) {
+  # gets coordinates of axis lines
+  if (outer) line <- line + par('mar')[side]
+  
+  lh <- par('cin')[2] * par('cex') * par('lheight')
+  x_off <- diff(grconvertX(c(0, lh), 'inches', 'npc'))
+  y_off <- diff(grconvertY(c(0, lh), 'inches', 'npc'))
+  switch(side,
+         `1` = grconvertY(-line * y_off, 'npc', 'user'),
+         `2` = grconvertX(-line * x_off, 'npc', 'user'),
+         `3` = grconvertY(1 + line * y_off, 'npc', 'user'),
+         `4` = grconvertX(1 + line * x_off, 'npc', 'user'),
+         stop("Side must be 1, 2, 3, or 4", call. = FALSE))
+}
 
 shrinklim <- function(lim, scale = .8) {
   ((lim - mean(lim)) * scale) + mean(lim)
@@ -1069,7 +1095,7 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
   }
   
   list(col = col,
-       legend = \(pos = 'right') legend_col_discrete(categories, col, pch, pos = pos, log = log))
+       legend = \(line = 1) legend_col_discrete(categories, col, pch, line = line))
 }
 
 setGeneric('prep_col', 
@@ -1099,7 +1125,7 @@ setMethod('prep_col', c('discrete'),
             col <- palette[match(col, categories)]
             
             list(col = col,
-                 legend = \(pos = 'right')  legend_col_discrete(categories, palette, pch, pos = pos))
+                 legend = \(line = 1)  legend_col_discrete(categories, palette, pch, line = line))
           })
 
 setMethod('prep_col', c('numeric'),
@@ -1113,51 +1139,43 @@ setMethod('prep_col', c('numeric'),
             
             
             list(col = cols,
-                 legend = \(pos) legend_col_continuous(col, palette, log = log, ...))
+                 legend = \(line = 1) legend_col_continuous(col, palette, ..., line = line))
           })
 
 
 
-legend_col_discrete <- function(categories, palette, pch, pos = 'right') {
-  legend(pos, TRUE, legend = categories, col = palette, 
-         inset = -.2, xpd = TRUE,
-         pch = pch[1], bty = 'n')
+legend_col_discrete <- function(categories, palette, pch, line = 1) {
+  
+  xpos <- line2user(c(line, line + .4), 4)
+  
+  y <- grconvertY(seq(.1, .9, along = categories), 'npc', 'user')
+  
+  points(rep(xpos[1], length(y)), y, pch = pch, xpd = TRUE, col = palette)
+  text(xpos[2], y, categories, pos = 4, cex = .6, xpd = NA)
+
 }
 
-legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, log = '') {
+legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, line = 1) {
   
-  yrange <- par('usr')[3:4]
-  yrange <- ((yrange - mean(yrange)) * .9) + mean(yrange)
+  col.labs <- pretty(var, min.n = 5, n = 10) |> format(big.mark = ',', digits = 2)
   
-  ticks <- pretty(var, min.n = 5, n = 10)
-  yticks <- seq(yrange[1], yrange[2], length.out = length(ticks))
+  ylabs <- grconvertY(seq(.1, .9, along = col.labs), 'npc', 'user')
+  ycols <- grconvertY(seq(.1, .9, along = palette), 'npc', 'user')
   
-  y <- seq(yrange[1], yrange[2], length.out = length(palette))
-  # if (grepl('y', log)) {
-  #   yticks <- 10^yticks
-  #   y <- 10^y
-  # }
-  xpos <- par('usr')[1:2]
-  # if (grepl('x', log)) xpos <- 10^xpos
-  xpos <- xpos[1] + diff(xpos) * c(1.1, 1.12, 1.09)
-  
-  on.exit({par(xlog = grepl('x', log), ylog = grepl('y', log))})
-  par(xlog = FALSE, ylog = FALSE)
+  xpos <- line2user(c(line, line + .4), 4)
   
   if (smooth_legend) {
-    ydiff <- diff(y) / 2
-    for(i in seq_along(y)) {
-      polygon(c(xpos[3], xpos[2], xpos[2], xpos[3]),
-              y[i] + c(ydiff[i], ydiff[i], -ydiff[max(1L, i - 1)], -ydiff[max(1L, i - 1)]),
+    ydiff <- diff(ycols) / 2
+    for(i in seq_along(ycols)) {
+      polygon(c(xpos[1], xpos[2], xpos[2], xpos[1]),
+              ycols[i] + c(ydiff[i], ydiff[i], -ydiff[max(1L, i - 1)], -ydiff[max(1L, i - 1)]),
               col = palette[i], xpd = TRUE, border = NA)
     } 
   } else {
-    points(rep(xpos[1], length(y)), y, pch = pch, col = palette, xpd = TRUE)
+    points(rep(xpos[1], length(ycols)), ycols, pch = pch, col = palette, xpd = TRUE)
   }
   
-  text(xpos[1], yticks, ticks, pos = 4, cex = .4, xpd = TRUE)
-  
-  
+  text(xpos[2], ylabs, col.labs, pos = 4, cex = .6, xpd = NA)
   
 }
 
@@ -1166,18 +1184,19 @@ legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE
 
 
 
-prep_cex <- function(x, y, cex = NULL, col, ...) {
+prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
   size <- max(length(x), length(y))
   checks(cex, xnull | (xpositive & (xlen1 | xlength(size))), seealso = '?draw')
  
-  
   output <- list(cex = cex)
   if (is.null(cex)) {
     output$cex <- cex_density(x, y)
     
   } else {
     if (length(cex) == size) {
-      val_legend <- 2^seq(log(min(cex), 2), log(max(cex), 2), length.out = 9)
+      
+      # val_legend <- 2^seq(log(min(cex), 2), log(max(cex), 2), length.out = 9) 
+      val_legend <- 2^pretty(log(range(cex), 2), min.n = 5, n = 10) # this must be calculated before cex is altered
       
       cex <- sqrt(cex) 
       
@@ -1195,17 +1214,12 @@ prep_cex <- function(x, y, cex = NULL, col, ...) {
       
       
       # scale to center on .5
-
       scale <- exp(mean(log(cex))) 
       cex_legend <- sqrt(val_legend) / scale
       cex <- cex / scale
       
-        
       output$cex <- cex 
-      output$legend <- \(pos = 'right') legend(pos, inset = -.1, col = col[1], pch = 16, 
-                                               legend = format(val_legend, big.mark = ',', digits = 2), 
-                                               pt.cex = cex_legend,
-                                               text.col = 'black', xpd = TRUE, bty = 'n')
+      output$legend <- \(line = 1) legend_cex_continuous(val_legend, cex_legend, col, pch, line = line)
     } 
   }
   
@@ -1223,10 +1237,22 @@ cex_density <- function(x, y) {
 
   1 - (maxdensity * .225)
   
-  
 }
 
-#### prep_layout
+legend_cex_continuous <- function(val, cex, col, pch, line = 1) {
+  
+  lab <- format(val, big.mark = ',', digits = 2)
+  
+  ypos <- grconvertY(seq(.1, .9, along = val), 'npc', 'user')
+  
+  xpos <- line2user(c(line, line + .4), 4)
+  
+  points(rep(xpos[1], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = TRUE)
+  
+  text(xpos[2], ypos, lab, pos = 4, cex = .6, xpd = NA)
+}
+  
+#### prep_layout ----
 
 prep_layout <- function(facets) {
   browser()
