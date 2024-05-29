@@ -75,13 +75,15 @@
 #' @export
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
-                 axes = 1:4, legend = TRUE, square = TRUE,
+                 axes = 1:4, legend = TRUE, square = FALSE,
                  main = '', sub = '', col = 1, cex = 1) {
   
   
   # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
   oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
-                cex.axis =.7, mar = c(5, 5, 5, 5), pty = if(square) 's' else 'm')
+                mar = c(5, 5, 5, 5), pty = if(square) 's' else 'm')
+  
+  marginLines <- setMargins(.15, square = square)
   
   do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0])
   oldpalette <- palette(flatly)
@@ -114,7 +116,7 @@ draw <- function(x, y, facets = list(), ...,
    
   if (length(facets)) {
     if (!is.list(facets)) facets <- list(facets)
-    par(mar = c(2, 3, 1, 1), oma = c(5, 5, 5, 5))
+    # par(mar = c(2, 3, 1, 1), oma = c(5, 5, 5, 5))
     return(draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
                        main = main, sub = sub,
                        col = col, cex = cex,
@@ -126,7 +128,7 @@ draw <- function(x, y, facets = list(), ...,
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
-  humaxes(output$axes, output$axisNames, axes)
+  humaxes(output$axes, output$axisNames, axes, marginLines)
   
  
   if (legend) {
@@ -607,10 +609,10 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
     .stop('Facets variables must be vectors of the same length as the x/y plotting variables.')
   }
   
-  oldpar <- par(oma = c(2, 3, 2, 3), mar = c(0, 0, 0, 0))
+  oldpar <- par(omi = c(1, 1, 1, 1), mar = c(0, 0, 0, 0))
   on.exit({
-    layout(1)
     title(main, sub, outer = TRUE, line = 0)
+    layout(1)
     par(oldpar)
     })
   
@@ -621,9 +623,10 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
-  args <- list(x = x, y = y, ..., col = output$col$col, cex = output$cex$cex,
-               xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]],
-               log = output$window$log)
+  args <- list(x = x, y = y,  log = output$window$log,
+               ..., col = output$col$col, cex = output$cex$cex,
+               xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]])
+  args <- args[!duplicated(names(args))]
   
   
   # Determine layout
@@ -666,8 +669,8 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       # set margins
       margin <- c(bottom.mar[cur], left.mar[cur], top.mar[cur], right.mar[cur])
       margin <- ifelse(margin, mar['outside'], mar['inside'])
-      par(mar = margin)
-      
+      # par(mar = margin)
+      par(mar = c(.5, .5, .5, .5))
       
       # prepare args and draw
       if (table[cur] > 0) {
@@ -685,6 +688,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
                 ifelse(1:4 %in% curaxes, output$axisNames, vector('list', 4L)),
                 curaxes)
       } else {
+        # empty facet
         plot.new() # only needed for writing facet levels in margins
       }
       
@@ -698,15 +702,13 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       
       
   }
-  layout(1)
-  
   if (legend) {
-    line <- -2
+    line <- 1
     if (!is.null(output$col$legend)) {
-      output$col$legend(line = line)
+      output$col$legend(line = line, outer = TRUE)
       line <- line + 3
     }
-    if (!is.null(output$cex$legend)) output$cex$legend(line = line)
+    if (!is.null(output$cex$legend)) output$cex$legend(line = line, outer = TRUE)
   } 
 }
 
@@ -873,6 +875,98 @@ draw_heat <- function(tab, log = '', ...) {
 
 ## draw()'s helpers ----
 
+
+### creating stable margins ----
+
+setMargins <- function(prop = .1, square = FALSE) {
+  
+
+  devsize <- par('din')
+  xsize <- devsize[1]
+  ysize <- devsize[2]
+  
+  omi <- prop * c(ysize, xsize, ysize, xsize)
+  
+  if (square) {
+    if (xsize < ysize) {
+      omi[c(1, 1)] <- omi[c(1, 3)] + (xsize * (1 - prop)) 
+      
+    } else {
+      omi[c(2, 4)] <- omi[c(2, 4)] + abs(xsize * (1 - prop * 2) - ysize * (1 - prop * 2)) / 2
+    }
+      
+  }
+  
+  par(omi = omi, mar = c(0, 0, 0, 0))
+  
+
+  # scale cex to size of device
+  xarea <- xsize * ysize
+  
+  magic <- .1488 # this seems to be the linear slope between cex and strheight('M')
+  unity <- 48 # arbitrary. For example, a 6in x 8in plot
+  
+  cex <- sqrt(xarea /  (unity / (magic^2))) / magic
+  par(cex = cex)
+  
+  
+  function(side, mar_p = .5, fig_p = .5, type = 'user') {
+    xedges <- grconvertX(c(0,1), 'nfc', 'inches')
+    yedges <- grconvertY(c(0,1), 'nfc', 'inches')
+    
+    xmarsize <- abs(grconvertX(c(0, 1), 'ndc', 'inches') - xedges)
+    ymarsize <- abs(grconvertY(c(0, 1), 'ndc', 'inches') - yedges)
+    
+    mar <- switch(side,
+                  yedges[1] - ymarsize[1] * mar_p,
+                  xedges[1] - xmarsize[1] * mar_p,
+                  yedges[2] + ymarsize[2] * mar_p,
+                  xedges[2] + xmarsize[2] * mar_p) 
+    
+    coor <- if (side %in% c(1, 3)) {
+      list(x = grconvertX(fig_p, 'nfc', type), y =  grconvertY(mar, 'inches', type))
+    } else {
+      list(x = grconvertX(mar, 'inches', 'user'), y = grconvertY(fig_p, 'nfc', type))
+    }
+    
+    do.call('match_size', coor)
+    
+    
+  }
+  
+  
+}
+
+otext <- function(marginLines) {
+  function(text, side, mar_p, fig_p, las = 0, ...) {
+    coor <- marginLines(side, mar_p, fig_p) 
+    
+    srt <- switch(las + 1,
+                  c(0, 90, 0, 270)[side],
+                  0,
+                  c(90, 0, 90, 0)[side],
+                  90)
+    text(coor$x, coor$y, text, srt = srt, xpd = NA)
+  }
+} 
+
+### other ----
+
+outerInches <- function(inches, side) {
+  
+  grconvert <- if (side %in% c(1, 3)) grconvertY else grconvertX
+  edge <- if (side %in% c(1, 2)) -1 else 1
+  
+  edgeinches <- grconvert(max(edge, 0), 'nic', 'inches')
+  
+  
+  inches <- edgeinches + inches * edge
+  
+  grconvert(inches, 'inches', 'user')
+  
+  
+}
+
 line2user <- function(line, side, outer = FALSE) {
   # gets coordinates of axis lines
   if (outer) line <- line + par('mar')[side]
@@ -944,19 +1038,23 @@ logcheck <- function(log, x = '', y = '') {
   
 }
 
-humaxes <- function(axesframe, axisNames, axes = 1:4) {
-  if (length(axesframe)) do.call('Map', c(list(humaxis), axesframe[side %in% axes]))
+humaxes <- function(axesframe, axisNames, axes = 1:4, marginLines) {
+  if (length(axesframe)) do.call('mapply', c(list(humaxis, MoreArgs = list(marginLines = marginLines)), 
+                                             axesframe[side %in% axes]))
+  
   
   Map(axisNames, 1:4, f = \(label, side) {
     if (!is.null(label)) {
-      mtext(label,  side,  line = 3,
-            las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
+      otext(marginLines)(label, side, mar_p = .5, fig_p = .5, col = par('col.lab'), 
+                         las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
+      # mtext(label,  side,  line = 3,
+            # las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
     } })
   
   
 }
 
-humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis')) {
+humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis'), marginLines) {
   # this function attempts to draw axis labels that always fit on the screen
   # but never overlap
   las <- 1
@@ -988,7 +1086,14 @@ humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis')) {
   }
   
   
-  axis(side, ticks, labels, line = line - 1, las = las, tick = FALSE, cex.axis = cex, gap.axis = .1)
+  line <- marginLines(side, .1, type = 'user')
+  line <- if (sides) {
+    text(line$x, ticks, labels, cex = cex, xpd = NA, col = par('cex.axis'))
+  } else {
+    text(ticks, line$y, labels, cex = cex, xpd = NA, col = par('cex.axis'))
+    
+  }
+  # axis(side, ticks, labels, line = line, las = las, tick = FALSE, cex.axis = cex, gap.axis = .1)
   
   
   
@@ -1053,6 +1158,14 @@ smartjitter <- function(x) {
 # 4 -> legend / sub title
 # 5 -> title
 
+drawlines <- function(n = 10, outer = FALSE) {
+  for (side in 1:4) {
+    for (line in 0:n) {
+      mtext(paste0('___', line, '___'), side = side, line = line, outer = outer)
+    }
+  }
+}
+
 axis.lines <- function() {
   cexs <- par(c('cex.axis', 'cex.lab', 'cex.sub'))
   
@@ -1095,7 +1208,7 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
   }
   
   list(col = col,
-       legend = \(line = 1) legend_col_discrete(categories, col, pch, line = line))
+       legend = \(line = 1, outer = FALSE) legend_col_discrete(categories, col, pch, line = line, outer = outer))
 }
 
 setGeneric('prep_col', 
@@ -1125,7 +1238,7 @@ setMethod('prep_col', c('discrete'),
             col <- palette[match(col, categories)]
             
             list(col = col,
-                 legend = \(line = 1)  legend_col_discrete(categories, palette, pch, line = line))
+                 legend = \(line = 1, outer = FALSE)  legend_col_discrete(categories, palette, pch, line = line, outer = outer))
           })
 
 setMethod('prep_col', c('numeric'),
@@ -1139,37 +1252,37 @@ setMethod('prep_col', c('numeric'),
             
             
             list(col = cols,
-                 legend = \(line = 1) legend_col_continuous(col, palette, ..., line = line))
+                 legend = \(line = 1, outer = FALSE) legend_col_continuous(col, palette, ..., line = line, outer = outer))
           })
 
 
 
-legend_col_discrete <- function(categories, palette, pch, line = 1) {
+legend_col_discrete <- function(categories, palette, pch, line = 1, outer = FALSE) {
   
-  xpos <- line2user(c(line, line + .4), 4)
+  xpos <- line2user(c(line, line + .4), 4, outer = outer)
   
-  y <- grconvertY(seq(.1, .9, along = categories), 'npc', 'user')
+  y <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
   
-  points(rep(xpos[1], length(y)), y, pch = pch, xpd = TRUE, col = palette)
+  points(rep(xpos[1], length(y)), y, pch = pch, xpd = NA, col = palette)
   text(xpos[2], y, categories, pos = 4, cex = .6, xpd = NA)
 
 }
 
-legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, line = 1) {
+legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, line = 1, outer = FALSE) {
   
   col.labs <- pretty(var, min.n = 5, n = 10) |> format(big.mark = ',', digits = 2)
   
-  ylabs <- grconvertY(seq(.1, .9, along = col.labs), 'npc', 'user')
-  ycols <- grconvertY(seq(.1, .9, along = palette), 'npc', 'user')
+  ylabs <- grconvertY(seq(.2, .8, along = col.labs), 'ndc', 'user')
+  ycols <- grconvertY(seq(.2, .8, along = palette), 'ndc', 'user')
   
-  xpos <- line2user(c(line, line + .4), 4)
+  xpos <- line2user(c(line, line + .4), 4, outer = outer)
   
   if (smooth_legend) {
     ydiff <- diff(ycols) / 2
     for(i in seq_along(ycols)) {
       polygon(c(xpos[1], xpos[2], xpos[2], xpos[1]),
               ycols[i] + c(ydiff[i], ydiff[i], -ydiff[max(1L, i - 1)], -ydiff[max(1L, i - 1)]),
-              col = palette[i], xpd = TRUE, border = NA)
+              col = palette[i], xpd = NA, border = NA)
     } 
   } else {
     points(rep(xpos[1], length(ycols)), ycols, pch = pch, col = palette, xpd = TRUE)
@@ -1239,15 +1352,15 @@ cex_density <- function(x, y) {
   
 }
 
-legend_cex_continuous <- function(val, cex, col, pch, line = 1) {
+legend_cex_continuous <- function(val, cex, col, pch, line = 1, outer = FALSE) {
   
   lab <- format(val, big.mark = ',', digits = 2)
   
-  ypos <- grconvertY(seq(.1, .9, along = val), 'npc', 'user')
+  ypos <- grconvertY(seq(.2, .8, along = val), 'ndc', 'user')
   
-  xpos <- line2user(c(line, line + .4), 4)
+  xpos <- line2user(c(line, line + .4), 4, outer = outer)
   
-  points(rep(xpos[1], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = TRUE)
+  points(rep(xpos[1], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = NA)
   
   text(xpos[2], ypos, lab, pos = 4, cex = .6, xpd = NA)
 }
