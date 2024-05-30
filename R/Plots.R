@@ -75,7 +75,7 @@
 #' @export
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
-                 axes = 1:4, legend = TRUE, square = FALSE,
+                 axes = 1:4, legend = TRUE, aspect = NULL,
                  main = '', sub = '', col = 1, cex = 1) {
   
   
@@ -83,7 +83,7 @@ draw <- function(x, y, facets = list(), ...,
   oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
                 mar = c(5, 5, 5, 5), pty = if(square) 's' else 'm')
   
-  marginLines <- setMargins(.15, square = square)
+  marginLines <- setMargins(.15, aspect)
   
   do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0])
   oldpalette <- palette(flatly)
@@ -878,33 +878,39 @@ draw_heat <- function(tab, log = '', ...) {
 
 ### creating stable margins ----
 
-setMargins <- function(prop = .1, square = FALSE) {
+setMargins <- function(prop = .1, aspect = NULL) {
+  
+  
+  
   
 
   devsize <- par('din')
-  xsize <- devsize[1]
-  ysize <- devsize[2]
   
-  omi <- prop * c(ysize, xsize, ysize, xsize)
+  figsize <- devsize * (1 - prop)
+  figmar <- (devsize * prop) / 2
   
-  if (square) {
-    if (xsize < ysize) {
-      omi[c(1, 1)] <- omi[c(1, 3)] + (xsize * (1 - prop)) 
-      
+  figasp <- figsize[1] / figsize[2]
+  
+  if (!is.null(aspect)) {
+    if (aspect >= figasp) {
+      figsize[2] <- figsize[1] / aspect 
     } else {
-      omi[c(2, 4)] <- omi[c(2, 4)] + abs(xsize * (1 - prop * 2) - ysize * (1 - prop * 2)) / 2
+      figsize[1] <- figsize[2] * aspect
     }
-      
+    
   }
   
-  par(omi = omi, mar = c(0, 0, 0, 0))
+  fullmar <- (devsize - figsize) / 2
+  
+  par(omi = fullmar[c(2, 1, 2, 1)], mar = c(0, 0, 0, 0))
   
 
   # scale cex to size of device
-  xarea <- xsize * ysize
+  # xarea <- prod(devsize)
+  xarea <- prod(figsize)
   
   magic <- .1488 # this seems to be the linear slope between cex and strheight('M')
-  unity <- 48 # arbitrary. For example, a 6in x 8in plot
+  unity <- 36 # arbitrary. For example, a 6in x 8in plot
   
   cex <- sqrt(xarea /  (unity / (magic^2))) / magic
   par(cex = cex)
@@ -914,14 +920,14 @@ setMargins <- function(prop = .1, square = FALSE) {
     xedges <- grconvertX(c(0,1), 'nfc', 'inches')
     yedges <- grconvertY(c(0,1), 'nfc', 'inches')
     
-    xmarsize <- abs(grconvertX(c(0, 1), 'ndc', 'inches') - xedges)
-    ymarsize <- abs(grconvertY(c(0, 1), 'ndc', 'inches') - yedges)
+    xmarsize <- figmar[1] # abs(grconvertX(c(0, 1), 'ndc', 'inches') - xedges)
+    ymarsize <- figmar[2] # abs(grconvertY(c(0, 1), 'ndc', 'inches') - yedges)
     
     mar <- switch(side,
-                  yedges[1] - ymarsize[1] * mar_p,
-                  xedges[1] - xmarsize[1] * mar_p,
-                  yedges[2] + ymarsize[2] * mar_p,
-                  xedges[2] + xmarsize[2] * mar_p) 
+                  yedges[1] - ymarsize * mar_p,
+                  xedges[1] - xmarsize * mar_p,
+                  yedges[2] + ymarsize * mar_p,
+                  xedges[2] + xmarsize * mar_p) 
     
     coor <- if (side %in% c(1, 3)) {
       list(x = grconvertX(fig_p, 'nfc', type), y =  grconvertY(mar, 'inches', type))
@@ -1061,7 +1067,7 @@ humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis'), margi
   sides <- side %% 2 == 0L
   
   labels <- names(ticks) %||% ticks
-  
+  browser()
   dist <- local({
     if (par('ylog') && sides || (par('xlog') && !sides)) {
       ticks <- ticks
@@ -1074,7 +1080,7 @@ humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis'), margi
   if (!sides) {
     widths <- strwidth(labels, cex = cex)
     toowide <- widths > dist
-    if (any(toowide))las <- (las + 2) %% 4
+    if (any(toowide)) las <- (las + 2) %% 4
   } else {
     toowide <- FALSE
   }
