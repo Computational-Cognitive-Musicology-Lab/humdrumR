@@ -739,29 +739,39 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
       usr <- par('usr')
       limits <- if (sides) usr[1:2] else usr[3:4]
     }
-    lineArgs <- list(limits[1], limits[2], quants, quants, lty = 'dashed', lwd = .3, col = rgb(0, 0, 0, .5))
-    names(lineArgs)[1:4] <- if (sides) {
-      c('x0', 'x1', 'y0', 'y1')
-    } else {
-      c('y0', 'y1', 'x0', 'x1')
-    }
-    do.call(graphics::segments, lineArgs)
+  
     
-    
+   # labels
    q <- paste0(round(quantiles       * 100, 1), '%')
    p <- paste0(round((1 - quantiles) * 100, 1), '%')
     
    if (sides) {
      text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
-          cex = .4, xpd = TRUE, adj = c(1, .5))
+          cex = .4, xpd = NA, adj = c(0, .5))
      text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
-          cex = .4, xpd = TRUE, adj = c(0, .5))
+          cex = .4, xpd = NA, adj = c(1, .5))
    } else {
      text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
-          cex = .4, xpd = TRUE, adj = c(.5, 1))
+          cex = .4, xpd = NA, adj = c(.5, 1))
      text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), 
-          cex = .4, xpd = TRUE, adj = c(.5, 0))
+          cex = .4, xpd = NA, adj = c(.5, 0))
    }
+   
+   # lines
+   strwidth <- if (sides) {
+     max(strwidth(paste0('|', names(quants)), cex = .4) )
+   } else {
+     max(strheight(names(quants), cex = .4))
+   }
+   lineArgs <- list(limits[1] + strwidth,
+                    limits[2] - strwidth, quants, quants, lty = 'dashed', 
+                    lwd = .3, col = rgb(0, 0, 0, .5))
+   names(lineArgs)[1:4] <- if (sides) {
+     c('x0', 'x1', 'y0', 'y1')
+   } else {
+     c('y0', 'y1', 'x0', 'x1')
+   }
+   do.call(graphics::segments, lineArgs)
     
     
   }
