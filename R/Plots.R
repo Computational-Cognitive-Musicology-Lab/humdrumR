@@ -143,12 +143,13 @@ draw <- function(x, y, facets = list(), ...,
  
   if (is.character(legend) || legend) {
     side <- 4
+    if (is.logical(legend)) legend <- ''
     legend <- rep(legend, length.out = 2)
     if (!is.null(output$col$legend)) {
-      output$col$legend(side = side, marginLines = marginLines, col.legend = legend[2], ...)
+      output$col$legend(side = side, marginLines = marginLines, col.legend = legend[2])
       side <- side - 2
     }
-    if (!is.null(output$cex$legend)) output$cex$legend(side = side, marginLines = marginLines, cex.legend = legend[1], ...)
+    if (!is.null(output$cex$legend)) output$cex$legend(side = side, marginLines = marginLines, cex.legend = legend[1])
   } 
   
   return(invisible(output))
@@ -937,7 +938,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   par(cex = cex)
   
   # everything is currently inches
-  lines <- c(0, .25, .5, .75, 1) * min(figmar)
+  lines <- c(0, .4, .7, .85, 1) * min(figmar)
   
   marginLines <- list(grconvertY(0, 'nfc', 'inches') - lines,
                       grconvertX(0, 'nfc', 'inches') - lines,
