@@ -78,9 +78,7 @@ draw <- function(x, y, facets = list(), ...,
                  axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
                  main = '', sub = '', col = 1, cex = 1) {
   
-  checks(cex, xlen1 & xnumeric & xmin(.001) & xmax(20))
-  checks(margin, xlen1 & xnumeric & xmin(.1) & xmax(.4))
-  checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)))
+
   
   # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
   oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
@@ -95,7 +93,7 @@ draw <- function(x, y, facets = list(), ...,
   on.exit({par(oldpar) ; palette(oldpalette)})
   
   
-  checks(legend, xTF)
+  checks(legend, xTF | (xcharacter & xminlength(1) & xmaxlength(2)))
   checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
   checks(main, xatomic & xlen1)
   checks(sub, xatomic & xlen1)
@@ -143,13 +141,14 @@ draw <- function(x, y, facets = list(), ...,
   humaxes(output$axes, output$axisNames, axes, marginLines)
   
  
-  if (legend) {
-    line <- 1
+  if (is.character(legend) || legend) {
+    side <- 4
+    legend <- rep(legend, length.out = 2)
     if (!is.null(output$col$legend)) {
-      output$col$legend(line = line)
-      line <- line + 3
+      output$col$legend(side = side, marginLines = marginLines, col.legend = legend[2], ...)
+      side <- side - 2
     }
-    if (!is.null(output$cex$legend)) output$cex$legend(line = line)
+    if (!is.null(output$cex$legend)) output$cex$legend(side = side, marginLines = marginLines, cex.legend = legend[1], ...)
   } 
   
   return(invisible(output))
@@ -892,7 +891,8 @@ draw_heat <- function(tab, log = '', ...) {
 
 setMargins <- function(margin.percent = .2, aspect = NULL) {
   
-  
+  checks(margin.percent, xlen1 & xnumeric & xmin(.1) & xmax(.4), argname = 'margin', seealso = '?draw()')
+  checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)), seealso = '?draw()')
   
 
   devsize <- par('din')
@@ -1058,13 +1058,13 @@ humaxes <- function(axesframe, axisNames, axes = 1:4, marginLines) {
   Map(axisNames, 1:4, f = \(label, side) {
     if (!is.null(label)) {
       marginLab(marginLines, label, side, col = par('col.lab'), 
-                las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
+                las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 0  else  1)
     } })
   
   
 }
 
-humaxis <- function(side, ticks, lab = 0, cex = par('cex.axis'), marginLines) {
+humaxis <- function(side, ticks, line = 1, lab = 0, cex = par('cex.axis'), marginLines) {
   # this function attempts to draw axis labels that always fit on the screen
   # but never overlap
   las <- 1
@@ -1107,8 +1107,8 @@ checkStrFit_13 <- function(slotSize, ticks, labels, cex) {
   strWidth  <- strwidth(labels, units = 'inches', cex = cex)
   strHeight <- strheight(labels, units = 'inches', cex = cex)
   
-  strStart <- grconvertY(ticks, 'user', 'inches') - (strWidth / 2)
-  strEnd   <- grconvertY(ticks, 'user', 'inches') + (strWidth / 2)
+  strStart <- grconvertX(ticks, 'user', 'inches') - (strWidth / 2)
+  strEnd   <- grconvertX(ticks, 'user', 'inches') + (strWidth / 2)
   
   tootall <- max(strHeight) >= slotSize
   overlap <- tail(strStart, -1) <= head(strEnd, -1)
@@ -1123,8 +1123,8 @@ checkStrFit_24 <- function(slotSize, ticks, labels, cex) {
   strWidth  <- strwidth(labels, units = 'inches', cex = cex)
   strHeight <- strheight(labels, units = 'inches', cex = cex)
   
-  strTop    <- grconvertX(ticks, 'user', 'inches') + (strHeight / 2)
-  strBottom <- grconvertX(ticks, 'user', 'inches') - (strHeight / 2)
+  strTop    <- grconvertY(ticks, 'user', 'inches') + (strHeight / 2)
+  strBottom <- grconvertY(ticks, 'user', 'inches') - (strHeight / 2)
   
   toowide <- max(strWidth) >= slotSize
   overlap <- tail(strBottom, -1) <= head(strTop, -1)
@@ -1147,8 +1147,8 @@ canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
   
   axes <- data.table(side = 1:2,
                      ticks = list(axTicks(1, log = grepl('x', log)),
-                                  axTicks(2, log = grepl('y', log))))
-                     # line = 1L)
+                                  axTicks(2, log = grepl('y', log))),
+                     line = 1L)
   
   window <- data.table(Screen = as.integer(screen()),
                        xlim = list(xlim), ylim = list(ylim),
@@ -1240,7 +1240,8 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
   }
   
   list(col = col,
-       legend = \(line = 1, outer = FALSE) legend_col_discrete(categories, col, pch, line = line, outer = outer))
+       legend = \(side = 3, marginLines, col.legend = '') legend_col_discrete(categories, col, pch, col.legend = col.legend,
+                                                                      side = side, marginLines = marginLines))
 }
 
 setGeneric('prep_col', 
@@ -1270,7 +1271,8 @@ setMethod('prep_col', c('discrete'),
             col <- palette[match(col, categories)]
             
             list(col = col,
-                 legend = \(line = 1, outer = FALSE)  legend_col_discrete(categories, palette, pch, line = line, outer = outer))
+                 legend = \(side = 3, marginLines, col.legend = '')  legend_col_discrete(categories, palette, pch, col.legend = col.legend,
+                                                                        side = side, marginLines = marginLines))
           })
 
 setMethod('prep_col', c('numeric'),
@@ -1284,30 +1286,32 @@ setMethod('prep_col', c('numeric'),
             
             
             list(col = cols,
-                 legend = \(line = 1, outer = FALSE) legend_col_continuous(col, palette, ..., line = line, outer = outer))
+                 legend = \(side = 3, marginLines, col.legend = '') legend_col_continuous(col, palette, ..., col.legend = col.legend,
+                                                                                  side = side, marginLines = marginLines))
           })
 
 
 
-legend_col_discrete <- function(categories, palette, pch, line = 1, outer = FALSE) {
+legend_col_discrete <- function(categories, palette, pch, side, marginLines, col.legend = '') {
   
-  xpos <- line2user(c(line, line + .4), 4, outer = outer)
+  xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user')
   
   y <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
   
   points(rep(xpos[1], length(y)), y, pch = pch, xpd = NA, col = palette)
   text(xpos[2], y, categories, pos = 4, cex = .6, xpd = NA)
 
+  text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
 }
 
-legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, line = 1, outer = FALSE) {
+legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, side, marginLines, col.legend = '') {
   
+  xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user')
   col.labs <- pretty(var, min.n = 5, n = 10) |> format(big.mark = ',', digits = 2)
   
   ylabs <- grconvertY(seq(.2, .8, along = col.labs), 'ndc', 'user')
   ycols <- grconvertY(seq(.2, .8, along = palette), 'ndc', 'user')
   
-  xpos <- line2user(c(line, line + .4), 4, outer = outer)
   
   if (smooth_legend) {
     ydiff <- diff(ycols) / 2
@@ -1320,8 +1324,9 @@ legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE
     points(rep(xpos[1], length(ycols)), ycols, pch = pch, col = palette, xpd = TRUE)
   }
   
-  text(xpos[2], ylabs, col.labs, pos = 4, cex = .6, xpd = NA)
+  text(xpos[2], ylabs, col.labs, pos = side, cex = .6, xpd = NA)
   
+  text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
 }
 
 
@@ -1364,7 +1369,9 @@ prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
       cex <- cex / scale
       
       output$cex <- cex 
-      output$legend <- \(line = 1) legend_cex_continuous(val_legend, cex_legend, col, pch, line = line)
+      output$legend <- \(side = 3, marginLines, cex.legend = '') legend_cex_continuous(val_legend, cex_legend, col, pch, 
+                                                                               cex.legend = cex.legend,
+                                                                               side = side, marginLines = marginLines)
     } 
   }
   
@@ -1384,23 +1391,25 @@ cex_density <- function(x, y) {
   
 }
 
-legend_cex_continuous <- function(val, cex, col, pch, line = 1, outer = FALSE) {
+legend_cex_continuous <- function(val, cex, col, pch, side, marginLines, cex.legend = '') {
   
   lab <- format(val, big.mark = ',', digits = 2)
   
   ypos <- grconvertY(seq(.2, .8, along = val), 'ndc', 'user')
   
-  xpos <- line2user(c(line, line + .4), 4, outer = outer)
+  xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user') 
   
-  points(rep(xpos[1], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = NA)
+  points(rep(xpos[2], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = NA)
   
-  text(xpos[2], ypos, lab, pos = 4, cex = .6, xpd = NA)
+  text(xpos[2], ypos, lab, pos = side, cex = .6, xpd = NA)
+  
+  text(xpos[2], grconvertY(.81, 'ndc', 'user'), cex.legend, pos = 3, col = par('col.lab'), xpd = NA)
 }
   
 #### prep_layout ----
 
 prep_layout <- function(facets) {
-  browser()
+  
   if (length(facets) > 2) {
     facets[[2]] <- squashGroupby(facets[-1])
     facets <- facets[1:2]
