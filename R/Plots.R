@@ -75,15 +75,20 @@
 #' @export
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
-                 axes = 1:4, legend = TRUE, aspect = NULL,
+                 axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
                  main = '', sub = '', col = 1, cex = 1) {
   
+  checks(cex, xlen1 & xnumeric & xmin(.001) & xmax(20))
+  checks(margin, xlen1 & xnumeric & xmin(.1) & xmax(.4))
+  checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)))
   
   # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
-  oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, 
-                mar = c(5, 5, 5, 5), pty = if(square) 's' else 'm')
+  oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
+  oldpar$mar <- oldpar$omi <- NULL
   
-  marginLines <- setMargins(.15, aspect)
+
+  marginLines <- setMargins(margin, aspect)
+  
   
   do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0])
   oldpalette <- palette(flatly)
@@ -123,8 +128,15 @@ draw <- function(x, y, facets = list(), ...,
                        axes = axes, legend = legend,
                        xexpr = xexpr, yexpr = yexpr))
   } 
+  
   output <- .draw(x, y, ..., col = col, cex = cex)
-  title(main = main, sub = sub)
+  output$marginLines <- marginLines
+  
+  # title and subtitle
+  marginLab(marginLines, stringr::str_to_title(main), 3, 3, 
+            col = par('col.main'), cex = par('cex.main'), font = 2)
+  marginLab(marginLines, stringr::str_to_title(sub), 3, 2, 
+            font = 2)
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
@@ -878,16 +890,15 @@ draw_heat <- function(tab, log = '', ...) {
 
 ### creating stable margins ----
 
-setMargins <- function(prop = .1, aspect = NULL) {
-  
+setMargins <- function(margin.percent = .2, aspect = NULL) {
   
   
   
 
   devsize <- par('din')
   
-  figsize <- devsize * (1 - prop)
-  figmar <- (devsize * prop) / 2
+  figsize <- devsize * (1 - margin.percent*2)
+  figmar <- devsize * margin.percent 
   
   figasp <- figsize[1] / figsize[2]
   
@@ -915,46 +926,39 @@ setMargins <- function(prop = .1, aspect = NULL) {
   cex <- sqrt(xarea /  (unity / (magic^2))) / magic
   par(cex = cex)
   
+  # everything is currently inches
+  lines <- c(0, .25, .5, .75, 1) * min(figmar)
   
-  function(side, mar_p = .5, fig_p = .5, type = 'user') {
-    xedges <- grconvertX(c(0,1), 'nfc', 'inches')
-    yedges <- grconvertY(c(0,1), 'nfc', 'inches')
-    
-    xmarsize <- figmar[1] # abs(grconvertX(c(0, 1), 'ndc', 'inches') - xedges)
-    ymarsize <- figmar[2] # abs(grconvertY(c(0, 1), 'ndc', 'inches') - yedges)
-    
-    mar <- switch(side,
-                  yedges[1] - ymarsize * mar_p,
-                  xedges[1] - xmarsize * mar_p,
-                  yedges[2] + ymarsize * mar_p,
-                  xedges[2] + xmarsize * mar_p) 
-    
-    coor <- if (side %in% c(1, 3)) {
-      list(x = grconvertX(fig_p, 'nfc', type), y =  grconvertY(mar, 'inches', type))
-    } else {
-      list(x = grconvertX(mar, 'inches', 'user'), y = grconvertY(fig_p, 'nfc', type))
-    }
-    
-    do.call('match_size', coor)
-    
-    
-  }
+  marginLines <- list(grconvertY(0, 'nfc', 'inches') - lines,
+                      grconvertX(0, 'nfc', 'inches') - lines,
+                      grconvertY(1, 'nfc', 'inches') + lines,
+                      grconvertX(1, 'nfc', 'inches') + lines) 
   
+  marginLines
   
 }
 
-otext <- function(marginLines) {
-  function(text, side, mar_p, fig_p, las = 0, ...) {
-    coor <- marginLines(side, mar_p, fig_p) 
-    
-    srt <- switch(las + 1,
-                  c(0, 90, 0, 270)[side],
-                  0,
-                  c(90, 0, 90, 0)[side],
-                  90)
-    text(coor$x, coor$y, text, srt = srt, xpd = NA)
+marginLab <- function(marginLines, text, side, marginLine = 3, las = 0, ...) {
+  
+  marginLine <- marginLines[[side]][marginLine]
+  
+  if (side %in% c(1, 3)) {
+    x <- grconvertX(.5, 'nfc', 'user')
+    y <- grconvertY(marginLine, 'inches', 'user')
+  } else {
+    x <- grconvertX(marginLine, 'inches', 'user')
+    y <- grconvertY(.5, 'nfc', 'user')
   }
-} 
+  
+  srt <- switch(las + 1,
+                c(0, 90, 0, 270)[side],
+                0,
+                c(90, 0, 90, 0)[side],
+                90)
+  text(x, y, text, srt = srt, xpd = NA, adj = c(.5, if (side == 1) 0 else 1), offset = 0, ...)
+  
+}
+
 
 ### other ----
 
@@ -1032,6 +1036,8 @@ setalpha <- function(col, alpha = 1) {
 
 
 logcheck <- function(log, x = '', y = '') {
+  checks(log, xlen1 & xcharacter & xlegal(c('x', 'y', 'xy', 'yx', '')), seealso = '?draw()')
+  
   badx <- grepl('x', log, fixed = TRUE) && any(x <= 0)
   bady <- grepl('y', log, fixed = TRUE) && any(y <= 0)
   
@@ -1045,65 +1051,85 @@ logcheck <- function(log, x = '', y = '') {
 }
 
 humaxes <- function(axesframe, axisNames, axes = 1:4, marginLines) {
-  if (length(axesframe)) do.call('mapply', c(list(humaxis, MoreArgs = list(marginLines = marginLines)), 
+  if (length(axesframe)) do.call('mapply', c(list(humaxis, MoreArgs = list(marginLines = marginLines)),
                                              axesframe[side %in% axes]))
   
   
   Map(axisNames, 1:4, f = \(label, side) {
     if (!is.null(label)) {
-      otext(marginLines)(label, side, mar_p = .5, fig_p = .5, col = par('col.lab'), 
-                         las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
-      # mtext(label,  side,  line = 3,
-            # las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
+      marginLab(marginLines, label, side, col = par('col.lab'), 
+                las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 3  else  1)
     } })
   
   
 }
 
-humaxis <- function(side, ticks, line = 0, lab = 0, cex = par('cex.axis'), marginLines) {
+humaxis <- function(side, ticks, lab = 0, cex = par('cex.axis'), marginLines) {
   # this function attempts to draw axis labels that always fit on the screen
   # but never overlap
   las <- 1
   sides <- side %% 2 == 0L
   
-  labels <- names(ticks) %||% ticks
-  browser()
-  dist <- local({
-    if (par('ylog') && sides || (par('xlog') && !sides)) {
-      ticks <- ticks
-      10 ^ pmin(c(Inf, diff(ticks)), 
-                c(diff(ticks), Inf))
-    } else {
-      pmin(c(Inf, diff(ticks)), 
-           c(diff(ticks), Inf))
-    } })
-  if (!sides) {
-    widths <- strwidth(labels, cex = cex)
-    toowide <- widths > dist
-    if (any(toowide)) las <- (las + 2) %% 4
+  labels <- if (is.null(names(ticks))) {
+    format(ticks, big.mark = ',')
   } else {
-    toowide <- FALSE
+    names(ticks)
+  }
+
+  slotSize <- abs(diff(marginLines[[side]][c(1, 2)])) # in inches
+  fits <- checkStrFit(side, slotSize, ticks, labels, cex)
+  while(!fits) {
+    cex <- cex * .95
+    fits <- checkStrFit(side, slotSize, ticks, labels, cex)
   }
   
-  if (sides || any(toowide)) {
-    heights <- strheight(labels, cex = cex)
-    tootall <- heights * 1.5 > dist
-    if (any(tootall) && cex > .3) return(Recall(side, ticks, line, cex = cex * .9))
-  }
-  
-  
-  line <- marginLines(side, .1, type = 'user')
+  marginLine <- marginLines[[side]][1]
   line <- if (sides) {
-    text(line$x, ticks, labels, cex = cex, xpd = NA, col = par('cex.axis'))
+    marginLine <- grconvertX(marginLine, 'inches', 'user')
+    text(marginLine, ticks, pos = side,
+         labels, cex = cex, xpd = NA, col = par('col.axis'))
   } else {
-    text(ticks, line$y, labels, cex = cex, xpd = NA, col = par('cex.axis'))
+    marginLine <- grconvertY(marginLine, 'inches', 'user')
+    text(ticks, marginLine, pos = side,
+         labels, cex = cex, xpd = NA, col = par('col.axis'))
     
   }
   # axis(side, ticks, labels, line = line, las = las, tick = FALSE, cex.axis = cex, gap.axis = .1)
+
+}
+
+checkStrFit  <- function(side, slotSize, ticks, labels, cex) {
+  list(checkStrFit_13, checkStrFit_24, checkStrFit_13, checkStrFit_24)[[side]](slotSize, ticks, labels, cex)
+}
+
+checkStrFit_13 <- function(slotSize, ticks, labels, cex) {
+  
+  strWidth  <- strwidth(labels, units = 'inches', cex = cex)
+  strHeight <- strheight(labels, units = 'inches', cex = cex)
+  
+  strStart <- grconvertY(ticks, 'user', 'inches') - (strWidth / 2)
+  strEnd   <- grconvertY(ticks, 'user', 'inches') + (strWidth / 2)
+  
+  tootall <- max(strHeight) >= slotSize
+  overlap <- tail(strStart, -1) <= head(strEnd, -1)
   
   
+  !(any(overlap) || any(tootall))
   
+}
+
+checkStrFit_24 <- function(slotSize, ticks, labels, cex) {
   
+  strWidth  <- strwidth(labels, units = 'inches', cex = cex)
+  strHeight <- strheight(labels, units = 'inches', cex = cex)
+  
+  strTop    <- grconvertX(ticks, 'user', 'inches') + (strHeight / 2)
+  strBottom <- grconvertX(ticks, 'user', 'inches') - (strHeight / 2)
+  
+  toowide <- max(strWidth) >= slotSize
+  overlap <- tail(strBottom, -1) <= head(strTop, -1)
+  
+  !(any(overlap) || any(toowide))
   
 }
 
@@ -1121,8 +1147,8 @@ canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
   
   axes <- data.table(side = 1:2,
                      ticks = list(axTicks(1, log = grepl('x', log)),
-                                  axTicks(2, log = grepl('y', log))),
-                     line = 1L)
+                                  axTicks(2, log = grepl('y', log))))
+                     # line = 1L)
   
   window <- data.table(Screen = as.integer(screen()),
                        xlim = list(xlim), ylim = list(ylim),
