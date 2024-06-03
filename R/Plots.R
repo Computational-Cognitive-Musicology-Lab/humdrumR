@@ -76,7 +76,7 @@
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
                  axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
-                 main = '', sub = '', col = 1, cex = 1) {
+                 main = '', sub = '', col = 1, cex = NULL) {
   
 
   
@@ -116,18 +116,21 @@ draw <- function(x, y, facets = list(), ...,
     xlab <- xlab %||% formula$xlab
     ylab <- ylab %||% formula$ylab
   } 
-   
+
   if (length(facets)) {
     if (!is.list(facets)) facets <- list(facets)
-    # par(mar = c(2, 3, 1, 1), oma = c(5, 5, 5, 5))
-    return(draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
-                       main = main, sub = sub,
-                       col = col, cex = cex,
-                       axes = axes, legend = legend,
-                       xexpr = xexpr, yexpr = yexpr))
-  } 
+    
+    output <- draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
+                col = col, cex = cex, marginLines = marginLines, 
+                axes = axes, legend = legend,
+                xexpr = xexpr, yexpr = yexpr)
+  } else {
+    output <- .draw(x, y, ..., col = col, cex = cex, marginLines = marginLines)
+    
+    output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
+    output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+  }
   
-  output <- .draw(x, y, ..., col = col, cex = cex)
   output$marginLines <- marginLines
   
   # title and subtitle
@@ -135,8 +138,7 @@ draw <- function(x, y, facets = list(), ...,
             col = par('col.main'), cex = par('cex.main'), font = 2)
   marginLab(marginLines, stringr::str_to_title(sub), 3, 2, 
             font = 2)
-  output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
-  output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+  
   
   humaxes(output$axes, output$axisNames, axes, marginLines)
   
@@ -278,7 +280,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             count.ticks <- unique(round(pretty(c(0, sum(histogram$counts) * output$axes[side == 2, ticks[[1]]]), n = 10L, min.n = 5L)))
             count.ticks <- structure(count.ticks / sum(histogram$counts), names = count.ticks)
             output$axes <- rbind(output$axes,
-                                 data.table(side = 4, ticks = list(count.ticks), line = 0))
+                                 data.table(side = 4, ticks = list(count.ticks), line = 1))
         
             
             output$axisNames[c(2,4)] <- list(if (histogram$equidist) 'Proportion' else 'Density', 
@@ -344,7 +346,7 @@ setMethod('.draw', c('NULL', 'numeric'),
 setMethod('.draw', c('table', 'NULL'),
           function(x, y, log = '', 
                    beside = NULL, heat = length(dim(x) == 2L) && length(x) > 80L,
-                   ylim = NULL, 
+                   ylim = NULL, marginLines, 
                    col = NULL,  alpha = .9, ...) { 
             if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
             dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
@@ -374,7 +376,7 @@ setMethod('.draw', c('table', 'NULL'),
                             ylab = '', xlab = '',
                             beside = type != 'stacked', axes = FALSE, 
                             ylim = ylim,
-                            border = rgb(.2,.2,.2,.2), ...)
+                            border = rgb(.2,.2,.2,.2))
             
             if (type == 'both') {
               barplot(x[nrow(x):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
@@ -382,7 +384,7 @@ setMethod('.draw', c('table', 'NULL'),
                       add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
             }
             
-            legend_col_discrete(rownames(x), col$col, ..., pch = 15)
+            legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             
             # axes
             proportions <- pretty(ylim / sum(x), n = 10L, min.n = 5L)
@@ -621,12 +623,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
     .stop('Facets variables must be vectors of the same length as the x/y plotting variables.')
   }
   
-  oldpar <- par(omi = c(1, 1, 1, 1), mar = c(0, 0, 0, 0))
-  on.exit({
-    title(main, sub, outer = TRUE, line = 0)
-    layout(1)
-    par(oldpar)
-    })
+
   
   
   # determine overall xlim ylim etc (output)
@@ -660,29 +657,19 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
     
   }
                
-  if (length(facets) == 1L) {
-    left.mar   <- right.mar <- table >= 0
-    top.mar    <- seq_along(table) == 1L
-    bottom.mar <- seq_along(table) == length(table)
-  } else {
-    left.mar   <- col(table) == 1L
-    right.mar  <- col(table) == ncol(table)
-    top.mar    <- row(table) == 1L
-    bottom.mar <- row(table) == nrow(table)
-    
-  }
   
-  mar <- c(outside = 5, inside = .5)
+  # mar <- c(outside = 5, inside = .5)
+  mar <- 1
+  facetX <- facetY <- c()
   # plot each screen
   for (n in lay) {
+  
+    
       cur <- lay == n
       curlevels <- Map('[', dimnames(table), which(cur, arr.ind = TRUE))
       
       # set margins
-      margin <- c(bottom.mar[cur], left.mar[cur], top.mar[cur], right.mar[cur])
-      margin <- ifelse(margin, mar['outside'], mar['inside'])
-      # par(mar = margin)
-      par(mar = c(.5, .5, .5, .5))
+      par(mar = c(mar, mar, mar, mar))
       
       # prepare args and draw
       if (table[cur] > 0) {
@@ -696,32 +683,45 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
         
         # # axes 
         curaxes <- intersect(which(sides), axes)
-        humaxes(output$axes, 
+        
+        marginLines <- facetMargins()
+        humaxes(output$axes,
                 ifelse(1:4 %in% curaxes, output$axisNames, vector('list', 4L)),
-                curaxes)
+                curaxes, marginLines)
       } else {
         # empty facet
         plot.new() # only needed for writing facet levels in margins
       }
       
-      # facet levels
-      if (left.mar[cur]) mtext(curlevels[[1]], side = 2, font = 2,
-                               outer = FALSE, col = 'black',
-                               line = 5, las = 1)
-      if (length(curlevels) > 1L && bottom.mar[cur]) mtext(curlevels[[2]], side = 1, font = 2,
-                                                           outer = FALSE, col = 'black',
-                                                           line = 5, las = 1)
+      #coordinates of facets-
+      if (sides[1]) facetX <- c(facetX, grconvertX(.5, 'nfc', 'ndc'))
+      if (sides[2]) facetY <- c(facetY, grconvertY(.5, 'nfc', 'ndc'))
       
       
   }
-  if (legend) {
-    line <- 1
-    if (!is.null(output$col$legend)) {
-      output$col$legend(line = line, outer = TRUE)
-      line <- line + 3
-    }
-    if (!is.null(output$cex$legend)) output$cex$legend(line = line, outer = TRUE)
-  } 
+  
+  
+  # reset layout
+  layout(1)
+  par(mar = c(0, 0, 0, 0))
+  
+  # axes for facet(s)
+  output$axisNames[2] <-  list(if (.names(facets)[1] != '') names(facets)[1])
+  axes <- data.table(side = 2L, 
+                     ticks = list(sort(setNames(grconvertY(unique(facetY), 'ndc', 'user'), 
+                                                dimnames(table)[[1]]))),
+                     line = 2L)
+  output$axisNames[1] <- list(if (length(dim(table)) > 1L) {
+    axes <- rbind(axes, 
+                  data.table(side = 1L, 
+                             ticks = list(sort(setNames(grconvertX(unique(facetX), 'ndc', 'user'),
+                                                        dimnames(table)[[2]]))),
+                             line = 2L))
+    if (.names(facets)[2] != '') names(facets)[2]
+  } )
+  output$axes <- axes
+  
+  output
 }
 
 ## draw_x ----
@@ -926,7 +926,6 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   
   par(omi = fullmar[c(2, 1, 2, 1)], mar = c(0, 0, 0, 0))
   
-
   # scale cex to size of device
   # xarea <- prod(devsize)
   xarea <- prod(figsize)
@@ -947,6 +946,23 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   
   marginLines
   
+}
+facetMargins <- function(margin.percent = .15) {
+  figsize <- par('fin')
+  figmar <- figsize * margin.percent
+  
+  lines <- c(0, .75, 1.5) * min(figmar)
+  
+  mai <- par('mai')
+  maiX <- mai[2]
+  maiY <- mai[1]
+  
+  marginLines <- list(grconvertY(0, 'nfc', 'inches') - lines + maiY,
+                      grconvertX(0, 'nfc', 'inches') - lines + maiX,
+                      grconvertY(1, 'nfc', 'inches') + lines - maiY,
+                      grconvertX(1, 'nfc', 'inches') + lines - maiX) 
+  
+  marginLines
 }
 
 marginLab <- function(marginLines, text, side, marginLine = 3, las = 0, ...) {
@@ -1091,10 +1107,11 @@ humaxis <- function(side, ticks, line = 1, lab = 0, cex = par('cex.axis'), margi
   fits <- checkStrFit(side, slotSize, ticks, labels, cex)
   while(!fits) {
     cex <- cex * .95
+    if ( cex < .1) break
     fits <- checkStrFit(side, slotSize, ticks, labels, cex)
   }
   
-  marginLine <- marginLines[[side]][1]
+  marginLine <- marginLines[[side]][line]
   line <- if (sides) {
     marginLine <- grconvertX(marginLine, 'inches', 'user')
     text(marginLine, ticks, pos = side,
