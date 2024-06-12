@@ -168,7 +168,7 @@ setMethod('.draw', c('numeric', 'numeric'),
           \(x, y, log = '', jitter = '', 
             quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
-            col = 1, alpha = .5, cex = NULL, ...) {
+            col = 1, alpha = .5, cex = NULL, marginLines, ...) {
             
             if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
               .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -216,7 +216,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             breaks = 'Sturges', quantiles = c(),
             conditional = FALSE,
             xlim = NULL, ylim = NULL,
-            col = 3, alpha = .2, cex = .7, ...) {
+            col = 3, alpha = .2, cex = .7, marignLines, ...) {
             
             if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1 && length(quantiles)) {
               breaks <- quantile(x, sort(unique(c(0, quantiles, 1))))
@@ -237,7 +237,13 @@ setMethod('.draw', c('numeric', 'NULL'),
             
             draw_quantiles(1, x, quantiles)
             
-            
+            if (is.numeric(col)) {
+              col <- if (length(unique(col)) < 4) {
+                as.factor(col) 
+                } else {
+                  cut(col, breaks = hist(col, plot = FALSE, breaks = 4)$breaks)
+                }
+            }
             # actual plot of polygons
             cols <- prep_col(col, x, alpha = alpha, log = log, ...)
             ymin <- min(output$window$ylim[[1]])
@@ -296,7 +302,8 @@ setMethod('.draw', c('NULL', 'numeric'),
                    violin = FALSE, showNormal = FALSE,
                    quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
-                   col = 1, alpha = .8, cex = NULL, pch = 16, ...) {
+                   col = 1, alpha = .8, cex = NULL, pch = 16, 
+                   marginLines, ...) {
             
             checks(violin, xTF)
             output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
@@ -737,8 +744,8 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
     
     
     if (is.null(limits)) {
-      usr <- par('usr')
-      limits <- if (sides) usr[1:2] else usr[3:4]
+      
+      limits <- if (sides) grconvertX(c(0, 1), 'nfc', 'user') else grconvertY(c(0, 1), 'nfc', 'user')
     }
   
     
@@ -1273,8 +1280,8 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
 }
 
 setGeneric('prep_col', 
-           useAsDefault = function(col, var, pch, alpha, contrast, ncontinuous, log, ...) rep(col, length.out = n), # if there is no method
-           function(col, var, pch = 16, alpha = 1, contrast = FALSE, ncontinuous = 100, log = '', ...) { 
+           useAsDefault = function(col, var, pch, alpha, contrast, ncontinuous, log, marginLines, ...) rep(col, length.out = n), # if there is no method
+           function(col, var, pch = 16, alpha = 1, contrast = FALSE, ncontinuous = 100, log = '', marginLines, ...) { 
              if (is.list(col) && names(col)[1] == 'col') col <- col$col
              
              checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
