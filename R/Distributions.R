@@ -1149,7 +1149,7 @@ entropy.probability <-  function(q, p, condition = NULL, base = 2) {
 
 #' @rdname entropy
 #' @export
-entropy.numeric <- function(x, base = 2, na.rm = TRUE) {
+entropy.numeric <- function(x, base = 2, na.rm = TRUE, ...) {
   entropy(density(x, ...), base = base, na.rm = na.rm)
 }
 
@@ -1157,12 +1157,13 @@ entropy.numeric <- function(x, base = 2, na.rm = TRUE) {
 #' @rdname entropy
 #' @export
 entropy.density <- function(x, base = 2, na.rm = TRUE) {
-            label <- rlang::expr_name(rlang::enexpr(x))
+            label <- rlang::expr_label(rlang::enexpr(x))
             if (any(is.na(x))) return(NA_real_)
             
             dx <- diff(x$x[1:2])
             
-            equation <- paste0('H(', label, ')')
+            equation <- if (nchar(label) < 10) paste0('H(', label, ')')
+            
             
             setNames(-sum(log(x$y, base = base) * x$y * dx), equation)
             
