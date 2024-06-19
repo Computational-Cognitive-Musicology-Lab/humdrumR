@@ -259,6 +259,10 @@ prettyP <- function(P, digits = 3, zeros = '.') {
 
 
 prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
+  checks(maxN, xlen1 & xpositive & xwholenum, argname = 'binArgs(maxN = )', seealso = '?count')
+  checks(quantiles, xlen1 & xpositiveorzero, argname = 'binArgs(quantiles = )', seealso = '?count')
+  checks(right, xTF, argname = 'binArgs(right = )', seealso = '?count')
+  
   levels <- sort(unique(x))
   if (is.integer(x) || all(is.whole(levels))) {
     range <- diff(range(levels))
@@ -288,7 +292,15 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
 setMethod('[', c('distribution', 'ANY', 'missing'),
           function(x, i, drop = FALSE) {
 
-            df <- as.data.frame(x)[i , ,  drop = FALSE]
+            df <- as.data.frame(x)
+            
+            rownames <- as.character(df[ , 1])
+            rownames[is.na(rownames)] <- 'NA'
+            if (is.character(i)) i[is.na(i)] <- 'NA'
+            rownames(df) <- rownames
+            
+            df <- df[i , ,  drop = FALSE]
+            rownames(df) <- NULL
             
             if (drop) df else distribution(df, x)
           })
@@ -445,7 +457,6 @@ as.data.table.distribution <- function(x) {
 setMethod('sort', 'distribution',
           function(x, decreasing = TRUE) {
   X <- getValues(x)
-  
   x <- x[order(X, decreasing = decreasing), ]
   
   x@Sort <- if (decreasing) -1L else 1L
@@ -592,6 +603,12 @@ setMethod('mean', 'distribution',
           })
 
 #' @export
+setMethod('median', 'distribution',
+          \(x, na.rm = FALSE, ...) {
+            setNames(median(getValues(x), na.rm = na.rm, ...), paste(varnames(x), collapse = '.'))
+          })
+
+#' @export
 setMethod('*', c('probability', 'probability'),
           \(e1, e2) {
             
@@ -658,7 +675,26 @@ setMethod('*', c('probability', 'probability'),
 #' You can specify these names directly as argument names, like `count(Kern = kern(Token))`;
 #' if you don't specify a name, `count()` will make up a name(s) based on expression(s) it is tallying.
 #' (Note that `count()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
-
+#'
+#' @section Counting numeric values
+#' 
+#' For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
+#' like in a histrogram.
+#' By default, if you pass a vector of numbers to `count()` which has more than `20` unique values,
+#' `count()` will bin the values using the same algorithm as [base::hist()].
+#' This process can be controlled using the `binArgs` argument, which is itself a list of control arguments.
+#' `binArgs = list(maxN = N)` controls the number of unique numbers needed before binning occurs,
+#' and `binArgs = list(right = FALSE)` (default is `TRUE`) can be used to make bins that are closed on the right instead of the left.
+#' Finally, any arguments to [base::hist()] can be passed via `binArgs`, controlling how binning occurs: notably,
+#' you can use the `binArgs = list(breaks = _)` to control exactly where boundaries should occur, or the number of bins you want.
+#' For example, `binArgs = list(breaks = 10)` will make `count()` bin the input numbers into twelve bins (see [hist()] 
+#' for details).
+#'
+#' Alternatively, you can tell `count()` to divy up (bin) the input numbers into quantiles by 
+#' passing `binArgs = list(quantiles = N)`.
+#' For example, `binArgs = list(quantiles = 4)` will divide the data into four equal quantiles (0%-25%, 25%-50%, 50%-75%, 75%-100%).
+#' 
+#'
 #' @section Manipulating humdrum tables:
 #' 
 #' The output of `count()` is a special form of R `table`, a `humdrumR.table`.

@@ -284,7 +284,7 @@ setMethod('.draw', c('numeric', 'NULL'),
               
             ## counts (side 4)
             count.ticks <- unique(round(pretty(c(0, sum(histogram$counts) * output$axes[side == 2, ticks[[1]]]), n = 10L, min.n = 5L)))
-            count.ticks <- structure(count.ticks / sum(histogram$counts), names = count.ticks)
+            count.ticks <- structure(count.ticks / sum(histogram$counts), names = format(count.ticks, big.mark = ','))
             output$axes <- rbind(output$axes,
                                  data.table(side = 4, ticks = list(count.ticks), line = 1))
         
