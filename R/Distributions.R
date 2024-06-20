@@ -784,30 +784,26 @@ count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, b
 
 #' @rdname distributions
 #' @export
-count.table <- function(..., sort = FALSE,
-                        na.rm = FALSE,
-                        .drop = FALSE) {
+count.table <- function(..., sort = FALSE, na.rm = FALSE, .drop = FALSE) {
   checks(sort, xTF | (xwholenum & xlen1))
   checks(na.rm, xTF)
   checks(.drop, xTF)
   
   tab <- list(...)[[1]]
-  
-  
-  type <- if(all(tab <= 1 & tab >= 0) && any(!tab %in% c(0, 1))) 'p' else 'n'
-  df <- as.data.frame(tab, responseName = type)
-  
-  
-  
-  dist <- if (type == 'p') {
-    distribution(df, type, N = sum(tab), Condition = NULL)
-  } else {
-    distribution(df, type)
+  if (any(tab != round(tab))) {
+    tab <- tab *  10^-floor(log10(min(tab[tab > 0])))
   }
   
   
+  
+  df <- as.data.frame(tab, responseName = 'n')
+  df$n <- as.integer(df$n)
+  
+  if (.drop) df <- df[dist$n > 0, , drop = FALSE]
+  
+  dist <- distribution(df, 'n')
+
   if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
-  if (.drop) dist <- dist[dist > 0, ]
   if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
   dist
@@ -977,47 +973,23 @@ pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE
 
 #' @rdname distributions
 #' @export
-pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
+pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
   
-  counts <- count(x, ..., na.rm = na.rm, sort = sort, binArgs = binArgs)
+  if (all(x == round(x))) return(pdist(count(x, ..., na.rm = na.rm, sort = sort, binArgs = binArgs), condition = condition))
   
-  pdist(counts, condition = condition)
-  # 
-  # if (length(dim(x)) == 1L) condition <- NULL
-  # 
-  # varnames <- names(dimnames(x))
-  # 
-  # if (na.rm) {
-  #   notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
-  #   x <- do.call('[', c(list(x), notna))
-  # }
-  # 
-  # if (is.character(condition)) {
-  #   margin <- pmatch(condition, varnames, duplicates.ok = FALSE)
-  #   if (length(margin) == 0L) {
-  #     margin <- condition <- NULL
-  #   } else {
-  #     condition <- condition[!is.na(margin)]
-  #     margin <- margin[!is.na(margin)]
-  #   }
-  #   
-  #   
-  # } else {
-  #   margin <- condition
-  #   if (!is.null(condition)) condition <- varnames[margin]
-  # }
-  # 
-  # ptab <- proportions(x, margin = margin) 
-  # 
-  # pdist <- distribution(as.data.frame(ptab, responseName = 'p'), 
-  #                       'p',
-  #                       Condition = condition,
-  #                       N = c(marginSums(x, margin = condition)))
-  # 
-  # 
-  # if (sort) dist <- sort(pdist, decreasing = sort > 0L)
-  # 
-  # pdist
+
+  
+  if (sum(x) != 1) x <- x / sum(x)
+  
+  df <- as.data.frame(x, responseName = 'p')
+  N <- as.integer(10 ^ -floor(log10(min(df$p[df$p > 0]))))
+  
+  dist <- distribution(df, 'p', N = N, Condition = condition)
+  
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
+  
+  dist
   
 }
 
