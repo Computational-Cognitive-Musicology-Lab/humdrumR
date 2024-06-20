@@ -67,5 +67,35 @@ test_that('distribution stuff, 1D',{
   expect_equal(count(cat) |> sort(decreasing = FALSE), count(cat, sort = -1))
   expect_equal(count(num) |> sort(decreasing = TRUE), count(num, sort = 1))
   
+  # .drop
+  expect_equal(nrow(count(num, .drop = FALSE)), 13)
+  expect_equal(nrow(count(num, .drop = TRUE)), 11)
+  
+})
+
+
+
+test_that('distribution stuff, 2+D',{
+  
+  # categorical        
+  set.seed(1)
+  N <- 10000
+  num <-  rchisq(N, 2)
+  cat <- sample(letters, N, replace = TRUE, prob = 1:26)
+  
+  
+  counts <- count(num, cat, na.rm = TRUE)
+  counts_named <- count(x = num, y = cat)
+  
+  expect_equal(sum(counts), setNames(N, 'num.cat'))
+  expect_equal(sum(counts_named), setNames(N, 'x.y'))
+  
+  expect_equal(sum(counts[counts > 50]), setNames(8697, 'num.cat'))
+  expect_equal(sum(counts[2:30, ]), setNames(6341, 'num.cat'))
+  
+  
+  # indexing collapses
+  expect_equal(count(cat), counts[,'cat'])
+  expect_equal(count(num), counts[,'num'])
   
 })

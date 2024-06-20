@@ -289,21 +289,19 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
 
 ### indexing ----
 # 
-setMethod('[', c('distribution', 'ANY', 'missing'),
+setMethod('[', c('distribution', 'atomic', 'missing'),
           function(x, i, drop = FALSE) {
 
             df <- as.data.frame(x)
             
-            rownames <- as.character(df[ , 1])
-            rownames[is.na(rownames)] <- 'NA'
-            if (is.character(i)) i[is.na(i)] <- 'NA'
-            rownames(df) <- rownames
+            if (is.character(i))  i <- which(df[ , 1] %in% i)
             
             df <- df[i , ,  drop = FALSE]
             rownames(df) <- NULL
             
             if (drop) df else distribution(df, x)
           })
+
 # 
 setMethod('[', c('distribution', 'missing', 'atomic'),
           function(x, i, j, drop = FALSE) {
@@ -750,7 +748,8 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   argdf <- as.data.frame(args)
   colnames(argdf) <- varnames
   
-  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(varnames)), name = 'n', .drop = !!.drop)))
+  if (.drop) argdf[sapply(argdf, is.factor)] <- lapply(argdf[sapply(argdf, is.factor)], factor) # drops unused levels
+  result <- do.call('table', argdf[ , varnames, drop = FALSE]) |> as.data.frame(responseName = 'n')
   
   if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
   
