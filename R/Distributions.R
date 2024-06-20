@@ -30,10 +30,13 @@ distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
   args <- list(new('distribution', df, Sort = Sort))
   
   if (class(type) != 'character') {
-    type <- class(type)[1]
-    if (class(type) == 'probability') {
+    
+    if (class(type)[1] == 'probability') {
       N <- type@N
       Condition <- type@Condition
+      type <- 'p'
+    }  else {
+      type <- class(type)[1]
     }
    
   }
@@ -476,8 +479,7 @@ alignDistributions <- function(..., funcname = '') {
                             \(dn) do.call('mergeLevels', lapply(dists, \(dist) as.data.frame(dist)[[dn]]))), 
                      varnames)
   
-  levels <- do.call('expand.grid', levels)
-
+  levels <- do.call('expand.grid', c(levels, list(KEEP.OUT.ATTRS = FALSE)))
   
   aligned <- lapply(dists, 
                   \(dist) {
@@ -491,7 +493,6 @@ alignDistributions <- function(..., funcname = '') {
                   })
   
   names(aligned) <- sapply(dists, dist_type)
-  
   list(Levels = levels, X = aligned)
 }
   
@@ -546,7 +547,6 @@ setMethod('+', c('count', 'count'),
             
             df <- aligned$Levels
             df$n <- callGeneric(aligned$X[[1]], aligned$X[[2]])
-            
             distribution(df, 'n')
           })
 
@@ -679,11 +679,11 @@ setMethod('*', c('probability', 'probability'),
 #' For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
 #' like in a histrogram.
 #' By default, if you pass a vector of numbers to `count()` which has more than `20` unique values,
-#' `count()` will bin the values using the same algorithm as [base::hist()].
+#' `count()` will bin the values using the same algorithm as [graphics::hist()].
 #' This process can be controlled using the `binArgs` argument, which is itself a list of control arguments.
 #' `binArgs = list(maxN = N)` controls the number of unique numbers needed before binning occurs,
 #' and `binArgs = list(right = FALSE)` (default is `TRUE`) can be used to make bins that are closed on the right instead of the left.
-#' Finally, any arguments to [base::hist()] can be passed via `binArgs`, controlling how binning occurs: notably,
+#' Finally, any arguments to [graphics::hist()] can be passed via `binArgs`, controlling how binning occurs: notably,
 #' you can use the `binArgs = list(breaks = _)` to control exactly where boundaries should occur, or the number of bins you want.
 #' For example, `binArgs = list(breaks = 10)` will make `count()` bin the input numbers into twelve bins (see [hist()] 
 #' for details).
@@ -726,6 +726,7 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   checks(sort, xTF | (xwholenum & xlen1))
   checks(na.rm, xTF)
   checks(.drop, xTF)
+  checks(binArgs, xclass('list'))
   
   args <- list(...)
   
@@ -749,9 +750,10 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   colnames(argdf) <- varnames
   
   if (.drop) argdf[sapply(argdf, is.factor)] <- lapply(argdf[sapply(argdf, is.factor)], factor) # drops unused levels
-  result <- do.call('table', argdf[ , varnames, drop = FALSE]) |> as.data.frame(responseName = 'n')
+  result <- do.call('table', c(list(useNA = if (na.rm) 'no' else 'ifany'), 
+                               argdf[ , varnames, drop = FALSE])) |> as.data.frame(responseName = 'n')
   
-  if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
+  # if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
   
   dist <- distribution(result, 'n')
   
@@ -785,9 +787,17 @@ count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, b
 count.table <- function(..., sort = FALSE,
                         na.rm = FALSE,
                         .drop = FALSE) {
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
+  
   tab <- list(...)[[1]]
+  
+  
   type <- if(all(tab <= 1 & tab >= 0) && any(!tab %in% c(0, 1))) 'p' else 'n'
   df <- as.data.frame(tab, responseName = type)
+  
+  
   
   dist <- if (type == 'p') {
     distribution(df, type, N = sum(tab), Condition = NULL)
@@ -796,6 +806,8 @@ count.table <- function(..., sort = FALSE,
   }
   
   
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
+  if (.drop) dist <- dist[dist > 0, ]
   if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
   dist
@@ -803,7 +815,34 @@ count.table <- function(..., sort = FALSE,
 }
 
 
-
+#' @rdname distributions
+#' @export
+count.pdist <- function(x, ..., sort = FALSE,
+                        na.rm = FALSE,
+                        .drop = FALSE) {
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
+  
+  
+  df <- as.data.frame(x)
+  
+  if (length(x@Condition)) {
+    vars <- do.call('paste', c(df[ , x@Condition, drop = FALSE], list(sep = '.')))
+    df$n <- round(df$p * df@N[vars])
+    
+  } else {
+    df$n <- round(df$p * x@N)
+  }
+  df$p <- NULL
+  
+  dist <- distribution(df, 'n')
+  
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
+  
+  dist 
+}
 
 ### pdist() -----
 
@@ -817,6 +856,7 @@ pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop =
   checks(sort, xTF | (xwholenum & xlen1))
   checks(na.rm, xTF)
   checks(.drop, xTF)
+  checks(binArgs, xclass('list'))
   
   UseMethod('pdist')
 }
@@ -828,20 +868,20 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
   if (sort) x <- sort(x, sort > 0L)
   
-  x <- as.data.frame(x)
+  df <- as.data.frame(x)
   
   exprs <- rlang::enexprs(...)
-  if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
+  if (length(exprs)) condition <- pexprs(exprs, colnames(df), condition)$Condition %||% condition
   
-  n <- sum(x$n, na.rm = TRUE)
+  n <- sum(df$n, na.rm = TRUE)
   
-  x$p <- x$n / n
-  x$n <- NULL
+  df$p <- df$n / n
+  df$n <- NULL
   
-  dist <- distribution(x, 'p', N = n)
-  
+  dist <- distribution(df, 'p', N = n)
   if (!is.null(condition)) dist <- conditional(dist, condition = condition)
   
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
   if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
   dist
@@ -939,41 +979,45 @@ pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE
 #' @export
 pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
   
-  if (length(dim(x)) == 1L) condition <- NULL
+  counts <- count(x, ..., na.rm = na.rm, sort = sort, binArgs = binArgs)
   
-  varnames <- names(dimnames(x))
-  
-  if (na.rm) {
-    notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
-    x <- do.call('[', c(list(x), notna))
-  }
-  
-  if (is.character(condition)) {
-    margin <- pmatch(condition, varnames, duplicates.ok = FALSE)
-    if (length(margin) == 0L) {
-      margin <- condition <- NULL
-    } else {
-      condition <- condition[!is.na(margin)]
-      margin <- margin[!is.na(margin)]
-    }
-    
-    
-  } else {
-    margin <- condition
-    if (!is.null(condition)) condition <- varnames[margin]
-  }
-  
-  ptab <- proportions(x, margin = margin) 
-  
-  pdist <- distribution(as.data.frame(ptab, responseName = 'p'), 
-                        'p',
-                        Condition = condition,
-                        N = c(marginSums(x, margin = condition)))
-  
-  
-  if (sort) dist <- sort(pdist, decreasing = sort > 0L)
-  
-  pdist
+  pdist(counts, condition = condition)
+  # 
+  # if (length(dim(x)) == 1L) condition <- NULL
+  # 
+  # varnames <- names(dimnames(x))
+  # 
+  # if (na.rm) {
+  #   notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
+  #   x <- do.call('[', c(list(x), notna))
+  # }
+  # 
+  # if (is.character(condition)) {
+  #   margin <- pmatch(condition, varnames, duplicates.ok = FALSE)
+  #   if (length(margin) == 0L) {
+  #     margin <- condition <- NULL
+  #   } else {
+  #     condition <- condition[!is.na(margin)]
+  #     margin <- margin[!is.na(margin)]
+  #   }
+  #   
+  #   
+  # } else {
+  #   margin <- condition
+  #   if (!is.null(condition)) condition <- varnames[margin]
+  # }
+  # 
+  # ptab <- proportions(x, margin = margin) 
+  # 
+  # pdist <- distribution(as.data.frame(ptab, responseName = 'p'), 
+  #                       'p',
+  #                       Condition = condition,
+  #                       N = c(marginSums(x, margin = condition)))
+  # 
+  # 
+  # if (sort) dist <- sort(pdist, decreasing = sort > 0L)
+  # 
+  # pdist
   
 }
 
@@ -981,15 +1025,17 @@ pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, b
 
 conditional <- function(pdist, condition) {
   varnames <- varnames(pdist)
+  checks(condition, xcharnotempty | (xwholenum & xpositive & xmax(length(varnames))), seealso = '?pdist()')
+  
+  if (is.numeric(condition)) condition <- varnames[condition]
   if (any(!condition %in% varnames)) .stop("We can only calculate a conditional probability across an existing dimension/factor.",
-                                           "The <conditions|condition> {harvard(setdiff(condition, varnames), 'and')} <are not dimensions|is not a dimension> of the given",
-                                           "distribution (the dimensions are {harvard(varnames, 'and')}).", ifelse = length(setdiff(condition, varnames)) > 1)
+                                           "The <conditions|condition> {harvard(setdiff(condition, varnames), 'and', quote = TRUE)} <are not dimensions|is not a dimension> of the given",
+                                           "distribution (the dimensions are named {harvard(varnames, 'and', quote = TRUE)}).", ifelse = length(setdiff(condition, varnames)) > 1)
   
   if (!is.null(pdist@Condition)) {
     if (setequal(condition, pdist@Condition)) return(pdist)
     pdist <- unconditional(pdist)
   }
-  
   
   conditionvec <- do.call('paste', c(as.list(pdist)[condition], list(sep = '.')))
   

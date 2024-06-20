@@ -18,7 +18,7 @@ H(..., base = 2)
 
 \method{entropy}{probability}(q, p, condition = NULL, base = 2)
 
-\method{entropy}{numeric}(x, base = 2, na.rm = TRUE)
+\method{entropy}{numeric}(x, base = 2, na.rm = TRUE, ...)
 
 \method{entropy}{density}(x, base = 2, na.rm = TRUE)
 

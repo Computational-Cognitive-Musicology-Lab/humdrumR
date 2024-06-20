@@ -8,6 +8,7 @@
 \alias{count.default}
 \alias{count.humdrumR}
 \alias{count.table}
+\alias{count.pdist}
 \alias{pdist.count}
 \alias{pdist.probability}
 \alias{pdist.default}
@@ -25,6 +26,8 @@
   dist,
   digits = if (inherits(dist, "probability")) 3 else 1,
   syntaxHighlight = humdrumRoption("syntaxHighlight"),
+  wide = TRUE,
+  printZeros = TRUE,
   zeros = "."
 )
 
@@ -35,6 +38,8 @@
 \method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
 
 \method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+
+\method{count}{pdist}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
 \method{pdist}{count}(
   x,
