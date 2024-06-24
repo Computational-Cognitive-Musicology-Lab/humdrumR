@@ -7,28 +7,44 @@
 \alias{entropy.numeric}
 \alias{entropy.density}
 \alias{entropy.default}
-\alias{mutualInfo}
-\alias{mutualInfo.probability}
-\alias{mutualInfo.default}
+\alias{xentropy}
+\alias{kld}
+\alias{kld.probability}
+\alias{kld.default}
+\alias{mutual}
+\alias{mutual.probability}
+\alias{mutual.default}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
-entropy(..., base = 2)
+entropy(..., model, base = 2)
 
-H(..., base = 2)
+H(..., model, base = 2)
 
-\method{entropy}{probability}(q, p, condition = NULL, base = 2)
+\method{entropy}{probability}(pdist, model, condition = NULL, base = 2)
 
-\method{entropy}{numeric}(x, base = 2, na.rm = TRUE, ...)
+\method{entropy}{numeric}(x, model, base = 2, na.rm = TRUE, ...)
 
-\method{entropy}{density}(x, base = 2, na.rm = TRUE)
+\method{entropy}{density}(x, model, base = 2, na.rm = TRUE)
 
-\method{entropy}{default}(..., base = 2)
+\method{entropy}{default}(..., model, base = 2)
 
-mutualInfo(..., base = 2)
+xentropy(..., model, base = 2)
 
-\method{mutualInfo}{probability}(x, base = 2)
+kld(..., model, base = 2)
 
-\method{mutualInfo}{default}(..., base = 2)
+\method{kld}{probability}(pdist, model, condition = NULL, base = 2)
+
+\method{kld}{default}(..., model, base = 2)
+
+mutual(..., base = 2)
+
+\method{mutual}{probability}(x, base = 2)
+
+\method{mutual}{default}(..., base = 2)
+
+\method{mutual}{probability}(x, base = 2)
+
+\method{mutual}{default}(..., base = 2)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},
@@ -54,8 +70,8 @@ of the random (continuous) variable, then entropy is computed for the density.
 For other atomic vectors, \code{\link[=table]{table()}} is called to tabulate the discrete probability mass for each
 observed level, and entropy is then computed for the table.
 
-The \code{ic()} function only accepts atomic vectors as its main (\code{x}) argument, but must also
-be provided a \code{distribution} argument.
-By default, the \code{distribution} argument is estimated using \code{\link[=density]{density()}} (\code{numeric} input) or \code{\link[=table]{table()}} (other input).
+The \code{info()} function only accepts atomic vectors as its main (\code{x}) argument, but must also
+be provided a \code{model} argument.
+By default, the \code{model} argument is estimated using \code{\link[=density]{density()}} (\code{numeric} input) or \code{\link[=table]{table()}} (other input).
 }
 \concept{{Information theory functions}}

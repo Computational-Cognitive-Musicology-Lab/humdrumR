@@ -249,10 +249,11 @@ prettyP <- function(P, digits = 3, zeros = '.') {
   
   output <- paste0(Pprint, ifelse(approx, '~', ''))
   maxnchar <- max(nchar(output))
+  
   output <- paste0(output, strrep(' ', maxnchar - nchar(output))) 
   # output <- gsub(paste0('\\.', strrep('0', digits), '~'), paste0('.~', strrep(' ', digits)), output)
   
-  attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', maxnchar - 2L))
+  attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', max(0, maxnchar - 2L)))
   attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
   attr(output, 'approx') <- any(approx)
   
@@ -310,9 +311,9 @@ setMethod('[', c('distribution', 'missing', 'atomic'),
           function(x, i, j, drop = FALSE) {
             
 
-                        x <- unconditional(x)
                         varnames <- varnames(x)
 
+                        if (is.logical(j)) j <- which(j)
                         j <- if (is.numeric(j)) varnames[j] else intersect(j, varnames)
                         
                         if (any(is.na(j)) || length(j) == 0L) .stop("Can't index this distribution with non-existent columns.")
@@ -386,16 +387,19 @@ setMethod('[[', 'distribution',
 
           })
 
-setMethod('[', c('probability', 'missing', 'character'),
+#' @export
+setMethod('[', c('probability', 'missing', 'atomic'),
           function(x, i, j, ...) {
 
-            N <- x@N
+            varnames <- varnames(x)
+            if (is.logical(j)) j <- which(j)
+            j <- if (is.numeric(j)) varnames[j] else intersect(j, varnames)
+            
             x <- unconditional(x)
-            x <- as.data.table(x)
+            
+            dt <- as.data.table(x)[ , list(p = sum(p)), by = j]
 
-            x <- as.data.frame(x[ , list(p = sum(p)), by = j])
-
-            distribution(x, 'p', Condition = NULL, N = N)
+            distribution(as.data.frame(dt), x, Condition = x@Condition, N = x@N)
 
           })
 
@@ -607,6 +611,22 @@ setMethod('median', 'distribution',
           })
 
 #' @export
+setMethod('rowSums', 'distribution',
+          \(x, na.rm = FALSE, ...) {
+
+            x[ , 1]
+
+          })
+
+#' @export
+setMethod('colSums', 'distribution',
+          \(x, na.rm = FALSE, ...) {
+            x[, 2]
+            
+          })
+
+
+#' @export
 setMethod('*', c('probability', 'probability'),
           \(e1, e2) {
             
@@ -674,7 +694,7 @@ setMethod('*', c('probability', 'probability'),
 #' if you don't specify a name, `count()` will make up a name(s) based on expression(s) it is tallying.
 #' (Note that `count()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
 #'
-#' @section Counting numeric values
+#' @section Counting numeric values:
 #' 
 #' For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
 #' like in a histrogram.
@@ -1014,11 +1034,12 @@ conditional <- function(pdist, condition) {
   margin <- c(tapply(pdist$p, conditionvec, sum))
   margin <- margin[unique(conditionvec)] # to match original order
   
-  pdist$p <- ifelse(margin[conditionvec] == 0, 0, pdist$p / margin[conditionvec])
+  p <- ifelse(margin[conditionvec] == 0, 0, pdist$p / margin[conditionvec])
+  pdist$p <- tapply_inplace(p, conditionvec, \(x) if (any(x > 0)) x / sum(x) else x)
   
   pdist@Condition <- condition
   
-  pdist@N <- setNames(as.integer(pdist@N * margin), names(margin))
+  pdist@N <- setNames(as.integer(round(pdist@N * margin)), names(margin))
   pdist
   
 }
@@ -1026,12 +1047,10 @@ conditional <- function(pdist, condition) {
 unconditional <- function(dist) {
   if (!inherits(dist, 'probability') || is.null(dist@Condition)) return(dist)
   
-  
   N <- sum(dist@N)
   margins <- dist@N / N
   
-  dist$p <- dist$p * margins[paste(as.data.frame(dist)[[dist@Condition]])] # paste to deal with NA levels
-  
+  dist$p <- dist$p * margins[do.call('paste', c(as.data.frame(dist)[, dist@Condition, drop = FALSE], list(sep = '.')))] # paste to deal with NA levels
   
   dist@Condition <- NULL
   dist@N <- N
@@ -1080,46 +1099,87 @@ pexprs <- function(exprs, colnames, condition) {
 
 # Information Theory ----
 
+#' Information theory
+#' 
+#' HumdrumR includes some functionality for the computing statistics related to probability
+#' and **information theory**.
+#'
+#' @details
+#' 
+#' 
+#' Some important information theory quantities, are statistics that characterize a probability *distribution*.
+#' Thus, they are descriptive statistics, which describe a distribution (usually, the distribution of values in your data)
+#' using a single number.
+#' Such information-theoretic descriptive statistics can be computed using the [entropy()] 
+#' (joint/conditional entropy), [xentropy()] (cross entropy), [kld()] (Kullback–Leibler divergence), and  [mutual()] (mutual information) functions.
+#' Other information theory quantities are calculated (data)point-wise: one value for each observation.
+#' Our vectorized information theory functions include [like()] (likelihood),
+#' `info()` (information content), and `pmutual()` (pointwise mutual information).
+#'
+#' Note that these functions calculate *empirical* statistics---i.e., they describe your data.
+#' They are not (necessarily) estimates of the "true" quantity.
+#' 
+#' 
+#' @name information
+NULL
+
 ## Likelihoods ----
 
 ### like() ----
 
 #' @export
-like <- function(..., distribution) UseMethod('like')
-
-#' @export
-ic <- function(..., distribution, base = 2) -log(like(..., distribution = distribution), base = base)
-
-#' @export
-like.default <- function(..., distribution) {
-  like.data.frame(data.frame(...), distribution = distribution)
+like <- function(..., model) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
+  
+  UseMethod('like')
 }
 
 #' @export
-like.data.frame <- function(df, ..., distribution) {
-  
-  if (missing(distribution)) distribution <- do.call('pdist', list(df, ...))
-  
-  colnames <- colnames(df)
-  varnames <- varnames(distribution)
-  
-  if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
+info <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
+       base = base)
+}
 
-  distribution[as.matrix(df), , drop = TRUE]$p
+#' @export
+like.default <- function(..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  like.data.frame(data.frame(...), model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+}
+
+#' @export
+like.data.frame <- function(df, ..., model) {
+  if (missing(model) || is.null(model))  {
+    model <- if (is.numeric(df[[1]])) lm(df[,ncol(df):1]) else model <- do.call('pdist', list(df, ...))
+    
+  }
+  
+  if (inherits(model, 'probability')) {
+    colnames <- colnames(df)
+    varnames <- varnames(model)
+    
+    if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
+    
+    model[as.matrix(df), , drop = TRUE]$p
+    
+  } else {
+    dnorm(predict(model, newdata = df, type = 'response'), 0, summary(model)$sigma)
+  }
+  
   
 }
 
 
+
+
 #' @export
-pMI <- function(..., distribution, base = 2) {
+pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   df <- data.frame(...)
   
-  if (missing(distribution)) distribution <- do.call('pdist', df)
+  if (missing(model)) model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
   
-  independent <- Reduce('*', lapply(varnames(distribution), \(j) distribution[ , j]))
+  independent <- Reduce('*', lapply(varnames(model), \(j) model[ , j]))
   
-  ic_observed <- ic(df, distribution = distribution, base = base)
-  ic_independent <- ic(df, distribution = independent, base = base)
+  ic_observed <- info(df, model = model, base = base)
+  ic_independent <- info(df, model = independent, base = base)
   
   ic_independent - ic_observed
   
@@ -1157,15 +1217,16 @@ pMI <- function(..., distribution, base = 2) {
 #' For other atomic vectors, [table()] is called to tabulate the discrete probability mass for each
 #' observed level, and entropy is then computed for the table.
 #'
-#' The `ic()` function only accepts atomic vectors as its main (`x`) argument, but must also
-#' be provided a `distribution` argument.
-#' By default, the `distribution` argument is estimated using [density()] (`numeric` input) or [table()] (other input).
+#' The `info()` function only accepts atomic vectors as its main (`x`) argument, but must also
+#' be provided a `model` argument.
+#' By default, the `model` argument is estimated using [density()] (`numeric` input) or [table()] (other input).
 #' 
 #' 
 #' @family {Information theory functions} 
 #' @export
-entropy <- function(..., base = 2) {
-  checks(base, xnumber & xpositive)
+entropy <- function(..., model, base = 2) {
+  checks(base, xlen1 & xnumber & xpositive)
+  if (!missing(model)) checks(model, xinherits('probability'))
   
   UseMethod('entropy')
 }
@@ -1178,38 +1239,43 @@ H <- entropy
   
 #' @rdname entropy
 #' @export
-entropy.probability <-  function(q, p, condition = NULL, base = 2) {
-            if (!is.null(condition)) q <- conditional(q, condition)
+entropy.probability <-  function(pdist, model, condition = NULL, base = 2) {
+            if (!is.null(condition)) pdist <- conditional(pdist, condition)
   
-            if (missing(p) || !inherits(p, 'probability')) {
-              expected <- unconditional(q)$p
-              observed <- q$p
-             } else {
-               # cross entropy of q and p!
-                aligned <- alignDistributions(q, p, funcname = 'entropy')
-                observed <- aligned$X[[1]]
-                expected <- aligned$X[[2]]
-               
-             }
-  
-            observed <- ifelse(observed > 0L, log(observed, base = base), 0) 
             
-            
-            equation <- Pequation(q, 'H')
-            setNames(-sum(expected * observed), equation)
+            if (missing(model)) {
+              expected <- unconditional(pdist)$p
+              observed <- pdist$p
+              equation <- Pequation(pdist, 'H')
+            } else {
+              # cross entropy of q and p
+              aligned <- alignDistributions(pdist, model, funcname = 'xentropy')
+              observed <- aligned$X[[1]]
+              expected <- aligned$X[[2]]
+              equation <- 'H(p, q)'
           }
 
-
-#' @rdname entropy
-#' @export
-entropy.numeric <- function(x, base = 2, na.rm = TRUE, ...) {
-  entropy(density(x, ...), base = base, na.rm = na.rm)
+          observed <- ifelse(observed > 0L, log(observed, base = base), 0) 
+            
+          setNames(-sum(expected * observed), equation)
 }
 
 
 #' @rdname entropy
 #' @export
-entropy.density <- function(x, base = 2, na.rm = TRUE) {
+entropy.numeric <- function(x, model, base = 2, na.rm = TRUE, ...) {
+  if (missing(model)) {
+    entropy(density(x, ...), base = base, na.rm = na.rm)
+  } else {
+    entropy(pdist(...), model = model, base = base)
+  }
+  
+}
+
+
+#' @rdname entropy
+#' @export
+entropy.density <- function(x, model, base = 2, na.rm = TRUE) {
             label <- rlang::expr_label(rlang::enexpr(x))
             if (any(is.na(x))) return(NA_real_)
             
@@ -1226,8 +1292,8 @@ entropy.density <- function(x, base = 2, na.rm = TRUE) {
 
 #' @rdname entropy
 #' @export
-entropy.default <- function(..., base = 2) {
-            entropy(pdist(...), base = base)
+entropy.default <- function(..., model, base = 2) {
+            entropy(pdist(...), model = model, base = base)
           }
 
 
@@ -1261,8 +1327,53 @@ entropies <- function(..., base = 2, conditional = FALSE) {
   mat
 }
 
+#### xentropy() ----
 
-### mutualInfo() ----
+#' @rdname entropy
+#' @export
+xentropy <- function(..., model, base = 2) {
+  if (missing(model)) .stop("The xentropy() function requires a probability distribution passed to the 'model' argument.",
+                                   "If you want to estimate the model from the data, just use entropy().")
+  
+  if (!inherits(model, 'probability')) model <- pdist(model)
+  
+  entropy(..., model = model, base = base)
+
+}
+
+
+
+#### kld() ----
+
+#' @rdname entropy
+#' @export
+kld <- function(..., model, base = 2) {
+  checks(base, xnumber & xpositive)
+  
+  if (missing(model)) .stop("The lkd() function requires a probability distribution passed to the 'model' argument.")
+  
+  UseMethod('kld')
+}
+
+
+
+
+#' @rdname entropy
+#' @export
+kld.probability <-  function(pdist, model, condition = NULL, base = 2) {
+  xentropy(pdist, model = model, base = base, condition = condition) - 
+    entropy(pdist, base = base, condition = condition)
+}
+
+
+#' @rdname entropy
+#' @export
+kld.default <- function(..., model, base = 2) {
+  kld(pdist(...), model = model, base = base)
+}
+
+
+### mutual() ----
 
 #' Calculate Entropy or Information Content of variables 
 #'
@@ -1270,17 +1381,17 @@ entropies <- function(..., base = 2, conditional = FALSE) {
 #' @family {Information theory functions} 
 #' @rdname entropy
 #' @export
-mutualInfo <- function(..., base = 2) {
+mutual <- function(..., base = 2) {
   checks(base, xnumber & xpositive)
   
-  UseMethod('mutualInfo')
+  UseMethod('mutual')
 }
 
 
 
 #' @rdname entropy
 #' @export
-mutualInfo.probability <-  function(x, base = 2) {
+mutual.probability <-  function(x, base = 2) {
   varnames <- varnames(x)
   if (length(varnames) < 2L) .stop("Can't calculate mutual information of a single variable.")
   
@@ -1308,13 +1419,49 @@ mutualInfo.probability <-  function(x, base = 2) {
 
 #' @rdname entropy
 #' @export
-mutualInfo.default <- function(..., base = 2) {
-  mutualInfo(pdist(...), base = base)
+mutual.default <- function(..., base = 2) {
+  mutual.probability(pdist(...), base = base)
 }
 
 
 
 
+
+
+
+#' @rdname entropy
+#' @export
+mutual.probability <-  function(x, base = 2) {
+  varnames <- varnames(x)
+  if (length(varnames) < 2L) .stop("Can't calculate mutual information of a single variable.")
+  
+  x <- unconditional(x)
+  
+  observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
+  
+  independent <- Reduce('*', lapply(varnames, \(j) x[ , j]))
+  # expected <- (x[ , 1] * x[ , 2])
+  independent <- setNames(independent$p, do.call('paste', c(getLevels(independent), list(sep = '.'))))
+  
+  independent <- independent[names(observed)]
+  
+  ratio <- observed / independent
+  logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
+  
+  equation <- Pequation(x, 'I', ';')
+  
+  setNames(sum(observed * logratio, na.rm = TRUE), equation)
+  
+}
+
+
+
+
+#' @rdname entropy
+#' @export
+mutual.default <- function(..., base = 2) {
+  mutual.probability(pdist(...), base = base)
+}
 
 
 ##################################################-

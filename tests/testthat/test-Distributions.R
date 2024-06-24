@@ -171,6 +171,61 @@ expect_that('pdist and count are consistent', {
                pdist(pdist(cat, num), condition = 'cat'))
   
   
+})
+
+
+
+test_that('Entropy stuff', {
+  N <- 10000
   
+  num <-  rchisq(N, 2)
+  cat <- sample(letters, N, replace = TRUE, prob = 1:26)
+  cat2 <- sample(LETTERS[1:5], N, replace = TRUE, prob = c(10,2,10,2,5))
+  
+  # basics
+  expect_equal(H(cat), H(count(cat)))
+  expect_equal(H(cat), H(pdist(cat)))
+  expect_equal(H(cat), H(pdist(count(cat))))
+  
+  expect_equal(H(cat2, cat), H(count(cat2, cat)))
+  expect_equal(H(cat2, cat), H(pdist(cat2, cat)))
+  expect_equal(H(cat2, cat), H(pdist(count(cat2, cat))))
+  
+  
+  expect_equal(entropy(cat, cat2, condition = 'cat'), entropy(pdist(cat, cat2, condition = 'cat')))
+  expect_equal(entropy(pdist(cat, cat2), condition = 'cat'), entropy(pdist(cat, cat2, condition = 'cat')))
+  
+  
+  # mathematical identities
+  for (i in 1:10) {
+    
+    cat <- sample(letters, N, replace = TRUE, prob = 1:26)
+    cat2 <- sample(LETTERS[1:5], N, replace = TRUE, prob = c(10,2,10,2,5))
+    
+    Hc <- H(cat)
+    Hc2 <- H(cat2)
+    joint <- H(cat, cat2)
+    
+    # conditional
+    expect_equivalent(joint, Hc + H(cat, cat2, condition = 'cat'))
+    expect_equivalent(joint, Hc2 + H(cat, cat2, condition = 'cat2'))
+    
+    # mutual
+    expect_equivalent(joint, Hc + Hc2 - mutual(cat, cat2))
+    expect_equivalent(mutual(cat, cat), H(cat))
+    expect_equivalent(mutual(cat, cat2), mean(pmutual(cat, cat2)))
+    
+    # info and entropy
+    catx <- ifelse(seq_along(cat) %in% sample(length(cat), N / 4), 'a', cat)
+    
+    expect_equivalent(mean(info(cat)), H(cat))
+    expect_equivalent(mean(info(cat, catx)), H(cat, catx))
+    expect_equivalent(mean(info(cat, catx, condition = 'cat')), H(cat, catx, condition = 'cat'))
+  }
+  
+
   
 })
+
+
+  
