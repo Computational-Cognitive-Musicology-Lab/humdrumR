@@ -215,12 +215,18 @@ test_that('Entropy stuff', {
     expect_equivalent(mutual(cat, cat), H(cat))
     expect_equivalent(mutual(cat, cat2), mean(pmutual(cat, cat2)))
     
+    
     # info and entropy
     catx <- ifelse(seq_along(cat) %in% sample(length(cat), N / 4), 'a', cat)
     
     expect_equivalent(mean(info(cat)), H(cat))
     expect_equivalent(mean(info(cat, catx)), H(cat, catx))
     expect_equivalent(mean(info(cat, catx, condition = 'cat')), H(cat, catx, condition = 'cat'))
+    
+    # cross and kld
+    expect_gt(xentropy(cat, model = pdist(cat = catx)), H(cat))
+    expect_equivalent(xentropy(cat, model = pdist(cat)), H(cat))
+    expect_equivalent(kld(cat, model = pdist(cat = catx)) + H(cat), xentropy(cat, model = pdist(cat = catx)))
   }
   
 
