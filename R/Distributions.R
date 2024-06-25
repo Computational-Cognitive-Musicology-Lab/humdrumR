@@ -292,18 +292,14 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
 }
 
 ### indexing ----
+
+#### distributions in general ----
+
 # 
 setMethod('[', c('distribution', 'atomic', 'missing'),
           function(x, i, drop = FALSE) {
 
-            df <- as.data.frame(x)
-            
-            if (is.character(i))  i <- which(df[ , 1] %in% i)
-            
-            df <- df[i , ,  drop = FALSE]
-            rownames(df) <- NULL
-            
-            if (drop) df else distribution(df, x)
+            x[ , i, drop = drop]
           })
 
 # 
@@ -311,31 +307,31 @@ setMethod('[', c('distribution', 'missing', 'atomic'),
           function(x, i, j, drop = FALSE) {
             
 
-                        varnames <- varnames(x)
-
-                        if (is.logical(j)) j <- which(j)
-                        j <- if (is.numeric(j)) varnames[j] else intersect(j, varnames)
-                        
-                        if (any(is.na(j)) || length(j) == 0L) .stop("Can't index this distribution with non-existent columns.")
-
-                        type <- dist_type(x)
-                        dt <- as.data.table(x)[ , setNames(list(sum(get(type))), type), by = j]
-                        
-                        if (drop) as.data.frame(dt) else distribution(dt, x)
-                        
+            # prepare j
+            if (is.logical(j)) j <- which(j)
+            if (is.numeric(j)) j <- varnames[j] 
+            
+            if (length(setdiff(j, varnames)) || any(is.na(j)))  .stop("{harvard(setdiff(j ,varnames), 'and', quote = TRUE)} <is not a name|are not names> of",
+                                                                      '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(j, varnames)) == 1)
+            j <- intersect(j, varnames)
+            
+            # do indexing
+            type <- dist_type(x)
+            dt <- as.data.table(x)[ , setNames(list(sum(get(type))), type), by = j]
+            
+            if (drop) as.data.frame(dt) else distribution(dt, x)
+            
 
           })
 
 setMethod('[', c('distribution', 'ANY', 'ANY'),
           function(x, i, j, drop = FALSE) {
-            
-            x <- x[i , ]
-            x[ , j, drop = drop]
+            x[ , c(i, j), drop = drop]
           
             
           })
 
-setMethod('[', c('distribution', 'matrix'),
+setMethod('[[', c('distribution', 'matrix'),
           function(x, i, j, cartesian = TRUE, drop = FALSE) {
             
             i <- as.data.frame(i)
@@ -350,7 +346,6 @@ setMethod('[[', 'distribution',
           function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
             
             args <- as.list(rlang::enexprs(...))
-            
             args <- c(list(if (missing(i)) rlang::missing_arg() else i ),
                       list(if (missing(j)) rlang::missing_arg() else j ),
                       args)
@@ -363,44 +358,81 @@ setMethod('[[', 'distribution',
               missing <- missing[1L]
             }
             
-        
             levels <- getLevels(x)
             if (length(args) > length(levels)) .stop("This distribution only has {num2print(length(levels))} dimensions to index.",
-                                    "You have provided {num2print(length(args))}.")
+                                                     "You have provided {num2print(length(args))}.")
             levels <- levels[1:length(args)]
             
-            args[!missing] <- Map(\(arg, lev) {
-              if (is.numeric(arg)) unique(lev)[arg] else arg
-            } , args[!missing], levels[!missing])
+            args[!missing] <- Map(
+              \(arg, lev) {
+                if (is.numeric(arg)) unique(lev)[arg] else arg
+              } ,
+              args[!missing], levels[!missing])
             
             i <- if (cartesian) {
               matches(args[!missing], levels[!missing])
             } else {
-              Reduce('|', Map(`%in%`, levels[!missing], args[!missing]))
+              Reduce('&', Map(`%in%`, levels[!missing], args[!missing]))
             }
            
-            
-            x[i, , drop = drop]
-            
 
+            df <- as.data.frame(x)[i , , drop = FALSE]
+            if (drop) df else distribution(df, x) 
+              
+              # output <- distribution(df, x)
+              # output@names <- ifelse(output@names %in% varnames(x)[!missing] & !grepl('\\[\\]$', output@names), 
+                                     # paste0(output@names, '[]'), output@names)
+              # output
 
 
           })
 
+#### Special for probability distributions ----
+
 #' @export
 setMethod('[', c('probability', 'missing', 'atomic'),
-          function(x, i, j, ...) {
+          function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
 
             varnames <- varnames(x)
+            # prepare j
             if (is.logical(j)) j <- which(j)
-            j <- if (is.numeric(j)) varnames[j] else intersect(j, varnames)
+            if (is.numeric(j)) j <- varnames[j] 
             
+            if (length(setdiff(j, varnames)) || any(is.na(j)))  .stop("{harvard(setdiff(j ,varnames), 'and', quote = TRUE)} <is not a name|are not names> of",
+                                                                      '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(j, varnames)) == 1)
+            j <- intersect(j, varnames)
+            
+            # do indexing
             x <- unconditional(x)
             
             dt <- as.data.table(x)[ , list(p = sum(p)), by = j]
 
-            distribution(as.data.frame(dt), x, Condition = x@Condition, N = x@N)
+            distribution(as.data.frame(dt), x)
 
+          })
+
+
+#' @export
+setMethod('[[', 'probability',
+          function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
+            
+            output <- callNextMethod(x, i, j, ..., cartesian = cartesian, drop = FALSE)
+           
+            
+            if (is.null(x@Condition)) {
+              output@N <- as.integer(round(x@N * sum(output)))
+              output$p <- output$p / sum(output$p)
+              
+            } else {
+              newN <- as.integer(round(output@N * tapply(output$p, as.data.frame(output)[, x@Condition, drop = FALSE], sum)[names(output@N)]))
+              output@N <- setNames(ifelse(is.na(newN), 0L, newN), names(output@N))
+              
+              output$p <- tapply_inplace(output$p, as.data.frame(output)[, x@Condition, drop = FALSE], \(x) if (all(x == 0)) x else x / sum(x, na.rm = TRUE))
+              
+              output
+            }
+            
+            if (drop) as.data.frame(output) else output
           })
 
 
@@ -1168,7 +1200,33 @@ like.data.frame <- function(df, ..., model) {
 }
 
 
+### pentropy() ----
 
+#' @export
+pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  df <- data.frame(...)
+  
+  if (missing(model)) {
+    model <- pdist(..., condition = NULL, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+    df <- df[1]
+  }
+  
+  conditions <- intersect(varnames(model), names(df))
+  
+  model <- as.data.frame(model)
+  entropymat <- tapply(model$p, model[ , conditions, drop = FALSE], 
+                       \(P) {
+                         P <- P / sum(P)
+                         -sum(P * log(P, base = base), na.rm = TRUE)
+                       })
+                       
+  
+  entropymat[do.call('cbind', df)]
+  
+}
+
+
+### pmutual() ----
 
 #' @export
 pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
