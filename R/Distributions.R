@@ -188,7 +188,7 @@ Pequation <- function(dist, f = 'P', collapse = ',') {
   eq <- paste(setdiff(varnames, condition), collapse = collapse)
   if (!is.null(condition)) {
     condition <- paste(condition, collapse = collapse)
-    eq <- paste0(eq, ' | ', condition)
+    eq <- paste0(eq, '|', condition)
   }
   
   paste0(f, '(', eq, ')')
@@ -434,11 +434,14 @@ setMethod('[', c('probability', 'missing', 'atomic'),
             j <- intersect(j, varnames)
             
             # do indexing
+            condition <- intersect(x@Condition, j)
             x <- unconditional(x)
             
             dt <- as.data.table(x)[ , list(p = sum(p)), by = j]
 
-            distribution(as.data.frame(dt), x)
+            output <- distribution(as.data.frame(dt), x)
+            
+            if (length(condition)) conditional(output, condition) else output
 
           })
 
@@ -1395,6 +1398,58 @@ entropy.default <- function(..., model, base = 2) {
             entropy(pdist(...), model = model, base = base)
           }
 
+#### entropy_by() ----
+
+entropy_by <- function(..., by, independent = TRUE, base = 2) {
+  checks(base, xlen1 & xnumber & xpositive)
+  checks(by, xcharnotempty)
+
+  UseMethod('entropy_by')
+}
+
+
+#' @rdname entropy
+#' @export
+entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
+  
+  varnames <- varnames(pdist)
+  
+  if (!is.null(pdist@Condition) && any(base %in% pdist@Condition)) {
+    pdist <- conditional(unconditional(pdist), setdiff(pdist@Condition, base))
+  }
+  
+  if (length(setdiff(by, varnames))) .stop("We can't group this probability distribution by non-existent variable<s|>",
+                                           "{harvard(setdiff(by, varnames), 'or', TRUE)}.", ifelse = length(setdiff(by, varnames)) > 1)
+  
+  grouping <- as.data.frame(pdist)[ , by , drop = FALSE]
+  
+  expected <- if (!independent) unconditional(pdist)$p else tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , by , drop = FALSE], \(x) x / sum(x))
+  observed <- tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , c(pdist@Condition, by) , drop = FALSE], \(x) log(x / sum(x), base = base))
+# 
+#   Hs <- tapply(pdist$p, ,
+#                \(ps) {
+#                  browser()
+#                  if (independent) ps <- ps / sum(ps)
+#                  -sum(ps * log(ps, base = base), na.rm = TRUE)
+#                })
+  
+  Hs <- -tapply(expected * observed, as.data.frame(pdist)[ , by , drop = FALSE], sum, na.rm = TRUE)
+  
+  equation <- Pequation(pdist[ , setdiff(varnames, by)], 'H')
+  equation <- gsub('\\)$', '', equation)
+  equations <- paste0(equation, ';', 
+                      paste(by, collapse = '.'), '=',
+                      names(Hs), ')')
+  names(Hs) <- equations
+  Hs
+  
+}
+
+#' @rdname entropy
+#' @export
+entropy_by.default <- function(..., by, independent = TRUE, base = 2) {
+  entropy_by(pdist(...), by = by, independent = independent, base = base)
+}
 
 
 #### xentropy() ----

@@ -7,6 +7,7 @@
 \alias{entropy.numeric}
 \alias{entropy.density}
 \alias{entropy.default}
+\alias{entropy_by.default}
 \alias{xentropy}
 \alias{kld}
 \alias{kld.probability}
@@ -20,13 +21,17 @@ entropy(..., model, base = 2)
 
 H(..., model, base = 2)
 
-\method{entropy}{probability}(pdist, model, condition = NULL, base = 2)
+\method{entropy}{probability}(pdist, by, base = 2)
 
 \method{entropy}{numeric}(x, model, base = 2, na.rm = TRUE, ...)
 
 \method{entropy}{density}(x, model, base = 2, na.rm = TRUE)
 
 \method{entropy}{default}(..., model, base = 2)
+
+\method{entropy}{probability}(pdist, by, base = 2)
+
+\method{entropy_by}{default}(..., by, base = 2)
 
 xentropy(..., model, base = 2)
 
