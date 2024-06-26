@@ -63,6 +63,10 @@ getLevels <- function(dist) as.data.frame(dist)[ , varnames(dist), drop = FALSE]
 #' @export
 varnames <- function(x) setdiff(colnames(x), c('n', 'p'))
 
+
+#' @export
+levels.distribution <- function(x) getLevels(x)
+
 ### print() ----
 
 #' @export
@@ -293,13 +297,17 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
 
 ### indexing ----
 
-#### distributions in general ----
+#### distribution[] ----
 
 # 
 setMethod('[', c('distribution', 'atomic', 'missing'),
           function(x, i, drop = FALSE) {
 
-            x[ , i, drop = drop]
+            
+            df <- as.data.frame(x)[i, ]
+            
+            if (drop) df else distribution(df, x)
+            
           })
 
 # 
@@ -327,9 +335,9 @@ setMethod('[', c('distribution', 'missing', 'atomic'),
 setMethod('[', c('distribution', 'ANY', 'ANY'),
           function(x, i, j, drop = FALSE) {
             x[ , c(i, j), drop = drop]
-          
-            
           })
+
+#### distribution[[]] ----
 
 setMethod('[[', c('distribution', 'matrix'),
           function(x, i, j, cartesian = TRUE, drop = FALSE) {
@@ -344,24 +352,33 @@ setMethod('[[', c('distribution', 'matrix'),
 #' @export
 setMethod('[[', 'distribution',
           function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
+            varnames <- varnames(x)
+            args <- setNames(vector('list', length(varnames)), varnames)
             
-            args <- as.list(rlang::enexprs(...))
-            args <- c(list(if (missing(i)) rlang::missing_arg() else i ),
-                      list(if (missing(j)) rlang::missing_arg() else j ),
-                      args)
+            # prep args
+            ldots <- list(...)
             
-            missing <- sapply(args, rlang::is_missing)
-            args[!missing] <- lapply(args[!missing], rlang::eval_tidy)
+            named <- ldots[.names(ldots) != '']
+            if (any(duplicated(names(named)))) {
+              dups <- names(named)[duplicated(names(named))]
+              .stop("You have named multiple indexes for the {harvard(dups, 'and', quote = TRUE)} variable<|s>.", ifelse = length(dups) > 1)
+              }
+            if (length(setdiff(names(named), varnames))) .stop("{harvard(setdiff(names(named) ,varnames), 'and', quote = TRUE)} <is not the name|are not names> of",
+                                                               '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(names(named), varnames)) == 1)
             
-            if (missing[2] && length(args) == 2L) {
-              args <- args[1L]
-              missing <- missing[1L]
-            }
+            unnamed <- c(list(if (!missing(i)) i), list(if (!missing(j)) j), ldots[.names(ldots) == ''])
+            if ((length(named) + length(unnamed)) > length(args)) .stop("This distribution only has {num2print(length(varnames))} dimensions to index.",
+                                                                        "You have provided {num2print((length(named) + length(unnamed))}.")
             
+            args[names(named)] <- named
+            rest <- head(which(!varnames %in% names(named)), length(unnamed))
+            args[rest] <- unnamed
+            
+            missing <- sapply(args, is.null)
+            
+            # do indexing
             levels <- getLevels(x)
-            if (length(args) > length(levels)) .stop("This distribution only has {num2print(length(levels))} dimensions to index.",
-                                                     "You have provided {num2print(length(args))}.")
-            levels <- levels[1:length(args)]
+            
             
             args[!missing] <- Map(
               \(arg, lev) {
@@ -371,12 +388,13 @@ setMethod('[[', 'distribution',
             
             i <- if (cartesian) {
               matches(args[!missing], levels[!missing])
+              
             } else {
               Reduce('&', Map(`%in%`, levels[!missing], args[!missing]))
             }
-           
 
             df <- as.data.frame(x)[i , , drop = FALSE]
+            
             if (drop) df else distribution(df, x) 
               
               # output <- distribution(df, x)
@@ -387,7 +405,20 @@ setMethod('[[', 'distribution',
 
           })
 
-#### Special for probability distributions ----
+#### probability[] ----
+
+setMethod('[', c('probability', 'atomic', 'missing'),
+          function(x, i, drop = FALSE) {
+            
+            
+            output <- callNextMethod()
+            
+            output <- recomputeP(output, x)
+            
+            if (drop) as.data.frame(output) else output
+            
+          })
+
 
 #' @export
 setMethod('[', c('probability', 'missing', 'atomic'),
@@ -411,6 +442,7 @@ setMethod('[', c('probability', 'missing', 'atomic'),
 
           })
 
+#### probability[[]] ----
 
 #' @export
 setMethod('[[', 'probability',
@@ -418,28 +450,37 @@ setMethod('[[', 'probability',
             
             output <- callNextMethod(x, i, j, ..., cartesian = cartesian, drop = FALSE)
            
-            
-            if (is.null(x@Condition)) {
-              output@N <- as.integer(round(x@N * sum(output)))
-              output$p <- output$p / sum(output$p)
-              
-            } else {
-              newN <- as.integer(round(output@N * tapply(output$p, as.data.frame(output)[, x@Condition, drop = FALSE], sum)[names(output@N)]))
-              output@N <- setNames(ifelse(is.na(newN), 0L, newN), names(output@N))
-              
-              output$p <- tapply_inplace(output$p, as.data.frame(output)[, x@Condition, drop = FALSE], \(x) if (all(x == 0)) x else x / sum(x, na.rm = TRUE))
-              
-              output
-            }
+            output <- recomputeP(output, x)
             
             if (drop) as.data.frame(output) else output
           })
 
 
+
+
+recomputeP <- function(newx, x) {
+  
+  if (is.null(x@Condition)) {
+    newx@N <- as.integer(round(x@N * sum(newx)))
+    newx$p <- newx$p / sum(newx$p)
+    
+  } else {
+    newN <- as.integer(round(newx@N * tapply(newx$p, as.data.frame(newx)[, x@Condition, drop = FALSE], sum)[names(newx@N)]))
+    newx@N <- setNames(ifelse(is.na(newN), 0L, newN), names(newx@N))
+    
+    newx$p <- tapply_inplace(newx$p, as.data.frame(newx)[, x@Condition, drop = FALSE], \(x) if (all(x == 0)) x else x / sum(x, na.rm = TRUE))
+    
+    newx
+  }
+  
+  newx
+}
+
+#### filter() ----
+
 #' @export
 filter.distribution <- function(.data, ..., drop = FALSE) {
   exprs <- rlang::enquos(...)
-
   .data[rlang::eval_tidy(exprs[[1]], data = as.data.frame(.data)), , drop = drop]
 }
 
@@ -494,10 +535,10 @@ as.data.table.distribution <- function(x) {
 setMethod('sort', 'distribution',
           function(x, decreasing = TRUE) {
   X <- getValues(x)
-  x <- x[order(X, decreasing = decreasing), ]
+  df <- as.data.frame(x)[order(X, decreasing = decreasing), ]
   
-  x@Sort <- if (decreasing) -1L else 1L
-  x
+  distribution(df, x, Sort = if (decreasing) -1L else 1L)
+  
 })
 
 
@@ -1355,35 +1396,6 @@ entropy.default <- function(..., model, base = 2) {
           }
 
 
-entropies <- function(..., base = 2, conditional = FALSE) {
-  args <- list(...)
-  
-  names <- .names(args)
-  names <- ifelse(names == '', sapply(substitute(list(...))[-1], deparse, nlines = 1L), names)
-  names(args) <- names
-  
-  mat <- matrix(NA_real_, nrow = length(args), ncol = length(args))
-  
-  indices <- expand.grid(i = seq_along(args), j = seq_along(args))
-  if (!conditional) indices <- subset(indices, j >= i)
-  
-  
-  for (k in 1:nrow(indices)) {
-    i <- indices$i[k]
-    j <- indices$j[k]
-    
-
-    
-    mat[i, j] <- if (i == j) {
-      entropy(args[[i]], base = base)
-    } else {
-      do.call('entropy', c(args[c(i, j)], list(condition = if (conditional) names[j])))
-    }
-  }
-  
-  colnames(mat) <- rownames(mat) <- names
-  mat
-}
 
 #### xentropy() ----
 
