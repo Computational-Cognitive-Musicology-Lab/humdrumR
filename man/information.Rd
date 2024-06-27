@@ -4,19 +4,22 @@
 \alias{information}
 \title{Information theory}
 \description{
-HumdrumR includes some functionality for the computing statistics related to probability
-and \strong{information theory}.
+Many computational musicology analyses rely on probabilistic modeling and \href{https://en.wikipedia.org/wiki/Information_theory}{information theory}.
+HumdrumR includes functions to make these sorts of analyses quick and easy.
+These functions are closely connected to our \link{distributions} functions, which can be used to calculate/estimate the probability of data observations.
 }
 \details{
-Some important information theory quantities, are statistics that characterize a probability \emph{distribution}.
+The most fundamental tools of information theory are statistics that characterize probability \emph{distributions}.
 Thus, they are descriptive statistics, which describe a distribution (usually, the distribution of values in your data)
 using a single number.
 Such information-theoretic descriptive statistics can be computed using the \code{\link[=entropy]{entropy()}}
-(joint/conditional entropy), \code{\link[=xentropy]{xentropy()}} (cross entropy), \code{\link[=kld]{kld()}} (Kullback–Leibler divergence), and  \code{\link[=mutual]{mutual()}} (mutual information) functions.
-Other information theory quantities are calculated (data)point-wise: one value for each observation.
-Our vectorized information theory functions include \code{\link[=like]{like()}} (likelihood),
-\code{info()} (information content), and \code{pmutual()} (pointwise mutual information).
+(joint or conditional entropy), \code{\link[=xentropy]{xentropy()}} (cross entropy), \code{\link[=kld]{kld()}} (Kullback–Leibler divergence), and  \code{\link[=mutual]{mutual()}} (mutual information) functions.
+In contrast, other information theory metrics are calculated "point-wise": one value for each data observation.
+Our point-wise information theory functions are \code{\link[=like]{like()}} (likelihood),
+\code{\link[=info]{info()}} (information content), \code{pentropy()} (pointwise conditional entropy), and \code{pmutual()} (pointwise mutual information).
 
-Note that these functions calculate \emph{empirical} statistics---i.e., they describe your data.
-They are not (necessarily) estimates of the "true" quantity.
+Note that all of these functions calculate or utilize \emph{empirical} statistics---i.e., they describe \emph{your data}.
+They are not (necessarily) representative of the "true" information content in real music.
+They may be used as \emph{estimates} of the "true" entropy of music we study, but this assumes that our sample is
+representative and that our probabilistic models make sense (i.e., make valid assumptions).
 }

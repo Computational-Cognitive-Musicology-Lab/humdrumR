@@ -223,10 +223,15 @@ test_that('Entropy stuff', {
     expect_equivalent(mean(info(cat, catx)), H(cat, catx))
     expect_equivalent(mean(info(cat, catx, condition = 'cat')), H(cat, catx, condition = 'cat'))
     
+    expect_equivalent(-sum(log(like(cat, model = pdist(cat = catx)), base = 2)) / N, xentropy(cat, model = pdist(cat = catx)))
+    expect_equivalent(-sum(log(like(cat, model = pdist(cat = catx)))) / N, xentropy(cat, model = pdist(cat = catx), base = exp(1)))
+    
+    
     # cross and kld
     expect_gt(xentropy(cat, model = pdist(cat = catx)), H(cat))
     expect_equivalent(xentropy(cat, model = pdist(cat)), H(cat))
     expect_equivalent(kld(cat, model = pdist(cat = catx)) + H(cat), xentropy(cat, model = pdist(cat = catx)))
+    expect_equivalent(mean(info(cat, model = pdist(cat = catx))), H(cat, model = pdist(cat = catx)))
   }
   
 

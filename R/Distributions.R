@@ -367,8 +367,9 @@ setMethod('[[', 'distribution',
                                                                '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(names(named), varnames)) == 1)
             
             unnamed <- c(list(if (!missing(i)) i), list(if (!missing(j)) j), ldots[.names(ldots) == ''])
+            unnamed <- Filter(Negate(is.null), unnamed)
             if ((length(named) + length(unnamed)) > length(args)) .stop("This distribution only has {num2print(length(varnames))} dimensions to index.",
-                                                                        "You have provided {num2print((length(named) + length(unnamed))}.")
+                                                                        "You have provided {num2print((length(named) + length(unnamed)))}.")
             
             args[names(named)] <- named
             rest <- head(which(!varnames %in% names(named)), length(unnamed))
@@ -453,13 +454,19 @@ setMethod('[[', 'probability',
             
             output <- callNextMethod(x, i, j, ..., cartesian = cartesian, drop = FALSE)
            
-            output <- recomputeP(output, x)
-            
-            if (drop) as.data.frame(output) else output
+            if (drop) as.data.frame(output) else recomputeP(output, x)
           })
 
 
-
+setMethod('[[', c('probability', 'matrix'),
+          function(x, i, j, cartesian = TRUE, drop = FALSE) {
+            
+            i <- as.data.frame(i)
+            names(i) <- NULL
+            
+            do.call('[[', c(list(x, cartesian = cartesian, drop = drop), i))
+            
+          })
 
 recomputeP <- function(newx, x) {
   
@@ -1177,116 +1184,29 @@ pexprs <- function(exprs, colnames, condition) {
 
 #' Information theory
 #' 
-#' HumdrumR includes some functionality for the computing statistics related to probability
-#' and **information theory**.
+#' Many computational musicology analyses rely on probabilistic modeling and [information theory](https://en.wikipedia.org/wiki/Information_theory).
+#' HumdrumR includes functions to make these sorts of analyses quick and easy.
+#' These functions are closely connected to our [distributions] functions, which can be used to calculate/estimate the probability of data observations.
 #'
 #' @details
 #' 
 #' 
-#' Some important information theory quantities, are statistics that characterize a probability *distribution*.
+#' The most fundamental tools of information theory are statistics that characterize probability *distributions*.
 #' Thus, they are descriptive statistics, which describe a distribution (usually, the distribution of values in your data)
 #' using a single number.
 #' Such information-theoretic descriptive statistics can be computed using the [entropy()] 
-#' (joint/conditional entropy), [xentropy()] (cross entropy), [kld()] (Kullback–Leibler divergence), and  [mutual()] (mutual information) functions.
-#' Other information theory quantities are calculated (data)point-wise: one value for each observation.
-#' Our vectorized information theory functions include [like()] (likelihood),
-#' `info()` (information content), and `pmutual()` (pointwise mutual information).
+#' (joint or conditional entropy), [xentropy()] (cross entropy), [kld()] (Kullback–Leibler divergence), and  [mutual()] (mutual information) functions.
+#' In contrast, other information theory metrics are calculated "point-wise": one value for each data observation.
+#' Our point-wise information theory functions are [like()] (likelihood),
+#' [info()] (information content), `pentropy()` (pointwise conditional entropy), and `pmutual()` (pointwise mutual information).
 #'
-#' Note that these functions calculate *empirical* statistics---i.e., they describe your data.
-#' They are not (necessarily) estimates of the "true" quantity.
-#' 
+#' Note that all of these functions calculate or utilize *empirical* statistics---i.e., they describe *your data*.
+#' They are not (necessarily) representative of the "true" information content in real music.
+#' They may be used as *estimates* of the "true" entropy of music we study, but this assumes that our sample is 
+#' representative and that our probabilistic models make sense (i.e., make valid assumptions).
 #' 
 #' @name information
 NULL
-
-## Likelihoods ----
-
-### like() ----
-
-#' @export
-like <- function(..., model) {
-  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
-  
-  UseMethod('like')
-}
-
-#' @export
-info <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
-  -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
-       base = base)
-}
-
-#' @export
-like.default <- function(..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
-  like.data.frame(data.frame(...), model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
-}
-
-#' @export
-like.data.frame <- function(df, ..., model) {
-  if (missing(model) || is.null(model))  {
-    model <- if (is.numeric(df[[1]])) lm(df[,ncol(df):1]) else model <- do.call('pdist', list(df, ...))
-    
-  }
-  
-  if (inherits(model, 'probability')) {
-    colnames <- colnames(df)
-    varnames <- varnames(model)
-    
-    if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
-    
-    model[as.matrix(df), , drop = TRUE]$p
-    
-  } else {
-    dnorm(predict(model, newdata = df, type = 'response'), 0, summary(model)$sigma)
-  }
-  
-  
-}
-
-
-### pentropy() ----
-
-#' @export
-pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
-  df <- data.frame(...)
-  
-  if (missing(model)) {
-    model <- pdist(..., condition = NULL, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
-    df <- df[1]
-  }
-  
-  conditions <- intersect(varnames(model), names(df))
-  
-  model <- as.data.frame(model)
-  entropymat <- tapply(model$p, model[ , conditions, drop = FALSE], 
-                       \(P) {
-                         P <- P / sum(P)
-                         -sum(P * log(P, base = base), na.rm = TRUE)
-                       })
-                       
-  
-  entropymat[do.call('cbind', df)]
-  
-}
-
-
-### pmutual() ----
-
-#' @export
-pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
-  df <- data.frame(...)
-  
-  if (missing(model)) model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
-  
-  independent <- Reduce('*', lapply(varnames(model), \(j) model[ , j]))
-  
-  ic_observed <- info(df, model = model, base = base)
-  ic_independent <- info(df, model = independent, base = base)
-  
-  ic_independent - ic_observed
-  
-}
-
 
 ## Distributional ----
 
@@ -1296,35 +1216,102 @@ pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop
 #' Calculate Entropy or Information Content of variables 
 #'
 #' Information content and entropy are fundamental concepts in [information theory](https://en.wikipedia.org/wiki/Information_theory),
-#' which quantify the amount of information (or "surprise") in a random variable.
+#' quantifying the amount of information in samples from a random variable; they are often
+#' characterized as measures of how "expected" (low information) or "surprising" (high information) data is.
 #' Both concepts are closely related the probability density/mass of events: improbable events have higher information content.
-#' The probability of *each* observation maps to the [information content](https://en.wikipedia.org/wiki/Information_content);
+#' The probability of *each* (point-wise) observation maps to the [information content](https://en.wikipedia.org/wiki/Information_content);
 #' The average information content of a variable is the [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)).
 #' Information content/entropy can be calculated for discrete probabilities or continuous probabilities,
 #' and humdrumR defines methods for calculating both.
 #' 
 #' @details 
 #' 
-#' To calculate information content or entropy, we must assume (or estimate) a probability distribution.
-#' HumdrumR uses R's standard [table()] and [density()] functions to estimate discrte and continuous probability
-#' distributions respectively.
+#' To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
+#' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
+#' distributions of atomic data.
+#' For numeric, data we can also use R's standard [stats::density()] function to estimate the continuous probability density.
 #' 
-#' Entropy is the average information content of a variable.
-#' The `entropy()` function can accept either a [table()] object (for discrete variables), 
-#' or a [density()] object (for continuous variables).
-#' If `entropy()` is passed an [atomic][base::vector()] vector,
-#' the values of the vector are treated as observations or a random variable:
-#' for `numeric` vectors, the [stats::density()] function is used to estimate the probability distribution
-#' of the random (continuous) variable, then entropy is computed for the density.
-#' For other atomic vectors, [table()] is called to tabulate the discrete probability mass for each
-#' observed level, and entropy is then computed for the table.
+#' The `entropy()` function takes an object representing a probability distribution---ideally a humdrumR [distribution] object,
+#' base-R [table], or a [density()] object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
+#' However, if you are lazy, you can pass `entropy()` our atomic data vectors directly, and it will automatically pass them to the [pdist()]
+#' function for you; for example, if you want to calculate the joint entropy of variables`x` and `y` (which must be the same length),
+#'  you can call `entropy(pdist(x, y))` 
+#' or just `entropy(x, y)`.
+#' Other arguments can be provided to `pdist()` as well; notably, if you want to calculate the *conditional* entropy,
+#' you can, for example, say `entropy(x, y, condition = 'y')`.
 #'
-#' The `info()` function only accepts atomic vectors as its main (`x`) argument, but must also
-#' be provided a `model` argument.
-#' By default, the `model` argument is estimated using [density()] (`numeric` input) or [table()] (other input).
+#' The `info()` function is used similarly to the calling `entropy()` directly on data vectors:
+#' anywhere where you can call `entropy(x, y)`, you can call `info(x, y)` instead.
+#' The difference is that `info()` will return a vector of numbers, the same length as the representing the information content of each input observation.
+#' By definition, entropy of the data distribution is the average of all these point-wise information values: thus, `mean(info(x, y)) == entropy(x, y)`.
+#' 
+#' @section Cross entropy:
+#' 
+#' In many cases, we simply use entropy/information content to describe a set of data.
+#' In this case, the data we observe and the probability model (distribution) are the same---the probability model is the distribution of the data itself.
+#' However, we can also use a *different model*---in this case, a different probability distribution---to describe data.
+#' We thus get a measure of how well the model fits the data; this is called the [cross entropy](https://en.wikipedia.org/wiki/Cross-entropy).
+#' The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
+#' If a data matches the model well, the cross entropy will be a bit higher than the self entropy; if the data matches the model poorly,
+#' the cross entropy can be much higher.
+#' The difference between the cross entropy and the self entropy is always positive (or zero), and is called the 
+#' [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence).
+#' 
+#' To calculate cross entropy, use the `xentropy()` command.
+#' (The Kullback-Leibler Divergence can be calculated in the same way using the `kld()` function.)
+#' The `xentropy()` command works just like the entropy command, except you need to provide it a `model` argument, which must be 
+#' *another* probability distribution.
+#' Note that that data and the model have to have the **exact** same variable names, or `humdrumR` will throw an error!
+#' Name your arguments to avoid this (this is illustrated in the example below, where we name everything `X`).
+#' To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
+#' 
+#' ```
+#' dorian <- c('A', 'B', 'C', 'D', 'E', 'F#', 'G')
+#' N <- 1000
+#' 
+#' sample1 <- sample(dorian, N, replace = TRUE, prob = 7:1)
+#' sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1)
+#' sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7)
+#' 
+#' 
+#' ## first the self entropy
+#' entropy(X = sample1)
+#' entropy(X = sample2)
+#' entropy(X = sample3)
+#' 
+#' ## now the cross entropy
+#' 
+#' xentropy(X = sample1, model = pdist(X = sample2))
+#' xentropy(X = sample2, model = pdist(X = sample2))
+#' xentropy(X = sample3, model = pdist(X = sample2))
+#' 
+#' ```
+#' 
+#' `sample1` and `sample2` have very similar distributions, so when we use `sample2` as a model for `sample1`,
+#' the cross entropy is only slightly higher than the self entropy of `sample1`.
+#' However, when we use `sample2` as the model for `sample3` (which is distributed very differently)
+#' the entropy is quite a lot higher than the entropy of sample 3.
+#' 
+#' The `info()` command can also be passed a `model` argument.
+#' As always, `mean(info(x, model)) == xentropy(x, model)`.
+#' There is no standard name for this "cross information content."
+#' However, cross entropy/information-content are closely related to the more general concept of *likelihood* (see the next section).
+#'
+#' @section Likelihood:
+#' 
+#' The output of `info()` is identical to the log (base 2 by default) of the modeled [likelihood](https://en.wikipedia.org/wiki/Likelihood_function)
+#' of each data point, which can be computed using the [like()] function.
+#' Literally, `info(x, base) == log(like(x), base)`.
+#' The [like()] function works just like `info()`, computing pointwise probabilities for each data point based on the 
+#' probability distribution in `model`.
+#' However, we can use it to, for example, calculate the total *log likelihood* of data using `sum(log(like(...)))`.
+#' This value divided by N is the cross entropy (make sure to use the right log base!): `-sum(log(like(...), base = 2)) == xentropy(...)`.
+#' 
+#' 
 #' 
 #' 
 #' @family {Information theory functions} 
+#' @seealso The HumdrumR [information theory][information] overview.
 #' @export
 entropy <- function(..., model, base = 2) {
   checks(base, xlen1 & xnumber & xpositive)
@@ -1335,6 +1322,7 @@ entropy <- function(..., model, base = 2) {
 
 
 
+#' In equations, entropy is traditionally represented as *H(x)*, so we provide the `H()` function as a synonym for `entropy()`.
 #' @rdname entropy
 #' @export
 H <- entropy
@@ -1346,8 +1334,8 @@ entropy.probability <-  function(pdist, model, condition = NULL, base = 2) {
   
             
             if (missing(model)) {
-              expected <- unconditional(pdist)$p
-              observed <- pdist$p
+              expected <- pdist$p
+              observed <- unconditional(pdist)$p
               equation <- Pequation(pdist, 'H')
             } else {
               # cross entropy of q and p
@@ -1357,9 +1345,9 @@ entropy.probability <-  function(pdist, model, condition = NULL, base = 2) {
               equation <- 'H(p, q)'
           }
 
-          observed <- ifelse(observed > 0L, log(observed, base = base), 0) 
+          expected <- ifelse(expected > 0L, log(expected, base = base), 0) 
             
-          setNames(-sum(expected * observed), equation)
+          setNames(-sum(observed * expected), equation)
 }
 
 
@@ -1400,6 +1388,12 @@ entropy.default <- function(..., model, base = 2) {
 
 #### entropy_by() ----
 
+#' Calculate point-wise or contextual entropy
+#' 
+#' 
+#' @family {Information theory functions} 
+#' @seealso The HumdrumR [information theory][information] overview.
+#' @export
 entropy_by <- function(..., by, independent = TRUE, base = 2) {
   checks(base, xlen1 & xnumber & xpositive)
   checks(by, xcharnotempty)
@@ -1408,7 +1402,7 @@ entropy_by <- function(..., by, independent = TRUE, base = 2) {
 }
 
 
-#' @rdname entropy
+#' @rdname entropy_by
 #' @export
 entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
   
@@ -1445,7 +1439,7 @@ entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
   
 }
 
-#' @rdname entropy
+#' @rdname entropy_by
 #' @export
 entropy_by.default <- function(..., by, independent = TRUE, base = 2) {
   entropy_by(pdist(...), by = by, independent = independent, base = base)
@@ -1502,9 +1496,8 @@ kld.default <- function(..., model, base = 2) {
 
 #' Calculate Entropy or Information Content of variables 
 #'
-#' 
+#' @seealso The HumdrumR [information theory][information] overview.
 #' @family {Information theory functions} 
-#' @rdname entropy
 #' @export
 mutual <- function(..., base = 2) {
   checks(base, xnumber & xpositive)
@@ -1514,7 +1507,7 @@ mutual <- function(..., base = 2) {
 
 
 
-#' @rdname entropy
+#' @rdname mutual
 #' @export
 mutual.probability <-  function(x, base = 2) {
   varnames <- varnames(x)
@@ -1542,7 +1535,7 @@ mutual.probability <-  function(x, base = 2) {
 
 
 
-#' @rdname entropy
+#' @rdname mutual
 #' @export
 mutual.default <- function(..., base = 2) {
   mutual.probability(pdist(...), base = base)
@@ -1554,7 +1547,7 @@ mutual.default <- function(..., base = 2) {
 
 
 
-#' @rdname entropy
+#' @rdname mutual
 #' @export
 mutual.probability <-  function(x, base = 2) {
   varnames <- varnames(x)
@@ -1582,11 +1575,106 @@ mutual.probability <-  function(x, base = 2) {
 
 
 
-#' @rdname entropy
+#' @rdname mutual
 #' @export
 mutual.default <- function(..., base = 2) {
   mutual.probability(pdist(...), base = base)
 }
+
+
+## Point-wise ----
+
+### like() ----
+
+
+#' @export
+like <- function(..., model) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
+  
+  UseMethod('like')
+}
+
+#' @rdname entropy
+#' @export
+info <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
+       base = base)
+}
+
+#' @export
+like.default <- function(..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  like.data.frame(data.frame(...), model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+}
+
+#' @export
+like.data.frame <- function(df, ..., model) {
+  if (missing(model) || is.null(model))  {
+    model <- if (is.numeric(df[[1]])) lm(df[,ncol(df):1]) else model <- do.call('pdist', list(df, ...))
+    
+  }
+  
+  if (inherits(model, 'probability')) {
+    colnames <- colnames(df)
+    varnames <- varnames(model)
+    
+    if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
+    
+    model[[as.matrix(df), , drop = TRUE]]$p
+    
+  } else {
+    dnorm(predict(model, newdata = df, type = 'response'), 0, summary(model)$sigma)
+  }
+  
+  
+}
+
+
+### pentropy() ----
+
+
+#' @rdname entropy_by
+#' @export
+pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  df <- data.frame(...)
+  
+  if (missing(model)) {
+    model <- pdist(..., condition = NULL, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+    df <- df[1]
+  }
+  
+  conditions <- intersect(varnames(model), names(df))
+  
+  model <- as.data.frame(model)
+  entropymat <- tapply(model$p, model[ , conditions, drop = FALSE], 
+                       \(P) {
+                         P <- P / sum(P)
+                         -sum(P * log(P, base = base), na.rm = TRUE)
+                       })
+  
+  
+  entropymat[do.call('cbind', df)]
+  
+}
+
+
+### pmutual() ----
+
+#' @rdname mutual
+#' @export
+pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  df <- data.frame(...)
+  
+  if (missing(model)) model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+  
+  independent <- Reduce('*', lapply(varnames(model), \(j) model[ , j]))
+  
+  ic_observed <- info(df, model = model, base = base)
+  ic_independent <- info(df, model = independent, base = base)
+  
+  ic_independent - ic_observed
+  
+}
+
 
 
 ##################################################-

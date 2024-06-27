@@ -7,31 +7,24 @@
 \alias{entropy.numeric}
 \alias{entropy.density}
 \alias{entropy.default}
-\alias{entropy_by.default}
 \alias{xentropy}
 \alias{kld}
 \alias{kld.probability}
 \alias{kld.default}
-\alias{mutual}
-\alias{mutual.probability}
-\alias{mutual.default}
+\alias{info}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
 entropy(..., model, base = 2)
 
 H(..., model, base = 2)
 
-\method{entropy}{probability}(pdist, by, base = 2)
+\method{entropy}{probability}(pdist, model, condition = NULL, base = 2)
 
 \method{entropy}{numeric}(x, model, base = 2, na.rm = TRUE, ...)
 
 \method{entropy}{density}(x, model, base = 2, na.rm = TRUE)
 
 \method{entropy}{default}(..., model, base = 2)
-
-\method{entropy}{probability}(pdist, by, base = 2)
-
-\method{entropy_by}{default}(..., by, base = 2)
 
 xentropy(..., model, base = 2)
 
@@ -41,15 +34,15 @@ kld(..., model, base = 2)
 
 \method{kld}{default}(..., model, base = 2)
 
-mutual(..., base = 2)
-
-\method{mutual}{probability}(x, base = 2)
-
-\method{mutual}{default}(..., base = 2)
-
-\method{mutual}{probability}(x, base = 2)
-
-\method{mutual}{default}(..., base = 2)
+info(
+  ...,
+  model,
+  base = 2,
+  condition = NULL,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},
@@ -78,5 +71,12 @@ observed level, and entropy is then computed for the table.
 The \code{info()} function only accepts atomic vectors as its main (\code{x}) argument, but must also
 be provided a \code{model} argument.
 By default, the \code{model} argument is estimated using \code{\link[=density]{density()}} (\code{numeric} input) or \code{\link[=table]{table()}} (other input).
+}
+\seealso{
+The HumdrumR \link[=information]{information theory} overview.
+
+Other {Information theory functions}: 
+\code{\link{entropy_by}()},
+\code{\link{mutual}()}
 }
 \concept{{Information theory functions}}
