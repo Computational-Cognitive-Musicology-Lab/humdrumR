@@ -137,11 +137,13 @@ memoizeParse <- function(args, ..., dispatchArgs = c(), minMemoize = 100L, memoi
     
     if (is.struct(result)) {
       uniqueArgs$i <- seq_len(nrow(uniqueArgs))
-      result[merge(memoizeArgs, uniqueArgs, on = colnames(uniqueArgs), sort = FALSE)$i]
+      # result[merge(memoizeArgs, uniqueArgs, by = colnames(uniqueArgs), sort = FALSE)$i]
+      result[merge(memoizeArgs, uniqueArgs,  sort = FALSE)$i]
       
     } else {
       uniqueArgs[ , Result := result]
-      merge(memoizeArgs, uniqueArgs, on = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
+      merge(memoizeArgs, uniqueArgs,  sort = FALSE)$Result
+      # merge(memoizeArgs, uniqueArgs, by = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
       
     }
     
