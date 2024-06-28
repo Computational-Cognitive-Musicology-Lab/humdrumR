@@ -319,6 +319,7 @@ setMethod('[', c('distribution', 'missing', 'atomic'),
             if (is.logical(j)) j <- which(j)
             if (is.numeric(j)) j <- varnames[j] 
             
+            varnames <- varnames(x)
             if (length(setdiff(j, varnames)) || any(is.na(j)))  .stop("{harvard(setdiff(j ,varnames), 'and', quote = TRUE)} <is not a name|are not names> of",
                                                                       '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(j, varnames)) == 1)
             j <- intersect(j, varnames)
@@ -807,6 +808,8 @@ setMethod('*', c('probability', 'probability'),
 #' you can still add them together or bind them into a matrix.
 #'  See the examples!
 #'
+#'
+#'
 #' @examples 
 #' 
 #' generic <- c('c', 'c', 'e', 'g', 'a', 'b', 'b', 'b')
@@ -870,8 +873,9 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
 #' @export
 count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   quos <- rlang::enquos(...)
+  
   counts <- if (length(quos)) {
-    names(quos) <- sapply(quos, rlang::as_label)
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
     quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs)))
     rlang::eval_tidy(quo)
     
@@ -1053,12 +1057,13 @@ pdist.data.frame <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FA
 #' @export 
 pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             
-            exprs <- rlang::enexprs(...)
+            quos <- rlang::enexprs(...)
             
             humtab <- getHumtab(x, 'D')
-            if (length(exprs)) {
+            if (length(quos)) {
+              names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
               
-              rlang::eval_tidy(rlang::expr(pdist(humtab, !!!exprs, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs)))
+              rlang::eval_tidy(rlang::expr(pdist(humtab, !!!quos, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs)))
             } else {
               selectedFields <- selectedFields(x)
               names(selectedFields) <- selectedFields
@@ -1244,6 +1249,7 @@ NULL
 #' anywhere where you can call `entropy(x, y)`, you can call `info(x, y)` instead.
 #' The difference is that `info()` will return a vector of numbers, the same length as the representing the information content of each input observation.
 #' By definition, entropy of the data distribution is the average of all these point-wise information values: thus, `mean(info(x, y)) == entropy(x, y)`.
+
 #' 
 #' @section Cross entropy:
 #' 
@@ -1308,7 +1314,36 @@ NULL
 #' This value divided by N is the cross entropy (make sure to use the right log base!): `-sum(log(like(...), base = 2)) == xentropy(...)`.
 #' 
 #' 
+#' @param ... ***Distribution (or atomic vectors) to compute entropy/information of.***
 #' 
+#' Must either be a distribution object (created by [table()], [density()], [count()], or [pdist()]), or one
+#' or more atomic vectors of equal length.
+#'
+#' If atomic vectors are provided, and `model` is missing, the atomic vectors are passed to
+#' [pdist()] in order to calculate the `model`.
+#' 
+#' @param model ***The expected probability model.***
+#' 
+#' Must either be omitted (not allowed in calls to `xentropy()`) or must be a probability distribution created by [pdist()].
+#' 
+#' In calls to `entropy()` or `info()`, if `model` is missing, `...` arguments are used to generate the `model`.
+#' 
+#' @param base ***The logarithmic base.***
+#' 
+#' Defaults to `2`, so information is measured in units "bits."
+#' 
+#' Must be a single, non-zero positive number.
+#'
+#' Use `base = exp(1)` for natural-log "nats," or `base = 10` for Hartley/"dits".
+#' 
+#' @param condition ***Compute conditional entropy/information, conditoned on this variable.***
+#' 
+#' Defaults to `NULL` (no condition), so the joint entropy is calculated.
+#' 
+#' Must be a non-empty `character` string, which matches the name of one or of the named variables
+#' in the distribution.
+#' 
+#' This argument is simply passed to [pdist()].
 #' 
 #' @family {Information theory functions} 
 #' @seealso The HumdrumR [information theory][information] overview.
@@ -1494,7 +1529,69 @@ kld.default <- function(..., model, base = 2) {
 
 ### mutual() ----
 
-#' Calculate Entropy or Information Content of variables 
+#' Calculate mutual information between variables 
+#'
+#' The [mutual information](https://en.wikipedia.org/wiki/Mutual_information) is a measure of how statistically
+#' dependent two variables are: in information theory terms, how much information about one variable
+#' is learned from observing other variable(s).
+#' The overall mutual information can be calculated using `mutual()` (analogous to [entropy()]),
+#' while the point-wise mutual information can be calculated using `pmutual()` (analogous to [info()]).
+#'
+#' @details
+#' 
+#' Mutual information is a property of probability distributions over two or more variables.
+#' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
+#' distributions over atomic data, and we can then calculate their mutual information.
+#'
+#' The `mutual()` and `pmutual()` functions are called just like [entropy()] and [info()].
+#' `mutual()` can be provided a [table][table()] of distribution (from [pdist()]), or can be directly provided two or more 
+#' atomic vectors, which are simply passed to `pdist()`; in other words, `mutual(x, y) == mutual(pdist(x, y))`.
+#' `pmutual()`, like [info()], can only be passed raw atomic vectors, like `pmutual(x, y)`.
+#' Note that, unlike the entropy functions, the mutual information functions will throw an error if you only
+#' provide them a single variable.
+#'
+#' @section Further explanation:
+#' 
+#' If two (or more) variables are statistically independent, their joint entropy will be the sum of their
+#' independent entropies.
+#' 
+#' $$
+#' H(X, Y) = H(X) + H(Y)
+#' $$
+#' 
+#' However, if they are not independent, their joint entropy will be less than the summed independent entropies.
+#' The mutual information is the difference between the summed independent entropies and their actual observed
+#' joint entropy.
+#' 
+#' $$
+#' I(X,Y) = (H(X) + H(Y)) - H(X,Y)
+#' $$
+#' 
+#' 
+#' For the point-wise mutual information, we get a single value for each data observation.
+#' The value represents the difference between the observed joint likelihood of each observation
+#' and the value we'd expect if the variable were independent.
+#' For example, consider the variables binary variables "person likes heavy metal" ($P(metal)$) and "person plays electric guitar" ($P(guitar)$).
+#' Imagine that $P(metal) = .05$ and $P(guitar) = .1$.
+#' If these two variables are independent, we'd expect that the joint probability of liking heavy metal
+#' *and* playing guitar would be $P(metal, guitar) = .05 * .1 = .005$ (one out of 200 people).
+#' However, on measuring some data, we might find that actually one in fifty people like metal and play guitar ($P(metal, guitar) = .02$).
+#' This means that the combination of liking metal and playing guitar is $\frac{.02}{.005} = 4$ times more likely than we'd expect
+#' if they were independent.
+#' This would translate to a point-wise mutual information of (using default base-2 "bits") $+2$.
+#' The overall mutual information is the average over all the point-wise values (including other combinations, like heavy metal fans who don't play guitar).
+#' 
+#' 
+#'
+#' @examples
+#' 
+#' guitar <- c(T, T, T, T, T, T, T, T, F, F, F, F, F, F, F, F)
+#' metal <- c(T, T, T, T,T,T,F,F,T,T,F,F,F,F,F,F)
+#' 
+#' mutual(pdist(guitar, metal))
+#' mutual(guitar, metal)
+#' 
+#' pmutual(guitar, metal)
 #'
 #' @seealso The HumdrumR [information theory][information] overview.
 #' @family {Information theory functions} 
@@ -1511,7 +1608,7 @@ mutual <- function(..., base = 2) {
 #' @export
 mutual.probability <-  function(x, base = 2) {
   varnames <- varnames(x)
-  if (length(varnames) < 2L) .stop("Can't calculate mutual information of a single variable.")
+  if (length(varnames) < 2L) .stop("Can't calculate the mutual information of a single variable.")
   
   x <- unconditional(x)
   
