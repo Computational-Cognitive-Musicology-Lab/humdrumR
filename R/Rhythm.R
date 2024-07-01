@@ -1659,12 +1659,13 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' default tempo of 60 beats per minute.
 #' If `minutes == TRUE`, the output is formatted into `"minute:seconds.milliseconds"` character strings.
 #'
-#' If a `groupby` argument is provided, [localDuration()] is used to compute the minimum durations in each group before 
-#' computing the cumulative sum only with unique values from each `Record` in the `groupby`.
-#' By default, [with(in).humdrumR][withinHumdrum] will automatically pass `groupby = list(Piece = Piece, Record = Record)`
-#' into calls to `timeline()` or `timestamp()`.
-#' Thus, a call like `within(humData, timeline(Token))` will compute the correct timeline position for *all*
-#' tokens across all spines/paths/stops---all values in the same record will be the same.
+#' When applying `timeline()` to a [humdrumR dataset][humdrumR-class], the timeline of all spines with rhythmic information
+#' (e.g., `**kern`, `**harm`) is computed separately.
+#' (Note that `timeline()` can't guarantee that your data spines contain consistent rhythmic information!
+#' In other words, if one of your spines has (for example) an extra eighth-note token, the timelines in each spine will diverge.)
+#' By default, the timeline is output only in spines/tokens where rhythmic information is encoded.
+#' However, sometimes we want to know the timing of every datapoint.
+#' We can then set `total = TRUE`, which will propagate timeline information to *all* data tokens in all spines.
 #' 
 #' 
 #' Note that, `timeline()` and `timestamp()` follow the default behavior of [duration()] by treating grace-notes as duration `0`.
@@ -1674,6 +1675,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' By default, any *other* tokens without (parsable) rhythm information are returned a `NA`.
 #' However, if `threadNA = FALSE`, rhythm-less tokens will be treated as if they have a duration of `0` as well, and thus
 #' have a (shared) position on the timeline.
+#' 
 #' 
 #' @section Pickups:
 #' 
@@ -1737,6 +1739,12 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #'
+#' @param total ***Should timeline propagate to all records in all spines?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
 #' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
 #' Defaults to an empty `list()`.
@@ -1759,11 +1767,13 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @name timeline
 #' @export 
 timeline.default <- function(x, start = 0, pickup = NULL, ..., 
-                             Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
+                             Exclusive = NULL, threadNA = TRUE, total = FALSE, parseArgs = list(), groupby = list()) {
   
-  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive, ...), parseArgs))
   
-  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timeline')
+  excluded <- if (is.null(Exclusive)) logical(length(rints)) else !Exclusive %in% attributes(rints)$dispatch$Exclusive
+  
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, total = total, callname = 'timeline', excluded = excluded)
   
   rint2duration(timerints, ...)
   
@@ -1780,7 +1790,20 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' 
 #' @rdname timeline
 #' @export
-timeline.humdrumR <- humdrumRmethod(timeline.default)
+timeline.humdrumR <- function(x,  ..., total = FALSE) {
+  quos <- rlang::enexprs(...)
+  
+  quo <-  if (length(quos) > 1L) {
+    quos[[1]]
+  }  else {
+    rlang::quo(.)
+  }
+  
+  dataTypes <- if (total) 'Dd' else 'D'
+  
+  rlang::eval_tidy(rlang::quo(within(x, Timeline <- timeline.default(!!quo, ..., total = total), dataTypes = !!dataTypes)))
+  
+}
 #' @rdname timeline
 #' @export
 timeline <- humdrumRgeneric(timeline.default)
@@ -1789,12 +1812,12 @@ timeline <- humdrumRgeneric(timeline.default)
 #' @rdname timeline
 #' @export 
 timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., 
-                              Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
+                              Exclusive = NULL, threadNA = TRUE, total = FALSE, parseArgs = list(), groupby = list()) {
   
-  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive, ...), parseArgs))
   seconds <- rint2seconds(rints, BPM = BPM)
   rints <- as.rational(seconds)
-  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timestamp')
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, total = total, callname = 'timestamp')
   
   rint2dur(timerints, BPM = 240, minutes = minutes, ...) # BPM has already been incorporated, 240 is value we need now.
   
@@ -1812,16 +1835,31 @@ timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = T
 #' 
 #' @rdname timeline
 #' @export
-timestamp.humdrumR <- humdrumRmethod(timestamp.default)
+timestamp.humdrumR <- function(x,  ..., total = FALSE) {
+  quos <- rlang::enexprs(...)
+  
+  quo <-  if (length(quos) > 1L) {
+    quos[[1]]
+  }  else {
+    rlang::quo(.)
+  }
+  
+  dataTypes <- if (total) 'Dd' else 'D'
+  
+  rlang::eval_tidy(rlang::quo(within(x, Timestamp <- timestamp.default(!!quo, ..., total = total), dataTypes = !!dataTypes)))
+  
+}
 #' @rdname timeline
 #' @export
 timestamp <- humdrumRgeneric(timestamp.default)
 
-pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) {
+pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, total = FALSE, callname, excluded = logical(length(rints))) {
   # this does most of work for timestamp and timeline
 
   start <- rhythmInterval(start)
   
+  # NA rints are parse fails,
+  # 0 rints are grace notes
   na <- is.na(rints)
   rints[na] <- rational(0L)
   
@@ -1830,27 +1868,37 @@ pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) 
   start <- fractions$Numerator[1]
   
   .SD <- structureTab(Numerator = fractions$Numerator[-1L], groupby = groupby)
+  .SD[ , Excluded := excluded]
   
-  .SD[Stop == 1L, Time := sigma.default(c(as.integer64(0L), head(Numerator, -1L))), by = list(Piece, Spine, Path)]
+  .SD[Stop == 1L & !Excluded, Time := sigma.default(c(as.integer64(0L), head(Numerator, -1L))), by = list(Piece, Spine, Path)]
   
-  .SD[ , Time := Time + start]
+  .SD[Excluded == FALSE, Time := Time + start]
   
   # make empty events fill from PREVIOUS event
-  .SD$Time[.SD$Numerator == 0L] <- ditto(.SD$Time, null = .SD$Numerator == 0L)[.SD$Numerator == 0L]
+  .SD$Time[.SD$Numerator == 0L & .SD$Excluded == FALSE] <- ditto(.SD$Time[.SD$Excluded == FALSE], 
+                                                                 null = .SD$Numerator[.SD$Excluded == FALSE] == 0L)[.SD$Numerator[.SD$Excluded == FALSE] == 0L]
   
-  .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
+  .SD[Excluded == FALSE , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
   
   
   if (!is.null(pickup)) {
     .SD$Pickup <- pickup
-    .SD[ , Time := {
+    .SD[Excluded == FALSE, Time := {
       if (all(!Pickup, na.rm = TRUE)) Time else Time - Time[which(!Pickup)[1]]
       }, by = list(Piece, Spine, Path)]
   }
   
   
   # .SD$Time
-  if (threadNA) .SD$Time[na] <- NA_integer64_
+  .SD[ , Na := na]
+  .SD[ , Zero := rints == rational(0L)]
+  if (!threadNA) {
+    .SD[(Na == TRUE | Zero == TRUE) & Excluded != TRUE, Time := NA_integer64_] 
+  } else {
+    .SD[Excluded == FALSE, Time := if (any(!Na)) rep(Time[!Na][1], length(Time)) else Time, by = list(Piece, Record)] 
+  }
+  if (total) .SD[, Time := if (any(!Na)) rep(Time[!Na][1], length(Time)) else Time, by = list(Piece, Record)] 
+  
   
   rational(.SD$Time, fractions$Denominator)
 }

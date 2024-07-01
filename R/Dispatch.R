@@ -740,7 +740,7 @@ humdrumRgeneric <- function(default, envir = parent.frame()) {
   generic
 }
 
-humdrumRmethod <- function(default, envir = parent.frame()) { #, doArgs = c(), memoize = TRUE) {
+humdrumRmethod <- function(default, envir = parent.frame(), dataTypes = 'D') {
   
   .default <- rlang::enexpr(default)
   args <- formals(default)
@@ -761,7 +761,7 @@ humdrumRmethod <- function(default, envir = parent.frame()) { #, doArgs = c(), m
     quos <- rlang::enquos(...)
     
     if (!any(.names(quos) %in% c(.(firstArg), ''))) quos <- c(rlang::quo(.), quos)
-    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos))))
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos), dataTypes = .(dataTypes))))
   })
   
   rlang::new_function(setNames(alist(x = , ... = ), c(firstArg, '...')), env = envir,

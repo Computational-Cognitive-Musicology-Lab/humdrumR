@@ -437,7 +437,7 @@ structureTab <- function(..., groupby = list()) {
     
     groupby <- checkWindows(fields[[1]], groupby)
     
-    fields$Piece <- fields$Spine <- fields$Stop <- fields$File <- 1L
+    fields$Piece <- fields$Spine <- fields$Stop <- fields$File <- 1L # adds a File field, even though we mainly use Piece
     fields$Record <- seq_len(nrow(fields))
     fields$Path <- fields$ParentPath <- 0L
     fields[names(groupby)] <- groupby
