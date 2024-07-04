@@ -100,22 +100,92 @@ parseTrack <- function(track, division) {
   int <- as.integer(track)
   status <- int >= 128
   
-  on <- int %in% 144L:159L
-  off <- int %in% 128:143L
   
-  groups <- cumsum(status)
-  noteon <- unlist(tapply(on, groups, \(x) rep(any(x), length(x))))
+  data <- data.table(Int = int, Channel = integer(length(int)), Type = character(length(int)), Code = integer(length(int)), Delta = 0L, Data = vector('list', length(int)))
   
-  triple <- seq_len(sum(noteon)) %% 3L
+  data <- parseFF(data)
+
   
-  time <- int[noteon][triple == 1]
-  pitch <- int[noteon][triple == 2]
-  velocity <- int[noteon][triple == 0]
+  data[, Status := cumsum(Int >= 128L)]
   
-  cbind(time, pitch, velocity)
+  data <- data[, parseStatus(.SD), by = Status]
+
+  # try to find deltas!
+  data[Status == 0, Type := 'Delta']
+  data[is.na(Type), Type := {
+    Type[1] <- 'Delta'
+    Type
+    
+  }, by = Status]
+  # data[Type == 'Delta', Delta :=]
+  browser()
+  # data[is.na(Type) & Int < 128, 
   
   
   
+}
+
+parseStatus <- function(data) {
+  if (!is.na(data$Type[1]) && data$Type[1] == 'FF') return(data)
+  if (nrow(data) == 1L) {
+    data$Type == 'Delta'
+    return(data)
+  } 
+  
+  int <- data$Int[1] - 128L
+  channel <- int %% 16L
+  type <- (int - channel) / 16L
+  
+  type <- c('Note off', 'Note on', 'Polyphonic aftertouch', 'Control change', 'Program change', 'Channel aftertouch', 'Pitch wheel range', 'System')[type  + 1L]
+  
+  
+  datalen <- c('Note off' = 2L, "Note on" = 2L,
+               'Polyphonic aftertouch' = 2L, 'Control change' = 2L,
+               'Program change' = 1L, 'Channel pressure' = 1L,
+               'Pitch wheel range' = 2L, 'System' = NA_integer_)[type]
+  
+  dataint <- head(data$Int[-1], datalen)
+  
+  stuff <- data.table(Int = data$Int[1], Channel = channel, Type = type, Code = NA_integer_,  Delta = 0L, Data = list(dataint))
+  rest <- tail(data, -(datalen + 1L))
+  rbind(stuff, rest)
+}
+
+parseFF <- function(data) {
+  data[, FF := cumsum(Int == 255L)]
+  
+  data <- data[, {
+    if (FF == 0) {
+      .SD
+    } else {
+      len <- parseVarLen(Int[-1:-2])
+      
+      rest <-  tail(Int, -(2 + len$Length + length(len$Rest)))
+      data.table(Int = c(255L, rest),
+                 Channel = c(NA_integer_, integer(length(rest))),
+                 Type = c('FF', rep(NA_character_, length(rest))),
+                 Code = c(Int[2], rep(NA_integer_, length(rest))), 
+                 Delta =0L,
+                 Data = c(list(len$Rest), vector('list', length(rest))))
+    }
+  }, by = FF]
+  
+  data[ , FF := NULL]
+  
+  data
+
+
+}
+
+parseVarLen <- function(x) {
+  
+  bytes <- x[1:which(x < 128)[1]]
+  
+  bytes <- bytes %% 128L
+  n <- (length(bytes) - 1L) : 0L
+  
+  result <- sum(bytes * (2 ^ (7 * n)))
+  list(Number = result, Length = length(bytes), Rest = head(tail(x, -length(bytes)), result))
   
 }
 
