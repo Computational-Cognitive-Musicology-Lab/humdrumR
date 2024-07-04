@@ -1188,11 +1188,13 @@ chord2tset <- function(x, ..., major = 'maj', minor = 'min', augment = 'aug', di
   
 }
 
-harte2tset <- function(x,  ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = '-') {
+harte2tset <- function(x,  Key = dset(0L, 0L), ..., major = 'maj', minor = 'min', augment = 'aug', diminish = 'dim', flat = '-') {
   REparse(x,
           makeRE.harte(..., major = major, minor = minor, augment = augment, diminish = diminish,
                        flat = flat, collapse = FALSE), # makes tonalChroma, figqual, bass
           toEnv = TRUE) -> parsed
+  
+  Key <- diatonicSet(Key)
   
   # shorthand translation
   shorthands <- local({ 
@@ -1245,7 +1247,7 @@ harte2tset <- function(x,  ..., major = 'maj', minor = 'min', augment = 'aug', d
     
   }
   
-  tset + kern2tint(tonalChroma, flat = flat)
+  (tset + kern2tint(tonalChroma, flat = flat)) - getRoot(Key)
   
 }
 
