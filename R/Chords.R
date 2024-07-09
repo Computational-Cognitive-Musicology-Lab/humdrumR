@@ -450,13 +450,7 @@ reduceFigures <- function(alterations, extensions,
   output <- sapply(figures, \(f) paste(.paste(extension.sep[1], f[f != '.' & f != ''], extension.sep[2], na.if = all, sep = ''), collapse = ''))
   
   output
-  
-  # # remove extra . at ends
-  # sepRE <- .paste('(', sepRE[1], '\\.', sepRE[2], ')+$', na.if = all)
-  # # gsub(captureRE(c('.', extension.sep), '+$'), '', output)
-  # gsub(sepRE, '', output)
-  
-  #
+
   
 }
 
@@ -500,7 +494,7 @@ tset2tonalHarmony <- function(x,
     extensions  <- do.call('tset2extensions', c(list(x, inverted = getInversion(x) > 0L), figArgs))
     alterations <- do.call('tset2alterations', c(list(x, Key = Key, step = FALSE), figArgs[names(figArgs) != 'step']))
     
-    figuration <- do.call('reduceFigures', c(list(alterations, extensions, step = TRUE, root = root, ...,
+    figuration <- do.call('reduceFigures', c(list(alterations, extensions, step = TRUE, root = root,
                                                   quality, root.case, inversion = getInversion(x)), figArgs))
     quality[quality == '?'] <- ""
     quality[grepl('sus|add', figuration) & quality %in% c('5MAJOR', '5MINOR')] <- ''
@@ -640,10 +634,11 @@ tset2chord <- function(x, figArgs = c(), major = NULL, ...) {
   
 }
 
-tset2harte <- function(x, Key = NULL, figArgs = list(), flat = '-', ...) {
+tset2harte <- function(x, Key = NULL, figArgs = list(), flat = '-', sep = ':', ...) {
   
   figureArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE, diminish = 'o', augment = '+', flat = 'b',
-                     absoluteSpecies = TRUE, qualities = TRUE, extension.sep = ',')
+                     extension.decreasing = FALSE,
+                     absoluteSpecies = TRUE, qualities = FALSE, extension.sep = ',')
   
   figureArgs[names(figArgs)] <- figArgs
   
@@ -652,54 +647,32 @@ tset2harte <- function(x, Key = NULL, figArgs = list(), flat = '-', ...) {
                        parts = c('root', 'quality', 'figuration', 'inversion'), 
                        root_func = tint2simplepitch, 
                        root.case = FALSE,
-                       root = TRUE, quality = TRUE, figuration = TRUE, 
-                       inversion = FALSE, bass = TRUE,
+                       root = TRUE, quality = FALSE, figuration = TRUE, 
+                       inversion = TRUE, bass = TRUE, invertFigs = FALSE,
                        implicitSpecies = FALSE, inversion.labels = c('', '/3', '/5', '/7', '/2', '/4', '/6'),
                        extension.shorthand = TRUE, extension.simple = FALSE,
-                       extension.decreasing = NULL,
                        extension.add = FALSE, extension.sus = FALSE)
-  z <- t2tH(x, figArgs = figureArgs, ..., collapse = FALSE)
-  browser()
+  parts <- t2tH(x, Key = Key, figArgs = figureArgs, flat = flat, ..., collapse = FALSE)
   
-  Key <- diatonicSet(Key)
   
-  if (!is.null(Key)) {
-    Key <- rep(Key, length.out = length(x))
-    x[!is.na(Key)] <- x[!is.na(Key)] + getRoot(Key[!is.na(Key)])
+  if (length(parts$figuration)) {
+    parts$figuration <- local({
+      fig <- paste0('(1', gsub('n', '', parts$figuration), ')')
+      shorthand <- c('3,5' = 'maj', 'b3,5' = 'min', 'b3,b5' = 'dim', '3,#5' = 'aug',
+                     '3,5,7' = 'maj7', 'b3,5,b7' = 'min7', '3,5,b7' = '7', 'b3,b5,b7' = 'hdim7', 'b3,b5,bb7' = 'dim7', 'b3,5,7' = 'minmaj7',
+                     '3,5,6' = 'maj6', 'b3,5,6' = 'min6',
+                     '3,5,7,9' = 'maj9', 'b3,5,b7,9' = 'min9', '3,5,b7,9' = '9',
+                     '5,11' = 'sus4', '5,9' = 'sus2')
+      names(shorthand) <- paste0('(1,', names(shorthand), ')')
+      fig[fig %in% names(shorthand)] <- shorthand[fig[fig %in% names(shorthand)]]
+      fig
+    })
+   
   }
   
-  root <- getRootTint(x)
   
-  qualities <- tset2alterations(x, flat = 'b', inversion = FALSE)
-  extensions <- tset2extensions(x, inversion = FALSE, inverted = x@Inversion > 0)
-  extensions <- array(.paste(qualities, extensions), dim = dim(qualities))
-  
-  fig <- apply(extensions, 1, .paste, collapse = ',')
-  
-  fig <- paste0('(', fig, ')')
-  
-  shorthand <- c('3,5' = 'maj', 'b3,5' = 'min', 'b3,b5' = 'dim', '3,#5' = 'aug',
-                 '3,5,7' = 'maj7', 'b3,5,b7' = 'min7', '3,5,b7' = '7', 'b3,b5,b7' = 'hdim7', 'b3,b5,bb7' = 'dim7', 'b3,5,7' = 'minmaj7',
-                 '3,5,6' = 'maj6', 'b3,5,6' = 'min6',
-                 '3,5,7,9' = 'maj9', 'b3,5,b7,9' = 'min9', '3,5,b7,9' = '9',
-                 '5,11' = 'sus4', '5,9' = 'sus2')
-  names(shorthand) <- paste0('(1,', names(shorthand), ')')
-  fig[fig %in% names(shorthand)] <- shorthand[fig[fig %in% names(shorthand)]]
-  
-  
-  
-  root <- tint2simplepitch(root, flat = flat, ...)
-  
-  # bass
-  bass <- local({
-    inverted <- x@Inversion > 0L
-    bass <- character(length(x))
-    bass[inverted] <- paste0('/', extensions[cbind(which(inverted), x@Inversion[inverted] + 1L)])
-    bass
-    
-  })
-  paste0(root, ':', fig, bass)
-  
+  paste0(parts$root, sep,
+         parts$figuration, parts$inversion)
 }
 
 
