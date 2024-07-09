@@ -447,9 +447,14 @@ reduceFigures <- function(alterations, extensions,
     lapply(1L:nrow(alterations), \(i) alterations[i, ])
   }
   
-  output <- sapply(figures, \(f) paste(.paste(extension.sep[1], f, extension.sep[2], na.if = all, sep = ''), collapse = ''))
+  output <- sapply(figures, \(f) paste(.paste(extension.sep[1], f[f != '.' & f != ''], extension.sep[2], na.if = all, sep = ''), collapse = ''))
   
-  gsub('\\.+$', '', output)
+  output
+  
+  # # remove extra . at ends
+  # sepRE <- .paste('(', sepRE[1], '\\.', sepRE[2], ')+$', na.if = all)
+  # # gsub(captureRE(c('.', extension.sep), '+$'), '', output)
+  # gsub(sepRE, '', output)
   
   #
   
@@ -636,6 +641,25 @@ tset2chord <- function(x, figArgs = c(), major = NULL, ...) {
 }
 
 tset2harte <- function(x, Key = NULL, figArgs = list(), flat = '-', ...) {
+  
+  figureArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE, diminish = 'o', augment = '+', flat = 'b',
+                     absoluteSpecies = TRUE, qualities = TRUE, extension.sep = ',')
+  
+  figureArgs[names(figArgs)] <- figArgs
+  
+  
+  t2tH <- partialApply(tset2tonalHarmony, keyed = TRUE,
+                       parts = c('root', 'quality', 'figuration', 'inversion'), 
+                       root_func = tint2simplepitch, 
+                       root.case = FALSE,
+                       root = TRUE, quality = TRUE, figuration = TRUE, 
+                       inversion = FALSE, bass = TRUE,
+                       implicitSpecies = FALSE, inversion.labels = c('', '/3', '/5', '/7', '/2', '/4', '/6'),
+                       extension.shorthand = TRUE, extension.simple = FALSE,
+                       extension.decreasing = NULL,
+                       extension.add = FALSE, extension.sus = FALSE)
+  z <- t2tH(x, figArgs = figureArgs, ..., collapse = FALSE)
+  browser()
   
   Key <- diatonicSet(Key)
   
