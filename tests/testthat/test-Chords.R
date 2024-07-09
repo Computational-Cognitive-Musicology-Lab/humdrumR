@@ -53,6 +53,12 @@ test_that('Common chord function arguments work', {
   expect_equal(figuredBass(harte, inversion = FALSE , figuration = FALSE),  c(NA_character_, NA_character_, NA_character_, NA_character_, NA_character_, 'E-', 'B-'))
   expect_equal(figuredBass(harte, inversion = TRUE , figuration = FALSE), c('E', 'F#', 'E', 'A', 'F#', 'E-', 'B-'))
   
+  # convert to harte
+  expect_equal(harte(harte), harte)
+  expect_equal(harte(harte, inversion = FALSE), gsub('/.*', '', harte))
+  expect_equal(harte(harte, inversion = FALSE , figuration = FALSE), gsub(':.*', ':', harte))
+  expect_equal(harte(harte, inversion = TRUE , figuration = FALSE), gsub(':[^/]+(/?)', ':\\1', harte))
+  
   
 })
 
