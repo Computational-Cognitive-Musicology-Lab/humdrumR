@@ -254,7 +254,6 @@ tset2alterations <- function(x, Key = dset(0,0),
                              explicitNaturals = FALSE, ...) {
   # this produces either accidentals or qualities, depending on the parts argument
   bass <- getBass(x)
-  
   if (absoluteSpecies) {
     roots <- getRoot(x)
     x <- x - getRoot(x)
@@ -264,13 +263,11 @@ tset2alterations <- function(x, Key = dset(0,0),
     x <- x - getRoot(Key)
     Key <- Key - getRoot(Key)
   }
-  
   LO5ths <- LO5th(x)
   tints <- tint( , c(LO5ths))
   figures <- tint2tonalChroma(tints,  Key = Key, qualities = qualities, complex = FALSE, 
                               parts = 'species',
                               implicitSpecies = implicitSpecies, explicitNaturals = explicitNaturals, ...)
-  
   # colnames(figures) <- extensions
   # rownames(figures) <- tint2simplepitch(tint( , bass), Key = dset(0, 0), quality.cautionary = TRUE)
   figures %<-matchdim% LO5ths
@@ -367,8 +364,6 @@ reduceFigures <- function(alterations, extensions,
   present <- !is.na(alterations) 
   tags <- array(NA_character_, dim = dim(alterations))
   
-
-
   
   # get rid of alterations that are already taken care of by the quality!
   if (!is.null(triadQuality) && alterationsFromTriadQuality) {
@@ -509,7 +504,6 @@ tset2tonalHarmony <- function(x,
   }
   
   
-  
   if (collapse) {
       pasteordered(parts, root = root, quality = quality, figuration = figuration, inversion = if (inversion) inversion.label, bass = bass, sep = sep)
   } else {
@@ -578,9 +572,9 @@ tset2roman <- function(x,  Key = dset(0, 0), figArgs = c(), ...) {
 
 tset2harm <- function(x,  Key = dset(0, 0), figArgs = c(), ...) {
   figureArgs <- list(implicitSpecies = TRUE, qualities = TRUE, absoluteSpecies = TRUE,
-                  diminish = 'D', augment = 'A', 
-                  extension.shorthand = TRUE, extension.simple = FALSE, extension.decreasing = FALSE,
-                  extension.sus = TRUE, extension.add = TRUE)
+                     diminish = 'D', augment = 'A', 
+                     extension.shorthand = TRUE, extension.simple = FALSE, extension.decreasing = FALSE,
+                     extension.sus = TRUE, extension.add = TRUE)
   figureArgs[names(figArgs)] <- figArgs
   
   t2tH <- partialApply(tset2tonalHarmony, 

@@ -66,6 +66,22 @@ test_that('Figuration and keys cooperate', {
   expect_equal(figuredBass(harte, Key = 'D'),  c('E|b65', 'F#|#64#3#2', 'E|64', 'A|64b3', 'F#|65', 'E-|b9b7b5', 'B-|b5'))
   expect_equal(figuredBass(harte, Key = 'E'),  c('E|b65b3', 'F#|64#32', 'E|64', 'A|6b4b3', 'F#|b65', 'E-|b9bb7b5b3', 'B-|b5b3'))
   
+  
+  tertian <- c('CM', 'CMM', 'CMm', 'Cmm', 'FMm', 'FMM', 'Fmm', 'Fm', 'GMM', 'GMm', 'Ao', 'Aom', 'Bom', 
+               'Boo', 'AM/3', 'Amm/3', 'E-MM', 'A+', 'G+m')
+  
+  # the figuration part should be the same for chords in relative keys 
+  expect_equal(harm(tertian, Key = 'D', root = FALSE), harm(tertian, Key = 'b:', root = FALSE))
+  expect_equal(harm(tertian, Key = 'G-', root = FALSE), harm(tertian, Key = 'e-:', root = FALSE))
+  expect_equal(harm(harte, Key = 'E', root = FALSE), harm(harte, Key = 'c#:', root = FALSE))
+  expect_equal(harm(harte, Key = 'F', root = FALSE), harm(harte, Key = 'd:', root = FALSE))
+  
+  ### if we use implicitSpecies = TRUE, they should be the same regardless of key
+  figArgs <- list(implicitSpecies = FALSE, explicitNaturals = TRUE)
+  expect_equal(harm(tertian, Key = 'D', root = FALSE, figArgs = figArgs), harm(tertian, Key = 'E:', root = FALSE, figArgs = figArgs))
+  expect_equal(harm(tertian, Key = 'G-', root = FALSE, figArgs = figArgs), harm(tertian, Key = 'A:', root = FALSE, figArgs = figArgs))
+  expect_equal(harm(harte, Key = 'E', root = FALSE, figArgs = figArgs), harm(harte, Key = 'C:', root = FALSE, figArgs = figArgs))
+  expect_equal(harm(harte, Key = 'F', root = FALSE, figArgs = figArgs), harm(harte, Key = 'C#:', root = FALSE, figArgs = figArgs))
 })
 
 test_that('Examples used in Chords.R mans work', {
