@@ -31,6 +31,42 @@ test_that("Chord functions return same output, regardless of input.", {
 })
 
 
+test_that('Common chord function arguments work', {
+  harte <- c('C:maj7/3', 'G#:min9/7', 'A:maj/5', 'D:7/5', 'D:maj7/3', 'E-:9', 'B-:maj')
+  
+  # convert to harm
+  expect_equal(harm(harte), c('I7b', '#vm7M9d', 'VIc', 'II7c', 'IIM7b', '-IIIm79', '-VII'))
+  expect_equal(harm(harte, inversion = FALSE), c('I7', '#vm7M9', 'VI', 'II7', 'IIM7', '-IIIm79', '-VII'))
+  expect_equal(harm(harte, inversion = FALSE , figuration = FALSE), c('I', '#v', 'VI', 'II', 'II', '-III', '-VII'))
+  expect_equal(harm(harte, inversion = TRUE , figuration = FALSE), c('Ib', '#vd', 'VIc', 'IIc', 'IIb', '-III', '-VII'))
+  
+  # convert to roman
+  expect_equal(roman(harte), c('I65', '#v64M32m1', 'VI64', 'II643', 'II6M5', '-III9m7', '-VII'))
+  expect_equal(roman(harte, inversion = FALSE), c('I7', '#vM9m7', 'VI', 'II7', 'IIM7', '-III9m7', '-VII'))
+  expect_equal(roman(harte, inversion = FALSE , figuration = FALSE), c('I', '#v', 'VI', 'II', 'II', '-III', '-VII'))
+  expect_equal(roman(harte, inversion = TRUE , figuration = FALSE), c('I', '#v', 'VI', 'II', 'II', '-III', '-VII'))
+  
+  
+  # convert to figured bass
+  expect_equal(figuredBass(harte), c('E|65', 'F#|#64#3#2', 'E|#64', 'A|#643', 'F#|6#5', 'E-|9b7b5', 'B-|'))
+  expect_equal(figuredBass(harte, inversion = FALSE), c(NA_character_, NA_character_, NA_character_, NA_character_, NA_character_, 'E-|9b7b5', 'B-|'))
+  expect_equal(figuredBass(harte, inversion = FALSE , figuration = FALSE),  c(NA_character_, NA_character_, NA_character_, NA_character_, NA_character_, 'E-', 'B-'))
+  expect_equal(figuredBass(harte, inversion = TRUE , figuration = FALSE), c('E', 'F#', 'E', 'A', 'F#', 'E-', 'B-'))
+  
+  
+})
+
+test_that('Figuration and keys cooperate', {
+  
+  harte <- c('C:maj7/3', 'G#:min9/7', 'A:maj/5', 'D:7/5', 'D:maj7/3', 'E-:9', 'B-:maj')
+  
+  # already done with Key = C in previous tests!
+  expect_equal(harm(harte, Key = 'D'), c('-VII7b', '#ivM9d', 'Vc', 'Im7c', 'I7b', '-IIm7M9', '-VI'))
+  expect_equal(roman(harte, Key = 'D'), c('-VII65', '#iv64M321', 'V64', 'I64m3', 'I65', '-IIM9m7', '-VI'))
+  expect_equal(figuredBass(harte, Key = 'D'),  c('E|b65', 'F#|#64#3#2', 'E|64', 'A|64b3', 'F#|65', 'E-|b9b7b5', 'B-|b5'))
+  expect_equal(figuredBass(harte, Key = 'E'),  c('E|b65b3', 'F#|64#32', 'E|64', 'A|6b4b3', 'F#|b65', 'E-|b9bb7b5b3', 'B-|b5b3'))
+  
+})
 
 test_that('Examples used in Chords.R mans work', {
   # harm/roman man
