@@ -657,6 +657,7 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
     altmat[col(xmat) %in% c(1, 2, 7) & xmat == diminish] <- -7L
     altmat[col(xmat) %in% 3:6 & xmat == diminish] <- -14L
     altmat[col(xmat) %in% 3:6 & xmat == minor] <- -7L
+    altmat[col(xmat) == 7 & xmat == perfect] <- -7L
     altmat[xmat == '.'] <- NA
     
     altmat <- sweep(altmat, 2, 0:6, '+')
