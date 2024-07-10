@@ -89,6 +89,12 @@ tset <- function(root = 0L, signature = 0L, alterations = 0L, cardinality = 3L, 
         Inversion = as.integer(inversion))
 }
 
+
+.rootPosition <- function(tset) {
+  tset@Inversion <- rep(0L, length(tset@Root))
+  tset
+}
+
 ## Accessors ####
 
 
@@ -122,12 +128,7 @@ getInversion <- function(tset, inversion.labels = NULL) {
   inversion
 }
 
-#' @export
-rootPosition <- function(tset) {
-  is.tertianSet(tset)
-  tset@Inversion <- rep(0L, length(tset))
-  tset
-}
+
 
 
 
@@ -140,32 +141,6 @@ rootPosition <- function(tset) {
 is.tertianSet <- function(x) inherits(x, 'tertianSet')
 
 
-#### Tonal is.methods ####
-
-#' @rdname is.major
-#' @export
-is.major.default <- function(x, ...) {
-   parsed <- tertianSet(x, ...)
-   if (any(is.na(parsed))) {
-     keys <- diatonicSet(x, ...)
-     if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys
-   }
-  
-   is.major.diatonicSet(parsed) 
-   
-}
-#' @rdname is.major
-#' @export
-is.minor.default <- function(x, ...) {
-  parsed <- tertianSet(x, ...)
-  if (any(is.na(parsed))) {
-    keys <- diatonicSet(x, ...)
-    if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys
-  }
-  
-  is.minor.diatonicSet(parsed) 
-  
-}
 
 ## Order/relations methods ####
 
@@ -483,10 +458,10 @@ tset2tonalHarmony <- function(x,
   
   inversion.label <- if (!is.null(inversion.labels)) getInversion(x, inversion.labels = inversion.labels)
   
-  if (!inversion || !invertFigs)  x <- rootPosition(x)
+  if (!inversion || !invertFigs)  x <- .rootPosition(x)
   
   quality   <- if (quality) {
-    c("quality", "root") %<-% tset2triadLabel(rootPosition(x), root, root.case, ...)
+    c("quality", "root") %<-% tset2triadLabel(.rootPosition(x), root, root.case, ...)
     quality
   }
   
@@ -494,7 +469,7 @@ tset2tonalHarmony <- function(x,
     extensions  <- do.call('tset2extensions', c(list(x, inverted = getInversion(x) > 0L), figArgs))
     alterations <- do.call('tset2alterations', c(list(x, Key = Key, step = FALSE), figArgs[names(figArgs) != 'step']))
     
-    figuration <- do.call('reduceFigures', c(list(alterations, extensions, step = TRUE, root = root,
+    figuration <- do.call('reduceFigures', c(list(alterations, extensions, root = root,
                                                   quality, root.case, inversion = getInversion(x)), figArgs))
     quality[quality == '?'] <- ""
     quality[grepl('sus|add', figuration) & quality %in% c('5MAJOR', '5MINOR')] <- ''
@@ -706,28 +681,29 @@ integer2tset <- function(int) tset(int, 0)
 
 ### Extensions/Figuration ####
 
-extension2bit <- function(str) {
-  
-  extensions <- stringr::str_extract_all(str, captureRE(c('7', '9', '11', '13', 'sus4', 'add6', 'add2')))
-  
-  bit <- 7L # triad
-  
-  sapply(extensions,
-         \(exten) {
-           if (any(exten %in% c('9', '11', '13')) & !any(exten == '7')) bit <- bit + 8L
-           
-           if (any(stringr::str_detect(exten, 'sus'))) bit <- bit - 2L
-           
-           
-           
-           exten <- stringr::str_replace(exten, captureRE(c('65', '43', '42')), '7')
-           exten <- stringr::str_replace(exten, 'add2', '9')
-           exten <- stringr::str_replace(exten, 'add9', '9')
-           exten <- stringr::str_replace(exten, 'sus4', '11')
-           exten <- stringr::str_replace(exten, 'add6', '13')
-           
-           bit + sum(c(`7` = 8L, `9` = 16L, `11` = 32L, `13` = 64L)[exten])
-         })
+extension2bit <- function(n) {
+  as.integer(2L ^ (((n - 1L) %/% 2L) + 1L))
+  # 
+  # extensions <- stringr::str_extract_all(str, captureRE(c('7', '9', '11', '13', 'sus4', 'add6', 'add2')))
+  # 
+  # bit <- 7L # triad
+  # 
+  # sapply(extensions,
+  #        \(exten) {
+  #          if (any(exten %in% c('9', '11', '13')) & !any(exten == '7')) bit <- bit + 8L
+  #          
+  #          if (any(stringr::str_detect(exten, 'sus'))) bit <- bit - 2L
+  #          
+  #          
+  #          
+  #          exten <- stringr::str_replace(exten, captureRE(c('65', '43', '42')), '7')
+  #          exten <- stringr::str_replace(exten, 'add2', '9')
+  #          exten <- stringr::str_replace(exten, 'add9', '9')
+  #          exten <- stringr::str_replace(exten, 'sus4', '11')
+  #          exten <- stringr::str_replace(exten, 'add6', '13')
+  #          
+  #          bit + sum(c(`7` = 8L, `9` = 16L, `11` = 32L, `13` = 64L)[exten])
+  #        })
 }
 
 
@@ -758,6 +734,8 @@ triad2sciQuality <- function(triad, extensionQualities, incomplete,
   extensionQualities[extensionQualities[ , 2] == '', 2] <- triadQualities[extensionQualities[ , 2] == '' , 2]
   extensionQualities[extensionQualities[ , 3] == '', 3] <- triadQualities[extensionQualities[ , 3] == '' , 3]
   extensionQualities[extensionQualities[ , 4] == '', 4] <- '.'
+  
+  extensionQualities[extensionQualities == ''] <- '.'
   
   apply(extensionQualities, 1L, paste, collapse = '')
   
@@ -1688,8 +1666,167 @@ humdrumRmethods('harte')
 humdrumRmethods('tertian')
 
 ###################################################################### ### 
+# Analyzing tertian sets #################################################
+###################################################################### ### 
+
+
+#' Extract properties of chords
+
+#' @name analyzeChords
+#' @export
+root <- function(x, deparser = kern, ..., parseArgs = list()) {
+   tset <- do.call('tertianSet', c(list(x), parseArgs))
+   
+   if (is.null(deparser)) getRoot(tset) else deparser(getRootTint(tset) - tint(1L, 0L), ...)
+   
+}
+
+#' @rdname analyzeChords
+#' @export
+bass <- function(x, deparser = kern, ..., parseArgs = list()) {
+  tset <- do.call('tertianSet', c(list(x), parseArgs))
+  
+  if (is.null(deparser)) getBass(tset) else deparser(getBassTint(tset) - tint(1L, 0L), ...)
+  
+}
+
+#' @rdname analyzeChords
+#' @export
+inversion <- function(x, inversion.labels = NULL, parseArgs = list()) {
+  tset <- do.call('tertianSet', c(list(x), parseArgs))
+  
+  getInversion(tset, inversion.labels = inversion.labels)
+  
+  
+}
+
+
+#' @rdname analyzeChords
+#' @export
+is.major.default <- function(x, ...) {
+  parsed <- tertianSet(x, ...)
+  if (any(is.na(parsed))) {
+    keys <- diatonicSet(x, ...)
+    if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys
+  }
+  
+  is.major.diatonicSet(parsed) 
+  
+}
+#' @rdname analyzeChords
+#' @export
+is.minor.default <- function(x, ...) {
+  parsed <- tertianSet(x, ...)
+  if (any(is.na(parsed))) {
+    keys <- diatonicSet(x, ...)
+    if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys
+  }
+  
+  is.minor.diatonicSet(parsed) 
+  
+}
+
+
+#' @rdname analyzeChords
+#' @export
+hasExtension <- function(x, extension = c(7L, 9L, 11L, 13L)) {
+  checks(extension, xwholenum & xrange(1, 13))
+  
+  UseMethod('hasExtension')
+}
+#' @rdname analyzeChords
+#' @export
+hasExtension.tertianSet <- function(x, extension = c(7L, 9L, 11L, 13L)) {
+  extension <- extension2bit(extension)
+  lapply(extension, \(ext) {
+    (x@Extensions %% (ext)) >= (ext %/% 2L)
+  }) |> Reduce(f = '|')
+}
+
+
+#' @rdname analyzeChords
+#' @export
+hasThird <- function(x) hasExtension(x, 3L)
+#' @rdname analyzeChords
+#' @export
+hasFifth <- function(x) hasExtension(x, 5L)
+#' @rdname analyzeChords
+#' @export
+hasSeventh <- function(x) hasExtension(x, 7L)
+
+
+
+###################################################################### ### 
 # Manipulating tertian sets ##############################################
 ###################################################################### ### 
+
+
+
+## Simplifying chords ----
+
+#' Manipulate chord data
+#' @name manipulateChords
+#' @export
+reduceHarmony <- function(x, max.extension = 5L, unSus = TRUE, unAlter = TRUE, ...) {
+  checks(max.extension, xlen1 & xwholenum & xrange(1, 13))
+  checks(unSus, xTF)
+  checks(unAlter, xTF)
+  
+  UseMethod('reduceHarmony')
+}
+
+#' @rdname manipulateChords
+#' @export 
+reduceHarmony.tertianSet <- function(x,  max.extension = 5L, unSus = TRUE, unAlter = TRUE, Key = NULL) {
+  
+  if (unAlter) x@Alteration <- rep(0L, length(x@Root))
+  
+  if (unSus) {
+    thirds <- hasExtension(x, 3L)
+    
+    if (any(!thirds)) {
+      twos <- hasExtension(x, 9L)
+      fours <- hasExtension(x, 11L)
+      
+      
+      sustwo <- !thirds & twos
+      susfour <- !thirds & fours
+      
+      if (!is.null(Key)) {
+        x@Signature <- getSignature(diatonicSet(Key))
+      }
+      
+      x@Extensions[sustwo] <- x@Extensions[sustwo] + 2L - 32L
+      x@Extensions[susfour] <- x@Extensions[susfour] + 2L - 64L
+      
+      # if (!is.null(Key)) {
+      #   x@Signature <- x@Signature + getRoot(key)
+      # }
+      
+    }
+
+  }
+  
+  # extensions
+  modulo <- extension2bit(max.extension)
+  x@Extensions <- x@Extensions %% modulo
+  
+  x
+}
+
+
+
+#' @rdname manipulateChords
+#' @export 
+rootPosition <- function(tset) {
+  UseMethod('rootPosition')
+}
+
+
+
+#' @rdname manipulateChords
+#' @export 
+rootPosition.tertianSet <- .rootPosition
 
 
 
