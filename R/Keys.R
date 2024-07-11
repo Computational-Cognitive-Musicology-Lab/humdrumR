@@ -646,27 +646,30 @@ NULL
 
 ### Key representations ####  
 
-qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE, 
+qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE, root = rep(0L, length(x)),
                             major = 'M', minor = 'm', augment = '+', diminish = 'o', perfect = 'P', ...) {
     
     xmat <- do.call('rbind', strsplit(x, split = ''))
     if (steporder != 1L) xmat <- xmat[ ,  order(seq(0, by = steporder, length.out = 7L) %% 7L), drop = FALSE]
     
     altmat <- array(0L, dim = dim(xmat))
-    altmat[xmat == augment] <- 7L
+    altmat[col(xmat) != 7L & xmat == augment] <- 7L
     altmat[col(xmat) %in% c(1, 2, 7) & xmat == diminish] <- -7L
     altmat[col(xmat) %in% 3:6 & xmat == diminish] <- -14L
     altmat[col(xmat) %in% 3:6 & xmat == minor] <- -7L
     altmat[col(xmat) == 7 & xmat == perfect] <- -7L
     altmat[xmat == '.'] <- NA
     
-    altmat <- sweep(altmat, 2, 0:6, '+')
+    altmat <- sweep(altmat, 2, 0:6, '+') # alt mat is now LO5th representation of chord
+    altmat <- sweep(altmat, 1, root, '+')
     
     min <- colMins(altmat, na.rm = TRUE)
     max <- colMaxs(altmat, na.rm = TRUE)
+
+    
     span <- max - min
     
-    altered <- span > 7L
+    altered <- span > 7L | max > 6L | min < -6L
     
     mode <- alterations <- integer(length(x))
     
@@ -679,8 +682,11 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
       mode[!altered & max == 6L] <- 1L # lydian
       mode[!altered & min == -2L] <- -1L # mixolydian
       
+      
+      
     }
     if (any(altered)) {
+      
       means <- floor(rowMeans(altmat[altered, , drop = FALSE], na.rm = TRUE))
       
       mode[altered] <- ifelse(means > 0, 
@@ -693,7 +699,7 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE,
       alterations[altered] <- baltern2int(alters[ , c(7, 1:6), drop = FALSE])
     }
     
-    dset(root = 0, signature = mode, alterations = alterations )
+    dset(root = 0, signature = mode - root, alterations = alterations )
     
 }
 

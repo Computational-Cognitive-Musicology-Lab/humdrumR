@@ -545,7 +545,7 @@ tset2roman <- function(x,  Key = dset(0, 0), figArgs = c(), ...) {
 
 
 tset2harm <- function(x,  Key = dset(0, 0), figArgs = c(), ...) {
-  figureArgs <- list(implicitSpecies = TRUE, qualities = TRUE, absoluteSpecies = TRUE,
+  figureArgs <- list(implicitSpecies = TRUE, explicitNaturals = FALSE, qualities = TRUE, absoluteSpecies = TRUE,
                      diminish = 'D', augment = 'A', 
                      extension.shorthand = TRUE, extension.simple = FALSE, extension.decreasing = FALSE,
                      extension.sus = TRUE, extension.add = TRUE)
@@ -733,9 +733,9 @@ triad2sciQuality <- function(triad, extensionQualities, incomplete,
   
   extensionQualities[extensionQualities[ , 2] == '', 2] <- triadQualities[extensionQualities[ , 2] == '' , 2]
   extensionQualities[extensionQualities[ , 3] == '', 3] <- triadQualities[extensionQualities[ , 3] == '' , 3]
-  extensionQualities[extensionQualities[ , 4] == '', 4] <- '.'
   
-  extensionQualities[extensionQualities == ''] <- '.'
+  fills <- c('P', 'M', 'P', 'M', 'M', 'P', 'M')
+  extensionQualities[extensionQualities == ''] <- fills[col(extensionQualities)[extensionQualities == '']]
   
   apply(extensionQualities, 1L, paste, collapse = '')
   
@@ -1028,7 +1028,7 @@ harm2tset <- function(x, Key = dset(0,0),
     triad2sciQuality(triad, qualities, incomplete = '', diminish = 'D', augment = 'A', ...)
   })
   
-  qualitytset <-  sciQualities2tset(qualities, ..., diminish = 'D', augment = 'A')
+  qualitytset <-  sciQualities2tset(qualities, root = root, ..., diminish = 'D', augment = 'A')
   
   # if 1 is altered!
   root <- root + setNames(c(-7L, 7L, 0L), c(diminish, augment, 'P'))[stringr::str_sub(qualities, 1L, 1L)]
@@ -1046,11 +1046,11 @@ harm2tset <- function(x, Key = dset(0,0),
   
 }
 
-sciQualities2tset <- function(str, inversion = 0L, ...) {
+sciQualities2tset <- function(str, inversion = 0L, root = rep(0L, length(str)), ...) {
   
   chord <- stringr::str_pad(str, width = 7L, side = 'right', pad = '.')
   
-  dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, ...)
+  dset <- qualities2dset(chord, steporder = 4L, allow_partial = TRUE, root = root, ...)
   
   extension <- sapply(stringr::str_locate_all(str, '[^.]'), \(x) sum(as.integer(2L^(x[,  'start'] - 1L))))
   
@@ -1212,8 +1212,10 @@ harte2tset <- function(x,  Key = dset(0L, 0L), ..., major = 'maj', minor = 'min'
            
          })
   
+  root <- kern2tint(tonalChroma, flat = flat)
   
-  tset <- sciQualities2tset(tertian, augment = 'A', diminish = 'd')[match(fig, unique(fig))]
+  tset <- sciQualities2tset(tertian, root = root@Fifth - getRoot(Key) - getMode(Key), 
+                            augment = 'A', diminish = 'd')[match(fig, unique(fig))]
   
   if (any(bass != '')) {
     hasbass <- bass != ''
@@ -1222,7 +1224,7 @@ harte2tset <- function(x,  Key = dset(0L, 0L), ..., major = 'maj', minor = 'min'
     
   }
   
-  (tset + kern2tint(tonalChroma, flat = flat)) - getRoot(Key)
+  (tset + root) - getRoot(Key)
   
 }
 
@@ -1796,8 +1798,8 @@ reduceHarmony.tertianSet <- function(x,  max.extension = 5L, unSus = TRUE, unAlt
         x@Signature <- getSignature(diatonicSet(Key))
       }
       
-      x@Extensions[sustwo] <- x@Extensions[sustwo] + 2L - 32L
-      x@Extensions[susfour] <- x@Extensions[susfour] + 2L - 64L
+      x@Extensions[sustwo] <- x@Extensions[sustwo] + 2L - 16L
+      x@Extensions[susfour] <- x@Extensions[susfour] + 2L - 32L
       
       # if (!is.null(Key)) {
       #   x@Signature <- x@Signature + getRoot(key)
