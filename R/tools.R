@@ -1999,7 +1999,13 @@ ints2nits <- function(n, it = 2, nits = 8) {
     out
 }
 
+extension2trit <- function(n) {
+  as.integer(3L ^ (-(((n - 1L) * 2L) + 2L) %% 7L))
+}
 
+extension2bit <- function(n) {
+  as.integer(2L ^ ((n - 1L) %/% 2L))
+}
 
 
 ints2baltern <- function(n, ntrits = 8L) {

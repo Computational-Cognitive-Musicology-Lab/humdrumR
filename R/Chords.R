@@ -680,30 +680,7 @@ integer2tset <- function(int) tset(int, 0)
 
 ### Extensions/Figuration ####
 
-extension2bit <- function(n) {
-  as.integer(2L ^ (((n - 1L) %/% 2L) + 1L))
-  # 
-  # extensions <- stringr::str_extract_all(str, captureRE(c('7', '9', '11', '13', 'sus4', 'add6', 'add2')))
-  # 
-  # bit <- 7L # triad
-  # 
-  # sapply(extensions,
-  #        \(exten) {
-  #          if (any(exten %in% c('9', '11', '13')) & !any(exten == '7')) bit <- bit + 8L
-  #          
-  #          if (any(stringr::str_detect(exten, 'sus'))) bit <- bit - 2L
-  #          
-  #          
-  #          
-  #          exten <- stringr::str_replace(exten, captureRE(c('65', '43', '42')), '7')
-  #          exten <- stringr::str_replace(exten, 'add2', '9')
-  #          exten <- stringr::str_replace(exten, 'add9', '9')
-  #          exten <- stringr::str_replace(exten, 'sus4', '11')
-  #          exten <- stringr::str_replace(exten, 'add6', '13')
-  #          
-  #          bit + sum(c(`7` = 8L, `9` = 16L, `11` = 32L, `13` = 64L)[exten])
-  #        })
-}
+
 
 
 
@@ -1746,9 +1723,9 @@ hasExtension <- function(x, extension = c(7L, 9L, 11L, 13L), ...) {
 #' @rdname analyzeChords
 #' @export
 hasExtension.tertianSet <- function(x, extension = c(7L, 9L, 11L, 13L)) {
-  extension <- extension2bit(extension)
-  lapply(extension, \(ext) {
-    (x@Extensions %% (ext)) >= (ext %/% 2L)
+  extensionbit <- extension2bit(extension)
+  lapply(extensionbit, \(bit) {
+    (x@Extensions %/% bit) %% 2L == 1L
   }) |> Reduce(f = '|')
 }
 
@@ -1760,6 +1737,30 @@ hasExtension.character <- function(x, extension = c(7L, 9L, 11L, 13L), ...) {
   hasExtension.tertianSet(x, extension = extension)
 }
 
+#' @rdname analyzeChords
+#' @export
+isAltered <- function(x, extension = c(7L, 9L, 11L, 13L)) {
+  checks(extension, xwholenum & xrange(1, 13))
+  
+  UseMethod('isAltered')
+}
+
+#' @rdname analyzeChords
+#' @export
+isAltered.tertianSet <- function(x, extension = c(7L, 9L, 11L, 13L)) {
+  extensiontrit <- extension2trit(extension)
+  lapply(extensiontrit, \(trit) {
+    (x@Alteration %/% trit) %% 3L > 0L
+  }) |> Reduce(f = '|')
+}
+
+#' @rdname analyzeChords
+#' @export
+isAltered.character <- function(x, extension = c(7L, 9L, 11L, 13L), ...) {
+  x <- tertianSet.character(x, ...)
+  
+  isAltered.tertianSet(x, extension = extension)
+}
 
 #' @rdname analyzeChords
 #' @export
@@ -1784,19 +1785,42 @@ hasSeventh <- function(x) hasExtension(x, 7L)
 #' Manipulate chord data
 #' @name manipulateChords
 #' @export
-reduceHarmony <- function(x, max.extension = 5L, unSus = TRUE, unAlter = FALSE, fillMissing = NULL, ...) {
+reduceHarmony <- function(x, max.extension = 5L, unSus = TRUE, unAlter = FALSE, fill.extensions = FALSE, ...) {
   checks(max.extension, xlen1 & xwholenum & xrange(1, 13))
   checks(unSus, xTF)
-  checks(unAlter, xTF)
+  checks(unAlter, xTF | (xwholenum & xrange(1:13)))
+  checks(fill.extensions, xTF | (xwholenum & xrange(1:13)))
   
   UseMethod('reduceHarmony')
 }
 
 #' @rdname manipulateChords
 #' @export 
-reduceHarmony.tertianSet <- function(x,  max.extension = 5L, unSus = TRUE, unAlter = FALSE, fillMissing = NULL, Key = NULL) {
+reduceHarmony.tertianSet <- function(x,  max.extension = 5L, unSus = TRUE, unAlter = FALSE, fill.extensions = FALSE, Key = NULL) {
   
-  if (unAlter) x@Alteration <- rep(0L, length(x@Root))
+  if (unAlter[1]) {# unAlter[1] can't be zero because of checks()
+
+    if (is.logical(unAlter)) unAlter <- c(7L, 9L, 11L, 13L)
+    unAlter <- unAlter[unAlter <= max.extension] # gonna get removed anyway
+    
+    if (any(unAlter %in% c(4L, 11L))) x@Signature[getMode(x) == 1L] <- x@Signature[getMode(x) == 1L] - 1L # remove lydian
+    if (any(unAlter %in% c(5L, 12L))) x@Signature[getMode(x) == -5L] <- x@Signature[getMode(x) == -5L] + 1L # remove locrian
+    
+    if (any(x@Alteration != 0L)) {
+      for (trit in extension2trit(unAlter)) {
+        alttrit <- (x@Alteration %/% trit) %% 3L
+        
+        x@Alteration[alttrit == 1L] <- x@Alteration[alttrit == 1L] - trit
+        x@Alteration[alttrit == 2L] <- x@Alteration[alttrit == 2L] + trit
+      }
+    }
+ 
+    
+  } 
+    
+    
+  
+
   
   if (unSus) {
     thirds <- hasExtension(x, 3L) & getInversion(x) == 0L
@@ -1821,9 +1845,18 @@ reduceHarmony.tertianSet <- function(x,  max.extension = 5L, unSus = TRUE, unAlt
 
   }
   
-  # extensions
-  modulo <- extension2bit(max.extension)
+  # remove extensions
+  modulo <- extension2bit(max.extension) * 2L
   x@Extensions <- x@Extensions %% modulo
+  
+  # add extensions!
+  if (fill.extensions[1]) { # fill.extensions[1] can't be zero because of checks()
+    fill.extensions <- seq(1L, max.extension, by = 2L)
+    for (ext in fill.extensions) {
+      alreadyHas <- hasExtension(x, ext)
+      x@Extensions[!alreadyHas] <- x@Extensions[!alreadyHas] + extension2bit(ext)
+    }
+  }
   
   x
 }
@@ -1831,14 +1864,14 @@ reduceHarmony.tertianSet <- function(x,  max.extension = 5L, unSus = TRUE, unAlt
 
 #' @rdname manipulateChords
 #' @export 
-reduceHarmony.character <- function(x,  max.extension = 5L, unSus = TRUE, unAlter = FALSE, fillMissing = NULL, Key = NULL, ...) {
+reduceHarmony.character <- function(x,  max.extension = 5L, unSus = TRUE, unAlter = FALSE, fill.extensions = FALSE, Key = NULL, ...) {
   uniqx <- unique(x)
   
   uniqx <- tertianSet.character(uniqx, ...)
   dispatch <- attr(uniqx, 'dispatch')
   
   uniqx[!is.na(uniqx)] <- reduceHarmony.tertianSet(uniqx[!is.na(uniqx)], max.extension = max.extension,
-                                           unSus = unSus, unAlter = unAlter, fillMissing = fillMissing, Key = Key)
+                                           unSus = unSus, unAlter = unAlter, fill.extensions = fill.extensions, Key = Key)
   
   uniqx <- rePlace(reParse(uniqx, dispatch, c('harm', 'harte', 'roman', 'tertian', 'figuredBass', 'chord')),  dispatch) 
   uniqx[match(x, unique(x))]
