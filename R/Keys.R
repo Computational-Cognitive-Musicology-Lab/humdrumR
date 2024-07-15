@@ -198,7 +198,6 @@ getAlterations <- function(dset) {
     # colnames represent the MAJOR degrees
     alterations <- dset@Alteration %<-matchdim% dset
 
-    
     output <- ints2baltern(alterations, 7L) * 7L
     rownames(output) <- NULL
     colnames(output) <- c('4th', 'Root', '5th', '2nd', '6th', '3rd', '7th')
@@ -661,45 +660,52 @@ qualities2dset <-  function(x, steporder = 2L, allow_partial = FALSE, root = rep
     altmat[xmat == '.'] <- NA
     
     altmat <- sweep(altmat, 2, 0:6, '+') # alt mat is now LO5th representation of chord
-    altmat <- sweep(altmat, 1, root, '+')
-    
+    # altmat <- sweep(altmat, 1, root, '+')
+    # 
     min <- colMins(altmat, na.rm = TRUE)
     max <- colMaxs(altmat, na.rm = TRUE)
 
     
     span <- max - min
-    
-    altered <- span > 7L | max > 6L | min < -6L
+    altered <- span > 7L 
     
     mode <- alterations <- integer(length(x))
     
-    if (any(!altered)) {
-      # minor modes
-      mode[!altered & min == -3L] <- ifelse(max[!altered & min == -3L] <= 2L, -3L, -2L) # prioritize minor over dorian
-      mode[!altered & min <  -3L] <- min[!altered & min < -3L] + 1L
-      
-      # majormodes
-      mode[!altered & max == 6L] <- 1L # lydian
-      mode[!altered & min == -2L] <- -1L # mixolydian
-      
-      
-      
-    }
+    # if (any(!altered)) {
+    root <-  root %|% 0L
+    diatonic <- (max + root) <= 6L & (min + root) >= -6L & !altered
+    
+    max <- ifelse(diatonic, max + root, max)
+    min <- ifelse(diatonic, min + root, min)
+    
+    # minor modes
+    mode[min == -3L] <- ifelse(max[min == -3L] <= 2L, -3L, -2L) # prioritize minor over dorian
+    mode[min <  -3L] <- pmax(min[ min < -3L] + 1L, -5L)
+    
+    # majormodes
+    mode[max == 6L] <- 1L # lydian
+    mode[min == -2L] <- -1L # mixolydian
+    
+   
+    mode[diatonic] <- mode[diatonic] - root[diatonic]
+    
+    # }
     if (any(altered)) {
+      mode[rowSums(altmat == -3L, na.rm = TRUE) & altered] <- min(mode[altered], -2L)
+      # means <- floor(rowMeans(altmat[altered, , drop = FALSE], na.rm = TRUE))
+      # 
+      # mode[altered] <- ifelse(means > 0 & sowSums(altmat[altered, , drop = FALSE] == 6L, 
+      #                         ifelse(rowSums(altmat[altered, , drop = FALSE] == 6L, na.rm = TRUE), 
+      #                                1L, 0L), # only do lydian if #4 is present
+      #                         pmax(means, -6L))
       
-      means <- floor(rowMeans(altmat[altered, , drop = FALSE], na.rm = TRUE))
-      
-      mode[altered] <- ifelse(means > 0, 
-                              ifelse(rowSums(altmat[altered, , drop = FALSE] == 6L, na.rm = TRUE), 
-                                     1L, 0L), # only do lydian if #4 is present
-                              pmax(means, -6L))
-      
+      # altmat[altered, ] <- sweep(altmat[altered, , drop = FALSE], 1, root[altered], '+')
       alters <- sweep(altmat[altered, , drop = FALSE], 1, mode[altered] - 1L, '-') %/% 7
       alters[is.na(alters)] <- 0L
       alterations[altered] <- baltern2int(alters[ , c(7, 1:6), drop = FALSE])
+      
     }
-    
-    dset(root = 0, signature = mode - root, alterations = alterations )
+    dset(root = 0, signature = mode, alterations = alterations )
     
 }
 
