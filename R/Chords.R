@@ -1788,8 +1788,8 @@ hasSeventh <- function(x) hasExtension(x, 7L)
 reduceHarmony <- function(x, max.extension = 5L, unSus = TRUE, unAlter = FALSE, fill.extensions = FALSE, ...) {
   checks(max.extension, xlen1 & xwholenum & xrange(1, 13))
   checks(unSus, xTF)
-  checks(unAlter, xTF | (xwholenum & xrange(1:13)))
-  checks(fill.extensions, xTF | (xwholenum & xrange(1:13)))
+  checks(unAlter, xTF | (xwholenum & xrange(1,13)))
+  checks(fill.extensions, xTF | (xwholenum & xrange(1,13)))
   
   UseMethod('reduceHarmony')
 }
