@@ -10,6 +10,9 @@
 \alias{hasExtension}
 \alias{hasExtension.tertianSet}
 \alias{hasExtension.character}
+\alias{isAltered}
+\alias{isAltered.tertianSet}
+\alias{isAltered.character}
 \alias{hasThird}
 \alias{hasFifth}
 \alias{hasSeventh}
@@ -30,6 +33,12 @@ hasExtension(x, extension = c(7L, 9L, 11L, 13L), ...)
 \method{hasExtension}{tertianSet}(x, extension = c(7L, 9L, 11L, 13L))
 
 \method{hasExtension}{character}(x, extension = c(7L, 9L, 11L, 13L), ...)
+
+isAltered(x, extension = c(7L, 9L, 11L, 13L))
+
+\method{isAltered}{tertianSet}(x, extension = c(7L, 9L, 11L, 13L))
+
+\method{isAltered}{character}(x, extension = c(7L, 9L, 11L, 13L), ...)
 
 hasThird(x)
 

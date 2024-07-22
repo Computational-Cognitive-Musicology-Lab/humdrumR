@@ -10,15 +10,30 @@
 \alias{rootPosition.character}
 \title{Manipulate chord data}
 \usage{
-reduceHarmony(x, max.extension = 5L, unSus = TRUE, unAlter = TRUE, ...)
+reduceHarmony(
+  x,
+  max.extension = 5L,
+  unSus = TRUE,
+  unAlter = FALSE,
+  fill.extensions = FALSE,
+  ...
+)
 
-\method{reduceHarmony}{tertianSet}(x, max.extension = 5L, unSus = TRUE, unAlter = TRUE, Key = NULL)
+\method{reduceHarmony}{tertianSet}(
+  x,
+  max.extension = 5L,
+  unSus = TRUE,
+  unAlter = FALSE,
+  fill.extensions = FALSE,
+  Key = NULL
+)
 
 \method{reduceHarmony}{character}(
   x,
   max.extension = 5L,
   unSus = TRUE,
-  unAlter = TRUE,
+  unAlter = FALSE,
+  fill.extensions = FALSE,
   Key = NULL,
   ...
 )

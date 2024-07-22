@@ -7,55 +7,175 @@
 \alias{entropy.numeric}
 \alias{entropy.density}
 \alias{entropy.default}
-\alias{mutualInfo}
-\alias{mutualInfo.probability}
-\alias{mutualInfo.default}
+\alias{xentropy}
+\alias{kld}
+\alias{kld.probability}
+\alias{kld.default}
+\alias{info}
 \title{Calculate Entropy or Information Content of variables}
 \usage{
-entropy(..., base = 2)
+entropy(..., model, base = 2)
 
-H(..., base = 2)
+H(..., model, base = 2)
 
-\method{entropy}{probability}(q, p, condition = NULL, base = 2)
+\method{entropy}{probability}(pdist, model, condition = NULL, base = 2)
 
-\method{entropy}{numeric}(x, base = 2, na.rm = TRUE)
+\method{entropy}{numeric}(x, model, base = 2, na.rm = TRUE, ...)
 
-\method{entropy}{density}(x, base = 2, na.rm = TRUE)
+\method{entropy}{density}(x, model, base = 2, na.rm = TRUE)
 
-\method{entropy}{default}(..., base = 2)
+\method{entropy}{default}(..., model, base = 2)
 
-mutualInfo(..., base = 2)
+xentropy(..., model, base = 2)
 
-\method{mutualInfo}{probability}(x, base = 2)
+kld(..., model, base = 2)
 
-\method{mutualInfo}{default}(..., base = 2)
+\method{kld}{probability}(pdist, model, condition = NULL, base = 2)
+
+\method{kld}{default}(..., model, base = 2)
+
+info(
+  ...,
+  model,
+  base = 2,
+  condition = NULL,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
+}
+\arguments{
+\item{...}{\emph{\strong{Distribution (or atomic vectors) to compute entropy/information of.}}
+
+Must either be a distribution object (created by \code{\link[=table]{table()}}, \code{\link[=density]{density()}}, \code{\link[=count]{count()}}, or \code{\link[=pdist]{pdist()}}), or one
+or more atomic vectors of equal length.
+
+If atomic vectors are provided, and \code{model} is missing, the atomic vectors are passed to
+\code{\link[=pdist]{pdist()}} in order to calculate the \code{model}.}
+
+\item{model}{\emph{\strong{The expected probability model.}}
+
+Must either be omitted (not allowed in calls to \code{xentropy()}) or must be a probability distribution created by \code{\link[=pdist]{pdist()}}.
+
+In calls to \code{entropy()} or \code{info()}, if \code{model} is missing, \code{...} arguments are used to generate the \code{model}.}
+
+\item{base}{\emph{\strong{The logarithmic base.}}
+
+Defaults to \code{2}, so information is measured in units "bits."
+
+Must be a single, non-zero positive number.
+
+Use \code{base = exp(1)} for natural-log "nats," or \code{base = 10} for Hartley/"dits".}
+
+\item{condition}{\emph{\strong{Compute conditional entropy/information, conditoned on this variable.}}
+
+Defaults to \code{NULL} (no condition), so the joint entropy is calculated.
+
+Must be a non-empty \code{character} string, which matches the name of one or of the named variables
+in the distribution.
+
+This argument is simply passed to \code{\link[=pdist]{pdist()}}.}
 }
 \description{
 Information content and entropy are fundamental concepts in \href{https://en.wikipedia.org/wiki/Information_theory}{information theory},
-which quantify the amount of information (or "surprise") in a random variable.
+quantifying the amount of information in samples from a random variable; they are often
+characterized as measures of how "expected" (low information) or "surprising" (high information) data is.
 Both concepts are closely related the probability density/mass of events: improbable events have higher information content.
-The probability of \emph{each} observation maps to the \href{https://en.wikipedia.org/wiki/Information_content}{information content};
+The probability of \emph{each} (point-wise) observation maps to the \href{https://en.wikipedia.org/wiki/Information_content}{information content};
 The average information content of a variable is the \href{https://en.wikipedia.org/wiki/Entropy_(information_theory)}{entropy}.
 Information content/entropy can be calculated for discrete probabilities or continuous probabilities,
 and humdrumR defines methods for calculating both.
 }
 \details{
-To calculate information content or entropy, we must assume (or estimate) a probability distribution.
-HumdrumR uses R's standard \code{\link[=table]{table()}} and \code{\link[=density]{density()}} functions to estimate discrte and continuous probability
-distributions respectively.
+To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
+HumdrumR's \code{\link[=count]{count()}} and \code{\link[=pdist]{pdist()}} methods (or R's standard \code{\link[=table]{table()}} function) can be used calculate empirical
+distributions of atomic data.
+For numeric, data we can also use R's standard \code{\link[stats:density]{stats::density()}} function to estimate the continuous probability density.
 
-Entropy is the average information content of a variable.
-The \code{entropy()} function can accept either a \code{\link[=table]{table()}} object (for discrete variables),
-or a \code{\link[=density]{density()}} object (for continuous variables).
-If \code{entropy()} is passed an \link[base:vector]{atomic} vector,
-the values of the vector are treated as observations or a random variable:
-for \code{numeric} vectors, the \code{\link[stats:density]{stats::density()}} function is used to estimate the probability distribution
-of the random (continuous) variable, then entropy is computed for the density.
-For other atomic vectors, \code{\link[=table]{table()}} is called to tabulate the discrete probability mass for each
-observed level, and entropy is then computed for the table.
+The \code{entropy()} function takes an object representing a probability distribution---ideally a humdrumR \link{distribution} object,
+base-R \link{table}, or a \code{\link[=density]{density()}} object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
+However, if you are lazy, you can pass \code{entropy()} our atomic data vectors directly, and it will automatically pass them to the \code{\link[=pdist]{pdist()}}
+function for you; for example, if you want to calculate the joint entropy of variables\code{x} and \code{y} (which must be the same length),
+you can call \code{entropy(pdist(x, y))}
+or just \code{entropy(x, y)}.
+Other arguments can be provided to \code{pdist()} as well; notably, if you want to calculate the \emph{conditional} entropy,
+you can, for example, say \code{entropy(x, y, condition = 'y')}.
 
-The \code{ic()} function only accepts atomic vectors as its main (\code{x}) argument, but must also
-be provided a \code{distribution} argument.
-By default, the \code{distribution} argument is estimated using \code{\link[=density]{density()}} (\code{numeric} input) or \code{\link[=table]{table()}} (other input).
+The \code{info()} function is used similarly to the calling \code{entropy()} directly on data vectors:
+anywhere where you can call \code{entropy(x, y)}, you can call \code{info(x, y)} instead.
+The difference is that \code{info()} will return a vector of numbers, the same length as the representing the information content of each input observation.
+By definition, entropy of the data distribution is the average of all these point-wise information values: thus, \code{mean(info(x, y)) == entropy(x, y)}.
+}
+\section{Cross entropy}{
+
+
+In many cases, we simply use entropy/information content to describe a set of data.
+In this case, the data we observe and the probability model (distribution) are the same---the probability model is the distribution of the data itself.
+However, we can also use a \emph{different model}---in this case, a different probability distribution---to describe data.
+We thus get a measure of how well the model fits the data; this is called the \href{https://en.wikipedia.org/wiki/Cross-entropy}{cross entropy}.
+The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
+If a data matches the model well, the cross entropy will be a bit higher than the self entropy; if the data matches the model poorly,
+the cross entropy can be much higher.
+The difference between the cross entropy and the self entropy is always positive (or zero), and is called the
+\href{https://en.wikipedia.org/wiki/Kullback\%E2\%80\%93Leibler_divergence}{Kullback-Leibler Divergence}.
+
+To calculate cross entropy, use the \code{xentropy()} command.
+(The Kullback-Leibler Divergence can be calculated in the same way using the \code{kld()} function.)
+The \code{xentropy()} command works just like the entropy command, except you need to provide it a \code{model} argument, which must be
+\emph{another} probability distribution.
+Note that that data and the model have to have the \strong{exact} same variable names, or \code{humdrumR} will throw an error!
+Name your arguments to avoid this (this is illustrated in the example below, where we name everything \code{X}).
+To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{dorian <- c('A', 'B', 'C', 'D', 'E', 'F#', 'G')
+N <- 1000
+
+sample1 <- sample(dorian, N, replace = TRUE, prob = 7:1)
+sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1)
+sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7)
+
+
+## first the self entropy
+entropy(X = sample1)
+entropy(X = sample2)
+entropy(X = sample3)
+
+## now the cross entropy
+
+xentropy(X = sample1, model = pdist(X = sample2))
+xentropy(X = sample2, model = pdist(X = sample2))
+xentropy(X = sample3, model = pdist(X = sample2))
+
+}\if{html}{\out{</div>}}
+
+\code{sample1} and \code{sample2} have very similar distributions, so when we use \code{sample2} as a model for \code{sample1},
+the cross entropy is only slightly higher than the self entropy of \code{sample1}.
+However, when we use \code{sample2} as the model for \code{sample3} (which is distributed very differently)
+the entropy is quite a lot higher than the entropy of sample 3.
+
+The \code{info()} command can also be passed a \code{model} argument.
+As always, \code{mean(info(x, model)) == xentropy(x, model)}.
+There is no standard name for this "cross information content."
+However, cross entropy/information-content are closely related to the more general concept of \emph{likelihood} (see the next section).
+}
+
+\section{Likelihood}{
+
+
+The output of \code{info()} is identical to the log (base 2 by default) of the modeled \href{https://en.wikipedia.org/wiki/Likelihood_function}{likelihood}
+of each data point, which can be computed using the \code{\link[=like]{like()}} function.
+Literally, \code{info(x, base) == log(like(x), base)}.
+The \code{\link[=like]{like()}} function works just like \code{info()}, computing pointwise probabilities for each data point based on the
+probability distribution in \code{model}.
+However, we can use it to, for example, calculate the total \emph{log likelihood} of data using \code{sum(log(like(...)))}.
+This value divided by N is the cross entropy (make sure to use the right log base!): \code{-sum(log(like(...), base = 2)) == xentropy(...)}.
+}
+
+\seealso{
+The HumdrumR \link[=information]{information theory} overview.
+
+Other {Information theory functions}: 
+\code{\link{entropy_by}()},
+\code{\link{mutual}()}
 }
 \concept{{Information theory functions}}

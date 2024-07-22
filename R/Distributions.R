@@ -1,5 +1,5 @@
 
-
+setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'))
 
 # S4 Distributions ----
 
@@ -29,23 +29,24 @@ distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
   df <- as.data.frame(x)
   args <- list(new('distribution', df, Sort = Sort))
   
-  if (class(type) == 'character') {
+  if (class(type) != 'character') {
     
-    args$Class <- if (type == 'p') 'probability' else 'count'
-    if (args$Class == 'probability') {
-      args$N <- N
-      args$Condition <- Condition
+    if (class(type)[1] == 'probability') {
+      N <- type@N
+      Condition <- type@Condition
+      type <- 'p'
+    }  else {
+      type <- class(type)[1]
     }
-    
-  } else { # type must be a distribution
-    args$Class <- c(class(type))
-    if (args$Class == 'probability') {
-      args$N <- type@N
-      args$Condition <- type@Condition
-    }
-
+   
   }
-  do.call('new', args)
+    
+  if (type == 'p') {
+    new('probability', df, N = N, Condition = Condition, Sort = Sort)
+  } else {
+    new('count', df, Sort = Sort)
+  }
+
 }
   
 
@@ -62,6 +63,10 @@ getLevels <- function(dist) as.data.frame(dist)[ , varnames(dist), drop = FALSE]
 #' @export
 varnames <- function(x) setdiff(colnames(x), c('n', 'p'))
 
+
+#' @export
+levels.distribution <- function(x) getLevels(x)
+
 ### print() ----
 
 #' @export
@@ -72,6 +77,8 @@ setMethod('show', 'distribution', \(object) print.distribution(object))
 #' @rdname distributions
 print.distribution <- function(dist, digits = if (inherits(dist, 'probability')) 3 else 1,
                                syntaxHighlight = humdrumRoption('syntaxHighlight'),
+                               wide = TRUE,
+                               printZeros = TRUE,
                                zeros = '.') {
   
   type <- dist_type(dist)
@@ -89,6 +96,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   sort <- dist@Sort
   
   X <- getValues(dist)
+  zero <- X == 0
   
   X <- if (type == 'p') prettyP(X, digits = digits, zeros = zeros) else prettyN(X, digits = digits, zeros = zeros)
   
@@ -108,7 +116,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   
   # check if we can widen
   iswide <- FALSE
-  printmat <- (if(sort == -0L && length(varnames) >= 2L) {
+  printmat <- (if(wide && sort == 0L && length(varnames) >= 2L) {
     
     wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(varnames[2])), fill = attr(X, 'zerofill'), value.var = type))
     
@@ -126,10 +134,11 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
     iswide <- width < (options('width')$width - 10L)
     if (iswide) wide
   })  %||%  apply(rbind(colnames(dist), 
-                        as.matrix(dist), 
+                        as.matrix(if (printZeros) dist else dist[!zero, , drop = FALSE]), 
                         colnames(dist)), 
                   2, format, justify = 'right')
 
+  
   if (sort != 0L) {
     rank <- format(c('Rank', seq_len(nrow(printmat) - 2L), 'Rank'), 
                    justify = 'left')
@@ -137,10 +146,7 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
     printmat <- cbind(Rank = rank, printmat)
     
   }
-  
 
-  
-  
   if (syntaxHighlight) {
     
     syntax <- array('D', dim = dim(printmat))
@@ -182,7 +188,7 @@ Pequation <- function(dist, f = 'P', collapse = ',') {
   eq <- paste(setdiff(varnames, condition), collapse = collapse)
   if (!is.null(condition)) {
     condition <- paste(condition, collapse = collapse)
-    eq <- paste0(eq, ' | ', condition)
+    eq <- paste0(eq, '|', condition)
   }
   
   paste0(f, '(', eq, ')')
@@ -247,10 +253,11 @@ prettyP <- function(P, digits = 3, zeros = '.') {
   
   output <- paste0(Pprint, ifelse(approx, '~', ''))
   maxnchar <- max(nchar(output))
+  
   output <- paste0(output, strrep(' ', maxnchar - nchar(output))) 
   # output <- gsub(paste0('\\.', strrep('0', digits), '~'), paste0('.~', strrep(' ', digits)), output)
   
-  attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', maxnchar - 2L))
+  attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', max(0, maxnchar - 2L)))
   attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
   attr(output, 'approx') <- any(approx)
   
@@ -260,6 +267,10 @@ prettyP <- function(P, digits = 3, zeros = '.') {
 
 
 prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
+  checks(maxN, xlen1 & xpositive & xwholenum, argname = 'binArgs(maxN = )', seealso = '?count')
+  checks(quantiles, xlen1 & xpositiveorzero, argname = 'binArgs(quantiles = )', seealso = '?count')
+  checks(right, xTF, argname = 'binArgs(right = )', seealso = '?count')
+  
   levels <- sort(unique(x))
   if (is.integer(x) || all(is.whole(levels))) {
     range <- diff(range(levels))
@@ -285,44 +296,51 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
 }
 
 ### indexing ----
+
+#### distribution[] ----
+
 # 
-setMethod('[', c('distribution', 'ANY', 'missing'),
+setMethod('[', c('distribution', 'atomic', 'missing'),
           function(x, i, drop = FALSE) {
 
-            df <- as.data.frame(x)[i , ,  drop = FALSE]
+            
+            df <- as.data.frame(x)[i, ]
             
             if (drop) df else distribution(df, x)
+            
           })
+
 # 
 setMethod('[', c('distribution', 'missing', 'atomic'),
           function(x, i, j, drop = FALSE) {
             
 
-                        x <- unconditional(x)
-                        varnames <- varnames(x)
-
-                        j <- if (is.numeric(j)) varnames[j] else intersect(j, varnames)
-                        
-                        if (any(is.na(j)) || length(j) == 0L) .stop("Can't index this distribution with non-existent columns.")
-
-                        type <- dist_type(x)
-                        dt <- as.data.table(x)[ , setNames(list(sum(get(type))), type), by = j]
-                        
-                        if (drop) as.data.frame(dt) else distribution(dt, x)
-                        
+            # prepare j
+            if (is.logical(j)) j <- which(j)
+            if (is.numeric(j)) j <- varnames[j] 
+            
+            varnames <- varnames(x)
+            if (length(setdiff(j, varnames)) || any(is.na(j)))  .stop("{harvard(setdiff(j ,varnames), 'and', quote = TRUE)} <is not a name|are not names> of",
+                                                                      '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(j, varnames)) == 1)
+            j <- intersect(j, varnames)
+            
+            # do indexing
+            type <- dist_type(x)
+            dt <- as.data.table(x)[ , setNames(list(sum(get(type))), type), by = j]
+            
+            if (drop) as.data.frame(dt) else distribution(dt, x)
+            
 
           })
 
 setMethod('[', c('distribution', 'ANY', 'ANY'),
           function(x, i, j, drop = FALSE) {
-            
-            x <- x[i , ]
-            x[ , j, drop = drop]
-          
-            
+            x[ , c(i, j), drop = drop]
           })
 
-setMethod('[', c('distribution', 'matrix'),
+#### distribution[[]] ----
+
+setMethod('[[', c('distribution', 'matrix'),
           function(x, i, j, cartesian = TRUE, drop = FALSE) {
             
             i <- as.data.frame(i)
@@ -335,63 +353,145 @@ setMethod('[', c('distribution', 'matrix'),
 #' @export
 setMethod('[[', 'distribution',
           function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
+            varnames <- varnames(x)
+            args <- setNames(vector('list', length(varnames)), varnames)
             
-            args <- as.list(rlang::enexprs(...))
+            # prep args
+            ldots <- list(...)
             
-            args <- c(list(if (missing(i)) rlang::missing_arg() else i ),
-                      list(if (missing(j)) rlang::missing_arg() else j ),
-                      args)
+            named <- ldots[.names(ldots) != '']
+            if (any(duplicated(names(named)))) {
+              dups <- names(named)[duplicated(names(named))]
+              .stop("You have named multiple indexes for the {harvard(dups, 'and', quote = TRUE)} variable<|s>.", ifelse = length(dups) > 1)
+              }
+            if (length(setdiff(names(named), varnames))) .stop("{harvard(setdiff(names(named) ,varnames), 'and', quote = TRUE)} <is not the name|are not names> of",
+                                                               '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(names(named), varnames)) == 1)
             
-            missing <- sapply(args, rlang::is_missing)
-            args[!missing] <- lapply(args[!missing], rlang::eval_tidy)
+            unnamed <- c(list(if (!missing(i)) i), list(if (!missing(j)) j), ldots[.names(ldots) == ''])
+            unnamed <- Filter(Negate(is.null), unnamed)
+            if ((length(named) + length(unnamed)) > length(args)) .stop("This distribution only has {num2print(length(varnames))} dimensions to index.",
+                                                                        "You have provided {num2print((length(named) + length(unnamed)))}.")
             
-            if (missing[2] && length(args) == 2L) {
-              args <- args[1L]
-              missing <- missing[1L]
-            }
+            args[names(named)] <- named
+            rest <- head(which(!varnames %in% names(named)), length(unnamed))
+            args[rest] <- unnamed
             
-        
+            missing <- sapply(args, is.null)
+            
+            # do indexing
             levels <- getLevels(x)
-            if (length(args) > length(levels)) .stop("This distribution only has {num2print(length(levels))} dimensions to index.",
-                                    "You have provided {num2print(length(args))}.")
-            levels <- levels[1:length(args)]
             
-            args[!missing] <- Map(\(arg, lev) {
-              if (is.numeric(arg)) unique(lev)[arg] else arg
-            } , args[!missing], levels[!missing])
+            
+            args[!missing] <- Map(
+              \(arg, lev) {
+                if (is.numeric(arg)) unique(lev)[arg] else arg
+              } ,
+              args[!missing], levels[!missing])
             
             i <- if (cartesian) {
               matches(args[!missing], levels[!missing])
+              
             } else {
-              Reduce('|', Map(`%in%`, levels[!missing], args[!missing]))
+              Reduce('&', Map(`%in%`, levels[!missing], args[!missing]))
             }
-           
-            
-            x[i, , drop = drop]
-            
 
+            df <- as.data.frame(x)[i , , drop = FALSE]
+            
+            if (drop) df else distribution(df, x) 
+              
+              # output <- distribution(df, x)
+              # output@names <- ifelse(output@names %in% varnames(x)[!missing] & !grepl('\\[\\]$', output@names), 
+                                     # paste0(output@names, '[]'), output@names)
+              # output
 
 
           })
 
-setMethod('[', c('probability', 'missing', 'character'),
-          function(x, i, j, ...) {
+#### probability[] ----
 
-            N <- x@N
-            x <- unconditional(x)
-            x <- as.data.table(x)
-
-            x <- as.data.frame(x[ , list(p = sum(p)), by = j])
-
-            distribution(x, 'p', Condition = NULL, N = N)
-
+setMethod('[', c('probability', 'atomic', 'missing'),
+          function(x, i, drop = FALSE) {
+            
+            
+            output <- callNextMethod()
+            
+            output <- recomputeP(output, x)
+            
+            if (drop) as.data.frame(output) else output
+            
           })
 
 
 #' @export
+setMethod('[', c('probability', 'missing', 'atomic'),
+          function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
+
+            varnames <- varnames(x)
+            # prepare j
+            if (is.logical(j)) j <- which(j)
+            if (is.numeric(j)) j <- varnames[j] 
+            
+            if (length(setdiff(j, varnames)) || any(is.na(j)))  .stop("{harvard(setdiff(j ,varnames), 'and', quote = TRUE)} <is not a name|are not names> of",
+                                                                      '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(j, varnames)) == 1)
+            j <- intersect(j, varnames)
+            
+            # do indexing
+            condition <- intersect(x@Condition, j)
+            x <- unconditional(x)
+            
+            dt <- as.data.table(x)[ , list(p = sum(p)), by = j]
+
+            output <- distribution(as.data.frame(dt), x)
+            
+            if (length(condition)) conditional(output, condition) else output
+
+          })
+
+#### probability[[]] ----
+
+#' @export
+setMethod('[[', 'probability',
+          function(x, i, j, ..., cartesian = FALSE, drop = FALSE) {
+            
+            output <- callNextMethod(x, i, j, ..., cartesian = cartesian, drop = FALSE)
+           
+            if (drop) as.data.frame(output) else recomputeP(output, x)
+          })
+
+
+setMethod('[[', c('probability', 'matrix'),
+          function(x, i, j, cartesian = TRUE, drop = FALSE) {
+            
+            i <- as.data.frame(i)
+            names(i) <- NULL
+            
+            do.call('[[', c(list(x, cartesian = cartesian, drop = drop), i))
+            
+          })
+
+recomputeP <- function(newx, x) {
+  
+  if (is.null(x@Condition)) {
+    newx@N <- as.integer(round(x@N * sum(newx)))
+    newx$p <- newx$p / sum(newx$p)
+    
+  } else {
+    newN <- as.integer(round(newx@N * tapply(newx$p, as.data.frame(newx)[, x@Condition, drop = FALSE], sum)[names(newx@N)]))
+    newx@N <- setNames(ifelse(is.na(newN), 0L, newN), names(newx@N))
+    
+    newx$p <- tapply_inplace(newx$p, as.data.frame(newx)[, x@Condition, drop = FALSE], \(x) if (all(x == 0)) x else x / sum(x, na.rm = TRUE))
+    
+    newx
+  }
+  
+  newx
+}
+
+#### filter() ----
+
+#' @export
 filter.distribution <- function(.data, ..., drop = FALSE) {
   exprs <- rlang::enquos(...)
-
   .data[rlang::eval_tidy(exprs[[1]], data = as.data.frame(.data)), , drop = drop]
 }
 
@@ -446,11 +546,10 @@ as.data.table.distribution <- function(x) {
 setMethod('sort', 'distribution',
           function(x, decreasing = TRUE) {
   X <- getValues(x)
+  df <- as.data.frame(x)[order(X, decreasing = decreasing), ]
   
-  x <- x[order(X, decreasing = decreasing), ]
+  distribution(df, x, Sort = if (decreasing) -1L else 1L)
   
-  x@Sort <- if (decreasing) -1L else 1L
-  x
 })
 
 
@@ -468,8 +567,7 @@ alignDistributions <- function(..., funcname = '') {
                             \(dn) do.call('mergeLevels', lapply(dists, \(dist) as.data.frame(dist)[[dn]]))), 
                      varnames)
   
-  levels <- do.call('expand.grid', levels)
-
+  levels <- do.call('expand.grid', c(levels, list(KEEP.OUT.ATTRS = FALSE)))
   
   aligned <- lapply(dists, 
                   \(dist) {
@@ -483,7 +581,6 @@ alignDistributions <- function(..., funcname = '') {
                   })
   
   names(aligned) <- sapply(dists, dist_type)
-  
   list(Levels = levels, X = aligned)
 }
   
@@ -538,7 +635,6 @@ setMethod('+', c('count', 'count'),
             
             df <- aligned$Levels
             df$n <- callGeneric(aligned$X[[1]], aligned$X[[2]])
-            
             distribution(df, 'n')
           })
 
@@ -591,6 +687,28 @@ setMethod('mean', 'distribution',
           \(x, ..., na.rm = FALSE) {
             setNames(mean(getValues(x), ..., na.rm = na.rm), paste(varnames(x), collapse = '.'))
           })
+
+#' @export
+setMethod('median', 'distribution',
+          \(x, na.rm = FALSE, ...) {
+            setNames(median(getValues(x), na.rm = na.rm, ...), paste(varnames(x), collapse = '.'))
+          })
+
+#' @export
+setMethod('rowSums', 'distribution',
+          \(x, na.rm = FALSE, ...) {
+
+            x[ , 1]
+
+          })
+
+#' @export
+setMethod('colSums', 'distribution',
+          \(x, na.rm = FALSE, ...) {
+            x[, 2]
+            
+          })
+
 
 #' @export
 setMethod('*', c('probability', 'probability'),
@@ -659,7 +777,26 @@ setMethod('*', c('probability', 'probability'),
 #' You can specify these names directly as argument names, like `count(Kern = kern(Token))`;
 #' if you don't specify a name, `count()` will make up a name(s) based on expression(s) it is tallying.
 #' (Note that `count()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
-
+#'
+#' @section Counting numeric values:
+#' 
+#' For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
+#' like in a histrogram.
+#' By default, if you pass a vector of numbers to `count()` which has more than `20` unique values,
+#' `count()` will bin the values using the same algorithm as [graphics::hist()].
+#' This process can be controlled using the `binArgs` argument, which is itself a list of control arguments.
+#' `binArgs = list(maxN = N)` controls the number of unique numbers needed before binning occurs,
+#' and `binArgs = list(right = FALSE)` (default is `TRUE`) can be used to make bins that are closed on the right instead of the left.
+#' Finally, any arguments to [graphics::hist()] can be passed via `binArgs`, controlling how binning occurs: notably,
+#' you can use the `binArgs = list(breaks = _)` to control exactly where boundaries should occur, or the number of bins you want.
+#' For example, `binArgs = list(breaks = 10)` will make `count()` bin the input numbers into twelve bins (see [hist()] 
+#' for details).
+#'
+#' Alternatively, you can tell `count()` to divy up (bin) the input numbers into quantiles by 
+#' passing `binArgs = list(quantiles = N)`.
+#' For example, `binArgs = list(quantiles = 4)` will divide the data into four equal quantiles (0%-25%, 25%-50%, 50%-75%, 75%-100%).
+#' 
+#'
 #' @section Manipulating humdrum tables:
 #' 
 #' The output of `count()` is a special form of R `table`, a `humdrumR.table`.
@@ -670,6 +807,8 @@ setMethod('*', c('probability', 'probability'),
 #' This means, that if you have two tables of pitch data, but one table includes specific pitch and other doesn't,
 #' you can still add them together or bind them into a matrix.
 #'  See the examples!
+#'
+#'
 #'
 #' @examples 
 #' 
@@ -693,6 +832,7 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   checks(sort, xTF | (xwholenum & xlen1))
   checks(na.rm, xTF)
   checks(.drop, xTF)
+  checks(binArgs, xclass('list'))
   
   args <- list(...)
   
@@ -715,9 +855,11 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   argdf <- as.data.frame(args)
   colnames(argdf) <- varnames
   
-  result <- rlang::eval_tidy(rlang::expr(count(argdf, !!!(rlang::syms(varnames)), name = 'n', .drop = !!.drop)))
+  if (.drop) argdf[sapply(argdf, is.factor)] <- lapply(argdf[sapply(argdf, is.factor)], factor) # drops unused levels
+  result <- do.call('table', c(list(useNA = if (na.rm) 'no' else 'ifany'), 
+                               argdf[ , varnames, drop = FALSE])) |> as.data.frame(responseName = 'n')
   
-  if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
+  # if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
   
   dist <- distribution(result, 'n')
   
@@ -731,8 +873,9 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
 #' @export
 count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   quos <- rlang::enquos(...)
+  
   counts <- if (length(quos)) {
-    names(quos) <- sapply(quos, rlang::as_label)
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
     quo <- rlang::quo(with(x, count.default(!!!quos, sort = !!sort, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs)))
     rlang::eval_tidy(quo)
     
@@ -748,28 +891,61 @@ count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, b
 
 #' @rdname distributions
 #' @export
-count.table <- function(..., sort = FALSE,
-                        na.rm = FALSE,
-                        .drop = FALSE) {
-  tab <- list(...)[[1]]
-  type <- if (any(tab < 1 & tab > 0)) 'p' else 'n'
-  df <- as.data.frame(tab, responseName = type)
+count.table <- function(..., sort = FALSE, na.rm = FALSE, .drop = FALSE) {
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
   
-  dist <- if (type == 'p') {
-    distribution(df, type, N = sum(tab), Condition = NULL)
-  } else {
-    distribution(df, type)
+  tab <- list(...)[[1]]
+  if (any(tab != round(tab))) {
+    tab <- tab *  10^-floor(log10(min(tab[tab > 0])))
   }
   
   
-  if (sort) dist <- sort.distribution(dist, decreasing = sort > 0L)
+  
+  df <- as.data.frame(tab, responseName = 'n')
+  df$n <- as.integer(df$n)
+  
+  if (.drop) df <- df[dist$n > 0, , drop = FALSE]
+  
+  dist <- distribution(df, 'n')
+
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
   dist
   
 }
 
 
-
+#' @rdname distributions
+#' @export
+count.pdist <- function(x, ..., sort = FALSE,
+                        na.rm = FALSE,
+                        .drop = FALSE) {
+  checks(sort, xTF | (xwholenum & xlen1))
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
+  
+  
+  df <- as.data.frame(x)
+  
+  if (length(x@Condition)) {
+    vars <- do.call('paste', c(df[ , x@Condition, drop = FALSE], list(sep = '.')))
+    df$n <- round(df$p * df@N[vars])
+    
+  } else {
+    df$n <- round(df$p * x@N)
+  }
+  df$p <- NULL
+  
+  dist <- distribution(df, 'n')
+  
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
+  
+  dist 
+}
 
 ### pdist() -----
 
@@ -783,6 +959,7 @@ pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop =
   checks(sort, xTF | (xwholenum & xlen1))
   checks(na.rm, xTF)
   checks(.drop, xTF)
+  checks(binArgs, xclass('list'))
   
   UseMethod('pdist')
 }
@@ -794,20 +971,20 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
   if (sort) x <- sort(x, sort > 0L)
   
-  x <- as.data.frame(x)
+  df <- as.data.frame(x)
   
   exprs <- rlang::enexprs(...)
-  if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
+  if (length(exprs)) condition <- pexprs(exprs, colnames(df), condition)$Condition %||% condition
   
-  n <- sum(x$n, na.rm = TRUE)
+  n <- sum(df$n, na.rm = TRUE)
   
-  x$p <- x$n / n
-  x$n <- NULL
+  df$p <- df$n / n
+  df$n <- NULL
   
-  dist <- distribution(x, 'p', N = n)
-  
+  dist <- distribution(df, 'p', N = n)
   if (!is.null(condition)) dist <- conditional(dist, condition = condition)
   
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
   if (sort) dist <- sort(dist, decreasing = sort > 0L)
   
   dist
@@ -880,12 +1057,13 @@ pdist.data.frame <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FA
 #' @export 
 pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             
-            exprs <- rlang::enexprs(...)
+            quos <- rlang::enexprs(...)
             
             humtab <- getHumtab(x, 'D')
-            if (length(exprs)) {
+            if (length(quos)) {
+              names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
               
-              rlang::eval_tidy(rlang::expr(pdist(humtab, !!!exprs, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs)))
+              rlang::eval_tidy(rlang::expr(pdist(humtab, !!!quos, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs)))
             } else {
               selectedFields <- selectedFields(x)
               names(selectedFields) <- selectedFields
@@ -903,54 +1081,53 @@ pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE
 
 #' @rdname distributions
 #' @export
-pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list()) {
-            
-            if (length(dim(x)) == 1L) condition <- NULL
-            
-            if (na.rm) {
-              notna <- unname(lapply(varnames(x), \(dim) !is.na(dim)))
-              x <- do.call('[', c(list(x), notna))
-            }
-            
-            if (is.character(condition)) {
-              condition <- pmatch(condition, varnames(x), duplicates.ok = FALSE)
-              condition <- condition[!is.na(condition)]
-              if (length(condition) == 0L) condition <- NULL
-            }
-            
-            ptab <- proportions(x, margin = condition) 
-            
-            
-            N <- marginSums(x, margin = condition)
-            
-            distribution(N, 'p')
-            # new('probability.frame', ptab, N = as.integer(n), margin =  as.integer(condition))
-          }
+pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
+  
+  if (all(x == round(x))) return(pdist(count(x, ..., na.rm = na.rm, sort = sort, binArgs = binArgs), condition = condition))
+  
+
+  
+  if (sum(x) != 1) x <- x / sum(x)
+  
+  df <- as.data.frame(x, responseName = 'p')
+  N <- as.integer(10 ^ -floor(log10(min(df$p[df$p > 0]))))
+  
+  dist <- distribution(df, 'p', N = N, Condition = condition)
+  
+  if (na.rm) dist <- dist[Reduce('&', lapply(getLevels(dist), \(col) !is.na(col))), ]
+  if (sort) dist <- sort(dist, decreasing = sort > 0L)
+  
+  dist
+  
+}
 
 
 
 conditional <- function(pdist, condition) {
   varnames <- varnames(pdist)
+  checks(condition, xcharnotempty | (xwholenum & xpositive & xmax(length(varnames))), seealso = '?pdist()')
+  
+  if (is.numeric(condition)) condition <- varnames[condition]
   if (any(!condition %in% varnames)) .stop("We can only calculate a conditional probability across an existing dimension/factor.",
-                                           "The <conditions|condition> {harvard(setdiff(varnames, condition), 'and')} are not dimensions of the given",
-                                           "distribution ({harvard(varnames, 'and')}).")
+                                           "The <conditions|condition> {harvard(setdiff(condition, varnames), 'and', quote = TRUE)} <are not dimensions|is not a dimension> of the given",
+                                           "distribution (the dimensions are named {harvard(varnames, 'and', quote = TRUE)}).", ifelse = length(setdiff(condition, varnames)) > 1)
   
   if (!is.null(pdist@Condition)) {
     if (setequal(condition, pdist@Condition)) return(pdist)
     pdist <- unconditional(pdist)
   }
   
-  
   conditionvec <- do.call('paste', c(as.list(pdist)[condition], list(sep = '.')))
   
   margin <- c(tapply(pdist$p, conditionvec, sum))
   margin <- margin[unique(conditionvec)] # to match original order
   
-  pdist$p <- ifelse(margin[conditionvec] == 0, 0, pdist$p / margin[conditionvec])
+  p <- ifelse(margin[conditionvec] == 0, 0, pdist$p / margin[conditionvec])
+  pdist$p <- tapply_inplace(p, conditionvec, \(x) if (any(x > 0)) x / sum(x) else x)
   
   pdist@Condition <- condition
   
-  pdist@N <- setNames(as.integer(pdist@N * margin), names(margin))
+  pdist@N <- setNames(as.integer(round(pdist@N * margin)), names(margin))
   pdist
   
 }
@@ -958,12 +1135,10 @@ conditional <- function(pdist, condition) {
 unconditional <- function(dist) {
   if (!inherits(dist, 'probability') || is.null(dist@Condition)) return(dist)
   
-  
   N <- sum(dist@N)
   margins <- dist@N / N
   
-  dist$p <- dist$p * margins[paste(as.data.frame(dist)[[dist@Condition]])] # paste to deal with NA levels
-  
+  dist$p <- dist$p * margins[do.call('paste', c(as.data.frame(dist)[, dist@Condition, drop = FALSE], list(sep = '.')))] # paste to deal with NA levels
   
   dist@Condition <- NULL
   dist@N <- N
@@ -1012,51 +1187,31 @@ pexprs <- function(exprs, colnames, condition) {
 
 # Information Theory ----
 
-## Likelihoods ----
-
-### like() ----
-
-#' @export
-like <- function(..., distribution) UseMethod('like')
-
-#' @export
-ic <- function(..., distribution, base = 2) -log(like(..., distribution = distribution), base = base)
-
-#' @export
-like.default <- function(..., distribution) {
-  like.data.frame(data.frame(...), distribution = distribution)
-}
-
-#' @export
-like.data.frame <- function(df, ..., distribution) {
-  
-  if (missing(distribution)) distribution <- do.call('pdist', list(df, ...))
-  
-  colnames <- colnames(df)
-  varnames <- varnames(distribution)
-  
-  if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
-
-  distribution[as.matrix(df), , drop = TRUE]$p
-  
-}
-
-
-#' @export
-pMI <- function(..., distribution, base = 2) {
-  df <- data.frame(...)
-  
-  if (missing(distribution)) distribution <- do.call('pdist', df)
-  
-  independent <- Reduce('*', lapply(varnames(distribution), \(j) distribution[ , j]))
-  
-  ic_observed <- ic(df, distribution = distribution, base = base)
-  ic_independent <- ic(df, distribution = independent, base = base)
-  
-  ic_independent - ic_observed
-  
-}
-
+#' Information theory
+#' 
+#' Many computational musicology analyses rely on probabilistic modeling and [information theory](https://en.wikipedia.org/wiki/Information_theory).
+#' HumdrumR includes functions to make these sorts of analyses quick and easy.
+#' These functions are closely connected to our [distributions] functions, which can be used to calculate/estimate the probability of data observations.
+#'
+#' @details
+#' 
+#' 
+#' The most fundamental tools of information theory are statistics that characterize probability *distributions*.
+#' Thus, they are descriptive statistics, which describe a distribution (usually, the distribution of values in your data)
+#' using a single number.
+#' Such information-theoretic descriptive statistics can be computed using the [entropy()] 
+#' (joint or conditional entropy), [xentropy()] (cross entropy), [kld()] (Kullback–Leibler divergence), and  [mutual()] (mutual information) functions.
+#' In contrast, other information theory metrics are calculated "point-wise": one value for each data observation.
+#' Our point-wise information theory functions are [like()] (likelihood),
+#' [info()] (information content), `pentropy()` (pointwise conditional entropy), and `pmutual()` (pointwise mutual information).
+#'
+#' Note that all of these functions calculate or utilize *empirical* statistics---i.e., they describe *your data*.
+#' They are not (necessarily) representative of the "true" information content in real music.
+#' They may be used as *estimates* of the "true" entropy of music we study, but this assumes that our sample is 
+#' representative and that our probabilistic models make sense (i.e., make valid assumptions).
+#' 
+#' @name information
+NULL
 
 ## Distributional ----
 
@@ -1066,88 +1221,193 @@ pMI <- function(..., distribution, base = 2) {
 #' Calculate Entropy or Information Content of variables 
 #'
 #' Information content and entropy are fundamental concepts in [information theory](https://en.wikipedia.org/wiki/Information_theory),
-#' which quantify the amount of information (or "surprise") in a random variable.
+#' quantifying the amount of information in samples from a random variable; they are often
+#' characterized as measures of how "expected" (low information) or "surprising" (high information) data is.
 #' Both concepts are closely related the probability density/mass of events: improbable events have higher information content.
-#' The probability of *each* observation maps to the [information content](https://en.wikipedia.org/wiki/Information_content);
+#' The probability of *each* (point-wise) observation maps to the [information content](https://en.wikipedia.org/wiki/Information_content);
 #' The average information content of a variable is the [entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory)).
 #' Information content/entropy can be calculated for discrete probabilities or continuous probabilities,
 #' and humdrumR defines methods for calculating both.
 #' 
 #' @details 
 #' 
-#' To calculate information content or entropy, we must assume (or estimate) a probability distribution.
-#' HumdrumR uses R's standard [table()] and [density()] functions to estimate discrte and continuous probability
-#' distributions respectively.
+#' To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
+#' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
+#' distributions of atomic data.
+#' For numeric, data we can also use R's standard [stats::density()] function to estimate the continuous probability density.
 #' 
-#' Entropy is the average information content of a variable.
-#' The `entropy()` function can accept either a [table()] object (for discrete variables), 
-#' or a [density()] object (for continuous variables).
-#' If `entropy()` is passed an [atomic][base::vector()] vector,
-#' the values of the vector are treated as observations or a random variable:
-#' for `numeric` vectors, the [stats::density()] function is used to estimate the probability distribution
-#' of the random (continuous) variable, then entropy is computed for the density.
-#' For other atomic vectors, [table()] is called to tabulate the discrete probability mass for each
-#' observed level, and entropy is then computed for the table.
+#' The `entropy()` function takes an object representing a probability distribution---ideally a humdrumR [distribution] object,
+#' base-R [table], or a [density()] object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
+#' However, if you are lazy, you can pass `entropy()` our atomic data vectors directly, and it will automatically pass them to the [pdist()]
+#' function for you; for example, if you want to calculate the joint entropy of variables`x` and `y` (which must be the same length),
+#'  you can call `entropy(pdist(x, y))` 
+#' or just `entropy(x, y)`.
+#' Other arguments can be provided to `pdist()` as well; notably, if you want to calculate the *conditional* entropy,
+#' you can, for example, say `entropy(x, y, condition = 'y')`.
 #'
-#' The `ic()` function only accepts atomic vectors as its main (`x`) argument, but must also
-#' be provided a `distribution` argument.
-#' By default, the `distribution` argument is estimated using [density()] (`numeric` input) or [table()] (other input).
+#' The `info()` function is used similarly to the calling `entropy()` directly on data vectors:
+#' anywhere where you can call `entropy(x, y)`, you can call `info(x, y)` instead.
+#' The difference is that `info()` will return a vector of numbers, the same length as the representing the information content of each input observation.
+#' By definition, entropy of the data distribution is the average of all these point-wise information values: thus, `mean(info(x, y)) == entropy(x, y)`.
+
 #' 
+#' @section Cross entropy:
+#' 
+#' In many cases, we simply use entropy/information content to describe a set of data.
+#' In this case, the data we observe and the probability model (distribution) are the same---the probability model is the distribution of the data itself.
+#' However, we can also use a *different model*---in this case, a different probability distribution---to describe data.
+#' We thus get a measure of how well the model fits the data; this is called the [cross entropy](https://en.wikipedia.org/wiki/Cross-entropy).
+#' The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
+#' If a data matches the model well, the cross entropy will be a bit higher than the self entropy; if the data matches the model poorly,
+#' the cross entropy can be much higher.
+#' The difference between the cross entropy and the self entropy is always positive (or zero), and is called the 
+#' [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence).
+#' 
+#' To calculate cross entropy, use the `xentropy()` command.
+#' (The Kullback-Leibler Divergence can be calculated in the same way using the `kld()` function.)
+#' The `xentropy()` command works just like the entropy command, except you need to provide it a `model` argument, which must be 
+#' *another* probability distribution.
+#' Note that that data and the model have to have the **exact** same variable names, or `humdrumR` will throw an error!
+#' Name your arguments to avoid this (this is illustrated in the example below, where we name everything `X`).
+#' To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
+#' 
+#' ```
+#' dorian <- c('A', 'B', 'C', 'D', 'E', 'F#', 'G')
+#' N <- 1000
+#' 
+#' sample1 <- sample(dorian, N, replace = TRUE, prob = 7:1)
+#' sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1)
+#' sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7)
+#' 
+#' 
+#' ## first the self entropy
+#' entropy(X = sample1)
+#' entropy(X = sample2)
+#' entropy(X = sample3)
+#' 
+#' ## now the cross entropy
+#' 
+#' xentropy(X = sample1, model = pdist(X = sample2))
+#' xentropy(X = sample2, model = pdist(X = sample2))
+#' xentropy(X = sample3, model = pdist(X = sample2))
+#' 
+#' ```
+#' 
+#' `sample1` and `sample2` have very similar distributions, so when we use `sample2` as a model for `sample1`,
+#' the cross entropy is only slightly higher than the self entropy of `sample1`.
+#' However, when we use `sample2` as the model for `sample3` (which is distributed very differently)
+#' the entropy is quite a lot higher than the entropy of sample 3.
+#' 
+#' The `info()` command can also be passed a `model` argument.
+#' As always, `mean(info(x, model)) == xentropy(x, model)`.
+#' There is no standard name for this "cross information content."
+#' However, cross entropy/information-content are closely related to the more general concept of *likelihood* (see the next section).
+#'
+#' @section Likelihood:
+#' 
+#' The output of `info()` is identical to the log (base 2 by default) of the modeled [likelihood](https://en.wikipedia.org/wiki/Likelihood_function)
+#' of each data point, which can be computed using the [like()] function.
+#' Literally, `info(x, base) == log(like(x), base)`.
+#' The [like()] function works just like `info()`, computing pointwise probabilities for each data point based on the 
+#' probability distribution in `model`.
+#' However, we can use it to, for example, calculate the total *log likelihood* of data using `sum(log(like(...)))`.
+#' This value divided by N is the cross entropy (make sure to use the right log base!): `-sum(log(like(...), base = 2)) == xentropy(...)`.
+#' 
+#' 
+#' @param ... ***Distribution (or atomic vectors) to compute entropy/information of.***
+#' 
+#' Must either be a distribution object (created by [table()], [density()], [count()], or [pdist()]), or one
+#' or more atomic vectors of equal length.
+#'
+#' If atomic vectors are provided, and `model` is missing, the atomic vectors are passed to
+#' [pdist()] in order to calculate the `model`.
+#' 
+#' @param model ***The expected probability model.***
+#' 
+#' Must either be omitted (not allowed in calls to `xentropy()`) or must be a probability distribution created by [pdist()].
+#' 
+#' In calls to `entropy()` or `info()`, if `model` is missing, `...` arguments are used to generate the `model`.
+#' 
+#' @param base ***The logarithmic base.***
+#' 
+#' Defaults to `2`, so information is measured in units "bits."
+#' 
+#' Must be a single, non-zero positive number.
+#'
+#' Use `base = exp(1)` for natural-log "nats," or `base = 10` for Hartley/"dits".
+#' 
+#' @param condition ***Compute conditional entropy/information, conditoned on this variable.***
+#' 
+#' Defaults to `NULL` (no condition), so the joint entropy is calculated.
+#' 
+#' Must be a non-empty `character` string, which matches the name of one or of the named variables
+#' in the distribution.
+#' 
+#' This argument is simply passed to [pdist()].
 #' 
 #' @family {Information theory functions} 
+#' @seealso The HumdrumR [information theory][information] overview.
 #' @export
-entropy <- function(..., base = 2) {
-  checks(base, xnumber & xpositive)
+entropy <- function(..., model, base = 2) {
+  checks(base, xlen1 & xnumber & xpositive)
+  if (!missing(model)) checks(model, xinherits('probability'))
   
   UseMethod('entropy')
 }
 
 
 
+#' In equations, entropy is traditionally represented as *H(x)*, so we provide the `H()` function as a synonym for `entropy()`.
 #' @rdname entropy
 #' @export
 H <- entropy
   
 #' @rdname entropy
 #' @export
-entropy.probability <-  function(q, p, condition = NULL, base = 2) {
-            if (!is.null(condition)) q <- conditional(q, condition)
+entropy.probability <-  function(pdist, model, condition = NULL, base = 2) {
+            if (!is.null(condition)) pdist <- conditional(pdist, condition)
   
-            if (missing(p) || !inherits(p, 'probability')) {
-              expected <- unconditional(q)$p
-              observed <- q$p
-             } else {
-               # cross entropy of q and p!
-                aligned <- alignDistributions(q, p, funcname = 'entropy')
-                observed <- aligned$X[[1]]
-                expected <- aligned$X[[2]]
-               
-             }
-  
-            observed <- ifelse(observed > 0L, log(observed, base = base), 0) 
             
-            
-            equation <- Pequation(q, 'H')
-            setNames(-sum(expected * observed), equation)
+            if (missing(model)) {
+              expected <- pdist$p
+              observed <- unconditional(pdist)$p
+              equation <- Pequation(pdist, 'H')
+            } else {
+              # cross entropy of q and p
+              aligned <- alignDistributions(pdist, model, funcname = 'xentropy')
+              observed <- aligned$X[[1]]
+              expected <- aligned$X[[2]]
+              equation <- 'H(p, q)'
           }
 
-
-#' @rdname entropy
-#' @export
-entropy.numeric <- function(x, base = 2, na.rm = TRUE) {
-  entropy(density(x, ...), base = base, na.rm = na.rm)
+          expected <- ifelse(expected > 0L, log(expected, base = base), 0) 
+            
+          setNames(-sum(observed * expected), equation)
 }
 
 
 #' @rdname entropy
 #' @export
-entropy.density <- function(x, base = 2, na.rm = TRUE) {
-            label <- rlang::expr_name(rlang::enexpr(x))
+entropy.numeric <- function(x, model, base = 2, na.rm = TRUE, ...) {
+  if (missing(model)) {
+    entropy(density(x, ...), base = base, na.rm = na.rm)
+  } else {
+    entropy(pdist(...), model = model, base = base)
+  }
+  
+}
+
+
+#' @rdname entropy
+#' @export
+entropy.density <- function(x, model, base = 2, na.rm = TRUE) {
+            label <- rlang::expr_label(rlang::enexpr(x))
             if (any(is.na(x))) return(NA_real_)
             
             dx <- diff(x$x[1:2])
             
-            equation <- paste0('H(', label, ')')
+            equation <- if (nchar(label) < 10) paste0('H(', label, ')')
+            
             
             setNames(-sum(log(x$y, base = base) * x$y * dx), equation)
             
@@ -1157,61 +1417,236 @@ entropy.density <- function(x, base = 2, na.rm = TRUE) {
 
 #' @rdname entropy
 #' @export
-entropy.default <- function(..., base = 2) {
-            entropy(pdist(...), base = base)
+entropy.default <- function(..., model, base = 2) {
+            entropy(pdist(...), model = model, base = base)
           }
 
+#### entropy_by() ----
 
-entropies <- function(..., base = 2, conditional = FALSE) {
-  args <- list(...)
-  
-  names <- .names(args)
-  names <- ifelse(names == '', sapply(substitute(list(...))[-1], deparse, nlines = 1L), names)
-  names(args) <- names
-  
-  mat <- matrix(NA_real_, nrow = length(args), ncol = length(args))
-  
-  indices <- expand.grid(i = seq_along(args), j = seq_along(args))
-  if (!conditional) indices <- subset(indices, j >= i)
-  
-  
-  for (k in 1:nrow(indices)) {
-    i <- indices$i[k]
-    j <- indices$j[k]
-    
-
-    
-    mat[i, j] <- if (i == j) {
-      entropy(args[[i]], base = base)
-    } else {
-      do.call('entropy', c(args[c(i, j)], list(condition = if (conditional) names[j])))
-    }
-  }
-  
-  colnames(mat) <- rownames(mat) <- names
-  mat
-}
-
-
-### mutualInfo() ----
-
-#' Calculate Entropy or Information Content of variables 
-#'
+#' Calculate point-wise or contextual entropy
+#' 
 #' 
 #' @family {Information theory functions} 
+#' @seealso The HumdrumR [information theory][information] overview.
+#' @export
+entropy_by <- function(..., by, independent = TRUE, base = 2) {
+  checks(base, xlen1 & xnumber & xpositive)
+  checks(by, xcharnotempty)
+
+  UseMethod('entropy_by')
+}
+
+
+#' @rdname entropy_by
+#' @export
+entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
+  
+  varnames <- varnames(pdist)
+  
+  if (!is.null(pdist@Condition) && any(base %in% pdist@Condition)) {
+    pdist <- conditional(unconditional(pdist), setdiff(pdist@Condition, base))
+  }
+  
+  if (length(setdiff(by, varnames))) .stop("We can't group this probability distribution by non-existent variable<s|>",
+                                           "{harvard(setdiff(by, varnames), 'or', TRUE)}.", ifelse = length(setdiff(by, varnames)) > 1)
+  
+  grouping <- as.data.frame(pdist)[ , by , drop = FALSE]
+  
+  expected <- if (!independent) unconditional(pdist)$p else tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , by , drop = FALSE], \(x) x / sum(x))
+  observed <- tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , c(pdist@Condition, by) , drop = FALSE], \(x) log(x / sum(x), base = base))
+# 
+#   Hs <- tapply(pdist$p, ,
+#                \(ps) {
+#                  browser()
+#                  if (independent) ps <- ps / sum(ps)
+#                  -sum(ps * log(ps, base = base), na.rm = TRUE)
+#                })
+  
+  Hs <- -tapply(expected * observed, as.data.frame(pdist)[ , by , drop = FALSE], sum, na.rm = TRUE)
+  
+  equation <- Pequation(pdist[ , setdiff(varnames, by)], 'H')
+  equation <- gsub('\\)$', '', equation)
+  equations <- paste0(equation, ';', 
+                      paste(by, collapse = '.'), '=',
+                      names(Hs), ')')
+  names(Hs) <- equations
+  Hs
+  
+}
+
+#' @rdname entropy_by
+#' @export
+entropy_by.default <- function(..., by, independent = TRUE, base = 2) {
+  entropy_by(pdist(...), by = by, independent = independent, base = base)
+}
+
+
+#### xentropy() ----
+
 #' @rdname entropy
 #' @export
-mutualInfo <- function(..., base = 2) {
-  checks(base, xnumber & xpositive)
+xentropy <- function(..., model, base = 2) {
+  if (missing(model)) .stop("The xentropy() function requires a probability distribution passed to the 'model' argument.",
+                                   "If you want to estimate the model from the data, just use entropy().")
   
-  UseMethod('mutualInfo')
+  if (!inherits(model, 'probability')) model <- pdist(model)
+  
+  entropy(..., model = model, base = base)
+
 }
 
 
 
+#### kld() ----
+
 #' @rdname entropy
 #' @export
-mutualInfo.probability <-  function(x, base = 2) {
+kld <- function(..., model, base = 2) {
+  checks(base, xnumber & xpositive)
+  
+  if (missing(model)) .stop("The lkd() function requires a probability distribution passed to the 'model' argument.")
+  
+  UseMethod('kld')
+}
+
+
+
+
+#' @rdname entropy
+#' @export
+kld.probability <-  function(pdist, model, condition = NULL, base = 2) {
+  xentropy(pdist, model = model, base = base, condition = condition) - 
+    entropy(pdist, base = base, condition = condition)
+}
+
+
+#' @rdname entropy
+#' @export
+kld.default <- function(..., model, base = 2) {
+  kld(pdist(...), model = model, base = base)
+}
+
+
+### mutual() ----
+
+#' Calculate mutual information between variables 
+#'
+#' The [mutual information](https://en.wikipedia.org/wiki/Mutual_information) is a measure of how statistically
+#' dependent two variables are: in information theory terms, how much information about one variable
+#' is learned from observing other variable(s).
+#' The overall mutual information can be calculated using `mutual()` (analogous to [entropy()]),
+#' while the point-wise mutual information can be calculated using `pmutual()` (analogous to [info()]).
+#'
+#' @details
+#' 
+#' Mutual information is a property of probability distributions over two or more variables.
+#' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
+#' distributions over atomic data, and we can then calculate their mutual information.
+#'
+#' The `mutual()` and `pmutual()` functions are called just like [entropy()] and [info()].
+#' `mutual()` can be provided a [table][table()] of distribution (from [pdist()]), or can be directly provided two or more 
+#' atomic vectors, which are simply passed to `pdist()`; in other words, `mutual(x, y) == mutual(pdist(x, y))`.
+#' `pmutual()`, like [info()], can only be passed raw atomic vectors, like `pmutual(x, y)`.
+#' Note that, unlike the entropy functions, the mutual information functions will throw an error if you only
+#' provide them a single variable.
+#'
+#' @section Further explanation:
+#' 
+#' If two (or more) variables are statistically independent, their joint entropy will be the sum of their
+#' independent entropies.
+#' 
+#' $$
+#' H(X, Y) = H(X) + H(Y)
+#' $$
+#' 
+#' However, if they are not independent, their joint entropy will be less than the summed independent entropies.
+#' The mutual information is the difference between the summed independent entropies and their actual observed
+#' joint entropy.
+#' 
+#' $$
+#' I(X,Y) = (H(X) + H(Y)) - H(X,Y)
+#' $$
+#' 
+#' 
+#' For the point-wise mutual information, we get a single value for each data observation.
+#' The value represents the difference between the observed joint likelihood of each observation
+#' and the value we'd expect if the variable were independent.
+#' For example, consider the variables binary variables "person likes heavy metal" ($P(metal)$) and "person plays electric guitar" ($P(guitar)$).
+#' Imagine that $P(metal) = .05$ and $P(guitar) = .1$.
+#' If these two variables are independent, we'd expect that the joint probability of liking heavy metal
+#' *and* playing guitar would be $P(metal, guitar) = .05 * .1 = .005$ (one out of 200 people).
+#' However, on measuring some data, we might find that actually one in fifty people like metal and play guitar ($P(metal, guitar) = .02$).
+#' This means that the combination of liking metal and playing guitar is $\frac{.02}{.005} = 4$ times more likely than we'd expect
+#' if they were independent.
+#' This would translate to a point-wise mutual information of (using default base-2 "bits") $+2$.
+#' The overall mutual information is the average over all the point-wise values (including other combinations, like heavy metal fans who don't play guitar).
+#' 
+#' 
+#'
+#' @examples
+#' 
+#' guitar <- c(T, T, T, T, T, T, T, T, F, F, F, F, F, F, F, F)
+#' metal <- c(T, T, T, T,T,T,F,F,T,T,F,F,F,F,F,F)
+#' 
+#' mutual(pdist(guitar, metal))
+#' mutual(guitar, metal)
+#' 
+#' pmutual(guitar, metal)
+#'
+#' @seealso The HumdrumR [information theory][information] overview.
+#' @family {Information theory functions} 
+#' @export
+mutual <- function(..., base = 2) {
+  checks(base, xnumber & xpositive)
+  
+  UseMethod('mutual')
+}
+
+
+
+#' @rdname mutual
+#' @export
+mutual.probability <-  function(x, base = 2) {
+  varnames <- varnames(x)
+  if (length(varnames) < 2L) .stop("Can't calculate the mutual information of a single variable.")
+  
+  x <- unconditional(x)
+  
+  observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
+  
+  independent <- Reduce('*', lapply(varnames, \(j) x[ , j]))
+  # expected <- (x[ , 1] * x[ , 2])
+  independent <- setNames(independent$p, do.call('paste', c(getLevels(independent), list(sep = '.'))))
+  
+  independent <- independent[names(observed)]
+  
+  ratio <- observed / independent
+  logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
+  
+  equation <- Pequation(x, 'I', ';')
+  
+  setNames(sum(observed * logratio, na.rm = TRUE), equation)
+  
+}
+
+
+
+
+#' @rdname mutual
+#' @export
+mutual.default <- function(..., base = 2) {
+  mutual.probability(pdist(...), base = base)
+}
+
+
+
+
+
+
+
+#' @rdname mutual
+#' @export
+mutual.probability <-  function(x, base = 2) {
   varnames <- varnames(x)
   if (length(varnames) < 2L) .stop("Can't calculate mutual information of a single variable.")
   
@@ -1237,14 +1672,105 @@ mutualInfo.probability <-  function(x, base = 2) {
 
 
 
-#' @rdname entropy
+#' @rdname mutual
 #' @export
-mutualInfo.default <- function(..., base = 2) {
-  mutualInfo(pdist(...), base = base)
+mutual.default <- function(..., base = 2) {
+  mutual.probability(pdist(...), base = base)
 }
 
 
+## Point-wise ----
 
+### like() ----
+
+
+#' @export
+like <- function(..., model) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
+  
+  UseMethod('like')
+}
+
+#' @rdname entropy
+#' @export
+info <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
+       base = base)
+}
+
+#' @export
+like.default <- function(..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  like.data.frame(data.frame(...), model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+}
+
+#' @export
+like.data.frame <- function(df, ..., model) {
+  if (missing(model) || is.null(model))  {
+    model <- if (is.numeric(df[[1]])) lm(df[,ncol(df):1]) else model <- do.call('pdist', list(df, ...))
+    
+  }
+  
+  if (inherits(model, 'probability')) {
+    colnames <- colnames(df)
+    varnames <- varnames(model)
+    
+    if (!setequal(colnames, varnames)) .stop("To calculate likelihoods, the expected distribution must have the same variables as the observed variables.")
+    
+    model[[as.matrix(df), , drop = TRUE]]$p
+    
+  } else {
+    dnorm(predict(model, newdata = df, type = 'response'), 0, summary(model)$sigma)
+  }
+  
+  
+}
+
+
+### pentropy() ----
+
+
+#' @rdname entropy_by
+#' @export
+pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  df <- data.frame(...)
+  
+  if (missing(model)) {
+    model <- pdist(..., condition = NULL, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+    df <- df[1]
+  }
+  
+  conditions <- intersect(varnames(model), names(df))
+  
+  model <- as.data.frame(model)
+  entropymat <- tapply(model$p, model[ , conditions, drop = FALSE], 
+                       \(P) {
+                         P <- P / sum(P)
+                         -sum(P * log(P, base = base), na.rm = TRUE)
+                       })
+  
+  
+  entropymat[do.call('cbind', df)]
+  
+}
+
+
+### pmutual() ----
+
+#' @rdname mutual
+#' @export
+pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  df <- data.frame(...)
+  
+  if (missing(model)) model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+  
+  independent <- Reduce('*', lapply(varnames(model), \(j) model[ , j]))
+  
+  ic_observed <- info(df, model = model, base = base)
+  ic_independent <- info(df, model = independent, base = base)
+  
+  ic_independent - ic_observed
+  
+}
 
 
 

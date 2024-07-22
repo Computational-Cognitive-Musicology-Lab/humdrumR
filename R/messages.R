@@ -321,6 +321,8 @@ xpnatural <- xnumber & xmin(1) & xwholenum
 xposORneg <- argCheck(\(arg)  all(arg >= 0) || all(arg <= 0), "can't mix negative and positive indices", 
                       \(arg) "'argname' includes {.values(arg[arg > 0])} AND {.values(arg[arg < 0])}")
 
+
+
 ### Length -----
 
 
@@ -332,6 +334,12 @@ xmaxlength <- function(n = 1) {
 xminlength <- function(n = 1) {
   argCheck(\(arg) length(arg) >= n,
            glue::glue("must be at least {n} long"),
+           .mismatch(length))
+}
+
+xlength <- function(n = 1) {
+  argCheck(\(arg) length(arg) == n,
+           glue::glue("must be exactly {n} long"),
            .mismatch(length))
 }
 

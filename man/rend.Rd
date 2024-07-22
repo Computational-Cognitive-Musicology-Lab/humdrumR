@@ -7,7 +7,7 @@
 \usage{
 rend(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty = FALSE)
 
-\method{pivot_longer}{humdrumR}(data, cols, ...)
+pivot_longer.humdrumR(data, cols, ...)
 }
 \arguments{
 \item{humdrumR}{\emph{\strong{HumdrumR data.}}

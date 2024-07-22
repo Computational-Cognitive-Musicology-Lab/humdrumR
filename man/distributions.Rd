@@ -8,6 +8,7 @@
 \alias{count.default}
 \alias{count.humdrumR}
 \alias{count.table}
+\alias{count.pdist}
 \alias{pdist.count}
 \alias{pdist.probability}
 \alias{pdist.default}
@@ -25,16 +26,33 @@
   dist,
   digits = if (inherits(dist, "probability")) 3 else 1,
   syntaxHighlight = humdrumRoption("syntaxHighlight"),
+  wide = TRUE,
+  printZeros = TRUE,
   zeros = "."
 )
 
 \S4method{sort}{distribution}(x, decreasing = TRUE)
 
-\method{count}{default}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
+count.default(
+  ...,
+  sort = FALSE,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\method{count}{humdrumR}(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list())
+count.humdrumR(
+  x,
+  ...,
+  sort = FALSE,
+  na.rm = FALSE,
+  .drop = FALSE,
+  binArgs = list()
+)
 
-\method{count}{table}(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+count.table(..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
+
+count.pdist(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE)
 
 \method{pdist}{count}(
   x,
@@ -85,7 +103,7 @@
   binArgs = list()
 )
 
-\method{pdist}{table}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, binArgs = list())
+\method{pdist}{table}(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE)
 
 table(
   x,
@@ -133,6 +151,26 @@ You can specify these names directly as argument names, like \code{count(Kern = 
 if you don't specify a name, \code{count()} will make up a name(s) based on expression(s) it is tallying.
 (Note that \code{count()} does not copy \code{\link[base:table]{base::table()}}'s obtusely-named \code{dnn} or \code{deparse.level} arguments.)
 }
+\section{Counting numeric values}{
+
+
+For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
+like in a histrogram.
+By default, if you pass a vector of numbers to \code{count()} which has more than \code{20} unique values,
+\code{count()} will bin the values using the same algorithm as \code{\link[graphics:hist]{graphics::hist()}}.
+This process can be controlled using the \code{binArgs} argument, which is itself a list of control arguments.
+\code{binArgs = list(maxN = N)} controls the number of unique numbers needed before binning occurs,
+and \code{binArgs = list(right = FALSE)} (default is \code{TRUE}) can be used to make bins that are closed on the right instead of the left.
+Finally, any arguments to \code{\link[graphics:hist]{graphics::hist()}} can be passed via \code{binArgs}, controlling how binning occurs: notably,
+you can use the \verb{binArgs = list(breaks = _)} to control exactly where boundaries should occur, or the number of bins you want.
+For example, \code{binArgs = list(breaks = 10)} will make \code{count()} bin the input numbers into twelve bins (see \code{\link[=hist]{hist()}}
+for details).
+
+Alternatively, you can tell \code{count()} to divy up (bin) the input numbers into quantiles by
+passing \code{binArgs = list(quantiles = N)}.
+For example, \code{binArgs = list(quantiles = 4)} will divide the data into four equal quantiles (0\%-25\%, 25\%-50\%, 50\%-75\%, 75\%-100\%).
+}
+
 \section{Manipulating humdrum tables}{
 
 

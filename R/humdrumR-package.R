@@ -593,13 +593,18 @@ humdrumR_version <- as.character(packageVersion('humdrumR'))
 
 ## Bootswatch flatly in plots ----
 
-flatly <- c('#18BC9C', '#F39C12', '#3498DB', '#E74C3C', '#2C3E50')
-flatly_continuous <- function(n, k = 2, alpha = 1) {
-  structure(setalpha(colorRampPalette(flatly[k + 0:1])(n), alpha = alpha),
-            name = 'flatly_continuous', class = 'palette')
-}
-flatly_discrete <- function(n, alpha = 1) {
-  structure(setalpha(colorRampPalette(flatly)(n), alpha = alpha), name = 'flatly_discrete', class = 'palette')
+flatly <- c('#18BC9C', '#3498DB', '#F39C12', '#E74C3C', '#2C3E50')
+
+flatly_scale <- function(n, alpha = 1, contrast = FALSE) {
+  
+  if (n <= 5L) return(setalpha(flatly[1:n], alpha = alpha))
+  
+  col <- setalpha(colorRampPalette(flatly)(n), alpha = alpha)
+  if (contrast) col <- col[c(matrix(c(seq_along(col), if (n %% 2 == 1) NA), nrow = 2, byrow = TRUE))]
+  
+  col
+  
+  
 }
 # setHook('plot.new', function() {
 #   par(family = 'Lato', col.main = flatly[5], col.axis = flatly[5], col.sub = flatly[5],

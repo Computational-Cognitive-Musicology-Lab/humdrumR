@@ -2,192 +2,28 @@
 % Please edit documentation in R/Plots.R
 \name{draw}
 \alias{draw}
-\alias{draw,numeric,numeric-method}
-\alias{draw,numeric,missing-method}
-\alias{draw,missing,numeric-method}
-\alias{draw,discrete,discrete-method}
-\alias{draw,discrete,missing-method}
-\alias{draw,token,missing-method}
-\alias{draw,missing,token-method}
-\alias{draw,token,token-method}
-\alias{draw,count,ANY-method}
-\alias{draw,table,ANY-method}
-\alias{draw,humdrumR.table,ANY-method}
-\alias{draw,probability,ANY-method}
-\alias{draw,discrete,numeric-method}
-\alias{draw,list,numeric-method}
-\alias{draw,formula,ANY-method}
-\alias{draw,humdrumR,ANY-method}
 \title{Visualize data}
 \usage{
 draw(
   x,
   y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{numeric,numeric}(
-  x,
-  y,
-  col = 3,
-  log = "",
-  jitter = "xy",
-  xlim = NULL,
-  ylim = NULL,
-  xat = NULL,
-  yat = NULL,
-  cex = prep_cex(x),
-  ...
-)
-
-\S4method{draw}{numeric,missing}(
-  x,
-  y,
-  col = 3,
-  breaks = "Sturges",
-  jitter = "",
+  facets = list(),
   ...,
-  cex = prep_cex(x) * 0.75,
-  xlim = NULL,
-  ylim = NULL
-)
-
-\S4method{draw}{missing,numeric}(
-  x,
-  y,
-  col = 3,
-  log = "",
-  jitter = "",
-  ...,
-  cex = prep_cex(y),
-  yat = NULL,
-  quantiles = c(0.025, 0.25, 0.5, 0.75, 0.975)
-)
-
-\S4method{draw}{discrete,discrete}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
   xlab = NULL,
   ylab = NULL,
-  ...
-)
-
-\S4method{draw}{discrete,missing}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
+  axes = 1:4,
+  legend = TRUE,
+  aspect = NULL,
+  margin = 0.2,
   main = "",
   sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{token,missing}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{missing,token}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{token,token}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{count,ANY}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{table,ANY}(
-  x,
-  y,
-  col = 1:nrow(x),
-  log = "",
-  ...,
-  ylim = NULL,
-  yat = NULL,
-  beside = TRUE
-)
-
-\S4method{draw}{humdrumR.table,ANY}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
-)
-
-\S4method{draw}{probability,ANY}(x, y, col = 1:nrow(x), log = "", ..., yat = NULL, beside = TRUE)
-
-\S4method{draw}{discrete,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
-
-\S4method{draw}{list,numeric}(x, y, col = 3, log = "", breaks = "Sturges", ..., yat = NULL)
-
-\S4method{draw}{formula,ANY}(x, y, col = 2, xlab = NULL, ylab = NULL, data = NULL, ...)
-
-\S4method{draw}{humdrumR,ANY}(
-  x,
-  y,
-  col = 2,
-  facet = list(),
-  main = "",
-  sub = "",
-  xlab = NULL,
-  ylab = NULL,
-  ...
+  col = 1,
+  cex = NULL
 )
 }
 \description{
-The \code{draw()} function is humdrumR's goto plotting function.
-\code{draw()} can make a variety of graphs, depending on the type of data you give it.
+The \code{draw()} function is humdrumR's go-to plotting function.
+\code{draw()} will make a variety of graphs, depending on the type of data you give it.
 For the most part, \code{draw()} is simply a stylish, easy to use wrapper around
 the base-R graphics functions \code{\link[=plot]{plot()}}, \code{\link[=barplot]{barplot()}}, and \code{\link[=hist]{hist()}}.
 }
@@ -198,10 +34,64 @@ the base-R graphics functions \code{\link[=plot]{plot()}}, \code{\link[=barplot]
 \item \code{x} and \code{y} both numeric: scatter plot.
 \item \code{x} numeric by itself: histogram.
 \item \code{y} numeric by itself: quantile plot.
-\item \code{x} is a \link[=count]{table}: barplot.
+\item \code{x} is a \link[=count]{table}: barplot or heatmap.
 \item \code{y} is numeric, \code{x} is \code{character} or \code{factor}: a violin plot.
 }
 
-All the standard arguments to base-R plots can be used to customize plots.
-See \code{\link[=par]{par()}} for a full list.
+\code{draw()} is simply a wrapper built on top of R's "base" plotting system.
+This means that all the standard arguments to base-R plots can be used to customize plots
+(See \code{\link[=par]{par()}} for a full list) or add to them (for example, using \code{\link[=points]{points()}} or \code{\link[=mtext]{mtext()}}).
+However, \code{draw()} has a number of special additional features, including easily plotting "facets"
+(dividing data into multiple plots).
+Anything that \code{draw()} does can be done using normal base-R plotting functions (\code{\link[=plot]{plot()}}, \code{\link[=barplot]{barplot()}}, etc.),
+but \code{draw()} makes making good looking plots faster and easier.
+
+The following arguments are the main arguments used with \code{draw()},
+though not all arguments will have an effect in all types of plots.
+\itemize{
+\item Base R:
+\itemize{
+\item \code{x}: left/right position.
+\item \code{y}: up/down position.
+\item \code{col}: color.
+\itemize{
+\item \code{humdrumR} implements a custom color scheme,
+which can be accessed by using whole number values for \code{col}.
+}
+\item \code{cex}: point size.
+\item \code{log}: draw on log scale?
+}
+\item \code{draw()} specific:
+\itemize{
+\item \code{square}: Should the plot be forced to be square?
+\item \code{alpha}: control transparency.
+\item \code{quantiles}: mark distribution quantiles.
+\item \code{facets}: divide the data into multiple plots.
+}
+}
+
+Specific methods also have additional arguments.
+\subsection{Scatter Plot}{
+
+If both \code{x} and \code{y} are real numbers (\code{\link[=numeric]{numeric()}} in R), a scatter plot is drawn.
+These vectors should be the same length, but if one of them is \code{length == 1},
+all the points will simply be drawn in a line at that value.
+\itemize{
+\item \strong{Coloring points} (\code{col} arg)
+\itemize{
+\item If a single \code{col} value is provided, all points are draw this color.
+\item If the \code{col} value is the same length as \code{x} and \code{y}, a scale of colors (either discrete of continuos)
+is generated to match the values this variable takes.
+\item A legend is drawn.
+}
+\item \strong{Point size} (\code{cex} arg)
+\itemize{
+\item If a single \code{cex} value is provided, all points are drawn the same size.
+\item If the \code{cex} value is numeric and the same length as \code{x} and \code{y},
+a scale of sizes is generated to match the values this variable takes.
+This auto-sizing should scale with the area of the points.
+\item A legend is drawn.
+}
+}
+}
 }
