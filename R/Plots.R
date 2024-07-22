@@ -374,7 +374,7 @@ setMethod('.draw', c('table', 'NULL'),
             type <- if (is.null(beside)) 'both' else { if (beside) 'beside' else 'stacked'}
             space <- if (type == 'stacked') .5 else c(0, 1 + nrow(x) %/% 8) 
             
-            ylim <- ylim %||% c(0, if (type == 'beside') max(x) else max(colSums(x)))
+            ylim <- ylim %||% c(0, if (is.null(beside) || type == 'beside') max(x) else max(colSums(x)))
             
             col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, log = log, ...)
             
@@ -421,6 +421,8 @@ setMethod('.draw', c('table', 'NULL'),
             axisNames <- vector('list', 4L)
             axisNames[c(2,4)] <- c('Proportion', if (is.integer(x)) 'Count' else 'N')
             
+            axisNames[1] <- paste(Filter(\(x) x != '', names(dimnames(x))), collapse = ' × ')
+            
             list(axes = axes, window = window, axisNames = axisNames, col = col)
           })
 
@@ -431,6 +433,12 @@ setMethod('.draw', c('count', 'NULL'),
             .draw(as.table(x), NULL, ...)
           })
 
+
+setMethod('.draw', c('humdrumR.table', 'NULL'),
+          function(x, y, ...) {
+            class(x) <- class(x)[-1]
+            .draw(x, NULL, ...)
+          })
 
 setMethod('.draw', c('discrete', 'NULL'),
           function(x, y, ...){ 
@@ -490,7 +498,7 @@ setMethod('.draw', c('list', 'numeric'),
               canvas(log = gsub('x', '', log), 
                      xlim = c(0, 1), xat = xtick, x.labels = xlabel,
                      ylim = ylim, yat = ytick)
-              
+              a
               if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
               draw_violin(y[[k]], breaks = breaks)
             }
@@ -1091,7 +1099,8 @@ humaxes <- function(axesframe, axisNames, axes = 1:4, marginLines) {
   
   Map(axisNames, 1:4, f = \(label, side) {
     if (!is.null(label)) {
-      marginLab(marginLines, label, side, col = par('col.lab'), 
+      marginLab(marginLines, label, marginLine = 3L, 
+                side, col = par('col.lab'), 
                 las = if (is.character(label) && nchar(label) > 3 && side %% 2 == 0) 0  else  1)
     } })
   
@@ -1333,8 +1342,8 @@ legend_col_discrete <- function(categories, palette, pch, side, marginLines, col
   
   y <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
   
-  points(rep(xpos[1], length(y)), y, pch = pch, xpd = NA, col = palette)
-  text(xpos[2], y, categories, pos = 4, cex = .6, xpd = NA)
+  points(rep(xpos[2], length(y)), y, pch = pch, xpd = NA, col = palette, cex = 1)
+  text(xpos[2], y, categories, cex = .6, xpd = NA, pos = 4)
 
   text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
 }

@@ -5,7 +5,7 @@
 \alias{mutual.probability}
 \alias{mutual.default}
 \alias{pmutual}
-\title{Calculate Entropy or Information Content of variables}
+\title{Calculate mutual information between variables}
 \usage{
 mutual(..., base = 2)
 
@@ -28,7 +28,66 @@ pmutual(
 )
 }
 \description{
-Calculate Entropy or Information Content of variables
+The \href{https://en.wikipedia.org/wiki/Mutual_information}{mutual information} is a measure of how statistically
+dependent two variables are: in information theory terms, how much information about one variable
+is learned from observing other variable(s).
+The overall mutual information can be calculated using \code{mutual()} (analogous to \code{\link[=entropy]{entropy()}}),
+while the point-wise mutual information can be calculated using \code{pmutual()} (analogous to \code{\link[=info]{info()}}).
+}
+\details{
+Mutual information is a property of probability distributions over two or more variables.
+HumdrumR's \code{\link[=count]{count()}} and \code{\link[=pdist]{pdist()}} methods (or R's standard \code{\link[=table]{table()}} function) can be used calculate empirical
+distributions over atomic data, and we can then calculate their mutual information.
+
+The \code{mutual()} and \code{pmutual()} functions are called just like \code{\link[=entropy]{entropy()}} and \code{\link[=info]{info()}}.
+\code{mutual()} can be provided a \link[=table]{table} of distribution (from \code{\link[=pdist]{pdist()}}), or can be directly provided two or more
+atomic vectors, which are simply passed to \code{pdist()}; in other words, \code{mutual(x, y) == mutual(pdist(x, y))}.
+\code{pmutual()}, like \code{\link[=info]{info()}}, can only be passed raw atomic vectors, like \code{pmutual(x, y)}.
+Note that, unlike the entropy functions, the mutual information functions will throw an error if you only
+provide them a single variable.
+}
+\section{Further explanation}{
+
+
+If two (or more) variables are statistically independent, their joint entropy will be the sum of their
+independent entropies.
+
+$$
+H(X, Y) = H(X) + H(Y)
+$$
+
+However, if they are not independent, their joint entropy will be less than the summed independent entropies.
+The mutual information is the difference between the summed independent entropies and their actual observed
+joint entropy.
+
+$$
+I(X,Y) = (H(X) + H(Y)) - H(X,Y)
+$$
+
+For the point-wise mutual information, we get a single value for each data observation.
+The value represents the difference between the observed joint likelihood of each observation
+and the value we'd expect if the variable were independent.
+For example, consider the variables binary variables "person likes heavy metal" ($P(metal)$) and "person plays electric guitar" ($P(guitar)$).
+Imagine that $P(metal) = .05$ and $P(guitar) = .1$.
+If these two variables are independent, we'd expect that the joint probability of liking heavy metal
+\emph{and} playing guitar would be $P(metal, guitar) = .05 * .1 = .005$ (one out of 200 people).
+However, on measuring some data, we might find that actually one in fifty people like metal and play guitar ($P(metal, guitar) = .02$).
+This means that the combination of liking metal and playing guitar is $\frac{.02}{.005} = 4$ times more likely than we'd expect
+if they were independent.
+This would translate to a point-wise mutual information of (using default base-2 "bits") $+2$.
+The overall mutual information is the average over all the point-wise values (including other combinations, like heavy metal fans who don't play guitar).
+}
+
+\examples{
+
+guitar <- c(T, T, T, T, T, T, T, T, F, F, F, F, F, F, F, F)
+metal <- c(T, T, T, T,T,T,F,F,T,T,F,F,F,F,F,F)
+
+mutual(pdist(guitar, metal))
+mutual(guitar, metal)
+
+pmutual(guitar, metal)
+
 }
 \seealso{
 The HumdrumR \link[=information]{information theory} overview.

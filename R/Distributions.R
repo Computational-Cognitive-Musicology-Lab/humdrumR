@@ -841,7 +841,6 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   
   varnames <- .names(args)
   if (any(varnames == '')) varnames[varnames == ''] <- vapply(exprs[varnames == ''], deparse, nlines = 1L, '')
-  
   if (length(unique(lengths(args))) > 1L) .stop("Can't cross-tabulate these vectors ({harvard(varnames, 'and')}), because they are different lengths.")
   
   # factorize arguments as needed
@@ -859,6 +858,7 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   result <- do.call('table', c(list(useNA = if (na.rm) 'no' else 'ifany'), 
                                argdf[ , varnames, drop = FALSE])) |> as.data.frame(responseName = 'n')
   
+  colnames(result)[seq_along(argdf)] <- colnames(argdf)
   # if (na.rm) result <- result[Reduce('&', lapply(result[ , varnames, drop = FALSE], \(col) !is.na(col))), , drop = FALSE]
   
   dist <- distribution(result, 'n')
