@@ -137,11 +137,13 @@ memoizeParse <- function(args, ..., dispatchArgs = c(), minMemoize = 100L, memoi
     
     if (is.struct(result)) {
       uniqueArgs$i <- seq_len(nrow(uniqueArgs))
-      result[merge(memoizeArgs, uniqueArgs, on = colnames(uniqueArgs), sort = FALSE)$i]
+      # result[merge(memoizeArgs, uniqueArgs, by = colnames(uniqueArgs), sort = FALSE)$i]
+      result[merge(memoizeArgs, uniqueArgs,  sort = FALSE)$i]
       
     } else {
       uniqueArgs[ , Result := result]
-      merge(memoizeArgs, uniqueArgs, on = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
+      merge(memoizeArgs, uniqueArgs,  sort = FALSE)$Result
+      # merge(memoizeArgs, uniqueArgs, by = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
       
     }
     
@@ -738,7 +740,7 @@ humdrumRgeneric <- function(default, envir = parent.frame()) {
   generic
 }
 
-humdrumRmethod <- function(default, envir = parent.frame()) { #, doArgs = c(), memoize = TRUE) {
+humdrumRmethod <- function(default, envir = parent.frame(), dataTypes = 'D') {
   
   .default <- rlang::enexpr(default)
   args <- formals(default)
@@ -759,7 +761,7 @@ humdrumRmethod <- function(default, envir = parent.frame()) { #, doArgs = c(), m
     quos <- rlang::enquos(...)
     
     if (!any(.names(quos) %in% c(.(firstArg), ''))) quos <- c(rlang::quo(.), quos)
-    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos))))
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos), dataTypes = .(dataTypes))))
   })
   
   rlang::new_function(setNames(alist(x = , ... = ), c(firstArg, '...')), env = envir,

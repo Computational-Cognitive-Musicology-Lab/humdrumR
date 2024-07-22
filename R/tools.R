@@ -1999,14 +1999,21 @@ ints2nits <- function(n, it = 2, nits = 8) {
     out
 }
 
+extension2trit <- function(n) {
+  as.integer(3L ^ (-(((n - 1L) * 2L) + 2L) %% 7L))
+}
 
+extension2bit <- function(n) {
+  as.integer(2L ^ ((n - 1L) %/% 2L))
+}
 
 
 ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
+  
+    if (any(abs(n) > (3L ^ ntrits), na.rm = TRUE)) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to repersent in {ntrits} trits.")
+  
     tern <- ints2nits(abs(n), it = 3L, nits = ntrits)
-    
-    if (any(abs(n) > (3L ^ ntrits))) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to repersent in {ntrits} trits.")
     
     while(any(tern == 2L, na.rm = TRUE)) {
         twos <- which(tern == 2L, arr.ind = TRUE)

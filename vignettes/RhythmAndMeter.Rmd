@@ -260,6 +260,47 @@ So we get a separate timeline for each spine in each piece.
 > Note: `timeline()` ignores all multi-stops. 
 > If you have spine paths in your data, you should look into the [expandPaths](ComplexSyntax.html#expanding-paths "Complex syntax article, expanding paths section") options.
 
+
+
+In many cases, we actually want to know what timeline position for *every* token in a file is.
+This is especially useful when your data set contains some data spines which don't explicitely have rhythmic information
+but which line up with the rhythmic information in other spines (as they generally should!).
+A good example if our rap flow (MCFlow data), which contains rhythm encoded in one `**recip` spine, lined up with
+lots of other information in other spines.
+If we load our MCFlow data and run `timeline()`, we'll see the timeline computed for the `**recip` spine:
+
+
+```{r}
+mcflow <- readHumdrum(humdrumRroot, 'HumdrumData/RapFlow/.*rap')
+
+mcflow |>
+  timeline()
+
+```
+
+That's all well and good, but what if you want to know at what point in the timeline the Fresh Prince first mentioned "summertime"?
+It would be helpful to get the "total" timeline for the file, by specifying `total = TRUE`:
+
+
+```{r}
+mcflow |>
+  timeline(total = TRUE)
+```
+
+Nice!
+To answer our question...
+
+```{r}
+mcflow |>
+  timeline(total = TRUE) |>
+  filter(Token == 'su-') |> # first syllable of "summertime" 
+  pull() |>
+  min()
+
+```
+
+There it is, midway through the tenth measure of *Summertime*!
+
 ## Controlling the Start
 
 You'll notice that our timelines all start from zero, which makes sense of course.
