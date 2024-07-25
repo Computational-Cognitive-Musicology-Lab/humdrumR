@@ -1474,7 +1474,7 @@ prep_layout <- function(facets) {
 
 # Notation viewer ----
 
-toHNP <- function(lines, message) {
+toHNP <- function(lines, message, render = TRUE) {
   output <- paste(lines, collapse = '\n')
   
   randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
@@ -1494,15 +1494,19 @@ toHNP <- function(lines, message) {
     </body>
     </html>')
   
-  
-  tempDir <- tempfile()
-  dir.create(tempDir)
-  htmlFile <- file.path(tempDir, 'index.html')
-  
-  writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
-  
-  getOption('viewer', default = utils::browseURL)(htmlFile)
-  
+  if (render) {
+    tempDir <- tempfile()
+    dir.create(tempDir)
+    htmlFile <- file.path(tempDir, 'index.html')
+    
+    writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
+    
+    getOption('viewer', default = utils::browseURL)(htmlFile)
+  } else {
+    cat(html, sep = '\n')
+  }
+
+  invisible(html)
 }
 
 #' @export

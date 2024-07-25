@@ -1926,7 +1926,7 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
                            syntaxHighlight =  humdrumRoption('syntaxHighlight'),
                            maxRecordsPerFile = if (length(humdrumR) == 1L) 800L else humdrumRoption('maxRecordsPerFile'), 
                            maxTokenLength = humdrumRoption('maxTokenLength'), 
-                           censorEmptyRecords = humdrumRoption('censorEmptyRecords')) {
+                           censorEmptyRecords = humdrumRoption('censorEmptyRecords'), ...) {
     
   checks(humdrumR, xhumdrumR)
   dataTypes <- checkTypes(dataTypes, "print_humdrumR")
@@ -1946,12 +1946,11 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
     return(invisible(humdrumR))
   }
   
-  local({# we (may) change humdrumR object in here.
       Npieces <- npieces(humdrumR)
       Nfiles <- nfiles(humdrumR) # needs to be done before firstLast indexing
       if (Npieces > 2L && firstAndLast) humdrumR <- humdrumR[c(1L, Npieces)]
       
-      if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile))
+      if (view == 'score') return(print_score(humdrumR, maxRecordsPerFile, ...))
       
       tokmat <- if (view == 'humdrum') {
           tokmat_humdrum(humdrumR, dataTypes, null = null, censorEmptyRecords = censorEmptyRecords)
@@ -1980,7 +1979,6 @@ print.humdrumR <- function(humdrumR, view = humdrumRoption('view'),
           cat('.\n')
           
       }
-  })
   
   ## Fields
   showFields(humdrumR)
@@ -2168,17 +2166,35 @@ print_tokmat <- function(parsed, Nmorefiles = 0, maxRecordsPerFile, maxTokenLeng
 }
 
 
-print_score <- function(humdrumR, maxRecordsPerFile) {
+print_score <- function(humdrumR, maxRecordsPerFile, render = TRUE, 
+                        ...) {
     selectedFields <- selectedFields(humdrumR)
     
+    humdrumR <- humdrumR[1]
   humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot')
     
   lines <- as.lines(humdrumR[1])
   
-  toHNP(lines, .glue("Viewing the '{paste(selectedFields, collapse = '/')}' <fields|field>",
-                     "using the PLUGIN.", ifelse = length(selectedFields) > 1L))
+  data <- list(...)
+  data <- data[.names(data) %in% c('adata', 'bdata', 'cdata', 'color', 'vdata', 'vvdata')]
+  if (length(data)) {
+      data <- Map(data, names(data), f = \(field, name) {
+                         humdrumR <- selectFields(humdrumR, field)
+                         humdrumR <- printableSelectedField(humdrumR, dataTypes = 'GLIMDd', null = 'NA2dot')
+                         
+                         spine <- as.lines(humdrumR[1][[ , 1]])
+                         spine[grepl('^\\*\\*', spine)] <- paste0('**', name)
+                         gsub(' .*', '', spine)
+                     })
+      
+      local <- !grepl('^!!', lines)
+      for (spine in data) lines[local] <- paste0(lines[local], '\t', spine[local])
+  }
   
-  invisible(NULL)
+  html <- toHNP(lines, .glue("Viewing the '{paste(selectedFields, collapse = '/')}' <fields|field>",
+                     "using the PLUGIN.", ifelse = length(selectedFields) > 1L), render = render)
+  
+  invisible(html)
 }
 
 
