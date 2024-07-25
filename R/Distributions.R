@@ -75,7 +75,7 @@ setMethod('show', 'distribution', \(object) print.distribution(object))
 
 #' @export
 #' @rdname distributions
-print.distribution <- function(dist, digits = if (inherits(dist, 'probability')) 3 else 1,
+print.distribution <- function(dist, digits = 3,
                                syntaxHighlight = humdrumRoption('syntaxHighlight'),
                                wide = TRUE,
                                printZeros = TRUE,
@@ -103,9 +103,8 @@ print.distribution <- function(dist, digits = if (inherits(dist, 'probability'))
   # do we scale or round?
   scale <- attr(X, 'scale')
   
-  scale <- if (length(scale) == 1L) {
-    if (scale > 0) paste0(' (', c('thousands', 'millions', 'billions', 'trillions')[scale], ')')
-  }
+  scale <- if (!is.null(scale)) paste0(' (', scale, ')')
+  
   
   if (attr(X, 'negative') %||% FALSE) scale <- paste0(scale, ' (∃N < 0)')
   if (attr(X, 'approx')) scale <- paste0(scale, ', ~rounded')
@@ -194,7 +193,7 @@ Pequation <- function(dist, f = 'P', collapse = ',') {
   paste0(f, '(', eq, ')')
 }
 
-prettyN <- function(N, digits = 1L, zeros = '.') {
+prettyN <- function(N, digits = 3L, zeros = '.') {
   tens <- ifelse(N == 0, 0, log10(abs(N)) |> floor())
   
   thousands <- pmin(tens %/% 3, 4L)
@@ -208,22 +207,26 @@ prettyN <- function(N, digits = 1L, zeros = '.') {
   globalscale <- if (length(unique(scale[N != 0])) == 1L) {
     globalscale <- unique(thousands[N != 0])
     scale <- NULL
-    globalscale
+    c('thousands', 'millions', 'billions', 'trillions')[globalscale]
   }
-  
   # round and format
-  Nround <- round(N, digits = digits)
+  Nround <- signif(N, digits = digits)
   approx <- N != Nround
   
-  Nprint <- format(Nround, scientific = FALSE)
-  Nprint[N != 0] <- gsub('^( *)0\\.', '\\1 .', Nprint[N != 0])
-  Nprint <- gsub('\\.0+$', '', Nprint)
-  Nprint <- gsub('^( *)0( *)$', paste0('\\1', zeros, '\\2'), Nprint)
-
   
-  output <- paste0(Nprint, scale, ifelse(approx, '~', ''))
-  output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+  Nprint <- if (is.null(scale)) {
+     format(Nround, scientific = FALSE, digits = digits, justify = 'left') 
+  }  else {
+    tapply_inplace(Nround, scale, format, scientific = FALSE, digits = digits, justify = 'left')
+  }
+  # Nprint[N != 0] <- gsub('^( *)0\\.', '\\1 .', Nprint[N != 0]) # pad left
   
+  output <- paste0(Nprint, scale)
+  output[approx] <- gsub('^( *) ?', '\\1~', output[approx])
+  output <- stringr::str_pad(output, width = max(nchar(output)), 'left')
+  # output <- paste0(ifelse(approx, '~', ''), Nprint, scale)
+  # output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+  # 
   attr(output, 'zerofill') <- zeros
   attr(output, 'scale') <- globalscale
   attr(output, 'approx') <- any(approx, na.rm = TRUE)
@@ -234,31 +237,43 @@ prettyN <- function(N, digits = 1L, zeros = '.') {
 }
 
 
-prettyP <- function(P, digits = 3, zeros = '.') {
+prettyP <- function(P, digits = 3L, zeros = '.') {
   tens <- ifelse(P == 0, 0, log10(P) |> round())
   
-  thousands <- (tens - 1) %/% -3
-  scale <- min(thousands)
+  thousands <- (tens + 1L) %/% -3
+  # scale <- min(thousands)
   
-  P <- P * 1000^-scale
+  # scaling (powers of 10^3)
+  scale <- c('', 'm', '𝜇', 'n', 'p')[1L + abs(thousands)]
   
-  Pround <- round(P, digits = digits)
+  globalscale <- if (length(unique(scale[P != 0])) == 1L) {
+    globalscale <- paste0('10^(', -unique(thousands[P != 0]) * 3, ')')
+    scale <- NULL
+    globalscale
+  }
+  
+  P <- P * 1000^thousands
+  
+  Pround <- signif(P, digits = digits)
   approx <- P != Pround
   
-  Pprint <- format(Pround, scientific = FALSE)
-  Pprint <- gsub('^( *)0\\.', '\\1 .', Pprint)
-  Pprint <- gsub('\\0*$', '', Pprint)
-  Pprint[P == 0] <- paste0(' ', zeros)
+  Pprint <- if (is.null(scale)) {
+     format(Pround, scientific = FALSE, digits = digits, justify = 'left')
+  } else {
+     tapply_inplace(Pround, scale, format, scientific = FALSE, digits = digits, justify = 'left')
+    
+  }
+  # Pprint <- format(Pround, scientific = FALSE, digits = digits)
+  Pprint <- gsub('^( *)0\\.', '\\1.', Pprint)
 
   
-  output <- paste0(Pprint, ifelse(approx, '~', ''))
+  output <- paste0(ifelse(approx, '~', ' '), Pprint, scale)
+  output[P == 0] <- zeros
   maxnchar <- max(nchar(output))
   
-  output <- paste0(output, strrep(' ', maxnchar - nchar(output))) 
-  # output <- gsub(paste0('\\.', strrep('0', digits), '~'), paste0('.~', strrep(' ', digits)), output)
   
   attr(output, 'zerofill') <- paste0(' ', zeros, strrep(' ', max(0, maxnchar - 2L)))
-  attr(output, 'scale') <- if (scale != 0L) paste0('10^(', -scale * 3, ')')
+  attr(output, 'scale') <- globalscale 
   attr(output, 'approx') <- any(approx)
   
   output

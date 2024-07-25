@@ -24,7 +24,7 @@
 
 \method{print}{distribution}(
   dist,
-  digits = if (inherits(dist, "probability")) 3 else 1,
+  digits = 3,
   syntaxHighlight = humdrumRoption("syntaxHighlight"),
   wide = TRUE,
   printZeros = TRUE,
