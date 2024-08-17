@@ -76,6 +76,9 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/accidental.html</loc>
   </url>
   <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/analyzeChords.html</loc>
+  </url>
+  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bhatk.html</loc>
   </url>
   <url>
@@ -146,6 +149,9 @@
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/enum.html</loc>
@@ -223,6 +229,9 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/indexHumdrum.html</loc>
   </url>
   <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/information.html</loc>
+  </url>
+  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.html</loc>
   </url>
   <url>
@@ -265,10 +274,16 @@
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lilypond.html</loc>
   </url>
   <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/manipulateChords.html</loc>
+  </url>
+  <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/meter.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.html</loc>
+  </url>
+  <url>
+    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutual.html</loc>
   </url>
   <url>
     <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutualInfo.html</loc>

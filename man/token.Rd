@@ -11,6 +11,7 @@
 \alias{is.token}
 \alias{order.token}
 \alias{Arith,token,token-method}
+\alias{diff,token-method}
 \alias{Arith,token,character-method}
 \alias{Arith,character,token-method}
 \alias{Summary,token-method}
@@ -41,6 +42,8 @@ order.token(
 )
 
 \S4method{Arith}{token,token}(e1, e2)
+
+\S4method{diff}{token}(x, ...)
 
 \S4method{Arith}{token,character}(e1, e2)
 

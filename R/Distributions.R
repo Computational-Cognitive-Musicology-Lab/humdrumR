@@ -1591,7 +1591,7 @@ kld.default <- function(..., model, base = 2) {
 #' If these two variables are independent, we'd expect that the joint probability of liking heavy metal
 #' *and* playing guitar would be $P(metal, guitar) = .05 * .1 = .005$ (one out of 200 people).
 #' However, on measuring some data, we might find that actually one in fifty people like metal and play guitar ($P(metal, guitar) = .02$).
-#' This means that the combination of liking metal and playing guitar is $\frac{.02}{.005} = 4$ times more likely than we'd expect
+#' This means that the combination of liking metal and playing guitar is $\\frac{.02}{.005} = 4$ times more likely than we'd expect
 #' if they were independent.
 #' This would translate to a point-wise mutual information of (using default base-2 "bits") $+2$.
 #' The overall mutual information is the average over all the point-wise values (including other combinations, like heavy metal fans who don't play guitar).

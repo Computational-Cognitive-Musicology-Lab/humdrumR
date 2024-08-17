@@ -352,7 +352,7 @@ setMethod('.draw', c('NULL', 'numeric'),
 
 setMethod('.draw', c('table', 'NULL'),
           function(x, y, log = '', 
-                   beside = NULL, heat = length(dim(x) == 2L) && length(x) > 80L,
+                   beside = TRUE, heat = length(dim(x) == 2L) && length(x) > 80L,
                    ylim = NULL, marginLines, 
                    col = NULL,  alpha = .9, ...) { 
             if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")

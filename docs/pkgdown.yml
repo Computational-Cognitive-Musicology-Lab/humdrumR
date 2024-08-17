@@ -1,5 +1,5 @@
 pandoc: 3.0.1
-pkgdown: 2.0.7
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   ComplexSyntax: ComplexSyntax.html
@@ -11,12 +11,12 @@ articles:
   HumdrumSyntax: HumdrumSyntax.html
   KeysAndChord: KeysAndChord.html
   PitchAndTonality: PitchAndTonality.html
-  RPrimer: RPrimer.html
   ReadWrite: ReadWrite.html
   Reshaping: Reshaping.html
   RhythmAndMeter: RhythmAndMeter.html
+  RPrimer: RPrimer.html
   Summary: Summary.html
-last_built: 2024-02-15T22:16Z
+last_built: 2024-08-17T03:48Z
 urls:
   reference: https://humdrumR.ccml.gtcmt.gatech.edu/reference
   article: https://humdrumR.ccml.gtcmt.gatech.edu/articles

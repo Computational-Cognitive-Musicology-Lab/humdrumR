@@ -1,4 +1,6 @@
-# Humdrum$_{\mathbb{R}}$
+
+
+<img src='humdrumR_logo.svg' style="padding-top:50px;"/>
 
 Welcome to the main website of humdrum$_{\mathbb{R}}$!
 

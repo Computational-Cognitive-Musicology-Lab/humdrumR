@@ -1790,18 +1790,14 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' 
 #' @rdname timeline
 #' @export
-timeline.humdrumR <- function(x,  ..., total = FALSE) {
+timeline.humdrumR <- function(x, ..., total = FALSE, dataTypes = 'Dd') {
   quos <- rlang::enexprs(...)
   
-  quo <-  if (length(quos) > 1L) {
-    quos[[1]]
-  }  else {
-    rlang::quo(.)
-  }
+  if (!any(.names(quos) %in% c('x', ''))) quos <- c(list(x = rlang::quo(.)), quos)
   
   dataTypes <- if (total) 'Dd' else 'D'
   
-  rlang::eval_tidy(rlang::quo(within(x, Timeline <- timeline.default(!!quo, ..., total = total), dataTypes = !!dataTypes)))
+  rlang::eval_tidy(rlang::quo(within(x, Timeline <- timeline.default(!!!quos, total = total), dataTypes = !!dataTypes)))
   
 }
 #' @rdname timeline

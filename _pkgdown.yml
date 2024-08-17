@@ -22,6 +22,14 @@ navbar:
     GUI:
       text: GUI
       href: https://ccml.music.gatech.edu/humdrumR
+footer:
+  structure:
+    left: logo
+    right: ccml
+  components:
+    logo: <a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a>
+    ccml: Developed by Nat Condit-Schultz and Claire Arthur<br/>[Georgia Tech](https://gatech.edu)<br/>[School of Music](https://music.gatech.edu)<br/>[Computational and Cognitive Musicology Lab](https://ccml.gtcmt.gatech.edu)</span>
+  
 template:
   includes:
     before_title: <a href="https://gatech.edu"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"/></a> <a href="https://ccml.gtcmt.gatech.edu"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"/></a>
@@ -152,6 +160,8 @@ reference:
   - is.major
   - is.minor
   - sonority
+  - analyzeChords
+  - manipulateChords
 - subtitle: "Rhythm overviews"
   desc: "These pages overview general concepts in humdrumR pitch:"
   contents:
@@ -215,9 +225,11 @@ reference:
   - distributions
 - subtitle: "Information theory"
   contents:
+  - information
   - pdist
   - entropy
-  - mutualInfo
+  - entropy_by
+  - mutual
 - subtitle: "Numeric values"
   contents:
   - rational
