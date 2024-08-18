@@ -11,7 +11,7 @@ setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'
 
 #' Distributions
 #' 
-#' HUmdrumR has ways to...
+#' HumdrumR has ways to...
 #' 
 #' @name distributions
 NULL
@@ -238,15 +238,15 @@ prettyN <- function(N, digits = 3L, zeros = '.') {
 
 
 prettyP <- function(P, digits = 3L, zeros = '.') {
-  tens <- ifelse(P == 0, 0, log10(P) |> round())
+  tens <- ifelse(P == 0, 0, log10(P) |> floor())
   
-  thousands <- (tens + 1L) %/% -3
+  thousands <- ifelse(P == 1, 0L, (tens + 1L) %/% -3)
   # scale <- min(thousands)
   
   # scaling (powers of 10^3)
   scale <- c('', 'm', '𝜇', 'n', 'p')[1L + abs(thousands)]
   
-  globalscale <- if (length(unique(scale[P != 0])) == 1L) {
+  globalscale <- if (length(unique(scale[P != 0])) == 1L && unique(thousands[P != 0]) != 0) {
     globalscale <- paste0('10^(', -unique(thousands[P != 0]) * 3, ')')
     scale <- NULL
     globalscale
@@ -1249,12 +1249,12 @@ NULL
 #' To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
 #' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
 #' distributions of atomic data.
-#' For numeric, data we can also use R's standard [stats::density()] function to estimate the continuous probability density.
+#' For numeric data we can also use R's standard [stats::density()] function to estimate the continuous probability density.
 #' 
 #' The `entropy()` function takes an object representing a probability distribution---ideally a humdrumR [distribution] object,
 #' base-R [table], or a [density()] object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
-#' However, if you are lazy, you can pass `entropy()` our atomic data vectors directly, and it will automatically pass them to the [pdist()]
-#' function for you; for example, if you want to calculate the joint entropy of variables`x` and `y` (which must be the same length),
+#' However, if you are lazy, you can pass `entropy()` atomic data vectors directly and it will automatically pass them to the [pdist()] or [base::density()]
+#' functions for you; for example, if you want to calculate the joint entropy of variables`x` and `y` (which must be the same length),
 #'  you can call `entropy(pdist(x, y))` 
 #' or just `entropy(x, y)`.
 #' Other arguments can be provided to `pdist()` as well; notably, if you want to calculate the *conditional* entropy,
@@ -1262,27 +1262,29 @@ NULL
 #'
 #' The `info()` function is used similarly to the calling `entropy()` directly on data vectors:
 #' anywhere where you can call `entropy(x, y)`, you can call `info(x, y)` instead.
-#' The difference is that `info()` will return a vector of numbers, the same length as the representing the information content of each input observation.
-#' By definition, entropy of the data distribution is the average of all these point-wise information values: thus, `mean(info(x, y)) == entropy(x, y)`.
+#' The difference is that `info()` will return a vector of numbers representing the information content of each input observation.
+#' By definition, the entropy of the data distribution is the average of all these point-wise information values: thus, `mean(info(x, y)) == entropy(x, y)`.
 
 #' 
 #' @section Cross entropy:
 #' 
 #' In many cases, we simply use entropy/information content to describe a set of data.
-#' In this case, the data we observe and the probability model (distribution) are the same---the probability model is the distribution of the data itself.
+#' In this case, the data we observe and the probability model (distribution) are the same---i.e., the probability model is the distribution of the data itself.
 #' However, we can also use a *different model*---in this case, a different probability distribution---to describe data.
-#' We thus get a measure of how well the model fits the data; this is called the [cross entropy](https://en.wikipedia.org/wiki/Cross-entropy).
 #' The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
-#' If a data matches the model well, the cross entropy will be a bit higher than the self entropy; if the data matches the model poorly,
+#' This is called the [cross entropy](https://en.wikipedia.org/wiki/Cross-entropy), and can be interpreted as a measure of how well the model fits the data; 
+#' The cross entropy is lowest when the model exactly matches the data, which will return the standard self entropy.
+#' Otherwise, the cross entropy will be higher then the self entropy.
+#' If the data matches the model well, the cross entropy will be a little bit higher than the self entropy; if the data matches the model poorly,
 #' the cross entropy can be much higher.
 #' The difference between the cross entropy and the self entropy is always positive (or zero), and is called the 
-#' [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence).
+#' [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) (KLD).
 #' 
 #' To calculate cross entropy, use the `xentropy()` command.
 #' (The Kullback-Leibler Divergence can be calculated in the same way using the `kld()` function.)
 #' The `xentropy()` command works just like the entropy command, except you need to provide it a `model` argument, which must be 
 #' *another* probability distribution.
-#' Note that that data and the model have to have the **exact** same variable names, or `humdrumR` will throw an error!
+#' Note that the data and the model have to have the **exact** same variable names or `humdrumR` will throw an error!
 #' Name your arguments to avoid this (this is illustrated in the example below, where we name everything `X`).
 #' To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
 #' 
@@ -1750,12 +1752,13 @@ pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .dro
   df <- data.frame(...)
   
   if (missing(model)) {
-    model <- pdist(..., condition = NULL, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
-    df <- df[1]
+    if (is.null(condition)) condition <- names(df)[-1]
+    model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
   }
   
-  conditions <- intersect(varnames(model), names(df))
+  if (is.null(model@Condition)) .stop("pentropy() requires a conditional probability model. The model provided has no condition variables.")
   
+  conditions <- model@Condition
   model <- as.data.frame(model)
   entropymat <- tapply(model$p, model[ , conditions, drop = FALSE], 
                        \(P) {
@@ -1763,9 +1766,7 @@ pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .dro
                          -sum(P * log(P, base = base), na.rm = TRUE)
                        })
   
-  
-  entropymat[do.call('cbind', df)]
-  
+  entropymat[as.matrix(df[,conditions, drop=FALSE])]
 }
 
 
