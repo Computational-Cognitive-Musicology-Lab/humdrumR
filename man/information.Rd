@@ -6,7 +6,7 @@
 \description{
 Many computational musicology analyses rely on probabilistic modeling and \href{https://en.wikipedia.org/wiki/Information_theory}{information theory}.
 HumdrumR includes functions to make these sorts of analyses quick and easy.
-These functions are closely connected to our \link{distributions} functions, which can be used to calculate/estimate the probability of data observations.
+These functions are closely connected to our \link{distribution} functions, which can be used to calculate/estimate the probability of data observations.
 }
 \details{
 The most fundamental tools of information theory are statistics that characterize probability \emph{distributions}.

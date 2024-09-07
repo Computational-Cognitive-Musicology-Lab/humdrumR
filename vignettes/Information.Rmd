@@ -1,0 +1,81 @@
+---
+title: "Counts, Probability, and Information"
+author: "Nathaniel Condit-Schultz"
+date:   "August 2024"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Filtering humdrum data}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE, message=FALSE, echo = FALSE }
+source('vignette_header.R')
+```
+
+
+Welcome to "Counts, Probability, and Information"!
+This article explains some of the features R and  `r hm` have for extracting count distributions, probability distributions, and information theory metrics from data.
+
+
+# Counting things
+
+Nearly all of our articles, from the very [start](GettingStarted.html#counting-things "Getting started with humdrumR > Counting things"), have made use of the `count()` function.
+This is a `r hm` workhorse function.
+Counting how often unique tokens occur in a vector, or unique combinations across combinations of vectors, is extremely useful.
+
+
+Let's take a moment to explain all of what `count()` can do, starting from the basics.
+The `count()` function can accept one or more atomic vectors, all of which must be the same length.
+It counts all the unique combination of values across the vectors.
+This can be illustrates with some simple examples:
+
+```{r}
+
+v1 <- c('a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c')
+v2 <- c('A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'C')
+
+
+count(v1)
+count(v2)
+count(v1, v2)
+
+
+```
+
+
+If you have a distribution of continuous numbers, you don't want to count every unique value (because there will be one of each).
+So in `r hm`, `count()` will (attempt) to treat numeric values in a smart way, by binning them into ranges, using the base R `hist()` function's binning algorithm (you can pass arguments to `hist()`).
+So for example:
+
+```{r}
+numbers <- rnorm(1000, 2, 2)
+
+numbers |> head(30)
+
+count(numbers)
+
+```
+
+If you *don't* want to bin numbers, just apply `as.character()` (perhaps after rounding the numbers).
+
+```{r}
+
+numbers |> round(1) |> as.character() |> count()
+
+```
+
+
+> In base R, the `table()` function serves basically the same role of the `count()` function.
+> You can use `table()` in many areas where you can use `count()`---you'll see that their output is essentially equivalent, but in a different structure (a `matrix` rather than a `data.frame`).
+> However, `count()` is fully integrated into the `dplyr` universe and workflow, so we recommend using it.
+
+
+
+
+
+
+

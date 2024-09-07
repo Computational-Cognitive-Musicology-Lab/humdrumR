@@ -90,12 +90,12 @@ and humdrumR defines methods for calculating both.
 To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
 HumdrumR's \code{\link[=count]{count()}} and \code{\link[=pdist]{pdist()}} methods (or R's standard \code{\link[=table]{table()}} function) can be used calculate empirical
 distributions of atomic data.
-For numeric, data we can also use R's standard \code{\link[stats:density]{stats::density()}} function to estimate the continuous probability density.
+For numeric data we can also use R's standard \code{\link[stats:density]{stats::density()}} function to estimate the continuous probability density.
 
 The \code{entropy()} function takes an object representing a probability distribution---ideally a humdrumR \link{distribution} object,
 base-R \link{table}, or a \code{\link[=density]{density()}} object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
-However, if you are lazy, you can pass \code{entropy()} our atomic data vectors directly, and it will automatically pass them to the \code{\link[=pdist]{pdist()}}
-function for you; for example, if you want to calculate the joint entropy of variables\code{x} and \code{y} (which must be the same length),
+However, if you are lazy, you can pass \code{entropy()} atomic data vectors directly and it will automatically pass them to the \code{\link[=pdist]{pdist()}} or \code{\link[stats:density]{stats::density()}}
+functions for you; for example, if you want to calculate the joint entropy of variables\code{x} and \code{y} (which must be the same length),
 you can call \code{entropy(pdist(x, y))}
 or just \code{entropy(x, y)}.
 Other arguments can be provided to \code{pdist()} as well; notably, if you want to calculate the \emph{conditional} entropy,
@@ -103,27 +103,29 @@ you can, for example, say \code{entropy(x, y, condition = 'y')}.
 
 The \code{info()} function is used similarly to the calling \code{entropy()} directly on data vectors:
 anywhere where you can call \code{entropy(x, y)}, you can call \code{info(x, y)} instead.
-The difference is that \code{info()} will return a vector of numbers, the same length as the representing the information content of each input observation.
-By definition, entropy of the data distribution is the average of all these point-wise information values: thus, \code{mean(info(x, y)) == entropy(x, y)}.
+The difference is that \code{info()} will return a vector of numbers representing the information content of each input observation.
+By definition, the entropy of the data distribution is the average of all these point-wise information values: thus, \code{mean(info(x, y)) == entropy(x, y)}.
 }
 \section{Cross entropy}{
 
 
 In many cases, we simply use entropy/information content to describe a set of data.
-In this case, the data we observe and the probability model (distribution) are the same---the probability model is the distribution of the data itself.
+In this case, the data we observe and the probability model (distribution) are the same---i.e., the probability model is the distribution of the data itself.
 However, we can also use a \emph{different model}---in this case, a different probability distribution---to describe data.
-We thus get a measure of how well the model fits the data; this is called the \href{https://en.wikipedia.org/wiki/Cross-entropy}{cross entropy}.
 The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
-If a data matches the model well, the cross entropy will be a bit higher than the self entropy; if the data matches the model poorly,
+This is called the \href{https://en.wikipedia.org/wiki/Cross-entropy}{cross entropy}, and can be interpreted as a measure of how well the model fits the data;
+The cross entropy is lowest when the model exactly matches the data, which will return the standard self entropy.
+Otherwise, the cross entropy will be higher then the self entropy.
+If the data matches the model well, the cross entropy will be a little bit higher than the self entropy; if the data matches the model poorly,
 the cross entropy can be much higher.
 The difference between the cross entropy and the self entropy is always positive (or zero), and is called the
-\href{https://en.wikipedia.org/wiki/Kullback\%E2\%80\%93Leibler_divergence}{Kullback-Leibler Divergence}.
+\href{https://en.wikipedia.org/wiki/Kullback\%E2\%80\%93Leibler_divergence}{Kullback-Leibler Divergence} (KLD).
 
 To calculate cross entropy, use the \code{xentropy()} command.
 (The Kullback-Leibler Divergence can be calculated in the same way using the \code{kld()} function.)
 The \code{xentropy()} command works just like the entropy command, except you need to provide it a \code{model} argument, which must be
 \emph{another} probability distribution.
-Note that that data and the model have to have the \strong{exact} same variable names, or \code{humdrumR} will throw an error!
+Note that the data and the model have to have the \strong{exact} same variable names or \code{humdrumR} will throw an error!
 Name your arguments to avoid this (this is illustrated in the example below, where we name everything \code{X}).
 To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
 

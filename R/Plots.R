@@ -297,6 +297,23 @@ setMethod('.draw', c('numeric', 'NULL'),
             
           })
 
+#### density ----
+
+setMethod('.draw', c('density', 'NULL'),
+          function(x, y, log = '', col = 3, ...) {
+            
+            output <- canvas(xlim = range(x$x), ylim = c(0, max(x$y)), log = log)
+            
+            points(x$x, x$y, type = 'l', col = col)
+            
+            xs <- c(x$x, rev(x$x))
+            ys <- c(x$y, rep(0, length(x$y)))
+            polygon(xs, ys, col = setalpha(col, alpha = .4), border = FALSE)
+            
+            output$axisNames[2] <- 'Estimated Density'
+            output
+          })
+
 setMethod('.draw', c('NULL', 'numeric'),
           function(x, y, log = '', 
                    violin = FALSE, showNormal = FALSE,
@@ -434,6 +451,8 @@ setMethod('.draw', c('count', 'NULL'),
           })
 
 
+
+
 setMethod('.draw', c('humdrumR.table', 'NULL'),
           function(x, y, ...) {
             class(x) <- class(x)[-1]
@@ -495,10 +514,8 @@ setMethod('.draw', c('list', 'numeric'),
                 xtick <- xlabel <- NULL
               }
               
-              canvas(log = gsub('x', '', log), 
-                     xlim = c(0, 1), xat = xtick, x.labels = xlabel,
-                     ylim = ylim, yat = ytick)
-              a
+              canvas(log = gsub('x', '', log),  xlim = c(0, 1),  ylim = ylim)
+              
               if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
               draw_violin(y[[k]], breaks = breaks)
             }

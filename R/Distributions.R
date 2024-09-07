@@ -13,7 +13,8 @@ setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'
 #' 
 #' HumdrumR has ways to...
 #' 
-#' @name distributions
+#' @seealso Use the [count()][count.default] and [pdist()] functions to create distribution objects.
+#' @name distribution
 NULL
 
 
@@ -70,11 +71,11 @@ levels.distribution <- function(x) getLevels(x)
 ### print() ----
 
 #' @export
-#' @rdname distributions
+#' @rdname distribution
 setMethod('show', 'distribution', \(object) print.distribution(object))
 
 #' @export
-#' @rdname distributions
+#' @rdname distribution
 print.distribution <- function(dist, digits = 3,
                                syntaxHighlight = humdrumRoption('syntaxHighlight'),
                                wide = TRUE,
@@ -281,8 +282,8 @@ prettyP <- function(P, digits = 3L, zeros = '.') {
 }
 
 
-prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
-  checks(maxN, xlen1 & xpositive & xwholenum, argname = 'binArgs(maxN = )', seealso = '?count')
+prettyBins <- function(x, maxUnique = 20, quantiles = 0, right = TRUE, ...) {
+  checks(maxUnique, xlen1 & xpositive & xwholenum, argname = 'binArgs(maxUnique = )', seealso = '?count')
   checks(quantiles, xlen1 & xpositiveorzero, argname = 'binArgs(quantiles = )', seealso = '?count')
   checks(right, xTF, argname = 'binArgs(right = )', seealso = '?count')
   
@@ -290,12 +291,12 @@ prettyBins <- function(x, maxN = 20, quantiles = 0, right = TRUE, ...) {
   if (is.integer(x) || all(is.whole(levels))) {
     range <- diff(range(levels))
     
-    if (range <= maxN) {
+    if (range <= maxUnique) {
       return(factor(x, levels = min(levels) : max(levels)))
     }
-    if (length(levels) <= maxN) return(factor(x, levels = levels))
+    if (length(levels) <= maxUnique) return(factor(x, levels = levels))
   } else {
-    if (length(levels) <= (maxN / 2)) return(factor(x, levels = levels))
+    if (length(levels) <= (maxUnique / 2)) return(factor(x, levels = levels))
   }
   
   if (quantiles) {
@@ -556,7 +557,7 @@ as.data.table.distribution <- function(x) {
 
 ### sorting ----
 
-#' @rdname distributions
+#' @rdname distribution
 #' @export
 setMethod('sort', 'distribution',
           function(x, decreasing = TRUE) {
@@ -693,7 +694,7 @@ setMethod('Math', 'distribution',
 #' @export
 setMethod('Summary', 'distribution',
           \(x, ..., na.rm = FALSE) {
-            setNames(callGeneric(getValues(x), ..., na.rm), paste(varnames(x), collapse = '.'))
+            setNames(callGeneric(getValues(x), ..., na.rm = na.rm), paste(varnames(x), collapse = '.'))
           })
 
 
@@ -768,79 +769,142 @@ setMethod('*', c('probability', 'probability'),
 
 #' Tabulate and/or cross-tabulate data
 #' 
-#' The `count()` function is exactly like R's fundamental [table()][base::table] function,
-#' except that 1) will give special treatment to humdrumR [token()] data 2)
-#' has more intuitive/simple argument names 3) makes it easier to combine/manipulate
-#' disparate output tables.
+#' The `count()` function can be used to tabulate unique values in a vector, or cross-tabulate
+#' combinations of values across multiple vectors of the same length.
+#' This is similar to R's fundamental [table()][base::table] function,
+#' except it returns a specialized `data.frame` ([distribution] object) instead of an `array`.
+#' HumdrumR `count()` methods also give special treatment to [token()] data
+#' and to numeric data.
+#' 
 #' 
 #' @details
 #' 
-#' The `count()` function is essentially a wrapper
-#' around [base::table()][base::table] function.
-#' However, any [token()] class arguments are treated like [factors()],
-#' calling generating their own levels.
-#' This assures that, for example, pitch data is tabulated in order of pitch height,
-#' and "missing" pitches are counted as zero.
+#' The `count()` function is defined in the [dplyr][dplyr::count] package, but only 
+#' for working with [tibbles][tibble()].
+#' In `humdrumR`, we extend the `count()` function to work with atomic data (like [base::table()])
+#' as well as [humdrumR data][humdrumRclass].
+#' When `humdrumR` is attached, [dplyr::count()] will only be called for [tibble()] objects specifically.
+#' Note that [dplyr::count()] doesn't have all the same arguments or behaviors as `humdrumR`'s `count()`
+#' methods, which are described in *this* documentation.
 #' 
-#' `count()` will, by default, count `NA` values if they are present---if you don't want
-#' to count `NA`s, specify `na.rm = TRUE`.
-#' You can also tell `count()` to exclude (not count) any other arbitrary values you
-#' provide as a vector to the `exclude` argument.
-#' 
-#' 
-#' `count()` will always give names to the dimensions of the table it creates.
-#' You can specify these names directly as argument names, like `count(Kern = kern(Token))`;
+#' HumdrumR `count()` and `pdist()` methods return special [distribution] objects, with each input vector
+#' creating one dimension in the distribution.
+#' When applied to atomic vectors, `humdrumR::count()` will use the deparsed expression(s)
+#' provided to it as the name for each vector/dimension (similar to `base::table(..., dnn = 2)`).
+#' You can override this by specifying dimension names directly as argument names, like `count(Kern = kern(Token))`;
 #' if you don't specify a name, `count()` will make up a name(s) based on expression(s) it is tallying.
-#' (Note that `count()` does not copy [base::table()]'s obtusely-named `dnn` or `deparse.level` arguments.)
 #'
-#' @section Counting numeric values:
+#' The `sort` argument can be used to sort the output distribution, just like passing it to the `sort()` function.
+#' Thus, `count(x) |> sort()` is identical to `count(x, sort = TRUE)`.
+#' If you want to sort the output in reverse (ascending), specify `sort = -1`.
+#' Thus, `count(x) |> sort(decreasing = FALSE)` is also identical to `count(x, sort = -1)`.
+#'
+#' If `count()` or `pdist()` are applied directly to a [humdrumR data object][humdrumRclass],
+#' you can specify any fields in the data as arguments.
+#' If you don't specify any fields, the [selected][selectedFields] field(s) will be passed and tabulated.
 #' 
-#' For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
-#' like in a histrogram.
-#' By default, if you pass a vector of numbers to `count()` which has more than `20` unique values,
-#' `count()` will bin the values using the same algorithm as [graphics::hist()].
+#'
+#' @section NAs and zeros:
+#' 
+#' HumdrumR `count()` methods will, by default, count `NA` values if they are present---if you don't want
+#' to count `NA`s, specify `na.rm = TRUE`.
+#' 
+#' By default, `count()` will include counts of known levels of variables, even if they are zero.
+#' This can happen if the data are [factors][base::factor] or [tokens][token()], where all possible levels
+#' are embedded in the data.
+#' When cross-tabulating multiple vectors, zeroes can also occur for any atomic type
+#' if certain combinations never occur.
+#' To drop zeros from the output distribution, specify `count(.drop = TRUE)`.
+#' (Note that `dplyr::count()` drops levels by default.)
+#' 
+#' 
+#' 
+#' @section Tabulating numeric values:
+#' 
+#' For numeric values, especially real numbers, it is often the case that there are few (or no) exact values that
+#' occur more than once, so tabulating unique values is pointless.
+#' In these cases, we might prefer to count numbers into corresponding to ranges of numbers, like in a histogram,
+#' and this is exactly what `count()`/`pdist()` (can) do.
+#' 
+#' By default, if you pass a vector of numbers which has more than `20` unique values,
+#' the numbers will be binned using the same algorithm as [graphics::hist()].
 #' This process can be controlled using the `binArgs` argument, which is itself a list of control arguments.
-#' `binArgs = list(maxN = N)` controls the number of unique numbers needed before binning occurs,
-#' and `binArgs = list(right = FALSE)` (default is `TRUE`) can be used to make bins that are closed on the right instead of the left.
-#' Finally, any arguments to [graphics::hist()] can be passed via `binArgs`, controlling how binning occurs: notably,
+#' `binArgs = list(maxUnique = N)` controls the number of unique numbers needed before binning occurs (`20` by default).
+#' `binArgs = list(right = FALSE)` (default is `TRUE`) controls whether are closed on the right (larger numbers) instead of the left.
+#' Finally, additional arguments to [graphics::hist()] can be passed via `binArgs`, controlling how binning occurs: notably,
 #' you can use the `binArgs = list(breaks = _)` to control exactly where boundaries should occur, or the number of bins you want.
 #' For example, `binArgs = list(breaks = 10)` will make `count()` bin the input numbers into twelve bins (see [hist()] 
 #' for details).
 #'
-#' Alternatively, you can tell `count()` to divy up (bin) the input numbers into quantiles by 
+#' Alternatively, you can tell `count()` to divy up (bin) the input numbers into quantiles by
 #' passing `binArgs = list(quantiles = N)`.
 #' For example, `binArgs = list(quantiles = 4)` will divide the data into four equal quantiles (0%-25%, 25%-50%, 50%-75%, 75%-100%).
+#' In the resulting tables, all the counts/proportions will be the same, but you can see what the quantile ranges would be.
 #' 
+#' Note that this binning process will also be applied to integer values, if there are more than `maxUnique` unique integers.
+#' If you ever want to force `count()`/`pdist()` to (not) do numeric binning, coerce your input to `character`.
+#' For example, `count(as.character(myNumbers))`.
 #'
-#' @section Manipulating humdrum tables:
+#' @section Coersion/conversion:
 #' 
-#' The output of `count()` is a special form of R `table`, a `humdrumR.table`.
-#' Given two or more `humdrumR.table`s, if you apply basic R operators 
-#' (e.g., arithmetic, comparisons) or row/column binding (`cbind`/`rbind`) 
-#' `humdrumR` will align the tables by their dimension-names before
-#' doing the operation.
-#' This means, that if you have two tables of pitch data, but one table includes specific pitch and other doesn't,
-#' you can still add them together or bind them into a matrix.
-#'  See the examples!
-#'
-#'
+#' The `humdrumR` [distribution] class can be converted to and from R's base [table][base::table()].
+#' Count and probability distributions cannot also be converted between.
+#' All you do is call the appropriate function(s).
+#' What this means is that, for example
+#' 
+#' + `count(x) |> table()` is the same as `table(x)`
+#' + `table(x) |> count(na)` is the same as `count(x, na.rm = TRUE)`
+#' + `count(x) |> pdist()` is the same as `pdist(x)`
+#' + `pdist(x) |> count() |> table()` is the same as `count(x) |> table()`
+#' + etc.
+#' 
 #'
 #' @examples 
 #' 
-#' generic <- c('c', 'c', 'e', 'g', 'a', 'b', 'b', 'b')
-#' complex <- c('c', 'c#', 'e', 'f', 'g','g#', 'g#', 'a')
+#' generic <- c('c', 'c', 'e', 'g', 'a', 'b', 'b', 'b', NA)
+#' complex <- c('c', 'c#', 'e', 'f', 'g','g#', 'g#', 'a', 'a##')
 #' 
-#' genericTable   <- count(generic)
-#' complexTable <- count(complex)
+#' count(generic)
+#' count(generic, na.rm = TRUE)
+#' count(complex)
 #' 
-#' genericTable
-#' complexTable
 #' 
-#' genericTable + complexTable
 #' 
-#' cbind(genericTable, complexTable)
+#' count(generic, complex)
+#' count(generic, complex, sort = TRUE)
+#' count(generic, complex, sort = -1)
+#' count(generic, complex, sort = -1, na.rm = TRUE)
+#' count(generic, complex, sort = -1, .drop = TRUE)
 #' 
-#' @name distributions
+#' # Dimension names
+#' count(Generic = generic, X = complex)
+#' 
+#' # HumdrumR data
+#' \dontrun{
+#'   humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
+#' 
+#'   humData |> kern() |> count()
+#'   humData |> mutate(Kern = kern(Token), Recip = recip(Token)) |> count()
+#'   humData |> mutate(Kern = kern(Token),  Recip = recip(Token)) |> count(Recip, sort = TRUE)
+#'   humData |> mutate(Kern = kern(Token),  Recip = recip(Token)) |> select(Recip) |> count()
+#' }
+#' 
+#' # Numeric values
+#' 
+#' real <- rnorm(1000)
+#' 
+#' count(real)
+#' count(real, binArgs = list(breaks = 40))
+#' count(real, binArgs = list(breaks = 40, right = FALSE))
+#' count(real, binArgs = list(quantiles = 4))
+#' 
+#' int <- sample(100, 30, replace = TRUE)
+#' 
+#' count(int)
+#' count(int, binArgs = list(maxUnique = 50))
+#' count(int, binArgs = list(maxUnique = 5))
+#' 
+#' @name count
 #' @export 
 count.default <- function(..., sort = FALSE, na.rm = FALSE,
                           .drop = FALSE, binArgs = list()) {
@@ -878,13 +942,15 @@ count.default <- function(..., sort = FALSE, na.rm = FALSE,
   
   dist <- distribution(result, 'n')
   
+  if (.drop) dist <- dist |> filter(n > 0L)
+  
   if (sort) sort(dist, decreasing = sort > 0L) else dist
   
   
   
 }
 
-#' @rdname distributions
+#' @rdname count
 #' @export
 count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   quos <- rlang::enquos(...)
@@ -904,7 +970,6 @@ count.humdrumR <- function(x, ..., sort = FALSE, na.rm = FALSE, .drop = FALSE, b
 
 
 
-#' @rdname distributions
 #' @export
 count.table <- function(..., sort = FALSE, na.rm = FALSE, .drop = FALSE) {
   checks(sort, xTF | (xwholenum & xlen1))
@@ -915,9 +980,7 @@ count.table <- function(..., sort = FALSE, na.rm = FALSE, .drop = FALSE) {
   if (any(tab != round(tab))) {
     tab <- tab *  10^-floor(log10(min(tab[tab > 0])))
   }
-  
-  
-  
+
   df <- as.data.frame(tab, responseName = 'n')
   df$n <- as.integer(df$n)
   
@@ -933,9 +996,8 @@ count.table <- function(..., sort = FALSE, na.rm = FALSE, .drop = FALSE) {
 }
 
 
-#' @rdname distributions
 #' @export
-count.pdist <- function(x, ..., sort = FALSE,
+count.probability <- function(x, ..., sort = FALSE,
                         na.rm = FALSE,
                         .drop = FALSE) {
   checks(sort, xTF | (xwholenum & xlen1))
@@ -966,9 +1028,18 @@ count.pdist <- function(x, ..., sort = FALSE,
 
 
 
-#' Tabulate and cross proportions
+#' Tabulate and/or cross-tabulate proportions of data
+#' 
+#' The `pdist()` function is identical to `count()`, except it produces (empirical) probability [distributions][distribution], 
+#' simply by dividing by the sum of all counts or, if a `condition` is indicated, the marginal sums across one or more dimensions.
+#' The later case produces a conditional probability distribution.
+#' The function of `pdist()` is similar to using [base::prop.table()].
+#' 
+#' @section Conditional probability:
 #' 
 #' 
+#' 
+#' @rdname count
 #' @export
 pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
   checks(sort, xTF | (xwholenum & xlen1))
@@ -979,9 +1050,8 @@ pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop =
   UseMethod('pdist')
 }
 
-#' @rdname distributions
 #' @export
-pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE) {
   
   if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
   if (sort) x <- sort(x, sort > 0L)
@@ -1006,7 +1076,6 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   
 }
 
-#' @rdname distributions
 #' @export
 pdist.probability <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
   exprs <- rlang::enexprs(...)
@@ -1017,7 +1086,7 @@ pdist.probability <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = F
 }
 
 
-#' @rdname distributions
+#' @rdname distribution
 #' @export
 pdist.default <-  function(..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
   exprs <- as.list(substitute(list(...)))[-1]
@@ -1043,7 +1112,7 @@ pdist.default <-  function(..., condition = NULL, na.rm = FALSE, sort = FALSE, .
   
 }
 
-#' @rdname distributions
+#' @rdname distribution
 #' @export
 pdist.data.frame <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             exprs <- rlang::enexprs(...)
@@ -1068,7 +1137,7 @@ pdist.data.frame <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FA
 
 
 
-#' @rdname distributions
+#' @rdname distribution
 #' @export 
 pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
             
@@ -1094,11 +1163,10 @@ pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE
 
 
 
-#' @rdname distributions
 #' @export
 pdist.table <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE) {
   
-  if (all(x == round(x))) return(pdist(count(x, ..., na.rm = na.rm, sort = sort, binArgs = binArgs), condition = condition))
+  if (all(x == round(x))) return(pdist(count(x, ..., na.rm = na.rm, sort = sort), condition = condition))
   
 
   
@@ -1206,7 +1274,7 @@ pexprs <- function(exprs, colnames, condition) {
 #' 
 #' Many computational musicology analyses rely on probabilistic modeling and [information theory](https://en.wikipedia.org/wiki/Information_theory).
 #' HumdrumR includes functions to make these sorts of analyses quick and easy.
-#' These functions are closely connected to our [distributions] functions, which can be used to calculate/estimate the probability of data observations.
+#' These functions are closely connected to our [distribution] functions, which can be used to calculate/estimate the probability of data observations.
 #'
 #' @details
 #' 
@@ -1253,7 +1321,7 @@ NULL
 #' 
 #' The `entropy()` function takes an object representing a probability distribution---ideally a humdrumR [distribution] object,
 #' base-R [table], or a [density()] object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
-#' However, if you are lazy, you can pass `entropy()` atomic data vectors directly and it will automatically pass them to the [pdist()] or [base::density()]
+#' However, if you are lazy, you can pass `entropy()` atomic data vectors directly and it will automatically pass them to the [pdist()] or [stats::density()]
 #' functions for you; for example, if you want to calculate the joint entropy of variables`x` and `y` (which must be the same length),
 #'  you can call `entropy(pdist(x, y))` 
 #' or just `entropy(x, y)`.
@@ -1860,9 +1928,11 @@ as.table.distribution <- function(x) {
   
   tab <- array(dim = lengths(levels), dimnames = lapply(levels, paste))
   tab[do.call('cbind', x[varnames])] <- x[[type]]
+  names(dim(tab)) <- NULL
   dimnames(tab) <- levels
   
-  humdrumR.table(tab)
+  class(tab) <- 'table'
+  tab
   
 }
 
@@ -1933,7 +2003,7 @@ deparse.names <- function(exprs, deparse.level = 1L) {
          "")
 }
 
-#' @rdname distributions
+#' @rdname distribution
 #' @export
 setGeneric('table', signature = 'x',
            def = function(x, ..., exclude = if (useNA == 'no') c(NA, NaN), useNA = 'no', dnn = NULL, deparse.level = 1) {
@@ -1976,7 +2046,7 @@ setGeneric('table', signature = 'x',
 
 
 #' @export
-#' @rdname distributions
+#' @rdname distribution
 setMethod('table', 'humdrumR', 
           function(x, ..., exclude = if (useNA == 'no') c(NA, NaN),
                    useNA = 'no', dnn = NULL,
@@ -2001,8 +2071,8 @@ setMethod('table', 'humdrumR',
           })
 
 #' @export
-#' @rdname distributions
+#' @rdname distribution
 setMethod('table', 'distribution',
           function(x) {
-            as.table(x)
+            humdrumR.table(as.table(x))
           })

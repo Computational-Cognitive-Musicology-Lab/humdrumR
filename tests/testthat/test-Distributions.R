@@ -1,3 +1,103 @@
+test_that('count() logic works', {
+  # Sum should match vector size
+  for (i in 1:10) {
+    n <- sample(100:1000, 1)
+    sample <- sample(letters, size = n, replace = TRUE)
+    
+    nNA <- sample(1:10, 1)
+    sample[sample(n, nNA)] <- NA
+    
+    expect_equal(sum(count(sample)) |> unname(), n)
+    expect_equal(sum(count(sample, na.rm = TRUE)) |> unname(), n - nNA)
+  }
+
+  
+})
+
+test_that('count documentation examples', {
+  
+  
+
+  generic <- c('c', 'c', 'e', 'g', 'a', 'b', 'b', 'b', NA)
+  complex <- c('c', 'c#', 'e', 'f', 'g','g#', 'g#', 'a', 'a##')
+  
+  expect_equal(count(generic) |> max() |> unname(), 3)
+  
+  expect_equal(count(generic, complex) |> max() |> unname(), 2)
+  
+  expect_equal((count(complex) |> filter(complex == 'g#') )$n, 2)
+  
+  expect_equal(nrow(count(generic, na.rm = TRUE)) + 1, nrow(count(generic)))
+  
+  # dimensions
+  expect_equal(ncol( count(complex)), 2L)
+  expect_equal(ncol( count(generic, complex)), 3L)
+  
+  # names
+  expect_equal(colnames(count(generic, complex)), c('generic', 'complex', 'n'))
+  expect_equal(colnames(count(Generic = generic, X= complex)), c('Generic', 'X', 'n'))
+  
+  # sort
+  mx <- count(generic, complex) |> max() |> unname()
+  expect_equal(count(generic, complex, sort = TRUE)$n[1], mx)
+  expect_equal(count(generic, complex, sort = 1)$n[1], mx)
+  expect_equal(count(generic, complex, sort = -1)$n |> tail(n = 1), mx)
+  
+  expect_equal(count(generic, sort = TRUE), count(generic) |> sort())
+  expect_equal(count(generic, sort = 1), count(generic) |> sort())
+  expect_equal(count(generic, sort = -1), count(generic) |> sort(decreasing = FALSE))
+  
+  # .drop
+  expect_equal(nrow(count(generic, complex, sort = -1, .drop = TRUE)), 8)
+  expect_equal(nrow(count(generic, complex, sort = -1, .drop = FALSE)), 48)
+  
+  expect_equal(count(generic, complex) |> min() |> unname(), 0)
+  expect_equal(count(generic, complex, .drop = TRUE) |> min() |> unname(), 1L)
+  
+  ## with humdrum data
+  humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
+  
+  expect_equal(humData |> kern(simple = TRUE) |> count() |> max() |> unname(), 334L)
+  
+  twoD <- humData |> mutate(Kern = kern(Token, simple = TRUE), Recip = recip(Token)) |> count()
+  expect_equal(twoD |> max() |> unname(), 200L)
+  expect_equal(ncol(twoD), 3L)
+  expect_equal(humData |> mutate(Kern = kern(Token, simple = TRUE), Recip = recip(Token)) |> count(.drop = TRUE) |> nrow(), 83L)
+  
+  expect_equal(humData |> mutate(Kern = kern(Token, simple = TRUE),  Recip = recip(Token)) |> count(Recip, sort = TRUE),
+               humData |> recip() |> count(sort = TRUE))
+  
+  expect_equal(humData |> mutate(Kern = kern(Token, simple = TRUE),  Recip = recip(Token)) |> count(Recip),
+               humData |> mutate(Kern = kern(Token, simple = TRUE),  Recip = recip(Token)) |> select(Recip) |> count())
+  
+  # numeric values
+  set.seed(2)
+  real <- rnorm(1000)
+  int <- sample(100, 30, replace = TRUE)
+  
+  expect_equal(count(real) |> max() |> unname(), 194L)
+  expect_equal(count(real, binArgs = list(breaks = 40)) |> max() |> unname(), 84L)
+  expect_true(all(count(real, binArgs = list(quantiles = 4))$n == 250L))
+  
+  
+  
+  expect_equal(count(int, binArgs = list(maxUnique = length(unique(int)) + 1, breaks = 20)) |> nrow(), length(unique(int)))
+  expect_equal(count(int, binArgs = list(maxUnique = length(unique(int)) - 1, breaks = 20)) |> nrow(), 20)
+  
+  
+  
+  # coercsion/conversion
+  
+  ### count <-> table
+  expect_equal(count(generic, na.rm = TRUE) |> as.table(), table(generic))
+  expect_equal(count(generic, na.rm = TRUE) |> table(), table(generic) |> humdrumR:::humdrumR.table())
+  
+  ### table <-> distribution
+  expect_equal(table(generic) |> count(), count(generic, na.rm = TRUE))
+  expect_equal(table(generic) |> pdist(), pdist(generic, na.rm = TRUE))
+  expect_equal(table(generic) |> count() |> pdist(), pdist(generic, na.rm = TRUE))
+  expect_equal(table(generic, useNA = 'ifany') |> pdist() |> count(), count(generic, na.rm = FALSE))
+})
 
 test_that('distribution stuff, 1D',{
     
