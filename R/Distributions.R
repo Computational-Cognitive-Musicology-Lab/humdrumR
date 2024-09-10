@@ -1091,8 +1091,10 @@ count.probability <- function(x, ..., sort = FALSE,
 #' [conditional probabilities](https://en.wikipedia.org/wiki/Conditional_probability_distribution), conditioned
 #' on one or more of the variable.
 #' (There can be `K - 1` conditions, where `K` is the total number of variables.)
-#' Conditions can be expressed as either natural numbers (indicating the variable in their input order)
-#' or as character strings matching dimension names.
+#' Conditions can be expressed as either natural numbers (indicating which variable(s) to condition on
+#'  in their input order) or as character strings exactly matching dimension names.
+#' Thus, if we call something like `pdist(X = x, Y = y)`, we could condition on the `y` variable *either*
+#' by saying `pdist(X = x, Y = y, condition = 2)` or `pdist(X = x, Y = y, condition = "Y")`.
 #' 
 #' 
 #' @rdname count
