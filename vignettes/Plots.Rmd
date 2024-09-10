@@ -1,0 +1,21 @@
+---
+title: "Making plots with humdrumR"
+author: "Nathaniel Condit-Schultz"
+date:   "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Making plots with humdrumR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+source('vignette_header.R')
+
+```
+
+
+Welcome to "Making plots with `r hm`"!
+This article provides a quick introduction to the basics of plotting in R, but mostly focuses on `r hm`'s own specialty plotting function, `draw()`.
+Our `draw()` function is not a full replacement for either of R's main plotting systems (base and [ggplot][ggplot2]), but it is really useful.

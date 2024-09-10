@@ -806,16 +806,17 @@ setMethod('*', c('probability', 'probability'),
 #'
 #' @section NAs and zeros:
 #' 
-#' HumdrumR `count()` methods will, by default, count `NA` values if they are present---if you don't want
+#' HumdrumR `count()` and `pdist()` methods will, by default, count `NA` values if they are present---if you don't want
 #' to count `NA`s, specify `na.rm = TRUE`.
 #' 
-#' By default, `count()` will include counts of known levels of variables, even if they are zero.
-#' This can happen if the data are [factors][base::factor] or [tokens][token()], where all possible levels
-#' are embedded in the data.
-#' When cross-tabulating multiple vectors, zeroes can also occur for any atomic type
-#' if certain combinations never occur.
-#' To drop zeros from the output distribution, specify `count(.drop = TRUE)`.
-#' (Note that `dplyr::count()` drops levels by default.)
+#' By default, `count()` and `pdist()` will include all known levels of input variables, even if those levels don't occur 
+#' (they are counted as zero).
+#' This can happen if the input includes [factors][base::factor] or [tokens][token()], which have their known levels attached to
+#' them.
+#' Zeros can also occur for any atomic type when cross-tabulating multiple vectors, if certain combinations of values
+#' never occur.
+#' To drop zeros from the output distribution, specify .drop = TRUE`.
+#' (Note that `dplyr::count()` drops levels by default, but `r hm` functions do not.=)
 #' 
 #' 
 #' 
@@ -847,13 +848,12 @@ setMethod('*', c('probability', 'probability'),
 #'
 #' @section Coersion/conversion:
 #' 
-#' The `humdrumR` [distribution] class can be converted to and from R's base [table][base::table()].
-#' Count and probability distributions cannot also be converted between.
-#' All you do is call the appropriate function(s).
-#' What this means is that, for example
+#' Count and probability distributions, as well as base R [tables][base::table()]
+#' can be freely converted between using the `count()`, `pdist()`, and `table()` functions.
+#' What this means is that, for example:
 #' 
 #' + `count(x) |> table()` is the same as `table(x)`
-#' + `table(x) |> count(na)` is the same as `count(x, na.rm = TRUE)`
+#' + `table(x) |> count()` is the same as `count(x, na.rm = TRUE)`
 #' + `count(x) |> pdist()` is the same as `pdist(x)`
 #' + `pdist(x) |> count() |> table()` is the same as `count(x) |> table()`
 #' + etc.
@@ -904,11 +904,56 @@ setMethod('*', c('probability', 'probability'),
 #' count(int, binArgs = list(maxUnique = 50))
 #' count(int, binArgs = list(maxUnique = 5))
 #' 
+#' @param ... ***Values to count.***
+#' 
+#' Either one or more vectors of equal length, a [humdrumR object][humdrumRclass],
+#' or a [table][table()].
+#' 
+#' @param sort ***Should the output table be sorted?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Either a single `logical` value (on or off), or a single numeric value.
+#' 
+#' Positive values (or `TRUE`) lead to decreasing sort (top to bottom);
+#' Negative values lead to increasing sort;
+#' Zero or `FALSE` lead to no sort.
+#' 
+#' @param na.rm ***Should `NA` values be removed (not counted)?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, `NA` values are not counted.
+#' 
+#' @param .drop ***Should missing levels be dropped (not counted as zeros)?***
+#' 
+#' Defaults to `FALSE`. (This is opposite of [dplyr's][dplyr::count] default.)
+#' 
+#' Must be singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, missing factor levels and/or missing combinations of values
+#' are *not* counted in the output table.
+#' If `FALSE`, these values are included in the output table (as zeros).
+#'
+#' @param binArgs ***List of arguments to pass to numeric binning algorithm.***
+#' 
+#' Defaults to empty `list()`.
+#'
+#' Possible list arguments include any arguments to [hist()], as well as:
+#' 
+#' + `maxUnique` (single whole number), defaulting to `20`.
+#' + `right` (single `logical`), defaulting to `TRUE`, 
+#' + `quantiles` (single whole number), defaulting to `0` (no quantiles).
+#' 
+#' Note that the `binArgs` argument has no effect if the input (`...`) are not numbers.
+#'
 #' @name count
 #' @export 
 count.default <- function(..., sort = FALSE, na.rm = FALSE,
                           .drop = FALSE, binArgs = list()) {
-  checks(sort, xTF | (xwholenum & xlen1))
+  checks(sort, xTF | (xnumber & xlen1))
   checks(na.rm, xTF)
   checks(.drop, xTF)
   checks(binArgs, xclass('list'))
@@ -1037,6 +1082,17 @@ count.probability <- function(x, ..., sort = FALSE,
 #' 
 #' @section Conditional probability:
 #' 
+#' By default, `pdist(x)` produces a table which is essentially identical to `count(x) / length(x)`, or
+#' `count(x, y, ...) / length(x)` for multi-dimensional arrays. 
+#' This means the default is the [marginal probability](https://en.wikipedia.org/wiki/Marginal_distribution) (for one variable) 
+#' or the [joint probability](https://en.wikipedia.org/wiki/Joint_probability_distribution) (for more than one variables).
+#' 
+#' If more than variables are present, `pdist()` can also the 
+#' [conditional probabilities](https://en.wikipedia.org/wiki/Conditional_probability_distribution), conditioned
+#' on one or more of the variable.
+#' (There can be `K - 1` conditions, where `K` is the total number of variables.)
+#' Conditions can be expressed as either natural numbers (indicating the variable in their input order)
+#' or as character strings matching dimension names.
 #' 
 #' 
 #' @rdname count
@@ -1052,9 +1108,9 @@ pdist <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop =
 
 #' @export
 pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE) {
-  
-  if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
-  if (sort) x <- sort(x, sort > 0L)
+  # 
+  # if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
+  # if (sort) x <- sort(x, sort > 0L)
   
   df <- as.data.frame(x)
   
@@ -1081,7 +1137,12 @@ pdist.probability <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = F
   exprs <- rlang::enexprs(...)
   if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
   
-  if (!is.null(condition)) conditional(x, condition) else x
+  x <- if (!is.null(condition)) conditional(x, condition) else unconditional(x)
+  
+  if (na.rm) x <- x[Reduce('&', lapply(getLevels(x), \(col) !is.na(col))), ]
+  if (sort) x <- sort(x, decreasing = sort > 0L)
+  
+  x
   
 }
 

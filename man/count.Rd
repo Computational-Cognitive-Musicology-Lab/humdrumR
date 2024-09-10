@@ -21,6 +21,53 @@ pdist(
   binArgs = list()
 )
 }
+\arguments{
+\item{...}{\emph{\strong{Values to count.}}
+
+Either one or more vectors of equal length, a \link[=humdrumRclass]{humdrumR object},
+or a \link[=table]{table}.}
+
+\item{sort}{\emph{\strong{Should the output table be sorted?}}
+
+Defaults to \code{FALSE}.
+
+Either a single \code{logical} value (on or off), or a single numeric value.
+
+Positive values (or \code{TRUE}) lead to decreasing sort (top to bottom);
+Negative values lead to increasing sort;
+Zero or \code{FALSE} lead to no sort.}
+
+\item{na.rm}{\emph{\strong{Should \code{NA} values be removed (not counted)?}}
+
+Defaults to \code{FALSE}.
+
+Must be singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, \code{NA} values are not counted.}
+
+\item{.drop}{\emph{\strong{Should missing levels be dropped (not counted as zeros)?}}
+
+Defaults to \code{FALSE}. (This is opposite of \link[dplyr:count]{dplyr's} default.)
+
+Must be singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, missing factor levels and/or missing combinations of values
+are \emph{not} counted in the output table.
+If \code{FALSE}, these values are included in the output table (as zeros).}
+
+\item{binArgs}{\emph{\strong{List of arguments to pass to numeric binning algorithm.}}
+
+Defaults to empty \code{list()}.
+
+Possible list arguments include any arguments to \code{\link[=hist]{hist()}}, as well as:
+\itemize{
+\item \code{maxUnique} (single whole number), defaulting to \code{20}.
+\item \code{right} (single \code{logical}), defaulting to \code{TRUE},
+\item \code{quantiles} (single whole number), defaulting to \code{0} (no quantiles).
+}
+
+Note that the \code{binArgs} argument has no effect if the input (\code{...}) are not numbers.}
+}
 \description{
 The \code{count()} function can be used to tabulate unique values in a vector, or cross-tabulate
 combinations of values across multiple vectors of the same length.

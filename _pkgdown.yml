@@ -63,6 +63,7 @@ articles:
   - Grouping
   - Context
   - Information
+  - Plots
 - title: Musical Processing
   desc: Functionality for analyzing musical information
   navbar: Musical tools

@@ -24,12 +24,11 @@ This article explains some of the features R and  `r hm` have for extracting cou
 # Counting things
 
 Nearly all of our articles, from the very [start](GettingStarted.html#counting-things "Getting started with humdrumR > Counting things"), have made use of the `count()` function.
-This is a `r hm` workhorse function.
-Counting how often unique tokens occur in a vector, or unique combinations across combinations of vectors, is extremely useful.
+This is a `r hm` workhorse function, which is used to count the number of unique values in a vector, or unique combinations of values across combinations of vectors.
 
 
 Let's take a moment to explain all of what `count()` can do, starting from the basics.
-The `count()` function can accept one or more atomic vectors, all of which must be the same length.
+The `count()` function accepts one or more atomic vectors, all of which must be the same length.
 It counts all the unique combination of values across the vectors.
 This can be illustrates with some simple examples:
 
@@ -47,8 +46,10 @@ count(v1, v2)
 ```
 
 
+### Counting Numbers 
+
 If you have a distribution of continuous numbers, you don't want to count every unique value (because there will be one of each).
-So in `r hm`, `count()` will (attempt) to treat numeric values in a smart way, by binning them into ranges, using the base R `hist()` function's binning algorithm (you can pass arguments to `hist()`).
+So in `r hm`, `count()` will (attempt) to treat numeric values in a smart way, by binning them into ranges using the base R `hist()` function's binning algorithm.
 So for example:
 
 ```{r}
@@ -59,6 +60,19 @@ numbers |> head(30)
 count(numbers)
 
 ```
+
+
+Deatils of this process can be controlled using the `binArgs` argument, which must be a list of arguments.
+In particular, you pass arguments to the `hist()` alrgorithm, such as `breaks` (to control the number of bins).
+
+```{r}
+
+count(numbers, binArgs = list(breaks = 12))
+count(numbers, binArgs = list(breaks = -8:12))
+
+```
+
+----
 
 If you *don't* want to bin numbers, just apply `as.character()` (perhaps after rounding the numbers).
 
