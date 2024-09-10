@@ -112,6 +112,8 @@ autoArgTable  <- rbind(data.table(Argument = 'groupby',  Type = 'melodic',
                                   Expression = list(quote(Tandem)))
 )
 
+autoArgTable[, Function := paste0('humdrumR::', Function)]
+
 setOldClass('quosure')
 setOldClass('quosures')
 
