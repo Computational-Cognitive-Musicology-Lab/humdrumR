@@ -4,7 +4,7 @@
 \alias{wort}
 \alias{wort.character}
 \alias{wort.humdrumR}
-\title{Paste sylllables together into words}
+\title{Paste syllables together into words}
 \usage{
 \method{wort}{character}(
   x,

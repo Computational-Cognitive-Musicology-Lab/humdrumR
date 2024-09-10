@@ -1,6 +1,6 @@
 Package: humdrumR
 Title: humdrumR
-Version: 0.7.0.4
+Version: 0.7.0.5
 Authors@R: c(person("Nathaniel", "Condit-Schultz", email = "natcs@gatech.edu", role = c("aut", "cre")),
              person("Claire", "Arthur", email = "claire.arthur@gatech.edu", role = "aut"))
 Description: This package is a toolkit for the visualization, manipulation, and analysis of data encoded in the Humdrum syntax (<http://www.humdrum.org). 

@@ -46,6 +46,12 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 A numeric vector or a \code{character} string treated as a regular expression.}
 
+\item{drop}{\emph{\strong{Should empty records/spines/pieces be removed?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{j}{\emph{\strong{Index for matrix/data.frame columns.}}
 
 A numeric vector or a \code{character} string treated as a regular expression.}
