@@ -34,7 +34,7 @@ The Open and Close columns indicate row indices in the humdrum table."><!-- math
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -385,19 +385,19 @@ once windowing is done.</p>
 <li><p><code>end</code>: represents the last index of the <code>reference</code> vector(s).</p></li>
 <li><p><code>|</code>: As in "OR"---specify alternative window <code>open</code>/<code>close</code> criteria.</p></li>
 </ul><p><code>What if we'd like each of our windows to close right before the next window opens? We can do this by making the</code>close<code>argument refer to the *next*</code>open<code>, by referring to the </code>nextopen` variable:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>)</span></code></pre><p></p></div>
 <p>Conversely, <code>open</code> can refer to the <code>prevclose</code> close:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> prevclose <span class="sc">+</span> <span class="dv">1</span>, <span class="at">close =</span> <span class="st">'[aeiou]'</span>, <span class="at">alignToOpen =</span> <span class="cn">FALSE</span>)</span></code></pre><p></p></div>
 <p>Notice that when we called <code>context(letters, open = '[aeiou]', close = nextopen - 1L)</code>,
 the window opening on <code>"u"</code> is not returned.
 This is because there is no "<code>nextopen</code>" open to close on.
 We can instead provide <code>context()</code> an alternative, using <code>|</code> (or):</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L <span class="sc">|</span> <span class="dv">26</span>)</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span> <span class="sc">|</span> <span class="dv">26</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span></code></pre><p></p></div>
 <p>Here we are saying, close a window 1 index before the next open <em>OR</em> at index 26.
 What if we don't know exactly how long our input vector is?
 Refer to the <code>end</code> variable:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L <span class="sc">|</span> end)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span> <span class="sc">|</span> end)</span></code></pre><p></p></div>
 </div>
 
 <div class="section">
@@ -410,7 +410,7 @@ We can also define <code>open</code> and <code>close</code> expressions that ref
 and which aren't necessarily the thing we want to apply the windowing to.
 To illustrate this last point, let's take the last command from the previous section
 and make it so the <code>x</code> argument is different than the <code>reference</code> argument:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(LETTERS, <span class="at">reference =</span> letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L <span class="sc">|</span> <span class="dv">26</span>)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(LETTERS, <span class="at">reference =</span> letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span> <span class="sc">|</span> <span class="dv">26</span>)</span></code></pre><p></p></div>
 <p>Now, <code>letters</code> is still being used as the windowing reference, but the contextual windowing is being
 applied to <code>LETTERS</code>.
 When we use <code>context()</code> on a <a href="humdrumRclass.html">humdrumR dataset</a>, the data's <code><a href="humTable.html">fields()</a></code> can be used as the reference,
@@ -618,7 +618,7 @@ This can be used to keep</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpzItG3i/temp_libpath7dc2a20fcec82/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -736,7 +736,7 @@ This can be used to keep</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Georgia Tech, <a href="https://music.gatech.edu" class="external-link">School of Music</a>, <a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>

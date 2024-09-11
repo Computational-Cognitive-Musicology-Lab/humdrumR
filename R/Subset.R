@@ -607,6 +607,12 @@ combineFields <- function(humdrumR, ...) {
 #'
 #' A numeric vector or a `character` string treated as a regular expression.
 #'
+#' @param drop ***Should empty records/spines/pieces be removed?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
 #' @examples
 #' 
 #' humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")

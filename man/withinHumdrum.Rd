@@ -205,6 +205,12 @@ are \link[=selectedFields]{selected}.
 
 If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 Each expression can refer variables assigned in the previous expression (examples below).
+
+\emph{Note}: Within any of these expressions, the humdrumR namespace takes priority.
+This means that, for example, if you use \code{lag()} within an expression, the humdrumR version of \code{lag()}
+will be used, even if you have loaded other packages which have their own \code{lag()} function.
+To use another package's function, you'll have to specify \verb{package::function()}---for example, \code{dplyr::lag()}.
+This is only an issue when functions have the exact same name as a humdrumR function.
 \subsection{Expression pre-processing}{
 
 These functions all do some

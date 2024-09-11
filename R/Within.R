@@ -71,6 +71,12 @@
 #' If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 #' Each expression can refer variables assigned in the previous expression (examples below).
 #' 
+#' *Note*: Within any of these expressions, the humdrumR namespace takes priority.
+#' This means that, for example, if you use `lag()` within an expression, the humdrumR version of `lag()`
+#' will be used, even if you have loaded other packages which have their own `lag()` function.
+#' To use another package's function, you'll have to specify `package::function()`---for example, `dplyr::lag()`.
+#' This is only an issue when functions have the exact same name as a humdrumR function.
+#' 
 #' ### Expression pre-processing
 #' 
 #' These functions all do some
@@ -749,6 +755,8 @@ prepareQuosures <- function(humtab, quosures, dotField, recycle, variables, with
   
   quosures <- unformula(quosures)
   
+  quosures <- quoForceHumdrumRcalls(quosures)
+  
   quosures <- quoFieldNames(quosures)
   
   # insert variables
@@ -767,7 +775,8 @@ prepareQuosures <- function(humtab, quosures, dotField, recycle, variables, with
   quosures <- lapply(quosures, splatQuo, fields = colnames(humtab))
   
   # final result parsing (objects, recyclng, visible, etc.)
-  concatinateQuosures(quosures, alignLeft)
+   concatinateQuosures(quosures, alignLeft)
+ 
   # quosures <- lapply(quosures, quosureParseResult, recycle = recycle, withFunc = withFunc, alignLeft = alignLeft)
 
   # quosures
@@ -784,7 +793,8 @@ unformula <- function(quosures) {
                                         env = rlang::quo_get_env(quo))
              }
            } else {
-             if (as.character(rlang::quo_get_expr(quo)[[1]]) %in% c('~', 'quote', 'expression')){ 
+            
+             if (any(as.character(rlang::quo_get_expr(quo)[[1]]) %in% c('~', 'quote', 'expression'))) { 
                quo <- rlang::as_quosure(eval(rlang::quo_get_expr(quo), 
                                              rlang::quo_get_env(quo)),
                                         env = rlang::quo_get_env(quo))
@@ -793,6 +803,30 @@ unformula <- function(quosures) {
            }
            quo
          })
+}
+
+
+quoForceHumdrumRcalls <- function(quosures) {
+  # this changes any function call from a humdrumR function to humdrumR:::function
+  # we use ::: because the ls() output includes methods that aren't actually exported (:: won't work).
+  # we don't include infix functions line %~%
+  
+  humdrumRpackage <- ls('package:humdrumR') |> grep(pattern = '%', x = _, value = TRUE, invert = TRUE)
+  humdrumRpackage <- setdiff(humdrumRpackage, 'count')
+  # we can't do it to count because the count() generic was originally exported by dplyr
+  # there might other functions which need to be added to this list?
+  
+  lapply(quosures, 
+         \(quo) {
+           withinExpression(quo,
+                            predicate = \(Head) Head[1] %in% humdrumRpackage,
+                            func = \(exprA) {
+                              exprA$Head <- paste0('humdrumR:::', exprA$Head)
+                              exprA
+                            })
+         })
+
+  
 }
 
 quoFieldNames <- function(quosures) {
@@ -1014,9 +1048,13 @@ activateQuo <- function(funcQuosure, dotField) {
 
 
 autoArgsQuo <- function(funcQuosure, fields) {
-  predicate <- \(Head) Head %in% c(autoArgTable$Function, paste0(autoArgTable$Function, '.default'))
+  
+  funcRegex <- paste0('^(humdrumR:::?)?', autoArgTable$Function, '(\\.default)?$')
+  
+  predicate <- \(Head) any(stringr::str_detect(Head, funcRegex))
+  
   do <- \(exprA) {
-    tab <- autoArgTable[(Function == exprA$Head | paste0(Function, '.default') == exprA$Head) & 
+    tab <- autoArgTable[stringr::str_detect(exprA$Head, funcRegex) & 
                           !Argument %in% names(exprA$Args) &
                           sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
     args <- setNames(tab$Expression, tab$Argument)
@@ -1031,13 +1069,12 @@ autoArgsQuo <- function(funcQuosure, fields) {
 interpolateVariablesQuo <- function(quo, variables) {
   
   withinExpression(quo, predicate = \() TRUE, applyTo = 'symbol',
-                   \(exprA)
-                   
+                   \(exprA) {
                    if (exprA$Head %in% names(variables)) {
                      analyzeExpr(variables[[exprA$Head]])
                    } else {
                      exprA
-                   })
+                   }})
                    
 }
 

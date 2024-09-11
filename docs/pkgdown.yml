@@ -1,4 +1,4 @@
-pandoc: 3.0.1
+pandoc: 3.1.11
 pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
@@ -16,7 +16,7 @@ articles:
   RhythmAndMeter: RhythmAndMeter.html
   RPrimer: RPrimer.html
   Summary: Summary.html
-last_built: 2024-08-17T03:48Z
+last_built: 2024-09-11T16:12Z
 urls:
   reference: https://humdrumR.ccml.gtcmt.gatech.edu/reference
   article: https://humdrumR.ccml.gtcmt.gatech.edu/articles

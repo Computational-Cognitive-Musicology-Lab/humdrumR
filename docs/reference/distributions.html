@@ -18,7 +18,7 @@ disparate output tables."><!-- mathjax --><script src="https://cdnjs.cloudflare.
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,10 +100,8 @@ disparate output tables.</p>
 <span><span class="co"># S3 method for distribution</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span></span>
 <span>  <span class="va">dist</span>,</span>
-<span>  digits <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  digits <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">dist</span>, <span class="st">"probability"</span><span class="op">)</span><span class="op">)</span> <span class="fl">3</span> <span class="kw">else</span> <span class="fl">1</span>,</span>
 <span>  syntaxHighlight <span class="op">=</span> <span class="fu">humdrumRoption</span><span class="op">(</span><span class="st">"syntaxHighlight"</span><span class="op">)</span>,</span>
-<span>  wide <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  printZeros <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  zeros <span class="op">=</span> <span class="st">"."</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -118,9 +116,6 @@ disparate output tables.</p>
 <span></span>
 <span><span class="co"># S3 method for table</span></span>
 <span><span class="fu">count</span><span class="op">(</span><span class="va">...</span>, sort <span class="op">=</span> <span class="cn">FALSE</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span>, .drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for pdist</span></span>
-<span><span class="fu">count</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, sort <span class="op">=</span> <span class="cn">FALSE</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span>, .drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for count</span></span>
 <span><span class="fu"><a href="pdist.html">pdist</a></span><span class="op">(</span></span>
@@ -177,7 +172,7 @@ disparate output tables.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for table</span></span>
-<span><span class="fu"><a href="pdist.html">pdist</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, condition <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span>, sort <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="pdist.html">pdist</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, condition <span class="op">=</span> <span class="cn">NULL</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span>, sort <span class="op">=</span> <span class="cn">FALSE</span>, binArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">table</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
@@ -220,26 +215,6 @@ if you don't specify a name, <code>count()</code> will make up a name(s) based o
 (Note that <code>count()</code> does not copy <code><a href="https://rdrr.io/r/base/table.html" class="external-link">base::table()</a></code>'s obtusely-named <code>dnn</code> or <code>deparse.level</code> arguments.)</p>
     </div>
     <div class="section level2">
-    <h2 id="counting-numeric-values">Counting numeric values<a class="anchor" aria-label="anchor" href="#counting-numeric-values"></a></h2>
-    
-
-
-<p>For numeric values, if there are many unique numbers to count we often want to count ranges of numbers in bins,
-like in a histrogram.
-By default, if you pass a vector of numbers to <code>count()</code> which has more than <code>20</code> unique values,
-<code>count()</code> will bin the values using the same algorithm as <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">graphics::hist()</a></code>.
-This process can be controlled using the <code>binArgs</code> argument, which is itself a list of control arguments.
-<code>binArgs = list(maxN = N)</code> controls the number of unique numbers needed before binning occurs,
-and <code>binArgs = list(right = FALSE)</code> (default is <code>TRUE</code>) can be used to make bins that are closed on the right instead of the left.
-Finally, any arguments to <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">graphics::hist()</a></code> can be passed via <code>binArgs</code>, controlling how binning occurs: notably,
-you can use the <code>binArgs = list(breaks = _)</code> to control exactly where boundaries should occur, or the number of bins you want.
-For example, <code>binArgs = list(breaks = 10)</code> will make <code>count()</code> bin the input numbers into twelve bins (see <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist()</a></code>
-for details).</p>
-<p>Alternatively, you can tell <code>count()</code> to divy up (bin) the input numbers into quantiles by
-passing <code>binArgs = list(quantiles = N)</code>.
-For example, <code>binArgs = list(quantiles = 4)</code> will divide the data into four equal quantiles (0%-25%, 25%-50%, 50%-75%, 75%-100%).</p>
-    </div>
-    <div class="section level2">
     <h2 id="manipulating-humdrum-tables">Manipulating humdrum tables<a class="anchor" aria-label="anchor" href="#manipulating-humdrum-tables"></a></h2>
     
 
@@ -264,7 +239,7 @@ See the examples!</p>
 <span class="r-in"><span><span class="va">complexTable</span> <span class="op">&lt;-</span> <span class="fu">count</span><span class="op">(</span><span class="va">complex</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">genericTable</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution ()</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">generic</span>  <span style="color: #000000; font-style: italic;">n</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      a</span>  <span style="color: #BBBB00;">1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      b</span>  <span style="color: #BBBB00;">3</span></span>
@@ -272,9 +247,9 @@ See the examples!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      e</span>  <span style="color: #BBBB00;">1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      g</span>  <span style="color: #BBBB00;">1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">generic</span>  <span style="color: #000000; font-style: italic;">n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution ()</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
 <span class="r-in"><span><span class="va">complexTable</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution ()</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">complex</span>  <span style="color: #000000; font-style: italic;">n</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      a</span>  <span style="color: #BBBB00;">1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      c</span>  <span style="color: #BBBB00;">1</span></span>
@@ -284,7 +259,7 @@ See the examples!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">      g</span>  <span style="color: #BBBB00;">1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">     g#</span>  <span style="color: #BBBB00;">2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">complex</span>  <span style="color: #000000; font-style: italic;">n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution ()</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">genericTable</span> <span class="op">+</span> <span class="va">complexTable</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Failed to parse glue component</span>
@@ -311,7 +286,7 @@ See the examples!</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Georgia Tech, <a href="https://music.gatech.edu" class="external-link">School of Music</a>, <a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>

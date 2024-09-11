@@ -24,7 +24,7 @@ which can be used in pipes."><!-- mathjax --><script src="https://cdnjs.cloudfla
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,6 +136,12 @@ which can be used in pipes.</p>
 <dt>i</dt>
 <dd><p><em><strong>Index for vectors or matrix/data.frame rows.</strong></em></p>
 <p>A numeric vector or a <code>character</code> string treated as a regular expression.</p></dd>
+
+
+<dt>drop</dt>
+<dd><p><em><strong>Should empty records/spines/pieces be removed?</strong></em></p>
+<p>Defaults to <code>TRUE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
 
 
 <dt>j</dt>
@@ -262,16 +268,16 @@ this example, only the kern spines (if there are any) are indexed!</p>
 
     </div>
     <div class="section level2">
-    <h2 id="drop">drop<a class="anchor" aria-label="anchor" href="#drop"></a></h2>
+    <h2 id="removeempty">removeEmpty<a class="anchor" aria-label="anchor" href="#removeempty"></a></h2>
     
 
 
-<p>The <code>drop</code> argument to any humdrumR indexing controls whether
+<p>The <code>removeEmpty</code> argument to any humdrumR indexing controls whether
 filtered data is completely removed from the data, or simply set to null
 This means the filtered data can be recovered using <code><a href="subset.humdrumR.html">unfilter()</a></code> (see the <a href="subset.humdrumR.html">subset()/filter()</a>
 docs for an explanation).
-By default, piece-indexing and spine-indexing have <code>drop = TRUE</code>,
-but record-indexing defaults to <code>drop = FALSE</code>.</p>
+By default, piece-indexing and spine-indexing have <code>removeEmpty = TRUE</code>,
+but record-indexing defaults to <code>removeEmpty = FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -283,7 +289,7 @@ but record-indexing defaults to <code>drop = FALSE</code>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/RollingStoneCorpus/*.hum"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpzItG3i/temp_libpath7dc2a20fcec82/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Thirteen files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating thirteen files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -995,123 +1001,8 @@ but record-indexing defaults to <code>drop = FALSE</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	        *Token :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="va">humData</span><span class="op">[[</span><span class="st">'b3'</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #################### vvv blue_suede_shoes.hum vvv ####################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     1:  </span><span style="color: #00BBBB;">!!!Rolling Stone List Rank: 95</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     2:  </span><span style="color: #00BBBB;">!!!OTL: Blue Suede Shoes</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     3:  </span><span style="color: #00BBBB;">!!!COC: Carl Perkins</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     4:  </span><span style="color: #00BBBB;">!!!RRD: 1956/</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     5:  </span><span style="color: #00BBBB;">!!!In original RS 5x20 subset: True</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     6:  </span><span style="color: #BB0000;">         **harm         **harm          **deg     **timestamp</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     7:  </span><span style="color: #00BBBB;">        !T.d.C.          !D.T.        !T.d.C.               !</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     8:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1              =1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">     9:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    10:  </span><span style="color: #BB00BB;">         *M12/8         *M12/8         *M12/8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    11:  </span><span style="color: #BB00BB;">            *A:            *A:            *A:               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    12:  </span><span style="color: #BB00BB;">     *k[f#c#g#]     *k[f#c#g#]     *k[f#c#g#]               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    25:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2              =2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    32:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    34:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    38:  </span><span style="color: #00BB00; text-decoration: underline;">             =3             =3             =3              =3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    39:  </span><span style="color: #BB00BB;">          *tb2.          *tb2.          *tb2.               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    40:  </span><span style="color: #BB00BB;">          *M6/8          *M6/8          *M6/8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    42:  </span><span style="color: #00BB00; text-decoration: underline;">             =4             =4             =4              =4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    43:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    44:  </span><span style="color: #BB00BB;">         *M12/8         *M12/8         *M12/8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    51:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    57:  </span><span style="color: #00BB00; text-decoration: underline;">             =5             =5             =5              =5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    58:  </span><span style="color: #BB00BB;">          *tb2.          *tb2.          *tb2.               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    59:  </span><span style="color: #BB00BB;">          *M6/8          *M6/8          *M6/8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    61:  </span><span style="color: #00BB00; text-decoration: underline;">             =6             =6             =6              =6</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    62:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    63:  </span><span style="color: #BB00BB;">         *M12/8         *M12/8         *M12/8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    76:  </span><span style="color: #00BB00; text-decoration: underline;">             =7             =7             =7              =7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    83:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    88:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    89:  </span><span style="color: #00BB00; text-decoration: underline;">             =8             =8             =8              =8</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    90:  </span><span style="color: #BB00BB;">           *tb4           *tb4           *tb4               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    92:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    97:  </span><span style="color: #00BB00; text-decoration: underline;">             =9             =9             =9              =9</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">    98:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   105:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   111:  </span><span style="color: #00BB00; text-decoration: underline;">            =10            =10            =10             =10</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   112:  </span><span style="color: #BB00BB;">          *tb1.          *tb1.          *tb1.               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   114:  </span><span style="color: #00BB00; text-decoration: underline;">            =11            =11            =11             =11</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   115:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   128:  </span><span style="color: #00BB00; text-decoration: underline;">            =12            =12            =12             =12</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   141:  </span><span style="color: #00BB00; text-decoration: underline;">            =13            =13            =13             =13</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   154:  </span><span style="color: #00BB00; text-decoration: underline;">            =14            =14            =14             =14</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   155:  </span><span style="color: #BB00BB;">          *tb1.          *tb1.          *tb1.               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   157:  </span><span style="color: #00BB00; text-decoration: underline;">            =15            =15            =15             =15</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   158:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   171:  </span><span style="color: #00BB00; text-decoration: underline;">            =16            =16            =16             =16</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   180:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">   184:  </span><span style="color: #00BB00; text-decoration: underline;">            =17            =17            =17             =17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">197-869:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> #################### ^^^ blue_suede_shoes.hum ^^^ ####################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 		(six more pieces...)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ####################### vvv your_song.hum vvv ########################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;"> 1-1006:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1007:  </span><span style="color: #BB00BB;">          *tb16          *tb16          *tb16               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1024:  </span><span style="color: #00BB00; text-decoration: underline;">            =99            =99            =99             =99</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1025:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1034:  </span><span style="color: #00BB00; text-decoration: underline;">           =100           =100           =100            =100</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1035:  </span><span style="color: #BB00BB;">          *tb16          *tb16          *tb16               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1052:  </span><span style="color: #00BB00; text-decoration: underline;">           =101           =101           =101            =101</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1053:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1062:  </span><span style="color: #00BB00; text-decoration: underline;">           =102           =102           =102            =102</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1063:  </span><span style="color: #BB00BB;">          *tb16          *tb16          *tb16               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1080:  </span><span style="color: #00BB00; text-decoration: underline;">           =103           =103           =103            =103</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1081:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1090:  </span><span style="color: #00BB00; text-decoration: underline;">           =104           =104           =104            =104</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1099:  </span><span style="color: #00BB00; text-decoration: underline;">           =105           =105           =105            =105</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1108:  </span><span style="color: #00BB00; text-decoration: underline;">           =106           =106           =106            =106</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1109:  </span><span style="color: #BB00BB;">           *tb1           *tb1           *tb1               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1111:  </span><span style="color: #00BB00; text-decoration: underline;">           =107           =107           =107            =107</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1112:  </span><span style="color: #BB00BB;">           *tb4           *tb4           *tb4               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1117:  </span><span style="color: #00BB00; text-decoration: underline;">           =108           =108           =108            =108</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1118:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1127:  </span><span style="color: #00BB00; text-decoration: underline;">           =109           =109           =109            =109</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1136:  </span><span style="color: #00BB00; text-decoration: underline;">           =110           =110           =110            =110</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1137:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3         205.287</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1145:  </span><span style="color: #00BB00; text-decoration: underline;">           =111           =111           =111            =111</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1146:  </span><span style="color: #BB00BB;">           *tb1           *tb1           *tb1               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1148:  </span><span style="color: #00BB00; text-decoration: underline;">           =112           =112           =112            =112</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1150:  </span><span style="color: #00BB00; text-decoration: underline;">           =113           =113           =113            =113</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1151:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1160:  </span><span style="color: #00BB00; text-decoration: underline;">           =114           =114           =114            =114</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1163:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3</span><span style="color: #BBBB00; font-weight: 100;">               .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1169:  </span><span style="color: #00BB00; text-decoration: underline;">           =115           =115           =115            =115</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1178:  </span><span style="color: #00BB00; text-decoration: underline;">           =116           =116           =116            =116</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1179:  </span><span style="color: #BB00BB;">           *tb1           *tb1           *tb1               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1181:  </span><span style="color: #00BB00; text-decoration: underline;">           =117           =117           =117            =117</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1182:  </span><span style="color: #BB00BB;">           *tb8           *tb8           *tb8               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1191:  </span><span style="color: #00BB00; text-decoration: underline;">           =118           =118           =118            =118</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1200:  </span><span style="color: #00BB00; text-decoration: underline;">           =119           =119           =119            =119</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1209:  </span><span style="color: #00BB00; text-decoration: underline;">           =120           =120           =120            =120</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1210:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             b3         224.253</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1218:  </span><span style="color: #00BB00; text-decoration: underline;">           =121           =121           =121            =121</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1219:  </span><span style="color: #BB00BB;">           *tb1           *tb1           *tb1               *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1221:  </span><span style="color: #00BB00; text-decoration: underline;">           =122           =122           =122            =122</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1223:  </span><span style="color: #00BB00; text-decoration: underline;">           =123           =123           =123            =123</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1225:  </span><span style="color: #00BB00; text-decoration: underline;">           =124           =124           =124            =124</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1227:  </span><span style="color: #00BB00; text-decoration: underline;">           =125           =125           =125            =125</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1229:  </span><span style="color: #BB00BB;">             *-             *-             *-              *-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1230:  </span><span style="color: #00BBBB;">!!!ONB: Translated from original encodings in the***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;"> </span><span style="color: #000000; font-style: italic;">  1231:  </span><span style="color: #00BBBB;">!!!ONB: Original transcribers noted in comments i***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;"> </span><span style="color: #000000; font-style: italic;">  1232:  </span><span style="color: #00BBBB;">!!!YOE: David Temperley, Trevor de Clercq</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #000000; font-style: italic;">  1233:  </span><span style="color: #00BBBB;">!!!EED: Nathaniel Condit-Schultz (fathermckenzie.***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;"> </span><span style="color: #000000; font-style: italic;">  1234:  </span><span style="color: #00BBBB;">!!!ENC: Nathaniel Condit-Schultz (fathermckenzie.***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">####################### ^^^ your_song.hum ^^^ ########################</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">              (***four global comments truncated due to screen size***)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	humdrumR corpus of eight pieces.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *Token :: character</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="va">humData</span><span class="op">[[</span><span class="st">'b3'</span>, removeEmpty <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in .local(x, i, ...):</span> unused argument (removeEmpty = TRUE)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Exclusive interpretation indexing</span></span></span>
 <span class="r-in"><span><span class="va">humData</span><span class="op">[[</span>deg <span class="op">=</span> <span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
@@ -1248,7 +1139,7 @@ but record-indexing defaults to <code>drop = FALSE</code>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Georgia Tech, <a href="https://music.gatech.edu" class="external-link">School of Music</a>, <a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>

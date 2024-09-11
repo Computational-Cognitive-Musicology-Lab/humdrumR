@@ -22,7 +22,7 @@ a logical vector for indicating where onsets fall on or off beat."><!-- mathjax 
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -268,7 +268,7 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpzItG3i/temp_libpath7dc2a20fcec82/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -391,8 +391,8 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	humdrumR corpus of four pieces.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                                                    :: character</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *timecount(Token, unit = TimeSignature, pickup = Bar &lt; 1) :: integer</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                     :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::timecount(...) :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">show</span><span class="op">(</span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu">timecount</span><span class="op">(</span><span class="va">Token</span>, unit <span class="op">=</span> <span class="fu"><a href="tactus.html">tactus</a></span><span class="op">(</span><span class="va">TimeSignature</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -510,8 +510,8 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	humdrumR corpus of four pieces.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                                          :: character</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *timecount(Token, unit = tactus(TimeSignature)) :: integer</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                                                     :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::timecount(Token, unit = tactus(TimeSignature)) :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span> </span></span>
 <span class="r-in"><span>  </span></span>
@@ -526,7 +526,7 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Georgia Tech, <a href="https://music.gatech.edu" class="external-link">School of Music</a>, <a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>

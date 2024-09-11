@@ -10,7 +10,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,29 @@
       <small>Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="7.0.5" id="humdrumr-705">humdrumR 7.0.5<a class="anchor" aria-label="anchor" href="#humdrumr-705"></a></h2>
+<p>Version 7.0.5 includes a small patch to fix a bug related to the <code>::</code> function, as well as a new feature/behavior which builds off of that fix.</p>
+<p>In previous versions, an error would occur if you used <code>::</code> inside any of the fundamental humdrumR “with/within” methods (including <code>base</code> functions and <code>dplyr</code> “verbs”). We’ve fixed this bug.</p>
+<hr><p>We’ve also added a new feature; specifically, we’ve made using <code>::</code> in humdrumR less necessary. Now, within a humdrumR call to any of these methods (listed below), if you use any function exported by humdrumR, humdrumR will automatically use the humdrumR version of that function, even if another package you have attached includes a function with same name. In other words, the humdrumR namespace will always takes priority within a humdrumR method call.</p>
+<p>For example, the <code>dplyr</code> package exports a function called <code><a href="../reference/lag.html">lag()</a></code> and so does humdrumR (these functions do the same thing, but humdrumR’s version has a few extra features). Before this update, if you loaded <code>dplyr</code> <em>after</em> you loaded humdrumR, then <code>dplyr</code>’s <code><a href="../reference/lag.html">lag()</a></code> function would generally take priority over humdrumR’s <code><a href="../reference/lag.html">lag()</a></code>. So, code like this</p>
+<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span>
+<span></span>
+<span><span class="va">chorales</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>Lagged <span class="op">=</span> <span class="fu"><a href="../reference/lag.html">lag</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span>
+<span></span></code></pre>
+<p>would call <code><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">dplyr::lag()</a></code>. This sort of behavior can be confusing but wouldn’t normally be the end of the world (this is how R is supposed to work, after all). However, the <code><a href="../reference/lag.html">lag()</a></code> function is particularly problematic because <em>many</em> humdrumR methods rely on our special version of <code><a href="../reference/lag.html">lag()</a></code>. This is why we’ve implemented a change: Now, if you use <code><a href="../reference/lag.html">lag()</a></code> within a humdrumR with/within method, it will default to using the humdrumR version, regardless of what other packages are loaded. So the code above would use <code><a href="../reference/lag.html">humdrumR::lag()</a></code>. If you <em>want</em> to use <code>dplyr</code>’s version (or any other package), you still can by specifying (for example) <code><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">dplyr::lag()</a></code>. Another function which (in the past) could lead to frequent namespace confusion was <code><a href="../reference/transpose.html">transpose()</a></code>—now, you can safely use <code><a href="../reference/transpose.html">transpose()</a></code> and know that your system will use <code><a href="../reference/transpose.html">humdrumR::transpose()</a></code>.</p>
+<p>All <code>.humdrumR</code> methods for the following functions are affected by this change:</p>
+<ul><li><code><a href="../reference/withinHumdrum.html">with()</a></code></li>
+<li><code><a href="../reference/withinHumdrum.html">within()</a></code></li>
+<li><code>mutate()</code></li>
+<li><code>reframe()</code></li>
+<li><code>summarize()</code></li>
+<li><code><a href="../reference/subset.humdrumR.html">filter()</a></code></li>
+<li><code><a href="../reference/subset.humdrumR.html">subset()</a></code></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="7.0.3" id="humdrumr-703">humdrumR 7.0.3<a class="anchor" aria-label="anchor" href="#humdrumr-703"></a></h2>
 <div class="section level4">
@@ -141,7 +164,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Georgia Tech, <a href="https://music.gatech.edu" class="external-link">School of Music</a>, <a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>

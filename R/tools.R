@@ -2248,12 +2248,16 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
 }
 
 unanalyzeExpr <- function(exprA) {
-  
     if (exprA$Type == 'atomic' && exprA$Head == 'c' && length(exprA$Args) == 1L) exprA$Type <- 'scalar'
     expr <- switch(exprA$Type,
                    scalar = exprA$Args[[1]],
                    atomic = ,
-                   call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
+                   call =  {
+                     if (grepl('::', exprA$Head)) {
+                       rlang::expr((!!(rlang::parse_expr(exprA$Head)))(!!!exprA$Args))
+                     } else {
+                       do.call('call', c(exprA$Head, exprA$Args), quote = TRUE)
+                     }},
                    symbol = rlang::sym(exprA$Head),
                    lambda = call('function', exprA$Pairlist, exprA$Args[[1]]))
     
@@ -2296,7 +2300,6 @@ exprStringMatch <- function(exprs, strings, includeSymbols = FALSE) {
 withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE, envir = parent.frame()) {
   if (is.null(expr)) return(expr)
   exprA <- analyzeExpr(expr)
-  
   if (exprA$Type %in% applyTo) {
     hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
@@ -2326,7 +2329,6 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
                                   envir = innerEnvir)
       }
     }
-    
   }
   
   unanalyzeExpr(exprA)

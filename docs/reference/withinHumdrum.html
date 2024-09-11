@@ -26,7 +26,7 @@ are equivalent to using with()/within() with particular arguments.'><!-- mathjax
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -292,7 +292,12 @@ See the <code><a href="ditto.html">ditto()</a></code> manual for an example appl
 Keep in mind that <code>humdrumR</code> dynamically updates what tokens are considered "null" (<code>"d"</code>) based on what fields
 are <a href="selectedFields.html">selected</a>.</p>
 <p>If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
-Each expression can refer variables assigned in the previous expression (examples below).</p><div class="section">
+Each expression can refer variables assigned in the previous expression (examples below).</p>
+<p><em>Note</em>: Within any of these expressions, the humdrumR namespace takes priority.
+This means that, for example, if you use <code><a href="lag.html">lag()</a></code> within an expression, the humdrumR version of <code><a href="lag.html">lag()</a></code>
+will be used, even if you have loaded other packages which have their own <code><a href="lag.html">lag()</a></code> function.
+To use another package's function, you'll have to specify <code>package::function()</code>---for example, <code><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">dplyr::lag()</a></code>.
+This is only an issue when functions have the exact same name as a humdrumR function.</p><div class="section">
 <h3 id="expression-pre-processing">Expression pre-processing<a class="anchor" aria-label="anchor" href="#expression-pre-processing"></a></h3>
 
 
@@ -645,7 +650,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpzItG3i/temp_libpath7dc2a20fcec82/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -654,74 +659,74 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">with</span><span class="op">(</span><span class="fu">count</span><span class="op">(</span><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution ()</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">kern(Token, simple = TRUE, Exclusive = Exclusive, Key = Key)</span>  <span style="color: #000000; font-style: italic;">Spine</span>  <span style="color: #000000; font-style: italic;"> n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">12</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          c#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">25</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          d#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">43</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          f#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">20</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">23</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          g#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">11</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">29</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          b-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">33</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">22</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          c#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">42</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          d#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          f#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">18</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          g#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">13</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          b-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          c#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">12</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          d#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">10</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">46</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          f#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">41</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">24</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          g#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">25</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">27</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          b-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">15</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          c#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">19</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          d#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          e#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          f#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 8</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">13</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          g#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 9</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">33</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          a#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                          b-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 0</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">53</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">kern(Token, simple = TRUE, Exclusive = Exclusive, Key = Key)</span>  <span style="color: #000000; font-style: italic;">Spine</span>  <span style="color: #000000; font-style: italic;"> n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution ()</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">humdrumR:::kern(Token, simple = TRUE, Exclusive = Exclusive, </span>  <span style="color: #000000; font-style: italic;">Spine</span>  <span style="color: #000000; font-style: italic;"> n</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">12</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">22</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">25</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">42</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">12</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">43</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">46</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">20</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">18</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">41</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">23</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">24</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">11</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">25</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">29</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">27</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">33</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">33</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">15</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">53</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">humdrumR:::kern(Token, simple = TRUE, Exclusive = Exclusive, </span>  <span style="color: #000000; font-style: italic;">Spine</span>  <span style="color: #000000; font-style: italic;"> n</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">within</span><span class="op">(</span><span class="va">Kern</span> <span class="op">&lt;-</span> <span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>, </span></span>
 <span class="r-in"><span>                  <span class="va">Recip</span> <span class="op">&lt;-</span> <span class="fu"><a href="recip.html">recip</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,</span></span>
@@ -736,30 +741,30 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> </span></span>
 <span class="r-in"><span>    <span class="fu"><a href="groupHumdrum.html">group_by</a></span><span class="op">(</span><span class="va">Piece</span>, <span class="va">Spine</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">with</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     mean(Semits) Piece Spine</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt; &lt;int&gt; &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:  -12.4126984     1     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:    0.2881356     1     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:    5.5737705     1     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:   10.4347826     1     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5:   -8.1639344     2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6:    0.7903226     2     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:    6.3818182     2     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:   10.7358491     2     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:   -7.7115385     3     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10:   -0.1200000     3     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:    5.6170213     3     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12:   10.8297872     3     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:   -8.3265306     4     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:    0.3111111     4     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15:    5.3877551     4     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16:   10.2093023     4     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     humdrumR:::mean(Semits) Piece Spine</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       &lt;num&gt; &lt;int&gt; &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:             -12.4126984     1     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:               0.2881356     1     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:               5.5737705     1     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:              10.4347826     1     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:              -8.1639344     2     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:               0.7903226     2     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:               6.3818182     2     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:              10.7358491     2     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:              -7.7115385     3     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:              -0.1200000     3     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:               5.6170213     3     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:              10.8297872     3     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:              -8.3265306     4     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:               0.3111111     4     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:               5.3877551     4     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:              10.2093023     4     4</span>
 <span class="r-in"><span>    </span></span>
 <span class="r-in"><span><span class="co"># tidyverse (dplyr) style:</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpzItG3i/temp_libpath7dc2a20fcec82/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -774,101 +779,101 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> </span></span>
 <span class="r-in"><span>    <span class="fu"><a href="groupHumdrum.html">group_by</a></span><span class="op">(</span><span class="va">Spine</span>, <span class="va">Bar</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">summarize</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     mean(Semits)   Bar Spine</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            &lt;num&gt; &lt;int&gt; &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1:  -8.00000000     0     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2:  -6.05882353     1     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  3:  -9.00000000     2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  4:  -7.71428571     3     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  5: -10.33333333     4     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  6: -12.50000000     5     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  7:  -7.19047619     6     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  8:  -9.81250000     7     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  9:  -8.35294118     8     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10: -10.64285714     9     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11:  -9.75000000    10     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12: -11.57142857    11     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13:  -6.44444444    12     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14:  -8.22222222    13     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15: -15.40000000    14     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16: -14.50000000    15     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17: -16.66666667    16     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18: -13.33333333    17     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19: -12.50000000    18     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20:  -7.50000000    19     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 21:  -6.33333333    20     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22: -10.00000000    21     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 23: -17.00000000    22     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 24:   2.00000000     0     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25:   0.38095238     1     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26:  -0.05555556     2     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 27:   0.43750000     3     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 28:  -2.30769231     4     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 29:  -2.50000000     5     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 30:   0.40000000     6     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 31:   1.14285714     7     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 32:   1.81250000     8     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33:  -0.14285714     9     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 34:  -0.63157895    10     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 35:  -0.21428571    11     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 36:   1.30000000    12     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 37:   2.44444444    13     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 38:   1.50000000    14     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 39:   1.00000000    15     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40:   0.25000000    16     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 41:   1.33333333    17     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42:   0.33333333    18     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 43:   2.00000000    19     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 44:   3.00000000    20     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 45:   2.00000000    21     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 46:  -1.00000000    22     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 47:   5.50000000     0     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 48:   6.47058824     1     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 49:   5.18750000     2     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 50:   5.47368421     3     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 51:   3.91666667     4     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 52:   6.00000000     5     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 53:   6.88888889     6     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 54:   6.06250000     7     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 55:   6.47058824     8     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 56:   5.06250000     9     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 57:   4.38888889    10     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 58:   5.00000000    11     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 59:   6.70000000    12     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 60:   8.00000000    13     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 61:   5.33333333    14     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 62:   5.50000000    15     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 63:   7.33333333    16     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 64:   6.50000000    17     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 65:   5.40000000    18     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 66:   6.50000000    19     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 67:   7.33333333    20     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 68:   6.50000000    21     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 69:   2.00000000    22     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 70:   9.50000000     0     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 71:  11.00000000     1     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 72:  10.37500000     2     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 73:   9.42105263     3     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 74:   9.54545455     4     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 75:  12.40000000     5     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 76:  10.56250000     6     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 77:  10.93333333     7     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 78:  11.37500000     8     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 79:   9.46153846     9     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 80:  11.40000000    10     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 81:   9.92307692    11     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 82:  12.83333333    12     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 83:  11.75000000    13     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 84:  10.00000000    14     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 85:   9.00000000    15     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 86:  13.00000000    16     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 87:  10.00000000    17     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 88:   9.00000000    18     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 89:  10.00000000    19     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 90:  13.00000000    20     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 91:  10.00000000    21     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 92:   7.00000000    22     4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     mean(Semits)   Bar Spine</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     humdrumR:::mean(Semits)   Bar Spine</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       &lt;num&gt; &lt;int&gt; &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1:             -8.00000000     0     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2:             -6.05882353     1     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  3:             -9.00000000     2     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  4:             -7.71428571     3     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  5:            -10.33333333     4     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  6:            -12.50000000     5     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  7:             -7.19047619     6     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  8:             -9.81250000     7     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  9:             -8.35294118     8     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10:            -10.64285714     9     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11:             -9.75000000    10     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12:            -11.57142857    11     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13:             -6.44444444    12     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14:             -8.22222222    13     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15:            -15.40000000    14     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16:            -14.50000000    15     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17:            -16.66666667    16     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18:            -13.33333333    17     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19:            -12.50000000    18     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20:             -7.50000000    19     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21:             -6.33333333    20     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22:            -10.00000000    21     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23:            -17.00000000    22     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24:              2.00000000     0     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25:              0.38095238     1     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26:             -0.05555556     2     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 27:              0.43750000     3     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 28:             -2.30769231     4     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 29:             -2.50000000     5     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30:              0.40000000     6     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 31:              1.14285714     7     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 32:              1.81250000     8     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33:             -0.14285714     9     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 34:             -0.63157895    10     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 35:             -0.21428571    11     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 36:              1.30000000    12     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 37:              2.44444444    13     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 38:              1.50000000    14     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 39:              1.00000000    15     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40:              0.25000000    16     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 41:              1.33333333    17     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42:              0.33333333    18     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 43:              2.00000000    19     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 44:              3.00000000    20     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 45:              2.00000000    21     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 46:             -1.00000000    22     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47:              5.50000000     0     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48:              6.47058824     1     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 49:              5.18750000     2     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 50:              5.47368421     3     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51:              3.91666667     4     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52:              6.00000000     5     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53:              6.88888889     6     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 54:              6.06250000     7     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 55:              6.47058824     8     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 56:              5.06250000     9     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 57:              4.38888889    10     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58:              5.00000000    11     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 59:              6.70000000    12     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 60:              8.00000000    13     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61:              5.33333333    14     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 62:              5.50000000    15     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 63:              7.33333333    16     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 64:              6.50000000    17     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 65:              5.40000000    18     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 66:              6.50000000    19     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 67:              7.33333333    20     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 68:              6.50000000    21     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 69:              2.00000000    22     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 70:              9.50000000     0     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 71:             11.00000000     1     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 72:             10.37500000     2     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 73:              9.42105263     3     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 74:              9.54545455     4     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75:             12.40000000     5     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 76:             10.56250000     6     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77:             10.93333333     7     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 78:             11.37500000     8     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79:              9.46153846     9     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 80:             11.40000000    10     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81:              9.92307692    11     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 82:             12.83333333    12     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 83:             11.75000000    13     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84:             10.00000000    14     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 85:              9.00000000    15     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86:             13.00000000    16     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 87:             10.00000000    17     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 88:              9.00000000    18     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89:             10.00000000    19     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 90:             13.00000000    20     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 91:             10.00000000    21     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92:              7.00000000    22     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     humdrumR:::mean(Semits)   Bar Spine</span>
 <span class="r-in"><span>      </span></span>
 <span class="r-in"><span><span class="co"># dataTypes argument</span></span></span>
 <span class="r-in"><span></span></span>
@@ -995,7 +1000,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                          :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	        *paste(Token, seq_along(Token)) :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (eight groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (sixteen groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece                          :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine                          :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1124,7 +1129,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Semits     :: integer (**semits tokens)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token      :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (eight groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (sixteen groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece      :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine      :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1254,7 +1259,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Semits  :: integer (**semits tokens)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token   :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (140 groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (248 groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Bar     :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece   :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine   :: integer</span>
@@ -1383,7 +1388,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Semits  :: integer (**semits tokens)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token   :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (140 groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (248 groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Bar     :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece   :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine   :: integer</span>
@@ -1403,7 +1408,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Georgia Tech, <a href="https://music.gatech.edu" class="external-link">School of Music</a>, <a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>
