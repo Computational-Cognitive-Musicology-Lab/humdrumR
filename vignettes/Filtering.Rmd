@@ -239,10 +239,11 @@ we see that what is now the third file actually had flats in all four spines, an
 
 In some cases you may find the renumbering of spines on a *per file* basis confusing, and you want to keep track of the original spine numbers.
 Fortunately, for you there is an option that might helpful, which you will learn more about below: 
-try specifying `removeEmpty = FALSE`:
+try specifying `drop = FALSE`.
+(The `drop` argument is less intuitive, but is the standard R argument for this sort of thing.)
 
 ```{r}
-chorales[[ , '-', removeEmpty = FALSE]]
+chorales[[ , '-', drop = FALSE]]
 
 ```
 

@@ -11,7 +11,7 @@ The uncontext() function removes contextual windows
 from a humdrumR data object.
 Once contextual windows are created, the windows() function can be used to
 view a data.table representing these windows.
-The Open and Close columns indicate row indices in the humdrum table."><title>Group vectors into contextual windows — context • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet"><meta property="og:title" content="Group vectors into contextual windows — context"><meta property="og:description" content="The context() command can be used to group input data (vectors or fields)
+The Open and Close columns indicate row indices in the humdrum table."><title>Group vectors into contextual windows — context • humdrumR</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet"><meta property="og:title" content="Group vectors into contextual windows — context"><meta property="og:description" content="The context() command can be used to group input data (vectors or fields)
 into arbitrary contextual windows.
 Unlike grouping vectors,
 context() windows 1) are always contiguous relative to the reference vector(s)/field(s)
@@ -30,11 +30,11 @@ The Open and Close columns indicate row indices in the humdrum table."><!-- math
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-primary" data-bs-theme="dark"><div class="container">
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -385,19 +385,19 @@ once windowing is done.</p>
 <li><p><code>end</code>: represents the last index of the <code>reference</code> vector(s).</p></li>
 <li><p><code>|</code>: As in "OR"---specify alternative window <code>open</code>/<code>close</code> criteria.</p></li>
 </ul><p><code>What if we'd like each of our windows to close right before the next window opens? We can do this by making the</code>close<code>argument refer to the *next*</code>open<code>, by referring to the </code>nextopen` variable:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>)</span></code></pre><p></p></div>
 <p>Conversely, <code>open</code> can refer to the <code>prevclose</code> close:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> prevclose <span class="sc">+</span> <span class="dv">1</span>, <span class="at">close =</span> <span class="st">'[aeiou]'</span>, <span class="at">alignToOpen =</span> <span class="cn">FALSE</span>)</span></code></pre><p></p></div>
 <p>Notice that when we called <code>context(letters, open = '[aeiou]', close = nextopen - 1L)</code>,
 the window opening on <code>"u"</code> is not returned.
 This is because there is no "<code>nextopen</code>" open to close on.
 We can instead provide <code>context()</code> an alternative, using <code>|</code> (or):</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L <span class="sc">|</span> <span class="dv">26</span>)</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span> <span class="sc">|</span> <span class="dv">26</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span></code></pre><p></p></div>
 <p>Here we are saying, close a window 1 index before the next open <em>OR</em> at index 26.
 What if we don't know exactly how long our input vector is?
 Refer to the <code>end</code> variable:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L <span class="sc">|</span> end)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span> <span class="sc">|</span> end)</span></code></pre><p></p></div>
 </div>
 
 <div class="section">
@@ -410,7 +410,7 @@ We can also define <code>open</code> and <code>close</code> expressions that ref
 and which aren't necessarily the thing we want to apply the windowing to.
 To illustrate this last point, let's take the last command from the previous section
 and make it so the <code>x</code> argument is different than the <code>reference</code> argument:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(LETTERS, <span class="at">reference =</span> letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> 1L <span class="sc">|</span> <span class="dv">26</span>)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(LETTERS, <span class="at">reference =</span> letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span> <span class="sc">|</span> <span class="dv">26</span>)</span></code></pre><p></p></div>
 <p>Now, <code>letters</code> is still being used as the windowing reference, but the contextual windowing is being
 applied to <code>LETTERS</code>.
 When we use <code>context()</code> on a <a href="humdrumRclass.html">humdrumR dataset</a>, the data's <code><a href="humTable.html">fields()</a></code> can be used as the reference,
@@ -618,7 +618,7 @@ This can be used to keep</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpz26RCR/temp_libpatha780af15d1/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -732,11 +732,11 @@ This can be used to keep</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer></div>

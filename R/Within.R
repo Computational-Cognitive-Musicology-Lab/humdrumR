@@ -71,6 +71,12 @@
 #' If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 #' Each expression can refer variables assigned in the previous expression (examples below).
 #' 
+#' *Note*: Within any of these expressions, the humdrumR namespace takes priority.
+#' This means that, for example, if you use `lag()` within an expression, the humdrumR version of `lag()`
+#' will be used, even if you have loaded other packages which have their own `lag()` function.
+#' To use another package's function, you'll have to specify `package::function()`---for example, `dplyr::lag()`.
+#' This is only an issue when functions have the exact same name as a humdrumR function.
+#' 
 #' ### Expression pre-processing
 #' 
 #' These functions all do some
@@ -801,15 +807,21 @@ unformula <- function(quosures) {
 
 
 quoForceHumdrumRcalls <- function(quosures) {
-  # this changes any function call from a humdrumR function to humdrumR::function
-  humdrumRpackage <- ls('package:humdrumR')
+  # this changes any function call from a humdrumR function to humdrumR:::function
+  # we use ::: because the ls() output includes methods that aren't actually exported (:: won't work).
+  # we don't include infix functions line %~%
+  
+  humdrumRpackage <- ls('package:humdrumR') |> grep(pattern = '%', x = _, value = TRUE, invert = TRUE)
+  humdrumRpackage <- setdiff(humdrumRpackage, 'count')
+  # we can't do it to count because the count() generic was originally exported by dplyr
+  # there might other functions which need to be added to this list?
   
   lapply(quosures, 
          \(quo) {
            withinExpression(quo,
                             predicate = \(Head) Head[1] %in% humdrumRpackage,
                             func = \(exprA) {
-                              exprA$Head <- paste0('humdrumR::', exprA$Head)
+                              exprA$Head <- paste0('humdrumR:::', exprA$Head)
                               exprA
                             })
          })
@@ -1036,9 +1048,13 @@ activateQuo <- function(funcQuosure, dotField) {
 
 
 autoArgsQuo <- function(funcQuosure, fields) {
-  predicate <- \(Head) Head %in% c(autoArgTable$Function, paste0(autoArgTable$Function, '.default'))
+  
+  funcRegex <- paste0('^(humdrumR:::?)?', autoArgTable$Function, '(\\.default)?$')
+  
+  predicate <- \(Head) any(stringr::str_detect(Head, funcRegex))
+  
   do <- \(exprA) {
-    tab <- autoArgTable[(Function == exprA$Head | paste0(Function, '.default') == exprA$Head) & 
+    tab <- autoArgTable[stringr::str_detect(exprA$Head, funcRegex) & 
                           !Argument %in% names(exprA$Args) &
                           sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
     args <- setNames(tab$Expression, tab$Argument)
