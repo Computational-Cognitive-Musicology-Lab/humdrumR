@@ -2,7 +2,6 @@
 % Please edit documentation in R/Distributions.R
 \name{distribution}
 \alias{distribution}
-\alias{show,distribution-method}
 \alias{print.distribution}
 \alias{sort,distribution-method}
 \alias{pdist.default}
@@ -13,8 +12,6 @@
 \alias{table,distribution-method}
 \title{Distributions}
 \usage{
-\S4method{show}{distribution}(object)
-
 \method{print}{distribution}(
   dist,
   digits = 3,
@@ -75,9 +72,281 @@ table(
 
 \S4method{table}{distribution}(x)
 }
-\description{
-HumdrumR has ways to...
+\arguments{
+\item{wide}{\emph{\strong{Should the second dimension in distributions be printed "wide"?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{printZeros}{\emph{\strong{Should zero counts/probabilities be printed?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{zeros}{\emph{\strong{How should zeros be represented in tables?}}
+
+Defaults to \code{"."}.
+
+Must be a single atomic value, which will be coerced to a \code{character}.}
+
+\item{syntaxHighight}{\emph{\strong{Should syntax highlighting be used (in Rstudio)?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 }
+\description{
+HumdrumR represents data distributions in a special \code{distribution} class, which
+is a simple extension of a standard \code{data.frame}.
+Distributions may have one or more dimensions.
+There are two subtypes of distributions: count distributions (created by \code{\link[=count]{count()}}) and
+probability distributions (created by \code{\link[=pdist]{pdist()}}).
+}
+\details{
+The \code{distribution} class is essentially just a normal \code{data.frame} except with
+a special methods for printing, indexing, and combining distributions.
+These features all make the object look and behave more intuitively
+like a like a distribution of data.
+You can always use \code{as.data.frame()}, \code{as.data.table()}, or \code{as_tibble()} (if you've attached \link{tibble}) to
+get rid of the humdrumR features.
+
+Each \code{distribution} frame has \eqn{k + 1} columns, where \eqn{k} is the number of dimensions (variables).
+In a \code{distribution} data.frame, each row represents a level, or combination of levels, in the distribution.
+The first $k$ columns indicate the levels of each variable in the distribution (each dimension).
+Each of these $k$ dimensions always has a unique (non-empty) name, which can
+be accessed with the \code{varnames()} command, or modified with \code{varnames(myDist) <- newnames}.
+These columns can be accessed directly using the \code{levels()} command.
+
+The last (rightmost) column contains the count or proportion associated with each level.
+In the case of count distributions, this last column is named \code{n}; in probability distributions, it is named \code{p}.
+The \code{n} (count) column is always an \code{integer} vector, where are \eqn{\forall n, n \geq 0}.
+The \code{p} (proportion) column is always a \code{numeric} vector, where \eqn{\forall p, 1 \geq p \geq 0}.
+
+We define \code{as.matrix()} and \code{as.array()} methods for \code{distribution} objects.
+The \code{as.array()} method results in an \code{\link[=array]{array()}} with the same dimensionality
+as the distribution.
+In contrast, the \code{as.matrix()} function will force distributions with more than two dimensions
+into two dimensions, by collapsing combining all dimensions greater than two with the first dimension:
+each combination of levels will appear as a row (with \code{.} in between the names of levels).
+}
+\section{Printing distributions}{
+
+
+The \code{\link[=print]{print()}} method for distribution objects has some nice features, including syntax highlighting
+(which can be turned off with the \code{syntaxHighlight = FALSE} argument to \code{print()}, or by setting the
+global humdrumR option with \code{humdrumR(syntaxHighlight = FALSE)}.
+
+HumdrumR distributions will print rounded versions of numbers (marked with \code{~}), and use appropriate
+\href{https://en.wikipedia.org/wiki/Metric_prefix}{SI prefixes} for large and small numbers.
+Specifically, count distributions will affix large numbers with the characters
+\code{k} (kilo), \code{M} (mega), \code{G} (giga), or \code{P} (peta), while probability distributions will use
+\code{m} (milli), \code{𝜇} (micro), \code{n} (nano), and \code{p} (pico).
+For example, humdrumR will print \code{12321} as \verb{~12.3k}.
+The number of digits printed can be controlled with the \code{digits} argument to \code{print()}, defaulting
+to \code{digits = 3}.
+For example, if \code{digits = 4}, \code{12321} would print as \verb{~12.32k}.
+If \emph{all} numbers in a distribution are of the same order of magnitude,
+the scale is printed with the name of the distribution instead of adding
+prefixes to all the numbers.
+For example, it might print "humdrumR count distribution (thousands)."
+
+The \code{distribution} print method also includes an argument \code{printZeros}, to control whether
+zero values are printed, and the argument \code{zeros} to control \emph{how} zeros are printed.
+By default, \code{zeros = '.'}, so zeros are printed as \code{.}, which makes tables easier to read.
+Note that the \code{printZeros} function only determines if zeros are printed; the \code{count()}
+and \code{pdist()} functions also have the \code{.drop} argument to actually \emph{remove} those levels
+from a distribution.
+
+A final printing feature is controlled by the \code{wide} print argument.
+When \code{wide = TRUE} (which is the default), the second dimension (if present) of
+the a distribution is printed "wide", with each level in its own column.
+This creates a contingency table like visual, which is easier to read.
+This wide format is only used when the resulting printout will fit on your screen.
+
+Note that the wide printing does not change the structure of the underlying \code{data.frame},
+which is still a "tall" data.frame, with each levels of dimension two represented in different rows.
+This may make indexing unintuitive, i.e., if you expect the (apparent) two-dimensional table to
+be indexed like a 2d matrix/table would be in R.
+It won't work that way!
+This is why we provide the \code{wide = FALSE} option, so you can see what the table
+"really" looks like if you need to.
+}
+
+\section{Indexing distributions}{
+
+
+Subsets of humdrumR \code{distribution} objects can be extracted using indexing (\verb{[]} or \verb{[[]]})
+or the (equivalent) \code{filter()}/\code{subset()} methods.
+In either case, a \code{distribution} of the same class (either \code{count} or \code{probability})
+if returned unless the \code{drop} argument is set to \code{TRUE}, which will cause a \code{data.frame}
+to return.
+Distributions cannot be empty, so any attempt to index that returns nothing will
+result in an error (unless \code{drop = TRUE}).
+You can use \code{myDist[drop = TRUE]} to transform a \code{distribution} into a normal \code{data.frame}, without indexing it.
+
+In calls to \code{subset()}/\code{filter()}, you can refer to either the distribution's variable names,
+or to the \code{n} (count) or \code{p} (proportion) column.
+For example, you can find all variables where the count is greater than one hundred
+with \code{myDist |> filter(n > 100)}.
+\subsection{Single-bracket \link{i , }}{
+
+With single-bracket indexing, the \code{i} argument is matched to rows of the underlying data.table.
+(As mentioned above, this may conflict visually with the \code{wide} printing option,
+for distributions with two or more dimensions.)
+If \code{i} is either \code{logical} or \code{numeric}, indexing is exactly like conventional \code{data.frames},
+except there are more strict checks for valid indexes---for example, non-whole values of \code{i} are not allowed,
+and an error will throw if \code{any(i > nrow(myDist))},
+
+If \code{i} is \code{character}, the strings are matched against the level names of \emph{all} the distributions' dimensions.
+An exact match with a level in any dimension will result in that level being returned.
+}
+
+\subsection{Single-bracket \link{ , j}}{
+
+With single-bracket indexing, the \code{j} argument is used to index the dimensions of the distribution.
+If \code{j} is either \code{logical} or \code{numeric}, indexing is exactly like conventional \code{data.frames},
+except 1) there are more strict checks for valid indexes---for example, non-whole values of \code{j} are not allowed,
+and an error will throw if \code{any(j > length(varnames(myDist)))}; and 2) the \code{n}/\code{p} is not counted
+as a column to index---this column is always retained.
+If \code{j} is \code{character}, the strings are matched exactly against the distribution names.
+}
+
+\subsection{Double-bracket \link{i, j, ...}}{
+
+Double-bracket indexing can be used to index specific combinations of levels, across more than one distribution.
+Named index arguments are matched (exactly) to dimension names; unnamed arguments are matched
+in order to any dimensions not given a named argument.
+Each index argument can be a \code{logical} (same length as number of levels for corresponding dimension),
+whole numbers (indexing dimension levels in order), or \code{character} strings (exactly) matching level names.
+
+Normally, each dimension is indexed separately based on any indexes applied to it.
+However, if \code{cartesian = TRUE}, specific combinations of levels are indexed
+based on which values in each of the index vectors align with each other.
+(This approach cannot be used with \code{logical} indices.)
+For example, \code{myDist[[c(1, 1, 2, 2), c(1, 2, 3, 4)]]} will return only the counts/proportions
+from the level-pairs (1,1), (1,2), (2,3), and (2,4).
+The count for (1,3)--for example---would not be returned.
+This behavior is similar to indexing a \code{\link[base:matrix]{base::matrix()}} using matrix---indeed,
+you can get the same behavior by indexing with a matrix.
+For example, \code{myDist[[cbind(c(1,1,2,2), c(1,2,3,4))]]}.
+}
+
+\subsection{Probability sums}{
+
+When indexing/filtering a \code{probability} distribution, the probabilities of any remaining levels
+after filtering/indexing are recomputed so as to sum to 1.
+If you index out dimensions, the levels of the removed dimensions are summed across
+the levels of the remaining dimensions.
+If you want to keep the values as is (not summing to 1), use \code{drop = TRUE}---the output will no longer
+be a probability distribution.
+}
+}
+
+\section{Conditional probability}{
+
+
+\code{probability} \code{distribution} objects, by default, represent the joint probability
+of all their dimensions.
+(This means that the whole distribution sums to one).
+However, they may also have their probabilities
+conditioned on one or more of their variables, so that the probabilities with each level
+(or combinations of levels) of the conditions sum to one.
+These conditions can be set when a distribution is created, or modified, by the \code{pdist()}
+function, using the \code{condition} argument.
+When a \code{condition} is not specified, the joint probability is computed.
+Thus, you can remove conditions from any \code{probability} distribution by passing it to
+\code{pdist()} with no \code{condition} argument---or can also change the condition to other variables.
+For example:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{pdist(X = x, Y = y, condition = 'X') -> condition_X
+
+condition_X |> pdist() -> joint
+condition_X |> pdist(condition = 'Y') -> condition_y
+
+}\if{html}{\out{</div>}}
+
+When indexing levels, conditional probabilities are resummed as usual.
+If you are indexing out variables, any conditions remaining in the distribution (after indexing)
+will be kept (and recomputed) if it makes sense.
+However, if you index out all the conditions, or index out all variables that weren't conditioned on,
+the conditions will be removed during indexing.
+}
+
+\section{Combining distributions}{
+
+
+HumdrumR's \code{distribution} objects can be concatenatated (combined) together to form new distributions.
+Only \code{distribution} objects with \emph{identical} dimension names can be combined (an error will be thrown, otherwise).
+(If you need to change dimension names to make the match, use \verb{varnames()<-}.
+When combined, the shared levels of each dimension are aligned.
+Levels that are not shared are simply copied from their origin \code{distribution}.
+This means that the levels of each dimension of the resulting \code{distribution} will be the
+union of the levels of that dimension between the two originating distributions.
+
+The \code{c()} function can be used to combine two or more \code{count} distributions which have identical dimension names.
+The resulting distribution has a new variable added, indexing the original distribution source.
+This new variable/dimension is named \code{"concat"} by default, but can be changed to another name using
+the \code{varname} argument.
+}
+
+\section{Distribution math}{
+
+
+HumdrumR defines some mathematical operations for \code{distribution} objects, including arithmetic operations
+between two distributions, operations between a distributions and positive, whole-number scalar values, and
+mathematical summaries of distributions.
+
+When doing arithmetic with \code{distribution} objects, some operations make sense as "closed" operations: meaning
+that the result of the operation is still a \code{distribution} of the same type.
+In contrast, other arithmetic operations only make sense if we view the result as "just" numbers,
+not a new distribution.
+In these cases, humdrumR will return a \code{data.frame}, not a \code{distribution}.
+\subsection{Arithmetic with count distributions}{
+
+Only addition (\code{+}) between two \code{count} distributions results in new distribution: all other operations \emph{between}
+distributions result in a plain \code{data.frame}.
+(Subtraction is not allowed, so as to avoid negative counts.)
+However, \code{count} distributions can be scaled by positive whole numbers using either \code{*} (multiplication) or \code{\%/\%} (Euclidean division).
+The scaling value must either be length 1, or be the same length as the number of levels in the distribution (\code{nrow(levels(myDist))}).
+All other arithmetic with count distributions will result in non-\code{distribution} output.
+}
+
+\subsection{Arithmetic with probability distributions}{
+
+For \code{probability} distributions, all arithmetic involving distributions inevitably destroys their structure
+(e.g., make it so the total probability no longer sums to 1), so
+arithmetic can be done between \code{probability} distributions (which share dimension names)
+or between \code{probability} distributions and scalar values (length 1, or same length as the number of levels in the distribution),
+but the result is always a plain \code{data.frame}.
+
+There is one other special arithmetic operation between \code{probability} distributions which \emph{don't}
+share dimensions.
+The outer product function \code{\%o\%} can be used to produce the empirical,
+independent joint probability between two probability distributions.
+The joint probability of all levels is calculated, assuming all dimensions/variables
+are independent---in other words, the joint product of each condition is just the product of
+all the levels.
+This outer-product operation (\code{\%o\%}) will strip any/all conditions from the \code{probability}
+distributions.
+}
+
+\subsection{Mathematical summaries of distributions}{
+
+The R "group generic functions" \link{Math} and \link{Summary} are defined for
+\code{distribution} objects. This includes, functions like \code{log()},
+\code{round()}, \code{min()}, \code{range()}, and \code{sum()}.
+Methods for \code{\link[=mean]{mean()}} and \code{\link[=median]{median()}} are also defined.
+All of these functions, when applied to a \code{distribution}, return a
+vanilla \code{data.frame} (not a distribution).
+
+For more general operations with \code{distribution} values,
+use \code{\link[=mutate]{mutate()}} or \code{\link[=summarize]{summarize()}} (or \link[base:with]{with/within}), and refer to
+the \code{n} (count) or \code{p} (probability) field.
+}
+}
+
 \seealso{
 Use the \link[=count.default]{count()} and \code{\link[=pdist]{pdist()}} functions to create distribution objects.
 }

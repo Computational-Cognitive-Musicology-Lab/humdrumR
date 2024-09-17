@@ -110,7 +110,7 @@ test_that('distribution stuff, 1D',{
   cat_count_named <- count(varname = cat)
   
   ## logicals
-  expect_equal(which(cat_count == 72), 21)
+  expect_equal(which(cat_count == 72), setNames(21, 'u'))
   expect_equal(sum(cat_count > 20), 19)
   
   expect_equal(cat_count |> filter(grepl('[aeiou]', cat)) |> sum(), setNames(147, 'cat'))
@@ -130,7 +130,7 @@ test_that('distribution stuff, 1D',{
   ## coercion
   expect_equal(as.data.frame(cat_count) |> ncol(), 2)
   expect_equal(as.matrix(cat_count) |> ncol(), 1)
-  expect_equal(as.data.frame(cat_count_named)$varname, rownames(as.matrix(cat_count)))
+  expect_equal(as.data.frame(cat_count_named)$varname, factor(rownames(as.matrix(cat_count))))
   
           
   # numeric
@@ -152,7 +152,7 @@ test_that('distribution stuff, 1D',{
   
   expect_error(count(num, binArgs = list(quantiles = c(3, 6))))
   expect_error(count(num, binArgs = list(right = list(3))))
-  expect_error(count(num, binArgs = list(maxN = 'apple')))
+  expect_error(count(num, binArgs = list(maxUnique = 'apple')))
   
   # NA
   cat[sample(length(cat), 20)] <- NA
@@ -168,8 +168,8 @@ test_that('distribution stuff, 1D',{
   expect_equal(count(num) |> sort(decreasing = TRUE), count(num, sort = 1))
   
   # .drop
-  expect_equal(nrow(count(num, .drop = FALSE)), 13)
-  expect_equal(nrow(count(num, .drop = TRUE)), 11)
+  expect_equal(nrow(count(num, .drop = FALSE)), 17)
+  expect_equal(nrow(count(num, .drop = TRUE)), 14)
   
 })
 
@@ -191,7 +191,7 @@ test_that('distribution stuff, 2+D',{
   expect_equal(sum(counts_named), setNames(N, 'x.y'))
   
   expect_equal(sum(counts[counts > 50]), setNames(8697, 'num.cat'))
-  expect_equal(sum(counts[2:30, ]), setNames(6341, 'num.cat'))
+  expect_equal(sum(counts[2:30, ]), setNames(170, 'num.cat'))
   
   
   # indexing collapses
@@ -205,6 +205,9 @@ test_that('distribution stuff, 2+D',{
   # pdist sums
   expect_equal(pdist(x = cat, z = cat2) |> sum(), setNames(1, 'x.z'))
   expect_equal(pdist(x = cat, y = num, z = cat2)[ , c('x', 'z')] |> sum(),  setNames(1, 'x.z'))
+  
+  
+  
 })
 
 
@@ -233,10 +236,23 @@ expect_that('Can create distributions from other things', {
 
 expect_that('Distribution arithmetic works', {
   set.seed(2)
-  N <- 100
-  cat1 <- sample(letters, N, replace = TRUE, prob = 1:26)
-  cat2 <- sample(letters, N, replace = TRUE, prob = 1:26)
+  N <- 1000
   
+  cat <- sample(letters, N, replace = TRUE, prob = 1:26)
+  cat1 <- sample(letters, N, replace = TRUE, prob = 26:1)
+  cat2 <- sample(LETTERS[1:5], N, replace = TRUE, prob = c(10,2,10,2,5))
+  
+  
+  # arith and concat
+  expect_error(count(cat) + count(cat2))
+  count0 <- count(X = cat)
+  count1 <- count(X = cat1)
+  count2 <- count(X = cat2)
+  expect_equal(sum(count1 + count2), setNames(length(cat) + length(cat2), 'X'))
+  expect_equal(c(count0, count1)[,'X'], count1 + count0)
+  expect_equal(count0 + count0 + count0, count0 * 3)
+  
+  expect_equal(sum(pdist(count0) %o% pdist(count2)), setNames(1, "pdist(count0){X}.pdist(count2){X}"))
   
   expect_true(all(count(X = c(cat1, cat2)) == (count(X = cat1) + count(X = cat2))))
 })

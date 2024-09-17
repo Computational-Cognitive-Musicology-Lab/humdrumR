@@ -109,16 +109,16 @@ If you don't specify any fields, the \link[=selectedFields]{selected} field(s) w
 \section{NAs and zeros}{
 
 
-HumdrumR \code{count()} methods will, by default, count \code{NA} values if they are present---if you don't want
+HumdrumR \code{count()} and \code{pdist()} methods will, by default, count \code{NA} values if they are present---if you don't want
 to count \code{NA}s, specify \code{na.rm = TRUE}.
 
-By default, \code{count()} will include counts of known levels of variables, even if they are zero.
-This can happen if the data are \link[base:factor]{factors} or \link[=token]{tokens}, where all possible levels
-are embedded in the data.
-When cross-tabulating multiple vectors, zeroes can also occur for any atomic type
-if certain combinations never occur.
-To drop zeros from the output distribution, specify \code{count(.drop = TRUE)}.
-(Note that \code{dplyr::count()} drops levels by default.)
+By default, \code{count()} and \code{pdist()} will include all known levels of input variables, even if those levels don't occur
+(they are counted as zero).
+This can happen if the input includes \link[base:factor]{factors} or \link[=token]{tokens}, which have their known levels attached to
+them.
+Zeros can also occur for any atomic type when cross-tabulating multiple vectors, if certain combinations of values
+never occur.
+To drop zeros from the output distribution, specify .drop = TRUE\verb{. (Note that }dplyr::count()\verb{drops levels by default, but}r hm` functions do not.=)
 }
 
 \section{Tabulating numeric values}{
@@ -152,13 +152,12 @@ For example, \code{count(as.character(myNumbers))}.
 \section{Coersion/conversion}{
 
 
-The \code{humdrumR} \link{distribution} class can be converted to and from R's base \link[base:table]{table}.
-Count and probability distributions cannot also be converted between.
-All you do is call the appropriate function(s).
-What this means is that, for example
+Count and probability distributions, as well as base R \link[base:table]{tables}
+can be freely converted between using the \code{count()}, \code{pdist()}, and \code{table()} functions.
+What this means is that, for example:
 \itemize{
 \item \code{count(x) |> table()} is the same as \code{table(x)}
-\item \code{table(x) |> count(na)} is the same as \code{count(x, na.rm = TRUE)}
+\item \code{table(x) |> count()} is the same as \code{count(x, na.rm = TRUE)}
 \item \code{count(x) |> pdist()} is the same as \code{pdist(x)}
 \item \code{pdist(x) |> count() |> table()} is the same as \code{count(x) |> table()}
 \item etc.
@@ -167,6 +166,20 @@ What this means is that, for example
 
 \section{Conditional probability}{
 
+
+By default, \code{pdist(x)} produces a table which is essentially identical to \code{count(x) / length(x)}, or
+\code{count(x, y, ...) / length(x)} for multi-dimensional arrays.
+This means the default is the \href{https://en.wikipedia.org/wiki/Marginal_distribution}{marginal probability} (for one variable)
+or the \href{https://en.wikipedia.org/wiki/Joint_probability_distribution}{joint probability} (for more than one variables).
+
+If more than variables are present, \code{pdist()} can also the
+\href{https://en.wikipedia.org/wiki/Conditional_probability_distribution}{conditional probabilities}, conditioned
+on one or more of the variable.
+(There can be \code{K - 1} conditions, where \code{K} is the total number of variables.)
+Conditions can be expressed as either natural numbers (indicating which variable(s) to condition on
+in their input order) or as character strings exactly matching dimension names.
+Thus, if we call something like \code{pdist(X = x, Y = y)}, we could condition on the \code{y} variable \emph{either}
+by saying \code{pdist(X = x, Y = y, condition = 2)} or \code{pdist(X = x, Y = y, condition = "Y")}.
 }
 
 \examples{

@@ -321,7 +321,8 @@ xpnatural <- xnumber & xmin(1) & xwholenum
 xposORneg <- argCheck(\(arg)  all(arg >= 0) || all(arg <= 0), "can't mix negative and positive indices", 
                       \(arg) "'argname' includes {.values(arg[arg > 0])} AND {.values(arg[arg < 0])}")
 
-
+xnodups <- argCheck(\(arg) !any(duplicated(arg)), "can't include duplicate values",
+                    \(arg) "'argname' includes duplicates of values {.values(arg[duplicated(arg)])}")
 
 ### Length -----
 
@@ -374,6 +375,18 @@ xmatch <- function(match) {
            rule,
            describe)
 
+}
+
+xmatchnrow <- function(match) {
+  matchname <- rlang::expr_name(rlang::enexpr(match))
+  
+  rule <- glue::glue("must be the same length as the {matchname} argument has rows")  
+  
+  describe <- \(arg) glue::glue("{.mismatch(length)(arg)} and ", .mismatch(nrow)(match, matchname))
+  argCheck(\(arg)  length(arg) == nrow(match),
+           rule,
+           describe)
+  
 }
 
 xmatchclass <- function(match) {
