@@ -7,11 +7,11 @@
 \alias{pentropy}
 \title{Calculate point-wise or contextual entropy}
 \usage{
-entropy_by(..., by, independent = TRUE, base = 2)
+entropy_by(..., condition, independent = TRUE, base = 2)
 
-\method{entropy_by}{probability}(pdist, by, independent = TRUE, base = 2)
+\method{entropy_by}{probability}(pdist, condition, independent = TRUE, base = 2)
 
-\method{entropy_by}{default}(..., by, independent = TRUE, base = 2)
+\method{entropy_by}{default}(..., condition, independent = TRUE, base = 2)
 
 pentropy(
   ...,
@@ -23,8 +23,76 @@ pentropy(
   binArgs = list()
 )
 }
+\arguments{
+\item{...}{\emph{\strong{Distribution (or atomic vectors) to compute entropy of.}}
+
+Must either be a distribution object (created by \code{\link[=table]{table()}}, \code{\link[=density]{density()}}, \code{\link[=count]{count()}}, or \code{\link[=pdist]{pdist()}}), or one
+or more atomic vectors of equal length.}
+
+\item{condition}{\emph{\strong{Compute conditional entropy, conditioned on this variable.}}
+
+Must be a non-empty \code{character} string, which matches the name of one or of the named variables
+in the distribution, or a positive whole number which indexes the variables.}
+
+\item{base}{\emph{\strong{The logarithmic base.}}
+
+Defaults to \code{2}, so information is measured in units "bits."
+
+Must be a single, non-zero positive number.
+
+Use \code{base = exp(1)} for natural-log "nats," or \code{base = 10} for Hartley/"dits".}
+}
 \description{
-Calculate point-wise or contextual entropy
+These functions model \href{https://en.wikipedia.org/wiki/Conditional_entropy}{conditional entropy}
+as a dynamic process.
+The \code{entropy_by()} function returns the entropy of outcome variables, grouped
+by conditioning variables, with a separate (isolated) entropy values for each condition.
+The \code{pentropy()} function computes and returns these same values in a vectorized form,
+with the entropy of each condition returned at each point in the input vectors.
+This "pointwise-entropy" is often used as a model of dynamic "uncertainty" in music.
+}
+\details{
+The formal information theoretic notion of\href{https://en.wikipedia.org/wiki/Conditional_entropy}{conditional entropy}
+is a description of how much entropy is observed in explained variables when conditioned on other variables,
+but \emph{averaged over all possible conditions and outcomes} in the proportions they appear in the distribution.
+This "proper" conditional entropy is always a single value, and can be computed using
+humdrumR's \link[=entropy]{entropy(..., condition = 'var')} command.
+
+Consider the following sequence: A, B, A, B, A, B, A, B, C, A, B.
+If we compute the conditional probability of each letter, conditioned on the previous letter,
+we get the conditional entropy
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{seq <- c('A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'C', 'A', 'B', 'C', 'B')
+
+entropy(From = lag(seq,-1), To = seq, condition = 'From', na.rm = TRUE) 
+
+}\if{html}{\out{</div>}}
+
+The result is \code{0.5954373} bits of entropy, which is pretty low.
+However, if we analyze the conditions in the this sequence closely we can observe a few things:
+\itemize{
+\item When the previous value is A, the next value is \emph{always} B---so the entropy is \code{0}.
+\item When the previous value is B, the next value is A three times, and C once---so the entropy of \emph{that}
+distribution would be \code{entropy(c('A', 'A','A', 'C')) = .8112781}.
+\item Finally, when the previous value is C, the next values is always A---so again, the entropy is \code{0}.
+}
+
+However, these three outcomes don't occur equally often.
+If we walked through this sequence, we'd see five As (\code{0} each), four Bs (\code{.81} each), and one C (\code{0} zero).
+If we average six \code{0} and four \code{.8112781} we get...\code{0.3245112}. That's the conditional entropy which we computed above;
+The \emph{average} conditional entropy over the sequence.
+In music research practice, sometimes we don't just want to know the overall conditional entropy.
+Rather, we want to keep track of the dynamic changes in the conditional entropy, as we did above.
+This is the purpose of the \code{entropy_by()} and \code{pentropy()} functions.
+
+The \code{entropy_by()} and \code{pentropy()} functions can be use just like the \code{\link[=entropy]{entropy()}} and \code{\link[=info]{info()}} functions respectively,
+except 1) there must be at least two dimensions and 2) a \code{condition} \emph{must} be supplied,
+as a \code{character} string matching dimension names or whole number indices of dimensions.
+Unlike \code{\link[=entropy]{entropy()}}, \code{entropy_by()} will return a vector of entropy values,
+corresponding to each combination of levels in the \code{condition} arguments.
+Unlike \code{\link[=info]{info()}}, the output of \code{pentropy()} represents the entropy
+at each index, conditioned on all the \code{condition} variables,
+not the information content of each observed data point.
 }
 \seealso{
 The HumdrumR \link[=information]{information theory} overview.

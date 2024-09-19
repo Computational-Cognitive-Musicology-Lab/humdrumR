@@ -67,12 +67,12 @@ Must be a single, non-zero positive number.
 
 Use \code{base = exp(1)} for natural-log "nats," or \code{base = 10} for Hartley/"dits".}
 
-\item{condition}{\emph{\strong{Compute conditional entropy/information, conditoned on this variable.}}
+\item{condition}{\emph{\strong{Compute conditional entropy/information, conditioned on this variable.}}
 
 Defaults to \code{NULL} (no condition), so the joint entropy is calculated.
 
 Must be a non-empty \code{character} string, which matches the name of one or of the named variables
-in the distribution.
+in the distribution, or a positive whole number which indexes the variables.
 
 This argument is simply passed to \code{\link[=pdist]{pdist()}}.}
 }
@@ -88,20 +88,20 @@ and humdrumR defines methods for calculating both.
 }
 \details{
 To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
-HumdrumR's \code{\link[=count]{count()}} and \code{\link[=pdist]{pdist()}} methods (or R's standard \code{\link[=table]{table()}} function) can be used calculate empirical
-distributions of atomic data.
+HumdrumR's \code{\link[=count]{count()}} and \code{\link[=pdist]{pdist()}} methods can be used calculate empirical
+distributions from atomic data.
 For numeric data we can also use R's standard \code{\link[stats:density]{stats::density()}} function to estimate the continuous probability density.
 
 The \code{entropy()} function takes an object representing a probability distribution---ideally a humdrumR \link{distribution} object,
 base-R \link{table}, or a \code{\link[=density]{density()}} object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
 However, if you are lazy, you can pass \code{entropy()} atomic data vectors directly and it will automatically pass them to the \code{\link[=pdist]{pdist()}} or \code{\link[stats:density]{stats::density()}}
-functions for you; for example, if you want to calculate the joint entropy of variables\code{x} and \code{y} (which must be the same length),
-you can call \code{entropy(pdist(x, y))}
+functions for you; for example, if you want to calculate the joint entropy of variables \code{x} and \code{y} (which must be the same length),
+you can either call \code{entropy(pdist(x, y))}
 or just \code{entropy(x, y)}.
-Other arguments can be provided to \code{pdist()} as well; notably, if you want to calculate the \emph{conditional} entropy,
+Other arguments can be provided to \code{\link[=pdist]{pdist()}} as well; notably, if you want to calculate the \emph{conditional} entropy,
 you can, for example, say \code{entropy(x, y, condition = 'y')}.
 
-The \code{info()} function is used similarly to the calling \code{entropy()} directly on data vectors:
+Using the \code{info()} function is similar to calling \code{entropy()} directly on data vectors:
 anywhere where you can call \code{entropy(x, y)}, you can call \code{info(x, y)} instead.
 The difference is that \code{info()} will return a vector of numbers representing the information content of each input observation.
 By definition, the entropy of the data distribution is the average of all these point-wise information values: thus, \code{mean(info(x, y)) == entropy(x, y)}.
@@ -110,12 +110,14 @@ By definition, the entropy of the data distribution is the average of all these 
 
 
 In many cases, we simply use entropy/information content to describe a set of data.
-In this case, the data we observe and the probability model (distribution) are the same---i.e., the probability model is the distribution of the data itself.
+In this case, the data we observe and the probability model (distribution) are the
+same---i.e., the probability model is the ("empirical") distribution of the data itself.
 However, we can also use a \emph{different model}---in this case, a different probability distribution---to describe data.
-The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
-This is called the \href{https://en.wikipedia.org/wiki/Cross-entropy}{cross entropy}, and can be interpreted as a measure of how well the model fits the data;
-The cross entropy is lowest when the model exactly matches the data, which will return the standard self entropy.
-Otherwise, the cross entropy will be higher then the self entropy.
+This is called the \href{https://en.wikipedia.org/wiki/Cross-entropy}{cross entropy}, and can be interpreted as a measure
+of how well the model fits the data.
+The cross entropy is lowest when the model exactly matches the data, when it will be the same as the
+normal ("self") entropy.
+If the model doesn't exactly match the data, the cross entropy will be higher then the self entropy.
 If the data matches the model well, the cross entropy will be a little bit higher than the self entropy; if the data matches the model poorly,
 the cross entropy can be much higher.
 The difference between the cross entropy and the self entropy is always positive (or zero), and is called the
@@ -127,26 +129,29 @@ The \code{xentropy()} command works just like the entropy command, except you ne
 \emph{another} probability distribution.
 Note that the data and the model have to have the \strong{exact} same variable names or \code{humdrumR} will throw an error!
 Name your arguments to avoid this (this is illustrated in the example below, where we name everything \code{X}).
-To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{dorian <- c('A', 'B', 'C', 'D', 'E', 'F#', 'G')
+To illustrate the propertise of cross entropy, lets create three sets of data, two of which are similar,
+and one which is very different:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{set.seed(1)
+dorian <- c('A', 'B', 'C', 'D', 'E', 'F#', 'G')
 N <- 1000
 
 sample1 <- sample(dorian, N, replace = TRUE, prob = 7:1)
-sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1)
-sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7)
+sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1) 
+sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7) 
 
 
 ## first the self entropy
-entropy(X = sample1)
-entropy(X = sample2)
-entropy(X = sample3)
+entropy(X = sample1) # 2.607
+entropy(X = sample2) # 2.597
+entropy(X = sample3) # 2.592
 
 ## now the cross entropy
 
-xentropy(X = sample1, model = pdist(X = sample2))
-xentropy(X = sample2, model = pdist(X = sample2))
-xentropy(X = sample3, model = pdist(X = sample2))
+xentropy(X = sample1, model = pdist(X = sample2)) # 2.619
+xentropy(X = sample2, model = pdist(X = sample2)) # 2.597 (same as self entropy above)
+xentropy(X = sample3, model = pdist(X = sample2)) # 3.538
 
 }\if{html}{\out{</div>}}
 
@@ -164,8 +169,9 @@ However, cross entropy/information-content are closely related to the more gener
 \section{Likelihood}{
 
 
-The output of \code{info()} is identical to the log (base 2 by default) of the modeled \href{https://en.wikipedia.org/wiki/Likelihood_function}{likelihood}
-of each data point, which can be computed using the \code{\link[=like]{like()}} function.
+The output of \code{info()} is identical to the log of the modeled
+\href{https://en.wikipedia.org/wiki/Likelihood_function}{likelihood} of each data point,
+which can be computed using the \code{\link[=like]{like()}} function.
 Literally, \code{info(x, base) == log(like(x), base)}.
 The \code{\link[=like]{like()}} function works just like \code{info()}, computing pointwise probabilities for each data point based on the
 probability distribution in \code{model}.

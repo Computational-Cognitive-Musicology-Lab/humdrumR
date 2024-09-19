@@ -328,7 +328,7 @@ test_that('Entropy stuff', {
     
     # mutual
     expect_equivalent(joint, Hc + Hc2 - mutual(cat, cat2))
-    expect_equivalent(mutual(cat, cat), H(cat))
+    expect_equivalent(mutual(x= cat, y = cat), H(cat))
     expect_equivalent(mutual(cat, cat2), mean(pmutual(cat, cat2)))
     
     
@@ -336,7 +336,7 @@ test_that('Entropy stuff', {
     catx <- ifelse(seq_along(cat) %in% sample(length(cat), N / 4), 'a', cat)
     
     expect_equivalent(mean(info(cat)), H(cat))
-    expect_equivalent(mean(info(cat, catx)), H(cat, catx))
+    expect_equivalent(mean(info(x = cat, y = catx)), H(cat, catx))
     expect_equivalent(mean(info(cat, catx, condition = 'cat')), H(cat, catx, condition = 'cat'))
     
     expect_equivalent(-sum(log(like(cat, model = pdist(cat = catx)), base = 2)) / N, xentropy(cat, model = pdist(cat = catx)))
@@ -351,6 +351,16 @@ test_that('Entropy stuff', {
   }
   
 
+  # entropy by
+  
+  chord <- c('I', 'I', 'I', 'I', 'V', 'V', 'V', 'V', 'IV', 'IV', 'IV', 'IV')
+  note  <- c('1', '3', '5', '5', '5', '7', '4', '2', '6',  '1',   '4',  '4')
+  
+  by <- entropy_by(chord, note, condition = 'note')
+  expect_equal(unname(entropy(chord, note, condition = 'note')), # conditional entropy,
+               mean(by[as.integer(note)]))
+  
+  expect_equal(range(by), c(0, 1))
   
 })
 

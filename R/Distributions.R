@@ -366,10 +366,12 @@ dist_type <- function(dist) intersect(colnames(dist), c('n', 'p'))
 getValues <- function(dist) as.data.frame(dist)[ , dist_type(dist)]
 getLevels <- function(dist) as.data.frame(dist)[ , varnames(dist), drop = FALSE]
 getLevelString <- function(dist, sep = '.') do.call('paste', c(getLevels(dist), list(sep = sep)))
-
+ 
+#' @rdname distribution
 #' @export
 varnames <- function(x) setdiff(colnames(x), c('n', 'p'))
 
+#' @rdname distribution
 #' @export
 `varnames<-` <- function(x, value) {
   checks(value, xlen && xmaxlength(length(x) - 1L))
@@ -723,7 +725,7 @@ setMethod('[[', 'distribution',
                                                                '<any dimension|dimensions> in this distribution.', ifelse = length(setdiff(names(named), varnames)) == 1)
             
             unnamed <- c(list(if (!missing(i)) i), list(if (!missing(j)) j), ldots[.names(ldots) == ''])
-            unnamed[-1:-2] <- Filter(Negate(is.null), unnamed[-1:-2])
+            unnamed <- Filter(Negate(is.null), unnamed)
             if ((length(named) + length(unnamed)) > length(args)) .stop("This distribution only has {num2print(length(varnames))} dimensions to index.",
                                                                         "You have provided {num2print((length(named) + length(unnamed)))}.")
             
@@ -1431,6 +1433,7 @@ setMethod('rowSums', 'distribution',
 #' 
 #' Note that the `binArgs` argument has no effect if the input (`...`) are not numbers.
 #'
+#' @seealso These functions create [distribution] objects.
 #' @name count
 #' @export 
 count.default <- function(..., sort = FALSE, na.rm = FALSE,
@@ -1578,6 +1581,23 @@ count.probability <- function(x, ..., sort = FALSE,
 #' Thus, if we call something like `pdist(X = x, Y = y)`, we could condition on the `y` variable *either*
 #' by saying `pdist(X = x, Y = y, condition = 2)` or `pdist(X = x, Y = y, condition = "Y")`.
 #' 
+#' @param condition ***Compute conditional entropy/information, conditioned on this variable.***
+#' 
+#' Defaults to `NULL` (no condition), so the joint entropy is calculated.
+#' 
+#' Must be a non-empty `character` string, which matches the name of one or of the named variables
+#' in the distribution, or a positive whole number which indexes the variables.
+#'
+#' @examples
+#' 
+#' chord <- c('I', 'I', 'I', 'I', 'V', 'V', 'V', 'V', 'IV', 'IV', 'IV', 'IV')
+#' note  <- c('1', '3', '5', '5', '5', '7', '4', '2', '6',  '1',   '4',  '4')
+#' 
+#' entropy(chord, note) # joint entropy
+#' entropy(chord, note, condition = 'note') # conditional entropy
+#' 
+#' entropy_by(chord, note, condition = 'note') # conditional entropy, by condition
+#' 
 #' 
 #' @rdname count
 #' @export
@@ -1595,8 +1615,10 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   # 
   # if (na.rm) x <- x[!Reduce('|', lapply(getLevels(x), is.na)), ]
   # if (sort) x <- sort(x, sort > 0L)
+  checks(condition, xnull | (xcharacter & xlegal(varnames(x))) | (xnatural & xmax(length(varnames(x)))))
   
   df <- as.data.frame(x)
+  
   
   exprs <- rlang::enexprs(...)
   if (length(exprs)) condition <- pexprs(exprs, colnames(df), condition)$Condition %||% condition
@@ -1618,6 +1640,8 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
 
 #' @export
 pdist.probability <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+  checks(condition, xnull | (xcharacter & xlegal(varnames(x))) | (xnatural & xmax(length(varnames(x)))))
+  
   exprs <- rlang::enexprs(...)
   if (length(exprs)) condition <- pexprs(exprs, colnames(x), condition)$Condition %||% condition
   
@@ -1859,20 +1883,20 @@ NULL
 #' @details 
 #' 
 #' To calculate information content or entropy, we must assume (or more often, estimate) a probability distribution.
-#' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
-#' distributions of atomic data.
+#' HumdrumR's [count()] and [pdist()] methods can be used calculate empirical
+#' distributions from atomic data.
 #' For numeric data we can also use R's standard [stats::density()] function to estimate the continuous probability density.
 #' 
 #' The `entropy()` function takes an object representing a probability distribution---ideally a humdrumR [distribution] object,
 #' base-R [table], or a [density()] object (for continuous variables)---and returns the entropy, defaulting to base-2 entropy ("bits").
 #' However, if you are lazy, you can pass `entropy()` atomic data vectors directly and it will automatically pass them to the [pdist()] or [stats::density()]
-#' functions for you; for example, if you want to calculate the joint entropy of variables`x` and `y` (which must be the same length),
-#'  you can call `entropy(pdist(x, y))` 
+#' functions for you; for example, if you want to calculate the joint entropy of variables `x` and `y` (which must be the same length),
+#'  you can either call `entropy(pdist(x, y))` 
 #' or just `entropy(x, y)`.
-#' Other arguments can be provided to `pdist()` as well; notably, if you want to calculate the *conditional* entropy,
+#' Other arguments can be provided to [pdist()] as well; notably, if you want to calculate the *conditional* entropy,
 #' you can, for example, say `entropy(x, y, condition = 'y')`.
 #'
-#' The `info()` function is used similarly to the calling `entropy()` directly on data vectors:
+#' Using the `info()` function is similar to calling `entropy()` directly on data vectors:
 #' anywhere where you can call `entropy(x, y)`, you can call `info(x, y)` instead.
 #' The difference is that `info()` will return a vector of numbers representing the information content of each input observation.
 #' By definition, the entropy of the data distribution is the average of all these point-wise information values: thus, `mean(info(x, y)) == entropy(x, y)`.
@@ -1881,12 +1905,14 @@ NULL
 #' @section Cross entropy:
 #' 
 #' In many cases, we simply use entropy/information content to describe a set of data.
-#' In this case, the data we observe and the probability model (distribution) are the same---i.e., the probability model is the distribution of the data itself.
+#' In this case, the data we observe and the probability model (distribution) are the
+#' same---i.e., the probability model is the ("empirical") distribution of the data itself.
 #' However, we can also use a *different model*---in this case, a different probability distribution---to describe data.
-#' The minimum cross entropy occurs when the data matches the model exactly, and that minimum is the normal "self" entropy of the model.
-#' This is called the [cross entropy](https://en.wikipedia.org/wiki/Cross-entropy), and can be interpreted as a measure of how well the model fits the data; 
-#' The cross entropy is lowest when the model exactly matches the data, which will return the standard self entropy.
-#' Otherwise, the cross entropy will be higher then the self entropy.
+#' This is called the [cross entropy](https://en.wikipedia.org/wiki/Cross-entropy), and can be interpreted as a measure
+#' of how well the model fits the data.
+#' The cross entropy is lowest when the model exactly matches the data, when it will be the same as the
+#' normal ("self") entropy.
+#' If the model doesn't exactly match the data, the cross entropy will be higher then the self entropy.
 #' If the data matches the model well, the cross entropy will be a little bit higher than the self entropy; if the data matches the model poorly,
 #' the cross entropy can be much higher.
 #' The difference between the cross entropy and the self entropy is always positive (or zero), and is called the 
@@ -1898,27 +1924,30 @@ NULL
 #' *another* probability distribution.
 #' Note that the data and the model have to have the **exact** same variable names or `humdrumR` will throw an error!
 #' Name your arguments to avoid this (this is illustrated in the example below, where we name everything `X`).
-#' To illustrate, lets create three sets of data, two of which are similar, and one which is very different:
+#' 
+#' To illustrate the propertise of cross entropy, lets create three sets of data, two of which are similar,
+#' and one which is very different:
 #' 
 #' ```
+#' set.seed(1)
 #' dorian <- c('A', 'B', 'C', 'D', 'E', 'F#', 'G')
 #' N <- 1000
 #' 
 #' sample1 <- sample(dorian, N, replace = TRUE, prob = 7:1)
-#' sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1)
-#' sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7)
+#' sample2 <- sample(dorian, N, replace = TRUE, prob = 7:1) 
+#' sample3 <- sample(dorian, N, replace = TRUE, prob = 1:7) 
 #' 
 #' 
 #' ## first the self entropy
-#' entropy(X = sample1)
-#' entropy(X = sample2)
-#' entropy(X = sample3)
+#' entropy(X = sample1) # 2.607
+#' entropy(X = sample2) # 2.597
+#' entropy(X = sample3) # 2.592
 #' 
 #' ## now the cross entropy
 #' 
-#' xentropy(X = sample1, model = pdist(X = sample2))
-#' xentropy(X = sample2, model = pdist(X = sample2))
-#' xentropy(X = sample3, model = pdist(X = sample2))
+#' xentropy(X = sample1, model = pdist(X = sample2)) # 2.619
+#' xentropy(X = sample2, model = pdist(X = sample2)) # 2.597 (same as self entropy above)
+#' xentropy(X = sample3, model = pdist(X = sample2)) # 3.538
 #' 
 #' ```
 #' 
@@ -1934,8 +1963,9 @@ NULL
 #'
 #' @section Likelihood:
 #' 
-#' The output of `info()` is identical to the log (base 2 by default) of the modeled [likelihood](https://en.wikipedia.org/wiki/Likelihood_function)
-#' of each data point, which can be computed using the [like()] function.
+#' The output of `info()` is identical to the log of the modeled 
+#' [likelihood](https://en.wikipedia.org/wiki/Likelihood_function) of each data point, 
+#' which can be computed using the [like()] function.
 #' Literally, `info(x, base) == log(like(x), base)`.
 #' The [like()] function works just like `info()`, computing pointwise probabilities for each data point based on the 
 #' probability distribution in `model`.
@@ -1965,12 +1995,12 @@ NULL
 #'
 #' Use `base = exp(1)` for natural-log "nats," or `base = 10` for Hartley/"dits".
 #' 
-#' @param condition ***Compute conditional entropy/information, conditoned on this variable.***
+#' @param condition ***Compute conditional entropy/information, conditioned on this variable.***
 #' 
 #' Defaults to `NULL` (no condition), so the joint entropy is calculated.
 #' 
 #' Must be a non-empty `character` string, which matches the name of one or of the named variables
-#' in the distribution.
+#' in the distribution, or a positive whole number which indexes the variables.
 #' 
 #' This argument is simply passed to [pdist()].
 #' 
@@ -2054,13 +2084,84 @@ entropy.default <- function(..., model, base = 2) {
 
 #' Calculate point-wise or contextual entropy
 #' 
+#' These functions model [conditional entropy](https://en.wikipedia.org/wiki/Conditional_entropy)
+#' as a dynamic process.
+#' The `entropy_by()` function returns the entropy of outcome variables, grouped
+#' by conditioning variables, with a separate (isolated) entropy values for each condition.
+#' The `pentropy()` function computes and returns these same values in a vectorized form,
+#' with the entropy of each condition returned at each point in the input vectors.
+#' This "pointwise-entropy" is often used as a model of dynamic "uncertainty" in music.
+#' 
+#' @details 
+#'
+#' The formal information theoretic notion of[conditional entropy](https://en.wikipedia.org/wiki/Conditional_entropy)
+#' is a description of how much entropy is observed in explained variables when conditioned on other variables,
+#' but *averaged over all possible conditions and outcomes* in the proportions they appear in the distribution.
+#' This "proper" conditional entropy is always a single value, and can be computed using
+#' humdrumR's [entropy(..., condition = 'var')][entropy()] command.
+#' 
+#' Consider the following sequence: A, B, A, B, A, B, A, B, C, A, B.
+#' If we compute the conditional probability of each letter, conditioned on the previous letter,
+#' we get the conditional entropy
+#' 
+#' ```
+#' seq <- c('A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'C', 'A', 'B', 'C', 'B')
+#' 
+#' entropy(From = lag(seq,-1), To = seq, condition = 'From', na.rm = TRUE) 
+#' 
+#' ```
+#' 
+#' The result is `0.5954373` bits of entropy, which is pretty low.
+#' However, if we analyze the conditions in the this sequence closely we can observe a few things:
+#' 
+#' + When the previous value is A, the next value is *always* B---so the entropy is `0`.
+#' + When the previous value is B, the next value is A three times, and C once---so the entropy of *that*
+#' distribution would be `entropy(c('A', 'A','A', 'C')) = .8112781`.
+#' + Finally, when the previous value is C, the next values is always A---so again, the entropy is `0`.
+#' 
+#' However, these three outcomes don't occur equally often. 
+#' If we walked through this sequence, we'd see five As (`0` each), four Bs (`.81` each), and one C (`0` zero).
+#' If we average six `0` and four `.8112781` we get...`0.3245112`. That's the conditional entropy which we computed above;
+#' The *average* conditional entropy over the sequence.
+#' In music research practice, sometimes we don't just want to know the overall conditional entropy.
+#' Rather, we want to keep track of the dynamic changes in the conditional entropy, as we did above.
+#' This is the purpose of the `entropy_by()` and `pentropy()` functions.
+#' 
+#' The `entropy_by()` and `pentropy()` functions can be use just like the [entropy()] and [info()] functions respectively,
+#' except 1) there must be at least two dimensions and 2) a `condition` *must* be supplied,
+#' as a `character` string matching dimension names or whole number indices of dimensions.
+#' Unlike [entropy()], `entropy_by()` will return a vector of entropy values,
+#' corresponding to each combination of levels in the `condition` arguments.
+#' Unlike [info()], the output of `pentropy()` represents the entropy
+#' at each index, conditioned on all the `condition` variables, 
+#' not the information content of each observed data point.
+#' 
+#' @param ... ***Distribution (or atomic vectors) to compute entropy of.***
+#' 
+#' Must either be a distribution object (created by [table()], [density()], [count()], or [pdist()]), or one
+#' or more atomic vectors of equal length.
+#'
+#' 
+#' @param base ***The logarithmic base.***
+#' 
+#' Defaults to `2`, so information is measured in units "bits."
+#' 
+#' Must be a single, non-zero positive number.
+#'
+#' Use `base = exp(1)` for natural-log "nats," or `base = 10` for Hartley/"dits".
+#' 
+#' @param condition ***Compute conditional entropy, conditioned on this variable.***
+#' 
+#' Must be a non-empty `character` string, which matches the name of one or of the named variables
+#' in the distribution, or a positive whole number which indexes the variables.
+#' 
+#' 
 #' 
 #' @family {Information theory functions} 
 #' @seealso The HumdrumR [information theory][information] overview.
 #' @export
-entropy_by <- function(..., by, independent = TRUE, base = 2) {
+entropy_by <- function(..., condition, independent = TRUE, base = 2) {
   checks(base, xlen1 & xnumber & xpositive)
-  checks(by, xcharnotempty)
 
   UseMethod('entropy_by')
 }
@@ -2068,21 +2169,21 @@ entropy_by <- function(..., by, independent = TRUE, base = 2) {
 
 #' @rdname entropy_by
 #' @export
-entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
-  
+entropy_by.probability <-  function(pdist, condition, independent = TRUE, base = 2) {
   varnames <- varnames(pdist)
+  checks(condition, xlen & ((xcharacter & xlegal(varnames)) | (xnatural & xmax(length(varnames)))))
   
   if (!is.null(pdist@Condition) && any(base %in% pdist@Condition)) {
     pdist <- conditional(unconditional(pdist), setdiff(pdist@Condition, base))
   }
   
-  if (length(setdiff(by, varnames))) .stop("We can't group this probability distribution by non-existent variable<s|>",
-                                           "{harvard(setdiff(by, varnames), 'or', TRUE)}.", ifelse = length(setdiff(by, varnames)) > 1)
+  # if (length(setdiff(condition, varnames))) .stop("We can't group this probability distribution by non-existent variable<s|>",
+                                                 # "{harvard(setdiff(by, varnames), 'or', TRUE)}.", ifelse = length(setdiff(condition, varnames)) > 1)
   
-  grouping <- as.data.frame(pdist)[ , by , drop = FALSE]
+  grouping <- as.data.frame(pdist)[ , condition , drop = FALSE]
   
-  expected <- if (!independent) unconditional(pdist)$p else tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , by , drop = FALSE], \(x) x / sum(x))
-  observed <- tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , c(pdist@Condition, by) , drop = FALSE], \(x) log(x / sum(x), base = base))
+  expected <- if (!independent) unconditional(pdist)$p else tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , condition , drop = FALSE], \(x) x / sum(x))
+  observed <- tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , c(pdist@Condition, condition) , drop = FALSE], \(x) log(x / sum(x), base = base))
 # 
 #   Hs <- tapply(pdist$p, ,
 #                \(ps) {
@@ -2091,12 +2192,12 @@ entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
 #                  -sum(ps * log(ps, base = base), na.rm = TRUE)
 #                })
   
-  Hs <- -tapply(expected * observed, as.data.frame(pdist)[ , by , drop = FALSE], sum, na.rm = TRUE)
+  Hs <- -tapply(expected * observed, as.data.frame(pdist)[ , condition , drop = FALSE], sum, na.rm = TRUE)
   
-  equation <- Pequation(pdist[ , setdiff(varnames, by)], 'H')
+  equation <- Pequation(pdist[ , setdiff(varnames, condition)], 'H')
   equation <- gsub('\\)$', '', equation)
   equations <- paste0(equation, ';', 
-                      paste(by, collapse = '.'), '=',
+                      paste(condition, collapse = '.'), '=',
                       names(Hs), ')')
   names(Hs) <- equations
   Hs
@@ -2105,8 +2206,8 @@ entropy_by.probability <-  function(pdist, by, independent = TRUE, base = 2) {
 
 #' @rdname entropy_by
 #' @export
-entropy_by.default <- function(..., by, independent = TRUE, base = 2) {
-  entropy_by(pdist(...), by = by, independent = independent, base = base)
+entropy_by.default <- function(..., condition, independent = TRUE, base = 2) {
+  entropy_by(pdist(...), condition = condition, independent = independent, base = base)
 }
 
 
@@ -2162,18 +2263,19 @@ kld.default <- function(..., model, base = 2) {
 #'
 #' The [mutual information](https://en.wikipedia.org/wiki/Mutual_information) is a measure of how statistically
 #' dependent two variables are: in information theory terms, how much information about one variable
-#' is learned from observing other variable(s).
+#' is learned from observing the other variable(s).
 #' The overall mutual information can be calculated using `mutual()` (analogous to [entropy()]),
 #' while the point-wise mutual information can be calculated using `pmutual()` (analogous to [info()]).
 #'
 #' @details
 #' 
 #' Mutual information is a property of probability distributions over two or more variables.
-#' HumdrumR's [count()] and [pdist()] methods (or R's standard [table()] function) can be used calculate empirical
+#' HumdrumR's [count()] and [pdist()] methods can be used to calculate empirical
 #' distributions over atomic data, and we can then calculate their mutual information.
 #'
 #' The `mutual()` and `pmutual()` functions are called just like [entropy()] and [info()].
-#' `mutual()` can be provided a [table][table()] of distribution (from [pdist()]), or can be directly provided two or more 
+#' `mutual()` can be provided a probability [distribution] (made with [pdist()]), or can 
+#' be directly provided two or more 
 #' atomic vectors, which are simply passed to `pdist()`; in other words, `mutual(x, y) == mutual(pdist(x, y))`.
 #' `pmutual()`, like [info()], can only be passed raw atomic vectors, like `pmutual(x, y)`.
 #' Note that, unlike the entropy functions, the mutual information functions will throw an error if you only
@@ -2184,31 +2286,34 @@ kld.default <- function(..., model, base = 2) {
 #' If two (or more) variables are statistically independent, their joint entropy will be the sum of their
 #' independent entropies.
 #' 
-#' $$
+#' \deqn{
 #' H(X, Y) = H(X) + H(Y)
-#' $$
+#' }
 #' 
-#' However, if they are not independent, their joint entropy will be less than the summed independent entropies.
+#' However, *if they are not independent*, their joint entropy will be less than the summed independent entropies.
 #' The mutual information is the difference between the summed independent entropies and their actual observed
 #' joint entropy.
 #' 
-#' $$
+#' \deqn{
 #' I(X,Y) = (H(X) + H(Y)) - H(X,Y)
-#' $$
+#' }
 #' 
 #' 
 #' For the point-wise mutual information, we get a single value for each data observation.
 #' The value represents the difference between the observed joint likelihood of each observation
 #' and the value we'd expect if the variable were independent.
-#' For example, consider the variables binary variables "person likes heavy metal" ($P(metal)$) and "person plays electric guitar" ($P(guitar)$).
-#' Imagine that $P(metal) = .05$ and $P(guitar) = .1$.
+#' For example, consider the binary variables "person likes heavy metal" (\eqn{P(metal)}) and 
+#' "person plays electric guitar" (\eqn{P(guitar)}).
+#' Imagine that \eqn{P(metal) = 0.05} and \eqn{P(guitar) = 0.1}.
 #' If these two variables are independent, we'd expect that the joint probability of liking heavy metal
-#' *and* playing guitar would be $P(metal, guitar) = .05 * .1 = .005$ (one out of 200 people).
-#' However, on measuring some data, we might find that actually one in fifty people like metal and play guitar ($P(metal, guitar) = .02$).
-#' This means that the combination of liking metal and playing guitar is $\\frac{.02}{.005} = 4$ times more likely than we'd expect
-#' if they were independent.
-#' This would translate to a point-wise mutual information of (using default base-2 "bits") $+2$.
-#' The overall mutual information is the average over all the point-wise values (including other combinations, like heavy metal fans who don't play guitar).
+#' *and* playing guitar would be \eqn{\bar{P(metal, guitar)} = .05 * 0.1 = 0.005} (one out of 200 people).
+#' However, on measuring some data, we might find that actually one in fifty people 
+#' like metal *and* play guitar (\eqn{P(metal, guitar) = 0.02}).
+#' This means that the combination of liking metal and playing guitar is \eqn{\frac{0.02}{0.005} = 4}
+#' times more likely than we'd expect if they were independent.
+#' This would translate to a point-wise mutual information of (using default base-2 "bits") \eqn{\\log_2(4) = +2}.
+#' The overall mutual information is the average over all the point-wise values 
+#' (including other combinations, like heavy metal fans who don't play guitar).
 #' 
 #' 
 #'

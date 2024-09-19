@@ -2,6 +2,8 @@
 % Please edit documentation in R/Distributions.R
 \name{distribution}
 \alias{distribution}
+\alias{varnames}
+\alias{varnames<-}
 \alias{print.distribution}
 \alias{sort,distribution-method}
 \alias{pdist.default}
@@ -12,6 +14,10 @@
 \alias{table,distribution-method}
 \title{Distributions}
 \usage{
+varnames(x)
+
+varnames(x) <- value
+
 \method{print}{distribution}(
   dist,
   digits = 3,
@@ -294,32 +300,35 @@ the \code{varname} argument.
 \section{Distribution math}{
 
 
-HumdrumR defines some mathematical operations for \code{distribution} objects, including arithmetic operations
-between two distributions, operations between a distributions and positive, whole-number scalar values, and
+HumdrumR defines some mathematical operations for \code{distribution} objects, including arithmetic and comparison operations
+between two distributions; operations between a distributions and positive, whole-number scalar values, and
 mathematical summaries of distributions.
 
-When doing arithmetic with \code{distribution} objects, some operations make sense as "closed" operations: meaning
+When doing arithmetic or comparison with \code{distribution} objects, some operations make sense as "closed" operations: meaning
 that the result of the operation is still a \code{distribution} of the same type.
 In contrast, other arithmetic operations only make sense if we view the result as "just" numbers,
 not a new distribution.
-In these cases, humdrumR will return a \code{data.frame}, not a \code{distribution}.
+In these cases, humdrumR simply returns an \code{atomic} vector corresponding to the \code{p}/\code{n} column of the distribution,
+with names corresponding to the levels of the distribution.
+These vectors can be used to, for example, index the original distribution; for example: \code{myCounts[myCounts > 50]}.
 \subsection{Arithmetic with count distributions}{
 
 Only addition (\code{+}) between two \code{count} distributions results in new distribution: all other operations \emph{between}
-distributions result in a plain \code{data.frame}.
+distributions result in an vector return value.
 (Subtraction is not allowed, so as to avoid negative counts.)
-However, \code{count} distributions can be scaled by positive whole numbers using either \code{*} (multiplication) or \code{\%/\%} (Euclidean division).
+However, \code{count} distributions can be scaled by positive whole numbers using either \code{*} (multiplication) or \code{\%/\%} (Euclidean division),
+while remaining a count distribution.
 The scaling value must either be length 1, or be the same length as the number of levels in the distribution (\code{nrow(levels(myDist))}).
-All other arithmetic with count distributions will result in non-\code{distribution} output.
+All other arithmetic with count distributions will result in vector output.
 }
 
 \subsection{Arithmetic with probability distributions}{
 
 For \code{probability} distributions, all arithmetic involving distributions inevitably destroys their structure
-(e.g., make it so the total probability no longer sums to 1), so
-arithmetic can be done between \code{probability} distributions (which share dimension names)
+(e.g., make it so the total probability no longer sums to 1), so if
+arithmetic is done between \code{probability} distributions (which share dimension names),
 or between \code{probability} distributions and scalar values (length 1, or same length as the number of levels in the distribution),
-but the result is always a plain \code{data.frame}.
+the result is always always a vector.
 
 There is one other special arithmetic operation between \code{probability} distributions which \emph{don't}
 share dimensions.
@@ -338,12 +347,12 @@ The R "group generic functions" \link{Math} and \link{Summary} are defined for
 \code{distribution} objects. This includes, functions like \code{log()},
 \code{round()}, \code{min()}, \code{range()}, and \code{sum()}.
 Methods for \code{\link[=mean]{mean()}} and \code{\link[=median]{median()}} are also defined.
-All of these functions, when applied to a \code{distribution}, return a
-vanilla \code{data.frame} (not a distribution).
+All of these functions, when applied to a \code{distribution}, return an atomic vector.
 
 For more general operations with \code{distribution} values,
 use \code{\link[=mutate]{mutate()}} or \code{\link[=summarize]{summarize()}} (or \link[base:with]{with/within}), and refer to
 the \code{n} (count) or \code{p} (probability) field.
+For example: \code{myDist |> filter(n > 70)}.
 }
 }
 

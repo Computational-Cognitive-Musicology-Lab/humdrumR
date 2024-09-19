@@ -67,6 +67,13 @@ Possible list arguments include any arguments to \code{\link[=hist]{hist()}}, as
 }
 
 Note that the \code{binArgs} argument has no effect if the input (\code{...}) are not numbers.}
+
+\item{condition}{\emph{\strong{Compute conditional entropy/information, conditioned on this variable.}}
+
+Defaults to \code{NULL} (no condition), so the joint entropy is calculated.
+
+Must be a non-empty \code{character} string, which matches the name of one or of the named variables
+in the distribution, or a positive whole number which indexes the variables.}
 }
 \description{
 The \code{count()} function can be used to tabulate unique values in a vector, or cross-tabulate
@@ -227,4 +234,17 @@ count(int)
 count(int, binArgs = list(maxUnique = 50))
 count(int, binArgs = list(maxUnique = 5))
 
+
+chord <- c('I', 'I', 'I', 'I', 'V', 'V', 'V', 'V', 'IV', 'IV', 'IV', 'IV')
+note  <- c('1', '3', '5', '5', '5', '7', '4', '2', '6',  '1',   '4',  '4')
+
+entropy(chord, note) # joint entropy
+entropy(chord, note, condition = 'note') # conditional entropy
+
+entropy_by(chord, note, condition = 'note') # conditional entropy, by condition
+
+
+}
+\seealso{
+These functions create \link{distribution} objects.
 }
