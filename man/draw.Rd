@@ -21,6 +21,79 @@ draw(
   cex = NULL
 )
 }
+\arguments{
+\item{...}{\emph{\strong{Additional parameters to pass to par().}}
+
+Any base-R graphing parameters that can be set using the \code{\link[=par]{par()}} function
+may be passed to \code{draw()}.
+These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
+\code{draw()} call---i.e., the global \code{par()} settings are not changed.}
+
+\item{xlab, ylab}{\emph{\strong{What X and/or Y axis labels should be used?}}
+
+Must be single \code{character} strings.
+
+See "Plot Text" section below.}
+
+\item{legend}{\emph{\strong{Should legends be drawn?}}
+
+Defaults to \code{TRUE}.}
+
+\item{margin}{\emph{\strong{How big should plot margins be?}}
+
+Defaults to \code{0.2}.
+
+Must be as single numeric value \eqn{0.4 \geq margin \geq 0.1}.
+
+This controls the proportion of the plotting area used for margins.
+A value of \code{0.2} means that 20\% of the plotting area is used for the margins.}
+
+\item{col}{\emph{\strong{What colors should be used in plots?}}
+
+See "Color" section below.}
+
+\item{cex}{\emph{\strong{What size of points should be plotted?}}
+
+See "Point size" section below.}
+
+\item{xlim, ylim}{\emph{\strong{What range of X/Y values should drawn on the plot?}}
+
+By default, X and Y limits are automatically selected.
+
+Must be a \code{numeric} vector of length two.
+
+The first number of each \code{xlim}/\code{ylim} vector specifies the left/bottom
+edge of the X/Y axis. The second number specifies the right/top edge.}
+
+\item{`aspect`}{Defaults to \code{NULL}.
+
+Must be a single numeric value \eqn{5 \geq aspect \geq 0.2}, or \code{NULL}.
+
+This controls the aspect ratio of the plot:
+\code{1} (square), \code{4/3}, \code{16/9}, etc.
+If \code{aspect} is \code{NULL} , R #' automatically uses the current aspect of
+your current plotting device.}
+
+\item{heat}{\emph{\strong{Should a heatmap be drawn?}}
+
+Defaults to \code{FALSE}, unless the input has two or more dimensions
+\emph{and} at least 80 conditions.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{normalReference}{\emph{\strong{Should a reference Normal distribution by overlayed?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{log}{\emph{\strong{Should X and/or Y axes be drawn on a logarithmic scale?}}
+
+Defaults to \code{""} (linear scale on both axes).
+
+Must be a single \code{character} string; options are \code{"x"} (X axis on log scale),
+\code{"y"} (Y-axis on log scale), and \code{"xy"} (both axes on log scale).}
+}
 \description{
 The \code{draw()} function is humdrumR's go-to plotting function.
 \code{draw()} will make a variety of graphs, depending on the type of data you give it.
@@ -29,69 +102,211 @@ the base-R graphics functions \code{\link[=plot]{plot()}}, \code{\link[=barplot]
 }
 \details{
 \code{draw()} is a generic function, which does different plots depending on the data you pass to its
-\code{x} and \code{y} arguments.
-\itemize{
-\item \code{x} and \code{y} both numeric: scatter plot.
-\item \code{x} numeric by itself: histogram.
-\item \code{y} numeric by itself: quantile plot.
-\item \code{x} is a \link[=count]{table}: barplot or heatmap.
-\item \code{y} is numeric, \code{x} is \code{character} or \code{factor}: a violin plot.
+\code{x} and \code{y} arguments.\tabular{lll}{
+   \code{x} \tab \code{y} \tab Plot type \cr
+   \code{numeric} \tab (missing) \tab Histogram \cr
+   (missing) \tab \code{numeric} \tab Quantile plot \cr
+    \tab  \tab (or Violin plot) \cr
+   \code{numeric} \tab \code{numeric} \tab Scatter plot \cr
+   1 or 2 dimensional \link[=table]{table} or \link{distribution} \tab  \tab  \cr
+   \code{character} or \code{factor} \tab (additional \code{character}/\code{factor}) \tab Barplot or Heatmap \cr
+   \code{character} or \code{factor} \tab \code{numeric} \tab Violin plot \cr
+   \code{numeric} \tab \code{character} or \code{factor} \tab Area char \cr
 }
 
-\code{draw()} is simply a wrapper built on top of R's "base" plotting system.
+
+For purely categorical data, the default behavior is to draw barplots for 1D distributions, or
+2D distributions with 80 or fewer conditions, and heatmaps otherwise.
+This default behavior can be overridden using either \code{heat = TRUE} or \code{heat = FALSE}.
+Similarly, \code{violin = TRUE} can be used to force \code{draw( , y)} to draw a violin plot.
+
+Note that, if you pass one or two \code{character}/\code{factor} vectors to \code{draw()}, it will pass these vectors to \code{\link[=count]{count()}},
+then pass the resulting \link{distribution} to \code{draw()}, creating a barplot.
+Thus, \code{draw(charvec1, charvec2)} is equivalent to \code{draw(count(charvec1, charvec2))}.
+\subsection{Drawing dimensions of data}{
+
+\code{draw()} is equipped to visualize data in up to four dimensions in one plot.
+The main dimensions are, of course, the X and Y axes, controlled by the \code{x} and \code{y} arguments.
+The other two dimensions are color (\code{col}) and point-size (\code{cex}).
+An another approach is to draw multiple plots at the same time in a grid, each sub
+plot called a "facet."
+Details for all these options can be found below.
+}
+}
+\section{General Arguments}{
+
+
+\code{draw()} is built on top of R's "base" plotting system.
 This means that all the standard arguments to base-R plots can be used to customize plots
 (See \code{\link[=par]{par()}} for a full list) or add to them (for example, using \code{\link[=points]{points()}} or \code{\link[=mtext]{mtext()}}).
 However, \code{draw()} has a number of special additional features, including easily plotting "facets"
 (dividing data into multiple plots).
 Anything that \code{draw()} does can be done using normal base-R plotting functions (\code{\link[=plot]{plot()}}, \code{\link[=barplot]{barplot()}}, etc.),
 but \code{draw()} makes making good looking plots faster and easier.
+\subsection{Plot Text}{
 
-The following arguments are the main arguments used with \code{draw()},
-though not all arguments will have an effect in all types of plots.
-\itemize{
-\item Base R:
-\itemize{
-\item \code{x}: left/right position.
-\item \code{y}: up/down position.
-\item \code{col}: color.
-\itemize{
-\item \code{humdrumR} implements a custom color scheme,
-which can be accessed by using whole number values for \code{col}.
-}
-\item \code{cex}: point size.
-\item \code{log}: draw on log scale?
-}
-\item \code{draw()} specific:
-\itemize{
-\item \code{square}: Should the plot be forced to be square?
-\item \code{alpha}: control transparency.
-\item \code{quantiles}: mark distribution quantiles.
-\item \code{facets}: divide the data into multiple plots.
-}
+Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis label.
+
+The \code{draw()} function will automatically generate X and Y labels for every plot,
+usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
+X label will be "rnorm(100)."
+This can be overriden using the \code{xlab} and/or \code{ylab} arguments, which can be provided a single string
+each---to surpress a label, provide an empty string, like \code{ylab = ""}.
+
+Titles and subtitles are specified using the \code{main} and \code{sub} arguments, respectively.
+No title or subtitle is drawn by default.
+
+You can use the base-R \code{\link[=mtext]{mtext()}} function to draw additional text on plot axes.
 }
 
-Specific methods also have additional arguments.
-\subsection{Scatter Plot}{
+\subsection{Axes control}{
 
-If both \code{x} and \code{y} are real numbers (\code{\link[=numeric]{numeric()}} in R), a scatter plot is drawn.
-These vectors should be the same length, but if one of them is \code{length == 1},
-all the points will simply be drawn in a line at that value.
+The \code{draw()} function will select reasonable X and Y axes ranges automatically.
+If you want to override the defaults, you can use \code{xlim} or \code{ylim} to control
+the range of values shown on each axis.
+Each of these must be passed a vector of two numbers, representing the left and right
+X-axis extremes (\code{xlim}) and the bottom and top Y-axis extremes (\code{ylim}).
+For example, to show data in the range \eqn{[10, 50]} on the X axis,
+specifiy \code{xlim = c(10, 50)}.
+
+For \code{numeric} axes, you can also plot data on a logarithmic scale
+using the \code{log} argument.
+This set by providing a single \code{character} string containing lower-case
+\code{"x"}, \code{"y"}, or both (\code{"xy"}).
+Note that \code{draw()} will throw an error if you try to plot negative values
+on a logarithmic scale.
+}
+
+\subsection{Color}{
+
+Colors can be specified in all \code{draw()} plots using the \code{col} argument, along with the
+\code{alpha} argument which controls the transparency of colors.
+Note that color control can used for entirely aesthetic purposes (picking
+a color scheme you want) \emph{or} to represent an additional dimension of data.
+
+Colors can be specified as either:
 \itemize{
-\item \strong{Coloring points} (\code{col} arg)
+\item Names (e.g., \code{"red"} or \verb{"darkgreen'})
+\item Hex codes (e.g., \code{"#ff0000"} or \verb{"#00ff00})
+\item Using the \code{\link[=rgb]{rgb()}} function.
 \itemize{
-\item If a single \code{col} value is provided, all points are draw this color.
-\item If the \code{col} value is the same length as \code{x} and \code{y}, a scale of colors (either discrete of continuos)
-is generated to match the values this variable takes.
-\item A legend is drawn.
+\item If a single \code{col} value is provided, all points are drawn this color.
+\item If the \code{col} value is the same length as \code{x} and \code{y}, a scale of colors (either discrete of continuous)
+is generated to match the values this variable takes, and a legend is drawn.
 }
-\item \strong{Point size} (\code{cex} arg)
+\item Or as natural numbers, indexing \code{humdrumR}'s flatly palette,
+based on the colors \code{'#18BC9C'}, \code{'#3498DB'}, \code{'#F39C12'}, \code{'#E74C3C'}, and \code{'#2C3E50'}.
+}
+
+The \code{alpha} argument must be a \code{numeric} value \eqn{1 \geq alpha \geq 0},
+where \code{alpha = 0} is totally transparent and \code{alpha = 1} is totally opaque.
+
+It is always possible to specify a single color value for a plot.
+However, \code{draw()} can also (generally) accept more color values, depending on the type of plot.
+For some plots, multiple colors are used (aesthetically) by default;
+For other types of plots, its possible to use color to represent an additional dimension of information.
 \itemize{
-\item If a single \code{cex} value is provided, all points are drawn the same size.
-\item If the \code{cex} value is numeric and the same length as \code{x} and \code{y},
-a scale of sizes is generated to match the values this variable takes.
-This auto-sizing should scale with the area of the points.
-\item A legend is drawn.
+\item Scatter (\code{x = y = 'numeric'}) and Quantile plots (\code{y = 'numeric'})
+\itemize{
+\item \code{col} may be an atomic vector the same length as \code{x}/\code{y}.
+\item A color scheme is automatically computed to cover the range of values in \code{col}
+and a legend is added to the plot.
+\item For example, if the \code{col} vector contains five unique values, each of these five values
+will be assigned a color in the plot.
+If the \code{col} values are continuous and numeric, the range of values will placed on a continuum
+of colors.
+}
+\item Histograms (\code{x = 'numeric'})
+\itemize{
+\item \code{col} may be an atomic vector the same length as \code{x}.
+\itemize{
+\item The histogram is divided into a separate histogram
+for each unique color value, they are plotted overlayed on top of each other,
+and a legend is added to the plot.
+\item For example, if the \code{col} vector contains five unique values, five separate
+histograms will be overlayed on top of each other, each with their own color.
+}
+}
+\item Barplots, Violinplots, and Area plots
+\itemize{
+\item \code{col} may be an atomic vector of the same length as the number of levels in the first
+(X) dimension of the plotted distribution.
+\item These colors are used to select the colors of each bar and a legend is added to the plot.
+Note that \code{draw()} will color bars by default (this currently can't be turned off).
+}
+\item Heatmaps
+\itemize{
+\item Heatmaps use colors to represent values, and there is currently no control of this process.
+Using \code{col} will have no effect.
 }
 }
 }
+
+\subsection{Point size}{
+
+Point size in \code{draw()} scatter and quantile plots can be controlled using the \code{cex} argument.
+Note that point-size control can used for entirely aesthetic purposes \emph{or} to represent an
+additional dimension of data.
+Generally, \code{draw()} automatically picks an aesthetic point size based on the number of data points,
+and the size of the plotting window:
+the more data points, the smaller the points.
+
+If a single \code{cex} value is provided, all points are drawn the same size.
+If the \code{cex} value is numeric and the same length as \code{x} and \code{y}, a scale of sizes is generated to match
+the range of values this variable takes, and a legend is added to the plot.
+The generated scale matches the range of \code{cex} values to the \emph{area} of drawn points.
+If the range of values is too great, it is not feasible to represent them using points,
+because the points would either get too small to see, or too big (covering the whole plot).
+Thus, if the largest \code{cex} value is more than 100 times greater than the smallest,
+the scaling will be changed to accomodate this.
+When this happens, a message will be printed, explaining how the relative area of drawn
+points relates to the relative magnitude of \code{cex} values.
+For example, in the two calls below, the first will work with no message
+but the second one will print the message shown:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{draw(rnorm(100)|>sort(),rnorm(100), cex=(1:100))
+
+draw(rnorm(100)|>sort(),rnorm(100), cex=(1:100)^2)
+# In draw(cex = ), your largest cex value is 10000 times greater than the smallest value.
+# To plot this, we must understate the differences between points. 
+# When comparing the point in this plot, a doubling of area corresponds to multiplying the value by three.
+
+}\if{html}{\out{</div>}}
 }
+
+\subsection{Drawing descriptive/reference statistics}{
+
+Most \code{draw()} plots have options for drawing (overlaying) additional useful information and the
+data distribution.
+For example, the arithmetic mean of numeric distributions can be marked (with a black cross hair) by specifying
+\code{mean = TRUE}.
+(Only violin plots do this by default.)
+For scatter plots, the cross hair mark is placed at the mean of both \code{x} and \code{y}.
+
+All \code{draw()} plots (except heatmaps) also have an option to overlay lines marking data quantiles.
+(Only quantile plots do this by default.)
+To do this, specify your desired quantiles as a vector of numbers \eqn{1 \geq qs \geq 0},
+providde to the \code{quantiles} argument.
+For example, \code{draw(rnorm(100), quantiles = c(.05, .25, .5, .75 ,.95))}.
+For scatter plots, quantiles are drawn for both \code{x} and \code{y} variables.
+For violin plots, if \code{global_quantiles = TRUE}, the quantiles of the marginal \code{y}
+distribution (ignoring the grouping by \code{x} categories) are drawn; however,
+if \code{global_quantiles = FALSE} (the default), separate quantiles are drawn for each group.
+
+Another option is to compare numeric distributions to a normal (Gaussian) distribution.
+If \code{normalReference = TRUE}, a normal distribution, with mean and standard deviation estimated
+from the data, is overlayed on the plot as a dashed, black line.
+If the data distribution is approximately normal, this line should approximate the data.
+This option is implemented for histograms and quantile plots only.
+A final option for scatter plots, is to automatically overline the simple linear regression line
+between the two variables.
+When \code{lm = TRUE}, the simple regression line \code{y ~ x} is estimated using \code{\link[=lm]{lm()}};
+the regression line and 95\% confidence limits on the regression line---estimated using \code{\link[=predict.lm]{predict.lm()}}---are
+drawn (as solid lines and dashed lines respectively).
+The regression coefficients are also drawn in a legend at the top left corner of the plot.
+}
+
+\subsection{Facets}{
+}
+}
+

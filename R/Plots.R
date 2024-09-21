@@ -18,13 +18,42 @@
 #' `draw()` is a generic function, which does different plots depending on the data you pass to its
 #' `x` and `y` arguments.
 #' 
-#' + `x` and `y` both numeric: scatter plot.
-#' + `x` numeric by itself: histogram.
-#' + `y` numeric by itself: quantile plot.
-#' + `x` is a [table][count()]: barplot or heatmap.
-#' + `y` is numeric, `x` is `character` or `factor`: a violin plot.
 #' 
-#' `draw()` is simply a wrapper built on top of R's "base" plotting system.
+#' | `x`                                                      | `y`                                   | Plot type           |
+#' |----------------------------------------------------------|---------------------------------------|---------------------|
+#' | `numeric`                                                | (missing)                             | Histogram           |
+#' | [density()] object                                       | (missing)                             | Density plot        |
+#' | (missing)                                                | `numeric`                             | Quantile plot       |
+#' |                                                          |                                       | (or Violin plot)    |
+#' | `numeric`                                                | `numeric`                             | Scatter plot        |
+#' | 1 or 2 dimensional [table][table()] or [distribution]    |                                       |                     |
+#' | `character` or `factor`                                  | (additional `character`/`factor`)     | Barplot or Heatmap  |
+#' | `character` or `factor`                                  | `numeric`                             | Violin plot         |
+#' | `numeric`                                                | `character` or `factor`               | Area char           |
+#' 
+#' For purely categorical data, the default behavior is to draw barplots for 1D distributions, or
+#' 2D distributions with 80 or fewer conditions, and heatmaps otherwise.
+#' This default behavior can be overridden using either `heat = TRUE` or `heat = FALSE`.
+#' Similarly, `violin = TRUE` can be used to force `draw( , y)` to draw a violin plot.
+#' 
+#' Note that, if you pass one or two `character`/`factor` vectors to `draw()`, it will pass these vectors to [count()],
+#' then pass the resulting [distribution] to `draw()`, creating a barplot.
+#' Thus, `draw(charvec1, charvec2)` is equivalent to `draw(count(charvec1, charvec2))`.
+#' 
+#' 
+#' ### Drawing dimensions of data
+#' 
+#' `draw()` is equipped to visualize data in up to four dimensions in one plot.
+#' The main dimensions are, of course, the X and Y axes, controlled by the `x` and `y` arguments.
+#' The other two dimensions are color (`col`) and point-size (`cex`).
+#' An another approach is to draw multiple plots at the same time in a grid, each sub
+#' plot called a "facet."
+#' Details for all these options can be found below.
+#' 
+#' @section General Arguments:
+#' 
+#' 
+#' `draw()` is built on top of R's "base" plotting system.
 #' This means that all the standard arguments to base-R plots can be used to customize plots 
 #' (See [par()] for a full list) or add to them (for example, using [points()] or [mtext()]).
 #' However, `draw()` has a number of special additional features, including easily plotting "facets" 
@@ -32,44 +61,292 @@
 #' Anything that `draw()` does can be done using normal base-R plotting functions ([plot()], [barplot()], etc.),
 #' but `draw()` makes making good looking plots faster and easier.
 #' 
-#' The following arguments are the main arguments used with `draw()`, 
-#' though not all arguments will have an effect in all types of plots.
+#'  
+#' ### Plot Text
 #' 
-#' + Base R:
-#'   + `x`: left/right position.
-#'   + `y`: up/down position.
-#'   + `col`: color.
-#'     + `humdrumR` implements a custom color scheme, 
-#'        which can be accessed by using whole number values for `col`.
-#'   + `cex`: point size.
-#'   + `log`: draw on log scale?
-#' + `draw()` specific:
-#'   + `square`: Should the plot be forced to be square?
-#'   + `alpha`: control transparency.
-#'   + `quantiles`: mark distribution quantiles.
-#'   + `facets`: divide the data into multiple plots.
+#' Every `draw()` plot can have a title, subtitle, X-axis label, and Y-axis label.
+#' 
+#' The `draw()` function will automatically generate X and Y labels for every plot,
+#' usually just using the expression you passed; for example, if you say `draw(rnorm(100))`, the
+#' X label will be "rnorm(100)."
+#' This can be overriden using the `xlab` and/or `ylab` arguments, which can be provided a single string
+#' each---to surpress a label, provide an empty string, like `ylab = ""`.
+#' 
+#' Titles and subtitles are specified using the `main` and `sub` arguments, respectively.
+#' No title or subtitle is drawn by default.
+#' 
+#' You can use the base-R [mtext()] function to draw additional text on plot axes.
+#' 
+#' ### Axes control
+#' 
+#' The `draw()` function will select reasonable X and Y axes ranges automatically.
+#' If you want to override the defaults, you can use `xlim` or `ylim` to control
+#' the range of values shown on each axis.
+#' Each of these must be passed a vector of two numbers, representing the left and right
+#' X-axis extremes (`xlim`) and the bottom and top Y-axis extremes (`ylim`).
+#' For example, to show data in the range \eqn{[10, 50]} on the X axis,
+#' specifiy `xlim = c(10, 50)`.
+#' 
+#' For `numeric` axes, you can also plot data on a logarithmic scale
+#' using the `log` argument.
+#' This set by providing a single `character` string containing lower-case
+#' `"x"`, `"y"`, or both (`"xy"`).
+#' Note that `draw()` will throw an error if you try to plot negative values 
+#' on a logarithmic scale.
+#' Note that some plots will not allow logarithmic scaling on some axes,
+#' and will simply ignore attempts to do that.
+#' 
+#' ### Color
+#' 
+#' 
+#' Colors can be specified in all `draw()` plots using the `col` argument, along with the 
+#' `alpha` argument which controls the transparency of colors.
+#' Note that color control can used for entirely aesthetic purposes (picking 
+#' a color scheme you want) *or* to represent an additional dimension of data.
 #'
-#' Specific methods also have additional arguments.
+#' Colors can be specified as either:
+#' 
+#' + Names (e.g., `"red"` or `"darkgreen'`)
+#' + Hex codes (e.g., `"#ff0000"` or `"#00ff00`)
+#' + Using the [rgb()] function.
+#'   + If a single `col` value is provided, all points are drawn this color.
+#'   + If the `col` value is the same length as `x` and `y`, a scale of colors (either discrete of continuous)
+#'     is generated to match the values this variable takes, and a legend is drawn.
+#' + Or as natural numbers, indexing `humdrumR`'s flatly palette,
+#'   based on the colors `'#18BC9C'`, `'#3498DB'`, `'#F39C12'`, `'#E74C3C'`, and `'#2C3E50'`.
 #'
-#' ### Scatter Plot
+#' The `alpha` argument must be a `numeric` value \eqn{1 \geq alpha \geq 0},
+#' where `alpha = 0` is totally transparent and `alpha = 1` is totally opaque.
+#'
+#' It is always possible to specify a single color value for a plot.
+#' However, `draw()` can also (generally) accept more color values, depending on the type of plot.
+#' For some plots, multiple colors are used (aesthetically) by default;
+#' For other types of plots, its possible to use color to represent an additional dimension of information.
 #' 
-#' If both `x` and `y` are real numbers ([numeric()] in R), a scatter plot is drawn.
-#' These vectors should be the same length, but if one of them is `length == 1`,
-#' all the points will simply be drawn in a line at that value.
+#' + Scatter (`x = y = 'numeric'`) and Quantile plots (`y = 'numeric'`)
+#'   + `col` may be an atomic vector the same length as `x`/`y`.
+#'   + A color scheme is automatically computed to cover the range of values in `col`
+#'     and a legend is added to the plot.
+#'   + For example, if the `col` vector contains five unique values, each of these five values
+#'     will be assigned a color in the plot.
+#'     If the `col` values are continuous and numeric, the range of values will placed on a continuum
+#'     of colors.
+#' + Histograms (`x = 'numeric'`)
+#'   + `col` may be an atomic vector the same length as `x`.
+#'     + The histogram is divided into a separate histogram
+#'       for each unique color value, they are plotted overlayed on top of each other,
+#'       and a legend is added to the plot.
+#'     + For example, if the `col` vector contains five unique values, five separate
+#'       histograms will be overlayed on top of each other, each with their own color.
+#'     + If the color argument contains is `numeric` with more than three unique values,
+#'       these values will be divided into four ranges, each assigned a color.
+#' + Barplots, Violinplots, and Area plots
+#'   + `col` may be an atomic vector of the same length as the number of levels in the first 
+#'     (X) dimension of the plotted distribution (or the Y dimension for area plots).
+#'   + These colors are used to select the colors of each bar and a legend is added to the plot.
+#'     Note that `draw()` will color levels by default (this currently can't be turned off).
+#' + Heatmaps
+#'   + Heatmaps use colors to represent values, and there is currently no control of this process.
+#'     Using `col` will have no effect.
+#'     
+#' ### Point size
 #' 
-#' + **Coloring points** (`col` arg)
-#'   + If a single `col` value is provided, all points are draw this color.
-#'   + If the `col` value is the same length as `x` and `y`, a scale of colors (either discrete of continuos)
-#'     is generated to match the values this variable takes.
-#'   + A legend is drawn.
-#' + **Point size** (`cex` arg)
-#'   + If a single `cex` value is provided, all points are drawn the same size.
-#'   + If the `cex` value is numeric and the same length as `x` and `y`, 
-#'     a scale of sizes is generated to match the values this variable takes.
-#'     This auto-sizing should scale with the area of the points.
-#'   + A legend is drawn.
+#' Point size in `draw()` scatter and quantile plots can be controlled using the `cex` argument.
+#' Note that point-size control can used for entirely aesthetic purposes *or* to represent an 
+#' additional dimension of data.
+#' Generally, `draw()` automatically picks an aesthetic point size based on the number of data points,
+#' and the size of the plotting window:
+#' the more data points, the smaller the points.
 #' 
+#' If a single `cex` value is provided, all points are drawn the same size.
+#' If the `cex` value is numeric and the same length as `x` and `y`, a scale of sizes is generated to match 
+#' the range of values this variable takes, and a legend is added to the plot.
+#' The generated scale matches the range of `cex` values to the *area* of drawn points.
+#' If the range of values is too great, it is not feasible to represent them using points,
+#' because the points would either get too small to see, or too big (covering the whole plot).
+#' Thus, if the largest `cex` value is more than 100 times greater than the smallest,
+#' the scaling will be changed to accomodate this.
+#' When this happens, a message will be printed, explaining how the relative area of drawn
+#' points relates to the relative magnitude of `cex` values.
+#' For example, in the two calls below, the first will work with no message
+#' but the second one will print the message shown:
 #' 
+#' ```
+#' draw(rnorm(100)|>sort(),rnorm(100), cex=(1:100))
+#' 
+#' draw(rnorm(100)|>sort(),rnorm(100), cex=(1:100)^2)
+#' # In draw(cex = ), your largest cex value is 10000 times greater than the smallest value.
+#' # To plot this, we must understate the differences between points. 
+#' # When comparing the point in this plot, a doubling of area corresponds to multiplying the value by three.
+#' 
+#' ```
+#' 
+#' ### Drawing descriptive/reference statistics
+#' 
+#' Most `draw()` plots have options for drawing (overlaying) additional useful information and the
+#' data distribution. 
+#' For example, the arithmetic mean of numeric distributions can be marked (with a black cross hair) by specifying
+#' `mean = TRUE`.
+#' (Only violin plots do this by default.)
+#' For scatter plots, the cross hair mark is placed at the mean of both `x` and `y`.
+#' 
+#' All `draw()` plots (except heatmaps) also have an option to overlay lines marking data quantiles.
+#' (Only quantile plots do this by default.)
+#' To do this, specify your desired quantiles as a vector of numbers \eqn{1 \geq qs \geq 0},
+#' providde to the `quantiles` argument.
+#' For example, `draw(rnorm(100), quantiles = c(.05, .25, .5, .75 ,.95))`.
+#' For scatter plots, quantiles are drawn for both `x` and `y` variables.
+#' For violin plots, if `global_quantiles = TRUE`, the quantiles of the marginal `y`
+#' distribution (ignoring the grouping by `x` categories) are drawn; however,
+#' if `global_quantiles = FALSE` (the default), separate quantiles are drawn for each group.
+#' 
+#' Note that, when drawing [density()] objects, the mean and quantiles of the density estimate are
+#' shown, not the raw data. 
+#' 
+#' Another option is to compare numeric distributions to a normal (Gaussian) distribution.
+#' If `normalReference = TRUE`, a normal distribution, with mean and standard deviation estimated 
+#' from the data, is overlayed on the plot as a dashed, black line.
+#' If the data distribution is approximately normal, this line should approximate the data.
+#' For scatter plots, the bivariate normal distribution of the two variables is estimated
+#' (i.e., using their individual variances and their covariance).
+#' A sample ten times the length of `x`/`y` (up to 10,000 at the most) is drawn
+#' and these sample points are drawn as a transparent underlay of the actual scatter plot.
+#' This conveys a sense of what the bivariate normal would look like, compared to the actual data.
+#
+#' A final option for scatter plots, is to automatically overline the simple linear regression line
+#' between the two variables.
+#' When `lm = TRUE`, the simple regression line is estimated using [lm(y ~ x)][lm()];
+#' the regression line and 95% confidence limits on the regression line---estimated using [predict.lm()]---are
+#' drawn (as solid lines and dashed lines respectively).
+#' The regression coefficients are also drawn in a legend at the top left corner of the plot.
+#' 
+#'
+#' 
+#' ### Binning and Smoothing
+#' 
+#' Histograms, violin plots, and area plots, all involve drawing `numeric` values into
+#' areas representing probability mass.
+#' There are two basic approaches 1) density estimation and 2) binning.
+#' The `draw()` function relies on the algorithms used by base-R's [density()] and [hist()] functions for 
+#' these two tasks.
+#' In many cases, we can pass arguments directly through to these functions.
+#' For example, the `bw` and `kernel` arguments can be passed through to [density()],
+#' or the `breaks` argument tp [hist()].
+#' 
+#' By default, `draw()` draws histograms using bins, while violin plots and area plots use density smoothing.
+#' However, this can be overridden using the `smooth` argument: `smooth = TRUE` for density, and `smooth = FALSE` for binning.
+#' If you create a violion plot with `smooth = FALSE`, the result is a very blocky, cubist violins.
+#' 
+#' ### Group proportions
+#' 
+#' Violin plots, area plots, and multi-color histograms draw probability mass grouped across categories.
+#' A consideration is whether to draw this mass proportioned to the overall mass, or proportioned within each group.
+#' These two possibilities can be set using the `conditional` argument: when `condition = FALSE`,
+#' each group's probability mass is drawn as a proportion of the total; when `condition = TRUE`, each group's
+#' probability mass is scaled up to the size of the group (i.e., so it should sum to 1).
+#' For illustrate, consider the following data and associated drawings:
+#' 
+#' ```
+#' X <- c(A = rnorm(1000, mean = 0), B = rnorm(5000, mean = 1), C = rnorm(2000, mean = 1))
+#' Categories <- rep(c('A', 'B', 'C'), c(1000, 5000, 2000))
+#' 
+#' # violin plot
+#' draw(Categories, X) 
+#' draw(Categories, X, conditional = TRUE) 
+#' 
+#' # area plot
+#' draw(X, Categories) 
+#' draw(X, Categories, conditional = TRUE) 
+#' 
+#' # multi-color histogram
+#' draw(X, col = Categories) 
+#' draw(X, col = Categories, conditional = TRUE) 
+#' 
+#' ```
+#' 
+#' @section Facets:
+#' 
+#'
+#' @param xlab,ylab ***What X and/or Y axis labels should be used?***
+#' 
+#' Must be single `character` strings. 
+#' 
+#' See "Plot Text" section below.
+#' 
+#' @param xlim,ylim ***What range of X/Y values should drawn on the plot?***
+#' 
+#' By default, X and Y limits are automatically selected.
+#' 
+#' Must be a `numeric` vector of length two.
+#' 
+#' The first number of each `xlim`/`ylim` vector specifies the left/bottom
+#' edge of the X/Y axis. The second number specifies the right/top edge.
+#' 
+#' @param col ***What colors should be used in plots?***
+#' 
+#' See "Color" section below.
+#' 
+#' @param cex ***What size of points should be plotted?***
+#' 
+#' See "Point size" section below.
+#' 
+#' @param legend ***Should legends be drawn?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' @param `aspect` 
+#' 
+#' Defaults to `NULL`.
+#' 
+#' Must be a single numeric value \eqn{5 \geq aspect \geq 0.2}, or `NULL`.
+#' 
+#' This controls the aspect ratio of the plot:
+#' `1` (square), `4/3`, `16/9`, etc. 
+#' If `aspect` is `NULL` , R #' automatically uses the current aspect of 
+#' your current plotting device.
+#' 
+#' @param margin ***How big should plot margins be?***
+#' 
+#' Defaults to `0.2`.
+#' 
+#' Must be as single numeric value \eqn{0.4 \geq margin \geq 0.1}.
+#' 
+#' This controls the proportion of the plotting area used for margins.
+#' A value of `0.2` means that 20% of the plotting area is used for the margins.
+#' 
+#' @param heat ***Should a heatmap be drawn?***
+#' 
+#' Defaults to `FALSE`, unless the input has two or more dimensions
+#' *and* at least 80 conditions.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param normalReference ***Should a reference Normal distribution by overlayed?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param log ***Should X and/or Y axes be drawn on a logarithmic scale?***
+#' 
+#' Defaults to `""` (linear scale on both axes).
+#' 
+#' Must be a single `character` string; options are `"x"` (X axis on log scale), 
+#' `"y"` (Y-axis on log scale), and `"xy"` (both axes on log scale).
+#'  
+#'  
+#' @param smooth ***Should continuous values be grouped using density estimation or binning?***
+#' 
+#' Defaults to `TRUE` for violin and area plots, but `FALSE` for histograms.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param ... ***Additional parameters to pass to par().***
+#' 
+#' Any base-R graphing parameters that can be set using the [par()] function
+#' may be passed to `draw()`. 
+#' These parameters are set using `par()` (overriding humdrumR's defaults), but only for the duration of the
+#' `draw()` call---i.e., the global `par()` settings are not changed.
 #' 
 #' 
 #' @export
@@ -79,7 +356,6 @@ draw <- function(x, y, facets = list(), ...,
                  main = '', sub = '', col = 1, cex = NULL) {
   
 
-  
   # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
   oldpar <- par(family = 'Helvetica',  pch = 16,  col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
   oldpar$mar <- oldpar$omi <- NULL
@@ -88,11 +364,12 @@ draw <- function(x, y, facets = list(), ...,
   marginLines <- setMargins(margin, aspect)
   
   
-  do.call('par', list(...)[pmatch(names(list(...)), names(par()), nomatch = 0L) > 0])
+  do.call('par', list(...)[match(names(list(...)), names(par()), nomatch = 0L) > 0])
   oldpalette <- palette(flatly)
   on.exit({par(oldpar) ; palette(oldpalette)})
   
-  
+  checks(xlab, xnull | (xlen1 & xatomic))
+  checks(ylab, xnull | (xlen1 & xatomic))
   checks(legend, xTF | (xcharacter & xminlength(1) & xmaxlength(2)))
   checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
   checks(main, xatomic & xlen1)
@@ -166,7 +443,7 @@ setGeneric('.draw', def =  \(x, y,  ...) standardGeneric('.draw'))
 
 setMethod('.draw', c('numeric', 'numeric'), 
           \(x, y, log = '', jitter = '', 
-            quantiles = c(), lm = FALSE,
+            normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
             col = 1, alpha = .5, cex = NULL, marginLines, ...) {
             
@@ -185,9 +462,13 @@ setMethod('.draw', c('numeric', 'numeric'),
             output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
             draw_quantiles(1, x, quantiles)
             draw_quantiles(2, y, quantiles)
+            if (mean)  points(mean(x), mean(y), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
             
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
+            
+            if (normalReference) showmvnorm(x, y)
+            
             points(x, y, col = output$col$col, cex = output$cex$cex, ...)
             
             if (lm) {
@@ -197,11 +478,12 @@ setMethod('.draw', c('numeric', 'numeric'),
                            output$window$xlim[[1]][2], length.out = 300L)
               conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
               
-              points(xseq, conf[ , 1], type = 'l', lwd = .5, col = 'black')
-              points(xseq, conf[ , 2], type = 'l', lwd = .5, lty = 'dashed', col = 'black')
-              points(xseq, conf[ , 3], type = 'l', lwd = .5, lty = 'dashed', col = 'black')
+              lmcol <- 'grey30'
+              points(xseq, conf[ , 1], type = 'l', lwd = .5, col = lmcol)
+              points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
+              points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
               
-              legend('topleft', bty = 'n', lwd = .5, col = 'black', text.col = 'black', cex = .8,
+              legend('topleft', bty = 'n', lwd = .5, col = lmcol, text.col = 'black', cex = .8,
                      legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
                                           b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
             }
@@ -213,10 +495,14 @@ setMethod('.draw', c('numeric', 'numeric'),
 
 setMethod('.draw', c('numeric', 'NULL'), 
           \(x, y, log = '', jitter = '', 
-            breaks = 'Sturges', quantiles = c(),
-            conditional = FALSE,
+            breaks = 'Sturges', normalReference = FALSE, 
+            smooth = FALSE, conditional = FALSE,
+            mean = FALSE, quantiles = c(),
             xlim = NULL, ylim = NULL,
-            col = 3, alpha = .2, cex = .7, marignLines, ...) {
+            col = 3, alpha = .2, cex = .7, marginLines, ...) {
+            
+            if (smooth) return(.draw(x = density(x, ...), y = NULL, log = log, mean = mean, quantiles = quantiles, normalReference = normalReference,
+                                     xlim = xlim, ylim = ylim, col = col, alpha = alpha, marginLines = marginLines))
             
             if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1 && length(quantiles)) {
               breaks <- quantile(x, sort(unique(c(0, quantiles, 1))))
@@ -233,19 +519,19 @@ setMethod('.draw', c('numeric', 'NULL'),
             ylim <- ylim %||% c(0, 2^(ceiling(log( max(prob), 2)) + 1)) # 1, .5, .25, .125, etc.
             output <- canvas(x = x, xlim = xlim %||%range(histogram$breaks), 
                              y = prob[prob > 0] , ylim = ylim, 
-                             log = log)
+                             log = gsub('y', '', log))
             
-            draw_quantiles(1, x, quantiles)
-            
+
             if (is.numeric(col)) {
               col <- if (length(unique(col)) < 4) {
                 as.factor(col) 
                 } else {
-                  cut(col, breaks = hist(col, plot = FALSE, breaks = 4)$breaks)
+                  cut(col, breaks = hist(col, plot = FALSE, breaks = 4)$breaks, include.lowest = TRUE)
                 }
             }
-            # actual plot of polygons
             cols <- prep_col(col, x, alpha = alpha, log = log, ...)
+            
+            # actual plot of polygons
             ymin <- min(output$window$ylim[[1]])
             probs <- if (length(cols$col) == length(x)) {
               hists <- tapply(x, col, hist, breaks = histogram$breaks, plot = FALSE, simplify = FALSE)
@@ -270,6 +556,16 @@ setMethod('.draw', c('numeric', 'NULL'),
                                  col = c)
             }, probs, cols$col)
           
+            # extra stuff
+            draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
+            if (normalReference) {
+              xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
+              points(xpoints, diff(histogram$breaks)[1] * dnorm(xpoints, mean(x), sd(x)), type = 'l',
+                     lwd = .5, lty = 'dashed')
+            }
+            if (mean)  points(mean(x), grconvertY(0.02, 'nfc', 'user'), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
+            
+            
             # prepare ticks
             ## x
             x.ticks <- histogram$breaks
@@ -300,12 +596,38 @@ setMethod('.draw', c('numeric', 'NULL'),
 #### density ----
 
 setMethod('.draw', c('density', 'NULL'),
-          function(x, y, log = '', col = 3, ...) {
+          function(x, y, 
+                   log = '',
+                   mean = FALSE, quantiles = c(), normalReference = FALSE,
+                   col = 3, alpha = .2, ...) {
             
-            output <- canvas(xlim = range(x$x), ylim = c(0, max(x$y)), log = log)
             
+            
+            output <- canvas(x = range(x$x), y = c(0, max(x$y)), log = gsub('y', '', log))
+            
+            if (is.numeric(col)) {
+              col <- if (length(unique(col)) < 4) {
+                as.factor(col) 
+              } else {
+                cut(col, breaks = hist(col, plot = FALSE, breaks = 4)$breaks, include.lowest = TRUE)
+              }
+            }
+            
+            # actual plot of polygons
+            cols <- prep_col(col, x$x, alpha = alpha, log = log, ...)
+          
             points(x$x, x$y, type = 'l', col = col)
+        
+            # extra stuff
+            draw_quantiles(1, x$x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
+            if (normalReference) {
+              xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
+              points(xpoints, dnorm(xpoints, mean(x$x), sd(x$x)) / diff(x$x)[1], type = 'l',
+                     lwd = .5, lty = 'dashed')
+            }
+            if (mean)  points(mean(x$x), grconvertY(0.02, 'nfc', 'user'), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
             
+                
             xs <- c(x$x, rev(x$x))
             ys <- c(x$y, rep(0, length(x$y)))
             polygon(xs, ys, col = setalpha(col, alpha = .4), border = FALSE)
@@ -316,8 +638,8 @@ setMethod('.draw', c('density', 'NULL'),
 
 setMethod('.draw', c('NULL', 'numeric'),
           function(x, y, log = '', 
-                   violin = FALSE, showNormal = FALSE,
-                   quantiles = c(.25, .5, .75),
+                   violin = FALSE, normalReference = FALSE,
+                   mean = FALSE, quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
                    col = 1, alpha = .8, cex = NULL, pch = 16, 
                    marginLines, ...) {
@@ -331,7 +653,7 @@ setMethod('.draw', c('NULL', 'numeric'),
             if (violin) {
               
               output$col <- prep_col(col, 1, alpha = alpha, log = log, ...)
-              draw_violins(list(y), horiz = FALSE, ..., col = output$col$col, quantiles = quantiles)
+              draw_violins(list(y), horiz = FALSE, mean = mean, ..., col = output$col$col, quantiles = quantiles)
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
               
@@ -341,12 +663,15 @@ setMethod('.draw', c('NULL', 'numeric'),
               output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
               if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
                
-              draw_quantiles(2, y, quantiles = quantiles)
+              
               y <- sort(y)
               x <- seq(0, 1, length.out = length(y))
               points(x = x, y = y, col = output$col$col, cex = output$cex$cex, ...)
               
-              if (showNormal) {
+              draw_quantiles(2, y, quantiles = quantiles)
+              if (mean)  points(0.5, mean(y), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
+              
+              if (normalReference) {
                 points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
                                      lwd = .5, lty = 'dashed', xpd = TRUE)
                 
@@ -370,7 +695,7 @@ setMethod('.draw', c('NULL', 'numeric'),
 setMethod('.draw', c('table', 'NULL'),
           function(x, y, log = '', 
                    beside = TRUE, heat = length(dim(x) == 2L) && length(x) > 80L,
-                   ylim = NULL, marginLines, 
+                   ylim = NULL, marginLines, quantiles = c(),
                    col = NULL,  alpha = .9, ...) { 
             if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
             dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
@@ -410,6 +735,7 @@ setMethod('.draw', c('table', 'NULL'),
             
             legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             
+            draw_quantiles(2, x, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
             # axes
             proportions <- pretty(ylim / sum(x), n = 10L, min.n = 5L)
             proportions <- setNames(proportions * sum(x), proportions)
@@ -611,7 +937,7 @@ setMethod('.draw', c('numeric', 'discrete'),
             
             categories <- sort(unique(y), decreasing = TRUE)
             
-            breaks <- hist.default(x, breaks = breaks, ...)$breaks #seq(min(x), max(x), length.out = n)
+            breaks <- hist.default(x, breaks = breaks)$breaks #seq(min(x), max(x), length.out = n)
             xcuts <- cut(x, breaks = breaks, include.lowest = TRUE)
             tab <- table(xcuts, factor(y, levels = categories))
             tab <- cbind(0, tab)
@@ -762,6 +1088,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
 draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), limits = NULL, ...) {
   
   if (length(quantiles)) {
+    quantiles <- unique(quantiles)
     checks(quantiles, xnumeric & xrange(0, 1))
     
     sides <- side %% 2 == 0
@@ -892,7 +1219,8 @@ draw_violins <- function(vars, smooth = TRUE, conditional = FALSE,
 }
 
 
-draw_heat <- function(tab, log = '', ...) {
+draw_heat <- function(tab, log = '', cex = NULL, ...) {
+  # cex isn't used obviously, but it gets passed in ... above, causing warnings below
   xlim <- c(0L, ncol(tab))
   ylim <- c(0L, nrow(tab))
   
@@ -913,7 +1241,7 @@ draw_heat <- function(tab, log = '', ...) {
   axes <- data.table(side = 1:2,
                      ticks = list(setNames(1:ncol(tab) - .5, colnames(tab)),
                                   setNames(1:nrow(tab) - .5, rev(rownames(tab)))),
-                     line = -1)
+                     line = 1)
   
   window <- data.table(Screen = as.integer(screen()),
                        xlim = list(xlim), ylim = list(ylim),
@@ -969,7 +1297,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   par(cex = cex)
   
   # everything is currently inches
-  lines <- c(0, .4, .7, .85, 1) * min(figmar)
+  lines <- c(0, .3, .6, .75, 1) * min(figmar)
   
   marginLines <- list(grconvertY(0, 'nfc', 'inches') - lines,
                       grconvertX(0, 'nfc', 'inches') - lines,
@@ -1020,6 +1348,46 @@ marginLab <- function(marginLines, text, side, marginLine = 3, las = 0, ...) {
 
 
 ### other ----
+
+
+
+showmvnorm <- function(x, y) {
+  
+  sigma <- matrix(cov(x, y), nrow = 2, ncol = 2)
+  sigma[1, 1] <- var(x)
+  sigma[2, 2] <- var(y)
+  
+  
+  sample <- MASS::mvrnorm(min(10000, length(x) * 10), c(mean(x), mean(y)), sigma)
+  
+  points(sample[,1], sample[,2], pch = 16, pch = 8, col = rgb(0,0,0, alpha=.02), xpd = TRUE)
+  
+# 
+#   
+#   xbr <- seq(min(x), max(x), length.out = nblocks)
+#   ybr <- seq(min(y), max(y), length.out = nblocks)
+#   
+#   tab <- table(x = cut(sample[,1], xbr), y = cut(sample[,2], ybr))
+#   
+#   xopen <- strsplit(rownames(tab), split = ',') |> do.call(what = 'rbind')
+#   xopen[] <- gsub('[^-0-9.]', '', xopen)
+#   xopen <- array(as.numeric(xopen), dim = dim(xopen))
+#   
+#   yopen <- strsplit(colnames(tab), split = ',') |> do.call(what = 'rbind')
+#   yopen[] <- gsub('[^-0-9.]', '', yopen)
+#   yopen <- array(as.numeric(yopen), dim = dim(yopen))
+#   for (i in 1:nrow(tab)) {
+#     for(j in 1:ncol(tab)) {
+#       if (tab[i,j] == 0) next
+#       polygon(x = c(xopen[i, 1:2], xopen[i, 2:1]),
+#               y = c(yopen[j, c(1,1)], yopen[j, c(2,2)]),
+#               border = NA,
+#               col = rgb(0,0,0, alpha = tab[i,j] / max(tab)))
+#     }
+#   }
+  
+}
+
 
 outerInches <- function(inches, side) {
   
@@ -1129,7 +1497,6 @@ humaxis <- function(side, ticks, line = 1, lab = 0, cex = par('cex.axis'), margi
   # but never overlap
   las <- 1
   sides <- side %% 2 == 0L
-  
   labels <- if (is.null(names(ticks))) {
     format(ticks, big.mark = ',')
   } else {
@@ -1359,7 +1726,7 @@ legend_col_discrete <- function(categories, palette, pch, side, marginLines, col
   
   y <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
   
-  points(rep(xpos[2], length(y)), y, pch = pch, xpd = NA, col = palette, cex = 1)
+  points(rep(xpos[2], length(y)), y, pch = pch, xpd = NA, col = palette, cex = 2)
   text(xpos[2], y, categories, cex = .6, xpd = NA, pos = 4)
 
   text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
@@ -1398,16 +1765,19 @@ legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE
 prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
   size <- max(length(x), length(y))
   checks(cex, xnull | (xpositive & (xlen1 | xlength(size))), seealso = '?draw')
- 
   output <- list(cex = cex)
   if (is.null(cex)) {
     output$cex <- cex_density(x, y)
     
   } else {
     if (length(cex) == size) {
-      
       # val_legend <- 2^seq(log(min(cex), 2), log(max(cex), 2), length.out = 9) 
-      val_legend <- 2^pretty(log(range(cex), 2), min.n = 5, n = 10) # this must be calculated before cex is altered
+      val_legend <- if (length(unique(cex)) > 20) {
+        2^pretty(log(range(cex), 2), min.n = 5, n = 10) # this must be calculated before cex is altered
+      } else {
+        sort(unique(cex))
+        
+      }
       
       cex <- sqrt(cex) 
       
@@ -1421,18 +1791,21 @@ prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
                  "When comparing the point in this plot, a doubling of area corresponds to multiplying the value",
                  "by {num2print(power)}.")
         cex <- 2^log(cex, power)
+        cex_legend <- sqrt(2 ^ log(val_legend, power))
+      } else {
+        cex_legend <- sqrt(val_legend)
       }
       
       
-      # scale to center on .5
+      # scale to center on 
       scale <- exp(mean(log(cex))) 
-      cex_legend <- sqrt(val_legend) / scale
+      cex_legend <- cex_legend / scale
       cex <- cex / scale
       
       output$cex <- cex 
       output$legend <- \(side = 3, marginLines, cex.legend = '') legend_cex_continuous(val_legend, cex_legend, col, pch, 
-                                                                               cex.legend = cex.legend,
-                                                                               side = side, marginLines = marginLines)
+                                                                                       cex.legend = cex.legend,
+                                                                                       side = side, marginLines = marginLines)
     } 
   }
   
