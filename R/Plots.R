@@ -496,71 +496,87 @@ setMethod('.draw', c('numeric', 'numeric'),
 setMethod('.draw', c('numeric', 'NULL'), 
           \(x, y, log = '', jitter = '', 
             breaks = 'Sturges', normalReference = FALSE, 
-            smooth = FALSE, conditional = FALSE,
-            mean = FALSE, quantiles = c(),
+            smooth = FALSE, conditional = FALSE, showCounts = TRUE, showPoints = TRUE,
+            mean = FALSE, quantiles = c(), global_quantiles = TRUE,
             xlim = NULL, ylim = NULL,
             col = 3, alpha = .2, cex = .7, marginLines, ...) {
             
-            if (smooth) return(.draw(x = density(x, ...), y = NULL, log = log, mean = mean, quantiles = quantiles, normalReference = normalReference,
-                                     xlim = xlim, ylim = ylim, col = col, alpha = alpha, marginLines = marginLines))
-            
-            if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1 && length(quantiles)) {
-              breaks <- quantile(x, sort(unique(c(0, quantiles, 1))))
-              names(breaks) <- format(breaks, digits = 3)
-            }  
-            
-              
-            histogram <- hist.default(x, breaks = breaks, plot = FALSE)
-            
-            prob <- histogram$density
-            if (histogram$equidist) prob <- prob * diff(histogram$breaks) # height is proportion (same as area)
-            
-            
-            ylim <- ylim %||% c(0, 2^(ceiling(log( max(prob), 2)) + 1)) # 1, .5, .25, .125, etc.
-            output <- canvas(x = x, xlim = xlim %||%range(histogram$breaks), 
-                             y = prob[prob > 0] , ylim = ylim, 
-                             log = gsub('y', '', log))
-            
-
-            if (is.numeric(col)) {
-              col <- if (length(unique(col)) < 4) {
-                as.factor(col) 
-                } else {
-                  cut(col, breaks = hist(col, plot = FALSE, breaks = 4)$breaks, include.lowest = TRUE)
-                }
+            cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
+          
+            breaks <- if (!smooth && length(breaks) == 1L && pmatch(breaks, 'quantiles', 0)) {
+              quantile(x, c(0, if (length(quantiles)) sort(unique(quantiles)) else c(.25, .5, .75), 1))
+            } else {
+              hist.default(x, breaks = breaks, plot = FALSE)$breaks
             }
-            cols <- prep_col(col, x, alpha = alpha, log = log, ...)
+            names(breaks) <- format(breaks, digits = 3)
+            
+            col <- rep(cols$col, length.out = length(x))
+            coordinates <- tapply(x, col, hist.coor, smooth = smooth, breaks = breaks, ..., simplify = FALSE)
+            if (length(coordinates) > 1L && !conditional) {
+              coordinates <- Map(\(coor, prop) {
+                coor$Density <- coor$Density * prop
+                coor
+                }, coordinates, prop.table(table(col)))
+            } 
+            
+            allDens <- unlist(lapply(coordinates, '[[', 'Density'))
+            
+            ylim <- ylim %||% c(0, 2^(ceiling(log( max(allDens), 2)))) # 1, .5, .25, .125, etc.
+            output <- canvas(x = x, xlim = xlim %||%range(breaks), 
+                             y =  allDens[allDens > 0], ylim = ylim, 
+                             log = gsub('y', '', log))
             
             # actual plot of polygons
             ymin <- min(output$window$ylim[[1]])
-            probs <- if (length(cols$col) == length(x)) {
-              hists <- tapply(x, col, hist, breaks = histogram$breaks, plot = FALSE, simplify = FALSE)
-              cols$col <- unique(cols$col)
-              proportions <- proportions(table(col))
+            Map(\(coor, color) {
+              coor[ , {
+                polygon(c(X, rev(X)), c(Density, rep(ymin, length(Density))), col = color, border = NA)
+                
+                points(type = 'l', X, Density, col = color, lwd = 2)
+                
+              }]
               
-              Map(\(h, p) h$density * diff(h$breaks)[1] * if (conditional) 1 else p, hists, proportions)
+              # lines and counts
+              if (!smooth) {
+                #horixontal bars
+                coor[!duplicated(X), { 
+                  graphics::segments(x0 = X, x1 = X, y0 = ymin, y1 = Density, col = color)
+                }]}
               
-            } else {
-               list(prob)
-            }
-            Map(\(p, c) {
-              Map(head(histogram$breaks, -1), tail(histogram$breaks, -1), p,
-                  f = \(x0, x1, p) {
-                    polygon(c(x0, x0, x1, x1), c(ymin, p, p, ymin), col = c, border = NA)
-                    
-                    graphics::segments(x0, p, x1, p, col = c)
-                  })
-              
-              # lines between polygons:
-              graphics::segments(histogram$breaks, 0, histogram$breaks, pmax(c(p, 0), c(0, p)),
-                                 col = c)
-            }, probs, cols$col)
-          
+             if (showCounts) {
+               if (!smooth) {
+                 coor[!duplicated(X) & Counts > 0, 
+                                     text(Mids, Density, as.expression(PrettyCounts), 
+                                          cex = cex_scale(Counts, targetWidth = min(Delta) * .8, cex = .8), 
+                                          col = setalpha(color, 1), pos = 3)]
+               } else {
+                 coor[ , text(X[which.max(Density)], max(Density), prettyN(sum(col == color), expr = TRUE)[[1]],
+                              cex = .8, col = setalpha(color, 1), pos = 3)]
+               }
+             }
+            }, coordinates, names(coordinates))
+            
             # extra stuff
-            draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
+            
+            ## dots
+            if (showPoints) {
+              xsamp <- if (length(x) >= 10^5) sample(x, 10^5) else x
+              ysamp <- runif(length(xsamp), max(allDens * 1.1, mean(output$window$ylim[[1]]) * 1.5), output$window$ylim[[1]][2])
+              dotAlpha <- cex_density(xsamp, ysamp, .3)
+              points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = TRUE)
+            }
+            
+            if (global_quantiles || length(coordinates) == 1L) {
+              draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
+            } else {
+              lapply(unique(col), \(color) {
+                draw_quantiles(1, x[col == color], quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'), col = color)
+              })
+              
+            }
             if (normalReference) {
               xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
-              points(xpoints, diff(histogram$breaks)[1] * dnorm(xpoints, mean(x), sd(x)), type = 'l',
+              points(xpoints, dnorm(xpoints, mean(x), sd(x)), type = 'l',
                      lwd = .5, lty = 'dashed')
             }
             if (mean)  points(mean(x), grconvertY(0.02, 'nfc', 'user'), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
@@ -568,7 +584,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             
             # prepare ticks
             ## x
-            x.ticks <- histogram$breaks
+            x.ticks <- breaks
             while(length(x.ticks) > 20L) {
               x.ticks <- x.ticks[seq(1, length(x.ticks), by = 2)]
             }
@@ -577,16 +593,15 @@ setMethod('.draw', c('numeric', 'NULL'),
             ## y
             output$axes[side == 2, ticks := setNames(ticks[[1]], format(paste0(ticks[[1]] * 100, '%')))]
               
-              
-            ## counts (side 4)
-            count.ticks <- unique(round(pretty(c(0, sum(histogram$counts) * output$axes[side == 2, ticks[[1]]]), n = 10L, min.n = 5L)))
-            count.ticks <- structure(count.ticks / sum(histogram$counts), names = format(count.ticks, big.mark = ','))
-            output$axes <- rbind(output$axes,
-                                 data.table(side = 4, ticks = list(count.ticks), line = 1))
+            #   
+            # ## counts (side 4)
+            # count.ticks <- unique(round(pretty(c(0, sum(histogram$counts) * output$axes[side == 2, ticks[[1]]]), n = 10L, min.n = 5L)))
+            # count.ticks <- structure(count.ticks / sum(histogram$counts), names = format(count.ticks, big.mark = ','))
+            # output$axes <- rbind(output$axes,
+            #                      data.table(side = 4, ticks = list(count.ticks), line = 1))
         
             
-            output$axisNames[c(2,4)] <- list(if (histogram$equidist) 'Proportion' else 'Density', 
-                                             'Count')
+            output$axisNames[[2]] <- 'Probability density'
             
             output$col <- cols
             output
@@ -1085,7 +1100,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
 ## draw_x ----
 
 
-draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), limits = NULL, ...) {
+draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), limits = NULL, col = 'black', ...) {
   
   if (length(quantiles)) {
     quantiles <- unique(quantiles)
@@ -1095,10 +1110,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
     quants <- quantile(var, prob = quantiles)
     
     
-    if (is.null(limits)) {
-      
-      limits <- if (sides) grconvertX(c(0, 1), 'nfc', 'user') else grconvertY(c(0, 1), 'nfc', 'user')
-    }
+    if (is.null(limits)) limits <- if (sides) grconvertX(c(0, 1), 'nfc', 'user') else grconvertY(c(0, 1), 'nfc', 'user')
   
     
    # labels
@@ -1107,14 +1119,14 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
     
    if (sides) {
      text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
-          cex = .4, xpd = NA, adj = c(0, .5))
+          cex = .4, xpd = NA, adj = c(0, .5), col = col)
      text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
-          cex = .4, xpd = NA, adj = c(1, .5))
+          cex = .4, xpd = NA, adj = c(1, .5), col = col)
    } else {
      text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
-          cex = .4, xpd = NA, adj = c(.5, 1))
+          cex = .4, xpd = NA, adj = c(.5, 1), col = col)
      text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), 
-          cex = .4, xpd = NA, adj = c(.5, 0))
+          cex = .4, xpd = NA, adj = c(.5, 0), col = col)
    }
    
    # lines
@@ -1125,7 +1137,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
    }
    lineArgs <- list(limits[1] + strwidth,
                     limits[2] - strwidth, quants, quants, lty = 'dashed', 
-                    lwd = .3, col = rgb(0, 0, 0, .5))
+                    lwd = .3, col = setalpha(col, .5))
    names(lineArgs)[1:4] <- if (sides) {
      c('x0', 'x1', 'y0', 'y1')
    } else {
@@ -1562,7 +1574,7 @@ checkStrFit_24 <- function(slotSize, ticks, labels, cex) {
 }
 
 canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
-  logcheck(log, x, y)
+ logcheck(log, x, y)
   
   xlim <- xlim %||% range(x) 
   ylim <- ylim %||% range(y) 
@@ -1646,6 +1658,43 @@ axis.lines <- function() {
 lines
 }
 
+
+hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL) {
+  # gets x/density/counts for a numeric distribution, using either density() or hist()
+  # but returning the same format either way
+  if (smooth) {
+    dens <- stats::density.default(x, ...)
+    output <- data.table(X = dens$x, Density = dens$y)
+  } else {
+    hist <- graphics::hist.default(x, breaks = breaks, ..., plot = FALSE)
+    
+    output <- data.table(Density = hist$density, Counts = hist$counts, Mids = hist$mids, 
+                         Delta = diff(hist$breaks))
+    output[ , PrettyCounts := prettyN(Counts, zeros = '', expr = TRUE)]
+    output <- output[rep(1:nrow(output), each = 2)]
+    i <- c(1, rep(2:(length(hist$breaks) - 1), each = 2), length(hist$breaks))
+    output[ , X := hist$breaks[i]]
+    
+  }
+  output[]
+}
+
+
+cutter <- function(value, reference, maxUnique = 4, Ncuts = 4) {
+  
+  # value is dimension that may need to be cut,
+  # reference is another data vector to match length
+  
+  if (is.numeric(value) && length(col) == length(x)) {
+    
+    value <- if (length(unique(value)) <= 8) {
+      as.factor(value) 
+    } else {
+      cut(value, breaks = Ncuts)
+    }
+  }
+  rep(value, length.out = length(reference))
+}
 ### argument preppers ----
 
 
@@ -1680,7 +1729,7 @@ setGeneric('prep_col',
              checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
              checks(contrast, xTF, seealso = c('?draw'))
              checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
-             checks(ncontinuous, xlen1 & xnatural & xmin(50), seealso = c('?draw')) 
+             checks(ncontinuous, xlen1 & xnatural & xmin(2), seealso = c('?draw')) 
              
              if (length(col) == 1L || any(isColor(as.character(col)))) return(list(col = setalpha(col, alpha)))
              
@@ -1813,7 +1862,14 @@ prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
   
 }
 
-cex_density <- function(x, y) {
+cex_scale <- function(str, targetWidth, cex = .8) {
+  mx <- max(strwidth(str, cex = cex))
+  min(targetWidth / mx, 1) * cex
+  
+  
+}
+
+cex_density <- function(x, y, scalar = .225) {
   vars <- Filter(length, list(x, y))
   
   cuts <- lapply(vars, cut, breaks = if (length(vars) == 1L) 100 else 10)
@@ -1821,7 +1877,7 @@ cex_density <- function(x, y) {
   # forced to be between 1 and 250
   maxdensity <- min(floor(log10(max(do.call('table', cuts)))), 4)
 
-  1 - (maxdensity * .225)
+  1 - (maxdensity * scalar)
   
 }
 

@@ -511,7 +511,7 @@ Pequation <- function(dist, f = 'P', collapse = ',') {
   paste0(f, '(', eq, ')')
 }
 
-prettyN <- function(N, digits = 3L, zeros = '.') {
+prettyN <- function(N, digits = 3L, zeros = '.', expr = FALSE) {
   tens <- ifelse(N == 0, 0, log10(abs(N)) |> floor())
   
   thousands <- pmin(tens %/% 3, 4L)
@@ -524,7 +524,7 @@ prettyN <- function(N, digits = 3L, zeros = '.') {
 
   globalscale <- if (length(unique(scale[N != 0])) == 1L) {
     globalscale <- unique(thousands[N != 0])
-    scale <- NULL
+    if (!expr) scale <- NULL
     c('thousands', 'millions', 'billions', 'trillions')[globalscale]
   }
   # round and format
@@ -537,21 +537,33 @@ prettyN <- function(N, digits = 3L, zeros = '.') {
   }  else {
     tapply_inplace(Nround, scale, format, scientific = FALSE, digits = digits, justify = 'left')
   }
-  # Nprint[N != 0] <- gsub('^( *)0\\.', '\\1 .', Nprint[N != 0]) # pad left
+
   
-  output <- paste0(Nprint, scale)
-  output[approx] <- gsub('^( *) ?', '\\1~', output[approx])
-  output <- stringr::str_pad(output, width = max(nchar(output)), 'left')
-  output[N == 0] <- zeros
-  # output <- paste0(ifelse(approx, '~', ''), Nprint, scale)
-  # output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
-  # 
-  attr(output, 'zerofill') <- zeros
-  attr(output, 'scale') <- globalscale
-  attr(output, 'approx') <- any(approx, na.rm = TRUE)
-  attr(output, 'negative') <- any(N < 0, na.rm = TRUE)
-  
-  output
+  if (expr) {
+    Map(\(n, s, app) {
+      
+      exp <- gsub('\\.0+$', '', n)
+      exp <- stringr::str_replace(n, '\\.([0-9]+)0+$', '.\\1')
+      if (s != '') exp <- bquote(.(exp)[.(s)])
+      if (app) exp <- bquote(widetilde(.(exp)))
+      exp
+      
+    }, Nprint, scale, approx)
+
+  } else {
+    output <- paste0(Nprint, scale)
+    output[approx] <- gsub('^( *) ?', '\\1~', output[approx])
+    output <- stringr::str_pad(output, width = max(nchar(output)), 'left')
+    output[N == 0] <- zeros
+    # output <- paste0(ifelse(approx, '~', ''), Nprint, scale)
+    # output <- paste0(output, strrep(' ', max(nchar(output)) - nchar(output))) 
+    # 
+    attr(output, 'zerofill') <- zeros
+    attr(output, 'scale') <- globalscale
+    attr(output, 'approx') <- any(approx, na.rm = TRUE)
+    attr(output, 'negative') <- any(N < 0, na.rm = TRUE)
+    output
+  }
   
 }
 
