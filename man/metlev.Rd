@@ -2,12 +2,26 @@
 % Please edit documentation in R/Metric.R
 \name{metlev}
 \alias{metlev}
+\alias{metlev.default}
 \alias{metcount.default}
-\alias{metcount.humdrumR}
 \alias{metcount}
+\alias{metsubpos.default}
 \alias{metsubpos}
 \title{Count or measure metric position}
 \usage{
+\method{metlev}{default}(
+  dur,
+  meter = duple(5),
+  pickup = NULL,
+  value = TRUE,
+  offBeats = TRUE,
+  remainderSubdivides = FALSE,
+  deparser = recip,
+  groupby = list(),
+  ...,
+  parseArgs = list()
+)
+
 metlev(
   dur,
   meter = duple(5),
@@ -34,8 +48,6 @@ metlev(
   Exclusive = NULL
 )
 
-\method{metcount}{humdrumR}(dur, ...)
-
 metcount(
   dur,
   meter = duple(5),
@@ -47,6 +59,17 @@ metcount(
   groupby = list(),
   parseArgs = list(),
   Exclusive = NULL
+)
+
+\method{metsubpos}{default}(
+  dur,
+  meter = duple(5),
+  pickup = NULL,
+  deparser = duration,
+  ...,
+  remainderSubdivides = TRUE,
+  groupby = list(),
+  parseArgs = list()
 )
 
 metsubpos(

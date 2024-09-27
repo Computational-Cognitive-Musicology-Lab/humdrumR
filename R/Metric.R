@@ -1127,9 +1127,10 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #'
 #' @seealso {The [timecount()] and [subpos()] functions are more basic versions of `metcount()` and `metsubpos()`,
 #' based only on counting a *single* beat level, rather then a hierarchy of beat levels.}
+#' @name metlev
 #' @export
-metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, remainderSubdivides = FALSE, deparser = recip, 
-                   groupby = list(), ..., parseArgs = list()) {
+metlev.default <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, remainderSubdivides = FALSE, deparser = recip, 
+                           groupby = list(), ..., parseArgs = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)))
@@ -1151,7 +1152,7 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
     } else {
       sapply(met$Levels, 
                        \(lev) {
-                         output <- deparser(lev, ...)
+                         output <- deparser(lev)
                          paste(output, collapse = '+')
                          
                        })[metlev]
@@ -1165,6 +1166,11 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
   
 }
 
+#' @export
+metlev.humdrumR <- humdrumRmethod(metlev.default)
+#' @rdname metlev
+#' @export
+metlev <- humdrumRgeneric(metlev.default)
 
 #' @rdname metlev
 #' @export
@@ -1214,7 +1220,6 @@ metcount.default <- function(dur, meter = duple(5), level = tactus(meter), picku
   mcount
     
 }
-#' @rdname metlev
 #' @export
 metcount.humdrumR <- humdrumRmethod(metcount.default)
 #' @rdname metlev
@@ -1223,8 +1228,8 @@ metcount <- humdrumRgeneric(metcount.default)
 
 #' @rdname metlev
 #' @export
-metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration, ...,
-                     remainderSubdivides = TRUE, groupby = list(), parseArgs = list()) {
+metsubpos.default <- function(dur, meter = duple(5), pickup = NULL, deparser = duration, ...,
+                              remainderSubdivides = TRUE, groupby = list(), parseArgs = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)))
@@ -1235,6 +1240,11 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   
   if (is.null(deparser)) met$Remainder else deparser(met$Remainder, ...)
 }
+#' @export
+metsubpos.humdrumR <- humdrumRmethod(metsubpos.default)
+#' @rdname metlev
+#' @export
+metsubpos <- humdrumRgeneric(metsubpos.default)
 
 
 .metric <- function(dur, meter = duple(5),  groupby = list(), pickup = NULL, ..., 
