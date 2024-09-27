@@ -95,7 +95,7 @@ is.rational(x)
 
 as.rational(x, ...)
 
-\S4method{as.rational}{rational}(x)
+\S4method{as.rational}{rational}(x, ...)
 
 \S4method{as.rational}{matrix}(x)
 

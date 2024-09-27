@@ -42,6 +42,7 @@ metlev(
   pickup = NULL,
   ...,
   offBeats = TRUE,
+  withinNext = FALSE,
   remainderSubdivides = FALSE,
   groupby = list(),
   parseArgs = list(),
@@ -55,6 +56,7 @@ metcount(
   pickup = NULL,
   ...,
   offBeats = TRUE,
+  withinNext = FALSE,
   remainderSubdivides = FALSE,
   groupby = list(),
   parseArgs = list(),
@@ -149,6 +151,12 @@ A single \code{character} value or positive natural number.
 
 A \code{character} string input must be a \code{\link[=recip]{recip()}} value, matching a beat level in the meter.
 A numeric input directly indicates a level in the meter, starting from the highest level (\code{1}).}
+
+\item{withinNext}{\emph{\strong{Should beats be counted within the next highest beat of the meter?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
 These functions take vectors of rhythmic duration values and
@@ -216,12 +224,28 @@ i.e., the quarter-note level (of 4/4) would be \code{3}, while the sixteenth-not
 
 \subsection{Metric counts}{
 
-The \code{metcount()} function counts one beat level in a metric hierarchy, \emph{within} the next highest level.
-In a full duple meter, the counts are always simply \code{1}, \code{2}, \code{1}, \code{2}, etc.
-Meters with a triple level will get \code{1}, \code{2}, \code{3}, etc.
-Why level you want to count is controlled by the \code{level} argument, which can be either a \code{character} string
+The \code{metcount()} function counts one beat level in a metric hierarchy within the span of highest ('measure') level (by default).
+Which level you want to count is controlled by the \code{level} argument, which can be either a \code{character} string
 in \code{\link[=recip]{recip()}} format or a natural number (\code{1} is top level, \code{2} is next lowest level, etc.).
-\subsection{(Full) 4/4 meter counts:}{\tabular{lllllllll}{
+If you tell \code{metcount()} to count the highest (measure) level in the meter, it will count bars.
+
+An additional option is to count beats within the next \emph{highest} beat (which is not necessarily the full bar).
+For example, if we count eighth-notes in a 6/8 meter, the default behavior is to count 1, 2, 3, 4, 5, 6.
+However, if we specify \code{withinNext = TRUE}, the eighth-notes will be counted within the next highest
+6/8 beat level, which is the dotted-quarter note. So the eighth notes in a bar would be counted 1, 2, 3, 1, 2, 3.
+The exact counting behavior can then be further controlled by changing exactly how the specifying \code{\link[=meter]{meter()}} is specified.
+\subsection{(Full) 4/4 meter counts:}{
+
+If \code{withinNext = FALSE}:\tabular{lllllllll}{
+    \tab 1 \tab & \tab 2 \tab & \tab 3 \tab & \tab 4 \tab & \cr
+   \code{"1"} (whole) \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \cr
+   \code{"2"} (half) \tab 1 \tab 1 \tab 1 \tab 1 \tab 2 \tab 2 \tab 2 \tab 2 \cr
+   \code{"4"} (quarter) \tab 1 \tab 1 \tab 2 \tab 2 \tab 3 \tab 3 \tab 4 \tab 4 \cr
+   \code{"8"} (eighth) \tab 1 \tab 2 \tab 3 \tab 4 \tab 5 \tab 6 \tab 7 \tab 8 \cr
+}
+
+
+If \code{withinNext = TRUE}:\tabular{lllllllll}{
     \tab 1 \tab & \tab 2 \tab & \tab 3 \tab & \tab 4 \tab & \cr
    \code{"1"} (whole) \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \cr
    \code{"2"} (half) \tab 1 \tab 1 \tab 1 \tab 1 \tab 2 \tab 2 \tab 2 \tab 2 \cr
@@ -231,7 +255,17 @@ in \code{\link[=recip]{recip()}} format or a natural number (\code{1} is top lev
 
 }
 
-\subsection{3/4 meter counts:}{\tabular{lllllll}{
+\subsection{3/4 meter counts:}{
+
+If \code{withinNext = FALSE}:\tabular{lllllll}{
+    \tab 1 \tab & \tab 2 \tab & \tab 3 \tab & \cr
+   \code{"2."} (dotted-half) \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \cr
+   \code{"4"} (quarter) \tab 1 \tab 1 \tab 2 \tab 2 \tab 3 \tab 3 \cr
+   \code{"8"} (eighth) \tab 1 \tab 2 \tab 3 \tab 4 \tab 5 \tab 6 \cr
+}
+
+
+If \code{withinNext = TRUE}:\tabular{lllllll}{
     \tab 1 \tab & \tab 2 \tab & \tab 3 \tab & \cr
    \code{"2."} (dotted-half) \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \cr
    \code{"4"} (quarter) \tab 1 \tab 1 \tab 2 \tab 2 \tab 3 \tab 3 \cr
@@ -240,16 +274,23 @@ in \code{\link[=recip]{recip()}} format or a natural number (\code{1} is top lev
 
 }
 
-\subsection{6/8 meter counts:}{\tabular{lllllll}{
+\subsection{6/8 meter counts:}{
+
+If \code{withinNext = FALSE}:\tabular{lllllll}{
+    \tab 1 \tab & \tab a \tab 2 \tab & \tab a \cr
+   \code{"2."} (dotted-half) \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \cr
+   \code{"4."} (dotted-quarter) \tab 1 \tab 1 \tab 1 \tab 2 \tab 2 \tab 2 \cr
+   \code{"8"} (eighth) \tab 1 \tab 2 \tab 3 \tab 4 \tab 5 \tab 6 \cr
+}
+
+
+If \code{withinNext = TRUE}:\tabular{lllllll}{
     \tab 1 \tab & \tab a \tab 2 \tab & \tab a \cr
    \code{"2."} (dotted-half) \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \tab 1 \cr
    \code{"4."} (dotted-quarter) \tab 1 \tab 1 \tab 1 \tab 2 \tab 2 \tab 2 \cr
    \code{"8"} (eighth) \tab 1 \tab 2 \tab 3 \tab 1 \tab 2 \tab 3 \cr
 }
 
-
-In the case of 4/4, if you want to count \code{1}, \code{2}, \code{3}, \code{4}, you'll need to make your \code{\link[=meter]{meter()}} object
-\emph{not} include a half-note level.
 }
 
 \subsection{4/4 meter with no half-note level:}{\tabular{lllllllll}{
