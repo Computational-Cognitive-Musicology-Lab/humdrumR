@@ -181,24 +181,30 @@ filter.humdrumR <- function(.data, ..., dataTypes = 'D', .by = NULL, removeEmpty
 
 nullify <- function(humtab, fields, subset, dataTypes) {
   if (all(subset) || length(fields) == 0L) return(humtab)
-  
   null <- logical(nrow(humtab))
-  targets <- humtab$Type %in% dataTypes
-  null[targets] <- !subset
+  targetTypes <- humtab$Type %in% dataTypes
+  null[targetTypes] <- !subset
   
   newFields <- lapply(fields,
                             \(fieldName) {
                               field <- humtab[[fieldName]]
-                              subset <- complement <- field[0][1:length(field)]
+                              subset <- complement <- field[0][1:length(field)] # makes class match
                               
+                              subset[!targetTypes | !null]    <- field[!targetTypes | !null] 
+                              
+                              if (paste0('_complement_', fieldName) %in% colnames(humtab)) {
+                                complement <- humtab[[paste0('_complement_', fieldName)]]
+                                complement[(!targetTypes | null) & is.na(complement)] <- field[(!targetTypes | null) & is.na(complement)]
+                              } else {
+                                complement[!targetTypes | null] <- field[!targetTypes |  null]
+                                
+                              }
                               # This is not backwards!
-                              subset[!targets | !null]    <- field[!targets | !null] 
-                              complement[!targets | null] <- field[!targets |  null]
                               
                               setNames(data.table(subset, complement), paste0(c('', '_complement_'), fieldName))
                             })
   
-  humtab <- humtab[ , !colnames(humtab) %in% fields, with = FALSE]
+  humtab <- humtab[ , !colnames(humtab) %in% c(fields, paste0('_complement_', fields)), with = FALSE]
   
   for (j in seq_along(newFields)) humtab <- cbind(humtab, newFields[[j]])
  

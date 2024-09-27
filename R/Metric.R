@@ -761,8 +761,9 @@ nbeats.NULL <- function(x) NULL
 #'  
 #'   
 #' @seealso {`timecount()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `timecount()` within a metric framework.}
+#' @name timecount
 #' @export
-timecount <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list(), ...) {
+timecount.default <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list(), ...) {
   
   checks(dur, xcharacter | xnumber)
   checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
@@ -828,9 +829,16 @@ timecount <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup =
   mcount
 }
 
+#' @export
+timecount.humdrumR <- humdrumRmethod(timecount.default)
 #' @rdname timecount
 #' @export
-subpos <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
+timecount <- humdrumRgeneric(timecount.default)
+
+
+#' @rdname timecount
+#' @export
+subpos.default <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?subpos", 'the rhythm vignette'))
@@ -868,6 +876,11 @@ subpos <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser 
   
   if (is.null(deparser)) timeline else deparser(timeline, ...)
 }
+#' @export
+subpos.humdrumR <- humdrumRmethod(subpos.default)
+#' @rdname timecount
+#' @export
+subpos <- humdrumRgeneric(subpos.default)
 
 scaled_timeline <- function(dur, unit, start, pickup, groupby, callname, sumBeats = FALSE, ...) {
   dur <- rhythmInterval(dur, ...)
@@ -903,9 +916,15 @@ scaled_timeline <- function(dur, unit, start, pickup, groupby, callname, sumBeat
 
 #' @rdname timecount
 #' @export
-onbeat <- function(dur, unit = rational(1L), groupby = list(), ...) {
+onbeat.default <- function(dur, unit = rational(1L), groupby = list(), ...) {
   subpos(dur, unit = unit, groupby = groupby, deparser = NULL) == rational(0L)
 }
+
+#' @export
+onbeat.humdrumR <- humdrumRmethod(onbeat.default)
+#' @rdname timecount
+#' @export
+onbeat <- humdrumRgeneric(onbeat.default)
 
 
 ## Meter ####
@@ -1485,7 +1504,8 @@ metsubpos <- humdrumRgeneric(metsubpos.default)
 #' The parsed levels must be levels of the given [meter()].
 #' 
 #' @export
-syncopation <- function(dur, meter = duple(5), levels = 'all', groupby = list()) {
+#' @name syncopation
+syncopation.default <- function(dur, meter = duple(5), levels = 'all', groupby = list()) {
   checks(dur, xcharacter | xnumber)
   
   levs <- metlev(dur, meter = meter, groupby = groupby, deparser = NULL)
@@ -1501,4 +1521,8 @@ syncopation <- function(dur, meter = duple(5), levels = 'all', groupby = list())
   syncopation
   
 }
-
+#' @export
+syncopation.humdrumR <- humdrumRmethod(syncopation.default)
+#' @rdname syncopation
+#' @export
+syncopation <- humdrumRgeneric(syncopation.default)
