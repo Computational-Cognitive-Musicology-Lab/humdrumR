@@ -10,7 +10,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,6 +75,19 @@
       <small>Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="7.0.6" id="humdrumr-706">humdrumR 7.0.6<a class="anchor" aria-label="anchor" href="#humdrumr-706"></a></h2>
+<p>We’ve fixed some minor bugs which were causing major problems in important functions:</p>
+<ul><li>There was a bug happening if you tried to used <code><a href="../reference/subset.humdrumR.html">filter()</a></code> (or <code><a href="../reference/subset.humdrumR.html">subset()</a></code>) twice on the same data. This should be fixed now.</li>
+<li>There were several bugs in <code><a href="../reference/metlev.html">metcount()</a></code> leading to errors. These should also be fixed.</li>
+</ul><p>While I was at it, I’ve added <code>.humdrumR()</code> methods for a bunch of rhythm functions (<code>metcount.humdrumR()</code>, <code>metsubpos.humdrum()</code>, <code>metlev.humdrumR()</code>, etc.) so that these functions can be used directly on humdrumR data objects. For example:</p>
+<pre><code><span></span>
+<span><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*.krn'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">chorales</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/metlev.html">metcount</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">'16'</span><span class="op">)</span></span>
+<span></span></code></pre>
+<p>Speaking of <code><a href="../reference/metlev.html">metcount()</a></code>, I also made a change so that it counts the given beat <code>level</code> inside the full span of the meter, instead of always within the next highest level. This is much more intuitive in most cases. You can still get the old behavior using a new argument, <code>withinNext = FALSE</code>.</p>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="7.0.5" id="humdrumr-705">humdrumR 7.0.5<a class="anchor" aria-label="anchor" href="#humdrumr-705"></a></h2>
 <p>Version 7.0.5 includes a small patch to fix a bug related to the <code>::</code> function, as well as a new feature/behavior which builds off of that fix.</p>

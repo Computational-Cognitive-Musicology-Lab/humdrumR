@@ -93,6 +93,12 @@ Defaults to \code{""} (linear scale on both axes).
 
 Must be a single \code{character} string; options are \code{"x"} (X axis on log scale),
 \code{"y"} (Y-axis on log scale), and \code{"xy"} (both axes on log scale).}
+
+\item{smooth}{\emph{\strong{Should continuous values be grouped using density estimation or binning?}}
+
+Defaults to \code{TRUE} for violin and area plots, but \code{FALSE} for histograms.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
 The \code{draw()} function is humdrumR's go-to plotting function.
@@ -105,6 +111,7 @@ the base-R graphics functions \code{\link[=plot]{plot()}}, \code{\link[=barplot]
 \code{x} and \code{y} arguments.\tabular{lll}{
    \code{x} \tab \code{y} \tab Plot type \cr
    \code{numeric} \tab (missing) \tab Histogram \cr
+   \code{\link[=density]{density()}} object \tab (missing) \tab Density plot \cr
    (missing) \tab \code{numeric} \tab Quantile plot \cr
     \tab  \tab (or Violin plot) \cr
    \code{numeric} \tab \code{numeric} \tab Scatter plot \cr
@@ -175,6 +182,8 @@ This set by providing a single \code{character} string containing lower-case
 \code{"x"}, \code{"y"}, or both (\code{"xy"}).
 Note that \code{draw()} will throw an error if you try to plot negative values
 on a logarithmic scale.
+Note that some plots will not allow logarithmic scaling on some axes,
+and will simply ignore attempts to do that.
 }
 
 \subsection{Color}{
@@ -225,14 +234,16 @@ for each unique color value, they are plotted overlayed on top of each other,
 and a legend is added to the plot.
 \item For example, if the \code{col} vector contains five unique values, five separate
 histograms will be overlayed on top of each other, each with their own color.
+\item If the color argument contains is \code{numeric} with more than three unique values,
+these values will be divided into four ranges, each assigned a color.
 }
 }
 \item Barplots, Violinplots, and Area plots
 \itemize{
 \item \code{col} may be an atomic vector of the same length as the number of levels in the first
-(X) dimension of the plotted distribution.
+(X) dimension of the plotted distribution (or the Y dimension for area plots).
 \item These colors are used to select the colors of each bar and a legend is added to the plot.
-Note that \code{draw()} will color bars by default (this currently can't be turned off).
+Note that \code{draw()} will color levels by default (this currently can't be turned off).
 }
 \item Heatmaps
 \itemize{
@@ -293,20 +304,71 @@ For violin plots, if \code{global_quantiles = TRUE}, the quantiles of the margin
 distribution (ignoring the grouping by \code{x} categories) are drawn; however,
 if \code{global_quantiles = FALSE} (the default), separate quantiles are drawn for each group.
 
+Note that, when drawing \code{\link[=density]{density()}} objects, the mean and quantiles of the density estimate are
+shown, not the raw data.
+
 Another option is to compare numeric distributions to a normal (Gaussian) distribution.
 If \code{normalReference = TRUE}, a normal distribution, with mean and standard deviation estimated
 from the data, is overlayed on the plot as a dashed, black line.
 If the data distribution is approximately normal, this line should approximate the data.
-This option is implemented for histograms and quantile plots only.
+For scatter plots, the bivariate normal distribution of the two variables is estimated
+(i.e., using their individual variances and their covariance).
+A sample ten times the length of \code{x}/\code{y} (up to 10,000 at the most) is drawn
+and these sample points are drawn as a transparent underlay of the actual scatter plot.
+This conveys a sense of what the bivariate normal would look like, compared to the actual data.
 A final option for scatter plots, is to automatically overline the simple linear regression line
 between the two variables.
-When \code{lm = TRUE}, the simple regression line \code{y ~ x} is estimated using \code{\link[=lm]{lm()}};
+When \code{lm = TRUE}, the simple regression line is estimated using \link[=lm]{lm(y ~ x)};
 the regression line and 95\% confidence limits on the regression line---estimated using \code{\link[=predict.lm]{predict.lm()}}---are
 drawn (as solid lines and dashed lines respectively).
 The regression coefficients are also drawn in a legend at the top left corner of the plot.
 }
 
-\subsection{Facets}{
+\subsection{Binning and Smoothing}{
+
+Histograms, violin plots, and area plots, all involve drawing \code{numeric} values into
+areas representing probability mass.
+There are two basic approaches 1) density estimation and 2) binning.
+The \code{draw()} function relies on the algorithms used by base-R's \code{\link[=density]{density()}} and \code{\link[=hist]{hist()}} functions for
+these two tasks.
+In many cases, we can pass arguments directly through to these functions.
+For example, the \code{bw} and \code{kernel} arguments can be passed through to \code{\link[=density]{density()}},
+or the \code{breaks} argument tp \code{\link[=hist]{hist()}}.
+
+By default, \code{draw()} draws histograms using bins, while violin plots and area plots use density smoothing.
+However, this can be overridden using the \code{smooth} argument: \code{smooth = TRUE} for density, and \code{smooth = FALSE} for binning.
+If you create a violion plot with \code{smooth = FALSE}, the result is a very blocky, cubist violins.
 }
+
+\subsection{Group proportions}{
+
+Violin plots, area plots, and multi-color histograms draw probability mass grouped across categories.
+A consideration is whether to draw this mass proportioned to the overall mass, or proportioned within each group.
+These two possibilities can be set using the \code{conditional} argument: when \code{condition = FALSE},
+each group's probability mass is drawn as a proportion of the total; when \code{condition = TRUE}, each group's
+probability mass is scaled up to the size of the group (i.e., so it should sum to 1).
+For illustrate, consider the following data and associated drawings:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{X <- c(A = rnorm(1000, mean = 0), B = rnorm(5000, mean = 1), C = rnorm(2000, mean = 1))
+Categories <- rep(c('A', 'B', 'C'), c(1000, 5000, 2000))
+
+# violin plot
+draw(Categories, X) 
+draw(Categories, X, conditional = TRUE) 
+
+# area plot
+draw(X, Categories) 
+draw(X, Categories, conditional = TRUE) 
+
+# multi-color histogram
+draw(X, col = Categories) 
+draw(X, col = Categories, conditional = TRUE) 
+
+}\if{html}{\out{</div>}}
+}
+}
+
+\section{Facets}{
+
 }
 

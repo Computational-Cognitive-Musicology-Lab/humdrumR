@@ -1,3 +1,28 @@
+# humdrumR 7.0.6
+
+We've fixed some minor bugs which were causing major problems in important functions:
+
++ There was a bug happening if you tried to used `filter()` (or `subset()`) twice on the same data. This should be fixed now.
++ There were several bugs in `metcount()` leading to errors. These should also be fixed.
+
+While I was at it, I've added `.humdrumR()` methods for a bunch of rhythm functions (`metcount.humdrumR()`, `metsubpos.humdrum()`, `metlev.humdrumR()`, etc.) 
+so that these functions can be used directly on humdrumR data objects.
+For example:
+
+```
+
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*.krn')
+
+chorales |> metcount(level = '16')
+
+
+```
+
+Speaking of `metcount()`, I also made a change so that it counts the given beat `level` inside the full span of the meter, instead of always 
+within the next highest level.
+This is much more intuitive in most cases.
+You can still get the old behavior using a new argument, `withinNext = FALSE`.
+
 # humdrumR 7.0.5
 
 Version 7.0.5 includes a small patch to fix a bug related to the `::` function, as well as a new feature/behavior which builds off of that fix.

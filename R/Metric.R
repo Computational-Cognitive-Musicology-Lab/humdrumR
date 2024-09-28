@@ -761,8 +761,9 @@ nbeats.NULL <- function(x) NULL
 #'  
 #'   
 #' @seealso {`timecount()` and `subpos()` are closely related to the [timeline()] function. The [metcount()] function applies `timecount()` within a metric framework.}
+#' @name timecount
 #' @export
-timecount <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list(), ...) {
+timecount.default <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup = NULL, offBeats = TRUE,  groupby = list(), ...) {
   
   checks(dur, xcharacter | xnumber)
   checks(start, (xnumber & xlen1 & (xnotzero + "The 'first' beat to count occurs at the starting instant, so there is no 'zeroth' beat" )))
@@ -828,9 +829,16 @@ timecount <- function(dur, unit = rational(1L), start = 1L, phase = 0,  pickup =
   mcount
 }
 
+#' @export
+timecount.humdrumR <- humdrumRmethod(timecount.default)
 #' @rdname timecount
 #' @export
-subpos <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
+timecount <- humdrumRgeneric(timecount.default)
+
+
+#' @rdname timecount
+#' @export
+subpos.default <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser = duration, ..., groupby = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?subpos", 'the rhythm vignette'))
@@ -868,6 +876,11 @@ subpos <- function(dur, unit = rational(1L), phase = 0, pickup = NULL, deparser 
   
   if (is.null(deparser)) timeline else deparser(timeline, ...)
 }
+#' @export
+subpos.humdrumR <- humdrumRmethod(subpos.default)
+#' @rdname timecount
+#' @export
+subpos <- humdrumRgeneric(subpos.default)
 
 scaled_timeline <- function(dur, unit, start, pickup, groupby, callname, sumBeats = FALSE, ...) {
   dur <- rhythmInterval(dur, ...)
@@ -903,9 +916,15 @@ scaled_timeline <- function(dur, unit, start, pickup, groupby, callname, sumBeat
 
 #' @rdname timecount
 #' @export
-onbeat <- function(dur, unit = rational(1L), groupby = list(), ...) {
+onbeat.default <- function(dur, unit = rational(1L), groupby = list(), ...) {
   subpos(dur, unit = unit, groupby = groupby, deparser = NULL) == rational(0L)
 }
+
+#' @export
+onbeat.humdrumR <- humdrumRmethod(onbeat.default)
+#' @rdname timecount
+#' @export
+onbeat <- humdrumRgeneric(onbeat.default)
 
 
 ## Meter ####
@@ -998,14 +1017,30 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' ## Metric counts
 #' 
-#' The `metcount()` function counts one beat level in a metric hierarchy, *within* the next highest level.
-#' In a full duple meter, the counts are always simply `1`, `2`, `1`, `2`, etc.
-#' Meters with a triple level will get `1`, `2`, `3`, etc.
-#' Why level you want to count is controlled by the `level` argument, which can be either a `character` string
+#' The `metcount()` function counts one beat level in a metric hierarchy within the span of highest ('measure') level (by default).
+#' Which level you want to count is controlled by the `level` argument, which can be either a `character` string
 #' in [recip()] format or a natural number (`1` is top level, `2` is next lowest level, etc.).
+#' If you tell `metcount()` to count the highest (measure) level in the meter, it will count bars.
+#'
+#' An additional option is to count beats within the next *highest* beat (which is not necessarily the full bar).
+#' For example, if we count eighth-notes in a 6/8 meter, the default behavior is to count 1, 2, 3, 4, 5, 6.
+#' However, if we specify `withinNext = TRUE`, the eighth-notes will be counted within the next highest 
+#' 6/8 beat level, which is the dotted-quarter note. So the eighth notes in a bar would be counted 1, 2, 3, 1, 2, 3.
+#' The exact counting behavior can then be further controlled by changing exactly how the specifying [meter()] is specified.
 #' 
 #' #### (Full) 4/4 meter counts:
+#'
+#' If `withinNext = FALSE`:
 #' 
+#' |                  | 1   | &   | 2   | &   | 3   | &   | 4   | &   |
+#' | ---------------- | --- | --- | --- | --- | --- | --- | --- | --- |
+#' | `"1"` (whole)    | 1   | 1   | 1   | 1   | 1   | 1   | 1   | 1   |
+#' | `"2"` (half)     | 1   | 1   | 1   | 1   | 2   | 2   | 2   | 2   | 
+#' | `"4"` (quarter)  | 1   | 1   | 2   | 2   | 3   | 3   | 4   | 4   |
+#' | `"8"` (eighth)   | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 
+#'
+#' If `withinNext = TRUE`:
+#'
 #' |                  | 1   | &   | 2   | &   | 3   | &   | 4   | &   |
 #' | ---------------- | --- | --- | --- | --- | --- | --- | --- | --- |
 #' | `"1"` (whole)    | 1   | 1   | 1   | 1   | 1   | 1   | 1   | 1   |
@@ -1015,6 +1050,16 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' #### 3/4 meter counts:
 #' 
+#' If `withinNext = FALSE`:
+#'
+#' |                       | 1   | &   | 2   | &   | 3   | &   |
+#' | --------------------- | --- | --- | --- | --- | --- | --- |
+#' | `"2."` (dotted-half)  | 1   | 1   | 1   | 1   | 1   | 1   | 
+#' | `"4"` (quarter)       | 1   | 1   | 2   | 2   | 3   | 3   |
+#' | `"8"` (eighth)        | 1   | 2   | 3   | 4   | 5   | 6   | 
+#' 
+#' If `withinNext = TRUE`:
+#'
 #' |                       | 1   | &   | 2   | &   | 3   | &   |
 #' | --------------------- | --- | --- | --- | --- | --- | --- |
 #' | `"2."` (dotted-half)  | 1   | 1   | 1   | 1   | 1   | 1   | 
@@ -1025,17 +1070,22 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' #### 6/8 meter counts:
 #' 
 #' 
+#' If `withinNext = FALSE`:
+#'
+#' |                         | 1   | &   | a   | 2   | &   | a   |
+#' | ----------------------- | --- | --- | --- | --- | --- | --- |
+#' | `"2."` (dotted-half)    | 1   | 1   | 1   | 1   | 1   | 1   | 
+#' | `"4."` (dotted-quarter) | 1   | 1   | 1   | 2   | 2   | 2   |
+#' | `"8"` (eighth)          | 1   | 2   | 3   | 4   | 5   | 6   | 
+#' 
+#' 
+#' If `withinNext = TRUE`:
+#'
 #' |                         | 1   | &   | a   | 2   | &   | a   |
 #' | ----------------------- | --- | --- | --- | --- | --- | --- |
 #' | `"2."` (dotted-half)    | 1   | 1   | 1   | 1   | 1   | 1   | 
 #' | `"4."` (dotted-quarter) | 1   | 1   | 1   | 2   | 2   | 2   |
 #' | `"8"` (eighth)          | 1   | 2   | 3   | 1   | 2   | 3   | 
-#' 
-#' 
-#' 
-#' 
-#' In the case of 4/4, if you want to count `1`, `2`, `3`, `4`, you'll need to make your [meter()] object
-#' *not* include a half-note level.
 #' 
 #' 
 #' #### 4/4 meter with no half-note level:
@@ -1098,6 +1148,11 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' A `character` string input must be a [recip()] value, matching a beat level in the meter.
 #' A numeric input directly indicates a level in the meter, starting from the highest level (`1`).
 #' 
+#' @param withinNext ***Should beats be counted within the next highest beat of the meter?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' @param remainderSubdivides ***Should off-beat onsets only be associated with beat levels that they evenly subdivide?***
 #'
@@ -1127,9 +1182,10 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #'
 #' @seealso {The [timecount()] and [subpos()] functions are more basic versions of `metcount()` and `metsubpos()`,
 #' based only on counting a *single* beat level, rather then a hierarchy of beat levels.}
+#' @name metlev
 #' @export
-metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, remainderSubdivides = FALSE, deparser = recip, 
-                   groupby = list(), ..., parseArgs = list()) {
+metlev.default <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats = TRUE, remainderSubdivides = FALSE, deparser = recip, 
+                           groupby = list(), ..., parseArgs = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)))
@@ -1151,7 +1207,7 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
     } else {
       sapply(met$Levels, 
                        \(lev) {
-                         output <- deparser(lev, ...)
+                         output <- deparser(lev)
                          paste(output, collapse = '+')
                          
                        })[metlev]
@@ -1165,11 +1221,16 @@ metlev <- function(dur, meter = duple(5), pickup = NULL, value = TRUE, offBeats 
   
 }
 
+#' @export
+metlev.humdrumR <- humdrumRmethod(metlev.default)
+#' @rdname metlev
+#' @export
+metlev <- humdrumRgeneric(metlev.default)
 
 #' @rdname metlev
 #' @export
 metcount.default <- function(dur, meter = duple(5), level = tactus(meter), pickup = NULL,  ...,
-                     offBeats = TRUE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list(), Exclusive = NULL) {
+                             offBeats = TRUE, withinNext = FALSE, remainderSubdivides = FALSE, groupby = list(), parseArgs = list(), Exclusive = NULL) {
   
   checks(dur, xcharacter | xnumber)
   checks(offBeats, xTF)
@@ -1177,7 +1238,7 @@ metcount.default <- function(dur, meter = duple(5), level = tactus(meter), picku
   checks(pickup, xnull | (xlogical & xmatch(dur)), seealso = c("?metcount", 'the rhythm vignette'))
   
   met <- .metric(dur = dur, meter = meter, pickup = pickup, groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive, 
-                 remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
+                 parentSelecter = if (withinNext) max else min, remainderSubdivides = remainderSubdivides, callname = 'metcount', ...)
   
   counts <- met$Counts
   
@@ -1214,7 +1275,6 @@ metcount.default <- function(dur, meter = duple(5), level = tactus(meter), picku
   mcount
     
 }
-#' @rdname metlev
 #' @export
 metcount.humdrumR <- humdrumRmethod(metcount.default)
 #' @rdname metlev
@@ -1223,8 +1283,8 @@ metcount <- humdrumRgeneric(metcount.default)
 
 #' @rdname metlev
 #' @export
-metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration, ...,
-                     remainderSubdivides = TRUE, groupby = list(), parseArgs = list()) {
+metsubpos.default <- function(dur, meter = duple(5), pickup = NULL, deparser = duration, ...,
+                              remainderSubdivides = TRUE, groupby = list(), parseArgs = list()) {
   
   checks(dur, xcharacter | xnumber)
   checks(pickup, xnull | (xlogical & xmatch(dur)))
@@ -1235,13 +1295,18 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   
   if (is.null(deparser)) met$Remainder else deparser(met$Remainder, ...)
 }
+#' @export
+metsubpos.humdrumR <- humdrumRmethod(metsubpos.default)
+#' @rdname metlev
+#' @export
+metsubpos <- humdrumRgeneric(metsubpos.default)
 
 
 .metric <- function(dur, meter = duple(5),  groupby = list(), pickup = NULL, ..., 
-                    parseArgs = list(), Exclusive = NULL, remainderSubdivides = TRUE, callname = '.metric') {
+                    parentSelecter = max, parseArgs = list(), Exclusive = NULL, remainderSubdivides = TRUE, callname = '.metric') {
   
   if (length(unique(meter)) > 1L) {
-    return(.metrics(dur, meter = meter, pickup = pickup,
+    return(.metrics(dur, meter = meter, pickup = pickup, parentSelecter = parentSelecter,
                     groupby = groupby, parseArgs = parseArgs, Exclusive = Exclusive, remainderSubdivides = remainderSubdivides,
                     callname = callname, ...))
   }
@@ -1272,7 +1337,7 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
                             spn <= spans & 
                             spn %divides% spans &
                             !(nbeats[i] > 1 & nbeats > 1)
-                          if (any(hits)) max(which(hits)) else 0L
+                          if (any(hits)) parentSelecter(which(hits)) else 0L
                         }))
   
   counts <- do.call('cbind', 
@@ -1316,11 +1381,14 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
   
   remainder <- c(remainders[cbind(seq_len(nrow(remainders)), lowestLevel)])
     
-  # remove redundant counts
-  counts[sweep(col(counts), 1L, lowestLevel, '>')] <- 0L
-  counts[sweep(col(counts), 1L, parents[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
   
-  counts <- as.integer(counts) %<-dim% dim(counts)
+  # remove redundant counts
+  if (identical(parentSelecter,max)) {
+    counts[sweep(col(counts), 1L, lowestLevel, '>')] <- 0L
+    counts[sweep(col(counts), 1L, parents[lowestLevel], '>') & !sweep(col(counts), 1L, lowestLevel, '==')] <- 0L
+  
+    counts <- as.integer(counts) %<-dim% dim(counts)
+  }
   
   colnames(counts) <-  colnames(onbeats) <- sapply(levels, \(ls) paste(recip(ls), collapse = '+'))
 
@@ -1333,7 +1401,7 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 }
 
 .metrics <- function(dur, meter = duple(5), pickup = NULL, groupby = list(), Exclusive = NULL, ..., 
-                     parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
+                     parentSelecter = max, parseArgs = list(), remainderSubdivides = TRUE, callname = '.metric') {
   
   uniqmeters <- unique(meter)
   uniqmeters <- uniqmeters[!is.na(uniqmeters)]
@@ -1343,7 +1411,7 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
                   
                   met <- .metric(dur[targets], uniqmeters[i], pickup = if (!is.null(pickup)) pickup[targets],
                                  groupby = lapply(groupby, '[', i = targets),
-                                 parseArgs = parseArgs, Exclusive = Exclusive[targets],
+                                 parentSelecter = parentSelecter, parseArgs = parseArgs, Exclusive = Exclusive[targets],
                                  remainderSubdivides = remainderSubdivides,
                                  callname = callname, ...)
                   met$Indices <- which(targets)
@@ -1436,7 +1504,8 @@ metsubpos <- function(dur, meter = duple(5), pickup = NULL, deparser = duration,
 #' The parsed levels must be levels of the given [meter()].
 #' 
 #' @export
-syncopation <- function(dur, meter = duple(5), levels = 'all', groupby = list()) {
+#' @name syncopation
+syncopation.default <- function(dur, meter = duple(5), levels = 'all', groupby = list()) {
   checks(dur, xcharacter | xnumber)
   
   levs <- metlev(dur, meter = meter, groupby = groupby, deparser = NULL)
@@ -1452,4 +1521,8 @@ syncopation <- function(dur, meter = duple(5), levels = 'all', groupby = list())
   syncopation
   
 }
-
+#' @export
+syncopation.humdrumR <- humdrumRmethod(syncopation.default)
+#' @rdname syncopation
+#' @export
+syncopation <- humdrumRgeneric(syncopation.default)

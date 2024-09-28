@@ -181,28 +181,29 @@ filter.humdrumR <- function(.data, ..., dataTypes = 'D', .by = NULL, removeEmpty
 
 nullify <- function(humtab, fields, subset, dataTypes) {
   if (all(subset) || length(fields) == 0L) return(humtab)
-  
   null <- logical(nrow(humtab))
-  targets <- humtab$Type %in% dataTypes
-  null[targets] <- !subset
+  targetTypes <- humtab$Type %in% dataTypes
+  null[targetTypes] <- !subset
   
-  complementFields <-  paste0('_complement_', fields)
+  complementFields <- paste0('_complement_', fields)
   
-  newFields <- Map(fields, 
-                   complementFields, f = \(fieldName, complementName) {
+  newFields <- Map(fields, complementFields, f = \(fieldName, complementName) {
                               field <- humtab[[fieldName]]
-                              complementField <- if (complementName %in% colnames(humtab)) humtab[[complementName]] else field
-                              
-                              subset <- complement <- field[0][1:length(field)] # vector of NAs of right class
+                              subset <- complement <- field[0][1:length(field)] # makes class match
                               
                               # This is not backwards!
-                              subset[!targets | !null]    <- field[!targets | !null] 
-                              complement[!targets | null] <- complementField[!targets |  null]
+                              subset[!targetTypes | !null]    <- field[!targetTypes | !null] 
                               
-                              setNames(data.table(subset, complement), c(fieldName, complementName))
+                              if (complementName %in% colnames(humtab)) {
+                                complement <- humtab[[complementName]]
+                                complement[(!targetTypes | null) & is.na(complement)] <- field[(!targetTypes | null) & is.na(complement)]
+                              } else {
+                                complement[!targetTypes | null] <- field[!targetTypes |  null]
+                              }
+                              
+                              setNames(data.table(subset, complement), paste0(c('', '_complement_'), fieldName))
                             })
   
-  complementFields
   humtab <- humtab[ , !colnames(humtab) %in% c(fields, complementFields), with = FALSE]
   
   for (j in seq_along(newFields)) humtab <- cbind(humtab, newFields[[j]])
@@ -338,7 +339,7 @@ removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = N
   fields <- fieldMatch(humdrumR, fields, 'removeSubset', 'fields', fieldTypes = 'Data')
   
   
-  humtab <- data.table::copy(getHumtab(humdrumR))
+  humtab <- getHumtab(humdrumR)
   fields <- fields(humdrumR)[Name %in% fields]
   
   if (is.null(complement)) {
@@ -366,7 +367,6 @@ removeSubset <- function(humdrumR, fields = dataFields(humdrumR), complement = N
   
   humdrumR@Fields[Name %in% fields$Name, Complement := FALSE]
   
-  putHumtab(humdrumR) <- humtab
   humdrumR <- update_Dd(humdrumR, fields$Name)
   
   humdrumR
@@ -584,14 +584,14 @@ combineFields <- function(humdrumR, ...) {
 #' this example, only the kern spines (if there are any) are indexed!
 #' 
 #' 
-#' @section drop:
+#' @section removeEmpty:
 #' 
-#' The `drop` argument to any humdrumR indexing controls whether
+#' The `removeEmpty` argument to any humdrumR indexing controls whether
 #' filtered data is completely removed from the data, or simply set to null 
 #' This means the filtered data can be recovered using [unfilter()] (see the [subset()/filter()][subset.humdrumR()]
 #' docs for an explanation).
-#' By default, piece-indexing and spine-indexing have `drop = TRUE`,
-#' but record-indexing defaults to `drop = FALSE`.
+#' By default, piece-indexing and spine-indexing have `removeEmpty = TRUE`,
+#' but record-indexing defaults to `removeEmpty = FALSE`.
 #' 
 #' 
 #' 
@@ -628,7 +628,7 @@ combineFields <- function(humdrumR, ...) {
 #' 
 #' # find all records that use a flat 3
 #' humData[['b3', ]]
-#' humData[['b3', drop = TRUE]]
+#' humData[['b3', removeEmpty = TRUE]]
 #' 
 #' # Exclusive interpretation indexing
 #' humData[[deg = 1]]
