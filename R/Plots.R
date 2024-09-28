@@ -22,7 +22,6 @@
 #' | `x`                                                      | `y`                                   | Plot type           |
 #' |----------------------------------------------------------|---------------------------------------|---------------------|
 #' | `numeric`                                                | (missing)                             | Histogram           |
-#' | [density()] object                                       | (missing)                             | Density plot        |
 #' | (missing)                                                | `numeric`                             | Quantile plot       |
 #' |                                                          |                                       | (or Violin plot)    |
 #' | `numeric`                                                | `numeric`                             | Scatter plot        |
@@ -235,14 +234,25 @@
 #' 
 #' By default, `draw()` draws histograms using bins, while violin plots and area plots use density smoothing.
 #' However, this can be overridden using the `smooth` argument: `smooth = TRUE` for density, and `smooth = FALSE` for binning.
-#' If you create a violion plot with `smooth = FALSE`, the result is a very blocky, cubist violins.
+#' If you create a violin plot with `smooth = FALSE`, the result is blocky, cubist violins.
+#' 
+#' #### Density vs counts
+#' 
+#' In histograms the Y-axis represents the probability density, which is not the same
+#' as the probability mass in each bin, because it depends on the widths of the bins.
+#' In some cases, density can even be greater than 1.
+#' Using the density assures that the relative *area* of each bin matches the probability mass 
+#' associated with that bin, even if the bins are of unequal width.
+#' However, if the bins are of unequal width, the actual height of the bins won't actually match
+#' the proportion of data.
+#' 
 #' 
 #' ### Group proportions
 #' 
 #' Violin plots, area plots, and multi-color histograms draw probability mass grouped across categories.
 #' A consideration is whether to draw this mass proportioned to the overall mass, or proportioned within each group.
-#' These two possibilities can be set using the `conditional` argument: when `condition = FALSE`,
-#' each group's probability mass is drawn as a proportion of the total; when `condition = TRUE`, each group's
+#' These two possibilities can be set using the `conditional` argument: when `conditional = FALSE`,
+#' each group's probability mass is drawn as a proportion of the total; when `conditional = TRUE`, each group's
 #' probability mass is scaled up to the size of the group (i.e., so it should sum to 1).
 #' For illustrate, consider the following data and associated drawings:
 #' 
@@ -324,6 +334,18 @@
 #' @param normalReference ***Should a reference Normal distribution by overlayed?***
 #' 
 #' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
+#' @param showCounts ***Should the number of observations in each category be drawn on the plot?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param showPoints ***Should individual data points be plotted above the histogram?***
+#' 
+#' Defaults to `TRUE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
@@ -610,46 +632,6 @@ setMethod('.draw', c('numeric', 'NULL'),
 
 #### density ----
 
-setMethod('.draw', c('density', 'NULL'),
-          function(x, y, 
-                   log = '',
-                   mean = FALSE, quantiles = c(), normalReference = FALSE,
-                   col = 3, alpha = .2, ...) {
-            
-            
-            
-            output <- canvas(x = range(x$x), y = c(0, max(x$y)), log = gsub('y', '', log))
-            
-            if (is.numeric(col)) {
-              col <- if (length(unique(col)) < 4) {
-                as.factor(col) 
-              } else {
-                cut(col, breaks = hist(col, plot = FALSE, breaks = 4)$breaks, include.lowest = TRUE)
-              }
-            }
-            
-            # actual plot of polygons
-            cols <- prep_col(col, x$x, alpha = alpha, log = log, ...)
-          
-            points(x$x, x$y, type = 'l', col = col)
-        
-            # extra stuff
-            draw_quantiles(1, x$x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
-            if (normalReference) {
-              xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
-              points(xpoints, dnorm(xpoints, mean(x$x), sd(x$x)) / diff(x$x)[1], type = 'l',
-                     lwd = .5, lty = 'dashed')
-            }
-            if (mean)  points(mean(x$x), grconvertY(0.02, 'nfc', 'user'), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
-            
-                
-            xs <- c(x$x, rev(x$x))
-            ys <- c(x$y, rep(0, length(x$y)))
-            polygon(xs, ys, col = setalpha(col, alpha = .4), border = FALSE)
-            
-            output$axisNames[2] <- 'Estimated Density'
-            output
-          })
 
 setMethod('.draw', c('NULL', 'numeric'),
           function(x, y, log = '', 
