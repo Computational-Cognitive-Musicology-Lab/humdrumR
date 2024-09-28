@@ -1,3 +1,5 @@
+# humdrumR 7.0.6
+
 # humdrumR 7.0.5
 
 Version 7.0.5 includes a small patch to fix a bug related to the `::` function, as well as a new feature/behavior which builds off of that fix.

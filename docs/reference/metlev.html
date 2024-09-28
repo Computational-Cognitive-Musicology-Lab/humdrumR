@@ -22,7 +22,7 @@ metcount() and metsubpos() parallel the more general timecount() and subpos() fu
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,7 +100,21 @@ between an onset and the nearest metric beat.
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">metlev</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for default</span></span>
+<span><span class="fu">metlev</span><span class="op">(</span></span>
+<span>  <span class="va">dur</span>,</span>
+<span>  meter <span class="op">=</span> <span class="fu"><a href="duple.html">duple</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>,</span>
+<span>  pickup <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  value <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  offBeats <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  remainderSubdivides <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  deparser <span class="op">=</span> <span class="va">recip</span>,</span>
+<span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">metlev</span><span class="op">(</span></span>
 <span>  <span class="va">dur</span>,</span>
 <span>  meter <span class="op">=</span> <span class="fu"><a href="duple.html">duple</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>,</span>
 <span>  pickup <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -121,14 +135,12 @@ between an onset and the nearest metric beat.
 <span>  pickup <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  offBeats <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  withinNext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  remainderSubdivides <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Exclusive <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for humdrumR</span></span>
-<span><span class="fu">metcount</span><span class="op">(</span><span class="va">dur</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">metcount</span><span class="op">(</span></span>
 <span>  <span class="va">dur</span>,</span>
@@ -137,10 +149,23 @@ between an onset and the nearest metric beat.
 <span>  pickup <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  offBeats <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  withinNext <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  remainderSubdivides <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  Exclusive <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for default</span></span>
+<span><span class="fu">metsubpos</span><span class="op">(</span></span>
+<span>  <span class="va">dur</span>,</span>
+<span>  meter <span class="op">=</span> <span class="fu"><a href="duple.html">duple</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>,</span>
+<span>  pickup <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  deparser <span class="op">=</span> <span class="va">duration</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  remainderSubdivides <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  groupby <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  parseArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">metsubpos</span><span class="op">(</span></span>
@@ -219,6 +244,12 @@ Luckily, these are automatically passed by <a href="withinHumdrum.html">with(in)
 <p>A <code>character</code> string input must be a <code><a href="recip.html">recip()</a></code> value, matching a beat level in the meter.
 A numeric input directly indicates a level in the meter, starting from the highest level (<code>1</code>).</p></dd>
 
+
+<dt>withinNext</dt>
+<dd><p><em><strong>Should beats be counted within the next highest beat of the meter?</strong></em></p>
+<p>Defaults to <code>FALSE</code>.</p>
+<p>Must be a singleton <code>logical</code> value: an on/off switch.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -264,23 +295,31 @@ i.e., the quarter-note level (of 4/4) would be <code>3</code>, while the sixteen
 <h3 id="metric-counts">Metric counts<a class="anchor" aria-label="anchor" href="#metric-counts"></a></h3>
 
 
-<p>The <code>metcount()</code> function counts one beat level in a metric hierarchy, <em>within</em> the next highest level.
-In a full duple meter, the counts are always simply <code>1</code>, <code>2</code>, <code>1</code>, <code>2</code>, etc.
-Meters with a triple level will get <code>1</code>, <code>2</code>, <code>3</code>, etc.
-Why level you want to count is controlled by the <code>level</code> argument, which can be either a <code>character</code> string
-in <code><a href="recip.html">recip()</a></code> format or a natural number (<code>1</code> is top level, <code>2</code> is next lowest level, etc.).</p><div class="section">
+<p>The <code>metcount()</code> function counts one beat level in a metric hierarchy within the span of highest ('measure') level (by default).
+Which level you want to count is controlled by the <code>level</code> argument, which can be either a <code>character</code> string
+in <code><a href="recip.html">recip()</a></code> format or a natural number (<code>1</code> is top level, <code>2</code> is next lowest level, etc.).
+If you tell <code>metcount()</code> to count the highest (measure) level in the meter, it will count bars.</p>
+<p>An additional option is to count beats within the next <em>highest</em> beat (which is not necessarily the full bar).
+For example, if we count eighth-notes in a 6/8 meter, the default behavior is to count 1, 2, 3, 4, 5, 6.
+However, if we specify <code>withinNext = TRUE</code>, the eighth-notes will be counted within the next highest
+6/8 beat level, which is the dotted-quarter note. So the eighth notes in a bar would be counted 1, 2, 3, 1, 2, 3.
+The exact counting behavior can then be further controlled by changing exactly how the specifying <code><a href="meter.html">meter()</a></code> is specified.</p><div class="section">
 <h4 id="-full-meter-counts-">(Full) 4/4 meter counts:<a class="anchor" aria-label="anchor" href="#-full-meter-counts-"></a></h4>
-<table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>2</td><td>&amp;</td><td>3</td><td>&amp;</td><td>4</td><td>&amp;</td></tr><tr><td><code>"1"</code> (whole)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"2"</code> (half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td></tr><tr><td><code>"4"</code> (quarter)</td><td>1</td><td>1</td><td>2</td><td>2</td><td>1</td><td>1</td><td>2</td><td>2</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>1</td><td>2</td><td>1</td><td>2</td><td>1</td><td>2</td></tr></table></div>
+
+
+<p>If <code>withinNext = FALSE</code>:</p><table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>2</td><td>&amp;</td><td>3</td><td>&amp;</td><td>4</td><td>&amp;</td></tr><tr><td><code>"1"</code> (whole)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"2"</code> (half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td></tr><tr><td><code>"4"</code> (quarter)</td><td>1</td><td>1</td><td>2</td><td>2</td><td>3</td><td>3</td><td>4</td><td>4</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr></table><p>If <code>withinNext = TRUE</code>:</p><table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>2</td><td>&amp;</td><td>3</td><td>&amp;</td><td>4</td><td>&amp;</td></tr><tr><td><code>"1"</code> (whole)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"2"</code> (half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td><td>2</td></tr><tr><td><code>"4"</code> (quarter)</td><td>1</td><td>1</td><td>2</td><td>2</td><td>1</td><td>1</td><td>2</td><td>2</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>1</td><td>2</td><td>1</td><td>2</td><td>1</td><td>2</td></tr></table></div>
 
 <div class="section">
 <h4 id="-meter-counts-">3/4 meter counts:<a class="anchor" aria-label="anchor" href="#-meter-counts-"></a></h4>
-<table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>2</td><td>&amp;</td><td>3</td><td>&amp;</td></tr><tr><td><code>"2."</code> (dotted-half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"4"</code> (quarter)</td><td>1</td><td>1</td><td>2</td><td>2</td><td>3</td><td>3</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>1</td><td>2</td><td>1</td><td>2</td></tr></table></div>
+
+
+<p>If <code>withinNext = FALSE</code>:</p><table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>2</td><td>&amp;</td><td>3</td><td>&amp;</td></tr><tr><td><code>"2."</code> (dotted-half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"4"</code> (quarter)</td><td>1</td><td>1</td><td>2</td><td>2</td><td>3</td><td>3</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr></table><p>If <code>withinNext = TRUE</code>:</p><table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>2</td><td>&amp;</td><td>3</td><td>&amp;</td></tr><tr><td><code>"2."</code> (dotted-half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"4"</code> (quarter)</td><td>1</td><td>1</td><td>2</td><td>2</td><td>3</td><td>3</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>1</td><td>2</td><td>1</td><td>2</td></tr></table></div>
 
 <div class="section">
 <h4 id="-meter-counts--1">6/8 meter counts:<a class="anchor" aria-label="anchor" href="#-meter-counts--1"></a></h4>
-<table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>a</td><td>2</td><td>&amp;</td><td>a</td></tr><tr><td><code>"2."</code> (dotted-half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"4."</code> (dotted-quarter)</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>3</td><td>1</td><td>2</td><td>3</td></tr></table><p>In the case of 4/4, if you want to count <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, you'll need to make your <code><a href="meter.html">meter()</a></code> object
-<em>not</em> include a half-note level.</p>
-</div>
+
+
+<p>If <code>withinNext = FALSE</code>:</p><table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>a</td><td>2</td><td>&amp;</td><td>a</td></tr><tr><td><code>"2."</code> (dotted-half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"4."</code> (dotted-quarter)</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr></table><p>If <code>withinNext = TRUE</code>:</p><table class="table table"><tr><td></td><td>1</td><td>&amp;</td><td>a</td><td>2</td><td>&amp;</td><td>a</td></tr><tr><td><code>"2."</code> (dotted-half)</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td><code>"4."</code> (dotted-quarter)</td><td>1</td><td>1</td><td>1</td><td>2</td><td>2</td><td>2</td></tr><tr><td><code>"8"</code> (eighth)</td><td>1</td><td>2</td><td>3</td><td>1</td><td>2</td><td>3</td></tr></table></div>
 
 <div class="section">
 <h4 id="-meter-with-no-half-note-level-">4/4 meter with no half-note level:<a class="anchor" aria-label="anchor" href="#-meter-with-no-half-note-level-"></a></h4>
@@ -339,16 +378,16 @@ based only on counting a <em>single</em> beat level, rather then a hierarchy of 
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "2." "8"  "4." "8"  "2." "8"  "16" "8"  "8"  "2."</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">metcount</span><span class="op">(</span><span class="va">rhythm</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1 2 2 1 2 2 2 1 2 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1 2 2 3 4 4 4 1 2 3</span>
 <span class="r-in"><span><span class="fu">metcount</span><span class="op">(</span><span class="va">rhythm</span>, offBeats <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2 NA  1  2 NA NA  1 NA  1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2 NA  3  4 NA NA  1 NA  3</span>
 <span class="r-in"><span><span class="fu">metcount</span><span class="op">(</span><span class="va">rhythm</span>, meter <span class="op">=</span> <span class="st">'M6/8'</span>, offBeats <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1 NA  2 NA  1 NA NA NA NA  1</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># chorales</span></span></span>
 <span class="r-in"><span><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span> </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpj3llIw/temp_libpathf1bb188f0d5d/humdrumR/HumdrumData/BachChorales/.*krn' matches 10 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpu35ZGZ/temp_libpathe1c37ee1da73/humdrumR/HumdrumData/BachChorales/.*krn' matches 10 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Ten files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating ten files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -357,23 +396,123 @@ based only on counting a <em>single</em> beat level, rather then a hierarchy of 
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu">metlev</span><span class="op">(</span><span class="va">Token</span>, pickup <span class="op">=</span> <span class="va">Bar</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in .local(x, ...):</span> unused argument (Exclusive = c("kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", </span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern", "kern",</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   1:  </span><span style="color: #00BBBB;">!!!COM: Bach, Johann Sebastian</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   2:  </span><span style="color: #00BBBB;">!!!CDT: 1685/02/21/-1750/07/28/</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   3:  </span><span style="color: #00BBBB;">!!!OTL@@DE: Aus meines Herzens Grunde</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   4:  </span><span style="color: #00BBBB;">!!!OTL@EN:      From the Depths of My Heart</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   5:  </span><span style="color: #00BBBB;">!!!SCT: BWV 269</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   6:  </span><span style="color: #00BBBB;">!!!PC#: 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   7:  </span><span style="color: #00BBBB;">!!!AGN: chorale</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   8:  </span><span style="color: #BB0000;">         **kern         **kern         **kern         **kern</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">   9:  </span><span style="color: #BB00BB;">         *ICvox         *ICvox         *ICvox         *ICvox</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  10:  </span><span style="color: #BB00BB;">         *Ibass        *Itenor         *Ialto        *Isoprn</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  11:  </span><span style="color: #BB00BB;">        *I"Bass       *I"Tenor        *I"Alto     *I"Soprano</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BB00BB;">        *clefF4       *clefGv2        *clefG2        *clefG2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BB00BB;">         *k[f#]         *k[f#]         *k[f#]         *k[f#]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BB00BB;">            *G:            *G:            *G:            *G:</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #BB00BB;">          *M3/4          *M3/4          *M3/4          *M3/4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #BB00BB;">         *MM100         *MM100         *MM100         *MM100</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #BBBB00;">              4              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BBBB00;">              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span><span style="color: #BBBB00;">             16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  31:  </span><span style="color: #00BB00; text-decoration: underline;">             =3             =3             =3             =3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  32:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  33:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">             16             16</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  34:  </span><span style="color: #BBBB00;">              4              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  35:  </span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">             16             16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  36:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  37:  </span><span style="color: #00BB00; text-decoration: underline;">             =4             =4             =4             =4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  38:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  39:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  40:  </span><span style="color: #00BB00; text-decoration: underline;">             =5             =5             =5             =5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  41:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  42:  </span><span style="color: #BBBB00;">              4              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  43:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  44:  </span><span style="color: #00BB00; text-decoration: underline;">             =6             =6             =6             =6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  45:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  46:  </span><span style="color: #BBBB00;">              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  47:  </span><span style="color: #BBBB00;">              4              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  48:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  49:  </span><span style="color: #00BB00; text-decoration: underline;">             =7             =7             =7             =7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  50:  </span><span style="color: #BBBB00;">             2.             2.             2.             2.</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 		(eight more pieces...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor010.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  1-50::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  51:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  52:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  53:  </span><span style="color: #00BB00; text-decoration: underline;">             =7             =7             =7             =7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  54:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  55:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  56:  </span><span style="color: #BBBB00;">             16             16</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  57:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  58:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             16             16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  59:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  60:  </span><span style="color: #00BB00; text-decoration: underline;">             =8             =8             =8             =8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  61:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  62:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  63:  </span><span style="color: #00BB00; text-decoration: underline;">             =9             =9             =9             =9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  64:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  65:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  66:  </span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  67:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  68:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  69:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  70:  </span><span style="color: #00BB00; text-decoration: underline;">            =10            =10            =10            =10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  71:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  72:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  73:  </span><span style="color: #BBBB00;">              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  74:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  75:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  76:  </span><span style="color: #00BB00; text-decoration: underline;">            =11            =11            =11            =11</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  77:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  78:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  79:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  80:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .</span><span style="color: #BBBB00;">             16</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  81:  </span><span style="color: #00BB00; text-decoration: underline;">            =12            =12            =12            =12</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  82:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  83:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  84:  </span><span style="color: #BBBB00;">              4              4              4              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  85:  </span><span style="color: #BBBB00;">              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  86:  </span><span style="color: #00BB00; text-decoration: underline;">            =13            =13            =13            =13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  87:  </span><span style="color: #BBBB00;">              1              1              1              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  88:  </span><span style="color: #BBBB00;">              4              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  89:  </span><span style="color: #BBBB00;">              4              4              4</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  90:  </span><span style="color: #00BB00; text-decoration: underline;">             ==             ==             ==             ==</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  91:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  92:  </span><span style="color: #00BBBB;">!!!hum2abc: -Q ''</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  93:  </span><span style="color: #00BBBB;">!!!title: @{PC#}. @{OTL@@DE}</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;">  94:  </span><span style="color: #00BBBB;">!!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Jo***</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">  </span><span style="color: #000000; font-style: italic;">  95:  </span><span style="color: #00BBBB;">!!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: B***</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">  </span><span style="color: #000000; font-style: italic;">  96:  </span><span style="color: #00BBBB;">!!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint:***</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">  </span><span style="color: #000000; font-style: italic;">  97:  </span><span style="color: #00BBBB;">!!!YOR4: Chorales (New York: Associated Music Publi***</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">  </span><span style="color: #000000; font-style: italic;">  98:  </span><span style="color: #00BBBB;">!!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, p***</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">  </span><span style="color: #000000; font-style: italic;">  99:  </span><span style="color: #00BBBB;">!!!EED:  Craig Stuart Sapp</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #000000; font-style: italic;"> 100:  </span><span style="color: #00BBBB;">!!!EEV:  2009/05/22</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor010.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               (***five global comments truncated due to screen size***)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	humdrumR corpus of ten pieces.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                                      :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::metlev(Token, pickup = Bar &lt; 1) :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu">metcount</span><span class="op">(</span><span class="va">Token</span>, pickup <span class="op">=</span> <span class="va">Bar</span> <span class="op">&lt;</span> <span class="fl">1</span>, fill.levels <span class="op">=</span> <span class="st">'below'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
