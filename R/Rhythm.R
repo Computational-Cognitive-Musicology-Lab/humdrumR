@@ -1867,7 +1867,7 @@ recordDuration <- function(humdrumR) {
   humdrumR <- selectFields(humdrumR, selectedFields)
   
   humdrumR <- within(humdrumR, dataTypes = c('Dd'),
-                     fill = ..Timeline.. <- max(c(-1, ..Timeline..), na.rm = TRUE), by = list(File, Record))
+                     fill = max(c(-1, ..Timeline..), na.rm = TRUE), .by = c('File', 'Record'))
   
   within(humdrumR, RecordDuration <- {
     
@@ -1906,7 +1906,7 @@ timebase <- function(humdrumR, tb = '16') {
   checks(humdrumR, xhumdrumR)
   message('This is an early draft of timebase()...you might encounter errors.')
   
-  selectedFields <- selectedFields(humdruamR)
+  selectedFields <- selectedFields(humdrumR)
   
   tb <- if (is.null(tb)) with(humdrumR, tatum(., deparser = duration)) else duration(tb)
   
