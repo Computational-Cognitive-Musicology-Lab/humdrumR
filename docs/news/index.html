@@ -76,6 +76,19 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="7.0.6" id="humdrumr-706">humdrumR 7.0.6<a class="anchor" aria-label="anchor" href="#humdrumr-706"></a></h2>
+<p>We’ve fixed some minor bugs which were causing major problems in important functions:</p>
+<ul><li>There was a bug happening if you tried to used <code><a href="../reference/subset.humdrumR.html">filter()</a></code> (or <code><a href="../reference/subset.humdrumR.html">subset()</a></code>) twice on the same data. This should be fixed now.</li>
+<li>There were several bugs in <code><a href="../reference/metlev.html">metcount()</a></code> leading to errors. These should also be fixed.</li>
+</ul><p>While I was at it, I’ve added <code>.humdrumR()</code> methods for a bunch of rhythm functions (<code>metcount.humdrumR()</code>, <code>metsubpos.humdrum()</code>, <code>metlev.humdrumR()</code>, etc.) so that these functions can be used directly on humdrumR data objects. For example:</p>
+<pre><code><span></span>
+<span><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*.krn'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">chorales</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/metlev.html">metcount</a></span><span class="op">(</span>level <span class="op">=</span> <span class="st">'16'</span><span class="op">)</span></span>
+<span></span></code></pre>
+<p>Speaking of <code><a href="../reference/metlev.html">metcount()</a></code>, I also made a change so that it counts the given beat <code>level</code> inside the full span of the meter, instead of always within the next highest level. This is much more intuitive in most cases. You can still get the old behavior using a new argument, <code>withinNext = FALSE</code>.</p>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="7.0.5" id="humdrumr-705">humdrumR 7.0.5<a class="anchor" aria-label="anchor" href="#humdrumr-705"></a></h2>
 <p>Version 7.0.5 includes a small patch to fix a bug related to the <code>::</code> function, as well as a new feature/behavior which builds off of that fix.</p>
 <p>In previous versions, an error would occur if you used <code>::</code> inside any of the fundamental humdrumR “with/within” methods (including <code>base</code> functions and <code>dplyr</code> “verbs”). We’ve fixed this bug.</p>
