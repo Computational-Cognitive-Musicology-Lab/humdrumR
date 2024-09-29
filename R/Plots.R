@@ -463,6 +463,9 @@ setGeneric('.draw', def =  \(x, y,  ...) standardGeneric('.draw'))
 
 ### draw() numeric ----
 
+
+#### scatter ----
+
 setMethod('.draw', c('numeric', 'numeric'), 
           \(x, y, log = '', jitter = '', 
             normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
@@ -1381,7 +1384,7 @@ showmvnorm <- function(x, y) {
   
   sample <- MASS::mvrnorm(min(10000, length(x) * 10), c(mean(x), mean(y)), sigma)
   
-  points(sample[,1], sample[,2], pch = 16, pch = 8, col = rgb(0,0,0, alpha=.02), xpd = TRUE)
+  points(sample[,1], sample[,2], pch = 8, col = rgb(0,0,0, alpha=.02), xpd = NA)
   
 # 
 #   
