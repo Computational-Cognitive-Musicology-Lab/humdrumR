@@ -482,9 +482,8 @@ setMethod('.draw', c('numeric', 'numeric'),
             
             output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
             output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
-            draw_quantiles(1, x, quantiles)
-            draw_quantiles(2, y, quantiles)
-            if (mean)  points(mean(x), mean(y), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
+            
+           
             
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
@@ -492,6 +491,11 @@ setMethod('.draw', c('numeric', 'numeric'),
             if (normalReference) showmvnorm(x, y)
             
             points(x, y, col = output$col$col, cex = output$cex$cex, ...)
+            
+            # extra stuff
+            draw_quantiles(1, x, quantiles)
+            draw_quantiles(2, y, quantiles)
+            if (mean)  draw_mean(mean(x), mean(y)) 
             
             if (lm) {
               fit <- stats::lm(y ~ x)
@@ -514,6 +518,8 @@ setMethod('.draw', c('numeric', 'numeric'),
             output
             
           })
+
+#### histogram ----
 
 setMethod('.draw', c('numeric', 'NULL'), 
           \(x, y, log = '', jitter = '', 
@@ -567,13 +573,9 @@ setMethod('.draw', c('numeric', 'NULL'),
               
              if (showCounts) {
                if (!smooth) {
-                 coor[!duplicated(X) & Counts > 0, 
-                                     text(Mids, Density, as.expression(PrettyCounts), 
-                                          cex = cex_scale(Counts, targetWidth = min(Delta) * .8, cex = .8), 
-                                          col = setalpha(color, 1), pos = 3)]
+                 coor[!duplicated(X) & Counts > 0, draw_counts(Mids, Density, Counts, col, min(Delta))]
                } else {
-                 coor[ , text(X[which.max(Density)], max(Density), prettyN(sum(col == color), expr = TRUE)[[1]],
-                              cex = .8, col = setalpha(color, 1), pos = 3)]
+                 coor[ , draw_counts(X[which.max(Density)], max(Density), sum(col == color), col, diff(range(X)))]
                }
              }
             }, coordinates, names(coordinates))
@@ -601,7 +603,7 @@ setMethod('.draw', c('numeric', 'NULL'),
               points(xpoints, dnorm(xpoints, mean(x), sd(x)), type = 'l',
                      lwd = .5, lty = 'dashed')
             }
-            if (mean)  points(mean(x), grconvertY(0.02, 'nfc', 'user'), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
+            if (mean) draw_mean(x, grconvertY(0.02, 'nfc', 'user'))
             
             
             # prepare ticks
@@ -630,7 +632,6 @@ setMethod('.draw', c('numeric', 'NULL'),
             
           })
 
-#### density ----
 
 
 setMethod('.draw', c('NULL', 'numeric'),
@@ -665,8 +666,9 @@ setMethod('.draw', c('NULL', 'numeric'),
               x <- seq(0, 1, length.out = length(y))
               points(x = x, y = y, col = output$col$col, cex = output$cex$cex, ...)
               
+              # extra stuff
               draw_quantiles(2, y, quantiles = quantiles)
-              if (mean)  points(0.5, mean(y), pch = 3, cex = 1.4, lwd = 1.5, col = 'black') 
+              if (mean)  draw_mean(0.5, mean(y))
               
               if (normalReference) {
                 points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
@@ -692,7 +694,8 @@ setMethod('.draw', c('NULL', 'numeric'),
 setMethod('.draw', c('table', 'NULL'),
           function(x, y, log = '', 
                    beside = TRUE, heat = length(dim(x) == 2L) && length(x) > 80L,
-                   ylim = NULL, marginLines, quantiles = c(),
+                   ylim = NULL, marginLines, 
+                   quantiles = c(), mean = FALSE, showCounts = FALSE,
                    col = NULL,  alpha = .9, ...) { 
             if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
             dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
@@ -730,9 +733,13 @@ setMethod('.draw', c('table', 'NULL'),
                       add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
             }
             
-            legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             
+            # draw extra stuff
             draw_quantiles(2, x, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
+            if (mean) draw_mean(colMeans(barx), colMeans(x))
+            if (showCounts) draw_counts(barx, x, x, col =col$col,min(diff(x)))
+            
+            legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             # axes
             proportions <- pretty(ylim / sum(x), n = 10L, min.n = 5L)
             proportions <- setNames(proportions * sum(x), proportions)
@@ -1213,6 +1220,7 @@ draw_violins <- function(vars, smooth = TRUE, conditional = FALSE,
 }
 
 
+
 draw_heat <- function(tab, log = '', cex = NULL, ...) {
   # cex isn't used obviously, but it gets passed in ... above, causing warnings below
   xlim <- c(0L, ncol(tab))
@@ -1620,6 +1628,19 @@ drawlines <- function(n = 10, outer = FALSE) {
   }
 }
 
+draw_mean <- function(x, y) {
+  points(x, y, pch = 3, cex = 1.4, lwd = 1.5, col = 'black', xpd = TRUE)
+}
+
+draw_counts <- function(x, y, counts, col, width, cex = .8) {
+  counts <- prettyN(counts, expr = TRUE)
+  
+  text(x, y, counts, xpd = NA,
+       cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
+       col = setalpha(col, 1), pos = 3)
+}
+
+
 axis.lines <- function() {
   cexs <- par(c('cex.axis', 'cex.lab', 'cex.sub'))
   
@@ -1652,7 +1673,6 @@ hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL)
     
     output <- data.table(Density = hist$density, Counts = hist$counts, Mids = hist$mids, 
                          Delta = diff(hist$breaks))
-    output[ , PrettyCounts := prettyN(Counts, zeros = '', expr = TRUE)]
     output <- output[rep(1:nrow(output), each = 2)]
     i <- c(1, rep(2:(length(hist$breaks) - 1), each = 2), length(hist$breaks))
     output[ , X := hist$breaks[i]]

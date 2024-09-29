@@ -548,7 +548,7 @@ prettyN <- function(N, digits = 3L, zeros = '.', expr = FALSE) {
       if (app) exp <- bquote(widetilde(.(exp)))
       exp
       
-    }, Nprint, scale, approx)
+    }, Nprint, scale, approx) |> as.expression()
 
   } else {
     output <- paste0(Nprint, scale)
