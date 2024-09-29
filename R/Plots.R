@@ -773,6 +773,10 @@ setMethod('.draw', c('table', 'NULL'),
             list(axes = axes, window = window, axisNames = axisNames, col = col)
           })
 
+setMethod('.draw', c('NULL', 'table'),
+          function(x, y, ...) {
+            .draw(t(y), NULL, ...)
+          })
 
 
 setMethod('.draw', c('count', 'NULL'),
@@ -780,7 +784,22 @@ setMethod('.draw', c('count', 'NULL'),
             .draw(as.table(x), NULL, ...)
           })
 
+setMethod('.draw', c('NULL', 'count'),
+          function(x, y, ...) {
+            .draw(as.table(x) |> t(), NULL, ...)
+          })
 
+
+setMethod('.draw', c('probability', 'NULL'),
+          function(x, y, ...) {
+            .draw(count(x), NULL, ...)
+          })
+
+
+setMethod('.draw', c('NULL', 'probability'),
+          function(x, y, ...) {
+            .draw(NULL, count(y), ...)
+          })
 
 
 setMethod('.draw', c('humdrumR.table', 'NULL'),
