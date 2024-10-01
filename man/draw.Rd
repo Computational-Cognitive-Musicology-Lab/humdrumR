@@ -87,6 +87,18 @@ Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
+\item{showCounts}{\emph{\strong{Should the number of observations in each category be drawn on the plot?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{showPoints}{\emph{\strong{Should individual data points be plotted above the histogram?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{log}{\emph{\strong{Should X and/or Y axes be drawn on a logarithmic scale?}}
 
 Defaults to \code{""} (linear scale on both axes).
@@ -101,24 +113,24 @@ Defaults to \code{TRUE} for violin and area plots, but \code{FALSE} for histogra
 Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
-The \code{draw()} function is humdrumR's go-to plotting function.
-\code{draw()} will make a variety of graphs, depending on the type of data you give it.
-For the most part, \code{draw()} is simply a stylish, easy to use wrapper around
+The \code{draw()} function is humdrumR's go-to plotting function,
+which can make a variety of graphs depending on the type of data you give it.
+For the most part, \code{draw()} is simply a easy-to-use wrapper around
 the base-R graphics functions \code{\link[=plot]{plot()}}, \code{\link[=barplot]{barplot()}}, and \code{\link[=hist]{hist()}}.
 }
 \details{
 \code{draw()} is a generic function, which does different plots depending on the data you pass to its
-\code{x} and \code{y} arguments.\tabular{lll}{
+\code{x} and \code{y} arguments.
+The following table indicates the seven possibilities, with separate section below explaining how each plot can be modified.\tabular{lll}{
    \code{x} \tab \code{y} \tab Plot type \cr
-   \code{numeric} \tab (missing) \tab Histogram \cr
-   \code{\link[=density]{density()}} object \tab (missing) \tab Density plot \cr
+   \code{numeric} \tab (missing) \tab Density Histogram/Contour \cr
    (missing) \tab \code{numeric} \tab Quantile plot \cr
     \tab  \tab (or Violin plot) \cr
    \code{numeric} \tab \code{numeric} \tab Scatter plot \cr
    1 or 2 dimensional \link[=table]{table} or \link{distribution} \tab  \tab  \cr
    \code{character} or \code{factor} \tab (additional \code{character}/\code{factor}) \tab Barplot or Heatmap \cr
    \code{character} or \code{factor} \tab \code{numeric} \tab Violin plot \cr
-   \code{numeric} \tab \code{character} or \code{factor} \tab Area char \cr
+   \code{numeric} \tab \code{character} or \code{factor} \tab Area chart \cr
 }
 
 
@@ -140,7 +152,7 @@ plot called a "facet."
 Details for all these options can be found below.
 }
 }
-\section{General Arguments}{
+\section{Common Arguments}{
 
 
 \code{draw()} is built on top of R's "base" plotting system.
@@ -214,6 +226,7 @@ It is always possible to specify a single color value for a plot.
 However, \code{draw()} can also (generally) accept more color values, depending on the type of plot.
 For some plots, multiple colors are used (aesthetically) by default;
 For other types of plots, its possible to use color to represent an additional dimension of information.
+In the "Specific Plot" subsections below, the details of how each plot type interprets the \code{col} argument are explained.
 \itemize{
 \item Scatter (\code{x = y = 'numeric'}) and Quantile plots (\code{y = 'numeric'})
 \itemize{
@@ -249,6 +262,109 @@ Note that \code{draw()} will color levels by default (this currently can't be tu
 \itemize{
 \item Heatmaps use colors to represent values, and there is currently no control of this process.
 Using \code{col} will have no effect.
+}
+}
+}
+}
+
+\section{Specific Plot Type Details}{
+
+\subsection{Denisty Histogram or Contour (x = numeric, y = )}{
+
+To draw a single numeric variable on the X-axis, \code{draw()} either bins the numbers to create a
+histogram, or estimates a smooth density contour to draw.
+To choose which approach, use the \code{smooth} argument: \code{smooth = FALSE} (default) for histogram,
+and \code{smooth = TRUE} for density contour.
+The \code{draw()} function relies on the algorithms used by base-R's \code{\link[=hist]{hist()}} and \code{\link[=density]{density()}} functions, respectively, for
+these two tasks.
+In many cases, we can pass arguments directly through to these functions.
+For example, the \code{breaks} argument can be passed through to \code{\link[=hist]{hist()}},
+or the \code{bw} and \code{kernel} arguments to \code{\link[=density]{density()}}.
+
+Whether smoothed or binned, the Y-axis represents the probability density.
+This means that the height of histogram bars does not correspond exactly to the
+the probability mass in each bin, because it depends on the width of the bins;
+For narrow bins, density can even be greater than 1.
+If bin sizes are all equal, then the relative height of he density bars does
+map exactly to the probability mass of each bin.
+However, if bins are not equal width---which can only happen if you manually specify
+unequal bins using the \code{breaks} argument---the heights of bars \emph{don't} map to probability mass.
+However, using the density assures that the relative \strong{area} of each bin does match the probability mass
+associated with that bin, even if the bins are of unequal width.
+This is ideal for a plot.
+
+In addition to Plot Text and Axes Control parameters (listed above), arguments understood by histogram/density plots
+are listed below.
+The following arguments are all singleton \code{logical} on/off switches (\code{TRUE} or \code{FALSE}):
+\itemize{
+\item \code{smooth} --- Controls whether histogram is binned or smooth.
+\item \code{showPoints} --- Controls whether individual data points from the \code{x} input vector
+are plotted in a "cloud" above the density plot.
+\itemize{
+\item The X-position of each point is matched to its actual value.
+\item The Y-position of each point is randomly (uniformly) selected in a range at the top of the plot window.
+This spaces out points that are close together, so it is easier to see how dense they are.
+}
+\item \code{showCounts} --- Controls whether the actual count of values associated with each
+bin (or countour) is printed above the each bar/contour. Defaults to \code{TRUE}.
+\itemize{
+\item Note that, if the data is grouped into multiple draws by \code{col} (see below), there is no guarantee
+the counts won't be drawn on top of each other.
+}
+\item \code{normalReference} --- If \code{TRUE}, a normal (Gaussian) distribution is drawn as a dashed
+black line. The mean and standard deviation of this distribution is taken from the input vector \code{x}.
+This gives a sense of how close to normally distributed \code{x} is.
+\item \code{mean} --- If \code{TRUE}, the mean of input vector \code{x} is marked on the X-axis below the plot, using
+a black cross hairs.
+\itemize{
+\item If \code{global_quantiles = FALSE}, a separate mean for each \code{col} group (see below) is marked with an appropriately
+colored cross hair.
+}
+\item \code{conditional} --- If the data is grouped in multiple draws by \code{col} (see below), should the density
+of each color match it's global share in the distribution of input variable \code{x}, or be rescaled in each
+group to sum/integrate to 1? I.e., should probabilities be conditioned on the grouping factor?
+\itemize{
+\item Setting \code{conditional = TRUE} is useful if you want to see the details of how each group is distributed.
+\item \code{conditional = FALSE} (the default) is useful when you want to see the actual proportion of
+data in each group (if they are different size).
+}
+\item \code{global_quantiles} --- If the data is grouped into multiple draws by \code{col} (see below), and if \code{quantiles}
+(see below) or the \code{mean} are going to be drawn, should they be computed separately
+for each group or for the whole (global) distribution of the input variable \code{x}?
+\itemize{
+\item Defaults to \code{TRUE}.
+}
+}
+
+Two other arguments are not \code{logical}:
+\itemize{
+\item \code{quantiles} --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the default).
+\itemize{
+\item If any quantiles are specified, each quantile is marked with a vertical line on the plot, labeled appropriately.
+For example,
+\itemize{
+\item \code{quantiles = .5} will draw a line at the median of input vector \code{x}.
+\item \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.
+}
+\item By default, \code{global_quantiles = TRUE}, so the overall quantiles of input vector \code{x} are drawn.
+If the data is grouped by \code{col} (see below), and \code{global_quantiles = FALSE}, quantiles are instead
+computed and drawn separately for each group. This can get very messy very quickly!
+}
+\item \code{col} --- The \code{col} (color) argument can be used two ways for a histogram/density draw.
+\itemize{
+\item You can specify a single color, to color the whole graph.
+\item You pass to \code{col} a vector of values which is the exact same length as input vector \code{x}.
+The unique values of this vector will be used to group the \code{x} data, and a separate plot is
+drawn for each group, with its own color. These colors will be automatically computed,
+unless the entire \code{col} vector is valid color values. (Use \code{alpha} independently to change the
+transparency.)
+\itemize{
+\item A color legend will be drawn automatically.
+\item Use the \code{conditional} argument (see above) to control how the densities of each group
+are scaled relative to each other.
+\item If the grouping \code{col} vector is numeric and there are more than five unique values,
+the numbers are automatically divided into five bins.
+}
 }
 }
 }
@@ -297,7 +413,7 @@ For scatter plots, the cross hair mark is placed at the mean of both \code{x} an
 All \code{draw()} plots (except heatmaps) also have an option to overlay lines marking data quantiles.
 (Only quantile plots do this by default.)
 To do this, specify your desired quantiles as a vector of numbers \eqn{1 \geq qs \geq 0},
-providde to the \code{quantiles} argument.
+provide to the \code{quantiles} argument.
 For example, \code{draw(rnorm(100), quantiles = c(.05, .25, .5, .75 ,.95))}.
 For scatter plots, quantiles are drawn for both \code{x} and \code{y} variables.
 For violin plots, if \code{global_quantiles = TRUE}, the quantiles of the marginal \code{y}
@@ -324,28 +440,12 @@ drawn (as solid lines and dashed lines respectively).
 The regression coefficients are also drawn in a legend at the top left corner of the plot.
 }
 
-\subsection{Binning and Smoothing}{
-
-Histograms, violin plots, and area plots, all involve drawing \code{numeric} values into
-areas representing probability mass.
-There are two basic approaches 1) density estimation and 2) binning.
-The \code{draw()} function relies on the algorithms used by base-R's \code{\link[=density]{density()}} and \code{\link[=hist]{hist()}} functions for
-these two tasks.
-In many cases, we can pass arguments directly through to these functions.
-For example, the \code{bw} and \code{kernel} arguments can be passed through to \code{\link[=density]{density()}},
-or the \code{breaks} argument tp \code{\link[=hist]{hist()}}.
-
-By default, \code{draw()} draws histograms using bins, while violin plots and area plots use density smoothing.
-However, this can be overridden using the \code{smooth} argument: \code{smooth = TRUE} for density, and \code{smooth = FALSE} for binning.
-If you create a violion plot with \code{smooth = FALSE}, the result is a very blocky, cubist violins.
-}
-
 \subsection{Group proportions}{
 
 Violin plots, area plots, and multi-color histograms draw probability mass grouped across categories.
 A consideration is whether to draw this mass proportioned to the overall mass, or proportioned within each group.
-These two possibilities can be set using the \code{conditional} argument: when \code{condition = FALSE},
-each group's probability mass is drawn as a proportion of the total; when \code{condition = TRUE}, each group's
+These two possibilities can be set using the \code{conditional} argument: when \code{conditional = FALSE},
+each group's probability mass is drawn as a proportion of the total; when \code{conditional = TRUE}, each group's
 probability mass is scaled up to the size of the group (i.e., so it should sum to 1).
 For illustrate, consider the following data and associated drawings:
 
