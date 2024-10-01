@@ -469,18 +469,20 @@ draw <- function(x, y, facets = list(), ...,
   
  
   if (is.character(legend) || legend) {
-    side <- 4
+    sides <- c(4, 2, 3)
+    side_i <- 1
     if (is.logical(legend)) legend <- ''
     legend <- rep(legend, length.out = 3)
+    
     if (!is.null(output$col$legend)) {
-      output$col$legend(side = side, marginLines = marginLines, col.legend = legend[2])
-      side <- side - 2
+      output$col$legend(side = sides[side_i], marginLines = marginLines, col.legend = legend[2])
+      side_i <- side_i + 1
     }
     if (!is.null(output$cex$legend)) {
-      output$cex$legend(side = side, marginLines = marginLines, cex.legend = legend[1])
-      side <- side + 1
+      output$cex$legend(side = sides[side_i], marginLines = marginLines, cex.legend = legend[1])
+      side_i <- side_i + 1
     }
-    if (!is.null(output$pch$legend)) output$pch$legend(side = side, marginLines = marginLines)
+    if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
   } 
   
   return(invisible(output))
@@ -702,7 +704,7 @@ setMethod('.draw', c('NULL', 'numeric'),
               
               output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
               output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
-              output$pch <- prep_pch(x, y, pch = pch, log = lof)
+              output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
               
               if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
               if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
@@ -1782,6 +1784,8 @@ setGeneric('prep_col',
              checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
              checks(ncontinuous, xlen1 & xnatural & xmin(2), seealso = c('?draw')) 
              
+             pch <- if (length(unique(pch)) > 1) 16 else unique(pch)
+             
              if (length(col) == 1L || any(isColor(as.character(col)))) return(list(col = setalpha(col, alpha)))
              if (length(unique(col)) == 1L) return(list(col = setalpha(flatly[1], alpha)))
              
@@ -1885,6 +1889,8 @@ prep_pch <- function(x, y, pch = NULL, col, ...) {
   size <- max(length(x), length(y))
   checks(pch, xnull | (xlen1 & (xwholenum & xrange(1, 16L))) | (xatomic & xlength(size)))
   
+  col <- if (length(unique(col)) > 1) 'black' else unique(col)
+  
   if (is.null(pch) || length(unique(pch)) == 1L) return(list(pch = 16))
   pch <- if (is.numeric(pch) & length(unique(pch)) > 4) cut(pch, breaks = 4) else factor(pch)
   if (length(unique(pch)) > 16) .stop("You can only draw at most 16 distinct groups using the pch (point type) argument.")
@@ -1892,22 +1898,22 @@ prep_pch <- function(x, y, pch = NULL, col, ...) {
   pchfav <- c(16, 1, 3,2, 8, 13, 4, 5, 15, 6, 7, 9, 10, 11,14, 12)
   pch <- pchfav[as.integer(pch)]
   list(pch = pch,
-       legend = \(side, marginLines) legend_pch_discrete(categories, pchfav[seq_along(categories)], side, marginLines))
+       legend = \(side, marginLines) legend_pch_discrete(categories, pchfav[seq_along(categories)], side, marginLines, col))
 }
 
-legend_pch_discrete <- function(categories, pch, side, marginLines) {
+legend_pch_discrete <- function(categories, pch, side, marginLines, col = 'black') {
   
   if (side == 3) {
     ypos <- grconvertY(marginLines[[side]][1:2], 'inches', 'user')
     xpos <- grconvertX(seq(.2, .8, along = categories), 'ndc', 'user')
     
-    points(xpos, rep(ypos[2], length(xpos)), pch = pch, xpd = NA, cex = 1)
+    points(xpos, rep(ypos[2], length(xpos)), pch = pch, xpd = NA, cex = 1, col = col)
     text(xpos, ypos[2], categories, cex = .6, xpd = NA, pos = 3)
   } else {
     xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user')
     ypos <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
     
-    points(rep(xpos[2], length(ypos)), ypos, pch = pch, xpd = NA, cex = 1)
+    points(rep(xpos[2], length(ypos)), ypos, pch = pch, xpd = NA, cex = 1, col = col)
     text(xpos[2], ypos, categories, cex = .6, xpd = NA, pos = 4)
   }
   
@@ -1921,6 +1927,9 @@ legend_pch_discrete <- function(categories, pch, side, marginLines) {
 prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
   size <- max(length(x), length(y))
   checks(cex, xnull | (xpositive & (xlen1 | xlength(size))), seealso = '?draw')
+  
+  col <- if (length(unique(col)) > 1) 'black' else unique(col)
+  
   output <- list(cex = cex)
   if (is.null(cex)) {
     output$cex <- cex_density(x, y)
