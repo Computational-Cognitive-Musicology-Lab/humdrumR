@@ -122,35 +122,11 @@
 #' However, `draw()` can also (generally) accept more color values, depending on the type of plot.
 #' For some plots, multiple colors are used (aesthetically) by default;
 #' For other types of plots, its possible to use color to represent an additional dimension of information.
-#' In the "Specific Plot" subsections below, the details of how each plot type interprets the `col` argument are explained.
+#' In the "Specific Plot Types" subsections below, the details of how each plot type interprets
+#' the `col` argument are explained.
 #' 
-#' + Scatter (`x = y = 'numeric'`) and Quantile plots (`y = 'numeric'`)
-#'   + `col` may be an atomic vector the same length as `x`/`y`.
-#'   + A color scheme is automatically computed to cover the range of values in `col`
-#'     and a legend is added to the plot.
-#'   + For example, if the `col` vector contains five unique values, each of these five values
-#'     will be assigned a color in the plot.
-#'     If the `col` values are continuous and numeric, the range of values will placed on a continuum
-#'     of colors.
-#' + Histograms (`x = 'numeric'`)
-#'   + `col` may be an atomic vector the same length as `x`.
-#'     + The histogram is divided into a separate histogram
-#'       for each unique color value, they are plotted overlayed on top of each other,
-#'       and a legend is added to the plot.
-#'     + For example, if the `col` vector contains five unique values, five separate
-#'       histograms will be overlayed on top of each other, each with their own color.
-#'     + If the color argument contains is `numeric` with more than three unique values,
-#'       these values will be divided into four ranges, each assigned a color.
-#' + Barplots, Violinplots, and Area plots
-#'   + `col` may be an atomic vector of the same length as the number of levels in the first 
-#'     (X) dimension of the plotted distribution (or the Y dimension for area plots).
-#'   + These colors are used to select the colors of each bar and a legend is added to the plot.
-#'     Note that `draw()` will color levels by default (this currently can't be turned off).
-#' + Heatmaps
-#'   + Heatmaps use colors to represent values, and there is currently no control of this process.
-#'     Using `col` will have no effect.
 
-#' @section Specific Plot Type Details:
+#' @section Specific Plot Types:
 #'     
 #' ### Density Histogram or Contour (x = numeric, y =)
 #'
@@ -221,13 +197,13 @@
 #'   + `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
 #'     data in each group (if they are different size).
 #' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the default).
-#'   + If any quantiles are specified, each quantile is marked with a vertical line on the plot, labeled appropriately.
+#'   + If any quantiles are specified, each quantile is drawn as a vertical line on the plot, labeled appropriately.
 #'     For example, 
 #'     + `quantiles = .5` will draw a line at the median of input vector `x`.
 #'     + `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `x`.
 #'   + By default, `quantiles = c()` and no quantiles are drawn.
 #' + `mean` --- If `TRUE`, the mean of input vector `x` is marked on the X axis below the plot, 
-#'    using cross-hair symbol.
+#'    using a cross-hair symbol.
 #'   + Defaults to `FALSE`.
 #' + `global_quantiles` --- If the data is grouped into multiple draws by `col` (see above), and if `quantiles`
 #'   or the `mean` are going to be drawn, should they be computed separately
@@ -269,7 +245,7 @@
 #' Thus, if one point has a `cex = 3` and the second `cex = 6`, the second point will be drawn twice
 #' the size (twice the area).
 #' If the range of values is too great, it is not feasible to represent them using points,
-#' because the points would either get too small to see, or too big (covering the whole plot).
+#' because the points would either get too small to see or too big (covering the whole plot).
 #' Thus, if the largest `cex` value is more than 100 times greater than the smallest,
 #' the scaling will be changed to accommodate this.
 #' When this happens, a message will be printed, explaining how the relative area of drawn
@@ -277,29 +253,127 @@
 #' For example, you might see a message like: "When comparing the point in this plot, 
 #' a doubling of area corresponds to multiplying the value by three."
 #' 
-#' 
-
-
-
-#' For scatter plots, the bivariate normal distribution of the two variables is estimated
-#' (i.e., using their individual variances and their covariance).
-#' A sample ten times the length of `x`/`y` (up to 10,000 at the most) is drawn
-#' and these sample points are drawn as a transparent underlay of the actual scatter plot.
-#' This conveys a sense of what the bivariate normal would look like, compared to the actual data.
-#
-#' A final option for scatter plots, is to automatically overline the simple linear regression line
-#' between the two variables.
-#' When `lm = TRUE`, the simple regression line is estimated using [lm(y ~ x)][lm()];
-#' the regression line and 95% confidence limits on the regression line---estimated using [predict.lm()]---are
-#' drawn (as solid lines and dashed lines respectively).
-#' The regression coefficients are also drawn in a legend at the top left corner of the plot.
-#' 
+#' By default, each data point is represented by a solid circle.
+#' This can be overriden by passing a `pch` argument.
+#' There are sixteen possible shapes, which are specified by the natural
+#' numbers from 1 to 16---try calling `plot(1:16, pch = 1:16)` to see them all.
+#' If a single value is passed to `pch`, all points are drawn with the corresponding shape.
+#' However, if you pass `pch` a vector which is the same length as the input
+#' vector `y`, the data is grouped relative to the unique values of this vector,
+#' with a shape associated with each group.
+#' A point-shape legend is automatically drawn.
+#' If the `pch` vector is numeric, with more than four unique values, the 
+#' numeric range is divided into four groups automatically.
+#' If the `pch` vector is discrete (`character`, `logical`, or `factor`),
+#' each unique value is mapped to a point-shape;
+#' This only works up to sixteen unique values---if there are more
+#' unique values in a discrete `pch` vector, an error will occur.
 #'
+#' In addition to Plot Text and Axes Control parameters (listed above),
+#' and dimensional arguments `y`, `col`, `cex`, and `pch`, 
+#' arguments understood by quantile plots are listed below.
+#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`), 
+#' unless otherwise indicated.
+#'
+#' + `normalReference` --- If `TRUE`, a normal (Gaussian) distribution is drawn as a dashed
+#'   black line. The mean and standard deviation of this distribution is taken from the input vector `y`.
+#'   This gives a sense of how close to normally distributed `y` is.
+#'   + Defaults to `FALSE`.
+#' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
+#'   + If any quantiles are specified, each quantile is drawn as a horizontal line on the plot, labeled appropriately.
+#'     For example, 
+#'     + `quantiles = .5` will draw a line at the median of input vector `y`.
+#'     + `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `y` (this is the default
+#'       for quantile plots).
+#' + `mean` --- If `TRUE`, the mean of input vector `y` is marked on the Y axis at the center of plot, 
+#'    using a cross-hair symbol.
+#'   + Defaults to `FALSE`.
+#' + `violin` --- If `TRUE`, a single violin plot is drawn instead of a quantile plot. (See details about
+#'   these plots below.)
+#'
+#'
+#' ### Scatter plot (x = numeric, y = numeric)
+#'
+#' To draw a pair of numeric variables, `draw()` creates a scatter plot
+#' with the `x` and `y` input variables mapped to position on the X and Y axes respectively.
+#' The input vectors must be equal length, unless one of the pair is a single scalar,
+#' in which case that scalar is recycled to match the length of the other input.
+#' (Thus, providing a scalar `x` or `y` causes the other variable to be drawn on a straight line.)
+#' Up to three additional dimensions can be visually added to the plot using `col` (color),
+#' `cex` (point size), and `pch` (point style) arguments.
 #' 
+#' If you pass a single color value to `col`, the whole graph is drawn that color.
+#' However, if you pass `col` a vector of values which is the exact same length as 
+#' the input vectors `x`/`y`, the unique values of this vector will be used to color
+#' the points of the scatter plot.
+#' (A color legend will be drawn automatically.)
+#' The colors for each group will be chosen automatically, unless the entire `col` vector is
+#' valid color values. (Use `alpha` independently to change the transparency.)
+#' If the grouping `col` vector is numeric and there are more than ten unique values,
+#' a continuum of colors is created to represent that numeric space.
+#' 
+#' By default, `draw()` chooses an appropriate size to draw data points based on the 
+#' density of the X and Y points in the window---the more data on the screen, smaller the points are drawn.
+#' You can override this by passing a single numeric value to `cex`; values between about
+#' `.2` and `1.5` are pretty reasonable, typically.
+#' However, if you pass `cex` vector of positive numeric values which is the same length
+#' as the input vector `y`, the point sizes are scaled so that the relative *area* of drawn points
+#' matches the relative magnitude of numbers in the `cex` vector---A point-size legend is also drawn.
+#' Thus, if one point has a `cex = 3` and the second `cex = 6`, the second point will be drawn twice
+#' the size (twice the area).
+#' If the range of values is too great, it is not feasible to represent them using points,
+#' because the points would either get too small to see or too big (covering the whole plot).
+#' Thus, if the largest `cex` value is more than 100 times greater than the smallest,
+#' the scaling will be changed to accommodate this.
+#' When this happens, a message will be printed, explaining how the relative area of drawn
+#' points relates to the relative magnitude of `cex` values
+#' For example, you might see a message like: "When comparing the point in this plot, 
+#' a doubling of area corresponds to multiplying the value by three."
+#' 
+#' By default, each data point is represented by a solid circle.
+#' This can be overriden by passing a `pch` argument.
+#' There are sixteen possible shapes, which are specified by the natural
+#' numbers from 1 to 16---try calling `plot(1:16, pch = 1:16)` to see them all.
+#' If a single value is passed to `pch`, all points are drawn with the corresponding shape.
+#' However, if you pass `pch` a vector which is the same length as the input
+#' vector `y`, the data is grouped relative to the unique values of this vector,
+#' with a shape associated with each group.
+#' A point-shape legend is automatically drawn.
+#' If the `pch` vector is numeric, with more than four unique values, the 
+#' numeric range is divided into four groups automatically.
+#' If the `pch` vector is discrete (`character`, `logical`, or `factor`),
+#' each unique value is mapped to a point-shape;
+#' This only works up to sixteen unique values---if there are more
+#' unique values in a discrete `pch` vector, an error will occur.
+#'
+#' In addition to Plot Text and Axes Control parameters (listed above),
+#' and dimensional arguments `y`, `col`, `cex`, and `pch`, 
+#' arguments understood by scatter plots are listed below.
+#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`), 
+#' unless otherwise indicated.
+#'
+#' + `normalReference` --- If `TRUE`, a bivariate normal (Gaussian) distribution is drawn under the scatter 
+#'   plot, using the means and variances of, and the covariance between, the input vectors `x` and `y`.
+#'   To visualize this two dimensional distribution, a random sample of points from this bivariate
+#'   distribution is drawn in large black, but mostly transparent points.
+#'   This gives a sense of how close to normally distributed `y` is.
+#'   + Defaults to `FALSE`.
+#' + `lm` --- If `TRUE`, the simple regression line is estimated using [lm(y ~ x)][lm()];
+#'   This regression line and its 95% confidence limits---estimated using [predict.lm()]---are
+#'   drawn (as solid lines and dashed lines respectively).
+#'   The regression coefficients themselves are also drawn in a legend at the top left corner of the plot.
+#' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
+#'   + If any quantiles are specified, each quantile is drawn as on the plot and labeled appropriately.
+#'     Quantiles are computed separately for input vectors `x` and `y` drawn using vertical and horizontal
+#'     lines respectively.
+#'     For example, 
+#'     + `quantiles = .5` will draw a lines which converge at the medians of `x` and `y`.
+#'     + `quantiles = c(.25, .5, .75)` will draw vertical and horizontal lines marking the four 
+#'        quartiles of `x` and `y` (creating a grid with 16 cells).
+#'   + By default, `quantiles = c()` and no quantiles are drawn.
+#' + `mean` --- If `TRUE`, a cross-hair symbol is drawn marking at the point marking the means of `x` and `y`.
+#'   + Defaults to `FALSE`.
 
-#' 
-
-#' 
 #' @section Facets:
 #' 
 #'
@@ -502,7 +576,7 @@ setMethod('.draw', c('numeric', 'numeric'),
           \(x, y, log = '', jitter = '', 
             normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
-            col = 1, alpha = .5, cex = NULL, marginLines, ...) {
+            col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ...) {
             
             if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
               .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -517,7 +591,7 @@ setMethod('.draw', c('numeric', 'numeric'),
             
             output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
             output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
-            
+            output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
            
             
             if (grepl('x', jitter)) x <- smartjitter(x)
@@ -525,7 +599,7 @@ setMethod('.draw', c('numeric', 'numeric'),
             
             if (normalReference) showmvnorm(x, y)
             
-            points(x, y, col = output$col$col, cex = output$cex$cex, ...)
+            points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch, ...)
             
             # extra stuff
             draw_quantiles(1, x, quantiles)
