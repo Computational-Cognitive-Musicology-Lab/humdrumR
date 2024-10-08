@@ -93,7 +93,7 @@ matchDirs <- function(dirpattern) {
     
     initial <- if (length(dirpattern) && (dirpattern[1] == "" || (.Platform$OS.type == 'windows' && dirpattern[1] == 'C:'))) {
       dirpattern <- dirpattern[-1]
-      if (.Platform$OS.type == 'windows') 'C:' else '/'
+      if (.Platform$OS.type == 'windows') 'C:/' else '/'
     } else { 
       "." 
     }
