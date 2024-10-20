@@ -91,11 +91,11 @@ matchDirs <- function(dirpattern) {
     
     dirpattern <- dirpattern[dirpattern != "."]
     
-    if (length(dirpattern) && dirpattern[1] == "") {
-        dirpattern <- dirpattern[-1]
-        initial <- "/"
+    initial <- if (length(dirpattern) && (dirpattern[1] == "" || (.Platform$OS.type == 'windows' && dirpattern[1] == 'C:'))) {
+      dirpattern <- dirpattern[-1]
+      if (.Platform$OS.type == 'windows') 'C:' else '/'
     } else { 
-        initial <- "." 
+      "." 
     }
     
     Reduce( function(cur, nex) {
