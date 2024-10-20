@@ -1853,6 +1853,8 @@ recordDuration <- function(humdrumR) {
   humdrumR <- .recordDuration(humdrumR)
   
   humdrumR@Humtable[ , ..Timeline.. := NULL]
+  humdrumR@Humtable[ , ..fillTimeline.. := NULL]
+  humdrumR@Humtable[ , ..Duration.. := NULL]
   humdrumR <- updateFields(humdrumR)
   
   humdrumR 
@@ -1861,23 +1863,26 @@ recordDuration <- function(humdrumR) {
 .recordDuration <- function(humdrumR) {
   
   selectedFields <- selectedFields(humdrumR)
-  humtab <- getHumtab(humdrumR, 'LIMDd')
   
-  humdrumR <- within(humdrumR, ..Timeline.. <- timeline(.))
+  humdrumR <- within(humdrumR, 
+                     ..Duration.. <- duration(.),
+                     ..Timeline.. <- timeline(., threadNA = FALSE), dataTypes = 'Dd')
   humdrumR <- selectFields(humdrumR, selectedFields)
   
   humdrumR <- within(humdrumR, dataTypes = c('Dd'),
-                     fill = max(c(-1, ..Timeline..), na.rm = TRUE), .by = c('File', 'Record'))
+                     recycle = 'yes',
+                     ..fillTimeline.. = max(c(-1000, ..Timeline..), na.rm = TRUE), .by = c('File', 'Record'))
   
   within(humdrumR, RecordDuration <- {
-    
-    tl <- sort(unique(..Timeline..[..Timeline.. != -1]))
-    durs <- diff(sort(unique(..Timeline..[..Timeline.. != -1])))
-    durs <- durs[match(..Timeline.., tl)]
+    tl <- sort(unique(..fillTimeline..[..fillTimeline.. != -1000]))
+    indices <- match(..fillTimeline.., tl)
+    finalDur <- min(..Duration..[Record == max(Record[..fillTimeline.. %in% tl])], na.rm = TRUE)
+    durs <- c(diff(tl), finalDur)
+    durs <- durs[indices]
     durs[is.na(durs)] <- 0
     durs
     
-  }, by = File, dataTypes = 'LIMDd')
+  }, .by = 'File', dataTypes = 'LIMDd')
   
 }
 
