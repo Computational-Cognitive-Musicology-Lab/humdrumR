@@ -10,7 +10,9 @@
 #' The `draw()` function is humdrumR's go-to plotting function,
 #' which can make a variety of graphs depending on the type of data you give it.
 #' For the most part, `draw()` is simply a easy-to-use wrapper around
-#' the base-R graphics functions [plot()], [barplot()], and [hist()].
+#' the base-R graphics functions---Anything that `draw()` does can be done
+#'  using normal base-R functions ([plot()], [barplot()], etc.),
+#' but `draw()` makes making good looking plots faster and easier.
 #' 
 #' @details
 #' 
@@ -58,8 +60,6 @@
 #' (See [par()] for a full list) or add to them (for example, using [points()] or [mtext()]).
 #' However, `draw()` has a number of special additional features, including easily plotting "facets" 
 #' (dividing data into multiple plots).
-#' Anything that `draw()` does can be done using normal base-R plotting functions ([plot()], [barplot()], etc.),
-#' but `draw()` makes making good looking plots faster and easier.
 #' 
 #'  
 #' ### Plot Text
@@ -104,15 +104,15 @@
 #' Note that color control can used for entirely aesthetic purposes (picking 
 #' a color scheme you want) *or* to represent an additional dimension of data.
 #'
-#' Colors can be specified as either:
+#' Colors can be specified several ways:
 #' 
-#' + Names (e.g., `"red"` or `"darkgreen'`)
-#' + Hex codes (e.g., `"#ff0000"` or `"#00ff00`)
+#' + As names (e.g., `"red"` or `"darkgreen'`)
+#' + As hex codes (e.g., `"#ff0000"` or `"#00ff00`)
 #' + Using the [rgb()] function.
 #'   + If a single `col` value is provided, all points are drawn this color.
 #'   + If the `col` value is the same length as `x` and `y`, a scale of colors (either discrete of continuous)
 #'     is generated to match the values this variable takes, and a legend is drawn.
-#' + Or as natural numbers, indexing `humdrumR`'s flatly palette,
+#' + As natural numbers, indexing `humdrumR`'s flatly palette,
 #'   based on the colors `'#18BC9C'`, `'#3498DB'`, `'#F39C12'`, `'#E74C3C'`, and `'#2C3E50'`.
 #'
 #' The `alpha` argument must be a `numeric` value \eqn{1 \geq alpha \geq 0},
@@ -146,7 +146,7 @@
 #' the probability mass in each bin, because it depends on the width of the bins;
 #' For narrow bins, density can even be greater than 1.
 #' If bin sizes are all equal, then the relative height of he density bars does
-#' map exactly to the probability mass of each bin.
+#' map exactly to the relative probability mass of each bin.
 #' However, if bins are not equal width---which can only happen if you manually specify
 #' unequal bins using the `breaks` argument---the heights of bars *don't* map to probability mass.
 #' However, using the density assures that the relative **area** of each bin does match the probability mass 
@@ -157,7 +157,7 @@
 #' If you pass a single color, the whole graph is drawn that color.
 #' However, if you pass `col` a vector of values which is the exact same length as 
 #' the input vector `x`, the unique values of this vector will be used to group 
-#' the `x` data and a separate plot will be drawn for each group, with its own color.
+#' the `x` data and a separate density-graph will be drawn for each group, with its own color.
 #' (A color legend will be drawn automatically.)
 #' The colors for each group will be chosen automatically, unless the entire `col` vector is
 #' valid color values. (Use `alpha` independently to change the transparency.)
@@ -168,8 +168,8 @@
 #' 
 #' #### Other histogram arguments
 #' 
-#' In addition to Plot Text and Axes Control parameters (listed above), arguments understood by histogram/density plots
-#' are listed below.
+#' In addition to Plot Text and Axes Control parameters (listed above), as well as the dimensional `col` argument,
+#' arguments understood by histogram/density plots are listed below.
 #' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`), 
 #' unless otherwise indicated.
 #' 
@@ -195,13 +195,13 @@
 #'   group to sum/integrate to 1? I.e., should probabilities be conditioned on the grouping factor?
 #'   + Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
 #'   + `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
-#'     data in each group (if they are different size).
+#'     data in each group (if they are different sizes).
 #' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the default).
+#'   + By default, `quantiles = c()` and no quantiles are drawn.
 #'   + If any quantiles are specified, each quantile is drawn as a vertical line on the plot, labeled appropriately.
 #'     For example, 
 #'     + `quantiles = .5` will draw a line at the median of input vector `x`.
 #'     + `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `x`.
-#'   + By default, `quantiles = c()` and no quantiles are drawn.
 #' + `mean` --- If `TRUE`, the mean of input vector `x` is marked on the X axis below the plot, 
 #'    using a cross-hair symbol.
 #'   + Defaults to `FALSE`.
@@ -242,8 +242,8 @@
 #' However, if you pass `cex` vector of positive numeric values which is the same length
 #' as the input vector `y`, the point sizes are scaled so that the relative *area* of drawn points
 #' matches the relative magnitude of numbers in the `cex` vector---A point-size legend is also drawn.
-#' Thus, if one point has a `cex = 3` and the second `cex = 6`, the second point will be drawn twice
-#' the size (twice the area).
+#' Thus, if you draw two points with `cex = c(3, 6)`, the second point will be drawn twice
+#' the size (twice the area) of the first.
 #' If the range of values is too great, it is not feasible to represent them using points,
 #' because the points would either get too small to see or too big (covering the whole plot).
 #' Thus, if the largest `cex` value is more than 100 times greater than the smallest,
@@ -319,8 +319,8 @@
 #' However, if you pass `cex` vector of positive numeric values which is the same length
 #' as the input vector `y`, the point sizes are scaled so that the relative *area* of drawn points
 #' matches the relative magnitude of numbers in the `cex` vector---A point-size legend is also drawn.
-#' Thus, if one point has a `cex = 3` and the second `cex = 6`, the second point will be drawn twice
-#' the size (twice the area).
+#' Thus, if you draw two points with `cex = c(3, 6)`, the second point will be drawn twice
+#' the size (twice the area) of the first.
 #' If the range of values is too great, it is not feasible to represent them using points,
 #' because the points would either get too small to see or too big (covering the whole plot).
 #' Thus, if the largest `cex` value is more than 100 times greater than the smallest,
@@ -331,7 +331,7 @@
 #' a doubling of area corresponds to multiplying the value by three."
 #' 
 #' By default, each data point is represented by a solid circle.
-#' This can be overriden by passing a `pch` argument.
+#' This can be overridden by passing a `pch` argument.
 #' There are sixteen possible shapes, which are specified by the natural
 #' numbers from 1 to 16---try calling `plot(1:16, pch = 1:16)` to see them all.
 #' If a single value is passed to `pch`, all points are drawn with the corresponding shape.
@@ -356,13 +356,14 @@
 #'   plot, using the means and variances of, and the covariance between, the input vectors `x` and `y`.
 #'   To visualize this two dimensional distribution, a random sample of points from this bivariate
 #'   distribution is drawn in large black, but mostly transparent points.
-#'   This gives a sense of how close to normally distributed `y` is.
+#'   This gives a sense of how close to jointly-normally distributed `x` and `y` are.
 #'   + Defaults to `FALSE`.
-#' + `lm` --- If `TRUE`, the simple regression line is estimated using [lm(y ~ x)][lm()];
-#'   This regression line and its 95% confidence limits---estimated using [predict.lm()]---are
+#' + `lm` --- If `TRUE`, the simple regression line is estimated using [lm(y ~ x)][lm()] and
+#'   this regression line and its 95% confidence limits---estimated using [predict.lm()]---are
 #'   drawn (as solid lines and dashed lines respectively).
 #'   The regression coefficients themselves are also drawn in a legend at the top left corner of the plot.
 #' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
+#'   + By default, `quantiles = c()` and no quantiles are drawn.
 #'   + If any quantiles are specified, each quantile is drawn as on the plot and labeled appropriately.
 #'     Quantiles are computed separately for input vectors `x` and `y` drawn using vertical and horizontal
 #'     lines respectively.
@@ -370,7 +371,6 @@
 #'     + `quantiles = .5` will draw a lines which converge at the medians of `x` and `y`.
 #'     + `quantiles = c(.25, .5, .75)` will draw vertical and horizontal lines marking the four 
 #'        quartiles of `x` and `y` (creating a grid with 16 cells).
-#'   + By default, `quantiles = c()` and no quantiles are drawn.
 #' + `mean` --- If `TRUE`, a cross-hair symbol is drawn marking at the point marking the means of `x` and `y`.
 #'   + Defaults to `FALSE`.
 
