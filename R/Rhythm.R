@@ -1904,7 +1904,8 @@ recordDuration <- function(humdrumR) {
 #' 
 #' Defaults to a sixteenth-note.
 #' 
-#' Must be a single atomic value, which can be [parsed as a duration][rhythmFunctions].
+#' Must be a single atomic value, which can be [parsed as a duration][rhythmFunctions], or `NULL`.
+#' If `NULL`, the [tatum()] of the dataset if automatically used as the time base.
 #' 
 #' @export
 timebase <- function(humdrumR, tb = '16') {
@@ -1917,13 +1918,16 @@ timebase <- function(humdrumR, tb = '16') {
   
   humdrumR <- .recordDuration(humdrumR)
   
-  humtab <- getHumtab(humdrumR, 'LIMDd')
+  humtab <- getHumtab(humdrumR, 'GLIMDd')
   
   humtab[ , RecordDuration := as.integer(floor(RecordDuration / tb))]
   # remove records that dont line up with tb
-  humtab <- humtab[is.na(..Timeline..) | (is.whole(..Timeline.. / tb) & ..Timeline.. > -1L)]
-  
-  humtab[ , Nrep := ifelse(RecordDuration == 0 & Type != 'd', 1, RecordDuration)]
+  keep <- humtab[ , is.na(..fillTimeline..) | (is.whole(..fillTimeline.. / tb) & ..fillTimeline.. > -1000L)]
+  if (any(!keep))  .message('### This corpus includes rhythmic passages which cannot be represented at the {recip(tb)}-note timebase you have chosed.\n',
+                           '### To represent all rhythms faithfully, you need a timebase of { recip(with(humdrumR, tatum(..Duration..)))}, or smaller.\n',
+                           "##### Onsets which don't fit on your desired {recip(tb)}-note grid are being removed from the output.\n\n")
+  humtab <- humtab[keep == TRUE]
+  humtab[ , Nrep := ifelse((RecordDuration == 0 & Type != 'd') | Type == 'G', 1, RecordDuration)]
   # humtab <- humtab[Nrep > 0]
   # humtab$.tatum.[humtab.]
   
@@ -1947,7 +1951,7 @@ timebase <- function(humdrumR, tb = '16') {
   humtab$Type[humtab$Duplicated] <- 'd'
   
   putHumtab(humdrumR) <- humtab
-  humdrumR@Humtable[ , c('..Timeline..', 'RecordDuration') := NULL]
+  humdrumR@Humtable[ , c('..Timeline..', '..fillTimeline..', '..Duration..','RecordDuration', 'Duplicated', 'Nrep') := NULL]
   humdrumR <- updateFields(humdrumR)
   
   selectFields(humdrumR, selectedFields)

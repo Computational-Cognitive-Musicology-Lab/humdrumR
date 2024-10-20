@@ -1,3 +1,9 @@
+# humdrumR 7.0.7
+
+Fixed a bugs in timeline(), so it is now working, though I still hasn't been extensively tested and I consider it "under development."
+
+Also fixed a few other minor bugs.
+
 # humdrumR 7.0.6
 
 We've fixed some minor bugs which were causing major problems in important functions:

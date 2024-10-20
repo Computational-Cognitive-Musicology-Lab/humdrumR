@@ -15,7 +15,8 @@ This data must have at least one spine with rhythmic (\link[=rhythmFunctions]{du
 
 Defaults to a sixteenth-note.
 
-Must be a single atomic value, which can be \link[=rhythmFunctions]{parsed as a duration}.}
+Must be a single atomic value, which can be \link[=rhythmFunctions]{parsed as a duration}, or \code{NULL}.
+If \code{NULL}, the \code{\link[=tatum]{tatum()}} of the dataset if automatically used as the time base.}
 }
 \description{
 The \code{timebase()} function takes a \link[=humdrumRclass]{humdrumR} dataset
