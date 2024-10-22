@@ -2201,7 +2201,7 @@ rational2tint <- function(x, tonalHarmonic = 3, ...) {
 }
 
 ratio2tint <- function(x, tonalHarmonic = 2^(19/12), centMargin = 25,  ...) {
-  if (x <= 0) .stop('Numbers can only be interpreted as frequency ratios if they are non-zero and positive.')
+  if (any(x <= 0)) .stop('Numbers can only be interpreted as frequency ratios if they are non-zero and positive.')
   
   
   possibleLO5ths <- -12:12
@@ -2611,7 +2611,7 @@ tonalInterval.factor <- function(x, Exclusive = NULL, ...) {
 #' @rdname pitchParsing
 #' @export
 tonalInterval.token <- function(x, Exclusive = NULL, ...) {
- tonalInterval.character(as.character(x@.Data), Exclusive = Exclusive %||% getExclusive(x), ...)
+ tonalInterval(x@.Data, Exclusive = Exclusive %||% getExclusive(x), ...)
 }
 
 
