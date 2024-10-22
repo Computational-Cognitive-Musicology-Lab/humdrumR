@@ -2110,21 +2110,23 @@ prep_layout <- function(facets) {
 
 # Notation viewer ----
 
-toHNP <- function(lines, message, render = TRUE) {
+toHNP <- function(lines, message, render = TRUE, header = 'HumdrumR viewer') {
   output <- paste(lines, collapse = '\n')
   
   randomID <- paste0(sample(letters, 100, replace = TRUE), collapse = '')
   message <- gsub("PLUGIN", '<a href="https://plugin.humdrum.org/">humdrum notation plugin</a>', message)
+  header <- if (!is.null(header)) paste0('<h1>', header,'</h1>') else ''
+  doctype <- if(render) '<!DOCTYPE html>' else '' 
   
   html <- .glue(.open = '[[', .close = ']]',
-  '<!DOCTYPE html>
+  '[[doctype]]
     <html lang="en">
     <head>
     <script src="https://plugin.humdrum.org/scripts/humdrum-notation-plugin-worker.js"></script>
     <script>displayHumdrum({source: "[[randomID]]", autoResize: "true"});</script>
     </head>
     <body>
-    <h1>HumdrumR viewer</h1>
+    [[header]]
     <p>[[message]]</p>
     <script id="[[randomID]]" type="text/x-humdrum">[[output]]</script>
     </body>
@@ -2138,9 +2140,7 @@ toHNP <- function(lines, message, render = TRUE) {
     writeLines(strsplit(html, split = '\n')[[1]],  htmlFile)
     
     getOption('viewer', default = utils::browseURL)(htmlFile)
-  } else {
-    cat(html, sep = '\n')
-  }
+  } 
 
   invisible(html)
 }
