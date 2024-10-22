@@ -238,6 +238,14 @@ setMethod('Arith', c('token', 'token'),
 
 #' @rdname token
 #' @export
+setMethod('diff', 'token',
+          function(x, ...) {
+               x@.Data <- diff(x@.Data, ...)
+               x
+          })
+
+#' @rdname token
+#' @export
 setMethod('Arith', c('token', 'character'),
           function(e1, e2) {
             parser <- e1@Attributes$parser

@@ -72,6 +72,9 @@ test_that('Multiple filters works as they should', {
   expect_identical(chorales[6:10][2], chorales[7])
   expect_identical(chorales[[ , 3:4]][[, 2]], chorales[[, 4]])
   
+  expect_identical(chorales |> filter(nchar(Token) == 2 & Record %% 2 == 0) |> pull(),
+                   chorales |> filter(nchar(Token) == 2) |> filter(Record %% 2== 0) |> pull())
+  
   expect_identical(chorales |> filter(Spine == 1 & Record > 100),
                    chorales |> filter(Spine == 1) |> filter(Record > 100))
   
@@ -143,8 +146,8 @@ test_that("Unfiltering works", {
   cleared <- getHumtab(unfilter(subset(chorales, Spine == 1)))
   expect_identical(cleared, orig)
   
-  cleared <- getHumtab(chorales |> filter(Spine > 2) |> filter(Record %% 2 == 0) |> unfilter())
-  expect_identical(orig, cleared)
+  cleared2 <- getHumtab(chorales |> filter(Spine > 2) |> filter(Record %% 2 == 0) |> unfilter())
+  expect_identical(orig, cleared2)
 
   # can use subset/complement to achieve ifelse() 
   chorales |> 

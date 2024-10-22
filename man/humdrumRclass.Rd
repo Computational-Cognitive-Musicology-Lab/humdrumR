@@ -23,7 +23,8 @@ is.humdrumR(x)
   maxRecordsPerFile = if (length(humdrumR) == 1L) 800L else
     humdrumRoption("maxRecordsPerFile"),
   maxTokenLength = humdrumRoption("maxTokenLength"),
-  censorEmptyRecords = humdrumRoption("censorEmptyRecords")
+  censorEmptyRecords = humdrumRoption("censorEmptyRecords"),
+  ...
 )
 }
 \arguments{

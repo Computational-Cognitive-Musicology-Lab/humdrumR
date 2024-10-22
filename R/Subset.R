@@ -185,26 +185,26 @@ nullify <- function(humtab, fields, subset, dataTypes) {
   targetTypes <- humtab$Type %in% dataTypes
   null[targetTypes] <- !subset
   
-  newFields <- lapply(fields,
-                            \(fieldName) {
+  complementFields <- paste0('_complement_', fields)
+  
+  newFields <- Map(fields, complementFields, f = \(fieldName, complementName) {
                               field <- humtab[[fieldName]]
                               subset <- complement <- field[0][1:length(field)] # makes class match
                               
+                              # This is not backwards!
                               subset[!targetTypes | !null]    <- field[!targetTypes | !null] 
                               
-                              if (paste0('_complement_', fieldName) %in% colnames(humtab)) {
-                                complement <- humtab[[paste0('_complement_', fieldName)]]
+                              if (complementName %in% colnames(humtab)) {
+                                complement <- humtab[[complementName]]
                                 complement[(!targetTypes | null) & is.na(complement)] <- field[(!targetTypes | null) & is.na(complement)]
                               } else {
                                 complement[!targetTypes | null] <- field[!targetTypes |  null]
-                                
                               }
-                              # This is not backwards!
                               
                               setNames(data.table(subset, complement), paste0(c('', '_complement_'), fieldName))
                             })
   
-  humtab <- humtab[ , !colnames(humtab) %in% c(fields, paste0('_complement_', fields)), with = FALSE]
+  humtab <- humtab[ , !colnames(humtab) %in% c(fields, complementFields), with = FALSE]
   
   for (j in seq_along(newFields)) humtab <- cbind(humtab, newFields[[j]])
  

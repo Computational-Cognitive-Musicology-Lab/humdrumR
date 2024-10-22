@@ -16,6 +16,7 @@
   ...,
   Exclusive = NULL,
   threadNA = TRUE,
+  total = FALSE,
   parseArgs = list(),
   groupby = list()
 )
@@ -30,6 +31,7 @@ timeline(
   ...,
   Exclusive = NULL,
   threadNA = TRUE,
+  total = FALSE,
   parseArgs = list(),
   groupby = list()
 )
@@ -43,6 +45,7 @@ timeline(
   ...,
   Exclusive = NULL,
   threadNA = TRUE,
+  total = FALSE,
   parseArgs = list(),
   groupby = list()
 )
@@ -59,6 +62,7 @@ timestamp(
   ...,
   Exclusive = NULL,
   threadNA = TRUE,
+  total = FALSE,
   parseArgs = list(),
   groupby = list()
 )
@@ -86,6 +90,12 @@ See "Pickups" section below.}
 \item{threadNA}{\emph{\strong{Should rhythm-less tokens return \code{NA}?}}
 
 Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{total}{\emph{\strong{Should timeline propagate to all records in all spines?}}
+
+Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
@@ -152,12 +162,13 @@ The cumulative durations of \code{timeline()} represent musical duration units, 
 default tempo of 60 beats per minute.
 If \code{minutes == TRUE}, the output is formatted into \code{"minute:seconds.milliseconds"} character strings.
 
-If a \code{groupby} argument is provided, \code{\link[=localDuration]{localDuration()}} is used to compute the minimum durations in each group before
-computing the cumulative sum only with unique values from each \code{Record} in the \code{groupby}.
-By default, \link[=withinHumdrum]{with(in).humdrumR} will automatically pass \code{groupby = list(Piece = Piece, Record = Record)}
-into calls to \code{timeline()} or \code{timestamp()}.
-Thus, a call like \code{within(humData, timeline(Token))} will compute the correct timeline position for \emph{all}
-tokens across all spines/paths/stops---all values in the same record will be the same.
+When applying \code{timeline()} to a \link[=humdrumR-class]{humdrumR dataset}, the timeline of all spines with rhythmic information
+(e.g., \verb{**kern}, \verb{**harm}) is computed separately.
+(Note that \code{timeline()} can't guarantee that your data spines contain consistent rhythmic information!
+In other words, if one of your spines has (for example) an extra eighth-note token, the timelines in each spine will diverge.)
+By default, the timeline is output only in spines/tokens where rhythmic information is encoded.
+However, sometimes we want to know the timing of every datapoint.
+We can then set \code{total = TRUE}, which will propagate timeline information to \emph{all} data tokens in all spines.
 
 Note that, \code{timeline()} and \code{timestamp()} follow the default behavior of \code{\link[=duration]{duration()}} by treating grace-notes as duration \code{0}.
 This means that their position on the timeline is simply inherited from the previous event on the timeline, as if they occur
