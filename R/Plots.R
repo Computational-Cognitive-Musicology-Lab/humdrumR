@@ -505,8 +505,8 @@ draw <- function(x, y, facets = list(), ...,
   if (yexpr == '') yexpr <- 'y'
   
   # change missing to NULL
-  x <- if (!missing(x)) x
-  y <- if (!missing(y)) y
+  x <- if (!missing(x)) token2atomic(x)
+  y <- if (!missing(y)) token2atomic(y)
   
   if (rlang::is_formula(x)) {
     formula <- xy_formula(x)
@@ -532,32 +532,35 @@ draw <- function(x, y, facets = list(), ...,
   
   output$marginLines <- marginLines
   
-  # title and subtitle
-  marginLab(marginLines, stringr::str_to_title(main), 3, 3, 
-            col = par('col.main'), cex = par('cex.main'), font = 2)
-  marginLab(marginLines, stringr::str_to_title(sub), 3, 2, 
-            font = 2)
-  
-  
-  humaxes(output$axes, output$axisNames, axes, marginLines)
-  
- 
-  if (is.character(legend) || legend) {
-    sides <- c(4, 2, 3)
-    side_i <- 1
-    if (is.logical(legend)) legend <- ''
-    legend <- rep(legend, length.out = 3)
+  if (output$plot) {
     
-    if (!is.null(output$col$legend)) {
-      output$col$legend(side = sides[side_i], marginLines = marginLines, col.legend = legend[2])
-      side_i <- side_i + 1
-    }
-    if (!is.null(output$cex$legend)) {
-      output$cex$legend(side = sides[side_i], marginLines = marginLines, cex.legend = legend[1])
-      side_i <- side_i + 1
-    }
-    if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
-  } 
+    # title and subtitle
+    marginLab(marginLines, stringr::str_to_title(main), 3, 3, 
+              col = par('col.main'), cex = par('cex.main'), font = 2)
+    marginLab(marginLines, stringr::str_to_title(sub), 3, 2, 
+              font = 2)
+    
+    
+    humaxes(output$axes, output$axisNames, axes, marginLines)
+    
+    
+    if (is.character(legend) || legend) {
+      sides <- c(4, 2, 3)
+      side_i <- 1
+      if (is.logical(legend)) legend <- ''
+      legend <- rep(legend, length.out = 3)
+      
+      if (!is.null(output$col$legend)) {
+        output$col$legend(side = sides[side_i], marginLines = marginLines, col.legend = legend[2])
+        side_i <- side_i + 1
+      }
+      if (!is.null(output$cex$legend)) {
+        output$cex$legend(side = sides[side_i], marginLines = marginLines, cex.legend = legend[1])
+        side_i <- side_i + 1
+      }
+      if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
+    } 
+  }
   
   return(invisible(output))
 }
@@ -576,7 +579,7 @@ setMethod('.draw', c('numeric', 'numeric'),
           \(x, y, log = '', jitter = '', 
             normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
-            col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ...) {
+            col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ..., plot = TRUE) {
             
             if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
               .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -587,12 +590,14 @@ setMethod('.draw', c('numeric', 'numeric'),
             
             output <- canvas(x = x, xlim = xlim, 
                              y = y, ylim = ylim,
-                             log = log)
+                             log = log, plot = plot)
             
             output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
             output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
             output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
-           
+            output$plot <- plot
+            
+            if (!plot) return(output)
             
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
@@ -636,7 +641,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             smooth = FALSE, conditional = FALSE, showCounts = TRUE, showPoints = TRUE,
             mean = FALSE, quantiles = c(), global_quantiles = FALSE,
             xlim = NULL, ylim = NULL,
-            col = 3, alpha = .2, cex = .7, marginLines, ...) {
+            col = 3, alpha = .2, cex = .7, marginLines, ..., plot = TRUE) {
             
             cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
           
@@ -661,7 +666,26 @@ setMethod('.draw', c('numeric', 'NULL'),
             ylim <- ylim %||% c(0, 2^(ceiling(log( max(allDens), 2)))) # 1, .5, .25, .125, etc.
             output <- canvas(x = x, xlim = xlim %||%range(breaks), 
                              y =  allDens[allDens > 0], ylim = ylim, 
-                             log = gsub('y', '', log))
+                             log = gsub('y', '', log), plot = plot)
+            
+            
+            # prepare ticks
+            ## x
+            output$breaks <- x.ticks <- breaks
+            output$draw_type <- 'histogram'
+            while(length(x.ticks) > 20L) {
+              x.ticks <- x.ticks[seq(1, length(x.ticks), by = 2)]
+            }
+            output$axes[side == 1, ticks := x.ticks]
+            
+            ## y
+            output$axes[side == 2, ticks := setNames(ticks[[1]], format(ticks[[1]]))]
+            output$axisNames[[2]] <- 'Probability density'
+      
+            output$col <- cols
+            output$plot <- plot
+            
+            if (!plot) return(output)
             
             # actual plot of polygons
             ymin <- min(output$window$ylim[[1]])
@@ -724,28 +748,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             }
             
             
-            # prepare ticks
-            ## x
-            x.ticks <- breaks
-            while(length(x.ticks) > 20L) {
-              x.ticks <- x.ticks[seq(1, length(x.ticks), by = 2)]
-            }
-            output$axes[side == 1, ticks := x.ticks]
-            
-            ## y
-            output$axes[side == 2, ticks := setNames(ticks[[1]], format(ticks[[1]]))]
-              
-            #   
-            # ## counts (side 4)
-            # count.ticks <- unique(round(pretty(c(0, sum(histogram$counts) * output$axes[side == 2, ticks[[1]]]), n = 10L, min.n = 5L)))
-            # count.ticks <- structure(count.ticks / sum(histogram$counts), names = format(count.ticks, big.mark = ','))
-            # output$axes <- rbind(output$axes,
-            #                      data.table(side = 4, ticks = list(count.ticks), line = 1))
-        
-            
-            output$axisNames[[2]] <- 'Probability density'
-            
-            output$col <- cols
+           
             output
             
           })
@@ -759,26 +762,34 @@ setMethod('.draw', c('NULL', 'numeric'),
                    mean = FALSE, quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
                    col = 1, alpha = .8, cex = NULL, pch = NULL, 
-                   marginLines, ...) {
+                   marginLines, ..., plot = TRUE) {
             
             checks(violin, xTF)
             output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
                              xlim = xlim, 
                              y = y, ylim = ylim , 
-                             log = gsub('x', '', log))
+                             log = gsub('x', '', log), plot = plot)
             
             if (violin) {
               
               output$col <- prep_col(col, 1, alpha = alpha, log = log, ...)
-              draw_violins(list(y), horiz = FALSE, mean = mean, ..., col = output$col$col, quantiles = quantiles)
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
+              
+              output$plot <- plot
+              if (!plot) return(output)
+              
+              draw_violins(list(y), horiz = FALSE, mean = mean, ..., col = output$col$col, quantiles = quantiles)
               
             } else {
               
               output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
               output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
               output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
+              output$axisNames[[1]] <- 'Quantile'
+              
+              output$plot <- plot
+              if (!plot) return(output)
               
               if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
               if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
@@ -802,7 +813,6 @@ setMethod('.draw', c('NULL', 'numeric'),
                        legend = quote(N(mu[y], sigma[y])) )
               }
               
-              output$axisNames[[1]] <- 'Quantile'
             }
            
             output
@@ -819,7 +829,7 @@ setMethod('.draw', c('table', 'NULL'),
                    beside = TRUE, heat = length(dim(x) == 2L) && length(x) > 80L,
                    ylim = NULL, marginLines, 
                    quantiles = c(), mean = FALSE, showCounts = FALSE,
-                   col = NULL,  alpha = .9, ...) { 
+                   col = NULL,  alpha = .9, ..., plot = TRUE) { 
             if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
             dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
             
@@ -906,6 +916,8 @@ setMethod('.draw', c('count', 'NULL'),
           function(x, y, ...) {
             .draw(as.table(x), NULL, ...)
           })
+
+### draw() special ----
 
 setMethod('.draw', c('NULL', 'count'),
           function(x, y, ...) {
@@ -1020,6 +1032,8 @@ setMethod('.draw', c('formula'),
             
           })
 
+### draw() humdrumR objects ----
+
 setMethod('.draw', c('humdrumR'),
           function(x, facet = NULL, ...) {
             selected <- pullSelectedField(x, null = 'asis')
@@ -1035,6 +1049,26 @@ setMethod('.draw', c('humdrumR'),
             .draw(selected, facet = facet, ...)
             
           })
+
+# 
+# setMethod('.draw', c('token', 'NULL'),
+#           function(x, y, ...) {
+#             x <- token2atomic(x)
+#             .draw(x, NULL, ...)
+#           })
+# 
+# setMethod('.draw', c('NULL', 'token'),
+#           function(x, y, ...) {
+#             y <- token2atomic(y)
+#             .draw(NULL, y, ...)
+#           })
+# 
+# setMethod('.draw', c('token', 'token'),
+#           function(x, y, ...) {
+#             x <- token2atomic(x)
+#             y <- token2atomic(y)
+#             .draw(x, y, ...)
+#           })
 
 
 ### draw() numeric ~ discrete ----
@@ -1127,18 +1161,20 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
     .stop('Facets variables must be vectors of the same length as the x/y plotting variables.')
   }
   
-
-  
   
   # determine overall xlim ylim etc (output)
-  output <- .draw(x, y, ..., col = col, cex = cex)
+  output <- .draw(x, y, ..., col = col, cex = cex, plot = FALSE)
   
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
-  args <- list(x = x, y = y,  log = output$window$log,
-               ..., col = output$col$col, cex = output$cex$cex,
-               xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]])
+  args <- list(x = x, y = y,  log = output$window$log, 
+               col = output$col$col, cex = output$cex$cex,
+               xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]], ...)
+  if ('breaks' %in% names(output)) {
+    args <- c(list(breaks = output$breaks), args)
+    hist_scales <- prop.table(do.call('table', facets))
+  }
   args <- args[!duplicated(names(args))]
   
   
@@ -1167,8 +1203,6 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   facetX <- facetY <- c()
   # plot each screen
   for (n in lay) {
-  
-    
       cur <- lay == n
       curlevels <- Map('[', dimnames(table), which(cur, arr.ind = TRUE))
       
@@ -1179,6 +1213,8 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       if (table[cur] > 0) {
         facet_ind <- Reduce('&', Map('==', curlevels, facets))
         curargs <- lapply(args, \(arg) if (length(arg) == vecsize) arg[facet_ind] else arg)
+        
+        if (!is.null(output$draw_type) && output$draw_type == 'histogram') curargs$hist_scale <- hist_scales[cur]
         
         do.call('.draw', curargs) # actual draw of plot
         
@@ -1200,10 +1236,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       #coordinates of facets-
       if (sides[1]) facetX <- c(facetX, grconvertX(.5, 'nfc', 'ndc'))
       if (sides[2]) facetY <- c(facetY, grconvertY(.5, 'nfc', 'ndc'))
-      
-      
   }
-  
   
   # reset layout
   layout(1)
@@ -1222,7 +1255,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
                                                         dimnames(table)[[2]]))),
                              line = 2L))
     if (.names(facets)[2] != '') names(facets)[2]
-  } )
+  })
   output$axes <- axes
   
   output
@@ -1705,7 +1738,7 @@ checkStrFit_24 <- function(slotSize, ticks, labels, cex) {
   
 }
 
-canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
+canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '', plot = TRUE) {
  logcheck(log, x, y)
   
   xlim <- xlim %||% range(x) 
@@ -1714,8 +1747,11 @@ canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
   if (grepl('x', log, fixed = TRUE) && xlim[1] <= 0) xlim[1] <- min(x) / 2
   if (grepl('y', log, fixed = TRUE) && ylim[1] <= 0) ylim[1] <- min(y) / 2
   
-  plot.new()
-  plot.window(xlim = xlim, ylim = ylim, log = log)
+  if (plot) {
+    plot.new()
+    plot.window(xlim = xlim, ylim = ylim, log = log)
+  }
+
   
   axes <- data.table(side = 1:2,
                      ticks = list(axTicks(1, log = grepl('x', log)),
@@ -1805,14 +1841,14 @@ lines
 }
 
 
-hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL) {
+hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way
   if (smooth) {
     dens <- stats::density.default(x, ...)
     output <- data.table(X = dens$x, Density = dens$y)
   } else {
-    hist <- graphics::hist.default(x, breaks = breaks, ..., plot = FALSE)
+    hist <- graphics::hist.default(x, breaks = breaks, plot = FALSE)
     
     output <- data.table(Density = hist$density, Counts = hist$counts, Mids = hist$mids, 
                          Delta = diff(hist$breaks))
@@ -1821,6 +1857,7 @@ hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL)
     output[ , X := hist$breaks[i]]
     
   }
+  output[, Density := Density * hist_scale]
   output[]
 }
 
@@ -1976,7 +2013,6 @@ prep_pch <- function(x, y, pch = NULL, col, ...) {
 }
 
 legend_pch_discrete <- function(categories, pch, side, marginLines, col = 'black') {
-  
   if (side == 3) {
     ypos <- grconvertY(marginLines[[side]][1:2], 'inches', 'user')
     xpos <- grconvertX(seq(.2, .8, along = categories), 'ndc', 'user')
