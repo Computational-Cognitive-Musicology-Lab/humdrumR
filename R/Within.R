@@ -101,7 +101,7 @@
 #' For example, in
 #'
 #' ```
-#' within(humData, kern(Token, simple = x), variable(x = TRUE))
+#' within(humData, kern(Token, simple = x), variables = list(x = TRUE))
 #' 
 #' ```
 #' 
@@ -513,9 +513,8 @@
 #' The full list of options are `"no"`, `"yes"`, `"pad"`, `"ifscalar"`, `"ifeven"`, `"never"`, and 
 #' `"summarize"`, though not all functions accept all options.
 #' See the *Parsing expression results* section below.
-
+#'
 #' @param variables ***A named `list` of values, to interpolate into your expressions.***
-#' 
 #'  
 #' Defaults to `list()`.
 #' 

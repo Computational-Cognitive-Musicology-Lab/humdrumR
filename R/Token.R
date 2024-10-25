@@ -171,6 +171,13 @@ factorize <- function(token) {
   
 }
 
+token2atomic <- function(token) {
+  if (!inherits(token, 'token')) return(token)
+  
+  factorizer <- token@Attributes$factorizer
+  if (is.null(factorizer) || class(token@.Data) %in% c('numeric', 'integer')) return(token@.Data)
+  factorizer(token)
+}
 
 #' @export
 setMethod('as.factor', 'token', function(x) factorize(x))

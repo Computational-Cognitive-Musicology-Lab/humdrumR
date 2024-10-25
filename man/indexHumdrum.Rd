@@ -192,15 +192,15 @@ Note that \emph{other} exclusive interpretations in each piece are unaffected---
 this example, only the kern spines (if there are any) are indexed!
 }
 }
-\section{drop}{
+\section{removeEmpty}{
 
 
-The \code{drop} argument to any humdrumR indexing controls whether
+The \code{removeEmpty} argument to any humdrumR indexing controls whether
 filtered data is completely removed from the data, or simply set to null
 This means the filtered data can be recovered using \code{\link[=unfilter]{unfilter()}} (see the \link[=subset.humdrumR]{subset()/filter()}
 docs for an explanation).
-By default, piece-indexing and spine-indexing have \code{drop = TRUE},
-but record-indexing defaults to \code{drop = FALSE}.
+By default, piece-indexing and spine-indexing have \code{removeEmpty = TRUE},
+but record-indexing defaults to \code{removeEmpty = FALSE}.
 }
 
 \examples{
@@ -218,7 +218,7 @@ humData['b3']
 
 # find all records that use a flat 3
 humData[['b3', ]]
-humData[['b3', drop = TRUE]]
+humData[['b3', removeEmpty = TRUE]]
 
 # Exclusive interpretation indexing
 humData[[deg = 1]]
