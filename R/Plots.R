@@ -903,7 +903,7 @@ setMethod('.draw', c('table', 'NULL'),
             
             axisNames[1] <- paste(Filter(\(x) x != '', names(dimnames(x))), collapse = ' × ')
             
-            list(axes = axes, window = window, axisNames = axisNames, col = col)
+            list(axes = axes, window = window, axisNames = axisNames, col = col, plot = TRUE)
           })
 
 setMethod('.draw', c('NULL', 'table'),
@@ -1079,7 +1079,7 @@ setMethod('.draw', c('discrete', 'numeric'),
                    smooth = TRUE, conditional = FALSE,
                    mean = TRUE, quantiles = c(.25, .75), global_quantiles = FALSE, 
                    xlim = NULL, ylim = NULL, ...,
-                   col = NULL) {
+                   col = NULL, plot = TRUE) {
             
             categories <- sort(unique(x))
             if (is.integer(x) && length(categories) > 25L) {
@@ -1093,12 +1093,13 @@ setMethod('.draw', c('discrete', 'numeric'),
                              log = gsub('y', '', log))
             
             output$col <- prep_col_categories(col %||% categories, categories, log = log, ...)
+            output$axes[side == 1, ticks := list(setNames(seq_along(categories), categories))]
+            output$plot <- plot
+            if (!plot) return(output)
             
             draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = output$col$col, ...,
                          mean = mean, quantiles = quantiles, global_quantiles = global_quantiles)
             
-            # output$axisNames[[1]] <- 'Density'
-            output$axes[side == 1, ticks := list(setNames(seq_along(categories), categories))]
             output
             
           })
@@ -1113,7 +1114,7 @@ setMethod('.draw', c('numeric', 'discrete'),
                    center = TRUE, conditional = FALSE, breaks = 40,
                    mean = TRUE, quantiles = c(.25, .75),
                    xlim = NULL, ylim = NULL, 
-                   col = NULL, alpha = .7, ...) {
+                   col = NULL, alpha = .7, ..., plot = TRUE) {
             
             categories <- sort(unique(y), decreasing = TRUE)
             
@@ -1131,6 +1132,9 @@ setMethod('.draw', c('numeric', 'discrete'),
             output$col <- prep_col_categories(col %||% categories, categories, alpha = alpha, log = log, ...)
             
             if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
+            
+            output$plot <- plot
+            if (!plot) return(output)
             
             for (j in 1:(ncol(tab) - 1L)) {
               polygon(c(breaks, rev(breaks)), 
