@@ -2240,7 +2240,6 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
              exprA$Args[[1]])
       return(Recall(recurse, stripBrackets = TRUE))
     } 
-    
     exprA
     
     

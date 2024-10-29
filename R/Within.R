@@ -1047,17 +1047,31 @@ activateQuo <- function(funcQuosure, dotField) {
 
 
 autoArgsQuo <- function(funcQuosure, fields) {
-  
   funcRegex <- paste0('^(humdrumR:::?)?', autoArgTable$Function, '(\\.default)?$')
   
-  predicate <- \(Head) any(stringr::str_detect(Head, funcRegex))
+  predicate <- \(Head) any(stringr::str_detect(Head, funcRegex)) || Head == 'lm'
   
+  modelFuncs <- c('lm', 'glm', 'lmer', 'glmer')
   do <- \(exprA) {
-    tab <- autoArgTable[stringr::str_detect(exprA$Head, funcRegex) & 
-                          !Argument %in% names(exprA$Args) &
-                          sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
-    args <- setNames(tab$Expression, tab$Argument)
-    exprA$Args <- c(exprA$Args, args)
+    
+    
+    
+    if (any(exprA$Head %in% modelFuncs)) {
+      usedFields <- namesInExprs(fields, exprA$Args[['formula']] %||% exprA$Args[[1]])
+      usedFields <- lapply(usedFields, rlang::sym)
+      
+      data <- rlang::expr(data.frame(!!!usedFields))
+      
+      exprA$Args$data <- data
+    } else {
+      tab <- autoArgTable[stringr::str_detect(exprA$Head, funcRegex) & 
+                            !Argument %in% names(exprA$Args) &
+                            sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
+      
+      
+      args <- setNames(tab$Expression, tab$Argument)
+      exprA$Args <- c(exprA$Args, args)
+    }
     exprA
   }
   withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)
