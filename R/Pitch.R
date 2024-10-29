@@ -2615,6 +2615,10 @@ tonalInterval.token <- function(x, Exclusive = NULL, ...) {
 }
 
 
+tonalInterval.integer <- function(x, Exclusive = NULL, ...) {
+  tonalInterval.numeric(as.numeric(x), Exclusive = Exclusive, ...)
+}
+
 #### setAs tonal interval ####
 
 setAs('integer', 'tonalInterval', \(from) semits2tint(from))
