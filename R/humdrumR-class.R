@@ -1718,7 +1718,7 @@ pullPrintable <- function(humdrumR, fields,
 #' 
 #' + `"NA2dot"` means all `NA` values are converted to `"."`; note that this will cause all output to be coerced to `character`.
 #' + `"dot2NA"` means all `"."` are converted to `NA`.
-#' + `"charNA2dot"` means `NA` values in `character` vectors are converted to `NA`, but not in other atomic types.
+#' + `"charNA2dot"` means `NA` values in `character` vectors are converted to `"."`, but not in other atomic types.
 #' + `"asis"` means either `NA` or `"."` values may print, depending on what is in the field.
 #' 
 #' Note that `pull_tibble()` won't work if you don't independently load the `tibble` (or `tidyverse`) package---
@@ -1893,16 +1893,17 @@ naDots <- function(field, types, null) {
     
     nulltoken <- c(G = '!!', I = '*', L = '!', d = '.', D = '.', M = '=', E = '**', S = '*')[types]
     
-    
-    if (null == 'dot2NA') {
-        na <- na | field == nulltoken
-        field[na] <- NA
-    } else {
-        if (null == 'charNA2dot' && is.character(field)) {
-            field[na] <- nulltoken[na]
-        } 
-        
+    if (null == 'NA2dot') {
+        field[na] <- '.'
+        return(field)
     }
+    if (is.character(field) && null %in% c('dot2NA', 'charNA2dot')) {
+        if (null == 'dot2NA') {
+            field[field == nulltoken] <- NA_character_
+        } else {
+            field[na] <- '.'
+        }
+    } 
     
     field   
 }
