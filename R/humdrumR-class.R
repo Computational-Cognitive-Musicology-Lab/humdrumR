@@ -1898,8 +1898,10 @@ naDots <- function(field, types, null) {
         na <- na | field == nulltoken
         field[na] <- NA
     } else {
-        if (null == 'charNA2dot') na <- is.character(field) & na
-        field[na] <- nulltoken[na]
+        if (null == 'charNA2dot' && is.character(field)) {
+            field[na] <- nulltoken[na]
+        } 
+        
     }
     
     field   
