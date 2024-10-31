@@ -2240,6 +2240,7 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
              exprA$Args[[1]])
       return(Recall(recurse, stripBrackets = TRUE))
     } 
+    
     exprA
     
     
@@ -2302,13 +2303,12 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
   if (exprA$Type %in% applyTo) {
     hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
-      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
       exprA <- func(exprA)
     } 
   } else {
     hit <- FALSE
   }
-  
+  if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
   
   if (exprA$Type == 'call' && !(hit && stopOnHit)) {
     for (i in seq_along(exprA$Args)) {
