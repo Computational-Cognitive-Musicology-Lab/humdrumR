@@ -97,6 +97,21 @@
 #' Also note that some plots will not allow logarithmic scaling on some axes,
 #' and will simply ignore attempts to do that.
 #' 
+#' ### Window control
+#' #' 
+#' Normally, when you use `draw()` the plot is drawn to fill the available graphical device,
+#' using base-R's normal algorithm.
+#' However, the `aspect` argument can override this, controlling the aspect 
+#' ratio of the plot.
+#' The `aspect` argument must be a single numeric value between `0.5` and `5`.
+#' If `aspect = 1` the plot is drawn as a square.
+#' Try settings like `aspect = 4/3` or `aspect = 16/9`.
+#' 
+#' The `margin` argument controls the portion of the screen used for the plot margins,
+#' with legal values ranging from `0.4` to `0.1`.
+#' The default value is `0.2`---using other margins may result in less optimal placement
+#' of plot text and legends.
+#' 
 #' ### Color
 #' 
 #' 
@@ -415,7 +430,7 @@
 #' 
 #' This controls the aspect ratio of the plot:
 #' `1` (square), `4/3`, `16/9`, etc. 
-#' If `aspect` is `NULL` , R #' automatically uses the current aspect of 
+#' If `aspect` is `NULL` , R automatically uses the current aspect of 
 #' your current plotting device.
 #' 
 #' @param margin ***How big should plot margins be?***
