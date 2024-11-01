@@ -234,7 +234,7 @@ If any of the names in the \code{variable} list appear as symbols (variable name
 in any expression argument, their value is interpolated in place of that symbol.
 For example, in
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, kern(Token, simple = x), variable(x = TRUE))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, kern(Token, simple = x), variables = list(x = TRUE))
 
 }\if{html}{\out{</div>}}
 
