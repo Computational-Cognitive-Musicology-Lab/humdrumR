@@ -2223,7 +2223,8 @@ viewKernTable <- function(table) {
 ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
   humtab <- getHumtab(data, dataTypes = dataTypes)
   
-  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
+  
+  ggplot(humtab, mapping = mapping, ...) + theme_humdrum()
 }
 
 
