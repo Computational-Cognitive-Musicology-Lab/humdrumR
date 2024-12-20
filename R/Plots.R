@@ -1,6 +1,31 @@
 
 
+# plot class ----
 
+setClass('plot', contains = 'function', slots = c(add = 'expression'))
+
+
+setMethod('show', 'plot',
+          function(object) {
+            
+            envir <- environment(object)
+            
+            object()
+            
+            for (expr in object@add) {
+              eval(expr, envir = envir)
+            }
+            
+          })
+
+plot_object <- function(plotfunc) new('plot', plotfunc)
+
+
+drawMore <- function(plot, ...) {
+  exprs <- rlang::enexprs(...) |> as.expression()
+  plot@add <- c(plot@add, exprs)
+  plot
+}
 
 # draw() ----
 
@@ -499,20 +524,7 @@
 draw <- function(x, y, facets = list(), ..., 
                  xlab = NULL, ylab = NULL, 
                  axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
-                 main = '', sub = '', col = 1, cex = NULL, pch = NULL) {
-  
-
-  # this sets default par(...) values for for draw(), but these defaults can be overrode by ...
-  oldpar <- par(family = 'Helvetica',   col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
-  oldpar$mar <- oldpar$omi <- NULL
-  
-
-  marginLines <- setMargins(margin, aspect)
-  
-  
-  do.call('par', list(...)[match(names(list(...)), names(par()), nomatch = 0L) > 0])
-  oldpalette <- palette(flatly)
-  on.exit({par(oldpar) ; palette(oldpalette)})
+                 main = '', sub = '', col = 1, cex = NULL, pch = 16) {
   
   checks(xlab, xnull | (xlen1 & xatomic))
   checks(ylab, xnull | (xlen1 & xatomic))
@@ -520,6 +532,12 @@ draw <- function(x, y, facets = list(), ...,
   checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
   checks(main, xatomic & xlen1)
   checks(sub, xatomic & xlen1)
+
+  # this sets default par(...) values for for draw(), 
+  # but overrides them with args from list(...)
+  par_draw <- list(family = 'Helvetica',   col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
+  dotpars <- list(...)[intersect(names(list(...)), names(par()))]
+  par_draw[names(dotpars)] <- dotpars
   
 
   # xlab and ylab
@@ -544,19 +562,28 @@ draw <- function(x, y, facets = list(), ...,
     if (!is.list(facets)) facets <- list(facets)
     
     output <- draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
-                col = col, cex = cex, pch = pch, marginLines = marginLines, 
-                axes = axes, legend = legend,
-                xexpr = xexpr, yexpr = yexpr)
+                          col = col, cex = cex, pch = pch, 
+                          axes = axes, legend = legend,
+                          xexpr = xexpr, yexpr = yexpr)
   } else {
-    output <- .draw(x, y, ..., col = col, cex = cex, pch = pch, marginLines = marginLines)
+    output <- .draw(x, y, ..., col = col, cex = cex, pch = pch)
     
     output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
     output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   }
-  
-  output$marginLines <- marginLines
-  
-  if (output$plot) {
+  plot_object(function(...) {
+    list2env(list(...), envir = environment())
+    
+    marginLines <- setMargins(margin, aspect)
+    dotpars <- list(...)[intersect(names(list(...)), names(par()))]
+    par_draw[names(dotpars)] <- dotpars
+    
+    oldpalette <- palette(flatly)
+    oldpar <- do.call('par', par_draw)
+    on.exit({par(oldpar, no.readonly = TRUE) ; palette(oldpalette)})
+    
+    output$canvas()
+    output$drawer()
     
     # title and subtitle
     marginLab(marginLines, stringr::str_to_title(main), 3, 3, 
@@ -564,11 +591,12 @@ draw <- function(x, y, facets = list(), ...,
     marginLab(marginLines, stringr::str_to_title(sub), 3, 2, 
               font = 2)
     
-    
+    # axes labels
     humaxes(output$axes, output$axisNames, axes, marginLines)
     
-    
+    # legends
     if (is.character(legend) || legend) {
+      
       sides <- c(4, 2, 3)
       side_i <- 1
       if (is.logical(legend)) legend <- ''
@@ -583,10 +611,7 @@ draw <- function(x, y, facets = list(), ...,
         side_i <- side_i + 1
       }
       if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
-    } 
-  }
-  
-  return(invisible(output))
+    }})
 }
   
 ## the .draw() function ----
@@ -603,7 +628,7 @@ setMethod('.draw', c('numeric', 'numeric'),
           \(x, y, log = '', jitter = '', line = FALSE,
             normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
             xlim = NULL, ylim = NULL, 
-            col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ..., plot = TRUE) {
+            col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ...) {
             
             if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
               .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -614,55 +639,51 @@ setMethod('.draw', c('numeric', 'numeric'),
             
             output <- canvas(x = x, xlim = xlim, 
                              y = y, ylim = ylim,
-                             log = log, plot = plot)
+                             log = log)
             
             output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
             output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
             output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
-            output$plot <- plot
-            
-            if (!plot) return(output)
-            
+           
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
-            
-            if (normalReference) showmvnorm(x, y)
-            
-            if (line) {
-              y <- y[order(x)]
-              x <- x[order(x)]
-              points(x, y, col = output$col$col[1], type = 'l', ...)
-              
-            } else {
-              points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch, ...)
+             
+            output$drawer <- function() {
+                if (normalReference) showmvnorm(x, y)
+                
+                if (line) {
+                  y <- y[order(x)]
+                  x <- x[order(x)]
+                  points(x, y, col = output$col$col[1], type = 'l', ...)
+                  
+                } else {
+                  points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch, ...)
+                }
+                
+                
+                # extra stuff
+                draw_quantiles(1, x, quantiles)
+                draw_quantiles(2, y, quantiles)
+                if (mean)  draw_mean(mean(x), mean(y)) 
+                
+                if (lm) {
+                  fit <- stats::lm(y ~ x)
+                  
+                  xseq <-  seq(output$window$xlim[[1]][1], 
+                               output$window$xlim[[1]][2], length.out = 300L)
+                  conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
+                  
+                  lmcol <- 'grey30'
+                  points(xseq, conf[ , 1], type = 'l', lwd = .5, col = lmcol)
+                  points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
+                  points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
+                  
+                  legend('topleft', bty = 'n', lwd = .5, col = lmcol, text.col = 'black', cex = .8,
+                         legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
+                                              b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
+                }
             }
-           
-            
-            # extra stuff
-            draw_quantiles(1, x, quantiles)
-            draw_quantiles(2, y, quantiles)
-            if (mean)  draw_mean(mean(x), mean(y)) 
-            
-            if (lm) {
-              fit <- stats::lm(y ~ x)
-              
-              xseq <-  seq(output$window$xlim[[1]][1], 
-                           output$window$xlim[[1]][2], length.out = 300L)
-              conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
-              
-              lmcol <- 'grey30'
-              points(xseq, conf[ , 1], type = 'l', lwd = .5, col = lmcol)
-              points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
-              points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
-              
-              legend('topleft', bty = 'n', lwd = .5, col = lmcol, text.col = 'black', cex = .8,
-                     legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
-                                          b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
-            }
-            
-
             output
-            
           })
 
 #### histogram ----
@@ -673,7 +694,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             smooth = FALSE, conditional = FALSE, showCounts = FALSE, showPoints = TRUE,
             mean = FALSE, quantiles = c(), global_quantiles = FALSE,
             xlim = NULL, ylim = NULL,
-            col = 3, alpha = .2, cex = .7, marginLines, ..., plot = TRUE) {
+            col = 3, alpha = .2, cex = .7, ...) {
             
             cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
           
@@ -698,7 +719,7 @@ setMethod('.draw', c('numeric', 'NULL'),
             ylim <- ylim %||% c(0, 2^(ceiling(log( max(allDens), 2)))) # 1, .5, .25, .125, etc.
             output <- canvas(x = x, xlim = xlim %||%range(breaks), 
                              y =  allDens[allDens > 0], ylim = ylim, 
-                             log = gsub('y', '', log), plot = plot)
+                             log = gsub('y', '', log))
             
             
             # prepare ticks
@@ -717,72 +738,71 @@ setMethod('.draw', c('numeric', 'NULL'),
             output$col <- cols
             output$plot <- plot
             
-            if (!plot) return(output)
             
-            # actual plot of polygons
-            ymin <- min(output$window$ylim[[1]])
-            Map(\(coor, color) {
-              coor[ , {
-                polygon(c(X, rev(X)), c(Density, rep(ymin, length(Density))), col = color, border = NA)
+            output$drawer <- function() {
                 
-                points(type = 'l', X, Density, col = color, lwd = 2)
+                # actual plot of polygons
+                ymin <- min(output$window$ylim[[1]])
+                Map(\(coor, color) {
+                  coor[ , {
+                    polygon(c(X, rev(X)), c(Density, rep(ymin, length(Density))), col = color, border = NA)
+                    
+                    points(type = 'l', X, Density, col = color, lwd = 2)
+                    
+                  }]
+                  
+                  # lines and counts
+                  if (!smooth) {
+                    #horixontal bars
+                    coor[!duplicated(X), { 
+                      graphics::segments(x0 = X, x1 = X, y0 = ymin, y1 = Density, col = color)
+                    }]}
+                  
+                  if (showCounts) {
+                    if (!smooth) {
+                      coor[!duplicated(X) & Counts > 0, draw_counts(Mids, Density, Counts, color, min(Delta))]
+                    } else {
+                      coor[ , draw_counts(X[which.max(Density)], max(Density), sum(col == color), color, diff(range(X)))]
+                    }
+                  }
+                }, coordinates, names(coordinates))
                 
-              }]
-              
-              # lines and counts
-              if (!smooth) {
-                #horixontal bars
-                coor[!duplicated(X), { 
-                  graphics::segments(x0 = X, x1 = X, y0 = ymin, y1 = Density, col = color)
-                }]}
-              
-             if (showCounts) {
-               if (!smooth) {
-                 coor[!duplicated(X) & Counts > 0, draw_counts(Mids, Density, Counts, color, min(Delta))]
-               } else {
-                 coor[ , draw_counts(X[which.max(Density)], max(Density), sum(col == color), color, diff(range(X)))]
-               }
-             }
-            }, coordinates, names(coordinates))
-            
-            # extra stuff
-            
-            ## dots
-            if (showPoints) {
-              xsamp <- if (length(x) >= 10^5) sample(x, 10^5) else x
-              ysamp <- runif(length(xsamp), min(max(allDens * 1.1, mean(output$window$ylim[[1]]) * 1.5), 
-                                                grconvertY(.95, 'npc', 'user')), 
-                             grconvertY(1, 'npc', 'user'))
-              dotAlpha <- cex_density(xsamp, ysamp, .3)
-              points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
-            }
-            
-            if (global_quantiles || length(coordinates) == 1L) {
-              draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
-            } else {
-              lapply(unique(col), \(color) {
-                draw_quantiles(1, x[col == color], quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'), col = color)
-              })
-              
-            }
-            if (normalReference) {
-              xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
-              points(xpoints, dnorm(xpoints, mean(x), sd(x)), type = 'l',
-                     lwd = .5, lty = 'dashed')
-            }
-            if (mean) {
-              if (global_quantiles) {
-                draw_mean(mean(x), grconvertY(0.02, 'nfc', 'user'))
-              } else {
-                draw_mean(tapply(x, col, mean), grconvertY(0.02, 'nfc', 'user'), col = unique(col))
+                # extra stuff
                 
-              }
-            }
+                ## dots
+                if (showPoints) {
+                  xsamp <- if (length(x) >= 10^5) sample(x, 10^5) else x
+                  ysamp <- runif(length(xsamp), min(max(allDens * 1.1, mean(output$window$ylim[[1]]) * 1.5), 
+                                                    grconvertY(.95, 'npc', 'user')), 
+                                 grconvertY(1, 'npc', 'user'))
+                  dotAlpha <- cex_density(xsamp, ysamp, .3)
+                  points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
+                }
+                
+                if (global_quantiles || length(coordinates) == 1L) {
+                  draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
+                } else {
+                  lapply(unique(col), \(color) {
+                    draw_quantiles(1, x[col == color], quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'), col = color)
+                  })
+                  
+                }
+                if (normalReference) {
+                  xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
+                  points(xpoints, dnorm(xpoints, mean(x), sd(x)), type = 'l',
+                         lwd = .5, lty = 'dashed')
+                }
+                if (mean) {
+                  if (global_quantiles) {
+                    draw_mean(mean(x), grconvertY(0.02, 'nfc', 'user'))
+                  } else {
+                    draw_mean(tapply(x, col, mean), grconvertY(0.02, 'nfc', 'user'), col = unique(col))
+                    
+                  }
+                }
+              } 
             
-            
-           
             output
-            
           })
 
 
@@ -794,13 +814,13 @@ setMethod('.draw', c('NULL', 'numeric'),
                    mean = FALSE, quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
                    col = 1, alpha = .8, cex = NULL, pch = NULL, 
-                   marginLines, ..., plot = TRUE) {
+                   ...) {
             
             checks(violin, xTF)
             output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
                              xlim = xlim, 
                              y = y, ylim = ylim , 
-                             log = gsub('x', '', log), plot = plot)
+                             log = gsub('x', '', log))
             
             if (violin) {
               
@@ -808,10 +828,8 @@ setMethod('.draw', c('NULL', 'numeric'),
               output$axisNames[[1]] <- 'Density'
               output$axes <- output$axes[side == 2L]
               
-              output$plot <- plot
-              if (!plot) return(output)
               
-              draw_violins(list(y), horiz = FALSE, mean = mean, ..., col = output$col$col, quantiles = quantiles)
+              output$drawer <- function() draw_violins(list(y), horiz = FALSE, mean = mean, ..., col = output$col$col, quantiles = quantiles)
               
             } else {
               
@@ -821,29 +839,31 @@ setMethod('.draw', c('NULL', 'numeric'),
               output$axisNames[[1]] <- 'Quantile'
               
               output$plot <- plot
-              if (!plot) return(output)
               
-              if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
-              if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
-              if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
-               
-              y <- sort(y)
-              x <- seq(0, 1, length.out = length(y))
-              points(x = x, y = y, col = output$col$col, cex = output$cex$cex, 
-                     pch = output$pch$pch, ...)
-              
-              # extra stuff
-              draw_quantiles(2, y, quantiles = quantiles)
-              if (mean)  draw_mean(0.5, mean(y))
-              
-              if (normalReference) {
-                points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
-                                     lwd = .5, lty = 'dashed', xpd = TRUE)
+              output$drawer <- function() {
+                if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
+                if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
+                if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
                 
-                legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
-                       col = 'black', text.col = 'black', cex = .8, 
-                       legend = quote(N(mu[y], sigma[y])) )
+                y <- sort(y)
+                x <- seq(0, 1, length.out = length(y))
+                points(x = x, y = y, col = output$col$col, cex = output$cex$cex, 
+                       pch = output$pch$pch, ...)
+                
+                # extra stuff
+                draw_quantiles(2, y, quantiles = quantiles)
+                if (mean)  draw_mean(0.5, mean(y))
+                
+                if (normalReference) {
+                  points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
+                         lwd = .5, lty = 'dashed', xpd = TRUE)
+                  
+                  legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
+                         col = 'black', text.col = 'black', cex = .8, 
+                         legend = quote(N(mu[y], sigma[y])) )
+                }
               }
+              
               
             }
            
@@ -859,9 +879,9 @@ setMethod('.draw', c('NULL', 'numeric'),
 setMethod('.draw', c('table', 'NULL'),
           function(x, y, log = '', 
                    beside = TRUE, heat = length(dim(x) == 2L) && length(x) > 80L,
-                   ylim = NULL, marginLines, 
+                   ylim = NULL, 
                    quantiles = c(), mean = FALSE, showCounts = FALSE,
-                   col = NULL,  alpha = .9, ..., plot = TRUE) { 
+                   col = NULL,  alpha = .9, ...) { 
             if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
             dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
             
@@ -885,26 +905,13 @@ setMethod('.draw', c('table', 'NULL'),
             
             col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, log = log, ...)
             
-            barx <- barplot(x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), space = space,
-                            axisnames = FALSE,
-                            ylab = '', xlab = '',
-                            beside = type != 'stacked', axes = FALSE, 
-                            ylim = ylim,
-                            border = rgb(.2,.2,.2,.2))
+            output <- list(col = col)
             
-            if (type == 'both') {
-              barplot(x[nrow(x):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
-                      names.arg = logical(ncol(x)), axes = FALSE,
-                      add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
-            }
+            output$window <- data.table(Screen = as.integer(screen()),
+                                        xlim = list(c(0, ceiling(max(barx)))), 
+                                        ylim = list(ylim),
+                                        log = log)
             
-            
-            # draw extra stuff
-            draw_quantiles(2, x, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
-            if (mean) draw_mean(colMeans(barx), colMeans(x))
-            if (showCounts) draw_counts(barx, x, x, col =col$col,min(diff(x)))
-            
-            legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             # axes
             proportions <- pretty(ylim / sum(x), n = 10L, min.n = 5L)
             proportions <- setNames(proportions * sum(x), proportions)
@@ -919,23 +926,44 @@ setMethod('.draw', c('table', 'NULL'),
                                                       ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(x))),
                                                       line = 1 + as.integer(type != 'stacked')))
             if (type != 'stacked' && nrow(x) > 1L && length(x) < 100) axes <- rbind(axes,
-                                                              data.table(side = c(1),
-                                                                         ticks = list(setNames(c(barx), rownames(x)[row(barx)])),
-                                                                         line = 1))
+                                                                                    data.table(side = c(1),
+                                                                                               ticks = list(setNames(c(barx), rownames(x)[row(barx)])),
+                                                                                               line = 1))
+            output$axes <- axes
             
-            
-            window <- data.table(Screen = as.integer(screen()),
-                                 xlim = list(c(0, ceiling(max(barx)))), 
-                                 ylim = list(ylim),
-                                 log = log)
+         
             
             
             axisNames <- vector('list', 4L)
             axisNames[c(2,4)] <- c('Proportion', if (is.integer(x)) 'Count' else 'N')
             
             axisNames[1] <- paste(Filter(\(x) x != '', names(dimnames(x))), collapse = ' × ')
+            output$axisNames <- axisNames
             
-            list(axes = axes, window = window, axisNames = axisNames, col = col, plot = TRUE)
+            output$drawer <- function() {
+              barx <- barplot(x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), space = space,
+                              axisnames = FALSE,
+                              ylab = '', xlab = '',
+                              beside = type != 'stacked', axes = FALSE, 
+                              ylim = ylim,
+                              border = rgb(.2,.2,.2,.2))
+              
+              if (type == 'both') {
+                barplot(x[nrow(x):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
+                        names.arg = logical(ncol(x)), axes = FALSE,
+                        add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
+              }
+              
+              
+              # draw extra stuff
+              draw_quantiles(2, x, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
+              if (mean) draw_mean(colMeans(barx), colMeans(x))
+              if (showCounts) draw_counts(barx, x, x, col =col$col,min(diff(x)))
+              
+              legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
+            }
+            
+            output
           })
 
 setMethod('.draw', c('NULL', 'table'),
@@ -1111,7 +1139,7 @@ setMethod('.draw', c('discrete', 'numeric'),
                    smooth = TRUE, conditional = FALSE,
                    mean = TRUE, quantiles = c(.25, .75), global_quantiles = FALSE, 
                    xlim = NULL, ylim = NULL, ...,
-                   col = NULL, plot = TRUE) {
+                   col = NULL) {
             
             categories <- sort(unique(x))
             if (is.integer(x) && length(categories) > 25L) {
@@ -1126,11 +1154,11 @@ setMethod('.draw', c('discrete', 'numeric'),
             
             output$col <- prep_col_categories(col %||% categories, categories, log = log, ...)
             output$axes[side == 1, ticks := list(setNames(seq_along(categories), categories))]
-            output$plot <- plot
-            if (!plot) return(output)
             
-            draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = output$col$col, ...,
-                         mean = mean, quantiles = quantiles, global_quantiles = global_quantiles)
+            output$drawer <- function() {
+              draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = output$col$col, ...,
+                           mean = mean, quantiles = quantiles, global_quantiles = global_quantiles)
+            }
             
             output
             
@@ -1146,7 +1174,7 @@ setMethod('.draw', c('numeric', 'discrete'),
                    center = TRUE, conditional = FALSE, breaks = 40,
                    mean = TRUE, quantiles = c(.25, .75),
                    xlim = NULL, ylim = NULL, 
-                   col = NULL, alpha = .7, ..., plot = TRUE) {
+                   col = NULL, alpha = .7, ...) {
             
             categories <- sort(unique(y), decreasing = TRUE)
             
@@ -1165,16 +1193,14 @@ setMethod('.draw', c('numeric', 'discrete'),
             
             if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
             
-            output$plot <- plot
-            if (!plot) return(output)
-            
-            for (j in 1:(ncol(tab) - 1L)) {
-              polygon(c(breaks, rev(breaks)), 
-                      c(0, tab[ , j], rev(tab[ , j + 1]), 0), 
-                      col = output$col$col[j],
-                      border = FALSE)
+            output$drawer <- function() {
+              for (j in 1:(ncol(tab) - 1L)) {
+                polygon(c(breaks, rev(breaks)), 
+                        c(0, tab[ , j], rev(tab[ , j + 1]), 0), 
+                        col = output$col$col[j],
+                        border = FALSE)
+              }
             }
-            
             
             output
             
@@ -1774,31 +1800,33 @@ checkStrFit_24 <- function(slotSize, ticks, labels, cex) {
   
 }
 
-canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '', plot = TRUE) {
- logcheck(log, x, y)
+canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
+  logcheck(log, x, y)
   
   xlim <- xlim %||% range(x) 
   ylim <- ylim %||% range(y) 
   
-  if (grepl('x', log, fixed = TRUE) && xlim[1] <= 0) xlim[1] <- min(x) / 2
-  if (grepl('y', log, fixed = TRUE) && ylim[1] <= 0) ylim[1] <- min(y) / 2
   
-  if (plot) {
-    plot.new()
-    plot.window(xlim = xlim, ylim = ylim, log = log)
-  }
-
+  xlog <- grepl('x', log, fixed = TRUE)
+  ylog <- grepl('y', log, fixed = TRUE)
+  
+  if (xlog && xlim[1] <= 0) xlim[1] <- min(x) / 2
+  if (ylog && ylim[1] <= 0) ylim[1] <- min(y) / 2
   
   axes <- data.table(side = 1:2,
-                     ticks = list(axTicks(1, log = grepl('x', log)),
-                                  axTicks(2, log = grepl('y', log))),
+                     ticks = list(axisTicks(if (xlog) log10(xlim) else xlim, log = xlog),
+                                  axisTicks(if (ylog) log10(ylim) else ylim, log = ylog)),
                      line = 1L)
   
   window <- data.table(Screen = as.integer(screen()),
                        xlim = list(xlim), ylim = list(ylim),
                        log = log)
   
-  list(window = window, axes = axes, axisNames = vector('list', 4L))
+  list(window = window, axes = axes, axisNames = vector('list', 4L), 
+       canvas = function() {
+         plot.new()
+         plot.window(xlim = xlim, ylim = ylim, log = log)
+       })
 }
 
 smartjitter <- function(x) {
