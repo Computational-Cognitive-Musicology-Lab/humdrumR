@@ -2,31 +2,96 @@
 
 # plot class ----
 
-setClass('plot', contains = 'function', slots = c(add = 'expression'))
+setClass('plot', contains = 'function', slots = c(add = 'expression', layout = 'list'))
 
 
 setMethod('show', 'plot',
           function(object) {
             
-            envir <- environment(object)
-            
-            object()
-            
-            for (expr in object@add) {
-              eval(expr, envir = envir)
+            layout <- object@layout
+            if (length(layout$layout) != 1L) {
+              omi <- min(par('fin')) * .05
+              oldpar <- par(omi = c(omi, omi, omi, omi))
+              on.exit((par(oldpar)))
             }
+            
+            layout(layout$layout, 
+                   widths = layout$layout_widths,
+                   heights = layout$layout_heights)
+            
+            .drawSelf(object)
+            
+            layout(1L)
+            
+            invisible(NULL)
             
           })
 
-plot_object <- function(plotfunc) new('plot', plotfunc)
+
+.drawSelf <- function(object) {
+  object@.Data()
+  envir <- environment(object)
+  for (expr in object@add) eval(expr, envir = envir)
+}
 
 
+#' @export
+plot_object <- function(plotfunc, layout = list(layout = cbind(1L), layout_widths = 1, layout_heights = 1)) new('plot', plotfunc, layout = layout)
+
+#' @export
 drawMore <- function(plot, ...) {
   exprs <- rlang::enexprs(...) |> as.expression()
   plot@add <- c(plot@add, exprs)
   plot
 }
 
+
+.drawSet <- function(..., sizes = NULL, binder, funcName, argName) {
+  fs <- list(...)
+  
+  isfuncs <- sapply(fs, inherits, what = 'function')
+  if (!all(isfuncs)) .stop("Plot arguments to {funcName}() must be zero-argument functions.") 
+  
+  if (is.null(sizes)) sizes <- rep(1, length(fs))
+  checks(sizes, xpositive, argname = argName)
+  
+  # layout
+  layouts <- lapply(fs, \(f) if (class(f) == 'plot') f@layout$layout else cbind(1L))
+  newlayout <- Reduce(\(a, b) combineLayouts(a, b, binder = binder), layouts) 
+  newfunc <- function()  lapply(fs, \(f) if (class(f) == 'plot') .drawSelf(f) else f())
+  
+  plot_object(newfunc, layout = list(layout = newlayout,
+                                     layout_widths = sizes, layout_heights = 1))
+  
+}
+
+#' @export
+drawBeside <- function(..., widths = NULL) {
+  .drawSet(..., sizes = widths, binder = 'cbind', 
+           funcName = 'drawBeside', argName = 'widths')
+}
+
+#' @export
+drawAbove <- function(..., heights = NULL) {
+  .drawSet(..., sizes = heights, binder = 'rbind', 
+           funcName = 'drawAbove', argName = 'heights')
+}
+
+
+combineLayouts <- function(layout1, layout2, binder = 'cbind') {
+  layout2 <- layout2 + max(layout1)
+  
+  if (!hasdim(layout1)) layout1 <- cbind(layout1)
+  if (!hasdim(layout2)) layout2 <- cbind(layout2)
+  
+  newdim <- pmax(dim(layout1), dim(layout2))
+  
+  layout1 <- array(layout1, newdim)
+  layout2 <- array(layout2, newdim)
+  
+  do.call(binder, list(layout1 = layout1, layout2 = layout2))
+  
+}
 # draw() ----
 
 
@@ -563,18 +628,19 @@ draw <- function(x, y, facets = list(), ...,
     
     output <- draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
                           col = col, cex = cex, pch = pch, 
+                          aspect = aspect, margin = margin,
                           axes = axes, legend = legend,
                           xexpr = xexpr, yexpr = yexpr)
   } else {
     output <- .draw(x, y, ..., col = col, cex = cex, pch = pch)
-    
+    output$layout <- 1L
     output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
     output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   }
+  
   plot_object(function(...) {
     list2env(list(...), envir = environment())
     
-    marginLines <- setMargins(margin, aspect)
     dotpars <- list(...)[intersect(names(list(...)), names(par()))]
     par_draw[names(dotpars)] <- dotpars
     
@@ -582,26 +648,28 @@ draw <- function(x, y, facets = list(), ...,
     oldpar <- do.call('par', par_draw)
     on.exit({par(oldpar, no.readonly = TRUE) ; palette(oldpalette)})
     
+    plot.new()
+    marginLines <- setMargins(margin, aspect)
     output$canvas()
     output$drawer()
     
     # title and subtitle
-    marginLab(marginLines, stringr::str_to_title(main), 3, 3, 
+    marginLab(marginLines, stringr::str_to_title(main), 3, 3,
               col = par('col.main'), cex = par('cex.main'), font = 2)
-    marginLab(marginLines, stringr::str_to_title(sub), 3, 2, 
+    marginLab(marginLines, stringr::str_to_title(sub), 3, 2,
               font = 2)
-    
+
     # axes labels
     humaxes(output$axes, output$axisNames, axes, marginLines)
-    
+
     # legends
     if (is.character(legend) || legend) {
-      
+
       sides <- c(4, 2, 3)
       side_i <- 1
       if (is.logical(legend)) legend <- ''
       legend <- rep(legend, length.out = 3)
-      
+
       if (!is.null(output$col$legend)) {
         output$col$legend(side = sides[side_i], marginLines = marginLines, col.legend = legend[2])
         side_i <- side_i + 1
@@ -611,7 +679,9 @@ draw <- function(x, y, facets = list(), ...,
         side_i <- side_i + 1
       }
       if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
-    }})
+    }
+    },
+    layout = list(layout = output$layout, layout_heights = 1, layout_widths = 1))
 }
   
 ## the .draw() function ----
@@ -745,7 +815,7 @@ setMethod('.draw', c('numeric', 'NULL'),
                 ymin <- min(output$window$ylim[[1]])
                 Map(\(coor, color) {
                   coor[ , {
-                    polygon(c(X, rev(X)), c(Density, rep(ymin, length(Density))), col = color, border = NA)
+                    polygon(c(X, rev(X)), c(Density, rep(ymin, length(Density))), col = color, border = NA, xpd = NA)
                     
                     points(type = 'l', X, Density, col = color, lwd = 2)
                     
@@ -907,7 +977,7 @@ setMethod('.draw', c('table', 'NULL'),
             
             output <- list(col = col)
             
-            output$window <- data.table(Screen = as.integer(screen()),
+            output$window <- data.table(layout = 1L,
                                         xlim = list(c(0, ceiling(max(barx)))), 
                                         ylim = list(ylim),
                                         log = log)
@@ -1212,6 +1282,7 @@ setMethod('.draw', c('numeric', 'discrete'),
 draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = '', 
                         xlab = NULL, ylab = NULL,
                         axes = 1:4, legend = TRUE,
+                        aspect = NULL,
                         col = 1, cex = NULL,
                         main = '', sub = '') {
   
@@ -1225,7 +1296,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   
   
   # determine overall xlim ylim etc (output)
-  output <- .draw(x, y, ..., col = col, cex = cex, plot = FALSE)
+  output <- .draw(x, y, ..., col = col, cex = cex)
   
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
@@ -1243,7 +1314,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   # Determine layout
   table <- do.call('table', facets)
   lay <- array(seq_along(table), dim = dim(table))
-  layout(lay)
+  output$layout <-  if (length(dim(lay)) == 1L) cbind(lay) else lay
   
   
   if (length(facets) == 1L) {
@@ -1259,17 +1330,32 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
     
   }
                
+  axisNames <- output$axisNames
+  axes <- output$axes
   
-  # mar <- c(outside = 5, inside = .5)
-  mar <- 1
-  facetX <- facetY <- c()
-  # plot each screen
-  for (n in lay) {
+  # axes for facet(s)
+  ## get coordinates of facets (in whole window)
+  # 
+  # output$axisNames[2] <-  list(if (.names(facets)[1] != '') names(facets)[1])
+  # axes <- data.table(side = 2L, 
+  #                    ticks = list(sort(setNames(grconvertY(unique(facetY), 'ndc', 'user'), 
+  #                                               dimnames(table)[[1]]))),
+  #                    line = 2L)
+  # output$axisNames[1] <- list(if (length(dim(table)) > 1L) {
+  #   axes <- rbind(axes, 
+  #                 data.table(side = 1L, 
+  #                            ticks = list(sort(setNames(grconvertX(unique(facetX), 'ndc', 'user'),
+  #                                                       dimnames(table)[[2]]))),
+  #                            line = 2L))
+  #   if (.names(facets)[2] != '') names(facets)[2]
+  # })
+  
+  output$drawer <- function() {
+    for (n in lay) {
       cur <- lay == n
       curlevels <- Map('[', dimnames(table), which(cur, arr.ind = TRUE))
       
-      # set margins
-      par(mar = c(mar, mar, mar, mar))
+      if (n > min(lay)) plot.new()
       
       # prepare args and draw
       if (table[cur] > 0) {
@@ -1278,47 +1364,26 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
         
         if (!is.null(output$draw_type) && output$draw_type == 'histogram') curargs$hist_scale <- hist_scales[cur]
         
-        do.call('.draw', curargs) # actual draw of plot
+        facet <- do.call('.draw', curargs) # actual draw of plot
+        marginLines <- setMargins(.1, aspect = aspect)
+        output$canvas()
+        facet$drawer()
         
         sides <- c(bottom.side[cur], left.side[cur], top.side[cur], right.side[cur])
         lapply(which(!sides), border)
         
         # # axes 
-        curaxes <- intersect(which(sides), axes)
+        curaxes <- intersect(which(sides), axes$side)
         
-        marginLines <- facetMargins()
-        humaxes(output$axes,
-                ifelse(1:4 %in% curaxes, output$axisNames, vector('list', 4L)),
+        humaxes(axes,
+                ifelse(1:4 %in% curaxes, axisNames, vector('list', 4L)),
                 curaxes, marginLines)
-      } else {
-        # empty facet
-        plot.new() # only needed for writing facet levels in margins
-      }
+      } 
       
-      #coordinates of facets-
-      if (sides[1]) facetX <- c(facetX, grconvertX(.5, 'nfc', 'ndc'))
-      if (sides[2]) facetY <- c(facetY, grconvertY(.5, 'nfc', 'ndc'))
+    }
   }
-  
-  # reset layout
-  layout(1)
-  par(mar = c(0, 0, 0, 0))
-  
-  # axes for facet(s)
-  output$axisNames[2] <-  list(if (.names(facets)[1] != '') names(facets)[1])
-  axes <- data.table(side = 2L, 
-                     ticks = list(sort(setNames(grconvertY(unique(facetY), 'ndc', 'user'), 
-                                                dimnames(table)[[1]]))),
-                     line = 2L)
-  output$axisNames[1] <- list(if (length(dim(table)) > 1L) {
-    axes <- rbind(axes, 
-                  data.table(side = 1L, 
-                             ticks = list(sort(setNames(grconvertX(unique(facetX), 'ndc', 'user'),
-                                                        dimnames(table)[[2]]))),
-                             line = 2L))
-    if (.names(facets)[2] != '') names(facets)[2]
-  })
-  output$axes <- axes
+  output$axes <- output$axes[0]
+  output$axisNames <- vector('list', 4L)
   
   output
 }
@@ -1336,7 +1401,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
     quants <- quantile(var, prob = quantiles)
     
     
-    if (is.null(limits)) limits <- if (sides) grconvertX(c(0, 1), 'nfc', 'user') else grconvertY(c(0, 1), 'nfc', 'user')
+    if (is.null(limits)) limits <- if (sides) grconvertX(c(0, 1), 'npc', 'user') else grconvertY(c(0, 1), 'npc', 'user')
   
     
    # labels
@@ -1482,7 +1547,7 @@ draw_heat <- function(tab, log = '', cex = NULL, ...) {
                                   setNames(1:nrow(tab) - .5, rev(rownames(tab)))),
                      line = 1)
   
-  window <- data.table(Screen = as.integer(screen()),
+  window <- data.table(layout,
                        xlim = list(xlim), ylim = list(ylim),
                        log = log)
   
@@ -1505,8 +1570,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)), seealso = '?draw()')
   
 
-  devsize <- par('din')
-  
+  devsize <- par('fin')
   figsize <- devsize * (1 - margin.percent*2)
   figmar <- devsize * margin.percent 
   
@@ -1523,7 +1587,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   
   fullmar <- (devsize - figsize) / 2
   
-  par(omi = fullmar[c(2, 1, 2, 1)], mar = c(0, 0, 0, 0))
+  par(mai = fullmar[c(2, 1, 2, 1)]) #, omi = fullmar[c(2, 1, 2, 1)])
   
   # scale cex to size of device
   # xarea <- prod(devsize)
@@ -1536,13 +1600,12 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   par(cex = cex)
   
   # everything is currently inches
-  lines <- c(0, .3, .6, .75, 1) * min(figmar)
+  lines <- c(0, .3, .7, .85, 1) * min(figmar)
   
-  marginLines <- list(grconvertY(0, 'nfc', 'inches') - lines,
-                      grconvertX(0, 'nfc', 'inches') - lines,
-                      grconvertY(1, 'nfc', 'inches') + lines,
-                      grconvertX(1, 'nfc', 'inches') + lines) 
-  
+  marginLines <- list(grconvertY(0, 'npc', 'inches') - lines,
+                      grconvertX(0, 'npc', 'inches') - lines,
+                      grconvertY(1, 'npc', 'inches') + lines,
+                      grconvertX(1, 'npc', 'inches') + lines) 
   marginLines
   
 }
@@ -1564,16 +1627,17 @@ facetMargins <- function(margin.percent = .15) {
   marginLines
 }
 
+
 marginLab <- function(marginLines, text, side, marginLine = 3, las = 0, ...) {
   
   marginLine <- marginLines[[side]][marginLine]
   
   if (side %in% c(1, 3)) {
-    x <- grconvertX(.5, 'nfc', 'user')
+    x <- grconvertX(.5, 'npc', 'user')
     y <- grconvertY(marginLine, 'inches', 'user')
   } else {
     x <- grconvertX(marginLine, 'inches', 'user')
-    y <- grconvertY(.5, 'nfc', 'user')
+    y <- grconvertY(.5, 'npc', 'user')
   }
   
   srt <- switch(las + 1,
@@ -1818,13 +1882,12 @@ canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
                                   axisTicks(if (ylog) log10(ylim) else ylim, log = ylog)),
                      line = 1L)
   
-  window <- data.table(Screen = as.integer(screen()),
+  window <- data.table(layout = 1L,
                        xlim = list(xlim), ylim = list(ylim),
                        log = log)
   
   list(window = window, axes = axes, axisNames = vector('list', 4L), 
        canvas = function() {
-         plot.new()
          plot.window(xlim = xlim, ylim = ylim, log = log)
        })
 }
@@ -1884,25 +1947,6 @@ draw_counts <- function(x, y, counts, col, width, cex = .8) {
 }
 
 
-axis.lines <- function() {
-  cexs <- par(c('cex.axis', 'cex.lab', 'cex.sub'))
-  
-  lines <- cumsum(c(0.5, unlist(cexs))) 
-  names(lines) <- c(names(lines)[-1], 'mar')
-  lines <- as.list(lines)
-  
-  par(mar = rep(lines$mar, 4))
-  plot(1:10, type='n', axes= FALSE, xlab='', ylab='')
-  box()
-  mtext(1:10, 1, at = 1:10, line = lines$cex.axis, cex = cexs$cex.axis, padj = 1)
-  mtext(1:10, 2, at = 1:10, line = lines$cex.axis, cex = cexs$cex.axis)
-  mtext('Y', side = 2, line = lines$cex.lab, cex = cexs$cex.lab)
-  mtext('X', side = 1, line = lines$cex.lab, cex = cexs$cex.lab, padj = 1)
-  
-  mtext('Main', line = lines$cex.sub, cex = cexs$cex.sub)
-  mtext('Sub', side = 1, line = lines$cex.sub, cex = cexs$cex.sub, padj=1)
-lines
-}
 
 
 hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
