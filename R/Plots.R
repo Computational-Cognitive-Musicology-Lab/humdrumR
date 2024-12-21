@@ -714,7 +714,7 @@ setMethod('.draw', c('numeric', 'numeric'),
             output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
             output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
             output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
-           
+            
             if (grepl('x', jitter)) x <- smartjitter(x)
             if (grepl('y', jitter)) y <- smartjitter(y)
              
@@ -764,7 +764,8 @@ setMethod('.draw', c('numeric', 'NULL'),
             smooth = FALSE, conditional = FALSE, showCounts = FALSE, showPoints = TRUE,
             mean = FALSE, quantiles = c(), global_quantiles = FALSE,
             xlim = NULL, ylim = NULL,
-            col = 3, alpha = .2, cex = .7, ...) {
+            col = 3, alpha = .2, cex = .7, pch = NULL, ...) {
+            # pch is used to stop it being passed to hist.coor, which causes a warning
             
             cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
           
@@ -806,8 +807,6 @@ setMethod('.draw', c('numeric', 'NULL'),
             output$axisNames[[2]] <- 'Probability density'
       
             output$col <- cols
-            output$plot <- plot
-            
             
             output$drawer <- function() {
                 
@@ -908,8 +907,6 @@ setMethod('.draw', c('NULL', 'numeric'),
               output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
               output$axisNames[[1]] <- 'Quantile'
               
-              output$plot <- plot
-              
               output$drawer <- function() {
                 if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
                 if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
@@ -976,6 +973,8 @@ setMethod('.draw', c('table', 'NULL'),
             col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, log = log, ...)
             
             output <- list(col = col)
+            barx <-  barplot(plot = FALSE, x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
+                             space = space, beside = type != 'stacked')
             
             output$window <- data.table(layout = 1L,
                                         xlim = list(c(0, ceiling(max(barx)))), 
@@ -990,7 +989,6 @@ setMethod('.draw', c('table', 'NULL'),
                                ticks = list(proportions,
                                             unique(round(axTicks(2, log = grepl('y', log, fixed = TRUE))))),
                                line = 1L)
-            
             if (ncol(x) > 1) axes <- rbind(axes,
                                            data.table(side = 1,
                                                       ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(x))),
@@ -1000,16 +998,17 @@ setMethod('.draw', c('table', 'NULL'),
                                                                                                ticks = list(setNames(c(barx), rownames(x)[row(barx)])),
                                                                                                line = 1))
             output$axes <- axes
+              
+              # legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             
-         
-            
-            
+            # axis Names
             axisNames <- vector('list', 4L)
             axisNames[c(2,4)] <- c('Proportion', if (is.integer(x)) 'Count' else 'N')
             
             axisNames[1] <- paste(Filter(\(x) x != '', names(dimnames(x))), collapse = ' × ')
             output$axisNames <- axisNames
             
+            output$canvas <- \() {NULL}
             output$drawer <- function() {
               barx <- barplot(x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), space = space,
                               axisnames = FALSE,
@@ -1024,13 +1023,11 @@ setMethod('.draw', c('table', 'NULL'),
                         add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
               }
               
-              
               # draw extra stuff
               draw_quantiles(2, x, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
               if (mean) draw_mean(colMeans(barx), colMeans(x))
               if (showCounts) draw_counts(barx, x, x, col =col$col,min(diff(x)))
               
-              legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
             }
             
             output
@@ -1947,7 +1944,9 @@ draw_counts <- function(x, y, counts, col, width, cex = .8) {
 }
 
 
-
+bar_coor <- function(x, type) {
+  dim <- dim(x)
+}
 
 hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
