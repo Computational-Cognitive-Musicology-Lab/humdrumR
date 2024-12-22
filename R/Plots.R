@@ -598,9 +598,18 @@ draw <- function(x, ...) {
 
 #' @export
 draw.humdrumR <- function(x, ...) {
-  quos <- rlang::enquos(...)
-  
   call <- match.call()
+  
+  groups <- getGroupingFields(x)
+  x <- ungroup(x)
+  
+  if (!pmatch('facets', names(list(...)), nomatch = 0) &&
+      length(groups))  {
+    
+     call[['facets']] <- as.list(groups)
+  }
+  
+  
   
   call[['x']] <- NULL
   call[[1]] <- quote(draw.default)
