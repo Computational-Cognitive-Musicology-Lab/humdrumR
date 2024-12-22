@@ -4,23 +4,7 @@
 \alias{draw}
 \title{Visualize data}
 \usage{
-draw(
-  x,
-  y,
-  facets = list(),
-  ...,
-  xlab = NULL,
-  ylab = NULL,
-  axes = 1:4,
-  legend = TRUE,
-  aspect = NULL,
-  margin = 0.2,
-  main = "",
-  sub = "",
-  col = 1,
-  cex = NULL,
-  pch = NULL
-)
+draw(x, ...)
 }
 \arguments{
 \item{...}{\emph{\strong{Additional parameters to pass to par().}}
@@ -36,27 +20,6 @@ Must be single \code{character} strings.
 
 See "Plot Text" section below.}
 
-\item{legend}{\emph{\strong{Should legends be drawn?}}
-
-Defaults to \code{TRUE}.}
-
-\item{margin}{\emph{\strong{How big should plot margins be?}}
-
-Defaults to \code{0.2}.
-
-Must be as single numeric value \eqn{0.4 \geq margin \geq 0.1}.
-
-This controls the proportion of the plotting area used for margins.
-A value of \code{0.2} means that 20\% of the plotting area is used for the margins.}
-
-\item{col}{\emph{\strong{What colors should be used in plots?}}
-
-See "Color" section below.}
-
-\item{cex}{\emph{\strong{What size of points should be plotted?}}
-
-See "Point size" section below.}
-
 \item{xlim, ylim}{\emph{\strong{What range of X/Y values should drawn on the plot?}}
 
 By default, X and Y limits are automatically selected.
@@ -66,14 +29,35 @@ Must be a \code{numeric} vector of length two.
 The first number of each \code{xlim}/\code{ylim} vector specifies the left/bottom
 edge of the X/Y axis. The second number specifies the right/top edge.}
 
+\item{col}{\emph{\strong{What colors should be used in plots?}}
+
+See "Color" section below.}
+
+\item{cex}{\emph{\strong{What size of points should be plotted?}}
+
+See "Point size" section below.}
+
+\item{legend}{\emph{\strong{Should legends be drawn?}}
+
+Defaults to \code{TRUE}.}
+
 \item{`aspect`}{Defaults to \code{NULL}.
 
 Must be a single numeric value \eqn{5 \geq aspect \geq 0.2}, or \code{NULL}.
 
 This controls the aspect ratio of the plot:
 \code{1} (square), \code{4/3}, \code{16/9}, etc.
-If \code{aspect} is \code{NULL} , R #' automatically uses the current aspect of
+If \code{aspect} is \code{NULL} , R automatically uses the current aspect of
 your current plotting device.}
+
+\item{margin}{\emph{\strong{How big should plot margins be?}}
+
+Defaults to \code{0.2}.
+
+Must be as single numeric value \eqn{0.4 \geq margin \geq 0.1}.
+
+This controls the proportion of the plotting area used for margins.
+A value of \code{0.2} means that 20\% of the plotting area is used for the margins.}
 
 \item{line}{\emph{\strong{Should a line be drawn through scatter plot points?}}
 
@@ -205,6 +189,23 @@ Note that \code{draw()} will throw an error if you try to plot negative values
 on a logarithmic scale.
 Also note that some plots will not allow logarithmic scaling on some axes,
 and will simply ignore attempts to do that.
+}
+
+\subsection{Window control}{
+
+#'
+Normally, when you use \code{draw()} the plot is drawn to fill the available graphical device,
+using base-R's normal algorithm.
+However, the \code{aspect} argument can override this, controlling the aspect
+ratio of the plot.
+The \code{aspect} argument must be a single numeric value between \code{0.5} and \code{5}.
+If \code{aspect = 1} the plot is drawn as a square.
+Try settings like \code{aspect = 4/3} or \code{aspect = 16/9}.
+
+The \code{margin} argument controls the portion of the screen used for the plot margins,
+with legal values ranging from \code{0.4} to \code{0.1}.
+The default value is \code{0.2}---using other margins may result in less optimal placement
+of plot text and legends.
 }
 
 \subsection{Color}{

@@ -2,11 +2,17 @@
 
 # plot class ----
 
+# This class allows us to save the code to generate a plot
+# into an object, which can be saved, and regenerated time again.
+# Most importantly, it makes it composable.
+
 setClass('plot', contains = 'function', slots = c(add = 'expression', layout = 'list'))
 
 
 setMethod('show', 'plot',
           function(object) {
+            
+            on.exit(layout(1L))
             
             layout <- object@layout
             if (length(layout$layout) != 1L) {
@@ -21,7 +27,6 @@ setMethod('show', 'plot',
             
             .drawSelf(object)
             
-            layout(1L)
             
             invisible(NULL)
             
@@ -92,6 +97,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
   do.call(binder, list(layout1 = layout1, layout2 = layout2))
   
 }
+
 # draw() ----
 
 
@@ -586,10 +592,32 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' 
 #' 
 #' @export
-draw <- function(x, y, facets = list(), ..., 
-                 xlab = NULL, ylab = NULL, 
-                 axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
-                 main = '', sub = '', col = 1, cex = NULL, pch = 16) {
+draw <- function(x, ...) {
+  UseMethod('draw')
+}
+
+#' @export
+draw.humdrumR <- function(x, ...) {
+  quos <- rlang::enquos(...)
+  
+  call <- match.call()
+  
+  call[['x']] <- NULL
+  call[[1]] <- quote(draw.default)
+  
+  if (!any(.names(call[-1]) %in% c('x', 'y', ''))) {
+    fields <- rlang::syms(selectedFields(x))
+    for (field in fields) call[[length(call) + 1L]] <- field
+  }
+  
+  rlang::eval_tidy(rlang::expr(with(x, !!call)))
+}
+
+#' @export
+draw.default <- function(x, y, facets = list(), ..., 
+                         xlab = NULL, ylab = NULL, 
+                         axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
+                         main = '', sub = '', col = 1, cex = NULL, pch = 16) {
   
   checks(xlab, xnull | (xlen1 & xatomic))
   checks(ylab, xnull | (xlen1 & xatomic))
@@ -1330,22 +1358,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   axisNames <- output$axisNames
   axes <- output$axes
   
-  # axes for facet(s)
-  ## get coordinates of facets (in whole window)
-  # 
-  # output$axisNames[2] <-  list(if (.names(facets)[1] != '') names(facets)[1])
-  # axes <- data.table(side = 2L, 
-  #                    ticks = list(sort(setNames(grconvertY(unique(facetY), 'ndc', 'user'), 
-  #                                               dimnames(table)[[1]]))),
-  #                    line = 2L)
-  # output$axisNames[1] <- list(if (length(dim(table)) > 1L) {
-  #   axes <- rbind(axes, 
-  #                 data.table(side = 1L, 
-  #                            ticks = list(sort(setNames(grconvertX(unique(facetX), 'ndc', 'user'),
-  #                                                       dimnames(table)[[2]]))),
-  #                            line = 2L))
-  #   if (.names(facets)[2] != '') names(facets)[2]
-  # })
+ 
   
   output$drawer <- function() {
     for (n in lay) {
@@ -1376,11 +1389,65 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
                 ifelse(1:4 %in% curaxes, axisNames, vector('list', 4L)),
                 curaxes, marginLines)
       } 
+     
+      coor <- which(cbind(cur), arr.ind = TRUE)
+      
+      # draw facet levels
+      if (nrow(table) > 1L && sides[4]) {
+        text(grconvertX(marginLines[[4]][3], 'inches', 'user'), 
+             grconvertY(.5, 'npc', 'user'), 
+             dimnames(table)[[1]][coor[ , 'row']],
+             cex = 1.5, xpd = NA, col = par('col.axis'))
+      }
+      if (length(dim(table)) > 1L && ncol(table) > 1L && sides[3]) {
+        
+        text(grconvertX(.5, 'npc', 'user'),
+             grconvertY(marginLines[[3]][3], 'inches', 'user'), 
+             collevel <- dimnames(table)[[2]][coor[ , 'col']],
+             cex = 1.5, xpd = NA, col = par('col.axis'))
+      }
+      
+      # If we are in the middle row, draw the facet (dimension level) label
+      if (.names(facets)[1] != '' && sides[4] &&
+          coor[ , 'row'] == floor(nrow(table) / 2)) {
+        
+        lab <- names(facets)[1]
+        text(grconvertX(marginLines[[4]][5], 'inches', 'user'), 
+             if (is.whole(nrow(table) / 2)) {
+               grconvertY(marginLines[[1]][5], 'inches', 'user')
+             } else {
+               grconvertY(.5, 'npc', 'user')
+             },
+             lab, xpd = NA, col = par('col.lab'), 
+             cex = 2, srt = if (nchar(lab) > 3L) -90 else 0)
+      }
+      
+      # If we are in the middle col, draw the facet label
+      if (length(dim(table)) > 1 && .names(facets)[2] != '' && sides[3] &&
+        coor[ , 'col'] == floor(ncol(table) / 2)) {
+        
+        lab <- names(facets)[2]
+        text(if (is.whole(ncol(table) / 2)) {
+               grconvertX(marginLines[[4]][5], 'inches', 'user')
+             } else {
+               grconvertX(.5, 'npc', 'user')
+             },
+             grconvertY(marginLines[[3]][4], 'inches', 'user'),
+             lab, xpd = NA, col = par('col.lab'), 
+             cex = 2)
+      }
       
     }
+    
+      # mtext(names(facets)[1] , 2, col ='red', outer = TRUE)
   }
-  output$axes <- output$axes[0]
+  
+  # axis names for facet(s)
+  # 
   output$axisNames <- vector('list', 4L)
+
+  
+  output$axes <- output$axes[0]
   
   output
 }
@@ -1597,7 +1664,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   par(cex = cex)
   
   # everything is currently inches
-  lines <- c(0, .3, .7, .85, 1) * min(figmar)
+  lines <- c(0, .2, .5, .8, 1) * min(figmar)
   
   marginLines <- list(grconvertY(0, 'npc', 'inches') - lines,
                       grconvertX(0, 'npc', 'inches') - lines,
@@ -1725,7 +1792,7 @@ shrinklim <- function(lim, scale = .8) {
 
 border <- function(side, scale = .8) {
   coor <- par('usr')
-  
+  coor <- c(grconvertX(c(0,1),'nfc','user'), grconvertY(c(0, 1), 'nfc', 'user'))
   
   x <- switch(as.character(side),
               "1" = , "3" = shrinklim(coor[1:2], scale),
@@ -1739,7 +1806,7 @@ border <- function(side, scale = .8) {
   
   graphics::segments(x0 = x[1], x1 = x[2],
                      y0 = y[1], y1 = y[2], col = setalpha('grey50', .35),
-                     lwd = .5, lty = 'longdash')
+                     lwd = .5, lty = 'longdash', xpd = NA)
   
 }
 
