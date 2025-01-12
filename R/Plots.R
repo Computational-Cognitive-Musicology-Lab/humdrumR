@@ -150,7 +150,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' `draw()` is equipped to visualize data in up to five dimensions in one plot.
 #' The main dimensions are, of course, the X and Y axes, controlled by the `x` and `y` arguments.
 #' The other two dimensions are color (`col`), point size (`cex`), and point shape (`pch`).
-#' An another approach is to draw multiple plots at the same time in a grid, with each sub
+#' Another approach is to draw multiple plots at the same time in a grid, with each sub
 #' plot called a "facet."
 #' Details for all these options can be found below.
 #' 
@@ -160,7 +160,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' `draw()` is built on top of R's base plotting system.
 #' This means that all the standard arguments to base-R plots can be used to customize `draw()` plots 
 #' (see [par()] for a full list).
-#' You can also add stuff to `draw()` plots using base functions like [points()] or [mtext()].
+#' You can also add stuff to `draw()` plots using base functions like [points()], [mtext()], or [abline()].
 #' `draw()` also has a number of unique features, including easily dividing data into multiple plots ("facets").
 #' 
 #'  
@@ -191,7 +191,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' 
 #' For `numeric` axes, you can also plot data on a logarithmic scale
 #' using the `log` argument.
-#' This set by providing a single `character` string containing a lower-case
+#' This is set by providing a single `character` string containing a lower-case
 #' `"x"`, `"y"`, or both (`"xy"`).
 #' Note that `draw()` will throw an error if you try to plot negative values 
 #' on a logarithmic scale.
@@ -199,8 +199,8 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' and will simply ignore attempts to do that.
 #' 
 #' ### Window control
-#' #' 
-#' Normally, when you use `draw()` the plot is drawn to fill the available graphical device,
+#' 
+#' Normally, when you use `draw()`, the plot is drawn to fill the available graphical device,
 #' using base-R's normal algorithm.
 #' However, the `aspect` argument can override this, controlling the aspect 
 #' ratio of the plot.
@@ -223,10 +223,10 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #'
 #' Colors can be specified several ways:
 #' 
-#' + As names (e.g., `"red"` or `"darkgreen"`)
-#' + As [hex codes](https://en.wikipedia.org/wiki/Web_colors#hex-triplet) (e.g., `"#ff0000"` or `"#00ff00`)
+#' + As names (e.g., `"red"` or `"darkgreen"`).
+#' + As [hex codes](https://en.wikipedia.org/wiki/Web_colors#hex-triplet) (e.g., `"#ff0000"` or `"#00ff00`).
 #' + Using the [rgb()] function.
-#' + As natural  (1,2,3, etc.), indexing `humdrumR`'s flatly palette,
+#' + As natural number (1,2,3, etc.), indexing `humdrumR`'s flatly palette,
 #'   based on the colors `'#18BC9C'`, `'#3498DB'`, `'#F39C12'`, `'#E74C3C'`, and `'#2C3E50'`.
 #'
 #' The `alpha` argument must be a `numeric` value \eqn{1 \geq alpha \geq 0},
@@ -259,7 +259,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' This means that the height of histogram bars does not correspond exactly to the 
 #' the probability mass in each bin, because it depends on the width of the bins;
 #' For narrow bins, density can even be greater than 1.
-#' If bin sizes are all equal, then the relative height of he density bars does
+#' If bin sizes are all equal, then the *relative* height of the density bars *does*
 #' map exactly to the relative probability mass of each bin.
 #' If bins are not equal width---which can only happen if you manually specify
 #' unequal bins using the `breaks` argument---the heights of bars *don't* map to probability mass.
@@ -267,11 +267,11 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' associated with that bin, even if the bins are of unequal width.
 #' This is ideal for a plot.
 #' 
-#' A second dimension can be visually added to the plot using the `col` (color) argument.
+#' A second dimension can be added to the density plot using the `col` (color) argument.
 #' If you pass a single color, the whole graph is drawn that color.
 #' However, if you pass `col` a vector of values which is the exact same length as 
 #' the input vector `x`, the unique values of this vector will be used to group 
-#' the `x` data and a separate density-graph will be drawn for each group, with its own color.
+#' the `x` data, and a separate density plot will be drawn for each group, with its own color.
 #' (A color legend will be drawn automatically.)
 #' The colors for each group will be chosen automatically, unless the entire `col` vector is
 #' valid color values. (Use `alpha` independently to change the transparency.)
@@ -280,11 +280,11 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' Use the `conditional` argument (see below) to control how the densities of each group 
 #' are scaled relative to each other.
 #' 
-#' #### Other histogram arguments
+#' #### Other density-plot arguments
 #' 
-#' In addition to Plot Text and Axes Control parameters (listed above), as well as the dimensional `col` argument,
-#' arguments understood by histogram/density plots are listed below.
-#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`), 
+#' In addition to the Plot Text and Axes Control parameters (listed above), as well as the dimensional `col` argument,
+#' more arguments understood by histogram/density plots are listed below.
+#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`) 
 #' unless otherwise indicated.
 #' 
 #' + `smooth` --- Controls whether histogram is binned or smooth.
@@ -304,8 +304,8 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #'   black line. The mean and standard deviation of this distribution is taken from the input vector `x`.
 #'   This gives a sense of how close to normally distributed `x` is.
 #'   + Defaults to `FALSE`.
-#' + `conditional` --- If the data is grouped in multiple draws by `col` (see above), controls whether the density
-#'   of each color matches it's global share in the distribution of input variable `x`, or is rescaled in each
+#' + `conditional` --- If the data is grouped into multiple draws by `col` (see above), this controls whether the density
+#'   of each color matches its global share in the distribution of input variable `x`, or is rescaled in each
 #'   group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
 #'   + Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
 #'   + `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
@@ -320,7 +320,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #'    using a cross-hair symbol.
 #'   + Defaults to `FALSE`.
 #' + `global_quantiles` --- If the data is grouped into multiple draws by `col` (see above), and if `quantiles`
-#'   or the `mean` are going to be drawn, controls whether the mean/quantiles are computed separately
+#'   or the `mean` are going to be drawn, this controls whether the mean/quantiles are computed separately
 #'   for each group or for the whole (global) distribution of the input variable `x`.
 #'   + Defaults to `TRUE`.
 #'   + If `global_quantiles = TRUE`, the overall quantiles and/or mean of input vector `x` are drawn.
@@ -350,12 +350,14 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' a continuum of colors is created to represent that numeric space.
 #' 
 #' By default, `draw()` chooses an appropriate size to draw data points based on the 
-#' size of the input vector `y` and the window size---the more data on the screen, smaller the points are drawn.
+#' size of the input vector `y` and the window size---the more data on the screen 
+#' the smaller the points are drawn.
 #' You can override this by passing a single numeric value to `cex`; values between about
 #' `.2` and `1.5` are pretty reasonable, typically.
 #' However, if you pass `cex` vector of positive numeric values which is the same length
 #' as the input vector `y`, the point sizes are scaled so that the relative *area* of drawn points
-#' matches the relative magnitude of numbers in the `cex` vector---A point-size legend is also drawn.
+#' matches the relative magnitude of numbers in the `cex` vector.
+#' (A point-size legend will be drawn automatically.)
 #' Thus, if you draw two points with `cex = c(3, 6)`, the second point will be drawn twice
 #' the size (twice the area) of the first.
 #' If the range of values is too great, it is not feasible to represent them using points,
@@ -367,26 +369,26 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' For example, you might see a message like: "When comparing the points in this plot, 
 #' a doubling of area corresponds to multiplying the value by three."
 #' 
-#' By default, each data point is represented by a solid circle.
-#' This can be overriden by passing a `pch` argument.
+#' By default, each data point is represented by a solid circle;
+#' This can be overridden by passing a `pch` argument.
 #' There are sixteen possible shapes, which are specified by the natural
 #' numbers from 1 to 16---try calling `plot(1:16, pch = 1:16)` to see them all.
 #' If a single value is passed to `pch`, all points are drawn with the corresponding shape.
 #' However, if you pass `pch` a vector which is the same length as the input
 #' vector `y`, the data is grouped relative to the unique values of this vector,
 #' and a shape is used to represent each group.
-#' (A point-shape legend is automatically drawn.)
-#' If the `pch` vector is numeric, with more than four unique values, the 
+#' (A point-shape legend will be drawn automatically.)
+#' If the `pch` vector is `numeric`, and with more than four unique values, the 
 #' numeric range is divided into four groups automatically.
 #' If the `pch` vector is discrete (`character`, `logical`, or `factor`),
 #' each unique value is mapped to a point-shape;
 #' This only works up to sixteen unique values---if there are more than 16
 #' unique values in a discrete `pch` vector, an error will occur.
 #'
-#' In addition to Plot Text and Axes Control parameters (listed above),
-#' and dimensional arguments `y`, `col`, `cex`, and `pch`, 
-#' arguments understood by quantile plots are listed below.
-#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`), 
+#' In addition to the Plot Text and Axes Control parameters (listed above),
+#' and the dimensional arguments `y`, `col`, `cex`, and `pch`, 
+#' more arguments understood by quantile plots are listed below.
+#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`) 
 #' unless otherwise indicated.
 #'
 #' + `normalReference` --- If `TRUE`, a normal (Gaussian) distribution is drawn as a dashed
@@ -415,8 +417,8 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' (Thus, providing a scalar `x` or `y` causes the other variable to be drawn on a straight line.)
 #' Up to three additional dimensions can be visually added to the plot using `col` (color),
 #' `cex` (point size), and `pch` (point style) arguments.
-#' If `line = TRUE`, points are not drawn at all, and instead a line connecting the points is draw from leftmost
-#' point to rightmost.
+#' If `line = TRUE`, points are not drawn at all, and instead a line connecting the 
+#' points is draw from leftmost point to rightmost.
 #' 
 #' 
 #' If you pass a single color value to `col`, the whole graph is drawn that color.
@@ -463,10 +465,10 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' This only works up to sixteen unique values---if there are more than 16
 #' unique values in a discrete `pch` vector, an error will occur.
 #'
-#' In addition to Plot Text and Axes Control parameters (listed above),
-#' and dimensional arguments `x`, `y`, `col`, `cex`, and `pch`, 
-#' arguments understood by scatter plots are listed below.
-#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`), 
+#' In addition to the Plot Text and Axes Control parameters (listed above),
+#' and the dimensional arguments `x`, `y`, `col`, `cex`, and `pch`, 
+#' more arguments understood by scatter plots are listed below.
+#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`) 
 #' unless otherwise indicated.
 #'
 #' + `line` --- If `TRUE`, a line is drawn through the `x`/`y` coordinates, instead of points.
@@ -484,13 +486,13 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
 #'   + By default, `quantiles = c()` and no quantiles are drawn.
 #'   + If any quantiles are specified, each quantile is drawn on the plot and labeled appropriately.
-#'     Quantiles are computed separately for input vectors `x` and `y` drawn using vertical and horizontal
+#'     Quantiles are computed separately for input vectors `x` and `y` and drawn using vertical and horizontal
 #'     lines respectively.
 #'     For example, 
 #'     + `quantiles = .5` will draw a lines which converge at the medians of `x` and `y`.
 #'     + `quantiles = c(.25, .5, .75)` will draw vertical and horizontal lines marking the four 
 #'        quartiles of `x` and `y` (creating a grid with 16 cells).
-#' + `mean` --- If `TRUE`, a cross-hair symbol is drawn marking at the point marking the means of `x` and `y`.
+#' + `mean` --- If `TRUE`, a cross-hair symbol is drawn at the point marking the means of `x` and `y`.
 #'   + Defaults to `FALSE`.
 
 #' @section Facets:
@@ -903,9 +905,9 @@ setMethod('.draw', c('numeric', 'NULL'),
                 }
                 if (mean) {
                   if (global_quantiles) {
-                    draw_mean(mean(x), grconvertY(0.02, 'nfc', 'user'))
+                    draw_mean(mean(x), grconvertY(0.02, 'npc', 'user'))
                   } else {
-                    draw_mean(tapply(x, col, mean), grconvertY(0.02, 'nfc', 'user'), col = unique(col))
+                    draw_mean(tapply(x, col, mean), grconvertY(0.02, 'npc', 'user'), col = unique(col))
                     
                   }
                 }
@@ -2011,7 +2013,8 @@ drawlines <- function(n = 10, outer = FALSE) {
 
 draw_mean <- function(x, y, col = 'black') {
   if (length(x) == 1) col <- 'black'
-  points(x, rep(y, length.out = length(x)), pch = 3, cex = 1.4, lwd = 1.5, xpd = TRUE, col = setalpha(col, 1))
+  points(x, rep(y, length.out = length(x)), 
+         pch = 3, cex = 1.4, lwd = 1.5, xpd = TRUE, col = setalpha(col, 1))
 }
 
 draw_counts <- function(x, y, counts, col, width, cex = .8) {
@@ -2240,14 +2243,13 @@ prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
         
       }
       
+      logrange <- diff(range(log10(cex)))
+      
       cex <- sqrt(cex) 
-      
-      maxPowers <- 6
-      logrange <- diff(range(log(cex)))
-      power <- max(2, ceiling(exp(logrange / maxPowers)))
-      
-      if (power > 2) {
-        .message("In draw(cex = ), your largest cex value is {round(exp(logrange)^2)} times greater than the smallest value.",
+      if (logrange > 2) {
+        maxPowers <- 6
+        power <- ceiling(10^(logrange / maxPowers))
+        .message("In draw(cex = ), your largest cex value is {round(10^logrange)} times greater than the smallest value.",
                  "To plot this, we must understate the differences between points.",
                  "When comparing the point in this plot, a doubling of area corresponds to multiplying the value",
                  "by {num2print(power)}.")
@@ -2256,7 +2258,6 @@ prep_cex <- function(x, y, cex = NULL, col, pch = 16, ...) {
       } else {
         cex_legend <- sqrt(val_legend)
       }
-      
       
       # scale to center on 
       scale <- exp(mean(log(cex))) 
