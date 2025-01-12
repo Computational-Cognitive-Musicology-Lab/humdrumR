@@ -250,22 +250,21 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' and `smooth = TRUE` for density contour.
 #' The `draw()` function relies on the algorithms used by base-R's [hist()] and [density()] functions, respectively, for 
 #' these two tasks.
-#' In many cases, we can pass arguments directly through to these functions.
+#' We can pass arguments directly through to these functions:
 #' For example, the `breaks` argument can be passed through to [hist()],
 #' or the `bw` and `kernel` arguments to [density()].
 #' 
 #' 
-#' Whether smoothed or binned, the Y axis represents the probability density.
-#' This means that the height of histogram bars does not correspond exactly to the 
-#' the probability mass in each bin, because it depends on the width of the bins;
-#' For narrow bins, density can even be greater than 1.
+#' Whether smoothed or binned, the Y axis represents the probability **density**.
+#' The height of histogram bars does *not* correspond exactly to the 
+#' the probability **mass** in each bin, because that actually depends on the width of the bins;
+#' For narrow bins (or contious contours), density can even be greater than 1.
 #' If bin sizes are all equal, then the *relative* height of the density bars *does*
 #' map exactly to the relative probability mass of each bin.
 #' If bins are not equal width---which can only happen if you manually specify
 #' unequal bins using the `breaks` argument---the heights of bars *don't* map to probability mass.
-#' However, using the density assures that the relative **area** of each bin does match the probability mass 
+#' However, using the density assures that the relative **area** of each bin *does* match the probability mass 
 #' associated with that bin, even if the bins are of unequal width.
-#' This is ideal for a plot.
 #' 
 #' A second dimension can be added to the density plot using the `col` (color) argument.
 #' If you pass a single color, the whole graph is drawn that color.
@@ -282,12 +281,13 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' 
 #' #### Other density-plot arguments
 #' 
-#' In addition to the Plot Text and Axes Control parameters (listed above), as well as the dimensional `col` argument,
+#' In addition to the Plot Text and Axes Control parameters (listed above), 
+#' as well as the dimensional `col` argument,
 #' more arguments understood by histogram/density plots are listed below.
 #' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`) 
 #' unless otherwise indicated.
 #' 
-#' + `smooth` --- Controls whether histogram is binned or smooth.
+#' + `smooth` --- Controls whether plot is binned (histogram) or smooth (contour).
 #'   + Defaults to `FALSE`.
 #' + `showPoints` --- Controls whether individual data points from the `x` input vector
 #'   are plotted in a "cloud" above the density plot.
@@ -309,7 +309,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #'   group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
 #'   + Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
 #'   + `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
-#'     data in each group (if they are different sizes).
+#'     data in each group (i.e., if the groups are different sizes).
 #' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the default).
 #'   + By default, `quantiles = c()` and no quantiles are drawn.
 #'   + If any quantiles are specified, each quantile is drawn as a vertical line on the plot, labeled appropriately.
@@ -319,12 +319,12 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' + `mean` --- If `TRUE`, the mean of input vector `x` is marked on the X axis below the plot, 
 #'    using a cross-hair symbol.
 #'   + Defaults to `FALSE`.
-#' + `global_quantiles` --- If the data is grouped into multiple draws by `col` (see above), and if `quantiles`
+#' + `global_stats` --- If the data is grouped into multiple draws by `col` (see above), and if `quantiles`
 #'   or the `mean` are going to be drawn, this controls whether the mean/quantiles are computed separately
 #'   for each group or for the whole (global) distribution of the input variable `x`.
 #'   + Defaults to `TRUE`.
-#'   + If `global_quantiles = TRUE`, the overall quantiles and/or mean of input vector `x` are drawn.
-#'     If the data is grouped by `col` and `global_quantiles = FALSE`, quantiles and/or means are instead 
+#'   + If `global_stats = TRUE`, the overall quantiles and/or mean of input vector `x` are drawn.
+#'     If the data is grouped by `col` and `global_stats = FALSE`, quantiles and/or means are instead 
 #'     computed and drawn separately for each group. This can get very messy very quickly!
 #'      
 #'   
@@ -411,7 +411,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' ### Scatter plot (x = numeric, y = numeric)
 #'
 #' To draw a pair of numeric variables, `draw()` creates a scatter plot
-#' with the `x` and `y` input variables mapped to position on the X and Y axes respectively.
+#' with the `x` and `y` input arguments mapped to position on the X and Y axes respectively.
 #' The input vectors must be equal length, unless one of the pair is a single scalar,
 #' in which case that scalar is recycled to match the length of the other input.
 #' (Thus, providing a scalar `x` or `y` causes the other variable to be drawn on a straight line.)
@@ -494,7 +494,90 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #'        quartiles of `x` and `y` (creating a grid with 16 cells).
 #' + `mean` --- If `TRUE`, a cross-hair symbol is drawn at the point marking the means of `x` and `y`.
 #'   + Defaults to `FALSE`.
-
+#'
+#' ### Violin Plot (x = categorical, y = numeric)
+#'
+#' If the `x` argument is categorical and the `y` argument is numeric, `draw()`
+#' will draw the distribution of the numeric variable within each category
+#' as a "violin plot"---so-called for its characteristic shape that can (sometimes)
+#' resemble the shape of a violin.
+#' (The input length must be equal length.)
+#' No more than 25 violins can be drawn. 
+#' If the categorical `x` argument has more than 25 unique values,
+#' an error is thrown.
+#'
+#' A violin plot is much like a density histogram/contour plot (above) turned on its
+#' side, with the shape mirrored left to right.
+#' Like these plots, the violin plot can be generated using either R's [density()] or
+#' [hist()] algorithms, for smooth and binned plots respectively.
+#' We can pass arguments directly through to these functions:
+#' For example, the `breaks` argument can be passed through to [hist()],
+#' or the `bw` and `kernel` arguments to [density()].
+#' The smooth density contour is drawn by default; to draw a binned plot,
+#' use `smooth = FALSE`.
+#' 
+#' Whether smoothed or binned, the width of each "violin" represents the probability **density**.
+#' The width of bars (`smooth = FALSE`) does *not* correspond exactly to the 
+#' the probability **mass** in each bin, because that actually depends on the size of the bins;
+#' For narrow bins (or continuous contours), density can even be greater than 1.
+#' If bin sizes are all equal, then the *relative* width of the density bars *does*
+#' map exactly to the relative probability mass of each bin.
+#' If bins are *not* equal width---which can only happen if you manually specify
+#' unequal bins using the `breaks` argument---the widths of bars *don't* map to probability mass.
+#' However, using the density assures that the relative **area** of each bin *does* match the probability mass 
+#' associated with that bin, even if the bins are of unequal size.
+#' The scale of the densities in the plot is shown through the width of a set of lines above each violin.
+#' 
+#' By default, each violin is automatically drawn a different color, with
+#' a color legend drawn as well.
+#' However, these colors can be controlled using the `col` argument (as well as `alpha`);
+#' you can provide a single color for all the violins, or 
+#' a vector of unique colors exactly the same length as the number of categories 
+#' (unique values in `x`).
+#' These colors are mapped to the violins, from left to right.
+#' 
+#' In addition to the Plot Text and Axes Control parameters (listed above), 
+#' as well as the `col` argument,
+#' more arguments understood by violin plots are listed below.
+#' The following arguments are all singleton `logical` on/off switches (`TRUE` or `FALSE`) 
+#' unless otherwise indicated.
+#' 
+#' + `smooth` --- Controls whether the violin plot is smooth or binned like a histogram.
+#'   + Defaults to `TRUE`.
+#' + `showPoints` --- Controls whether individual data points from the `y` input vector
+#'   are plotted in a "cloud" over each violin.
+#'   + Defaults to `FALSE`.
+#'   + The Y-position of each point is matched to its actual value.
+#'   + The X-position of each point is randomly (uniformly) spread across the area of each violin.
+#'     + The points will look consistent, regardless of what histogram or density algorithm parameters are used.
+#' + `normalReference` --- If `TRUE`, a normal (Gaussian) distribution is drawn as a dashed
+#'   black line. The mean and standard deviation of this distribution is taken from the input vector `y`,
+#'   within each group.
+#'   This gives a sense of how close to normally distributed `y` is within each group.
+#'   + Defaults to `FALSE`.
+#' + `conditional` --- This controls whether the density
+#'   of each violin matches its global share in the distribution of input variable `y`, or is rescaled in each
+#'   group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
+#'   + Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
+#'   + `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
+#'     data in each group (i.e., if the groups are different sizes).
+#' + `quantiles` --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the default).
+#'   + By default, `quantiles = c(.25, .75)`, so the inter-quartile interval is shown.
+#'   + If any quantiles are specified, each quantile is drawn as a horizontal line on the plot, labeled appropriately.
+#'     For example, 
+#'     + `quantiles = .5` will draw a line at the median of input vector `y`.
+#'     + `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `y`.
+#' + `mean` --- If `TRUE`, the mean of input vector `y` is marked at the center of each violin, 
+#'    using a cross-hair symbol.
+#'   + Defaults to `TRUE`.
+#' + `global_stats` --- If `quantiles` or the `mean` are going to be drawn, 
+#'   this controls whether the mean/quantiles are computed separately
+#'   for each group or for the whole (global) distribution of the input variable `y`.
+#'   + Defaults to `FALSE`.
+#'   + If `global_stats = TRUE`, the overall quantiles and/or mean of input vector `y` are drawn.
+#'     If `global_stats = FALSE`, quantiles and/or means are instead 
+#'     computed and drawn separately for each group. This can get very messy very quickly!
+#'
 #' @section Facets:
 #' 
 #'
@@ -801,10 +884,10 @@ setMethod('.draw', c('numeric', 'numeric'),
 #### histogram ----
 
 setMethod('.draw', c('numeric', 'NULL'), 
-          \(x, y, log = '', jitter = '', 
+          \(x, y, log = '', 
             breaks = 'Sturges', normalReference = FALSE, 
             smooth = FALSE, conditional = FALSE, showCounts = FALSE, showPoints = TRUE,
-            mean = FALSE, quantiles = c(), global_quantiles = FALSE,
+            mean = FALSE, quantiles = c(), global_stats = FALSE,
             xlim = NULL, ylim = NULL,
             col = 3, alpha = .2, cex = .7, pch = NULL, ...) {
             # pch is used to stop it being passed to hist.coor, which causes a warning
@@ -818,19 +901,14 @@ setMethod('.draw', c('numeric', 'NULL'),
             }
             names(breaks) <- format(breaks, digits = 3)
             
-            col <- rep(cols$col, length.out = length(x))
-            coordinates <- tapply(x, col, hist.coor, smooth = smooth, breaks = breaks, ..., simplify = FALSE)
-            if (length(coordinates) > 1L && !conditional) {
-              coordinates <- Map(\(coor, prop) {
-                coor$Density <- coor$Density * prop
-                coor
-                }, coordinates, prop.table(table(col)))
-            } 
+            # This does the actual density stuff:
+            col <- rep(cols$col, length.out = length(x)) # col may be a grouping factor
+            coordinates <- multihist.coor(x, col, conditional = conditional, smooth = smooth, breaks = breaks, ...)
             
             allDens <- unlist(lapply(coordinates, '[[', 'Density'))
-            
             ylim <- ylim %||% c(0, 2^(ceiling(log( max(allDens), 2)))) # 1, .5, .25, .125, etc.
-            output <- canvas(x = x, xlim = xlim %||%range(breaks), 
+            
+            output <- canvas(x = x, xlim = xlim %||% range(breaks), 
                              y =  allDens[allDens > 0], ylim = ylim, 
                              log = gsub('y', '', log))
             
@@ -890,7 +968,7 @@ setMethod('.draw', c('numeric', 'NULL'),
                   points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
                 }
                 
-                if (global_quantiles || length(coordinates) == 1L) {
+                if (global_stats || length(coordinates) == 1L) {
                   draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
                 } else {
                   lapply(unique(col), \(color) {
@@ -904,7 +982,7 @@ setMethod('.draw', c('numeric', 'NULL'),
                          lwd = .5, lty = 'dashed')
                 }
                 if (mean) {
-                  if (global_quantiles) {
+                  if (global_stats) {
                     draw_mean(mean(x), grconvertY(0.02, 'npc', 'user'))
                   } else {
                     draw_mean(tapply(x, col, mean), grconvertY(0.02, 'npc', 'user'), col = unique(col))
@@ -921,56 +999,50 @@ setMethod('.draw', c('numeric', 'NULL'),
 
 setMethod('.draw', c('NULL', 'numeric'),
           function(x, y, log = '', 
-                   violin = FALSE, normalReference = FALSE,
+                   violin = FALSE, normalReference = FALSE, showPoints = FALSE,
                    mean = FALSE, quantiles = c(.25, .5, .75),
                    xlim = NULL, ylim = NULL, 
                    col = 1, alpha = .8, cex = NULL, pch = NULL, 
                    ...) {
             
             checks(violin, xTF)
+            
+            if (violin) return(draw_violins(integer(length(y)), y,  mean = mean,
+                                            xlim = xlim, ylim = ylim, alpha = alpha, 
+                                            normalReference = normalReference, showPoints = showPoints,
+                                            ..., col = col, quantiles = quantiles))
+              
+            
             output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
                              xlim = xlim, 
                              y = y, ylim = ylim , 
                              log = gsub('x', '', log))
+            output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
+            output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
+            output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
+            output$axisNames[[1]] <- 'Quantile'
             
-            if (violin) {
+            output$drawer <- function() {
+              if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
+              if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
+              if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
               
-              output$col <- prep_col(col, 1, alpha = alpha, log = log, ...)
-              output$axisNames[[1]] <- 'Density'
-              output$axes <- output$axes[side == 2L]
+              y <- sort(y)
+              x <- seq(0, 1, length.out = length(y))
+              points(x = x, y = y, col = output$col$col, cex = output$cex$cex, 
+                     pch = output$pch$pch, ...)
               
+              # extra stuff
+              draw_quantiles(2, y, quantiles = quantiles)
+              if (mean)  draw_mean(0.5, mean(y))
               
-              output$drawer <- function() draw_violins(list(y), horiz = FALSE, mean = mean, ..., col = output$col$col, quantiles = quantiles)
-              
-            } else {
-              
-              output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
-              output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
-              output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
-              output$axisNames[[1]] <- 'Quantile'
-              
-              output$drawer <- function() {
-                if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
-                if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
-                if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
+              if (normalReference) {
+                points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
+                       lwd = .5, lty = 'dashed', xpd = TRUE)
                 
-                y <- sort(y)
-                x <- seq(0, 1, length.out = length(y))
-                points(x = x, y = y, col = output$col$col, cex = output$cex$cex, 
-                       pch = output$pch$pch, ...)
-                
-                # extra stuff
-                draw_quantiles(2, y, quantiles = quantiles)
-                if (mean)  draw_mean(0.5, mean(y))
-                
-                if (normalReference) {
-                  points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
-                         lwd = .5, lty = 'dashed', xpd = TRUE)
-                  
-                  legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
-                         col = 'black', text.col = 'black', cex = .8, 
-                         legend = quote(N(mu[y], sigma[y])) )
-                }
+                legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
+                       col = 'black', text.col = 'black', cex = .8, 
+                       legend = quote(N(mu[y], sigma[y])) )
               }
               
               
@@ -1137,45 +1209,45 @@ setMethod('.draw', c('discrete', 'discrete'),
 #             list(xlab = NULL, ylab = NULL)
 #           })
 
-setMethod('.draw', c('list', 'numeric'),
-          function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
-            
-            layout <- prep_layout(x)
-            oldpar <- par(oma = par('mar'), mar = c(0, 0, 0, 0))
-            on.exit({
-              layout(cbind(1)) 
-              par(oldpar)
-              
-            })
-            
-            y.ticks <- auto_ticks(y, log = grepl('y', log), at = yat)
-            ylim <- range(y.ticks)
-            y <- split(y, f = x)
-            
-            x.ticks <- seq(0, 1, .1)
-            x.labels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
-            
-            xuniq <- unique(as.data.frame(x))
-            xuniq <- xuniq[sapply(xuniq, \(val) length(unique(val)) > 1L)]
-            grouplabels <- do.call('paste', xuniq)
-            for (k in c(layout)) {
-              ytick <- if (k %in% layout[, 1]) y.ticks 
-              if (k %in% layout[nrow(layout), ]) {
-                xtick <- x.ticks 
-                xlabel <- x.labels
-              } else {
-                xtick <- xlabel <- NULL
-              }
-              
-              canvas(log = gsub('x', '', log),  xlim = c(0, 1),  ylim = ylim)
-              
-              if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
-              draw_violin(y[[k]], breaks = breaks)
-            }
-            
-            
-            list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
-          })
+# setMethod('.draw', c('list', 'numeric'),
+#           function(x, y, col = 3, log = '', breaks = 'Sturges', ..., yat = NULL) {
+#             
+#             layout <- prep_layout(x)
+#             oldpar <- par(oma = par('mar'), mar = c(0, 0, 0, 0))
+#             on.exit({
+#               layout(cbind(1)) 
+#               par(oldpar)
+#               
+#             })
+#             
+#             y.ticks <- auto_ticks(y, log = grepl('y', log), at = yat)
+#             ylim <- range(y.ticks)
+#             y <- split(y, f = x)
+#             
+#             x.ticks <- seq(0, 1, .1)
+#             x.labels <- c(seq(1,.2,-.2), '0.0', seq(.2, 1, .2))
+#             
+#             xuniq <- unique(as.data.frame(x))
+#             xuniq <- xuniq[sapply(xuniq, \(val) length(unique(val)) > 1L)]
+#             grouplabels <- do.call('paste', xuniq)
+#             for (k in c(layout)) {
+#               ytick <- if (k %in% layout[, 1]) y.ticks 
+#               if (k %in% layout[nrow(layout), ]) {
+#                 xtick <- x.ticks 
+#                 xlabel <- x.labels
+#               } else {
+#                 xtick <- xlabel <- NULL
+#               }
+#               
+#               canvas(log = gsub('x', '', log),  xlim = c(0, 1),  ylim = ylim)
+#               
+#               if (length(layout) > 1L) text(0.2, ylim[1] + (diff(ylim) * .75), grouplabels[k])
+#               draw_violin(y[[k]], breaks = breaks)
+#             }
+#             
+#             
+#             list(oma = TRUE, xlab = if (length(layout) == 1L) 'Proportion' else "", ylab = "")
+#           })
 
 
 setMethod('.draw', c('formula'),
@@ -1246,30 +1318,17 @@ setMethod('.draw', c('humdrumR'),
 setMethod('.draw', c('discrete', 'numeric'),
           function(x, y, log = '', 
                    smooth = TRUE, conditional = FALSE,
-                   mean = TRUE, quantiles = c(.25, .75), global_quantiles = FALSE, 
+                   mean = TRUE, quantiles = c(.25, .75), global_stats = FALSE, 
                    xlim = NULL, ylim = NULL, ...,
                    col = NULL) {
             
-            categories <- sort(unique(x))
-            if (is.integer(x) && length(categories) > 25L) {
-              return(.draw(as.numeric(x), y, log = log, 
-                           xlim = xlim, ylim = ylim, ..., quantiles = quantiles))
-            }
             
-            xlim <- xlim %||% c(.5, length(categories) + .5)
-            output <- canvas(x = seq_along(categories), xlim = xlim, 
-                             y = y, ylim = ylim , 
-                             log = gsub('y', '', log))
+            draw_violins(x, y, log = log, 
+                         smooth = smooth, conditional = conditional,
+                         mean = mean, quantiles = quantiles, global_stats = global_stats,
+                         xlim = xlim, ylim = ylim, 
+                         col = col, ...)
             
-            output$col <- prep_col_categories(col %||% categories, categories, log = log, ...)
-            output$axes[side == 1, ticks := list(setNames(seq_along(categories), categories))]
-            
-            output$drawer <- function() {
-              draw_violins(tapply(y, x, list), smooth = smooth, conditional = conditional, col = output$col$col, ...,
-                           mean = mean, quantiles = quantiles, global_quantiles = global_quantiles)
-            }
-            
-            output
             
           })
 
@@ -1298,7 +1357,8 @@ setMethod('.draw', c('numeric', 'discrete'),
             if (center) tab <- sweep(tab, 1, rowMeans(tab), '-')
             
             output <- canvas(x, xlim, range(tab), ylim, log = gsub('y', '', log))
-            output$col <- prep_col_categories(col %||% categories, categories, alpha = alpha, log = log, ...)
+            output$col <- prep_col_categories(col %||% categories, categories, 
+                                              alpha = alpha, log = log, ...)
             
             if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
             
@@ -1522,80 +1582,126 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
 
 
 
-draw_violins <- function(vars, smooth = TRUE, conditional = FALSE, 
-                         mean = TRUE, quantiles = c(), global_quantiles = FALSE, 
-                         breaks = "Sturges", kernel = 'gaussian', bw = 'nrd0', ...,
-                         col = 1) {
-  vars <- lapply(vars, \(v) v[!is.na(v)])
+draw_violins <- function(groups, y, smooth = TRUE, conditional = FALSE, 
+                         mean = TRUE, quantiles = c(.25, .75), global_stats = FALSE, 
+                         breaks = "Sturges", normalReference = FALSE, showPoints = FALSE,
+                         xlim = NULL, ylim = NULL, log = '',
+                         col = 1, ...) {
   
-  if (length(breaks) == 1L && pmatch(breaks, 'quantiles', 0) == 1 && length(quantiles)) {
-    breaks <- quantile(unlist(vars), sort(unique(c(0, quantiles, 1))))
-    names(breaks) <- format(breaks, digits = 3)
-  }  
+  groups <- groups[!is.na(y)]
+  y <- y[!is.na(y)]
+  categories <- sort(unique(groups))
+  if (length(categories) > 25L) {
+    .stop("You can't draw a violin plot with more than 25 categories---it would result in the world's ",
+          "smallest violins. ",
+          "You have provided an grouping argument with {num2word(length(categories))} unique values.")
+  }
   
-  if (!smooth) x <- hist.default(unlist(vars), breaks = breaks, plot = FALSE)$breaks
+  col <- prep_col_categories(col %||% categories, categories, ...)
   
-  
-  lapply(seq_along(vars), 
-         \(i) {
-           var <- vars[[i]]
-           if (smooth) {
-             dens <- density(var, bw = bw, kernel = kernel)
-             x <- dens$x
-             y <- dens$y
-             dx <- mean(diff(x))
-             y <- y * dx
-             
-             x <- c(x[1], x,x[length(x)])
-             y <- c(0, y, 0)
-           } else {
-             hist <- hist.default(var, breaks = x, plot = FALSE)
-             y <- hist$density
-             dx <- mean(diff(x))
-             y <- y * dx
-             
-             x <- c(x[1], x[1], rep(x[-1], each = 2))
-             y <- c(0, rep(y, each = 2), 0)
-             # x <- c(x[1], x, x[length(x)])
-             # y <- c(0, y, 0)
-           }
-           
-           data.table(I = i, X = x, Y = y)
-           
-         }) |> data.table::rbindlist() -> Coor
-  
-  varprop <- proportions(lengths(vars))
-  
-  if (conditional) {
-    Coor[, Yscale := 2^(ceiling(log(max(Y), 2))), by = I]
-    
+  breaks <- if (!smooth && length(breaks) == 1L && pmatch(breaks, 'quantiles', 0)) {
+    quantile(y, c(0, if (length(quantiles)) sort(unique(quantiles)) else c(.25, .5, .75), 1))
   } else {
-    Coor[ , Y := Y * varprop[I]]
-    Coor[ , Yscale := 2^(ceiling(log(max(Y), 2)))]
+    hist.default(y, breaks = breaks, plot = FALSE)$breaks
+  }
+  names(breaks) <- format(breaks, digits = 3)
+  
+  values <- tapply(y, groups, list)
+  ptable <- proportions(table(groups))
+  coordinates <- multihist.coor(y, groups, vardim = 'Y',
+                                conditional = conditional, smooth = smooth, breaks = breaks)
+  
+  # need to figure out x-limit width
+  allDens <- unlist(lapply(coordinates, '[[', 'Density'))
+  xwidths <- unique(2^(ceiling(log(max(allDens), 2)):floor(log(median(allDens), 2)))) |> head(4)
+  xlim <- xlim %||% c(0, xwidths[1]) # 1, .5, .25, .125, etc.
+  
+  ## each violin will draw across a x range of N - . 5: (N + .5), centered on N
+  ## need to scale density to this range, based on xlim
+  coordinates <- lapply(coordinates, \(coor) {
+    coor[ , X := (Density / xlim[2]) / 2]
+    coor
+  })
+  xwidths_scaled <- (xwidths[-1] / xwidths[1]) / 2
+  
+  violinN <- setNames(seq_along(coordinates), categories)
+  
+  output <- canvas(x = violinN, xlim = c(0.5, max(violinN) + .5), 
+                   y =  y, #ylim = ylim %||% range(breaks), 
+                   ylim = ylim %||% range(unlist(lapply(coordinates, '[[', 'Y'))), #this stops density from going off plot
+                   log = gsub('x', '', log))
+  
+  # prepare ticks
+  ## y
+  output$breaks <- y.ticks <- breaks
+  output$draw_type <- 'violin'
+  while(length(y.ticks) > 20L) {
+    y.ticks <- y.ticks[seq(1, length(y.ticks), by = 2)]
+  }
+  output$axes[side == 2, ticks := y.ticks]
+  
+  ## x
+  # output$axisNames[[1]] <- 'Probability density'
+  output$axes[side == 1, ticks := list(violinN)]
+  
+  output$col <- col
+  output$drawer <- function() {
+    
+    Map(\(coor, col, N, vals, proportion) {
+      
+      coor[ , {
+                    # polygon(c(X, rev(X)), c(Density, rep(ymin, length(Density))), col = color, border = NA, xpd = NA)
+        if (!smooth) {
+          X <- c(X, rep(0, length(X)))
+          Y <- c(Y, rev(Y))
+        }
+        polygon(N + X, Y, border = NA, col = col, xpd = NA)
+        polygon(N - X, Y, border = NA, col = col, xpd = NA)
+        
+        
+        yscale <- grconvertY(seq(.97, 1.00, length.out = length(xwidths_scaled)), 'npc', 'user')
+        graphics::segments(N - xwidths_scaled, x1 = N + xwidths_scaled, lwd = .5, lty = 'solid',
+                           yscale, yscale, xpd = NA)
+        
+        text(N, grconvertY(1.02, 'npc', 'user'), 'Probability density', xpd = NA,
+             cex = .5, col = par('cex.lab'))
+        text(N + xwidths_scaled, yscale, 
+             format(xwidths[-1], drop0trailing = T) |> stringr::str_remove('^0'),
+             cex = .4, pos = 4, xpd = NA)
+        
+        if (normalReference) {
+          ypoints <- seq(output$window$ylim[[1]][1], output$window$ylim[[1]][2], length.out = 100)
+          norm <- dnorm(ypoints, mean(vals), sd(vals)) / (xwidths[1] * 2)
+          if (!conditional) norm <- norm * proportion
+          points(N + norm, ypoints, type = 'l',
+                 lwd = .5, lty = 'dashed')
+          points(N - norm, ypoints, type = 'l',
+                 lwd = .5, lty = 'dashed')
+        }
+        
+        if (showPoints) {
+          ysamp <- if (length(vals) >= 10^5) sample(vals, 10^5) else vals
+          samp_dens <- X[X > 0][order(Y[X > 0])][findInterval(ysamp, sort(Y[X > 0]))]
+          xsamp <- runif(length(ysamp), -samp_dens, samp_dens)
+          dotAlpha <- cex_density(xsamp, ysamp, .3)
+          points(xsamp + N , ysamp,  cex = .3, col = setalpha('black', dotAlpha), pch = 16, xpd = NA)
+        }
+        
+        if (!global_stats && length(coordinates) > 1L) {
+          draw_quantiles(2, vals, quantiles, limits = c(N - .5, N + .5)) 
+          if (mean) draw_mean(N, mean(vals), col = 'black')
+        }
+      }]
+      
+    }, coordinates, col$col, violinN, values, ptable)
+    if (global_stats || length(coordinates) == 1L) {
+      draw_quantiles(2, y, quantiles)
+      draw_mean(violinN, mean(y))
+  
+    }
   }
   
-  Coor[ , Y := Y / Yscale]
-  
-  for (i in seq_along(vars)) {
-    Coor[I == i, {
-
-      polygon(I + Y * .5, X, border = NA, col = col[i])
-      polygon(I - Y * .5, X, border = NA, col = col[i])
-
-      if (mean) points(i, mean(vars[[i]]), pch = 3, cex = 1.4, lwd = 1.5, col = 'black')
-      
-      minx <- par('usr')[3]
-      arrows(i - .5, x1 = i + .5, minx, minx, 
-             code = 3, length = .1, angle = 90, lty = 'dashed')
-      text(i, minx, unique(Yscale), pos = 3, cex = .5, xpd = TRUE, col = 'black')
-
-      
-    }]
-    if (!global_quantiles) draw_quantiles(2, vars[[i]], quantiles, limits = c(i - .5, i + .5))
-  }
-      
-  if (global_quantiles) draw_quantiles(2, unlist(vars), quantiles)
-  
+  output
   
 }
 
@@ -2030,12 +2136,24 @@ bar_coor <- function(x, type) {
   dim <- dim(x)
 }
 
-hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
+multihist.coor <- function(x, groups, conditional = TRUE, ...) {
+  coor_grouped <- tapply(x, groups, hist.coor, ..., simplify = FALSE)
+  
+  if (length(coor_grouped) > 1L && !conditional) {
+    coor_grouped <- Map(\(coor, prop) {
+      coor$Density <- coor$Density * prop
+      coor
+    }, coor_grouped, prop.table(table(groups)))
+  } 
+  coor_grouped
+}
+
+hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1, vardim = 'X') {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way
   if (smooth) {
     dens <- stats::density.default(x, ...)
-    output <- data.table(X = dens$x, Density = dens$y)
+    output <- data.table(Dim = dens$x, Density = dens$y)
   } else {
     hist <- graphics::hist.default(x, breaks = breaks, plot = FALSE)
     
@@ -2043,10 +2161,11 @@ hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL,
                          Delta = diff(hist$breaks))
     output <- output[rep(1:nrow(output), each = 2)]
     i <- c(1, rep(2:(length(hist$breaks) - 1), each = 2), length(hist$breaks))
-    output[ , X := hist$breaks[i]]
+    output[ , Dim := hist$breaks[i]]
     
   }
   output[, Density := Density * hist_scale]
+  colnames(output)[colnames(output) == 'Dim'] <- vardim
   output[]
 }
 
@@ -2162,10 +2281,11 @@ legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE
 }
 
 
-prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast = FALSE, log = '', ...) {
+prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast = FALSE, ...) {
   checks(col, xlen1 | xmatch(categories))
   checks(contrast, xTF, seealso = c('?draw'))
   checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
+  
   
   col <- if (all(isColor(col))) {
     setalpha(col, alpha)
@@ -2176,6 +2296,7 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
       flatly_scale(length(categories), alpha = alpha, contrast = contrast)
     }
   }
+  if (length(col) == 1L) return(list(col = rep(setalpha(col, alpha), length(categories))))
   
   list(col = col,
        legend = \(side = 3, marginLines, col.legend = '') legend_col_discrete(categories, col, pch, col.legend = col.legend,
