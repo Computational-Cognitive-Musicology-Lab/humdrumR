@@ -13,12 +13,11 @@ setMethod('show', 'plot',
           function(object) {
             
             on.exit(layout(1L))
-            
             layout <- object@layout
             if (length(layout$layout) != 1L) {
               omi <- min(par('fin')) * .05
               oldpar <- par(omi = c(omi, omi, omi, omi))
-              on.exit((par(oldpar)))
+              on.exit(par(oldpar), add = TRUE)
             }
             
             layout(layout$layout, 
@@ -40,7 +39,6 @@ setMethod('show', 'plot',
 }
 
 
-#' @export
 plot_object <- function(plotfunc, layout = list(layout = cbind(1L), layout_widths = 1, layout_heights = 1)) new('plot', plotfunc, layout = layout)
 
 #' @export
@@ -48,6 +46,13 @@ drawMore <- function(plot, ...) {
   exprs <- rlang::enexprs(...) |> as.expression()
   plot@add <- c(plot@add, exprs)
   plot
+}
+
+#' @export
+drawNothing <- function() {
+  
+  plot_object(function() plot.new())
+  
 }
 
 
@@ -603,12 +608,11 @@ draw.humdrumR <- function(x, ...) {
   groups <- getGroupingFields(x)
   x <- ungroup(x)
   
-  if (!pmatch('facets', names(list(...)), nomatch = 0) &&
+  if (!pmatch('facets', names(call[-1]), nomatch = 0) &&
       length(groups))  {
     
      call[['facets']] <- as.list(groups)
   }
-  
   
   
   call[['x']] <- NULL
@@ -618,7 +622,6 @@ draw.humdrumR <- function(x, ...) {
     fields <- rlang::syms(selectedFields(x))
     for (field in fields) call[[length(call) + 1L]] <- field
   }
-  
   rlang::eval_tidy(rlang::expr(with(x, !!call)))
 }
 
