@@ -1346,7 +1346,8 @@ setMethod('.draw', c('numeric', 'discrete'),
             output <- canvas(x, xlim, range(coordinates$Y), ylim, log = gsub('y', '', log))
             output$col <- prep_col_categories(col %||% categories, rev(categories), 
                                               alpha = alpha, ...)
-            
+            if (!conditional && center)  output$axes <- output$axes[side == 1]
+            output$axisNames[[2]] <-'Probability density' 
             # if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
             
             X <- coordinates$X
@@ -1358,18 +1359,38 @@ setMethod('.draw', c('numeric', 'discrete'),
                         border = FALSE, xpd = NA)
                 if (showPoints) draw_points(x, output$col$col[match(y, categories)], coordinates$Y, output$window$ylim)
                 
+                
+               
+                
                 if (!global_stats && length(categories) > 1) {
                   draw_quantiles(1, x[y == categories[j]], 
                                  quantiles,
                                  limits = NULL, 
                                  col =  setalpha(output$col$col[j], 1))
                   if (mean) draw_mean(mean(x[y == categories[j]]), 
-                                      grconvertY(0, 'npc', 'user'), col = output$col$col[j])
+                                      grconvertY(0.01, 'npc', 'user'), col = output$col$col[j])
                 }
               }
+              
+              ## Draw density Key
+            
+              if (!conditional && center) {
+                xkey <- grconvertX(seq(-.04, 0.0, length.out = length(coordinates$DensityKey)), 'npc', 'user')
+                ykey <- coordinates$DensityKey / 2
+
+                graphics::segments(x0 = xkey, x1 = xkey, 
+                                   -ykey, ykey, lwd = .5, lty = 'solid', xpd = NA)
+                text(xkey,  ykey, srt = 90,
+                     format(coordinates$DensityKey, drop0trailing = T) |> stringr::str_remove('^0'),
+                     adj = c(0, 1), 
+                     cex = .4, xpd = NA)
+              }
+              
+              
+           
              
               if (global_stats || length(coordinates) == 1L) {
-                if (mean) draw_mean(mean(x), grconvertY(0.02, 'npc', 'user'))
+                if (mean) draw_mean(mean(x), grconvertY(0.01, 'npc', 'user'))
                 draw_quantiles(1, x, quantiles, limits = NULL)
               } 
              
@@ -1618,8 +1639,8 @@ draw_violins <- function(groups, y, smooth = TRUE, conditional = FALSE,
   
   # need to figure out x-limit width
   allDens <- unlist(lapply(coordinates, '[[', 'Density'))
-  xwidths <- unique(2^(ceiling(log(max(allDens), 2)):floor(log(median(allDens), 2)))) |> head(4)
-  xlim <- xlim %||% c(0, xwidths[1]) # 1, .5, .25, .125, etc.
+  xkeyWidths <- unique(2^(ceiling(log(max(allDens), 2)):floor(log(median(allDens), 2)))) |> head(4)
+  xlim <- xlim %||% c(0, xkeyWidths[1]) # 1, .5, .25, .125, etc.
   
   ## each violin will draw across a x range of N - . 5: (N + .5), centered on N
   ## need to scale density to this range, based on xlim
@@ -1627,7 +1648,7 @@ draw_violins <- function(groups, y, smooth = TRUE, conditional = FALSE,
     coor[ , X := (Density / xlim[2]) / 2]
     coor
   })
-  xwidths_scaled <- (xwidths[-1] / xwidths[1]) / 2
+  xkeyWidths_scaled <- (xkeyWidths[-1] / xkeyWidths[1]) / 2
   
   violinN <- setNames(seq_along(coordinates), categories)
   
@@ -1664,19 +1685,20 @@ draw_violins <- function(groups, y, smooth = TRUE, conditional = FALSE,
         polygon(N - X, Y, border = NA, col = col, xpd = NA)
         
         
-        yscale <- grconvertY(seq(.97, 1.00, length.out = length(xwidths_scaled)), 'npc', 'user')
-        graphics::segments(N - xwidths_scaled, x1 = N + xwidths_scaled, lwd = .5, lty = 'solid',
-                           yscale, yscale, xpd = NA)
+        ## Draw density Key
+        ykey <- grconvertY(seq(.97, 1.00, length.out = length(xkeyWidths_scaled)), 'npc', 'user')
+        graphics::segments(N - xkeyWidths_scaled, x1 = N + xkeyWidths_scaled, lwd = .5, lty = 'solid',
+                           ykey, ykey, xpd = NA)
         
         text(N, grconvertY(1.02, 'npc', 'user'), 'Probability density', xpd = NA,
              cex = .5, col = par('cex.lab'))
-        text(N + xwidths_scaled, yscale, 
-             format(xwidths[-1], drop0trailing = T) |> stringr::str_remove('^0'),
+        text(N + xkeyWidths_scaled, ykey, 
+             format(xkeyWidths[-1], drop0trailing = T) |> stringr::str_remove('^0'),
              cex = .4, pos = 4, xpd = NA)
         
         if (normalReference) {
           ypoints <- seq(output$window$ylim[[1]][1], output$window$ylim[[1]][2], length.out = 100)
-          norm <- dnorm(ypoints, mean(vals), sd(vals)) / (xwidths[1] * 2)
+          norm <- dnorm(ypoints, mean(vals), sd(vals)) / (xkeyWidths[1] * 2)
           if (!conditional) norm <- norm * proportion
           points(N + norm, ypoints, type = 'l',
                  lwd = .5, lty = 'dashed')
@@ -2191,11 +2213,9 @@ area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = T
     
     X <- densities[[1]]$x
     Y <- lapply(densities, \(dens) dens$y)
-    if (!conditional)  {
-      Y <- Map(\(dens, prop) dens * prop, Y, prop.table(table(groups)))
-    } else {
-      
-    }
+    if (!conditional) Y <- Map(\(dens, prop) dens * prop, Y, prop.table(table(groups)))
+    
+     
   } else {
     
     coordinates <- multihist_coor(x, groups, conditional = conditional, breaks = breaks, vardim = 'X')
@@ -2208,13 +2228,15 @@ area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = T
     Y <- lapply(Y, \(y) y / ifelse(margin == 0, 1, margin))
   } 
     
+  # for density key
+  densKey <- unique(2^(ceiling(log(max(unlist(Y)), 2)):floor(log(median(unlist(Y)), 2)))) |> head(4)
   
   Y <- do.call('cbind', Reduce('+', Y, accumulate = TRUE))
   Y <- cbind(axis = 0, Y)
   if (center && !conditional) Y <- sweep(Y, 1, rowMeans(Y), '-')  
   
   
-  list(X = X, Y = Y)
+  list(X = X, Y = Y, DensityKey = densKey)
   
   
 }
