@@ -728,7 +728,8 @@ draw.default <- function(x, y, facets = list(), ...,
   par_draw <- list(family = 'Helvetica',   col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
   dotpars <- list(...)[intersect(names(list(...)), names(par()))]
   par_draw[names(dotpars)] <- dotpars
-  
+  oldpalette <- palette(flatly)
+  on.exit(palette(oldpalette))
 
   # xlab and ylab
   xexpr <- deparse1(substitute(x)) 
@@ -769,9 +770,8 @@ draw.default <- function(x, y, facets = list(), ...,
     dotpars <- list(...)[intersect(names(list(...)), names(par()))]
     par_draw[names(dotpars)] <- dotpars
     
-    oldpalette <- palette(flatly)
     oldpar <- do.call('par', par_draw)
-    on.exit({par(oldpar, no.readonly = TRUE) ; palette(oldpalette)})
+    on.exit({par(oldpar, no.readonly = TRUE)})
     
     plot.new()
     marginLines <- setMargins(margin, aspect)
@@ -885,12 +885,12 @@ setMethod('.draw', c('numeric', 'numeric'),
 
 setMethod('.draw', c('numeric', 'NULL'), 
           \(x, y, log = '', 
-            breaks = 'Sturges', normalReference = FALSE, 
+            breaks = 'Sturges', bw = 'SJ', normalReference = FALSE, 
             smooth = FALSE, conditional = FALSE, showCounts = FALSE, showPoints = TRUE,
             mean = FALSE, quantiles = c(), global_stats = FALSE,
             xlim = NULL, ylim = NULL,
-            col = 3, alpha = .2, cex = .7, pch = NULL, ...) {
-            # pch is used to stop it being passed to hist.coor, which causes a warning
+            col = 3, alpha = .4, cex = .7, pch = NULL, ...) {
+            # pch is used to stop it being passed to hist_coor, which causes a warning
             
             cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
           
@@ -903,7 +903,8 @@ setMethod('.draw', c('numeric', 'NULL'),
             
             # This does the actual density stuff:
             col <- rep(cols$col, length.out = length(x)) # col may be a grouping factor
-            coordinates <- multihist.coor(x, col, conditional = conditional, smooth = smooth, breaks = breaks, ...)
+            coordinates <- multihist_coor(x, col, conditional = conditional, bw = bw,
+                                          smooth = smooth, breaks = breaks, ...)
             
             allDens <- unlist(lapply(coordinates, '[[', 'Density'))
             ylim <- ylim %||% c(0, 2^(ceiling(log( max(allDens), 2)))) # 1, .5, .25, .125, etc.
@@ -959,35 +960,23 @@ setMethod('.draw', c('numeric', 'NULL'),
                 # extra stuff
                 
                 ## dots
-                if (showPoints) {
-                  xsamp <- if (length(x) >= 10^5) sample(x, 10^5) else x
-                  ysamp <- runif(length(xsamp), min(max(allDens * 1.1, mean(output$window$ylim[[1]]) * 1.5), 
-                                                    grconvertY(.95, 'npc', 'user')), 
-                                 grconvertY(1, 'npc', 'user'))
-                  dotAlpha <- cex_density(xsamp, ysamp, .3)
-                  points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
-                }
+                if (showPoints) draw_points(x, col, allDens, output$window$ylim)
                 
                 if (global_stats || length(coordinates) == 1L) {
-                  draw_quantiles(1, x, quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'))
+                  means <- mean(x)
+                  draw_quantiles(1, x, quantiles)
                 } else {
+                  means <- if (global_stats) mean(x) else tapply(x, col, mean)
                   lapply(unique(col), \(color) {
-                    draw_quantiles(1, x[col == color], quantiles, limits = grconvertY(c(.02, 1.01), 'nfc', 'user'), col = color)
+                    draw_quantiles(1, x[col == color], quantiles, col = color)
                   })
-                  
                 }
+                if (mean) draw_mean(means, grconvertY(0.02, 'npc', 'user'), col = output$col$col)
+                
                 if (normalReference) {
                   xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
                   points(xpoints, dnorm(xpoints, mean(x), sd(x)), type = 'l',
                          lwd = .5, lty = 'dashed')
-                }
-                if (mean) {
-                  if (global_stats) {
-                    draw_mean(mean(x), grconvertY(0.02, 'npc', 'user'))
-                  } else {
-                    draw_mean(tapply(x, col, mean), grconvertY(0.02, 'npc', 'user'), col = unique(col))
-                    
-                  }
                 }
               } 
             
@@ -1319,6 +1308,7 @@ setMethod('.draw', c('discrete', 'numeric'),
           function(x, y, log = '', 
                    smooth = TRUE, conditional = FALSE,
                    mean = TRUE, quantiles = c(.25, .75), global_stats = FALSE, 
+                   bw = 'SJ',
                    xlim = NULL, ylim = NULL, ...,
                    col = NULL) {
             
@@ -1327,7 +1317,7 @@ setMethod('.draw', c('discrete', 'numeric'),
                          smooth = smooth, conditional = conditional,
                          mean = mean, quantiles = quantiles, global_stats = global_stats,
                          xlim = xlim, ylim = ylim, 
-                         col = col, ...)
+                         col = col, bw = bw, ...)
             
             
           })
@@ -1339,36 +1329,50 @@ setMethod('.draw', c('discrete', 'numeric'),
 
 setMethod('.draw', c('numeric', 'discrete'),
           function(x, y, log = '', 
-                   center = TRUE, conditional = FALSE, breaks = 40,
-                   mean = TRUE, quantiles = c(.25, .75),
+                   center = TRUE, smooth = TRUE, conditional = FALSE, 
+                   breaks = 40, bw = 'SJ', 
+                   mean = TRUE, quantiles = c(.25, .75), global_stats = TRUE,
+                   showPoints = FALSE,
                    xlim = NULL, ylim = NULL, 
                    col = NULL, alpha = .7, ...) {
             
             categories <- sort(unique(y), decreasing = TRUE)
             
-            breaks <- hist.default(x, breaks = breaks)$breaks #seq(min(x), max(x), length.out = n)
-            xcuts <- cut(x, breaks = breaks, include.lowest = TRUE)
-            tab <- table(xcuts, factor(y, levels = categories))
-            tab <- cbind(0, tab)
+            breaks <- hist.default(x, breaks = breaks, plot = FALSE)$breaks 
             
-            if (conditional) tab <- proportions(tab, margin = 1)
-            tab[is.na(tab)] <- 0
-            tab <- do.call('cbind', Reduce('+', accumulate = TRUE, lapply(1:ncol(tab), \(j) tab[, j])))
-            if (center) tab <- sweep(tab, 1, rowMeans(tab), '-')
+            coordinates <- area_coor(x, y, smooth = smooth, conditional = conditional, 
+                                     center = center, bw = bw, breaks = breaks, ...)
             
-            output <- canvas(x, xlim, range(tab), ylim, log = gsub('y', '', log))
-            output$col <- prep_col_categories(col %||% categories, categories, 
-                                              alpha = alpha, log = log, ...)
+            output <- canvas(x, xlim, range(coordinates$Y), ylim, log = gsub('y', '', log))
+            output$col <- prep_col_categories(col %||% categories, rev(categories), 
+                                              alpha = alpha, ...)
             
-            if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
+            # if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
             
+            X <- coordinates$X
             output$drawer <- function() {
-              for (j in 1:(ncol(tab) - 1L)) {
-                polygon(c(breaks, rev(breaks)), 
-                        c(0, tab[ , j], rev(tab[ , j + 1]), 0), 
+              for (j in 1:(ncol(coordinates$Y) - 1L)) {
+                polygon(c(X, rev(X)), 
+                        c(coordinates$Y[ , j], rev(coordinates$Y[ , j + 1])), 
                         col = output$col$col[j],
-                        border = FALSE)
+                        border = FALSE, xpd = NA)
+                if (showPoints) draw_points(x, output$col$col[match(y, categories)], coordinates$Y, output$window$ylim)
+                
+                if (!global_stats && length(categories) > 1) {
+                  draw_quantiles(1, x[y == categories[j]], 
+                                 quantiles,
+                                 limits = NULL, 
+                                 col =  setalpha(output$col$col[j], 1))
+                  if (mean) draw_mean(mean(x[y == categories[j]]), 
+                                      grconvertY(0, 'npc', 'user'), col = output$col$col[j])
+                }
               }
+             
+              if (global_stats || length(coordinates) == 1L) {
+                if (mean) draw_mean(mean(x), grconvertY(0.02, 'npc', 'user'))
+                draw_quantiles(1, x, quantiles, limits = NULL)
+              } 
+             
             }
             
             output
@@ -1532,6 +1536,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
 draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), limits = NULL, col = 'black', ...) {
   
   if (length(quantiles)) {
+    col <- setalpha(col, 1)
     quantiles <- unique(quantiles)
     checks(quantiles, xnumeric & xrange(0, 1))
     
@@ -1566,7 +1571,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
    }
    lineArgs <- list(limits[1] + strwidth,
                     limits[2] - strwidth, quants, quants, lty = 'dashed', 
-                    lwd = .3, col = setalpha(col, .5))
+                    lwd = .5, col = col)
    names(lineArgs)[1:4] <- if (sides) {
      c('x0', 'x1', 'y0', 'y1')
    } else {
@@ -1584,7 +1589,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
 
 draw_violins <- function(groups, y, smooth = TRUE, conditional = FALSE, 
                          mean = TRUE, quantiles = c(.25, .75), global_stats = FALSE, 
-                         breaks = "Sturges", normalReference = FALSE, showPoints = FALSE,
+                         breaks = "Sturges", bw = 'SJ', normalReference = FALSE, showPoints = FALSE,
                          xlim = NULL, ylim = NULL, log = '',
                          col = 1, ...) {
   
@@ -1608,7 +1613,7 @@ draw_violins <- function(groups, y, smooth = TRUE, conditional = FALSE,
   
   values <- tapply(y, groups, list)
   ptable <- proportions(table(groups))
-  coordinates <- multihist.coor(y, groups, vardim = 'Y',
+  coordinates <- multihist_coor(y, groups, vardim = 'Y', bw = bw,
                                 conditional = conditional, smooth = smooth, breaks = breaks)
   
   # need to figure out x-limit width
@@ -2118,7 +2123,6 @@ drawlines <- function(n = 10, outer = FALSE) {
 }
 
 draw_mean <- function(x, y, col = 'black') {
-  if (length(x) == 1) col <- 'black'
   points(x, rep(y, length.out = length(x)), 
          pch = 3, cex = 1.4, lwd = 1.5, xpd = TRUE, col = setalpha(col, 1))
 }
@@ -2131,13 +2135,22 @@ draw_counts <- function(x, y, counts, col, width, cex = .8) {
        col = setalpha(col, 1), pos = 3)
 }
 
+draw_points <- function(x, col, allDens, ylim) {
+  xsamp <- if (length(x) >= 10^5) sample(x, 10^5) else x
+  ysamp <- runif(length(xsamp), min(max(allDens * 1.1, mean(ylim[[1]]) * 1.5), 
+                                    grconvertY(.95, 'npc', 'user')), 
+                 grconvertY(1, 'npc', 'user'))
+  dotAlpha <- cex_density(xsamp, ysamp, .3)
+  points(xsamp, ysamp,  cex = .4, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
+}
+
 
 bar_coor <- function(x, type) {
   dim <- dim(x)
 }
 
-multihist.coor <- function(x, groups, conditional = TRUE, ...) {
-  coor_grouped <- tapply(x, groups, hist.coor, ..., simplify = FALSE)
+multihist_coor <- function(x, groups, conditional = TRUE, ...) {
+  coor_grouped <- tapply(x, groups, hist_coor, ..., simplify = FALSE)
   
   if (length(coor_grouped) > 1L && !conditional) {
     coor_grouped <- Map(\(coor, prop) {
@@ -2148,7 +2161,7 @@ multihist.coor <- function(x, groups, conditional = TRUE, ...) {
   coor_grouped
 }
 
-hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1, vardim = 'X') {
+hist_coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1, vardim = 'X') {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way
   if (smooth) {
@@ -2169,6 +2182,42 @@ hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL,
   output[]
 }
 
+
+area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = TRUE, bw = 'SJ', breaks = 40, ...) {
+  range <- range(x)
+  
+  if (smooth) {
+    densities <- tapply(x, groups, density, bw = bw, from = range[1], to = range[2], simplify = FALSE)
+    
+    X <- densities[[1]]$x
+    Y <- lapply(densities, \(dens) dens$y)
+    if (!conditional)  {
+      Y <- Map(\(dens, prop) dens * prop, Y, prop.table(table(groups)))
+    } else {
+      
+    }
+  } else {
+    
+    coordinates <- multihist_coor(x, groups, conditional = conditional, breaks = breaks, vardim = 'X')
+    X <- coordinates[[1]]$X
+    Y <- lapply(coordinates, \(coor) coor$Density)
+  }
+  
+  if (conditional) {
+    margin <- Reduce('+', Y)
+    Y <- lapply(Y, \(y) y / ifelse(margin == 0, 1, margin))
+  } 
+    
+  
+  Y <- do.call('cbind', Reduce('+', Y, accumulate = TRUE))
+  Y <- cbind(axis = 0, Y)
+  if (center && !conditional) Y <- sweep(Y, 1, rowMeans(Y), '-')  
+  
+  
+  list(X = X, Y = Y)
+  
+  
+}
 
 cutter <- function(value, reference, maxUnique = 4, Ncuts = 4) {
   
