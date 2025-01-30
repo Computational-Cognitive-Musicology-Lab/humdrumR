@@ -507,7 +507,7 @@ humdrumRoption <- function(name) {
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be a singleton logical value; an on/off switch.
+#' Must be a singleton `logical` value; an on/off switch.
 #' 
 #' @param censorEmptyRecords ***Should consecutive records be "censored" (compressed) in printout?***
 #' 

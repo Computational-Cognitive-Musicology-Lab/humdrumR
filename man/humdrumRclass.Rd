@@ -52,7 +52,7 @@ or any combination of these (e.g., \code{"LIM"}).
 
 Defaults to \code{TRUE}.
 
-Must be a singleton logical value; an on/off switch.}
+Must be a singleton \code{logical} value; an on/off switch.}
 
 \item{maxRecordsPerFile}{\emph{\strong{How many records should be shown in each file, when more than one file is present?}}
 
