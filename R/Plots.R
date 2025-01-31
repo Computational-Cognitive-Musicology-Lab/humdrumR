@@ -1056,120 +1056,128 @@ draw_Qplot <- function(x, y, log = '',
 
 
 
-draw_counts <- function(x, y, log = '', 
-                   beside = TRUE, heat = length(dim(x) == 2L) && length(x) > 80L,
-                   ylim = NULL, 
-                   quantiles = c(), mean = FALSE, showCounts = FALSE,
-                   col = NULL,  alpha = .9, ...) { 
-            if (!is.numeric(c(x))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
-            dimnames(x) <- lapply(dimnames(x), \(dn) ifelse(is.na(dn), "NA", dn))
-            
-            # if table is one dimensional, add col dimension
-            if (length(dim(x)) == 1L)  {
-              dn <- dimnames(x)
-              dim(x) <- c(dim(x), 1L)
-              
-              dimnames(x) <- c(dn, list(''))
-            }
-            
-            
-            if (heat) return(draw_heat(x, log = log, ...))
-              
-            if (dim(x)[1] == 1L) x <- t(x)
-            
-            type <- if (is.null(beside)) 'both' else { if (beside) 'beside' else 'stacked'}
-            space <- if (type == 'stacked') .5 else c(0, 1 + nrow(x) %/% 8) 
-            
-            ylim <- ylim %||% c(0, if (is.null(beside) || type == 'beside') max(x) else max(colSums(x)))
-            
-            col <- prep_col_categories(col %||% rownames(x), rownames(x), alpha = alpha, log = log, ...)
-            
-            output <- list(col = col)
-            barx <-  barplot(plot = FALSE, x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
-                             space = space, beside = type != 'stacked')
-            
-            output$window <- data.table(layout = 1L,
-                                        xlim = list(c(0, ceiling(max(barx)))), 
-                                        ylim = list(ylim),
-                                        log = log)
-            
-            # axes
-            proportions <- pretty(ylim / sum(x), n = 10L, min.n = 5L)
-            proportions <- setNames(proportions * sum(x), proportions)
-            
-            axes <- data.table(side = c(2, 4),
-                               ticks = list(proportions,
-                                            unique(round(axTicks(2, log = grepl('y', log, fixed = TRUE))))),
-                               line = 1L)
-            if (ncol(x) > 1) axes <- rbind(axes,
-                                           data.table(side = 1,
-                                                      ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(x))),
-                                                      line = 1 + as.integer(type != 'stacked')))
-            if (type != 'stacked' && nrow(x) > 1L && length(x) < 100) axes <- rbind(axes,
-                                                                                    data.table(side = c(1),
-                                                                                               ticks = list(setNames(c(barx), rownames(x)[row(barx)])),
+draw_barplot <- function(counts, horizontal = FALSE, log = '', 
+                        beside = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
+                        xlim = NULL, ylim = NULL, 
+                        quantiles = c(), mean = FALSE, showCounts = FALSE,
+                        col = NULL,  alpha = .9, ...) { 
+  # counts should be a table object
+  if (!is.numeric(c(counts))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
+  dimnames(counts) <- lapply(dimnames(counts), \(dn) ifelse(is.na(dn), "NA", dn))
+  
+  # if table is one dimensional, add col dimension
+  if (length(dim(counts)) == 1L)  {
+    dn <- dimnames(counts)
+    dim(counts) <- c(dim(counts), 1L)
+    
+    dimnames(counts) <- c(dn, list(''))
+  }
+
+  if (heat) return(draw_heat(counts, log = log, ...))
+  
+  if (dim(counts)[1] == 1L) counts <- t(counts)
+  
+  type <- if (is.null(beside)) 'both' else { if (beside) 'beside' else 'stacked'}
+  space <- if (type == 'stacked') .5 else c(0, 1 + nrow(counts) %/% 8) 
+  
+  ylim <- ylim %||% c(0, if (is.null(beside) || type == 'beside') max(counts) else max(colSums(counts)))
+  
+  col <- prep_col_categories(col %||% rownames(counts), rownames(counts), alpha = alpha, log = log, ...)
+  
+  output <- list(col = col)
+  barx <-  barplot(plot = FALSE, counts, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
+                   space = space, beside = type != 'stacked')
+  
+  xlim <- xlim %||% c(1, ceiling(max(barx)))
+  output$window <- if (horizontal) {
+    data.table(layout = 1L,
+               xlim = list(xlim), 
+               ylim = list(ylim),
+               log = log)
+  } else {
+    data.table(layout = 1L,
+               xlim = list(ylim),
+               ylim = list(xlim), 
+               log = log)
+  }
+  
+  # axes
+  proportions <- pretty(ylim / sum(counts), n = 10L, min.n = 5L)
+  proportions <- setNames(proportions * sum(counts), proportions)
+  
+  axes <- data.table(side = if (horizontal) c(1, 3) else c(2, 4),
+                     ticks = list(proportions,
+                                  unique(round(axTicks(if (horizontal) 1L else 2L, 
+                                                       log = grepl(if (horizontal) 'x' else 'y', log, fixed = TRUE))))),
+                     line = 1L)
+  if (ncol(counts) > 1) axes <- rbind(axes,
+                                 data.table(side = if (horizontal) 2 else 1,
+                                            ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(counts))),
+                                            line = 1 + as.integer(type != 'stacked')))
+  if (type != 'stacked' && nrow(counts) > 1L && length(counts) < 100) axes <- rbind(axes,
+                                                                                    data.table(side = if (horizontal) 2 else 1,
+                                                                                               ticks = list(setNames(c(barx), rownames(counts)[row(barx)])),
                                                                                                line = 1))
-            output$axes <- axes
-              
-              # legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
-            
-            # axis Names
-            axisNames <- vector('list', 4L)
-            axisNames[c(2,4)] <- c('Proportion', if (is.integer(x)) 'Count' else 'N')
-            
-            axisNames[1] <- paste(Filter(\(x) x != '', names(dimnames(x))), collapse = ' × ')
-            output$axisNames <- axisNames
-            
-            output$canvas <- \() {NULL}
-            output$drawer <- function() {
-              barx <- barplot(x, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), space = space,
-                              axisnames = FALSE,
-                              ylab = '', xlab = '',
-                              beside = type != 'stacked', axes = FALSE, 
-                              ylim = ylim,
-                              border = rgb(.2,.2,.2,.2))
-              
-              if (type == 'both') {
-                barplot(x[nrow(x):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
-                        names.arg = logical(ncol(x)), axes = FALSE,
-                        add = TRUE, beside = FALSE, space = nrow(x) + space[2] - 1)
-              }
-              
-              # draw extra stuff
-              draw_quantiles(2, x, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
-              if (mean) draw_mean(colMeans(barx), colMeans(x))
-              if (showCounts) draw_counts(barx, x, x, col =col$col,min(diff(x)))
-              
-            }
-            
-            output
+  output$axes <- axes
+  
+  # legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
+  
+  # axis Names
+  axisNames <- vector('list', 4L)
+  axisNames[if (horizontal) c(1, 3) else c(2,4)] <- c('Proportion', if (is.integer(counts)) 'Count' else 'N')
+  
+  axisNames[if (horizontal) 2 else 1] <- paste(Filter(\(counts) counts != '', names(dimnames(counts))), collapse = ' × ')
+  output$axisNames <- axisNames
+  
+  output$canvas <- \() {NULL}
+  output$drawer <- function() {
+    barx <- barplot(counts, col = if (type == 'stacked' ) rev(col$col) else col$col, 
+                    log = gsub(if (horizontal) 'y' else 'x', '', log), space = space,
+                    axisnames = FALSE, 
+                    horiz = horizontal,
+                    ylab = '', xlab = '',
+                    beside = type != 'stacked', axes = FALSE, 
+                    ylim =  if (horizontal) xlim else ylim,
+                    xlim = if (horizontal) ylim else xlim,
+                    border = rgb(.2,.2,.2,.2))
+    
+    if (type == 'both') {
+      barplot(counts[nrow(counts):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
+              names.arg = logical(ncol(counts)), axes = FALSE,
+              horiz = horizontal,
+              add = TRUE, beside = FALSE, space = nrow(counts) + space[2] - 1)
+    }
+    
+    # draw extra stuff
+    draw_quantiles(if (horizontal) 1 else 2, counts, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
+    if (mean) draw_mean(colMeans(barx), colMeans(counts))
+    if (showCounts) draw_counts(barx, counts, counts, col =col$col,min(diff(counts)))
+    
+  }
+  
+  output
 }
 
 ### draw_heat ----
 
-draw_heat <- function(tab, log = '', cex = NULL, ...) {
-  # cex isn't used obviously, but it gets passed in ... above, causing warnings below
+draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
+  # cex/pch aren't used obviously, but it gets passed in ... above, causing warnings below
   xlim <- c(0L, ncol(tab))
   ylim <- c(0L, nrow(tab))
   
-  plot.new()
-  plot.window(xlim, ylim, log = log)
   
-  col <- prep_col(c(tab), c(tab), log = log, ..., pch = NULL)
+  col <- prep_col(c(tab), c(tab), log = log, pch = NULL)
   colarray <- array(col$col, dim = dim(tab))
   
-  Map(\(i, j, c) {
-    polygon(c(i, i, i - 1, i - 1), 
-            c(j, j - 1, j - 1, j), 
-            col = c,
-            border = rgb(.1, .1, .1, .1), lwd = .3)
-    
-  }, col(tab), nrow(tab) + 1L - row(tab), colarray)
+ 
+  output <- canvas(seq_along(tab), xlim = xlim %||% xlim, 
+                   seq_along(tab), ylim = ylim %||% ylim)
+  output$axes <- data.table(side = 1:2,
+                            ticks = list(setNames(1:ncol(tab) - .5, colnames(tab)),
+                                         setNames(1:nrow(tab) - .5, rev(rownames(tab)))),
+                            line = 1)
   
-  axes <- data.table(side = 1:2,
-                     ticks = list(setNames(1:ncol(tab) - .5, colnames(tab)),
-                                  setNames(1:nrow(tab) - .5, rev(rownames(tab)))),
-                     line = 1)
+  output$col <- col
   
   window <- data.table(layout,
                        xlim = list(xlim), ylim = list(ylim),
@@ -1178,7 +1186,19 @@ draw_heat <- function(tab, log = '', cex = NULL, ...) {
   axisNames <-  vector('list', 4L)
   if (names(dimnames(tab))[1] != '') axisNames[[1]] <- names(dimnames(tab))[1]
   if (names(dimnames(tab))[2] != '') axisNames[[2]] <- names(dimnames(tab))[2]
-  list(window = window, axes = axes, axisNames = axisNames, col = col)
+  output$axisNames <- axisNames
+  
+  output$drawer <- function() {
+    Map(\(i, j, c) {
+      polygon(c(i, i, i - 1, i - 1), 
+              c(j, j - 1, j - 1, j), 
+              col = c,
+              border = rgb(.1, .1, .1, .1), lwd = .3)
+      
+    }, col(tab), nrow(tab) + 1L - row(tab), colarray)
+    
+  }
+  output
 }
 
 
@@ -1194,18 +1214,17 @@ draw_heat <- function(tab, log = '', cex = NULL, ...) {
 
 #' Draw "violin" plot
 #' 
-#' This method draws a categorical (discrete) `x` value and numeric 
-#' (continuous) `y` value as a "violin plot"---so-called for its characteristic shape that can (sometimes)
-#' resemble the shape of a violin.
-#' Specifically, the density distribution of `y`, within each category (unique value) in `x`, 
-#' is drawn in a symmetric shape. 
-#' No more than 25 violins can be drawn; If the categorical `x` argument has more than 25 unique values,
-#' an error is thrown.
+#' This method draws the distribution of a numeric (continuous) `y` variable
+#' within groups defined by a categorical (discrete) `x` variable,
+#' creating a "[violin plot](https://en.wikipedia.org/wiki/Violin_plot)"---so-called
+#' for its characteristic shape that can (sometimes) resemble the shape of a violin.
+#' If there are too many violins (categories), the plot would be unreadable,
+#' so `draw()` will throw an error if the `x` argument has more than 25 unique values.
 #'
 #' @details
 #' 
 #' 
-#' A violin plot is much like a density histogram/contour plot (above) turned on its
+#' A violin plot is much like a density [histogram/contour][draw_density()] plot turned on its
 #' side, with the shape mirrored left to right.
 #' Like [draw_density()], the violin-plot density shape can be generated using either R's [density()] or
 #' [hist()] algorithms, for smooth and binned plots respectively.
@@ -1233,6 +1252,7 @@ draw_heat <- function(tab, log = '', cex = NULL, ...) {
 #' 
 #' By default, each violin is automatically drawn a different color, with
 #' a color legend drawn as well.
+#' (A color legend will be drawn automatically.)
 #' However, these colors can be controlled using the `col` argument;
 #' you can provide a single color for all the violins or 
 #' a vector of unique colors exactly the same length as the number of categories 
@@ -1455,22 +1475,21 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 
 ### draw_area ----
 
-#' Draw "violin" plot
+#' Draw area plot
 #' 
-#' This method draws a categorical (discrete) `x` value and numeric 
-#' (continuous) `y` value as a "violin plot"---so-called for its characteristic shape that can (sometimes)
-#' resemble the shape of a violin.
-#' Specifically, the density distribution of `y`, within each category (unique value) in `x`, 
-#' is drawn in a symmetric shape. 
-#' No more than 25 violins can be drawn; If the categorical `x` argument has more than 25 unique values,
-#' an error is thrown.
+#' This method draws the distribution of a categorical (discrete) `y` variable
+#' across the range of a numeric (continuous) `x` variable, creating an 
+#' "[area plot](https://en.wikipedia.org/wiki/Area_chart)."
+#' Specifically, colored areas representing the estimated probability density of each
+#' unique category in `y`, depending on the value of `x`, are stacked on top of each
+#' other. 
+#' The result is like stacking multiple histograms on top of each other.
 #'
 #' @details
 #' 
 #' 
-#' A violin plot is much like a density histogram/contour plot (above) turned on its
-#' side, with the shape mirrored left to right.
-#' Like [draw_density()], the violin-plot density shape can be generated using either R's [density()] or
+#' Like [draw_density()], the area-plot density shape(s) can be 
+#' generated using either R's [density()] or
 #' [hist()] algorithms, for smooth and binned plots respectively.
 #' We can pass arguments directly through to these functions:
 #' For example, the `breaks` argument can be passed through to [hist()],
@@ -1480,8 +1499,9 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' 
 #' ### Density vs Mass
 #' 
-#' Whether smoothed or binned, the width of each "violin" represents the probability **density**.
-#' The width of bars (when `smooth = FALSE`) does *not* correspond exactly to the 
+#' Whether smoothed or binned, the height of each color at each
+#' X coordinate represents the probability **density** of each category.
+#' The height of bars (when `smooth = FALSE`) does *not* correspond exactly to the 
 #' the probability **mass** in each bin, because that actually depends on the size of the bins;
 #' For narrow bins (or continuous contours), density can even be greater than 1.
 #' If bin sizes are all equal, then the *relative* width of the density bars *does*
@@ -1490,17 +1510,18 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' unequal bins using the `breaks` argument---the widths of bars *don't* map to probability mass.
 #' However, using the density assures that the relative **area** of each bin *does* match the probability mass 
 #' associated with that bin, even if the bins are of unequal size.
-#' The scale of the densities in the plot is shown through the width of a set of lines above each violin.
+#' The scale of the densities in the plot is shown through the width of a set of lines 
+#' to the left of the plot.
 #' 
 #' @section Color:
 #' 
-#' By default, each violin is automatically drawn a different color, with
-#' a color legend drawn as well.
+#' By default, colors are automatically chosen to represent
+#' the categories in the `y` variable.
+#' (A color legend will be drawn automatically.)
 #' However, these colors can be controlled using the `col` argument;
-#' you can provide a single color for all the violins or 
-#' a vector of unique colors exactly the same length as the number of categories 
-#' (unique values in `x`).
-#' These colors are mapped to the violins, from left to right.
+#' you can provide a vector of unique colors exactly the same length as
+#'  the number of categories (unique values in `y`).
+#' These colors are mapped to the areas, from bottom up.
 #' (Use `alpha` independently to change the transparency.)
 #' 
 #' @inheritSection draw General Draw Arguments
@@ -1511,32 +1532,21 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
-#' If `TRUE`, a smooth density contour is estimated from each group of `y` values, using [density()].
-#' If `FALSE`, `y` values are binned using [hist()].
+#' If `TRUE`, a smooth density contour is estimated from each group of `x` values, using [density()].
+#' If `FALSE`, `x` values are binned using [hist()].
 #' 
-#' @param showPoints ***Should individual points from `y` be overlaid on the violin(s)?***
+#' @param showPoints ***Should individual points from `x` be shown above the density plot?***
 #' 
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
-#' If `TRUE`, individual data points from the `y` input vector
-#' are plotted in a "cloud" over each violin.
-#' The Y-position of each point is matched to its actual value;
-#' The X-position of each point is randomly (uniformly) spread across the area of each violin.
-#' The points will look consistent, regardless of what histogram- or density-algorithm parameters are used.
-#'
-#' @param normalReference ***Should a Gaussian reference distribution be drawn?***
+#' If `TRUE`, individual data points from the `x` input vector
+#' are plotted in a "cloud" above the area plot.
+#' The X-position of each point is matched to its actual value;
+#' The Y-position of each point is randomly (uniformly) selected in a range at the top of the plot window.
+#' This spaces out points that are close together, so it is easier to see how dense they are.
 #' 
-#' Defaults to `FALSE`. 
-#'
-#' Must be a singleton `logical` value: an on/off switch.
-#'
-#' If `TRUE`, a normal (Gaussian) distribution is drawn as a dashed
-#' black line. The mean and standard deviation of this distribution is taken from the input vector `y`,
-#' within each group.
-#' This gives a sense of how close to normally distributed `y` is within each group.
-#'
 #' @param conditional ***Should probability density be calculated separately within each group?***
 #'
 #' Defaults to `FALSE`.
@@ -1544,7 +1554,7 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' This controls whether the density
-#' of each violin matches its global share in the distribution of input variable `y`, or is rescaled in each
+#' of color area matches its global share in the distribution of input variable `x`, or is rescaled in each
 #' group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
 #' Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
 #' `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
@@ -1552,16 +1562,16 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #'
 #' @param quantiles ***Should distribution quantiles of `y` be marked?***
 #'
-#' Defaults to `c(.25, .75)`, so the inter-quartile interval is shown.
+#' Defaults to `c()`, so no quantiles are drawn.
 #' 
 #' Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
 #'
-#' If any quantiles are specified, each quantile is drawn as a horizontal line on the plot, labeled appropriately.
-#' For example, `quantiles = .5` will draw a line at the median of input vector `y`;
-#' `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `y`.
+#' If any quantiles are specified, each quantile is drawn as a vetical line on the plot, labeled appropriately.
+#' For example, `quantiles = .5` will draw a line at the median of input vector `x`;
+#' `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `x`.
 #' (Depends on `global_stats` argument.)
 #' 
-#' @param mean ***Should the mean of input vector `y` be marked at the center of each violin?***
+#' @param mean ***Should the mean of input vector `x` be marked below the plot?***
 #'
 #' Defaults to `FALSE`.
 #' 
@@ -1581,16 +1591,16 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' Defaults to `""` (linear scale).
 #' 
 #' Must be a single `character` string, either `""` (linear scale)
-#' of `"y"` (draw Y on a logarithmic scale ).
+#' of `"x"` (draw X on a logarithmic scale ).
 #'  
 #' @usage draw(x # numeric,  
 #'      y # discrete,
-#'      col = NA)
+#'      col = NA # colors chosen automatically)
 #' @inheritParams draw
 draw_area <- function(x, y, log = '', 
                    center = TRUE, smooth = TRUE, conditional = FALSE, 
                    breaks = 40, bw = 'SJ', 
-                   mean = TRUE, quantiles = c(.25, .75), global_stats = TRUE,
+                   mean = TRUE, quantiles = c(), global_stats = TRUE,
                    showPoints = FALSE,
                    xlim = NULL, ylim = NULL, 
                    col = NULL, alpha = .7, ...) {
@@ -1616,7 +1626,8 @@ draw_area <- function(x, y, log = '',
                         c(coordinates$Y[ , j], rev(coordinates$Y[ , j + 1])), 
                         col = output$col$col[j],
                         border = FALSE, xpd = NA)
-                if (showPoints) draw_points(x, output$col$col[match(y, categories)], coordinates$Y, output$window$ylim)
+                if (showPoints) draw_points(x, output$col$col[match(y, categories)], 
+                                            coordinates$Y, output$window$ylim)
                 
                 
                
@@ -1627,7 +1638,8 @@ draw_area <- function(x, y, log = '',
                                  limits = NULL, 
                                  col =  setalpha(output$col$col[j], 1))
                   if (mean) draw_mean(mean(x[y == categories[j]]), 
-                                      grconvertY(0.01, 'npc', 'user'), col = output$col$col[j])
+                                      grconvertY(0.01, 'npc', 'user'), 
+                                      col = rev(output$col$col)[j])
                 }
               }
               
@@ -1820,24 +1832,38 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
 
 setGeneric('.draw', def =  \(x, y,  ...) standardGeneric('.draw'))
 
+### atomic ----
 
-setMethod('.draw', c('NULL', 'numeric'), draw_Qplot)
-setMethod('.draw', c('discrete', 'numeric'), draw_violins)
-setMethod('.draw', c('numeric', 'discrete'), draw_area)
-setMethod('.draw', c('numeric', 'numeric'), draw_scatter)
+#### numeric ----
 
 setMethod('.draw', c('numeric', 'NULL'), draw_density)
+setMethod('.draw', c('NULL', 'numeric'), draw_Qplot)
+setMethod('.draw', c('numeric', 'numeric'), draw_scatter)
+
+#### numeric X discrete ----
+
+setMethod('.draw', c('discrete', 'numeric'), draw_violins)
+setMethod('.draw', c('numeric', 'discrete'), draw_area)
+
+#### discrete only ----
+setMethod('.draw', c('discrete', 'NULL'),
+          function(x, y, ...) draw_barplot(table(x), ...))
+
+setMethod('.draw', c('NULL', 'discrete'),
+          function(x, y, ...) draw_barplot(table(y), horizontal = TRUE, ...))
+
+setMethod('.draw', c('discrete', 'discrete'),
+          function(x, y, ...) draw_heat(table(x, y), ...))
+
+### tables ----
+
 setMethod('.draw', c('NULL', 'count'),
           function(x, y, ...) {
             .draw(as.table(x) |> t(), NULL, ...)
           })
 
-setMethod('.draw', c('table', 'NULL'), draw_counts)
-
-setMethod('.draw', c('NULL', 'table'),
-          function(x, y, ...) {
-            .draw(t(y), NULL, ...)
-          })
+setMethod('.draw', c('table', 'NULL'), function(x, y, ...) draw_barplot(x, ...))
+setMethod('.draw', c('NULL', 'table'), function(x, y, ...) draw_barplot(x, horizontal = TRUE, ...))
 
 
 setMethod('.draw', c('count', 'NULL'),
@@ -1863,20 +1889,7 @@ setMethod('.draw', c('humdrumR.table', 'NULL'),
             .draw(x, NULL, ...)
           })
 
-setMethod('.draw', c('discrete', 'NULL'),
-          function(x, y, ...){ 
-            .draw(table(x, deparse.level = 2L), NULL, ...)
-          })
 
-
-setMethod('.draw', c('NULL', 'discrete'),
-          function(x, y, ...){ 
-            .draw(table(y, deparse.level = 2L) |> t(), NULL, ...)
-          })
-setMethod('.draw', c('discrete', 'discrete'),
-          function(x, y, ...){ 
-            .draw(table(x, y, deparse.level = 2L), NULL, ...)
-          })
 
 
 
