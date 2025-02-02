@@ -126,23 +126,16 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' 
 #' | `x`                                                      | `y`                                   | Plot type                                           |
 #' |----------------------------------------------------------|---------------------------------------|-----------------------------------------------------|
-#' | `numeric`                                                | (missing)                             | [Density Histogram/Contour][draw_density]           |
-#' | (missing)                                                | `numeric`                             | [Quantile plot][draw_Qplot()]                |
+#' | `numeric`                                                | (missing)                             | [Density Histogram/Contour][draw_density()]         |
+#' | (missing)                                                | `numeric`                             | [Quantile plot][draw_Qplot()]                       |
 #' |                                                          |                                       | (or Violin plot)                                    |
 #' | `numeric`                                                | `numeric`                             | [Scatter/line plot][draw_scatter()]                 |                  
-#' | `character` or `factor`                                  | (missing)                             | Barplot or Heatmap                                  |
-#' | `character` or `factor`                                  | `character`/`factor`                  | Barplot or Heatmap                                  |
-#' | `character` or `factor`                                  | `numeric`                             | [Violin plot][draw_violins]                         |
-#' | `numeric`                                                | `character` or `factor`               | Area chart                                          |
+#' | `character`/`factor`                                     | `numeric`                             | [Violin plot][draw_violins]                         |
+#' | `numeric`                                                | `character` or `factor`               | [Area chart][draw_area()]                           |
+#' | `character`/ `factor`                                    | (missing)                             | [barplot][draw_barplot()]                           |
+#' | (missing)                                                | `character`/`factor`                  | [barplot][draw_barplot()]                           |
+#' | `character`/`factor`                                     | `character`/`factor`                  | [Heat map][draw_heat()]                             |
 #' 
-#' For purely categorical data, the default behavior is to draw barplots for 1D distributions, or
-#' 2D distributions with 80 or fewer conditions, and heatmaps otherwise.
-#' This default behavior can be overridden using either `heat = TRUE` or `heat = FALSE`.
-#' Similarly, `violin = TRUE` can be used to force `draw( , y)` to draw a violin plot.
-#' 
-#' Note that, if you pass one or two `character`/`factor` vectors to `draw()`, it will pass these vectors to [count()],
-#' then pass the resulting [distribution] to `draw()`, creating a barplot.
-#' Thus, `draw(charvec1, charvec2)` is equivalent to `draw(count(charvec1, charvec2))`.
 #' 
 #' 
 #' ### Drawing dimensions of data
@@ -302,7 +295,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' 
 #' 
 #' @export
-draw <- function(x, ...) {
+draw <- function(x, y, ...) {
   UseMethod('draw')
 }
 
@@ -1052,10 +1045,60 @@ draw_Qplot <- function(x, y, log = '',
 }
 
 
-### draw_counts ----
+### draw_barplot ----
 
 
-
+#' Draw bar plot
+#' 
+#' This method draws [tabulated data][count()] as a bar plot.
+#' If the data is passed to the first (`x`) argument, the bar plot is oriented vertically;
+#' If the data is instead passed to the second (`y`) argument----with `x` missing---,
+#' the bar plot is oriented horizontally, from left to right.
+#' The input table can have one or two dimensions; if more dimensions are provided
+#' the third and fourth dimension are split across draw [facets][draw()#facets].
+#' 
+#' @details
+#' 
+#' The `draw_barplot()` method will accept tabular data created 
+#' `humdrumR` functions [count()] and [pdist()], or equivalent base-R functions [table()]/[proportions()].
+#' If a single atomic vector of discrete values is passed to either `x` or `y`, the discrete
+#' values are automatically [counted][count()], and the resulting table is passed to `draw_barplot()`.
+#' Thus, if `mydiscrete` is a vector of discrete values (like `character`), 
+#' calling `draw(mydiscrete)` is the same as calling `draw(count(mydiscrete))`.
+#'
+#' For count data (natural numbers), Y-axis labels for counts and proportion of total are shown;
+#' For proportion data (real numbers between 0 and 1) only a proportion key is shown;
+#' If the table includes negative numbers, the Y axis is simply labeled "value."
+#'
+#' ### Dimensions
+#' 
+#' A single-dimensional table (representing one variable) is simply drawn as a set of bars.
+#' However, if the input table is two dimensional, a double bar plot is drawn, with bars
+#' representing every combination of levels across the two dimensions;
+#' Bars representing values of the first dimension are drawn in groups representing 
+#' each level of second dimension.
+#' However, if the total number of bars to draw is greater than 80, 
+#' [draw()] will dispatch [draw_heatmap()] instead.
+#' This behavior can be overridden using the `heat` argument.
+#'
+#' ### Barplot types
+#' 
+#' By default, bars are drawn side by side, so their relative height is easiest to compare.
+#' However, is `beside = FALSE`, a "stacked" bar plot will be drawn, with bars stacked on top of each other.
+#' If `beside = NULL`, side-by-side *and* stacked plots are drawn---the bars are drawn side by side,
+#' but then redrawn (with more transparency) stacked on top of the right-most bar.
+#'
+#' @section Color
+#' 
+#' @inheritSection draw General Draw Arguments
+#' 
+#' @usage draw(x # table/counts, 
+#'      col = NA)
+#'      
+#' draw( , y # table/counts, 
+#'      col = NA)
+#' @inheritParams draw
+#' @inheritParams draw_scatter
 draw_barplot <- function(counts, horizontal = FALSE, log = '', 
                         beside = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
                         xlim = NULL, ylim = NULL, 
@@ -1683,7 +1726,7 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
                         col = 1, cex = NULL,
                         main = '', sub = '') {
   
-  if (length(facets) > 2L) .stop("The draw() functon can't handle more than two faceting variables.",
+  if (length(facets) > 2L) .stop("The draw() function can't handle more than two faceting variables.",
                                  "You have provided {num2print(length(facet))}.")
   
   vecsize <- max(length(x), length(y))
@@ -1729,8 +1772,6 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
                
   axisNames <- output$axisNames
   axes <- output$axes
-  
- 
   
   output$drawer <- function() {
     for (n in lay) {
@@ -1818,10 +1859,27 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   # 
   output$axisNames <- vector('list', 4L)
 
-  
   output$axes <- output$axes[0]
   
   output
+}
+
+draw_barplot_facets <- function(table, ..., xlab = NULL, ylab = NULL) {
+  marginal <- apply(table, 1:2, sum)
+  
+  output <- draw_barplot(marginal, ...)
+  
+  output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
+  output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+  
+  args <- list(col = output$col$col, xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]], ...)
+  
+  # Determine layout
+  lay <- apply(table, 1:2, sum)
+  browser()
+  lay <- array(seq_along(lay), dim = dim(lay))
+  output$layout <-  if (length(dim(lay)) == 1L) cbind(lay) else lay
+  
 }
 
 ### draw adders ---
@@ -1857,43 +1915,45 @@ setMethod('.draw', c('discrete', 'discrete'),
 
 ### tables ----
 
-setMethod('.draw', c('NULL', 'count'),
-          function(x, y, ...) {
-            .draw(as.table(x) |> t(), NULL, ...)
-          })
 
-setMethod('.draw', c('table', 'NULL'), function(x, y, ...) draw_barplot(x, ...))
-setMethod('.draw', c('NULL', 'table'), function(x, y, ...) draw_barplot(x, horizontal = TRUE, ...))
+
+setMethod('.draw', c('table', 'NULL'), 
+          function(x, y, ...) {
+            if (length(dim(x)) > 2) {
+              draw_barplot_facets(x, ...)  
+            } else {
+              draw_barplot(x, ...)
+              
+            }
+            })
+setMethod('.draw', c('NULL', 'table'), function(x, y, ...) draw_barplot(y, horizontal = TRUE, ...))
 
 
 setMethod('.draw', c('count', 'NULL'),
           function(x, y, ...) {
-            .draw(as.table(x), NULL, ...)
-          })
+            draw_barplot(as.table(x), ...)
+            })
+
+setMethod('.draw', c('NULL', 'count'),
+          function(x, y, ...) {
+            draw_barplot(as.table(y), horizontal = TRUE, ...)
+            
+            })
 
 setMethod('.draw', c('probability', 'NULL'),
-          function(x, y, ...) {
-            .draw(count(x), NULL, ...)
-          })
-
+          function(x, y, ...) .draw(count(x), NULL, ...))
 
 setMethod('.draw', c('NULL', 'probability'),
-          function(x, y, ...) {
-            .draw(NULL, count(y), ...)
-          })
+          function(x, y, ...) .draw(NULL, count(y), ...))
 
+
+### humdrumR and formula ----
 
 setMethod('.draw', c('humdrumR.table', 'NULL'),
           function(x, y, ...) {
             class(x) <- class(x)[-1]
             .draw(x, NULL, ...)
           })
-
-
-
-
-
-
 
 setMethod('.draw', c('humdrumR'),
           function(x, facet = NULL, ...) {

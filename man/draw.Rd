@@ -4,7 +4,7 @@
 \alias{draw}
 \title{Visualize data}
 \usage{
-draw(x, ...)
+draw(x, y, ...)
 }
 \arguments{
 \item{...}{\emph{\strong{Additional parameters to pass to par().}}
@@ -74,13 +74,14 @@ result in each type.
 Separate sections below explaining the detailed features of each type of plot.\tabular{lll}{
    \code{x} \tab \code{y} \tab Plot type \cr
    \code{numeric} \tab (missing) \tab \link[=draw_density]{Density Histogram/Contour} \cr
-   (missing) \tab \code{numeric} \tab \link[=draw_quantilePlot]{Quantile plot} \cr
+   (missing) \tab \code{numeric} \tab \link[=draw_Qplot]{Quantile plot} \cr
     \tab  \tab (or Violin plot) \cr
    \code{numeric} \tab \code{numeric} \tab \link[=draw_scatter]{Scatter/line plot} \cr
-   \code{character} or \code{factor} \tab (missing) \tab Barplot or Heatmap \cr
-   \code{character} or \code{factor} \tab \code{character}/\code{factor} \tab Barplot or Heatmap \cr
-   \code{character} or \code{factor} \tab \code{numeric} \tab \link[=draw_violins]{Violin plot} \cr
-   \code{numeric} \tab \code{character} or \code{factor} \tab Area chart \cr
+   \code{character}/\code{factor} \tab \code{numeric} \tab \link[=draw_violins]{Violin plot} \cr
+   \code{numeric} \tab \code{character} or \code{factor} \tab \link[=draw_area]{Area chart} \cr
+   \code{character}/ \code{factor} \tab (missing) \tab \link[=draw_barplot]{barplot} \cr
+   (missing) \tab \code{character}/\code{factor} \tab \link[=draw_barplot]{barplot} \cr
+   \code{character}/\code{factor} \tab \code{character}/\code{factor} \tab \link[=draw_heat]{Heat map} \cr
 }
 
 
