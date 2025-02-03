@@ -363,16 +363,24 @@ draw.default <- function(x, y, facets = list(), ...,
   } 
 
   if (length(facets)) {
-    if (!is.list(facets)) facets <- list(facets)
+    facets <- prep_facets(x, y, facets)
     
-    output <- draw_facets(x, y, facets, xlab = xlab, ylab = ylab, ..., 
-                          col = col, cex = cex, pch = pch, 
-                          aspect = aspect, margin = margin,
+    args <- list(x = x, y = y, col = col, cex = cex, pch = pch)
+    facets <- by(as.data.frame(args[lengths(args) == length(facets[[1]])]), 
+                 facets, simplify = FALSE, 
+                 FUN = \(df) {
+                   c(as.list(df), args[lengths(args) != length(facets[[1]])])
+                 })
+    
+    output <- draw_facets(args, facets, ...,
+                          xexpr = xexpr, yexpr = yexpr,
+                          xlab = xlab, ylab = ylab, 
                           axes = axes, legend = legend,
-                          xexpr = xexpr, yexpr = yexpr)
+                          aspect = aspect, margin = margin)
   } else {
-    output <- .draw(x, y, ..., col = col, cex = cex, pch = pch)
-    output$layout <- 1L
+    output <- .draw(x, y, ..., col = col, cex = cex, pch = pch, aspect = aspect)
+    output$layout <- output$layout %||% 1L
+    output$faceted <- output$faceted %||% FALSE
     output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
     output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   }
@@ -386,9 +394,11 @@ draw.default <- function(x, y, facets = list(), ...,
     oldpar <- do.call('par', par_draw)
     on.exit({par(oldpar, no.readonly = TRUE)})
     
-    plot.new()
     marginLines <- setMargins(margin, aspect)
-    output$canvas()
+    if (!output$faceted) {
+      plot.new()
+      output$canvas()
+    }
     output$drawer()
     
     # title and subtitle
@@ -1126,41 +1136,36 @@ draw_barplot <- function(counts, horizontal = FALSE, log = '',
   ylim <- ylim %||% c(0, if (is.null(beside) || type == 'beside') max(counts) else max(colSums(counts)))
   
   col <- prep_col_categories(col %||% rownames(counts), rownames(counts), alpha = alpha, log = log, ...)
-  
+  col$legend <- NULL
   output <- list(col = col)
+  
   barx <-  barplot(plot = FALSE, counts, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
                    space = space, beside = type != 'stacked')
   
   xlim <- xlim %||% c(1, ceiling(max(barx)))
-  output$window <- if (horizontal) {
-    data.table(layout = 1L,
-               xlim = list(xlim), 
-               ylim = list(ylim),
-               log = log)
-  } else {
-    data.table(layout = 1L,
-               xlim = list(ylim),
-               ylim = list(xlim), 
-               log = log)
-  }
+  output$window <- data.table(layout = 1L,
+                              xlim = list(xlim, ylim)[[horizontal + 1L]], 
+                              ylim = list(ylim, xlim)[[horizontal + 1L]],
+                              log = log)
   
   # axes
   proportions <- pretty(ylim / sum(counts), n = 10L, min.n = 5L)
   proportions <- setNames(proportions * sum(counts), proportions)
-  
   axes <- data.table(side = if (horizontal) c(1, 3) else c(2, 4),
                      ticks = list(proportions,
-                                  unique(round(axTicks(if (horizontal) 1L else 2L, 
+                                  unique(round(axTicks((!horizontal) + 1, 
                                                        log = grepl(if (horizontal) 'x' else 'y', log, fixed = TRUE))))),
                      line = 1L)
+  
   if (ncol(counts) > 1) axes <- rbind(axes,
-                                 data.table(side = if (horizontal) 2 else 1,
-                                            ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(counts))),
-                                            line = 1 + as.integer(type != 'stacked')))
-  if (type != 'stacked' && nrow(counts) > 1L && length(counts) < 100) axes <- rbind(axes,
+                                      data.table(side = if (horizontal) 2 else 1,
+                                                 ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(counts))),
+                                                 line = 1 + as.integer(type != 'stacked')))
+  if (type != 'stacked' && nrow(counts) > 1L && length(counts) < 100) axes <- rbind(axes, fill = TRUE,
                                                                                     data.table(side = if (horizontal) 2 else 1,
                                                                                                ticks = list(setNames(c(barx), rownames(counts)[row(barx)])),
-                                                                                               line = 1))
+                                                                                               line = 1,
+                                                                                               col = list(col$col)))
   output$axes <- axes
   
   # legend_col_discrete(rownames(x), col$col, pch = 15, side = 4, marginLines = marginLines)
@@ -1172,12 +1177,14 @@ draw_barplot <- function(counts, horizontal = FALSE, log = '',
   axisNames[if (horizontal) 2 else 1] <- paste(Filter(\(counts) counts != '', names(dimnames(counts))), collapse = ' × ')
   output$axisNames <- axisNames
   
-  output$canvas <- \() {NULL}
+  output$canvas <- function() plot.window(xlim = xlim, ylim = ylim)
   output$drawer <- function() {
+    
     barx <- barplot(counts, col = if (type == 'stacked' ) rev(col$col) else col$col, 
                     log = gsub(if (horizontal) 'y' else 'x', '', log), space = space,
                     axisnames = FALSE, 
                     horiz = horizontal,
+                    add = TRUE,
                     ylab = '', xlab = '',
                     beside = type != 'stacked', axes = FALSE, 
                     ylim =  if (horizontal) xlim else ylim,
@@ -1719,54 +1726,54 @@ draw_area <- function(x, y, log = '',
 ## draw_facets ----
 
 
-draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = '', 
+draw_facets <- function(full_data, faceted_data,  
+                        xexpr = '', yexpr = '', 
                         xlab = NULL, ylab = NULL,
                         axes = 1:4, legend = TRUE,
                         aspect = NULL,
-                        col = 1, cex = NULL,
-                        main = '', sub = '') {
+                        ...) {
   
-  if (length(facets) > 2L) .stop("The draw() function can't handle more than two faceting variables.",
-                                 "You have provided {num2print(length(facet))}.")
-  
-  vecsize <- max(length(x), length(y))
-  if (!all(lengths(facets) == vecsize)) {
-    .stop('Facets variables must be vectors of the same length as the x/y plotting variables.')
-  }
-  
-  
-  # determine overall xlim ylim etc (output)
-  output <- .draw(x, y, ..., col = col, cex = cex)
+  # overall xlim ylim etc (output) is determined by plotting the full data
+  output <- with(full_data, .draw(x = x,  y = y, ...,  
+                                  col = col, cex = cex, pch = pch))
   
   output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
   output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   
-  args <- list(x = x, y = y,  log = output$window$log, 
-               col = output$col$col, cex = output$cex$cex,
-               xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]], ...)
-  if ('breaks' %in% names(output)) {
-    args <- c(list(breaks = output$breaks), args)
-    hist_scales <- prop.table(do.call('table', facets))
-  }
-  args <- args[!duplicated(names(args))]
+  # args <- list(x = x, y = y,  log = output$window$log, 
+               # col = output$col$col, cex = output$cex$cex,
+               # xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]], ...)
+  facet_dimnames <- dimnames(faceted_data)
+  facet_names <- .names(facet_dimnames)
   
+  facet_sizes <- array(0L, dim = dim(faceted_data), dimnames = dimnames(faceted_data))
+  facet_sizes[] <- sapply(faceted_data, \(fdata) length(fdata[[1]]))
+  
+  if ('breaks' %in% names(output)) {
+    faceted_data[] <- Map(faceted_data, prop.table(facet_sizes),  
+                          f = \(fdata, p) {  
+                            fdata$breaks <- output$breaks  
+                            fdata$hist_scale <- p 
+                            fdata 
+                            })
+  }
+  # args <- args[!duplicated(names(args))]
   
   # Determine layout
-  table <- do.call('table', facets)
-  lay <- array(seq_along(table), dim = dim(table))
+  lay <- array(seq_along(facet_sizes), dim = dim(facet_sizes))
   output$layout <-  if (length(dim(lay)) == 1L) cbind(lay) else lay
   
   
-  if (length(facets) == 1L) {
-    left.side   <- right.side <- table > 0L
-    top.side    <- seq_along(table) == 1L
-    bottom.side <- seq_along(table) == length(table)
+  if (length(dim(lay)) == 1L) {
+    left.side   <- right.side <- facet_sizes > 0L
+    top.side    <- seq_along(facet_sizes) == 1L
+    bottom.side <- seq_along(facet_sizes) == length(facet_sizes)
   } else {
-    .table <- table > 0
-    left.side   <- leftmost(.table)
-    right.side  <- rightmost(.table)
-    top.side    <- topmost(.table)
-    bottom.side <- bottommost(.table)
+    .facet_sizes <- facet_sizes > 0
+    left.side   <- leftmost(.facet_sizes)
+    right.side  <- rightmost(.facet_sizes)
+    top.side    <- topmost(.facet_sizes)
+    bottom.side <- bottommost(.facet_sizes)
     
   }
                
@@ -1775,24 +1782,19 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
   
   output$drawer <- function() {
     for (n in lay) {
-      cur <- lay == n
-      curlevels <- Map('[', dimnames(table), which(cur, arr.ind = TRUE))
       
-      if (n > min(lay)) plot.new()
+      # if (n > min(lay)) plot.new()
+      plot.new()
       
       # prepare args and draw
-      if (table[cur] > 0) {
-        facet_ind <- Reduce('&', Map('==', curlevels, facets))
-        curargs <- lapply(args, \(arg) if (length(arg) == vecsize) arg[facet_ind] else arg)
-        
-        if (!is.null(output$draw_type) && output$draw_type == 'histogram') curargs$hist_scale <- hist_scales[cur]
-        
-        facet <- do.call('.draw', curargs) # actual draw of plot
+      if (facet_sizes[n] > 0) {
+        facet <- do.call('.draw', c(faceted_data[[n]], list(...))) # actual draw of plot
         marginLines <- setMargins(.1, aspect = aspect)
+        
         output$canvas()
         facet$drawer()
         
-        sides <- c(bottom.side[cur], left.side[cur], top.side[cur], right.side[cur])
+        sides <- c(bottom.side[n], left.side[n], top.side[n], right.side[n])
         lapply(which(!sides), border)
         
         # # axes 
@@ -1803,30 +1805,32 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
                 curaxes, marginLines)
       } 
      
-      coor <- which(cbind(cur), arr.ind = TRUE)
+      coor <- which(cbind(lay == n), arr.ind = TRUE)
       
       # draw facet levels
-      if (nrow(table) > 1L && sides[4]) {
-        text(grconvertX(marginLines[[4]][3], 'inches', 'user'), 
-             grconvertY(.5, 'npc', 'user'), 
-             dimnames(table)[[1]][coor[ , 'row']],
-             cex = 1.5, xpd = NA, col = par('col.axis'))
-      }
-      if (length(dim(table)) > 1L && ncol(table) > 1L && sides[3]) {
-        
-        text(grconvertX(.5, 'npc', 'user'),
-             grconvertY(marginLines[[3]][3], 'inches', 'user'), 
-             collevel <- dimnames(table)[[2]][coor[ , 'col']],
-             cex = 1.5, xpd = NA, col = par('col.axis'))
+      if (facet_sizes[n] > 0) {
+        if (nrow(facet_sizes) > 1L && sides[4]) {
+          text(grconvertX(marginLines[[4]][3], 'inches', 'user'), 
+               grconvertY(.5, 'npc', 'user'), 
+               facet_dimnames[[1]][coor[ , 'row']],
+               cex = 1.5, xpd = NA, col = par('col.axis'))
+        }
+        if (length(dim(facet_sizes)) > 1L && ncol(facet_sizes) > 1L && sides[3]) {
+          
+          text(grconvertX(.5, 'npc', 'user'),
+               grconvertY(marginLines[[3]][3], 'inches', 'user'), 
+               collevel <- facet_dimnames[[2]][coor[ , 'col']],
+               cex = 1.5, xpd = NA, col = par('col.axis'))
+        }
       }
       
       # If we are in the middle row, draw the facet (dimension level) label
-      if (.names(facets)[1] != '' && sides[4] &&
-          coor[ , 'row'] == floor(nrow(table) / 2)) {
+      if (facet_names[1] != '' && sides[4] &&
+          coor[ , 'row'] == ceiling(nrow(facet_sizes) / 2)) {
         
-        lab <- names(facets)[1]
+        lab <- facet_names[1]
         text(grconvertX(marginLines[[4]][5], 'inches', 'user'), 
-             if (is.whole(nrow(table) / 2)) {
+             if (is.whole(nrow(facet_sizes) / 2)) {
                grconvertY(marginLines[[1]][5], 'inches', 'user')
              } else {
                grconvertY(.5, 'npc', 'user')
@@ -1836,12 +1840,12 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       }
       
       # If we are in the middle col, draw the facet label
-      if (length(dim(table)) > 1 && .names(facets)[2] != '' && sides[3] &&
-        coor[ , 'col'] == floor(ncol(table) / 2)) {
+      if (length(dim(facet_sizes)) > 1 && facet_names[2] != '' && sides[3] &&
+        coor[ , 'col'] == ceiling(ncol(facet_sizes) / 2)) {
         
-        lab <- names(facets)[2]
-        text(if (is.whole(ncol(table) / 2)) {
-               grconvertX(marginLines[[4]][5], 'inches', 'user')
+        lab <- facet_names[2]
+        text(if (is.whole(ncol(facet_sizes) / 2)) {
+               grconvertX( 1, 'nfc', 'user')
              } else {
                grconvertX(.5, 'npc', 'user')
              },
@@ -1852,34 +1856,46 @@ draw_facets <- function(x = NULL, y = NULL, facets,  ..., xexpr = '', yexpr = ''
       
     }
     
-      # mtext(names(facets)[1] , 2, col ='red', outer = TRUE)
   }
   
   # axis names for facet(s)
-  # 
   output$axisNames <- vector('list', 4L)
-
   output$axes <- output$axes[0]
+  output$faceted <- TRUE
   
   output
 }
 
-draw_barplot_facets <- function(table, ..., xlab = NULL, ylab = NULL) {
-  marginal <- apply(table, 1:2, sum)
+prep_facets <- function(x, y, facets) {
+  if (!is.list(facets)) facets <- list(facets)
   
-  output <- draw_barplot(marginal, ...)
+  if (length(facets) > 2L) .stop("The draw() function can't handle more than two faceting variables.",
+                                 "You have provided {num2print(length(facet))}.")
   
-  output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
-  output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+  vecsize <- max(length(x), length(y))
+  if (!all(lengths(facets) == vecsize)) {
+    .stop('Facets variables must be vectors of the same length as the x/y plotting variables.')
+  }
   
-  args <- list(col = output$col$col, xlim = output$window$xlim[[1]], ylim = output$window$ylim[[1]], ...)
+  facets <- lapply(facets, \(facet) {
+    if (is.numeric(facet) && length(unique(facet)) > 8) {
+      cut(facet, breaks = 4) 
+    } else {
+      facet
+    }
+  })
   
-  # Determine layout
-  lay <- apply(table, 1:2, sum)
-  browser()
-  lay <- array(seq_along(lay), dim = dim(lay))
-  output$layout <-  if (length(dim(lay)) == 1L) cbind(lay) else lay
+  facets
+}
+
+table_dimtolist <- function(tab) {
   
+  higherdim <- dim(tab)[-1:-2]
+  
+  listmat <- array(apply(tab, seq_along(dim(tab))[-1:-2], as.table, simplify = FALSE),
+                   dim = dim(tab)[-1:-2], dimnames = dimnames(tab)[-1:-2])
+  
+  listmat
 }
 
 ### draw adders ---
@@ -1918,9 +1934,16 @@ setMethod('.draw', c('discrete', 'discrete'),
 
 
 setMethod('.draw', c('table', 'NULL'), 
-          function(x, y, ...) {
+          function(x, y, ..., col = NA, pch = NA, cex = NA) {
             if (length(dim(x)) > 2) {
-              draw_barplot_facets(x, ...)  
+              
+              full <- list(x = apply(x, 1:2, sum) |> as.table(),
+                           y = NULL, col = col, cex = NA, pch = NA)
+              faceted_tables <- table_dimtolist(x)
+              faceted_tables[] <- lapply(faceted_tables, \(tab) list(x = tab, y = NULL,
+                                                                     col = col, cex = NA, pch = NA))
+              draw_facets(full, faceted_tables, ...)
+              
             } else {
               draw_barplot(x, ...)
               
@@ -2292,7 +2315,8 @@ humaxes <- function(axesframe, axisNames, axes = 1:4, marginLines) {
   
 }
 
-humaxis <- function(side, ticks, line = 1, lab = 0, cex = par('cex.axis'), marginLines) {
+humaxis <- function(side, ticks, line = 1, lab = 0, 
+                    col = par('col.axis'), cex = par('cex.axis'), marginLines) {
   # this function attempts to draw axis labels that always fit on the screen
   # but never overlap
   las <- 1
@@ -2315,11 +2339,11 @@ humaxis <- function(side, ticks, line = 1, lab = 0, cex = par('cex.axis'), margi
   line <- if (sides) {
     marginLine <- grconvertX(marginLine, 'inches', 'user')
     text(marginLine, ticks, pos = side,
-         labels, cex = cex, xpd = NA, col = par('col.axis'))
+         labels, cex = cex, xpd = NA, col = col)
   } else {
     marginLine <- grconvertY(marginLine, 'inches', 'user')
     text(ticks, marginLine, pos = side,
-         labels, cex = cex, xpd = NA, col = par('col.axis'))
+         labels, cex = cex, xpd = NA, col = col)
     
   }
   # axis(side, ticks, labels, line = line, las = las, tick = FALSE, cex.axis = cex, gap.axis = .1)
@@ -2659,7 +2683,6 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
   checks(col, xlen1 | xmatch(categories))
   checks(contrast, xTF, seealso = c('?draw'))
   checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
-  
   
   col <- if (all(isColor(col))) {
     setalpha(col, alpha)
