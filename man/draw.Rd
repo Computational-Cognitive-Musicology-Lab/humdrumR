@@ -84,15 +84,6 @@ Separate sections below explaining the detailed features of each type of plot.\t
    \code{character}/\code{factor} \tab \code{character}/\code{factor} \tab \link[=draw_heat]{Heat map} \cr
 }
 
-
-For purely categorical data, the default behavior is to draw barplots for 1D distributions, or
-2D distributions with 80 or fewer conditions, and heatmaps otherwise.
-This default behavior can be overridden using either \code{heat = TRUE} or \code{heat = FALSE}.
-Similarly, \code{violin = TRUE} can be used to force \code{draw( , y)} to draw a violin plot.
-
-Note that, if you pass one or two \code{character}/\code{factor} vectors to \code{draw()}, it will pass these vectors to \code{\link[=count]{count()}},
-then pass the resulting \link{distribution} to \code{draw()}, creating a barplot.
-Thus, \code{draw(charvec1, charvec2)} is equivalent to \code{draw(count(charvec1, charvec2))}.
 \subsection{Drawing dimensions of data}{
 
 \code{draw()} is equipped to visualize data in up to five dimensions in one plot.

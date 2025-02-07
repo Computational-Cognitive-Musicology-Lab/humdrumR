@@ -329,10 +329,12 @@ draw.default <- function(x, y, facets = list(), ...,
                          axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
                          main = '', sub = '', col = 1, cex = NULL, pch = 16) {
   
-  checks(xlab, xnull | (xlen1 & xatomic))
-  checks(ylab, xnull | (xlen1 & xatomic))
+  checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)))
+  checks(margin, xlen1 & xnumeric & xmin(.1) & xmax(.4))
   checks(legend, xTF | (xcharacter & xminlength(1) & xmaxlength(2)))
   checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
+  checks(xlab, xnull | (xlen1 & xatomic))
+  checks(ylab, xnull | (xlen1 & xatomic))
   checks(main, xatomic & xlen1)
   checks(sub, xatomic & xlen1)
 
@@ -579,6 +581,12 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
                          normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
                          xlim = NULL, ylim = NULL, 
                          col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ...) {
+  checks(jitter, xcharacter & xlen1 & xlegal(c('', 'x', 'y', 'xy', 'yx')), seealso = '?draw_scatter')
+  checks(lm, xTF, seealso = '?draw_scatter')
+  checks(line, xTF, seealso = '?draw_scatter')
+  checks(mean, xTF, seealso = '?draw_scatter')
+  checks(normalReference, xTF, seealso = '?draw_scatter')
+  checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_scatter')
   
   if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
     .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -787,7 +795,15 @@ draw_density <- function(x, y, log = '',
                            mean = FALSE, quantiles = c(), global_stats = FALSE,
                            xlim = NULL, ylim = NULL,
                            col = 3, alpha = .4, cex = .7, pch = NULL, ...) {
-  # pch is used to stop it being passed to hist_coor, which causes a warning
+  # pch is used only to stop it being passed to hist_coor, which causes a warning
+  checks(conditional, xTF, seealso = '?draw_density')
+  checks(global_stats, xTF, seealso = '?draw_density')
+  checks(mean, xTF, seealso = '?draw_density')
+  checks(normalReference, xTF, seealso = '?draw_density')
+  checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_density')
+  checks(smooth, xTF, seealso = '?draw_density')
+  checks(showCounts, xTF, seealso = '?draw_density')
+  checks(showPoints, xTF, seealso = '?draw_density')
   
   cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
   
@@ -1002,17 +1018,20 @@ draw_density <- function(x, y, log = '',
 #' @inheritParams draw
 #' @inheritParams draw_scatter
 draw_Qplot <- function(x, y, log = '', 
-                           violin = FALSE, normalReference = FALSE, showPoints = FALSE,
-                           mean = FALSE, quantiles = c(.25, .5, .75),
-                           xlim = NULL, ylim = NULL, 
-                           col = 1, alpha = .8, cex = NULL, pch = NULL, 
-                           ...) {
+                       violin = FALSE, normalReference = FALSE, 
+                       mean = FALSE, quantiles = c(.25, .5, .75),
+                       xlim = NULL, ylim = NULL, 
+                       col = 1, alpha = .8, cex = NULL, pch = NULL, 
+                       ...) {
   
-  checks(violin, xTF)
+  checks(mean, xTF, seealso = '?draw_Qplot')
+  checks(normalReference, xTF, seealso = '?draw_Qplot')
+  checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_Qplot')
+  checks(violin, xTF, seealso = '?draw_Qplot')
   
   if (violin) return(draw_violins(integer(length(y)), y,  mean = mean,
                                   xlim = xlim, ylim = ylim, alpha = alpha, 
-                                  normalReference = normalReference, showPoints = showPoints,
+                                  normalReference = normalReference, 
                                   ..., col = col, quantiles = quantiles))
   
   
@@ -1109,11 +1128,19 @@ draw_Qplot <- function(x, y, log = '',
 #'      col = NA)
 #' @inheritParams draw
 #' @inheritParams draw_scatter
-draw_barplot <- function(counts, horizontal = FALSE, log = '', 
-                        beside = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
-                        xlim = NULL, ylim = NULL, 
-                        quantiles = c(), mean = FALSE, showCounts = FALSE,
-                        col = NULL,  alpha = .9, ...) { 
+draw_barplot <- function(counts, log = '', 
+                         horizontal = FALSE, beside = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
+                         xlim = NULL, ylim = NULL, 
+                         quantiles = c(), mean = FALSE, showCounts = FALSE,
+                         col = NULL,  alpha = .9, ...) { 
+  
+  checks(beside, xTF, seealso = '?draw_barplot')
+  checks(heat, xTF, seealso = '?draw_barplot')
+  checks(horizontal, xTF, seealso = '?draw_barplot')
+  checks(mean, xTF, seealso = '?draw_barplot')
+  checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_barplot')
+  checks(showCounts, xTF, seealso = '?draw_barplot')
+  
   # counts should be a table object
   if (!is.numeric(c(counts))) .stop("No draw() method for a matrix/table of class '{class(x[1, 1])}.'")
   dimnames(counts) <- lapply(dimnames(counts), \(dn) ifelse(is.na(dn), "NA", dn))
@@ -1399,6 +1426,14 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
                          breaks = "Sturges", bw = 'SJ', normalReference = FALSE, showPoints = FALSE,
                          xlim = NULL, ylim = NULL, log = '',
                          col = 1, ...) {
+  checks(conditional, xTF, seealso = '?draw_violins')
+  checks(global_stats, xTF, seealso = '?draw_violins')
+  checks(mean, xTF, seealso = '?draw_violins')
+  checks(normalReference, xTF, seealso = '?draw_violins')
+  checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_violins')
+  checks(smooth, xTF, seealso = '?draw_violins')
+  checks(showPoints, xTF, seealso = '?draw_violins')
+  
   
   groups <- x
   
@@ -1648,78 +1683,85 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #'      col = NA # colors chosen automatically)
 #' @inheritParams draw
 draw_area <- function(x, y, log = '', 
-                   center = TRUE, smooth = TRUE, conditional = FALSE, 
-                   breaks = 40, bw = 'SJ', 
-                   mean = TRUE, quantiles = c(), global_stats = TRUE,
-                   showPoints = FALSE,
-                   xlim = NULL, ylim = NULL, 
-                   col = NULL, alpha = .7, ...) {
-            
-            categories <- sort(unique(y), decreasing = TRUE)
-            
-            breaks <- hist.default(x, breaks = breaks, plot = FALSE)$breaks 
-            
-            coordinates <- area_coor(x, y, smooth = smooth, conditional = conditional, 
-                                     center = center, bw = bw, breaks = breaks, ...)
-            
-            output <- canvas(x, xlim, range(coordinates$Y), ylim, log = gsub('y', '', log))
-            output$col <- prep_col_categories(col %||% categories, rev(categories), 
-                                              alpha = alpha, ...)
-            if (!conditional && center)  output$axes <- output$axes[side == 1]
-            output$axisNames[[2]] <-'Probability density' 
-            # if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
-            
-            X <- coordinates$X
-            output$drawer <- function() {
-              for (j in 1:(ncol(coordinates$Y) - 1L)) {
-                polygon(c(X, rev(X)), 
-                        c(coordinates$Y[ , j], rev(coordinates$Y[ , j + 1])), 
-                        col = output$col$col[j],
-                        border = FALSE, xpd = NA)
-                if (showPoints) draw_points(x, output$col$col[match(y, categories)], 
-                                            coordinates$Y, output$window$ylim)
-                
-                
-               
-                
-                if (!global_stats && length(categories) > 1) {
-                  draw_quantiles(1, x[y == categories[j]], 
-                                 quantiles,
-                                 limits = NULL, 
-                                 col =  setalpha(output$col$col[j], 1))
-                  if (mean) draw_mean(mean(x[y == categories[j]]), 
-                                      grconvertY(0.01, 'npc', 'user'), 
-                                      col = rev(output$col$col)[j])
-                }
-              }
-              
-              ## Draw density Key
-            
-              if (!conditional && center) {
-                xkey <- grconvertX(seq(-.04, 0.0, length.out = length(coordinates$DensityKey)), 'npc', 'user')
-                ykey <- coordinates$DensityKey / 2
-
-                graphics::segments(x0 = xkey, x1 = xkey, 
-                                   -ykey, ykey, lwd = .5, lty = 'solid', xpd = NA)
-                text(xkey,  ykey, srt = 90,
-                     format(coordinates$DensityKey, drop0trailing = T) |> stringr::str_remove('^0'),
-                     adj = c(0, 1), 
-                     cex = .4, xpd = NA)
-              }
-              
-              
-           
-             
-              if (global_stats || length(coordinates) == 1L) {
-                if (mean) draw_mean(mean(x), grconvertY(0.01, 'npc', 'user'))
-                draw_quantiles(1, x, quantiles, limits = NULL)
-              } 
-             
-            }
-            
-            output
-            
-          }
+                      center = TRUE, smooth = TRUE, conditional = FALSE, 
+                      breaks = 40, bw = 'SJ', 
+                      mean = TRUE, quantiles = c(), global_stats = TRUE,
+                      showPoints = FALSE,
+                      xlim = NULL, ylim = NULL, 
+                      col = NULL, alpha = .7, ...) {
+  checks(center, xTF, seealso = '?draw_area')
+  checks(conditional, xTF, seealso = '?draw_area')
+  checks(global_stats, xTF, seealso = '?draw_area')
+  checks(mean, xTF, seealso = '?draw_area')
+  checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_area')
+  checks(smooth, xTF, seealso = '?draw_area')
+  checks(showPoints, xTF, seealso = '?draw_area')
+  
+  categories <- sort(unique(y), decreasing = TRUE)
+  
+  breaks <- hist.default(x, breaks = breaks, plot = FALSE)$breaks 
+  
+  coordinates <- area_coor(x, y, smooth = smooth, conditional = conditional, 
+                           center = center, bw = bw, breaks = breaks, ...)
+  
+  output <- canvas(x, xlim, range(coordinates$Y), ylim, log = gsub('y', '', log))
+  output$col <- prep_col_categories(col %||% categories, rev(categories), 
+                                    alpha = alpha, ...)
+  if (!conditional && center)  output$axes <- output$axes[side == 1]
+  output$axisNames[[2]] <-'Probability density' 
+  # if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
+  
+  X <- coordinates$X
+  output$drawer <- function() {
+    for (j in 1:(ncol(coordinates$Y) - 1L)) {
+      polygon(c(X, rev(X)), 
+              c(coordinates$Y[ , j], rev(coordinates$Y[ , j + 1])), 
+              col = output$col$col[j],
+              border = FALSE, xpd = NA)
+      if (showPoints) draw_points(x, output$col$col[match(y, categories)], 
+                                  coordinates$Y, output$window$ylim)
+      
+      
+      
+      
+      if (!global_stats && length(categories) > 1) {
+        draw_quantiles(1, x[y == categories[j]], 
+                       quantiles,
+                       limits = NULL, 
+                       col =  setalpha(output$col$col[j], 1))
+        if (mean) draw_mean(mean(x[y == categories[j]]), 
+                            grconvertY(0.01, 'npc', 'user'), 
+                            col = rev(output$col$col)[j])
+      }
+    }
+    
+    ## Draw density Key
+    
+    if (!conditional && center) {
+      xkey <- grconvertX(seq(-.04, 0.0, length.out = length(coordinates$DensityKey)), 'npc', 'user')
+      ykey <- coordinates$DensityKey / 2
+      
+      graphics::segments(x0 = xkey, x1 = xkey, 
+                         -ykey, ykey, lwd = .5, lty = 'solid', xpd = NA)
+      text(xkey,  ykey, srt = 90,
+           format(coordinates$DensityKey, drop0trailing = T) |> stringr::str_remove('^0'),
+           adj = c(0, 1), 
+           cex = .4, xpd = NA)
+    }
+    
+    
+    
+    
+    if (global_stats || length(coordinates) == 1L) {
+      if (mean) draw_mean(mean(x), grconvertY(0.01, 'npc', 'user'))
+      draw_quantiles(1, x, quantiles, limits = NULL)
+    } 
+    
+  }
+  
+  output
+  
+}
 
 
 
@@ -2091,7 +2133,6 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
   if (length(quantiles)) {
     col <- setalpha(col, 1)
     quantiles <- unique(quantiles)
-    checks(quantiles, xnumeric & xrange(0, 1))
     
     sides <- side %% 2 == 0
     quants <- quantile(var, prob = quantiles)
@@ -2194,9 +2235,6 @@ draw_lines <- function(n = 10, outer = FALSE) {
 
 
 setMargins <- function(margin.percent = .2, aspect = NULL) {
-  
-  checks(margin.percent, xlen1 & xnumeric & xmin(.1) & xmax(.4), argname = 'margin', seealso = '?draw()')
-  checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)), seealso = '?draw()')
   
 
   devsize <- par('fin')
@@ -2597,8 +2635,8 @@ setGeneric('prep_col',
              if (is.list(col) && names(col)[1] == 'col') col <- col$col
              
              checks(col, xlen1 | xmatch(var), seealso = c('?draw'))
-             checks(contrast, xTF, seealso = c('?draw'))
              checks(alpha, xlen1 & xnumber & xrange(0, 1), seealso = c('?draw'))
+             checks(contrast, xTF, seealso = c('?draw'))
              checks(ncontinuous, xlen1 & xnatural & xmin(2), seealso = c('?draw')) 
              
              pch <- if (length(unique(pch)) > 1) 16 else unique(pch)

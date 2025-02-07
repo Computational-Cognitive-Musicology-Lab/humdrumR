@@ -62,9 +62,47 @@ These parameters are set using \code{par()} (overriding humdrumR's defaults), bu
 }
 \description{
 This method draws \link[=count]{tabulated data} as a bar plot.
+If the data is passed to the first (\code{x}) argument, the bar plot is oriented vertically;
+If the data is instead passed to the second (\code{y}) argument----with \code{x} missing---,
+the bar plot is oriented horizontally, from left to right.
 The input table can have one or two dimensions; if more dimensions are provided
 the third and fourth dimension are split across draw \link[=draw()#facets]{facets}.
 }
+\details{
+The \code{draw_barplot()} method will accept tabular data created
+\code{humdrumR} functions \code{\link[=count]{count()}} and \code{\link[=pdist]{pdist()}}, or equivalent base-R functions \code{\link[=table]{table()}}/\code{\link[=proportions]{proportions()}}.
+If a single atomic vector of discrete values is passed to either \code{x} or \code{y}, the discrete
+values are automatically \link[=count]{counted}, and the resulting table is passed to \code{draw_barplot()}.
+Thus, if \code{mydiscrete} is a vector of discrete values (like \code{character}),
+calling \code{draw(mydiscrete)} is the same as calling \code{draw(count(mydiscrete))}.
+
+For count data (natural numbers), Y-axis labels for counts and proportion of total are shown;
+For proportion data (real numbers between 0 and 1) only a proportion key is shown;
+If the table includes negative numbers, the Y axis is simply labeled "value."
+\subsection{Dimensions}{
+
+A single-dimensional table (representing one variable) is simply drawn as a set of bars.
+However, if the input table is two dimensional, a double bar plot is drawn, with bars
+representing every combination of levels across the two dimensions;
+Bars representing values of the first dimension are drawn in groups representing
+each level of second dimension.
+However, if the total number of bars to draw is greater than 80,
+\code{\link[=draw]{draw()}} will dispatch \code{\link[=draw_heatmap]{draw_heatmap()}} instead.
+This behavior can be overridden using the \code{heat} argument.
+}
+
+\subsection{Barplot types}{
+
+By default, bars are drawn side by side, so their relative height is easiest to compare.
+However, is \code{beside = FALSE}, a "stacked" bar plot will be drawn, with bars stacked on top of each other.
+If \code{beside = NULL}, side-by-side \emph{and} stacked plots are drawn---the bars are drawn side by side,
+but then redrawn (with more transparency) stacked on top of the right-most bar.
+}
+}
+\section{Color}{
+NA
+}
+
 \section{General Draw Arguments}{
 
 
