@@ -1645,6 +1645,16 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
 #' data in each group (i.e., if the groups are different sizes).
 #'
+#' @param center ***Should the stacked areas be centered on the screen?***
+#' 
+#' Defaults to `TRUE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' If `TRUE`, the areas are centered in the Y-axis, expanding outward (up and down)
+#' when the density increases.
+#' If `FALSE`, the areas are stacked up from the bottom of the screen.
+#' 
 #' @param quantiles ***Should distribution quantiles of `y` be marked?***
 #'
 #' Defaults to `c()`, so no quantiles are drawn.
