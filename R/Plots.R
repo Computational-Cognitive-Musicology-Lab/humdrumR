@@ -257,7 +257,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' @param `aspect` 
+#' @param aspect ***Control the aspect ratio of the plot.***
 #' 
 #' Defaults to `NULL`.
 #' 
@@ -301,26 +301,25 @@ draw <- function(x, y, ...) {
 
 #' @export
 draw.humdrumR <- function(x, ...) {
-  call <- match.call()
+  
+  args <- rlang::enexprs(...)
   
   groups <- getGroupingFields(x)
   x <- ungroup(x)
   
-  if (!pmatch('facets', names(call[-1]), nomatch = 0) &&
+  if (!pmatch('facets', names(args), nomatch = 0) &&
       length(groups))  {
     
-     call[['facets']] <- as.list(groups)
+     args[['facets']] <- as.list(groups)
   }
   
-  
-  call[['x']] <- NULL
-  call[[1]] <- quote(draw.default)
-  
-  if (!any(.names(call[-1]) %in% c('x', 'y', ''))) {
+  if (!any(.names(args) %in% c('x', 'y', ''))) {
     fields <- rlang::syms(selectedFields(x))
-    for (field in fields) call[[length(call) + 1L]] <- field
+    for (field in fields) args[[length(args) + 1L]] <- field
   }
-  rlang::eval_tidy(rlang::expr(with(x, !!call)))
+  quo <- rlang::quo(with(x, draw.default(!!!args)))
+  
+  rlang::eval_tidy(quo)
 }
 
 #' @export
@@ -1169,6 +1168,7 @@ draw_barplot <- function(counts, log = '',
   barx <-  barplot(plot = FALSE, counts, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
                    space = space, beside = type != 'stacked')
   
+  
   xlim <- xlim %||% c(1, ceiling(max(barx)))
   output$window <- data.table(layout = 1L,
                               xlim = list(xlim, ylim)[[horizontal + 1L]], 
@@ -1204,7 +1204,7 @@ draw_barplot <- function(counts, log = '',
   axisNames[if (horizontal) 2 else 1] <- paste(Filter(\(counts) counts != '', names(dimnames(counts))), collapse = ' × ')
   output$axisNames <- axisNames
   
-  output$canvas <- function() plot.window(xlim = xlim, ylim = ylim)
+  output$canvas <- function() plot.window(xlim = output$window$xlim, ylim = output$window$ylim)
   output$drawer <- function() {
     
     barx <- barplot(counts, col = if (type == 'stacked' ) rev(col$col) else col$col, 
