@@ -526,11 +526,11 @@ draw.default <- function(x, y, facets = list(), ...,
 #'
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
-#' If `TRUE`, a bivariate normal (Gaussian) distribution is drawn under the scatter 
-#' plot, using the means and variances of, and the covariance between, the input vectors `x` and `y`.
-#' To visualize this two dimensional distribution, a random sample of points from this bivariate
-#' distribution is drawn in large black, but mostly transparent, points.
-#' This gives a sense of how close to jointly-normally distributed `x` and `y` are.
+#' If `TRUE`, the 95% and 50% density regions of
+#' a bivariate normal (Gaussian) distribution are
+#' drawn under the scatter plot, using the means variances of, and the covariance between, 
+#' the input vectors `x` and `y`.
+#' 
 #'
 #' @param quantiles ***Should distribution quantiles of `x` and `y` be marked?***
 #'
@@ -2216,11 +2216,40 @@ draw_mvnorm <- function(x, y) {
   sigma <- matrix(cov(x, y), nrow = 2, ncol = 2)
   sigma[1, 1] <- var(x)
   sigma[2, 2] <- var(y)
+  means <- c(mean(x), mean(y))
   
+  npoints <- 100
+  xseq <- seq(min(x, means[1] - sigma[1, 1] * 3), 
+              max(x, means[1] + sigma[1, 1] * 3), length.out = npoints)
+  yseq <- seq(min(y, means[2] - sigma[2, 2] * 3), 
+              max(y, means[2] + sigma[2, 2] * 3), length.out = npoints)
+  xy <- expand.grid(x = xseq, y = yseq)
   
-  sample <- MASS::mvrnorm(min(10000, length(x) * 10), c(mean(x), mean(y)), sigma)
+  # copied code from mvtnorm package:
+  dec <- tryCatch(base::chol(sigma), error = function(e) e)
+  if (inherits(dec, "error")) {
+    x.is.mu <- colSums(t(xy) != means) == 0
+    logretval <- rep.int(-Inf, nrow(x))
+    logretval[x.is.mu] <- Inf
+  } else {
+    tmp <- backsolve(dec, t(xy) - means, transpose = TRUE)
+    rss <- colSums(tmp^2)
+    logretval <- -sum(log(diag(dec))) - 0.5 * 2 * log(2 * 
+                                                        pi) - 0.5 * rss
+  }
+  dx <- diff(xseq[1:2])
+  dy <- diff(yseq[1:2])
   
-  points(sample[,1], sample[,2], pch = 8, col = rgb(0,0,0, alpha=.02), xpd = NA)
+  density <- exp(logretval)
+  # to integrate densities in 2d:
+  pmat <- matrix(cumsum(sort(density) * dx * dy)[rank(density)],
+                 npoints, npoints)
+  contour(xseq, yseq, pmat,
+          add = TRUE, levels = c(.05, .5),
+          labels = c('95%', '50%'),
+          drawlabels = TRUE, 
+          col = 'grey70', xpd = NA)
+  
   
   
 }
