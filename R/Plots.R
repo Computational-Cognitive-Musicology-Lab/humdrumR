@@ -3000,8 +3000,7 @@ viewKernTable <- function(table) {
 #' @export
 ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
   humtab <- getHumtab(data, dataTypes = dataTypes)
-  
-  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
+  ggplot(as.data.frame(humtab), mapping = mapping, ...) + theme_humdrum()
 }
 
 

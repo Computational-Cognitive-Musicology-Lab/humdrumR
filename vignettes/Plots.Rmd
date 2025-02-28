@@ -17,5 +17,115 @@ source('vignette_header.R')
 
 
 Welcome to "Making plots with `r hm`"!
-This article provides a quick introduction to the basics of plotting in R, but mostly focuses on `r hm`'s own specialty plotting function, `draw()`.
-Our `draw()` function is not a full replacement for either of R's main plotting systems (base and [ggplot][ggplot2]), but it is really useful.
+R has two major plotting systems that are widely used: R's built-in [base graphics][graphics-package] functions, and the more modern [ggplot2]. 
+`r Hm` is compatible with both of these systems.
+`r Hm` also has it's own, built-in [draw()] function, which is basically a spiffy (easier to use) extension of base-R graphics.
+
+In this vignette we'll give a few quick examples of how to use base-R graphics to plot `r hm` data, before diving into a detailed showcase of the features of [draw()].
+We'll then show you how to use [ggplot2] with `r hm` data, if that floats your boat.
+
+## Base R graphics
+
+The base-R graphics system is extremely powerful, giving you precise control of every aspect of plots.
+Unfortunately, though *getting started* with simple base-R plots is extremely fast and easy, as we'll show you in a moment, it takes quite a while to learn on how to precisely control your plots, and it ends up being quite verbose.
+The `r hm` [draw()] function is actually based on base-R graphics, and is fully compatible with base-R---our recommendation is to start with [draw()], then gradually learn base-R as needed.
+(Alternatively, just learn [ggplot][#ggplot].)
+If you are just getting started, you can probably skip ahead to the [Draw](#draw) or [GGplot](#ggplot) sections below, and come back to this for added context if and when you need it.
+
+---
+
+Base-R graphics is centered around a few main plotting functions: [plot()], [barplot()], and [hist()].
+Additional functions can then be used to *add* more elements on top of the plots you already created: [points()], [arrows()], [abline()], [lines()], [axis()], [polygon()], etc.
+(These "adding" functions can be used with [draw()] too.)
+
+Let's load some humdrum data:
+
+```{r}
+bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+```
+
+The main plot functions work by passing them numbers, so let's pull out some numeric values.
+We'll use [semits()] and [duration()] to convert pitch and rhythmic information into numbers:
+
+```{r}
+bach |>
+  mutate(Pitch = semits(Token),
+         Duration = duration(Token)) -> bach
+```
+
+We can then see what happens if we pass these numbers to [plot()] or [hist()].
+(As usual, we have to use [with()] to access the fields.)
+
+```{r}
+bach |>
+  with(hist(Duration))
+```
+
+```{r}
+bach |>
+  with(plot(Duration))
+
+bach |>
+  with(plot(Duration, Pitch))
+
+
+```
+
+To use [barplot()], the standard approach is to tabulate categorical data using [table()], then pass that to `barplot()`.
+
+```{r}
+bach |>
+  select(Token) |>
+  with(table(kern(Token, simple = TRUE))) |>
+  barplot()
+
+
+```
+
+# Draw()
+
+`r Hm`'s [draw()] function is basically a fancy wrapper around base-R functions like [plot()] and [hist()].
+Like these functions, using [draw()] is simple: just pass data ([atomic][vector] vectors) in to get a plot.
+The [draw()] function will look at the input arguments you give it, and make an appropriate plot for that input type---`draw()` currently makes seven different types of plots.
+
+To decide what kind of plot to make, [draw()] looks at its first two arguments, `x` and `y`, which represent (you guessed it) the X and Y axes.
+Here are the types of plots associated with different types of `x`/`y` arguments:
+
+| `x`                                                      | `y`                                   | Plot type                                           |
+|----------------------------------------------------------|---------------------------------------|-----------------------------------------------------|
+| `numeric`                                                | (missing)                             | [Density Histogram/Contour][draw_density()]         |
+| (missing)                                                | `numeric`                             | [Quantile plot][draw_Qplot()]                       |
+|                                                          |                                       | (or Violin plot)                                    |
+| `numeric`                                                | `numeric`                             | [Scatter/line plot][draw_scatter()]                 |                  
+| `character`/`factor`                                     | `numeric`                             | [Violin plot][draw_violins]                         |
+| `numeric`                                                | `character` or `factor`               | [Area chart][draw_area()]                           |
+| `character`/ `factor`                                    | (missing)                             | [barplot][draw_barplot()]                           |
+| (missing)                                                | `character`/`factor`                  | [barplot][draw_barplot()]                           |
+| `character`/`factor`                                     | `character`/`factor`                  | [Heat map][draw_heat()]                             |
+
+
+To see this in action, let's pass in various combinations of the fields we created in our `bach` data (in the previous section):
+
+```{r}
+
+bach |> draw(Duration)
+
+bach |> draw( , Pitch)
+
+```
+
+# GGplot
+
+
+```{r}
+library(ggplot)
+```
+
+
+```{r}
+
+bach |>
+  ggplot(aes(Duration, Pitch)) + geom_point()
+
+```
