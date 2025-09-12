@@ -115,14 +115,14 @@ example1 |> print(view = "table")
 
 
 When we use `view = "humdrum"`, we see the default `r hm` view of the data in humdrum syntax.
-However, with `view = "table"`, we are show the underling humdrum table.
+However, with `view = "table"`, we are showing the underling humdrum table.
 We can see that there is one row for *each and every* token, with different columns indicating which `File`, `Spine`, and `Record` each token comes from.
 In `r hm`, we refer to the columns of the humdrum table as **fields**.
 
 ---
 
 If you get tired of explicitly using `print()`, you can change `humdrumR`'s default print method using the 
-`humdrum()` *function*, the first argument of which is `view`.
+`humdrumR()` *function*, the first argument of which is `view`.
 
 
 ```{r}
@@ -164,7 +164,7 @@ fields(example1)
 
 ```
 
-We see that there are `r humdrumR:::num2print(length(example1))` fields (columns), and that they are divided into five types of fields: 
+We see that there are `r humdrumR:::num2print(length(fields(example1)))` fields (columns), and that they are divided into five types of fields: 
 
 + Data fields
 + Structure fields
@@ -369,7 +369,7 @@ Once you start creating many fields, it can be easy to lose track of which field
 
 #### Multiple fields
 
-Once we get to have more than one field to work with, it gets garder to use the "humdrum style."
+Once we get to have more than one field to work with, it gets harder to use the "humdrum style."
 Most `r hm` function wills only pipe the *first* selected field, so it doesn't matter if you select multiple fields.
 However, the `count()` function can accept multiple fields.
 Now that we've created a `Pitch` *and* `Duration` fields, we can do stuff like:
@@ -398,6 +398,7 @@ For example:
 ```{r}
 
 chorales |>
+  select(Token) |>
   mutate(mint(Token))
 
 
@@ -509,7 +510,7 @@ If you pull your data out of `r hm`, you'll have to manually manage what data ty
 For some functions, `r hm` will automatically pass specific fields as arguments to functions you call.
 For example, `r hm` [pitch functions](../references/pitchFunctions.html "HumdrumR pitch functions") like `solfa()` (solfege) need to key information to get you the information you want.
 Many humdrum data sets will have a `Key` field, which is automatically created if you read data files containing key interpretations, like `G*:`.
-`r Hm` unless you explicitly override it with a different `Key` argument, `r hm` will automatically pass the `Key` argument to pitch functions.
+Unless you explicitly override it with a different `Key` argument, `r hm` will automatically pass the `Key` argument to pitch functions.
 Thus:
 
 ```{r}
