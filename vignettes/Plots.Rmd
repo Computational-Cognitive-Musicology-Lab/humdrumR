@@ -119,7 +119,7 @@ bach |> draw( , Pitch)
 
 
 ```{r}
-library(ggplot)
+library(ggplot2)
 ```
 
 
