@@ -16,7 +16,7 @@
 #' @details
 #' 
 #' `subset()` and `filter()` are passed one or more expressions which are using the 
-#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrumR].
+#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrum].
 #' This evaluation can thus include all of [within.humdrumR()]'s functionality (and arguments)
 #' including group-apply.
 #' The only requirement is that the expressions/functions fed to `subset()`/`filter()`
@@ -548,7 +548,7 @@ combineFields <- function(humdrumR, ...) {
 #' 
 #' ### Character indexing:
 #' 
-#' If you index a [humdrumR object][humdrumR:humdrumRclass]
+#' If you index a [humdrumR object][humdrumRclass]
 #' with `character` strings, these strings are 
 #' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes),
 #' which are matched against non-null data tokens (`"D"`) in the object's first [selected field][selectedFields].

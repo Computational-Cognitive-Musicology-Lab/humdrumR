@@ -103,7 +103,7 @@ setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'
 #' with `myDist |> filter(n > 100)`.
 #' 
 #'
-#' #### Single-bracket [i , ]
+#' #### Single-bracket \[i , \]
 #' 
 #' With single-bracket indexing, the `i` argument is matched to rows of the underlying data.table.
 #' (As mentioned above, this may conflict visually with the `wide` printing option, 
@@ -115,7 +115,7 @@ setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'
 #' If `i` is `character`, the strings are matched against the level names of *all* the distributions' dimensions.
 #' An exact match with a level in any dimension will result in that level being returned.
 #' 
-#' #### Single-bracket [ , j]
+#' #### Single-bracket \[ , j\]
 #' 
 #' With single-bracket indexing, the `j` argument is used to index the dimensions of the distribution.
 #' If `j` is either `logical` or `numeric`, indexing is exactly like conventional `data.frames`,
@@ -124,7 +124,7 @@ setClassUnion('discrete', c('character', 'factor', 'logical', 'integer', 'token'
 #' as a column to index---this column is always retained.
 #' If `j` is `character`, the strings are matched exactly against the distribution names.
 #'  
-#' #### Double-bracket [i, j, ...]
+#' #### Double-bracket \[i, j, ...\]
 #'  
 #' Double-bracket indexing can be used to index specific combinations of levels, across more than one distribution.
 #' Named index arguments are matched (exactly) to dimension names; unnamed arguments are matched

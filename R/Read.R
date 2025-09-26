@@ -547,7 +547,7 @@ shortFilenames <- function(fileFrame) {
 #' @section Tandem Interpretations:
 #' 
 #' All tandem interpretations in a humdrum dataset are summarized in the [humdrum table's][humTable]
-#' `Tandem` field, which is described in detail [here][extractTandem()].
+#' `Tandem` field, which is described in detail [here][tandem()].
 #' In addition, certain "known" tandem interpretations are parsed into their *own* fields automatically.
 #' For example, `*clefG4` and "`*clefF2` are parsed as `Clef` data, while `*k[b-]` is parsed as a `KeySignature`.
 #' The "known" tandem interpretations that `humdrumR` recognizes are encoded in a built-in
@@ -1141,7 +1141,7 @@ parseTandem <- function(tandems, known) {
 
 #' Get tandem interpretation information from humdrum data
 #' 
-#' `extractTandem` extracts tandem interpretations from the raw `Tandem`
+#' `tandem` extracts tandem interpretations from the raw `Tandem`
 #' spine in [humdrumR object][humdrumRclass].
 #' 
 #' @details 
@@ -1193,18 +1193,18 @@ parseTandem <- function(tandems, known) {
 #' However, the `Tandem` field is retained in case your data contains any novel tandem intepretations
 #' that `humdrumR` does not recognize.
 #' 
-#' @section extractTandem:
+#' @section tandem:
 #' 
 #' If your data *does* contain novel/unknown tandem interpretations, you can use the
-#' `extractTandem` function to pull them out of the `Tandem` field.
-#' The first argument to `extractTandem` must be the `Tandem` field from a 
+#' `tandem` function to pull them out of the `Tandem` field.
+#' The first argument to `tandem` must be the `Tandem` field from a 
 #' [humdrumR object][humdrumRclass].
 #' The second argument (`regex`) is a regular expression which is matched against
 #' the the tandem interpretations.
 #' For each token in `Tandem`, the most recent match (if any) is retained.
 #' 
 #' For example, if we wanted to manually extract the key information from the `Tandem` field 
-#' (which `humdrumR` automatically does for you), we could call `extractTandem(Tandem, "[A-Ga-g][#-]*:")`.
+#' (which `humdrumR` automatically does for you), we could call `tandem(Tandem, "[A-Ga-g][#-]*:")`.
 #' 
 #' @param Tandem ***Parsed tandem interpretation data.***
 #' 

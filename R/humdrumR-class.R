@@ -495,7 +495,7 @@ is.humdrumR <- function(x){
 #'  
 #' Note that multiple-stop token (where `Stop > 1L`) cannot by incorporated into the two 
 #' dimensional `matrix`/`data.frame`. Thus, `as.matrix(humdrumR)` calls 
-#' [collapseStops(collapseAtomic = TRUE, sep = " ")]
+#' [collapseStops(collapseAtomic = TRUE, sep = " ")][collapseStops()]
 #' on the [humdrumR object][humdrumRclass] before creating a matrix.
 #' 
 #' @section Padding:
@@ -1239,7 +1239,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' + `Selected`,
 #'   + A `logical` indicating which fields are [selected][selectedFields()].
 #' + `GroupedBy`
-#'   + A `logical` indicating which, if any, fields are currently [grouping][humGrouping] the data.
+#'   + A `logical` indicating which, if any, fields are currently [grouping][groupingFactors] the data.
 #'
 #' Using the [names()] function on a [humdrumR object][humdrumRclass] will
 #' get just the field names, the same as `fields(humData)$Name`.
@@ -1253,7 +1253,7 @@ fillFields <- function(humdrumR, from = 'Token', to, where = NULL) {
 #' You can also pass `"selected"` to extract only the [selected fields][selectedFields()].
 #' Types can be [partially matched][partialMatching]---for example, `"S"` for `"Structure"`.
 #'   
-#' @seealso {To actually extract fields from [humdrumR data], see the [pull()] family of functions.}
+#' @seealso {To actually extract fields from [humdrumR data][humdrumRclass], see the [pull()] family of functions.}
 #' @rdname humTable
 #' @export
 fields <- function(humdrumR, fieldTypes = c('Data', 'Structure', 'Interpretation', 'Formal', 'Reference', 'Grouping', 'selected')) { 
@@ -1418,7 +1418,7 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' humData |> select(Spine) |> count()
 #'
 #' @seealso {Use [fields()] to see what fields are available, and how they are ordered.
-#' To actually *extract* fields, see [pullFields()].}
+#' To actually *extract* fields, see [pull()].}
 #' @export
 selectedFields <- function(humdrumR) {
     fields(humdrumR)[Selected > 0L][order(Selected)]$Name
@@ -1730,7 +1730,7 @@ pullPrintable <- function(humdrumR, fields,
 #' 
 #' @param ... ***Which fields to output.***
 #' 
-#' If no arguments are provided, the object's [selected fields][selectFields] are pulled.
+#' If no arguments are provided, the object's [selected fields][selectedFields] are pulled.
 #' 
 #' These arguments can be any combination of `character` strings, numbers, or symbols used
 #' to match fields in the `humdrumR` input using [tidyverse][dplyr::select()] semantics.
@@ -1760,7 +1760,7 @@ pullPrintable <- function(humdrumR, fields,
 #' 
 #' Default is `"charNA2dot"`.
 #' 
-#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
+#' Must be a single character string, [partially matching][partialMatching] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
 #' 
 #' @seealso {To know what fields are available to pull, use [fields()].
 #'           To know what fields are selected---the default fields to pull---use [selectedFields()].}

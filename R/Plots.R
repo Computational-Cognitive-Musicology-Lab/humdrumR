@@ -937,11 +937,11 @@ setMethod('.draw', c('NULL', 'probability'),
           })
 
 
-setMethod('.draw', c('humdrumR.table', 'NULL'),
-          function(x, y, ...) {
-            class(x) <- class(x)[-1]
-            .draw(x, NULL, ...)
-          })
+# setMethod('.draw', c('humdrumR.table', 'NULL'),
+ #         function(x, y, ...) {
+  #          class(x) <- class(x)[-1]
+   #         .draw(x, NULL, ...)
+    #      })
 
 setMethod('.draw', c('discrete', 'NULL'),
           function(x, y, ...){ 

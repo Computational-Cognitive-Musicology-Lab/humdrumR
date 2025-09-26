@@ -182,7 +182,7 @@
 #' spine paths...not between pieces/spines/paths (which wouldn't make sense!).
 #' 
 #' All `humdrumR` functions which use automatic argument interpolation will mention it in their own documentation.
-#' For example, the [?solfa] documentation mentions the treatment of `Key` in its "Key" section.
+#' For example, the [solfa()] documentation mentions the treatment of `Key` in its "Key" section.
 #' 
 #' #### Lagged vectors
 #' 

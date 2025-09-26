@@ -327,8 +327,8 @@ collapseRecords <- function(humdrumR, fields = selectedFields(humdrumR), collaps
 #' Cleave, as in "to cleave together," moves data from separate spines (or paths) into 
 #' new fields in the *same* spine(s).
 #' Under the hood, `cleave()` essentially runs a specialized call to make the [humdrum table][humTable]
-#' "wider," similar to R functions like [cast()][reshape2], [spread()][tidyr], or [pivot_wider()][tidyr].
-#' In fact, a humdrumR method for [pivot_wider()][tidyr] is defined, which is equivalent to `cleave()`.
+#' "wider," similar to R functions like [cast][reshape2::cast], [spread][tidyr::spread()], or [pivot_wider][tidyr::pivot_wider()].
+#' In fact, a humdrumR method for [pivot_wider][tidyr::pivot_wider()] is defined, which is equivalent to `cleave()`.
 #' The `cleave()` function is essentially the inverse of [rend()].
 #' 
 #' @details
@@ -899,7 +899,7 @@ cleaveGraceNotes <- function(humdrumR) {
 #' 
 #' Rend, as in "to rend apart," splits data in separate fields into separate spines or paths.
 #' Under the hood, `rend()` essentially runs a specialized call to make the [humdrum table][humTable]
-#' "longer"/"taller," similar to R functions like [melt()][reshape2], [gather()][tidyr], or [pivot_longer()][tidyr].
+#' "longer"/"taller," similar to R functions like [melt()] (`reshape2`), [gather()] (`tidyr`), or [pivot_longer()] (`tidyr`).
 #' In fact, a humdrumR method for [pivot_longer()][tidyr] is defined, which is equivalent to `rend()`.
 #' The `rend()` function is essentially the inverse of [cleave()].
 #' 
@@ -1076,7 +1076,7 @@ pivot_longer.humdrumR <- function(data, cols, ...) {
 #' stops in different fields, this function spreads the data from the 
 #' smaller fields into multiple stops.
 #' 
-#' @seealso The opposite (kinda) of [foldStops()]
+#' @seealso The opposite (kinda) of `foldStops()`
 #' @export
 unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
   checks(humdrumR, xhumdrumR)
