@@ -319,7 +319,8 @@ readTextFiles <- function(fpaths) {
       stringi::stri_enc_isutf16le(raw) |
       stringi::stri_enc_isutf32be(raw) |
       stringi::stri_enc_isutf16le(raw) |
-      stringi::stri_enc_isutf8(raw)
+      stringi::stri_enc_isutf8(raw) |
+      enc$Encoding == 'ISO-8859-1'
     
     files <- unlist(Map(stringi::stri_encode, raw[text], enc$Encoding[text]))
     
