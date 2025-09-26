@@ -207,7 +207,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 #' + etc.
 #' 
 #' The natural notes of (C) major scale---which we also call the *generic intervals*---fall in the range `-1:5`.
-#' In fact, any diatonic key is a block of seven consecutive numbers of the line-of-fifths: for example, Eb major is `-4:2`.
+#' In fact, any onic key is a block of seven consecutive numbers of the line-of-fifths: for example, Eb major is `-4:2`.
 #' "Sharps" and "flats" represent `+7` or `-7` on the line-of-fifths respectively.
 #' 
 #' 
@@ -289,11 +289,11 @@ is.tonalInterval <- function(x) inherits(x, 'tonalInterval')
 #' 
 #' Controls how simple intervals are interpreted relative to C.
 #' 
-#' @param Key ***The diatonic key used to defined generic pitches.***
+#' @param Key ***The onic key used to defined generic pitches.***
 #' 
 #' Defaults to `NULL`.
 #' 
-#' Must be something that can be [parsed as a diatonic key][keyParsing]; must be either length `1` or `length(x)`.
+#' Must be something that can be [parsed as a onic key][keyParsing]; must be either length `1` or `length(x)`.
 #'
 #' @param ... ***Parameters passed to [tonalInterval()].***
 #' 
@@ -331,6 +331,7 @@ is.generic.tonalInterval <- function(x, Key = NULL) {
   
 }
 
+#' @export
 is.generic.default <- function(x, Key = NULL, ...) is.generic.tonalInterval(tonalInterval(x, Key = NULL, ...), Key = Key)
 
 ## Order/relations methods ####
@@ -568,7 +569,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' + **Input** representation `|>` 
 #'   + *Parsing* `|>`
-#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'     + **Intermee** ([tonalInterval][tonalIntervalS4]) representation `|>`
 #'     + **Transformation**  `|>`
 #'   + *Deparsing* (DEPARSING ARGS GO HERE) `|>`
 #' +  **Output** representation 
@@ -730,8 +731,8 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' ## Steps
 #' 
-#' All representations of "tonal" pitch information include a representation of *diatonic steps*.
-#' You can control how the deparser writes diatonic steps using the `step.labels` argument.
+#' All representations of "tonal" pitch information include a representation of *onic steps*.
+#' You can control how the deparser writes onic steps using the `step.labels` argument.
 #' The `step.labels` argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 #' Examples of `step.labels` arguments that are currently used by `humdrumR` [pitch functions][pitchFunctions] include:
 #' 
@@ -1590,7 +1591,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' various basic pitch representations (including `numeric` and `character`-string representations) can be "parsed"---read
 #' and interpreted by `humdrumR`.
 #' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [pitch function][pitchFunctions], like [kern()]
-#' [semit()], or [solfa()].
+#' [semits()], or [solfa()].
 #' 
 #' @details 
 #'
@@ -1598,13 +1599,13 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' The `tonalInterval` parser will attempt to parse any input information into a [tonalInterval][tonalIntervalS4] object---a back-end pitch representation 
 #' that you probably don't need to care about!
 #' When you use one of the main [pitch functions][pitchFunctions], like [kern()] or [semits()], 
-#' the input is parsed into a [tonalInterval][tonalIntervalS4] object, then immediately [deparsed][pitchDeparsing]
+#' the input is parsed into a [tonalInterval][tonalIntervalS4] object, then immeely [deparsed][pitchDeparsing]
 #' to the representation you asked for (e.g., `**kern` or `**semits`).
 #' Thus, the underlying pipeline for `humdrumR` [pitch functions][pitchFunctions] looks something like:
 #' 
 #' + **Input** representation (e.g., `**pitch` or `**semits`) `|>` 
 #'   + *Parsing* (done by `tonalInterval()`) `|>`
-#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'     + **Intermee** ([tonalInterval][tonalIntervalS4]) representation `|>`
 #'   + *Deparsing* `|>`
 #' +  **Output** representation (e.g. `**kern` or `**solfa`)
 #' 
@@ -1688,7 +1689,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' + **Input** representation `|>` 
 #'   + *Parsing* (done by `tonalInterval(PARSE ARGS GO IN HERE!)`) `|>`
-#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'     + **Intermee** ([tonalInterval][tonalIntervalS4]) representation `|>`
 #'   + *Deparsing* `|>`
 #' +  **Output** representation 
 #' 
@@ -1738,8 +1739,8 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Steps
 #' 
-#' Any representation of "tonal" pitch information will include a representation of *diatonic steps*.
-#' You can control how the parser reads diatonic steps from a pitch representation using the `step.labels` argument.
+#' Any representation of "tonal" pitch information will include a representation of *onic steps*.
+#' You can control how the parser reads onic steps from a pitch representation using the `step.labels` argument.
 #' The `step.labels` argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 #' Examples of `step.labels` arguments that are currently used by preset `humdrumR` pitch parsers include:
 #' 
@@ -2057,7 +2058,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' Must be either `character` or `numeric`.
 #' 
-#' @param Key ***The diatonic key used to interpret the pitch information.***
+#' @param Key ***The onic key used to interpret the pitch information.***
 #' 
 #' Defaults to `NULL`.
 #' 
@@ -2855,7 +2856,7 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' 
 #' + **Input** representation (e.g., `**pitch` or `**semits`) `|>` 
 #'   + *Parsing* (done by [tonalInterval()]) `|>`
-#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
+#'     + **Intermee** ([tonalInterval][tonalIntervalS4]) representation `|>`
 #'     + **Transformation** (e.g., [transpose()]) `|>`
 #'   + *Deparsing* `|>`
 #' +  **Output** representation (e.g. `**kern` or `**solfa`) 
@@ -3146,7 +3147,7 @@ freq.default <- makePitchTransformer(tint2freq, 'freq', 'numeric', tandem = c('C
 #' 
 #' If `freq()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> freq() 
@@ -3197,7 +3198,7 @@ semits.default <- makePitchTransformer(tint2semits, 'semits', 'integer', tandem 
 #' 
 #' If `semits()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> semits() 
@@ -3217,7 +3218,7 @@ midi.default <- makePitchTransformer(tint2midi, 'midi', 'integer', tandem = c('C
 #' 
 #' If `midi()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> midi() 
@@ -3261,7 +3262,7 @@ cents.default <- makePitchTransformer(tint2cents, 'cents', 'numeric',
 #' 
 #' If `cents()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> cents() 
@@ -3321,7 +3322,7 @@ pc.default <- makePitchTransformer(tint2pc, 'pc', 'character', tandem = c('Clef'
 #' 
 #' If `pc()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> pc() 
@@ -3365,7 +3366,7 @@ pitch.default <- makePitchTransformer(tint2pitch, 'pitch')
 #' 
 #' If `pitch()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> pitch() 
@@ -3446,7 +3447,7 @@ kern.default <- makePitchTransformer(tint2kern, 'kern')
 #' 
 #' If `kern()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> kern() 
@@ -3491,7 +3492,7 @@ lilypond.default <- makePitchTransformer(tint2lilypond, 'lilypond')
 #' 
 #' If `lilypond()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> lilypond() 
@@ -3540,7 +3541,7 @@ tonh.default <- makePitchTransformer(tint2tonh, 'tonh')
 #' 
 #' If `tonh()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> tonh() 
@@ -3582,7 +3583,7 @@ helmholtz.default <- makePitchTransformer(tint2helmholtz, 'helmholtz')
 #' 
 #' If `helmholtz()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> helmholtz() 
@@ -3624,7 +3625,7 @@ interval.default <- makePitchTransformer(tint2interval, 'interval')
 #' 
 #' If `interval()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> interval() 
@@ -3677,7 +3678,7 @@ degree.default <- makePitchTransformer(tint2degree, 'degree', keyed = FALSE)
 #' 
 #' If `degree()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> degree() 
@@ -3699,7 +3700,7 @@ deg.default <- makePitchTransformer(tint2deg, 'deg', keyed = FALSE)
 #' 
 #' If `deg()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> deg() 
@@ -3741,7 +3742,7 @@ solfa.default <- makePitchTransformer(tint2solfa, 'solfa', keyed = FALSE)
 #' 
 #' If `solfa()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> solfa() 
@@ -3784,7 +3785,7 @@ solfg.default <- makePitchTransformer(tint2solfg, 'solfg')
 #' 
 #' If `solfg()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> solfg() 
@@ -3827,7 +3828,7 @@ bhatk.default <- makePitchTransformer(tint2bhatk, 'bhatk', keyed = FALSE)
 #' 
 #' If `bhatk()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> bhatk() 
@@ -3992,7 +3993,7 @@ tintPartition_compound <- function(tint, octave.round = floor, ...) {
 
 tintPartition_harmonic <- function(tint, enharmonic.minimum = -5L, enharmonic.maximum = enharmonic.minimum + 11L, ...) {
   
-  # modeoffset <- tint( , getSignature(Key)) + tint(, 2) # because 2 fifths is the "center" of the diatonic set
+  # modeoffset <- tint( , getSignature(Key)) + tint(, 2) # because 2 fifths is the "center" of the onic set
   # entint <- (tint - modeoffset) %<-dim% NULL
   
   # mode <- if (is.null(Key)) 0L else getMode(Key)
@@ -4036,11 +4037,11 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 
 #' Transpose pitches and keys
 #' 
-#' This function [transposes][https://en.wikipedia.org/wiki/Transposition_(music)] pitches or keys 
+#' This function [transposes](https://en.wikipedia.org/wiki/Transposition_(music)) pitches or keys 
 #' by various intervals or to target keys.
 #' Inside the box, inputs and transpositions take place as `tonalInterval`s or `diatonicSet`s,
 #' but any numeric or character string representation of pitches can be transposed as well.
-#' This function is incorporated directly into [tonalTransform], and thence, all [pitch translation][pitchRepresentations]
+#' This function is incorporated directly into [pitch functions][diatonicSet], and thence, all [pitch translation][pitchFunctions]
 #' functions, so you probably won't call it directly very often.
 #' 
 #' There are two distinct types of transposition (real and tonal).
@@ -4070,7 +4071,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' 1. Alterations/accidentals in the input are identified. (In this case, F# and D#).
 #' 2. The generic pitches are transposed within the key, resulting in `{D G A E F}`.
 #' 3. Alterations in the input are added to the output *unless* the resulting pitches are interpreted as a comma
-#'    by a call to [tintPartion], with a given enharmonic wrap value (the default is `12`).
+#'    by a call to `tintPartition`, with a given enharmonic wrap value (the default is `12`).
 #'    In this example, adding the first accidental results in `{G#}` which is not a comma.
 #'    However, the second accidental results in `{E#}` which *is* a comma away from the natural `{F}`. 
 #'    Thus, this accidental is not added to the output, resulting in `{E}`, not `{E#}`.
@@ -4105,7 +4106,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' For example, if the input is in the key of E major but we want it transposed to G major, we could say `to = '*E:'`.
 #' If `real = TRUE`, input is simply translated to the root of the `to` key, with all the exact same intervals.
 #' If `real = FALSE`, the input is translated to the root of the new key, with its intervals changed to match the new key as well.
-#' In either case, the result depends on what the input's key is, which is indicated by the [standard][tonalTransform] `Key` argument.
+#' In either case, the result depends on what the input's key is, which is indicated by the [standard][pitchFunctions] `Key` argument.
 #' The `Key` arguments is like the "from" key.
 #' If `Key = NULL`, the input key is interpreted as C major.
 #' 
@@ -4356,7 +4357,7 @@ invert.factor <- invert.token
 #'
 #' @details 
 #' 
-#' Input vectors `x` (and `from`) are [parsed as pitches][tonalInterval()] ([tonal interval objects][tonalIntervaS4]), if possible.
+#' Input vectors `x` (and `from`) are [parsed as pitches][tonalInterval()] ([tonal interval objects][tonalIntervalS4]), if possible.
 #' (Parsing arguments can be passed via the `parseArgs` list, or `parse(...)` sugar. 
 #' `Key` and `Exclusive` arguments are also passed to the parser.)
 #' Any inputs that fail to parse will show up as `NA` in the output.
@@ -4511,7 +4512,7 @@ invert.factor <- invert.token
 #' 
 #' @param lag ***The [lag()] to calculate harmonic/melodic intervals between.***
 #' 
-#' Defaults to `1`, which means intervals between immediate successors in `x`.
+#' Defaults to `1`, which means intervals between immee successors in `x`.
 #' 
 #' Must be either a single number, or a `logical` of `length(x)` (see "Logical lags" section in manual).
 #' 
@@ -4685,7 +4686,7 @@ mint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bra
 #' 
 #' If `mint()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> mint() 
@@ -4770,7 +4771,7 @@ hint.default <- function(x, lag = 1, deparser = interval, incomplete = kern, bra
 #' 
 #' If `hint()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> hint() 

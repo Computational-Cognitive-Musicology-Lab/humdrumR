@@ -19,7 +19,7 @@ Deparsing is the second step in the \link[=pitchFunctions]{pitch function} proce
 \itemize{
 \item \emph{Parsing} \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 \item \strong{Transformation}  \verb{|>}
 }
 \item \emph{Deparsing} (DEPARSING ARGS GO HERE) \verb{|>}
@@ -206,8 +206,8 @@ different flat symbol, like \code{"_"}, you could modify the deparser:
 This overrides the default value for \verb{**kern}, so the output would be \code{"ee_"} instead of \code{"ee-"}.
 \subsection{Steps}{
 
-All representations of "tonal" pitch information include a representation of \emph{diatonic steps}.
-You can control how the deparser writes diatonic steps using the \code{step.labels} argument.
+All representations of "tonal" pitch information include a representation of \emph{onic steps}.
+You can control how the deparser writes onic steps using the \code{step.labels} argument.
 The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 Examples of \code{step.labels} arguments that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
 \itemize{
@@ -419,19 +419,19 @@ For example, we might think of a ascending major 12th as being an ascending octa
 The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
-   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
-   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
-   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
-   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
-   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
-   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
-   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
-   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
-   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
    +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
-   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
-   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
+   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
    +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
+   +P26: \tab +P29 - P4 \tab +P22 + P5 \tab +P29 - P4 \tab +P22 + P5 \tab +P29 - P4 \cr
+   +P22: \tab +P22 + P1 \tab +P22 + P1 \tab +P22 + P1 \tab +P22 + P1 \tab +P22 + P1 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P33: \tab +P36 - P4 \tab +P29 + P5 \tab +P36 - P4 \tab +P29 + P5 \tab +P36 - P4 \cr
+   +P29: \tab +P29 + P1 \tab +P29 + P1 \tab +P29 + P1 \tab +P29 + P1 \tab +P29 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P40: \tab +P43 - P4 \tab +P36 + P5 \tab +P43 - P4 \tab +P36 + P5 \tab +P43 - P4 \cr
 }
 
 
@@ -441,19 +441,19 @@ When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.r
 The following table illustrates:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
-   GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
-   C: \tab C3 \tab C3 \tab C3 \tab C3 \tab C3 \cr
-   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
-   G: \tab G4 \tab G3 \tab G4 \tab G4 \tab G3 \cr
-   c: \tab C4 \tab C4 \tab C4 \tab C4 \tab C4 \cr
-   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
-   g: \tab G5 \tab G4 \tab G5 \tab G4 \tab G5 \cr
-   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
-   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
    gg: \tab G6 \tab G5 \tab G6 \tab G5 \tab G6 \cr
-   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
-   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
+   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
    ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
+   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
+   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
+   gggg: \tab G8 \tab G7 \tab G8 \tab G7 \tab G8 \cr
+   cccc: \tab C7 \tab C7 \tab C7 \tab C7 \tab C7 \cr
+   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
+   ggggg: \tab G9 \tab G8 \tab G9 \tab G8 \tab G9 \cr
+   ccccc: \tab C8 \tab C8 \tab C8 \tab C8 \tab C8 \cr
+   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   gggggg: \tab G10 \tab G9 \tab G10 \tab G9 \tab G10 \cr
 }
 
 }

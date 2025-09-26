@@ -92,7 +92,7 @@ in Western music.
 
 If \code{interval()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

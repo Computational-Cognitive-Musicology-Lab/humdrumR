@@ -139,11 +139,11 @@ to the beginning (attack) and end (release) of rhythmic events.
 
 If \code{timeline()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 
 If \code{timestamp()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
 Music unfolds over time, and humdrum data typically represents this
@@ -162,7 +162,7 @@ The cumulative durations of \code{timeline()} represent musical duration units, 
 default tempo of 60 beats per minute.
 If \code{minutes == TRUE}, the output is formatted into \code{"minute:seconds.milliseconds"} character strings.
 
-When applying \code{timeline()} to a \link[=humdrumR-class]{humdrumR dataset}, the timeline of all spines with rhythmic information
+When applying \code{timeline()} to a \link[=humdrumRclass]{humdrumR dataset}, the timeline of all spines with rhythmic information
 (e.g., \verb{**kern}, \verb{**harm}) is computed separately.
 (Note that \code{timeline()} can't guarantee that your data spines contain consistent rhythmic information!
 In other words, if one of your spines has (for example) an extra eighth-note token, the timelines in each spine will diverge.)

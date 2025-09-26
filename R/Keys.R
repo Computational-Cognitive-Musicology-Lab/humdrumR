@@ -10,7 +10,7 @@
 #' `diatonicSet` is one of [humdrumR]'s 
 #' types of tonal data, representing Western diatonic keys.
 #' For the most part, users should not need to interact with diatonicSets directly---rather, diatonicSets work behind the scene in numerous `humdrumR` pitch functions.
-#' See the [keyRepresentations] and [keyTransformations] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
+#' See the keyRepresentations and [keyFunctions] documentation for details of usage and functionality or the *Tonality in humdrumR* vignette for 
 #' a detailed explanation of the theory and specifics of diatonicSets.
 #' 
 #' @details
@@ -25,9 +25,9 @@
 #' The `root` argument will attempt to coerce character strings to [tonalIntervals][tonalInterval], and use their `LO5th` value as the root.
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
-#'  for diatonicSets call [key()][diatonicRepresentations].
+#'  for diatonicSets call [key()][keyFunctions].
 #' Thus, if you return a `diatonicSet` on the command line (or call [print][base::print] one one), 
-#' you'll see the [key interpretation][diatonicRepresentations] representation printed.
+#' you'll see the [key interpretation][keyFunctions] representation printed.
 #' 
 #' @slot Root integers representing the root of the key on the line-of-fifths
 #' @slot Signature integers representing the signature (number of accidentals) of the key. 
@@ -119,7 +119,7 @@
 #' + [integer][base::integer]: interpreted as root of major key
 #' + [numeric][base::numeric]: rounded to nearest integer and intepreted as root of major key
 #' + [character][base::character]: interpreted using `humdrumR`s [regular expression dispatch system][humdrumR::regexDispatch], as 
-#'   explained fully [here][diatonicRepresentations].
+#'   explained fully [here][keyFunctions].
 #'   
 #' @seealso The main way to create `diatonicSet` S4 objects is with the [diatonicSet()] pitch parser.
 #' @family {Tonal S4 classes}

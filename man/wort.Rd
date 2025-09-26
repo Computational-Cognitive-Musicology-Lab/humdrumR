@@ -72,7 +72,7 @@ The resulting word is aligned with the first syllable of each word in \verb{**si
 
 If \code{wort()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link{selectedFields} is used as \code{x}.
 }
 \details{
 If a non-null \code{Exclusive} argument is provided, \code{wort()} will only apply where \code{Exclusive == "silbe"}.

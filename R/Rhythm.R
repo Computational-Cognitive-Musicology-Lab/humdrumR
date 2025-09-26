@@ -400,7 +400,7 @@ rint2ms <- function(x, BPM = 60, ...) {
 #' @details 
 #' 
 #' The underlying parser used by all `humdrumR` [rhythm functions][rhythmFunctions] can be called explicitly using the function `rhythmInterval()`.
-#' The `rhythmInterval` parser will attempt to parse any input information into a [ratioanl number][rationa] object.
+#' The `rhythmInterval` parser will attempt to parse any input information into a [ratioanl number][rational] object.
 #' When you use one of the main [rhythm functions][rhythmFunctions], like [recip()] or [dur()], 
 #' the input is parsed into a [rational] object, then immediately [deparsed][rhythmDeparsing]
 #' to the representation you asked for (e.g., `**recip` or `**dur`).
@@ -1028,7 +1028,7 @@ recip.default <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(se
 #' 
 #' If `recip()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' ## humdrumR S3 method:
@@ -1075,7 +1075,7 @@ duration.default <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 #' 
 #' If `duration()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> duration() 
@@ -1096,7 +1096,7 @@ quarters.default <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' 
 #' If `quarters()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> quarters() 
@@ -1156,7 +1156,7 @@ notehead.default <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' 
 #' If `notehead()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> notehead() 
@@ -1234,7 +1234,7 @@ seconds.default <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', ext
 #' 
 #' If `seconds()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> seconds() 
@@ -1254,7 +1254,7 @@ ms.default <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(
 #' 
 #' If `ms()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> ms() 
@@ -1279,7 +1279,7 @@ dur.default <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*
 #' 
 #' If `dur()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> dur() 
@@ -1437,7 +1437,7 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
 #' 
 #' If `ioi()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> ioi() 
@@ -1511,7 +1511,7 @@ sumTies.default <- function(x, open = '[', close = ']', ...,
 #' 
 #' If `sumTies()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> sumTies() 
@@ -1659,7 +1659,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' default tempo of 60 beats per minute.
 #' If `minutes == TRUE`, the output is formatted into `"minute:seconds.milliseconds"` character strings.
 #'
-#' When applying `timeline()` to a [humdrumR dataset][humdrumR-class], the timeline of all spines with rhythmic information
+#' When applying `timeline()` to a [humdrumR dataset][humdrumRclass], the timeline of all spines with rhythmic information
 #' (e.g., `**kern`, `**harm`) is computed separately.
 #' (Note that `timeline()` can't guarantee that your data spines contain consistent rhythmic information!
 #' In other words, if one of your spines has (for example) an extra eighth-note token, the timelines in each spine will diverge.)
@@ -1782,7 +1782,7 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' 
 #' If `timeline()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> timeline() 
@@ -1823,7 +1823,7 @@ timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = T
 #' 
 #' If `timestamp()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> timestamp() 
@@ -2210,7 +2210,7 @@ grid.default <- makeRhythmTransformer(rint2grid, 'grid', 'character')
 #' 
 #' If `grid()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> grid() 

@@ -937,11 +937,11 @@ setMethod('.draw', c('NULL', 'probability'),
           })
 
 
-setMethod('.draw', c('humdrumR.table', 'NULL'),
-          function(x, y, ...) {
-            class(x) <- class(x)[-1]
-            .draw(x, NULL, ...)
-          })
+# setMethod('.draw', c('humdrumR.table', 'NULL'),
+ #         function(x, y, ...) {
+  #          class(x) <- class(x)[-1]
+   #         .draw(x, NULL, ...)
+    #      })
 
 setMethod('.draw', c('discrete', 'NULL'),
           function(x, y, ...){ 
@@ -1845,6 +1845,7 @@ lines
 }
 
 
+#' @export
 hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way
@@ -2223,7 +2224,8 @@ viewKernTable <- function(table) {
 ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
   humtab <- getHumtab(data, dataTypes = dataTypes)
   
-  ggplot(as.data.frame(data), mapping = mapping, ...) + theme_humdrum()
+  
+  ggplot(humtab, mapping = mapping, ...) + theme_humdrum()
 }
 
 

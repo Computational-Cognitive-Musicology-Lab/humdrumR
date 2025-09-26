@@ -27,7 +27,7 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
 \item{...}{\emph{\strong{Which fields to output.}}
 
-If no arguments are provided, the object's \link[=selectFields]{selected fields} are pulled.
+If no arguments are provided, the object's \link[=selectedFields]{selected fields} are pulled.
 
 These arguments can be any combination of \code{character} strings, numbers, or symbols used
 to match fields in the \code{humdrumR} input using \link[dplyr:select]{tidyverse} semantics.
@@ -49,7 +49,7 @@ or any combination of these (e.g., \code{"LIM"}).
 
 Default is \code{"charNA2dot"}.
 
-Must be a single character string, \link[=partialMatchng]{partially matching} \code{"NA2dot"}, \code{"dot2NA"}, \verb{'charNA2dot"}, or \code{"asis"}.}
+Must be a single character string, \link[=partialMatching]{partially matching} \code{"NA2dot"}, \code{"dot2NA"}, \verb{'charNA2dot"}, or \code{"asis"}.}
 
 \item{var}{\emph{\strong{Which field to output.}}
 

@@ -2456,6 +2456,7 @@ ast <- function(expr) {
 }
 
 
+#' @export
 print.ast <- function(x, depth = 0L) {
     pad <- strrep(' ', depth)
     if (!inherits(x, 'ast')) {

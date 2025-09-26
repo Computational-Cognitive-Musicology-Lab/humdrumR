@@ -157,7 +157,7 @@ directly and use its \code{errorReport.path} argument.
 
 
 All tandem interpretations in a humdrum dataset are summarized in the \link[=humTable]{humdrum table's}
-\code{Tandem} field, which is described in detail \link[=extractTandem]{here}.
+\code{Tandem} field, which is described in detail \link[=tandem]{here}.
 In addition, certain "known" tandem interpretations are parsed into their \emph{own} fields automatically.
 For example, \verb{*clefG4} and "\verb{*clefF2} are parsed as \code{Clef} data, while \verb{*k[b-]} is parsed as a \code{KeySignature}.
 The "known" tandem interpretations that \code{humdrumR} recognizes are encoded in a built-in

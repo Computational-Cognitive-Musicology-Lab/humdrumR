@@ -38,7 +38,7 @@ like \code{\link[=recip]{recip()}}, \code{\link[=dur]{dur()}}, or \code{\link[=d
 }
 \details{
 The underlying parser used by all \code{humdrumR} \link[=rhythmFunctions]{rhythm functions} can be called explicitly using the function \code{rhythmInterval()}.
-The \code{rhythmInterval} parser will attempt to parse any input information into a \link[=rationa]{ratioanl number} object.
+The \code{rhythmInterval} parser will attempt to parse any input information into a \link[=rational]{ratioanl number} object.
 When you use one of the main \link[=rhythmFunctions]{rhythm functions}, like \code{\link[=recip]{recip()}} or \code{\link[=dur]{dur()}},
 the input is parsed into a \link{rational} object, then immediately \link[=rhythmDeparsing]{deparsed}
 to the representation you asked for (e.g., \verb{**recip} or \verb{**dur}).

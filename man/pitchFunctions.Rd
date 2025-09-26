@@ -119,7 +119,7 @@ Underneath the hood, the full processing of each function looks like this:
 \itemize{
 \item \emph{Parsing} (done by \code{\link[=tonalInterval]{tonalInterval()}}) \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 \item \strong{Transformation} (e.g., \code{\link[=transpose]{transpose()}}) \verb{|>}
 }
 \item \emph{Deparsing} \verb{|>}

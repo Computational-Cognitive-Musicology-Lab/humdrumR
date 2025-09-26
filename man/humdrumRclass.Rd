@@ -116,14 +116,14 @@ the \code{pattern} used in the call to \code{\link[=readHumdrum]{readHumdrum()}}
 The second, "\code{Names}," is a vector of strings representing all the files which matched the \code{pattern}
 and were read into the \code{humdrumR} object, with \code{\link[=names]{names()}} corresponding to their "subcorpora" labels (\code{Label}).}
 
-\item{\code{Fields}}{A \link{data.table} indicating the existing fields in the \code{humdrumR} object's
+\item{\code{Fields}}{A \link[data.table:data.table]{data.table::data.table} indicating the existing fields in the \code{humdrumR} object's
 \link[=humTable]{humdrum table}.
 The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."}
 
 \item{\code{LoadTime}}{A \link[base:DateTimeClasses]{POSIXct} value, indicating the time at which \code{\link[=readHumdrum]{readHumdrum()}} was
 called to create this \code{humdrumR} object.}
 
-\item{\code{Context}}{A \link{data.table} with two columns: \code{Open} and \code{Close}.
+\item{\code{Context}}{A \link[data.table:data.table]{data.table::data.table} with two columns: \code{Open} and \code{Close}.
 Each row represents a contextual window to apply to the data.}
 }}
 
