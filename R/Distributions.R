@@ -2350,31 +2350,6 @@ mutual <- function(..., base = 2) {
 
 
 
-#' @rdname mutual
-#' @export
-mutual.probability <-  function(x, base = 2) {
-  varnames <- varnames(x)
-  if (length(varnames) < 2L) .stop("Can't calculate the mutual information of a single variable.")
-  
-  x <- unconditional(x)
-  
-  observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
-  
-  independent <- Reduce('*', lapply(varnames, \(j) x[ , j]))
-  # expected <- (x[ , 1] * x[ , 2])
-  independent <- setNames(independent$p, do.call('paste', c(getLevels(independent), list(sep = '.'))))
-  
-  independent <- independent[names(observed)]
-  
-  ratio <- observed / independent
-  logratio <- ifelse(ratio == 0 | ratio == Inf, 0, log(ratio, base = base))
-  
-  equation <- Pequation(x, 'I', ';')
-  
-  setNames(sum(observed * logratio, na.rm = TRUE), equation)
-  
-}
-
 
 
 
@@ -2399,8 +2374,7 @@ mutual.probability <-  function(x, base = 2) {
   x <- unconditional(x)
   
   observed <- setNames(x$p, do.call('paste', c(getLevels(x), list(sep = '.'))))
-  
-  independent <- Reduce('*', lapply(varnames, \(j) x[ , j]))
+  independent <- Reduce('%o%', lapply(varnames, \(j) x[ , j]))
   # expected <- (x[ , 1] * x[ , 2])
   independent <- setNames(independent$p, do.call('paste', c(getLevels(independent), list(sep = '.'))))
   
