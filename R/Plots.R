@@ -1845,6 +1845,7 @@ lines
 }
 
 
+#' @export
 hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way

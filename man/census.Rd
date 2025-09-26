@@ -104,7 +104,7 @@ The \code{by} argument can be used to tabulate data across other divisions in th
 The \code{by} argument to \code{census} indicates groupings in the data to tabulate within, grouping
 across pieces in the corpus by default.
 \code{by} can be an arbitrary expression which is evaluated inside the \link[=humTable]{humdrum table},
-like the \code{groupby} argument to a \link[=withHumdrum]{with/within} call.
+like the \code{groupby} argument to a \link[=withinHumdrum]{with/within} call.
 The by expression must be the full length of the humdrum table.
 }
 

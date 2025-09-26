@@ -1509,11 +1509,19 @@ NULL
 #' 
 #' @inheritParams chordFunctions
 #' @export 
-chord <- makeChordTransformer(tset2chord, 'chord')
+chord.default <- makeChordTransformer(tset2chord, 'chord')
+#' @export
+chord.humdrumR <- humdrumRmethod(chord.default)
+#' export
+chord <- humdrumRgeneric(chord.default)
 
 #' @rdname chord
 #' @export
-harte <- makeChordTransformer(tset2harte, 'harte')
+harte.default <- makeChordTransformer(tset2harte, 'harte')
+#' @export
+harte.humdrumR <- humdrumRmethod(harte.default)
+#' export
+harte <- humdrumRgeneric(harte.default)
 
 #' Figured bass representation of harmony
 #' 
@@ -1536,7 +1544,11 @@ harte <- makeChordTransformer(tset2harte, 'harte')
 #' 
 #' @inheritParams chordFunctions
 #' @export 
-figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
+figuredBass.default <- makeChordTransformer(tset2figuredBass, 'figuredBass')
+#' @export
+figuredBass.humdrumR <- humdrumRmethod(figuredBass.default)
+#' export
+figuredBass <- humdrumRgeneric(figuredBass.default)
 
 #' Roman numeral representations of harmony
 #' 
@@ -1562,7 +1574,11 @@ figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' 
 #' @inheritParams chordFunctions
 #' @export 
-harm <- makeChordTransformer(tset2harm, 'harm')
+harm.default <- makeChordTransformer(tset2harm, 'harm')
+#' @export
+harm.humdrumR <- humdrumRmethod(harm.default)
+#' export
+harm <- humdrumRgeneric(harm.default)
 
 
 
@@ -1578,7 +1594,11 @@ harm <- makeChordTransformer(tset2harm, 'harm')
 #' 
 #' @rdname harm
 #' @export 
-roman <- makeChordTransformer(tset2roman, 'roman')
+roman.default <- makeChordTransformer(tset2roman, 'roman')
+#' @export
+roman.humdrumR <- humdrumRmethod(roman.default)
+#' export
+roman <- humdrumRgeneric(roman.default)
 
 
 #' Tertian quality chord representation
@@ -1627,29 +1647,15 @@ roman <- makeChordTransformer(tset2roman, 'roman')
 #' 
 #' @inheritParams chordFunctions
 #' @export 
-tertian <- makeChordTransformer(tset2tertian, 'tertian')
+tertian.default <- makeChordTransformer(tset2tertian, 'tertian')
+#' @export
+tertian.humdrumR <- humdrumRmethod(tertian.default)
+#' export
+tertian <- humdrumRgeneric(tertian.default)
 
 ### humdrumR methods ----
 
 
-#' @exportS3Method roman default
-#' @exportS3Method roman humdrumR
-humdrumRmethods('roman')
-#' @exportS3Method figuredBass default
-#' @exportS3Method figuredBass humdrumR
-humdrumRmethods('figuredBass')
-#' @exportS3Method harm default
-#' @exportS3Method harm humdrumR
-humdrumRmethods('harm')
-#' @exportS3Method chord default
-#' @exportS3Method chord humdrumR
-humdrumRmethods('chord')
-#' @exportS3Method harte default
-#' @exportS3Method harte humdrumR
-humdrumRmethods('harte')
-#' @exportS3Method tertian default
-#' @exportS3Method tertian humdrumR
-humdrumRmethods('tertian')
 
 ###################################################################### ### 
 # Analyzing tertian sets #################################################

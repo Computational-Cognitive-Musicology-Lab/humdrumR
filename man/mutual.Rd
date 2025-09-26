@@ -97,7 +97,7 @@ pmutual(guitar, metal)
 The HumdrumR \link[=information]{information theory} overview.
 
 Other {Information theory functions}: 
-\code{\link{entropy_by}()},
-\code{\link{entropy}()}
+\code{\link{entropy}()},
+\code{\link{entropy_by}()}
 }
 \concept{{Information theory functions}}

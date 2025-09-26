@@ -94,7 +94,7 @@ Lilypond-like \emph{rhythms} can be creating using the \link{recip} function.
 
 If \code{lilypond()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

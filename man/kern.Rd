@@ -94,7 +94,7 @@ However! In \link{humdrumR}, the \code{kern} function outputs the \emph{pitch} p
 
 If \code{kern()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
 The pitch part of \verb{**kern} tokens breakdown tonal pitch information as so:

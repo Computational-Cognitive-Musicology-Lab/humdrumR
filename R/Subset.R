@@ -219,6 +219,7 @@ nullify <- function(humtab, fields, subset, dataTypes) {
 removeNull <- function(hum, by, nulltypes, ...) {
   UseMethod("removeNull")
 }
+#' @export
 removeNull.humdrumR <- function(hum, by = 'Piece', nullTypes = 'd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
@@ -227,6 +228,7 @@ removeNull.humdrumR <- function(hum, by = 'Piece', nullTypes = 'd', ...) {
   updateFields(hum) # in case any complements have been deleted
  
 }
+#' @export
 removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   

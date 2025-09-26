@@ -164,7 +164,7 @@ The \code{context()} command can be used to group input data (vectors or \link{f
 into arbitrary contextual windows.
 Unlike \link[=groupHumdrum]{grouping vectors},
 \code{context()} windows 1) are always contiguous relative to the reference vector(s)/field(s)
-(which can depend on \link[=order_by]{order}); 2) can \emph{overlap}; and 3) don't necesarily exhaustively
+(which can depend on \link[dplyr:order_by]{order}); 2) can \emph{overlap}; and 3) don't necesarily exhaustively
 divide the data.
 The \code{context()} function should generally be called on
 \link[=humdrumRclass]{humdrumR data}, but it can also be called directly on vectors.
@@ -173,16 +173,16 @@ The \code{uncontext()} function removes contextual windows
 from a \link[=humdrumRclass]{humdrumR data object}.
 
 Once contextual windows are created, the \code{windows()} function can be used to
-view a \link{data.table} representing these windows.
+view a \link[data.table:data.table]{data.table::data.table} representing these windows.
 The \code{Open} and \code{Close} columns indicate row indices in the \link[=humTable]{humdrum table}.
 }
 \details{
 The \code{context()} function determines where contextual windows will begin and end based on
-\link[=expressionEvaluation]{expressions} in its \code{open} and \code{close} arguments.
+\link[=evaluatingExpressions]{expressions} in its \code{open} and \code{close} arguments.
 These \code{open} and \code{close} expressions are evaluated using a \strong{reference} \link{vector}, or set of vectors/\code{\link[=fields]{fields()}} that are all
 the same length.
 
-In most cases, we'll apply \code{context()} to a \link{humdrumR data object}, so windows are defined by
+In most cases, we'll apply \code{context()} to a \link[=humdrumRclass]{humdrumR data object}, so windows are defined by
 evaluating the \code{open} and \code{close} arguments using the \code{\link[=fields]{fields()}} of the humdrum table as the reference.
 Once this has been done, the humdrumR object will \link[=humdrumRclass]{show} how many windows
 have been identified when printed in the console.

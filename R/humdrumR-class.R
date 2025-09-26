@@ -1023,6 +1023,7 @@ getHumtab <- function(humdrumR, dataTypes = "GLIMDd") {
 ##
 
 update_humdrumR <- function(hum, Exclusive, Null, ...) UseMethod('update_humdrumR')
+#' @export
 update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Dd = TRUE , ...) {
     humtab <- getHumtab(hum, 'GLIMDd')
     humtab <- update_humdrumR.data.table(humtab, Exclusive, Dd, ...)
@@ -1030,6 +1031,7 @@ update_humdrumR.humdrumR <- function(hum,  Exclusive = TRUE, Dd = TRUE , ...) {
     putHumtab(hum, overwriteEmpty = c('d')) <- humtab
     hum
 }
+#' @export
 update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Dd = TRUE, ...) {
     
     if (Exclusive) hum <- update_Exclusive.data.table(hum, ...)
@@ -1041,6 +1043,7 @@ update_humdrumR.data.table <- function(hum, Exclusive = TRUE, Dd = TRUE, ...) {
 
 #
 update_Exclusive <- function(hum, ...) UseMethod('update_Exclusive')
+#' @export
 update_Exclusive.humdrumR <- function(hum, ...) {
     humtab <- getHumtab(hum, 'ID')
     
@@ -1050,6 +1053,7 @@ update_Exclusive.humdrumR <- function(hum, ...) {
     hum
     
 }
+#' @export
 update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
     
     exclusiveFields <- colnames(hum) %in% paste0('Exclusive.', fields)
@@ -1062,6 +1066,7 @@ update_Exclusive.data.table <- function(hum, fields = 'Token', ...) {
 
 #
 update_Dd <- function(hum, field, ...) UseMethod('update_Dd')
+#' @export
 update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FALSE, ...) {
     
     if (allFields) field <- fields(hum, 'D')$Name
@@ -1070,6 +1075,7 @@ update_Dd.humdrumR <- function(hum, field = selectedFields(hum),  allFields = FA
     update_Dd.data.table(humtab, field = field) # in place
     hum
 }
+#' @export
 update_Dd.data.table <- function(hum, field = 'Token', ...) {
     
     hum[Type %in% c('d', 'D'), 

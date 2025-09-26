@@ -2,11 +2,13 @@
 # Renumbering ----
 
 renumberFiles <- function(hum) UseMethod('renumberFiles')
+#' @export
 renumberFiles.humdrumR <- function(hum) {
     humtab <- getHumtab(hum)
     putHumtab(hum) <- renumberSpines.data.table(humtab)
     hum
 }
+#' @export
 renumberFiles.data.table <- function(hum) {
     hum[ , File := match(File, sort(unique(File)))]
     hum[ , Piece := match(Piece, sort(unique(Piece)))]
@@ -14,12 +16,13 @@ renumberFiles.data.table <- function(hum) {
 }
 
 renumberSpines <- function(hum) UseMethod('renumberSpines')
+#' @export
 renumberSpines.humdrumR <- function(hum) {
     humtab <- getHumtab(hum, 'GLIMDd')
     putHumtab(hum, overwriteEmpty = c()) <- renumberSpines.data.table(humtab)
     hum
-    
 }
+#' @export
 renumberSpines.data.table <- function(hum) {
     hum[ , Spine := match(Spine, sort(unique(Spine))), by = Piece]
     
@@ -87,6 +90,7 @@ expandPaths.humdrumR <- function(x, asSpines = TRUE) {
     
     x
 }
+#' @export
 expandPaths.data.table <- function(humtab, asSpines = TRUE) {
     if (!any(humtab$Path > 0L, na.rm = TRUE)) return(humtab)
     

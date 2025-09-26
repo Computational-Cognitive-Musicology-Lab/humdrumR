@@ -37,7 +37,7 @@ Must be \code{NULL}, or a \code{character} vector which is either length \code{1
 
 Must be either \code{character} or \code{numeric}.}
 
-\item{Key}{\emph{\strong{The diatonic key used to interpret the pitch information.}}
+\item{Key}{\emph{\strong{The onic key used to interpret the pitch information.}}
 
 Defaults to \code{NULL}.
 
@@ -58,14 +58,14 @@ length and dimensions as \code{x}.
 various basic pitch representations (including \code{numeric} and \code{character}-string representations) can be "parsed"---read
 and interpreted by \code{humdrumR}.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=pitchFunctions]{pitch function}, like \code{\link[=kern]{kern()}}
-\code{\link[=semit]{semit()}}, or \code{\link[=solfa]{solfa()}}.
+\code{\link[=semits]{semits()}}, or \code{\link[=solfa]{solfa()}}.
 }
 \details{
 The underlying parser used by all \code{humdrumR} \link[=pitchFunctions]{pitch functions} can be called explicitly using the function \code{tonalInterval()}.
 The \code{tonalInterval} parser will attempt to parse any input information into a \link[=tonalIntervalS4]{tonalInterval} object---a back-end pitch representation
 that you probably don't need to care about!
 When you use one of the main \link[=pitchFunctions]{pitch functions}, like \code{\link[=kern]{kern()}} or \code{\link[=semits]{semits()}},
-the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immediately \link[=pitchDeparsing]{deparsed}
+the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immeely \link[=pitchDeparsing]{deparsed}
 to the representation you asked for (e.g., \verb{**kern} or \verb{**semits}).
 Thus, the underlying pipeline for \code{humdrumR} \link[=pitchFunctions]{pitch functions} looks something like:
 \itemize{
@@ -73,7 +73,7 @@ Thus, the underlying pipeline for \code{humdrumR} \link[=pitchFunctions]{pitch f
 \itemize{
 \item \emph{Parsing} (done by \code{tonalInterval()}) \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 }
 \item \emph{Deparsing} \verb{|>}
 }
@@ -160,7 +160,7 @@ This means we are controlling the behavior of \code{tonalInterval()}, in the sec
 \itemize{
 \item \emph{Parsing} (done by \verb{tonalInterval(PARSE ARGS GO IN HERE!)}) \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 }
 \item \emph{Deparsing} \verb{|>}
 }
@@ -232,8 +232,8 @@ This overrides the default value for \verb{**kern}---notice, that it \emph{also}
 
 \subsection{Steps}{
 
-Any representation of "tonal" pitch information will include a representation of \emph{diatonic steps}.
-You can control how the parser reads diatonic steps from a pitch representation using the \code{step.labels} argument.
+Any representation of "tonal" pitch information will include a representation of \emph{onic steps}.
+You can control how the parser reads onic steps from a pitch representation using the \code{step.labels} argument.
 The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 Examples of \code{step.labels} arguments that are currently used by preset \code{humdrumR} pitch parsers include:
 \itemize{
@@ -435,19 +435,19 @@ For example, we might think of a ascending major 12th as being an ascending octa
 The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
-   -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
-   -P8: \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \tab -P8  + P1 \cr
-   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
-   -P4: \tab +P1  - P4 \tab -P8  + P5 \tab +P1  - P4 \tab +P1  - P4 \tab -P8  + P5 \cr
-   P1: \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \tab +P1  + P1 \cr
-   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
-   +P5: \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \tab +P1  + P5 \tab +P8  - P4 \cr
-   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
-   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
    +P12: \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \tab +P8  + P5 \tab +P15 - P4 \cr
-   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
-   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P8: \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \tab +P8  + P1 \cr
+   -P5: \tab -P8  + P4 \tab -P8  + P4 \tab +P1  - P5 \tab +P1  - P5 \tab -P8  + P4 \cr
    +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
+   +P15: \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \tab +P15 + P1 \cr
+   +P4: \tab +P1  + P4 \tab +P1  + P4 \tab +P8  - P5 \tab +P1  + P4 \tab +P8  - P5 \cr
+   +P26: \tab +P29 - P4 \tab +P22 + P5 \tab +P29 - P4 \tab +P22 + P5 \tab +P29 - P4 \cr
+   +P22: \tab +P22 + P1 \tab +P22 + P1 \tab +P22 + P1 \tab +P22 + P1 \tab +P22 + P1 \cr
+   +P11: \tab +P8  + P4 \tab +P8  + P4 \tab +P15 - P5 \tab +P8  + P4 \tab +P15 - P5 \cr
+   +P33: \tab +P36 - P4 \tab +P29 + P5 \tab +P36 - P4 \tab +P29 + P5 \tab +P36 - P4 \cr
+   +P29: \tab +P29 + P1 \tab +P29 + P1 \tab +P29 + P1 \tab +P29 + P1 \tab +P29 + P1 \cr
+   +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
+   +P40: \tab +P43 - P4 \tab +P36 + P5 \tab +P43 - P4 \tab +P36 + P5 \tab +P43 - P4 \cr
 }
 
 
@@ -457,19 +457,19 @@ When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.r
 The following table illustrates:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
-   GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
-   C: \tab C3 \tab C3 \tab C3 \tab C3 \tab C3 \cr
-   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
-   G: \tab G4 \tab G3 \tab G4 \tab G4 \tab G3 \cr
-   c: \tab C4 \tab C4 \tab C4 \tab C4 \tab C4 \cr
-   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
-   g: \tab G5 \tab G4 \tab G5 \tab G4 \tab G5 \cr
-   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
-   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
    gg: \tab G6 \tab G5 \tab G6 \tab G5 \tab G6 \cr
-   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
-   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   cc: \tab C5 \tab C5 \tab C5 \tab C5 \tab C5 \cr
+   F: \tab F3 \tab F3 \tab F4 \tab F4 \tab F3 \cr
    ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
+   ccc: \tab C6 \tab C6 \tab C6 \tab C6 \tab C6 \cr
+   f: \tab F4 \tab F4 \tab F5 \tab F4 \tab F5 \cr
+   gggg: \tab G8 \tab G7 \tab G8 \tab G7 \tab G8 \cr
+   cccc: \tab C7 \tab C7 \tab C7 \tab C7 \tab C7 \cr
+   ff: \tab F5 \tab F5 \tab F6 \tab F5 \tab F6 \cr
+   ggggg: \tab G9 \tab G8 \tab G9 \tab G8 \tab G9 \cr
+   ccccc: \tab C8 \tab C8 \tab C8 \tab C8 \tab C8 \cr
+   fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
+   gggggg: \tab G10 \tab G9 \tab G10 \tab G9 \tab G10 \cr
 }
 
 }

@@ -38,7 +38,7 @@ A \code{character} input is parsed using \code{\link[=meter]{meter()}}; failures
 
 The default is \code{\link[=recip]{recip()}}.
 
-Must be a \link[=rhythmFunction]{rhythm function} or \code{NULL}.}
+Must be a \link[=rhythmFunctions]{rhythm function} or \code{NULL}.}
 
 \item{sep}{\emph{\strong{Seperator between irregular beat patterns.}}
 

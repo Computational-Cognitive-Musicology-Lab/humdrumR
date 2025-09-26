@@ -11,12 +11,12 @@ LazyData: TRUE
 Encoding: UTF-8
 StagedInstall: no
 Collate: humdrumR-package.R
+         Token.R
          tools.R
-	       Token.R
-         Distributions.R
          messages.R
          Dispatch.R
          humdrumR-class.R
+         Distributions.R
          Reshape.R
          Interpretations.R
          Summary.R

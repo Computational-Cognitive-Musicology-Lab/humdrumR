@@ -331,6 +331,7 @@ is.generic.tonalInterval <- function(x, Key = NULL) {
   
 }
 
+#' @export
 is.generic.default <- function(x, Key = NULL, ...) is.generic.tonalInterval(tonalInterval(x, Key = NULL, ...), Key = Key)
 
 ## Order/relations methods ####

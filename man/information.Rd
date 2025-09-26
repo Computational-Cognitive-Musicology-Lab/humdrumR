@@ -15,7 +15,7 @@ using a single number.
 Such information-theoretic descriptive statistics can be computed using the \code{\link[=entropy]{entropy()}}
 (joint or conditional entropy), \code{\link[=xentropy]{xentropy()}} (cross entropy), \code{\link[=kld]{kld()}} (Kullback–Leibler divergence), and  \code{\link[=mutual]{mutual()}} (mutual information) functions.
 In contrast, other information theory metrics are calculated "point-wise": one value for each data observation.
-Our point-wise information theory functions are \code{\link[=like]{like()}} (likelihood),
+Our point-wise information theory functions are \code{\link[data.table:like]{data.table::like()}} (likelihood),
 \code{\link[=info]{info()}} (information content), \code{pentropy()} (pointwise conditional entropy), and \code{pmutual()} (pointwise mutual information).
 
 Note that all of these functions calculate or utilize \emph{empirical} statistics---i.e., they describe \emph{your data}.

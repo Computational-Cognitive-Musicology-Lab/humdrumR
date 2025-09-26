@@ -4,7 +4,7 @@ author: "Nathaniel Condit-Schultz"
 date:   "August 2024"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Filtering humdrum data}
+  %\VignetteIndexEntry{Counts, Probability, and Information}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 

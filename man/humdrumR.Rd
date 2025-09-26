@@ -54,7 +54,7 @@ Can be any positive whole number.}
 
 Default is \code{"NA2dot"}.
 
-Must be a single character string, \link[=partialMatchng]{partially matching} \code{"NA2dot"}, \code{"dot2NA"}, \verb{'charNA2dot"}, or \code{"asis"}.
+Must be a single character string, \link[=partialMatching]{partially matching} \code{"NA2dot"}, \code{"dot2NA"}, \verb{'charNA2dot"}, or \code{"asis"}.
 \code{"NA2dot"} means all \code{NA} values are converted to \code{"."}; \verb{"dot2NA} means all \code{"."} are converted to \code{NA}; \code{charNA2dot} means \code{NA} values
 in \code{character} vectors are converted to \code{NA}, but not in other atomic types; \code{"asis"} means either \code{NA} or \code{"."} values may print, depending
 on what is in the field.}
@@ -100,7 +100,7 @@ the \link[=humTable]{humdrum table}.
 \item To filter \code{humdrumR} data, we have the \link[=subset.humdrumR]{subset()/filter()} functions, as well as methhods for
 \code{R}'s standard \link[base:Extract]{indexing operators} (\verb{[]} and \verb{[[]]}).
 \item To manipulate and modify \code{humdrumR} data, we have the \link[=withinHumdrum]{with and within} methods for \code{humdrumR} objects, and tidyverse
-aliases \code{\link[=mutate]{mutate()}}, \code{\link[=summarise]{summarise()}}, and \code{\link[=reframe]{reframe()}}.
+aliases \code{\link[dplyr:mutate]{dplyr::mutate()}}, \code{\link[dplyr:summarise]{dplyr::summarise()}}, and \code{\link[dplyr:reframe]{dplyr::reframe()}}.
 \item To facilitate the development of functions to work with humdrum tokens---which are simple character strings packed with information---,
 a useful API we call our \link[=humdrumDispatch]{regular-expression dispatch system}.
 \item Several \link[=humdrumPitch]{modules} for representing and manipulating musical pitch information,
