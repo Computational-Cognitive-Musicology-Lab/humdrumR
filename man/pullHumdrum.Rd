@@ -85,7 +85,7 @@ The \code{null} argument controls how null data is returned, with four options:
 \itemize{
 \item \code{"NA2dot"} means all \code{NA} values are converted to \code{"."}; note that this will cause all output to be coerced to \code{character}.
 \item \code{"dot2NA"} means all \code{"."} are converted to \code{NA}.
-\item \code{"charNA2dot"} means \code{NA} values in \code{character} vectors are converted to \code{NA}, but not in other atomic types.
+\item \code{"charNA2dot"} means \code{NA} values in \code{character} vectors are converted to \code{"."}, but not in other atomic types.
 \item \code{"asis"} means either \code{NA} or \code{"."} values may print, depending on what is in the field.
 }
 
