@@ -885,12 +885,12 @@ parseLocal <- function(records) {
   # recordns are still characters. This is necessarry, because we use them as names to index other objects.
   sections <- sections[recordns, , drop = FALSE] # these two should always be the same in each spine,
   barlines <- barlines[recordns, , drop = FALSE] # so I'm really just copying the first spine...maybe change this to work like tandems (below)?
- 
   
   spineLengths <- nrow(mat) + apply(mat[!grepl('^[*!=]', mat[ , 1]), , drop = FALSE], 2, \(col) sum(stringi::stri_count_fixed(col, ' ')))
   Columns      <- rep(Columns, spineLengths)
   
-  tandems  <- tandems[paste0(SpineNumbers[Columns], '_', recordns)] # These are different in each spine
+  # expand tandems to match multistops as well, by indexing using Column_RecordN names 
+  tandems  <- tandems[paste0(Columns, '_', recordns)] 
   
   # Don't need recordns to be characters anymore.
   recordns  <- as.integer(recordns)
@@ -1078,11 +1078,14 @@ parseInterpretations <- function(spinemat) {
   # i.e.  c("*clefF4", 
   #         "*F:,*clefF4", 
   #         "*k[b-],*F:,*clefF4")
+  #   The tandem objects are named by column_recordn
+  # Note: The input and output here are SPINE PATHs not spines.
   spinemat[is.na(spinemat)] <- '_P' # Not sure why this is necassary (Nat, December 2018)
   
   lapply(1:ncol(spinemat), 
          \(j) { 
            if (j > 1 && any(spinemat[ , j] == '_P')) {
+             # This has to be done one at a time, because there can be nested paths
              spinemat[spinemat[ , j] == '_P', j] <<- spinemat[spinemat[ , j] == '_P', j - 1] 
            }
            spine <- spinemat[ , j]
@@ -1093,6 +1096,7 @@ parseInterpretations <- function(spinemat) {
            
            setNames(sapply(seq_along(spine), \(i) paste(interps[i >= interpind], collapse = ',')), 
                     paste0(j, '_', rownames(spinemat)))
+           
          } 
   ) -> tandemIs
   
