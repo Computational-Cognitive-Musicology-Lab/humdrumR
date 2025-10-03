@@ -115,14 +115,14 @@ example1 |> print(view = "table")
 
 
 When we use `view = "humdrum"`, we see the default `r hm` view of the data in humdrum syntax.
-However, with `view = "table"`, we are show the underling humdrum table.
+However, with `view = "table"`, we are showing the underling humdrum table.
 We can see that there is one row for *each and every* token, with different columns indicating which `File`, `Spine`, and `Record` each token comes from.
 In `r hm`, we refer to the columns of the humdrum table as **fields**.
 
 ---
 
 If you get tired of explicitly using `print()`, you can change `humdrumR`'s default print method using the 
-`humdrum()` *function*, the first argument of which is `view`.
+`humdrumR()` *function*, the first argument of which is `view`.
 
 
 ```{r}
@@ -164,7 +164,7 @@ fields(example1)
 
 ```
 
-We see that there are `r humdrumR:::num2print(length(example1))` fields (columns), and that they are divided into five types of fields: 
+We see that there are `r humdrumR:::num2print(length(fields(example1)))` fields (columns), and that they are divided into five types of fields: 
 
 + Data fields
 + Structure fields
@@ -285,7 +285,7 @@ readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor0') -> chorales
 
 In our [quick start](GettingStarted.html#quick-start "Getting started with humdrumR article"), we showed you the simplest and most intuitive way to manipulate `r hm` data: simply pipe data directly to any `r hm` function.
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |> 
   pitch(simple = TRUE) 
 
@@ -298,7 +298,7 @@ We call this "humdrum style," because it looks a lot like the way the original [
 
 As we learned in the previous example, there are a bunch of fields in our `chorales` object:
 
-```{r}
+```{r, scroll.height='300px'}
 fields(chorales)
 
 ```
@@ -336,14 +336,16 @@ chorales |>
 
 We can now, select, access, or manipulate the new `Pitch` field:
 
-```{r}
+```{r, scroll.height='300px'}
 chorales$Pitch
+```
 
+```{r, scroll.height='800px'}
 chorales |> select(Pitch, Token, Key) |> print(view = "table")
+```
 
+```{r, scroll.height='800px'}
 chorales |> select(Pitch)
-
-
 ```
 
 
@@ -355,12 +357,11 @@ If we apply a [rhythm function](RhythmAndMeter.html "Rhythm and Meter in humdrum
 We need to "reset" by selecting the `Token` field again.
 
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
   select() |>  # this will select Token!
   duration() -> chorales
   
-
 chorales
 
 ```
@@ -369,7 +370,7 @@ Once you start creating many fields, it can be easy to lose track of which field
 
 #### Multiple fields
 
-Once we get to have more than one field to work with, it gets garder to use the "humdrum style."
+Once we get to have more than one field to work with, it gets harder to use the "humdrum style."
 Most `r hm` function wills only pipe the *first* selected field, so it doesn't matter if you select multiple fields.
 However, the `count()` function can accept multiple fields.
 Now that we've created a `Pitch` *and* `Duration` fields, we can do stuff like:
@@ -398,21 +399,21 @@ For example:
 ```{r}
 
 chorales |>
+  select(Token) |>
   mutate(mint(Token))
-
 
 ```
 
 What happened here?
 
-1. The call `mint(Token, simple = TRUE)` is evaluated, using the `Token` field from "inside" the `chorales` data object.
+1. The call `mint(Token)` is evaluated, using the `Token` field from "inside" the `chorales` data object.
 2. The resulting data ([melodic intervals](../reference/int.html "Mint documentation")) is put into a new field, which it calls `mint(Token)`.
 
 Of course, `mint()` is a `r hm` function, so we could do this simple command without using `mutate()`, by calling `chorales |> mint()` in "humdrum style."
 However, by using `mutate()` we can do a few nifty things.
 For one, we can execute more complex commands involving any of our fields:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   mutate(ifelse(Duration > (1/8), 
@@ -431,6 +432,11 @@ We can use non-`r hm` functions, like `gsub()`, `nchar()`, or `mean()`:
 
 chorales |>
   mutate(gsub('-', 'b', Token))
+```
+
+After `gsub()`, the token in the first spine of record 84 is changed from 4BB- to 4BBb.
+
+```{r}
 
 chorales |>
   summarize(Token |> nchar() |> mean())
@@ -490,16 +496,16 @@ By default, `r Hm` commands only operate on humdrum *data* tokens, ignoring bar 
 You can override this by providing a `dataTypes` argument to most `r hm` functions.
 For example, compare these two commands:
 
-```{r}
-
+```{r, scroll.height='800px'}
 chorales |>
   mutate(Nchar = nchar(Token))
+```
 
+```{r, scroll.height='800px'}
 chorales |> 
   mutate(Nchar = nchar(Token), dataTypes= 'GLIMDd')
 
 ```
-
 
 
 If you pull your data out of `r hm`, you'll have to manually manage what data types you want to work with yourself.
@@ -509,7 +515,7 @@ If you pull your data out of `r hm`, you'll have to manually manage what data ty
 For some functions, `r hm` will automatically pass specific fields as arguments to functions you call.
 For example, `r hm` [pitch functions](../references/pitchFunctions.html "HumdrumR pitch functions") like `solfa()` (solfege) need to key information to get you the information you want.
 Many humdrum data sets will have a `Key` field, which is automatically created if you read data files containing key interpretations, like `G*:`.
-`r Hm` unless you explicitly override it with a different `Key` argument, `r hm` will automatically pass the `Key` argument to pitch functions.
+Unless you explicitly override it with a different `Key` argument, `r hm` will automatically pass the `Key` argument to pitch functions.
 Thus:
 
 ```{r}
@@ -527,22 +533,27 @@ Function documentation will always tell you about any automatic arguments: for e
 
 A special case of "automatic arguments" (see previous section) is "lagged" functions, like `mint()`, `ditto()`, and `lag()`.
 These functions work by shifting of "lagging" the contents of a field.
-The `groupby` argument is used to make data is shifted across inappropriate boundaries in the music/data.
+The `groupby` argument allows humdrum to treat each group separately, so that data is not shifted across inappropriate boundaries in the music/data.
 For example, we don't want the first note from the second spine of data to be shifted into the last note of the first spine.
-What his all means that the following commands will all, automatically, respect logical (melodic) grouping boundaries in the data:
+The following commands will all, automatically, respect logical (melodic) grouping boundaries in the data:
 
 
-```{r}
-
-chorales |> mutate(ditto(Token))
-
-chorales |> mint()
-
-chorales |> mutate(lag(Token))
-
+```{r, scroll.height='800px'}
+chorales |> ditto(Token)
 ```
 
+`ditto()` fills null values with non-null values from earlier. 
+For example, the null values at the fourth spine of record 23 and 24 are replaced by 2g, the value of the token at record 22.
 
+```{r, scroll.height='800px'}
+chorales |> mint()
+```
+
+```{r, scroll.height='800px'}
+chorales |> mutate(lag(Token))
+```
+`lag()` shifts data down by n (default=1). 
+For example, `lag()` shifts the token 4GG at spine1 from record 20 to record 22 (skipping 21 because it is a bar), the token 4G from record 22 to record 23, etc.. 
 
 ### Special syntactic "sugar"
 

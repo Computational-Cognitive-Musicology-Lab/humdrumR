@@ -24,7 +24,7 @@ This article explains functionality `r hm` has to break your data into subgroups
 In this article, we'll once again work with our prepackaged `chorales` dataset, as we did in our [quick start](GettingStarted.html#quick-start "Getting started with humdrumR article") article.
 
 
-```{r}
+```{r, scroll.height='800px'}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
 chorales
@@ -58,9 +58,9 @@ chorales |>
 
 ```
 How does this work?
-The `group_by()` function looks at all the unique values the fields we give it---in this case the `Piece` field---and breaks the humdrum table into groups based on those values.
-So where ever `Piece == 1`, that's a group; wherever `Piece == 2`, that's another group, etc.
-After `group_by()` is applied, the `r hm` dataset is grouped, and any subsequent tidy-commands will automatically applied *within* the groups.
+The `group_by()` function looks at all the unique values in the fields we give it---in this case the `Piece` field---and breaks the humdrum table into groups based on those values.
+So whereever `Piece == 1`, that's a group; wherever `Piece == 2`, that's another group, etc.
+After `group_by()` is applied, the `r hm` dataset is grouped, and any subsequent tidy-commands will automatically be applied *within* the groups.
 
 ----
 
@@ -72,7 +72,7 @@ Once a `r hm` dataset has been grouped, it will stay grouped until you call `ung
 If we like, we can pass more than one field to `group_by()`.
 Groups will be formed for every unique *combinations* of values across grouping fields:
 
-```{r}
+```{r, scroll.height='300px'}
 chorales |>
   midi() |>
   group_by(Piece, Spine) |>
@@ -80,7 +80,7 @@ chorales |>
 
 ```
 
-You can also create new grouping fields on the fly.F
+You can also create new grouping fields on the fly. 
 For example, what if, instead of groups for four separate voices, we wanted to group bass/tenor and alto/soprano within each piece?
 We could do this:
 
@@ -96,7 +96,7 @@ chorales |>
 
 ----
 
-Grouping isn't just good for calcualting single values.
+Grouping isn't just good for calculating single values.
 We can, for instance, tabulate each group separately:
 
 ```{r}
@@ -115,7 +115,7 @@ chorales |>
 ### By file
 
 It is *very* common in `r hm` analyses that we want to apply commands grouped by piece.
-In most cases, two pieces of music are completely separate entities, so it makes sense to apply calcualtions/manipulations separately to each piece.
+In most cases, two pieces of music are completely separate entities, so it makes sense to apply calculations/manipulations separately to each piece.
 However, `r hm` won't (always) do this for you.
 You might think, "I want to count how many notes occur in each record" and run the command `group_by(Record)`---but watch out!
 Grouping by `Record` will group *all* the records 1s across all the pieces, all the record 2s across all the pieces, etc.
@@ -126,9 +126,9 @@ Don't forget to group by piece...unless you are sure you don't want to.
 ### Melodic grouping
 
 In lots of humdrum data, each spine (or at least some spines) in the data represent a musical part of voice.
-We often want isolate each voice, so `group_by(Piece, Spine)` gets used a lot.
+We often want to isolate each voice, so `group_by(Piece, Spine)` gets used a lot.
 However, watch out for spine paths and multi-stops, if your data has them---you might want something like `group_by(Piece, Spine, Path)`, for example, if you data has spine paths.
-Check out the [complex syntax][ComplexSyntax.html "Complex humdrum syntax article"] for more ideas/options about this.
+Check out the [complex syntax](ComplexSyntax.html "Complex humdrum syntax article") for more ideas/options about this.
 
 
 
@@ -142,7 +142,7 @@ For example, let's say we want to calculate the lowest note in each bar.
 
 
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   semits() |>

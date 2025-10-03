@@ -58,21 +58,21 @@ To use `readHumdrum()` we call the function with one (or more) character-string 
 These arguments are interpreted as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression), and matched against directories and files on your system.
 We call these "**REpath-patterns**," short for Regular Expression directory-path patterns.
 For example, 
-```{r}
+```{r, scroll.height='300px'}
 
 readHumdrum('HumdrumData/BachChorales/chor.*.krn')
 
 ```
 
 uses the REpath-pattern `"HumdrumData/BachChorales/chor.*.krn"` to match all files in the 'HumdrumData/BachChorales' directory whose name matches the regular expression `chor.*.krn`.
-As you can see, the REpath-pattern includes directory paths (relative or absolute)---using your operating system's appropriate delimiter ("\" for windows, "/" for everybody else)---*and* a pattern for matching file paths.
+As you can see, the REpath-pattern includes directory paths (relative or absolute)---using your operating system's appropriate delimiter (\"\\\" for windows, \"/\" for everybody else)---*and* a pattern for matching file paths.
 *Each* directory is also treated as a regular expression, possibly matching multiple directories.
 Let's break this down: `r hm` splits your REpath-pattern input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three as regular expressions.
 The first two expressions are used to match directories, while the last expression is used to match files.
 So, while `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the files with the ".krn" extension in the "BeethovenVariations" directories and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the files in the "MozartVariations" directories, the command `readHumdrum('HumdrumData/.*Variations/.*.krn')` will match all kern files in both directories!
 
 
-```{r}
+```{r, scroll.height='300px'}
 readHumdrum('HumdrumData/.*Variations/.*.krn')
 ```
 
@@ -83,7 +83,7 @@ readHumdrum('HumdrumData/.*Variations/.*.krn')
 
 To read *all* of our test files we can enter:
 
-```{r}
+```{r, scroll.height='300px'}
 
 readHumdrum('HumdrumData/.*/.*')
 
@@ -118,14 +118,14 @@ Sometimes, expressing all the files you want in a single regular expression is n
 Luckily, `readHumdrum()` can accept as many separate patterns you want, just group them into a vector.
 Instead of writing `readHumdrum('HumdrumData/.*Variations/.*.krn')`, you could be explicit and write 
 
-```{r}
+```{r, scroll.height='300px'}
 readHumdrum(c('HumdrumData/BeethovenVariations/.*.krn', 'HumdrumData/MozartVariations/.*.krn'))
 ```
 
 I've used the `c` command to create a vector with two REpath-patterns.
 However, that was a lot of (bug-prone) typing...what if we combine these multiple patterns with the Multi-Argument Approach from above?:
 
-```{r}
+```{r, scroll.height='300px'}
 readHumdrum('HumdrumData',
             c('BeethovenVariations', 'MozartVariations'),
             '.*.krn')
@@ -153,7 +153,7 @@ However, the middle argument (`"...Variations"`) is of length two.
 
 #### Pattern Names
 
-Whenever we specific more than one REpath-pattern, `r hm` gives them names which we can access in the `Label` field of the resulting `r hm` data object.
+Whenever we specify more than one REpath-pattern, `r hm` gives them names which we can access in the `Label` field of the resulting `r hm` data object.
 You can choose these labels by giving names to the patterns in your multi-pattern vectors:
 Thus, we could write
 
@@ -169,13 +169,13 @@ This feature is very useful if you are working with multiple heterogeneous datas
 
 Sometimes you want to only read humdrum files which contain particular data.
 For instance, you might want to read only the files in a minor key.
-One option is to read all the files in the corpus then filter out the files you don't want (see the [humdrumR filtering vignette](Filtering.html) to learn how.
+One option is to read all the files in the corpus then filter out the files you don't want (see the [humdrumR filtering vignette](Filtering.html) to learn how).
 However, in some cases, it can save a lot of time and effort to filter the files you want before parsing them.
 The `contains` argument of `readHumdrum()` can be used in just this way!
 The contains argument must be a character vector---each character string is treated as a regular expression, and only files which contain matches to all of these regular expressions will be read.
 Thus, we could only read pieces with minor keys by writing:
 
-```{r}
+```{r, scroll.height='300px'}
 readHumdrum('HumdrumData', 'BachChorales', 'chor.*.krn',
             contains = '\\*[a-g][-b#]*:') 
 ```
@@ -202,7 +202,7 @@ You will see a message that checks which files are "valid humdrum," and tell you
 If you are trying to read a file which you *think* should be valid humdrum but `readHumdrum()` won't read it, use `validateHumdrum()` to see a detailed report of the problem.
 `r Hm` won't read files with *any* humdrum-syntax violations, even relatively minor ones.
 Once you see the problems that `validateHumdrum()` is finding in your data, you'll need to fix them yourself before you can use `r hm` on the data.
-Check out the [validateHumdrum][reference/validateHumdrum.html] documentation to learn more about `r hm`'s data validation tools, and how they can be used to identify errors in your humdrum data.
+Check out the [validateHumdrum](reference/validateHumdrum.html) documentation to learn more about `r hm`'s data validation tools, and how they can be used to identify errors in your humdrum data.
 
 > Note that `validateHumdrum()` does not automatically check if the humdrum *data* is encoded correctly or makes sense, just that it is structurally sound, in accordance with the humdrum syntax.
 
@@ -232,13 +232,19 @@ This can be accomplished quite easily with the `reference` argument.
 The `reference` argument defaults to `"all"`, which means all reference records are parsed.
 However, reference can also be a character vector of reference codes.
 
+```{r}
+readHumdrum('HumdrumData',
+            c('BeethovenVariations', 'MozartVariations'),
+            '.*.krn') |> fields('Reference')
+```
+
 Thus, 
 
 ```{r}
 readHumdrum('HumdrumData',
             c('BeethovenVariations', 'MozartVariations'),
             '.*.krn',
-            reference = 'COM')
+            reference = 'COM') |> fields('Reference')
 ```
 
 will only parse the `COM` reference record in each piece.
@@ -248,7 +254,7 @@ We can use this to rename our reference fields if we like---in this case,
 readHumdrum('HumdrumData',
             c('BeethovenVariations', 'MozartVariations'),
             '.*.krn',
-            reference = c(Composer = 'COM'))
+            reference = c(Composer = 'COM')) |> fields('Reference')
 ```
 
 the `COM` reference records will be parsed but saved into a field called `Composer` instead of `COM`.
@@ -392,7 +398,7 @@ Even if you specify `overwrite = TRUE`, `writeHumdrum()` will ask you to confirm
 ## !!!EMD
 
 `!!!EMD:` is a humdrum reference code, meaning  "*Document modification description*."
-This code is used is to keep track of modifications to humdrum datasets.
-`r Hm` will, by default, insert an `!!!EMD` record into any files it writes, saying: "Edited using humdrumR, version `r humdrumR_version` on (*current data/time*."
+This code is used to keep track of modifications to humdrum datasets.
+`r Hm` will, by default, insert an `!!!EMD` record into any files it writes, saying: "Edited using humdrumR, version `r humdrumR_version` on (*current data/time*)."
 
 

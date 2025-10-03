@@ -19,7 +19,7 @@ par(mar=c(1,1,1,1))
 ```
 
 Welcome to "Getting to know your humdrum data"!
-This article explains how `r hm` you an find essential metainformation about your data: how much data is there, and how is it structured?
+This article explains how you can find essential metainformation about your data with `r hm`: how much data is there, and how is it structured?
 If you don't understand your data, you won't be able to do intelligent analyses of it.
 
 This article, like all of our articles, closely parallels information in `r hm`'s detailed code documentation, which can be found in the "[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#summarizing "HumdrumR function reference, Summarizing")" section of the `r hm` [homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
@@ -71,7 +71,7 @@ chorales |> census()
 
 ```
 
-The corpus contains, in total, `r humdrumR:::num2print(sum(census(chorales)$Tokens))` in `r humdrumR:::num2print(sum(census(chorales)$Records))`.
+The corpus contains, in total, `r humdrumR:::num2print(sum(census(chorales)$Tokens))` tokens in `r humdrumR:::num2print(sum(census(chorales)$Records))` records.
 The `(unique)` column tells us how many unique `Tokens` there are per file (and overall, at the bottom).
 The `(per token)` column indicates the average number of characters in each file, and overall.
 
@@ -175,14 +175,14 @@ reference(chorales)[3, ]
 # Summarizing Data
 
 
-The next thing to do, when getting started with a `r hm` data analysis, is too get a sense of the data *content* itself.
+The next thing to do, when getting started with a `r hm` data analysis, is to get a sense of the data *content* itself.
 What tokens does our data actually contain?
 R's `unique()`, `count()`, and `sort()` functions are perfect for this.
 We'll need to use the some techniques from the [Data Fields](DataFields.html#working-with-fields "Data fields article") article, so review that if you don't understand the following!
 
 Let's get the unique values, sorted:
 
-```{r}
+```{r, scroll.height='300px'}
 
 chorales |>
   with(unique(Token)) |>
@@ -194,7 +194,7 @@ chorales |>
 Unlike `unique()`, `count()` will count each unique value, and we can then sort to see the most common tokens:
 
 
-```{r}
+```{r, scroll.height='300px'}
 
 chorales |>
   with(count(Token)) |>
@@ -213,7 +213,7 @@ But don't get too hasty---it's a good idea to dig in a little more before we get
 Our call to `interpretations()` told us to expect `**kern` data, representing
 musical "notes" (pitch and rhythm).
 So you probably *expected* to see things like `4.` (dotted quarter note) and `f#` (F sharp above middle-C).
-But what is the `X` is `4dnX`? Or the all the `J`s and `L`s and `;`s?
+But what is the `X` in `4dnX`? Or all the `J`s and `L`s and `;`s?
 We can look these up in the [`**kern` definition](https://www.humdrum.org/rep/kern/index.html), but the point is, we probably didn't know they were there until we took a look!
 You might *think* you know what's in your data...and get unpleasantly surprised.
 This is especially true with less mature (newer) datasets, which *WILL DEFINITELY CONTAIN ERRORS*.

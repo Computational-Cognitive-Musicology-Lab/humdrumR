@@ -36,6 +36,20 @@ htmlColors <- function(humdrumR) {
   
   cat(lines, sep = '\n')
 }
+
+# To make scrollable output, add max.height option to the code block. For example:
+# ``{r, scroll.height='300px'}
+# Note that each row is about 25px
+local({
+  hook_output <- knitr::knit_hooks$get("output")
+  knitr::knit_hooks$set(output = function(x, options) {
+    if (!is.null(options$scroll.height)) options$attr.output <- c(
+      options$attr.output,
+      sprintf('style="height: %s; overflow: auto; resize: vertical;"', options$scroll.height)
+    )
+    hook_output(x, options)
+  })
+})
 # 
 # local({
 #   hook_old <- knitr::knit_hooks$get("output")  # save the old hook

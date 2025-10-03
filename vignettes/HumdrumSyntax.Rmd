@@ -35,7 +35,7 @@ What information is encoded, and how that information is represented is flexible
 For all this flexibility, the *structure* of humdrum data---the humdrum syntax---is always the same, which makes it easy to work with!
 
 
-To fill content into our humdrum files, we define "**interpretations**.
+To fill content into our humdrum files, we define "**interpretations**".
 Interpretations are schemes for how to represent some information as characters.
 This sounds complicated/scary, but it can be very simple!
 For instance, if I wanted to encode drum beats in humdrum I could invent a simple scheme for encoding drum beats as:
@@ -87,9 +87,6 @@ Indeed, these are called "*global*" records---they don't belong to a particular 
 This image illustrates that the two spines in this file don't include records `1` and `10`:
 
 ![](images/Syntax_Spine.png){width=800px}
-
-Or with the real data again:
-
 
 ## Time
 

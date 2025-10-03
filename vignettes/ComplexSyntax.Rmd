@@ -59,7 +59,9 @@ Here is a more complex example:
 
 paths2 <- readHumdrum('examples/Paths2.krn')
 
-paths2
+paths2 |> print(view = "humdrum")
+
+paths2 |> print(view = "table")
 
 ```
 
@@ -99,7 +101,7 @@ paths2 |> expandPaths(asSpines = TRUE)
 
 ```
 
-`r Hm`'s [tidyverse methods][withinHumdrum], like `mutate()` and `within()`, also have an `expandPaths` argument.
+`r Hm`'s [tidyverse methods](../reference/withinHumdrum.html), like `mutate()` and `within()`, also have an `expandPaths` argument.
 If `expandPaths = TRUE`, these functions will expand spine paths, apply their expression, then "unexpand" the paths back to normal.
 Look at the differnce between these two calls:
 
@@ -122,7 +124,7 @@ Notice how, when we *don't* use `expandPaths`, each path is counted entirely sep
 
 In humdrum syntax, multiple tokens can be placed "in the same place" (i.e., same record, same spine) by simply separating them with spaces.
 (This is most commonly used to represent chords in `**kern` data.)
-In `r hm`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a `r hm` [humdrum table][humTable].
+In `r hm`, we call these "Stops"---as always, **every** humdrum token, including stops, get their own row in a `r hm` [humdrum table](../reference/humTable.html).
 Thus, we need the `Stop` field to tell us which stop a token came from!
 In much data, all/most tokens are simply `Stop == 1` (the first position), but if there are more than one tokens in the same record/spine, they will be numbered ascending from one.
 
@@ -147,7 +149,7 @@ You can see that each note of the chords gets its own row, numbered `1`, `2`, an
 Working with multi-stops is often even more challenging than working with spine paths.
 How you work with stops depends, as always, on the nature of the data.
 Again, If you are simply doing global counting of notes, for example, tokens in stops might be treated no differently than any other data.
-In other analyses---especially, if you are analyzing data in a linear/melodic way---, incorporating/handling spine paths may be very difficult, with no obviously correct way to do it.
+In other analyses---especially, if you are analyzing data in a linear/melodic way---, incorporating/handling multiple stops may be very difficult, with no obviously correct way to do it.
 In fact, many of `r hm`'s standard "lagged" functions---like `ditto()`, `mint()`, and `timeline()`---can give weird results in the presence of stops.
 Often, the simplest solution is to simply ignore/remove stops from your data.
 Since the `Stop` field is numbered starting from `1`, this can be achieved easily by filtering out anywhere where `Stop > 1`.

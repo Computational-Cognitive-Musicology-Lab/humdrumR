@@ -20,7 +20,7 @@ Welcome to "Shaping humdrum data"!
 This article explains various steps you can, and often need, to take to prepare humdrum datasets for analysis, using `r hm`.
 
 One of the great strengths of the [humdrum syntax](HumdrumSyntax.html "Intro to the humdrum syntax") is its flexibility---there are lots of ways you can structure your data to conveniently *represent* musical information.
-However, when it comes time analyze data, we typically want to "reshape" our data into a particular format that is ideal for *analysis*.
+However, when it comes to analyze data, we typically want to "reshape" our data into a particular format that is ideal for *analysis*.
 The key idea is this:
 given our data *and* our particular research question, we must determine/decide what constitutes a *single data observation*.
 We want each data observation, or data point, to correspond to one row in our humdrum table.
@@ -55,7 +55,7 @@ the [data filtering](Filtering.html "Filtering humdrum data article") article.
 ## Indexing
 
 For example, *if* we are studying tonality, we might simply want to ignore the lyric data.
-These easiest way to do this is to index out spines we don't want, either using numeric indices
+The easiest way to do this is to index out spines we don't want, either using numeric indices
 
 ```{r}
 example[[ , c(1,3,5)]]
@@ -95,7 +95,7 @@ A common example would be limiting our rhythmic analyses to music in 4/4 time, a
 The `TimeSignature` field indicates the time signature, and the `Bar` field can be used as an indicator of pickups at the beginning of pieces, as they are marked `Bar == 0`.
 So for example (using the Bach chorale data):
 
-```{r}
+```{r, scroll.height='800px'}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 chorales |>
@@ -110,7 +110,7 @@ chorales
 # Splitting/Separating Data
 
 Humdrum data often packs multiple pieces of information into compact, concise, readable tokens.
-The classic example, or course, is `**kern` itself which often includes rhythm, pitch, phrasing, beaming, and pitch ornamentation information!
+The classic example, of course, is `**kern` itself which often includes rhythm, pitch, phrasing, beaming, and pitch ornamentation information!
 These tokens are great for reading/writing, but not for analyzing, so we typically want to separate the information we do want.
 
 ### Isolating Pitch and Rhythm
@@ -154,7 +154,7 @@ This is only possible because we separated the information which was originally 
 
 ## Rend
 
-What if actually want to move the rhythm and pitch information to separate spines---i.e., into their rows in the humdrum table?
+What if we actually want to move the rhythm and pitch information to separate spines---i.e., into their rows in the humdrum table?
 Use `rend()`:
 
 ```{r}
@@ -169,8 +169,8 @@ The next step might be to align/combine information that is currently separated.
 In many `r hm` datasets, we have multiple pieces of information spread across multiple spines, or in some cases, across spine paths or stops.
 If, given our research question, we need to think of multiple pieces of information as describing a *single data point*, we'll need to reshape the data.
 For example, in our `example` file the `**silbe` (lyric) spines associate each syllable with exactly one note in the adjacent `**kern` spines.
-Currently, by default, each `**kern` token *and* each `**silbe` token are in their own, separate row of the humdrum table.
-We want them in the *same* row.
+Currently, by default, each `**kern` token *and* each `**silbe` token are in their own, separate row of the humdrum table ("row" in terms of `view = "table"`, rather than spines in `view = "humdrum"`).
+We want them in the *same* row.  
 In the humdrum syntax view, this means moving the `**silbe` data into the same location as the `**kern` tokens.
 
 ## Cleaving Spines
@@ -196,7 +196,7 @@ We can improve this name using the `newFields` argument:
 
 ```{r}
 example |>
-  cleave(1:2, 3:4, newFields = 'Silbe') -> example
+  cleave(1:2, 3:4, newFields = 'Lyrics') -> example
 
 example
 
@@ -210,7 +210,7 @@ See:
 ```{r}
 example |> select(Token)
 
-example |> select(Silbe)
+example |> select(Lyrics)
 
 ```
 
@@ -220,7 +220,7 @@ Notice that the fifth spine, which wasn't part of the cleave, is also left untou
 ------------------------------------------------------------------------
 
 In some datasets, there might be different numbers of `**kern`/`**silbe` spines in different files within the dataset.
-In these cases, it will be much smarter to pass `cleave()` the names of the exclusive intepretations we want to cleave.
+In these cases, it will be much smarter to pass `cleave()` the names of the exclusive interpretations we want to cleave.
 We should get the same result we got manually before:
 
 ```{r}
@@ -230,10 +230,17 @@ example |>
   cleave(c('kern', 'silbe'))
 ```
 
+Since we are cleaving by the name of exclusive interpretation here, `r hm` names the new field with the capitalized exclusive interpretation name by default.
+
+We may customize the new field name as before:
+```{r}
+example |>
+  cleave(c('kern', 'silbe'), newFields = 'Lyrics')
+```
 ----
 
 What if we want to study the note combinations that are formed between the two `**kern` spines?
-As they are, this would be hard because the tokens from each spine are all in their own rows.
+As they are, this would be hard because the tokens from each spine are all in their own rows (in the table view).
 However, we could `cleave()` together the two kern spines!
 (We'll also isolate *just* the `**kern` spines for this.)
 
@@ -287,7 +294,7 @@ example_stops <- readHumdrum(humdrumRroot, 'examples/Reshaping_example2_stops.hu
 example_stops
 ```
 
-By default, `r hm` treats each token (note) in *each* stop as a separate data observation, with its own row in the humdrum table.
+By default, `r hm` treats each token (note) in *each* stop as a separate data observation, with its own row in the humdrum table view.
 If we are studying harmony, we might want to align those stops "on top" of each other, in different fields.
 But, we can cleave the stops together, putting them each into their own field!
 

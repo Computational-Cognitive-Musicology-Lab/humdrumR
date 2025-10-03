@@ -141,7 +141,7 @@ Notice that when you print a `r hm` object, `r hm` shows you the beginning of th
 Once we have some data loaded, the next thing a good computational musicologist does is start counting!
 To count the contents of data, we can use the `count()` function.
 
-```{r}
+```{r, scroll.height='300px'}
 chorales |> 
   count() 
 
@@ -183,7 +183,7 @@ The `pitch()` function takes the original `**kern` tokens, reads the pitch part 
 and translates it to [scientific pitch](https://en.wikipedia.org/wiki/Scientific_pitch) notation.
 Let's pass *that* to count:
 
-```{r}
+```{r, scroll.height='300px'}
 chorales |>
   pitch() |>
   count()

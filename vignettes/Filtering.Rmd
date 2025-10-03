@@ -86,7 +86,7 @@ If we give a `numeric` value `i` to a single-bracket index command, that number 
 file in the dataset.
 For example, if we want to look only at the fifth chorale, we can call:
 
-```{r}
+```{r, scroll.height='300px'}
 
 chorales[5]
 
@@ -95,7 +95,7 @@ chorales[5]
 
 We can also give the command a vector of `i` numbers:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales[c(1,3,5)]
 
@@ -103,7 +103,7 @@ chorales[c(1,3,5)]
 
 You might want to use the R sequence command, `:`, to select a range of numbers:
 
-```{r}
+```{r, scroll.height='300px'}
 
 chorales[6:10]
 
@@ -149,14 +149,13 @@ Basically, commands should look like this:
 + `chorales[[  , j]]` (spines)
 + `chorales[[i , j]]` (records *and* spines)
 
-
 ### Numeric indices (for double-brackets)
 
 `Numeric` values `i` *or* `j` can be given to double-bracket `r hm` index commands.
 For `i`, the number is simply matched to record numbers in each file.
 For example, you could extract the first fifty records from each file as so:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales[[1:50, ]]
 
@@ -166,7 +165,7 @@ chorales[[1:50, ]]
 For `j`, the number is matched to the spines in each file (from left to right).
 So if you wanted the second spine in each file, you'd write:
 
-```{r}
+```{r, scroll.height='800px'}
 chorales[[ , 2]]
 
 ```
@@ -175,15 +174,15 @@ If you give indices that are larger than the number of records or spines in a fi
 that file will be dropped.
 For example, if we call
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales[[150:200, ]]
 
 ```
 
 We only get three files back, because the other seven files don't have any records above 150!
-(Notice that `r hm` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax.)
-
+(Notice that `r hm` won't remove the Exclusive interpretation or spine spine closing (`*-`) records...since that would break the humdrum syntax. 
+However, if you only query for the exclusive interpretation or reference record rows, the output will be empty. For example, ``chorales[[1, ]]`` returns empty humdrumR object because the first row in all chorales files are reference record, not kern data.)
 
 ### Character indices (for double-brackets)
 
@@ -194,7 +193,7 @@ For example, let's (again) say we are interesting in studying flats.
 Since `**kern` represents flats as "`-`", we can find records that contain a flat by calling:
 
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales[['-', ]]
 
@@ -207,7 +206,7 @@ leaving a (handful) of records with at least one flat.
 
 If we do the same thing with `j` (spines)
 
-```{r}
+```{r, scroll.height='800px'}
 chorales[[ , '-']]
 
 ```
@@ -219,7 +218,7 @@ In the first file, what is now spine `1` was the old spine `2`, which we can tel
 instrument interpretation is `*Itenor`.
 However, if you look at the last of the five files
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales[[ , '-']][5]
 
@@ -228,7 +227,7 @@ chorales[[ , '-']][5]
 we see `*Ibass`---so the new spine `1` was actually the original spine `1` in that file.
 And wait, there's more! If we dig in and look at the other files returned to us (which aren't shown by default),
 
-```{r}
+```{r, scroll.height='800px'}
 chorales[[ , '-']][3]
 
 ```
@@ -242,7 +241,7 @@ Fortunately, for you there is an option that might helpful, which you will learn
 try specifying `drop = FALSE`.
 (The `drop` argument is less intuitive, but is the standard R argument for this sort of thing.)
 
-```{r}
+```{r, scroll.height='800px'}
 chorales[[ , '-', drop = FALSE]]
 
 ```
@@ -254,14 +253,14 @@ A nifty feature of R is that if you supply negative numbers to an indexer, R wil
 numbers.
 This works in `r hm` too, so if you want all the files *except* the first file, you could write:
 
-```{r}
+```{r, scroll.height='300px'}
 chorales[-1]
 
 ```
 
 Or if you want all the spines *except* the fourth spine, write
 
-```{r}
+```{r, scroll.height='300px'}
 
 chorales[[ , -4]]
 
@@ -270,7 +269,7 @@ chorales[[ , -4]]
 Or if you want to remove the first 20 records from each file:
 
 
-```{r}
+```{r, scroll.height='300px'}
 
 chorales[[-1:-20, ]]
 
@@ -292,7 +291,7 @@ However, the expression(s) you give must evaluate to a logical vector (`TRUE` or
 We can reproduce the functionality of the `[]` and `[[]]` indexing operators (previous section) using `filter()`:
 
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
   filter(Spine == 1)
 
@@ -303,7 +302,7 @@ But, now we can filter based on *any* arbitrary criteria we want.
 For example, we could extract tokens from odd numbered spines in odd numbered records *and* even numbered spines in even numbered records.
 We'll use Rs modulo command `%%` to separate even and odd numbers (`odd %% 2 == 1`, `even %% 2 == 0`).
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   filter((Record %% 2 == 0) == (Spine %% 2 == 0))
@@ -314,7 +313,7 @@ chorales |>
 Would we ever want to do that? Probably not.
 However, returning to our flats, study, lets grab *all* the flat notes:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   filter(Token %~% '-')
@@ -327,7 +326,7 @@ chorales |>
 Woh, we're only seeing a couple of B flats in these files!
 But from before, we know that there are a lot more flats in the fourth file (after losing the files with no flats):
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   filter(Token %~% '-') |>
@@ -345,7 +344,7 @@ This can be a useful way to get some context for our searches.
 For example, let's say we want to find flats again, but we want to see the whole *bar* of music that contains a flat.
 We can do this by grouping by the `Bar` field (and the `Piece` field, of course).
 We'll want to say "within each bar, if there are *any* flats, return `TRUE` for the *whole* bar, else return `FALSE` for the *whole* bar."
-By default, `filter()` will [recycle][recycling] scalar results, so if you return a single `TRUE`/`FALSE`, it will be recycled to fill the whole group.
+By default, `filter()` will [recycle](../reference/recycling.html) scalar results, so if you return a single `TRUE`/`FALSE`, it will be recycled to fill the whole group.
 
 ```{r}
 
@@ -373,7 +372,7 @@ chorales |>
 You probably noticed that, unlike the indexing commands `[]` and `[[]]`, `filter()` doesn't seem to actually *remove* data that you filter out.
 So when we say 
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
    filter(Spine == 1)
 
@@ -397,7 +396,7 @@ By using this commands, we make sure that 1) you explicitly want to remove them 
 
 So for our spines example:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   filter(Spine == 1) |>
@@ -408,7 +407,7 @@ chorales |>
 
 or for records:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   filter(Record %% 2 == 0) |>
@@ -424,7 +423,7 @@ The output of `filter()` is a subset of the original data: the *complement* of t
 This allows us to restore the filtered data, using `unfilter()`:
 
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
   filter(Spine == 1) |>
   unfilter()
@@ -432,7 +431,7 @@ chorales |>
 ```
 We can also expliticely switch to the complement using the `complement()` command:
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
   filter(Spine == 1) |>
   complement()
@@ -449,7 +448,7 @@ Let's say we want to find and look at the notes leading up to the *third* phrase
 We'd first need to count the phrase endings (`;`) in each chorale.
 We could filter our data, and simply `seq_along()` (enumerate) the fermatas in each bar:
 
-```{r}
+```{r, scroll.height='1500px'}
 chorales |>
   filter(Token %~% ';') |>
   group_by(Piece, Spine) |>
@@ -462,7 +461,7 @@ Cool!
 We now have a `FermataN` field, showing us the number of each fermata.
 But wait, using filter *removed* most of our tokens, so we can only see the notes during the fermatas, not leading up to them.
 
-```{r}
+```{r, scroll.height='1500px'}
 chorales |>
   select(Token)
 
@@ -470,7 +469,7 @@ chorales |>
 
 Luckily, we can `unfilter()`, then filter again by bar:
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |> 
   unfilter() |>
   ungroup() |>
@@ -483,7 +482,7 @@ chorales |>
 What if you wanted to transpose the bass voice an octave higher, but keep the other voices the same?
 Well, we could try:
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
   filter(Spine == 1) |>
   mutate(Transposed = transpose(Token, by = 'P8')) |> 
@@ -494,9 +493,9 @@ chorales |>
 
 We successfully unfiltered...but the `Token` field was unfiltered, not our new `Transposed` field.
 This is because the `Tranposed` field has no complement data: it didn't exist until after the filter was applied.
-Luckily, we can tell `unfiltered()` to use a specific complement, using the `complement` argument:
+Luckily, we can tell `unfilter()` to use a specific complement, using the `complement` argument:
 
-```{r}
+```{r, scroll.height='800px'}
 chorales |>
   filter(Spine == 1) |>
   mutate(Transposed = transpose(Token, by = 'P8')) |> 

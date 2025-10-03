@@ -60,7 +60,7 @@ articles:
   contents:
   - PitchAndTonality
   - RhythmAndMeter
-  - KeysAndChord
+  # - KeysAndChord
 reference:
 - title: "Reading and Summarizing Data"
   desc: "These tools allow you to import, validate, and abstractly summarize the content of humdrum data."

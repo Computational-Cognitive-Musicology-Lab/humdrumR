@@ -61,12 +61,8 @@ So you can do things like:
 ```{r}
 
 recip(0.375)
-
 quarters('4.')
 quarters(0.375)
-
-#
-#
 recip("𝅘𝅥 𝅭 ")
 
 
@@ -170,7 +166,7 @@ ioi(melody)
 What did this do?
 
 1. The duration of each rest is append to the duration of the previous non-rest (if any).
-  + The first `8g` becomes a `4g`
+  + The second `8g` becomes a `4g`
   + The `4d#` becomes `4.d#`.
 2. Rests are replaced by null tokens (`"."`).
 3. The last note even is `NA`, because there is no more onsets after it to create a inter-*onset*-interval.
@@ -230,7 +226,7 @@ timeline(row)
 ```
 
 The first note (`4c`) occurs at zero (the beginning) of the timeline; the last note (`2c`) lands `3.5` whole-notes later; etc.
-If we combine this with a call to `semits()` (check out the [Pitch and Tonality][PitchAndTonality.html] guide) we can even make a plot of the melody:
+If we combine this with a call to `semits()` (check out the [Pitch and Tonality](PitchAndTonality.html) guide) we can even make a plot of the melody:
 
 ```{r}
 
@@ -246,7 +242,7 @@ The `timeline()` function has extra special functionality when working on actual
 It will automatically (unless told not too) calculate timelines separately within each File/Spine/Path of a dataset, ignoring multiple stops.
 For example:
 
-```{r}
+```{r, scroll.height='800px'}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
 chorales |>
@@ -281,7 +277,7 @@ The `pickup` argument gives us another option to control where our timeline star
 In many datasets, the first few events in the music are an *anacrusis* or "pick up"; we'd generally like our timeline to start *after* the pickup.
 To make this happen, the `pickup` argument can be passed a `logical` vector which is the same length as the input (`x`): 
 Any `TRUE` values at the beginning of the vector are considered a pickup;
-Thus, the *first* `FALSE` value in the `pickup` vector is chosen as the start of th timeline.
+Thus, the *first* `FALSE` value in the `pickup` vector is chosen as the start of the timeline.
 For example, let's say we have the melody
 
 ```{r}
@@ -313,7 +309,7 @@ When `r hm` reads a file, it counts the barlines and creates a field called `Bar
 This means pickups will have `Bar < 1`.
 So, in our Bach chorales:
 
-```{r}
+```{r, scroll.height='800px'}
 
 chorales |>
   timeline(pickup = Bar < 1)
@@ -398,11 +394,11 @@ subpos(seven8, unit = list(c('4', '4', '4.')), scale = 8)
 The `timecount()` and `subpos()` commands are great if we want count in a single beat/measure unit.
 To take things to the next level(s), we need to consider musical *meter*.
 From the point of view of `r hm`, "meter" is a set of multiple "beat levels" occurring at the same time (in parallel), with "lower" (faster/shorter) levels nested inside "higher" (slower/longer) levels.
-`R Hm` defines a number of useful tools for applying metric analyses to rhythmic data.
+`r hm` defines a number of useful tools for applying metric analyses to rhythmic data.
 
 ### Metric levels
 
-The first thing we might want to do, is take a sequence of rhythm durations and identify which metric level each onset lands on.
+The first thing we might want to do, is to take a sequence of rhythm durations and identify which metric level each onset lands on.
 To do this, use `metlev()`:
 
 ```{r}
@@ -434,7 +430,7 @@ The whole-note level is `1` and (in this case) the eighth-note level is `4`.
 
 ### Metric position
 
-Along with `metlev()`, `r hm` provides to complementary functions called `metcount()`, `metsubpos()`.
+Along with `metlev()`, `r hm` provides two complementary functions called `metcount()`, `metsubpos()`.
 As you might guess, these are metric parallels of `timecount()` and `subpos()`.
 The `metcount()` function counts beats at a particular beat level (the `level` argument) *within* the highest level in the meter.
 The `metsubpos()` function calculates the rhythm offset between each onset and the nearest beat in the meter.
