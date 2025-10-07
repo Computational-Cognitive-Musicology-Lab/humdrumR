@@ -31,11 +31,11 @@ Must be a \link[=expand]{rouding function}.
 
 Controls how simple intervals are interpreted relative to C.}
 
-\item{Key}{\emph{\strong{The diatonic key used to defined generic pitches.}}
+\item{Key}{\emph{\strong{The onic key used to defined generic pitches.}}
 
 Defaults to \code{NULL}.
 
-Must be something that can be \link[=keyParsing]{parsed as a diatonic key}; must be either length \code{1} or \code{length(x)}.}
+Must be something that can be \link[=keyParsing]{parsed as a onic key}; must be either length \code{1} or \code{length(x)}.}
 }
 \description{
 These functions test basic properties of pitch information.

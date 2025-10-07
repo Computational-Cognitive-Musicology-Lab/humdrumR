@@ -106,7 +106,7 @@ The matrix's \code{Piece.Record} \link[base:colnames]{row names} are preserved a
 
 Note that multiple-stop token (where \code{Stop > 1L}) cannot by incorporated into the two
 dimensional \code{matrix}/\code{data.frame}. Thus, \code{as.matrix(humdrumR)} calls
-\link{collapseStops(collapseAtomic = TRUE, sep = " ")}
+\link[=collapseStops]{collapseStops(collapseAtomic = TRUE, sep = " ")}
 on the \link[=humdrumRclass]{humdrumR object} before creating a matrix.
 }
 \section{Padding}{

@@ -2,9 +2,9 @@
 % Please edit documentation in R/Subset.R
 \name{indexHumdrum}
 \alias{indexHumdrum}
-\alias{[,humdrumR,missing,ANY-method}
-\alias{[,humdrumR,numeric,ANY-method}
-\alias{[,humdrumR,character,ANY-method}
+\alias{[,humdrumR,missing,ANY,ANY-method}
+\alias{[,humdrumR,numeric,ANY,ANY-method}
+\alias{[,humdrumR,character,ANY,ANY-method}
 \alias{[[,humdrumR,numeric,missing-method}
 \alias{[[,humdrumR,missing,numeric-method}
 \alias{[[,humdrumR,character,missing-method}
@@ -155,7 +155,7 @@ data records.
 
 \subsection{Character indexing:}{
 
-If you index a \link[=humdrumR:humdrumRclass]{humdrumR object}
+If you index a \link[=humdrumRclass]{humdrumR object}
 with \code{character} strings, these strings are
 treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes),
 which are matched against non-null data tokens (\code{"D"}) in the object's first \link[=selectedFields]{selected field}.

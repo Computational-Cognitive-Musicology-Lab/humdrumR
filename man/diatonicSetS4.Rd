@@ -36,7 +36,7 @@ order.diatonicSet(
 \code{diatonicSet} is one of \link{humdrumR}'s
 types of tonal data, representing Western diatonic keys.
 For the most part, users should not need to interact with diatonicSets directly---rather, diatonicSets work behind the scene in numerous \code{humdrumR} pitch functions.
-See the \link{keyRepresentations} and \link{keyTransformations} documentation for details of usage and functionality or the \emph{Tonality in humdrumR} vignette for
+See the keyRepresentations and \link{keyFunctions} documentation for details of usage and functionality or the \emph{Tonality in humdrumR} vignette for
 a detailed explanation of the theory and specifics of diatonicSets.
 }
 \details{
@@ -49,9 +49,9 @@ All inputs will be coerced to match in length.
 The \code{root} argument will attempt to coerce character strings to \link[=tonalInterval]{tonalIntervals}, and use their \code{LO5th} value as the root.
 
 By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method,
-for diatonicSets call \link[=diatonicRepresentations]{key()}.
+for diatonicSets call \link[=keyFunctions]{key()}.
 Thus, if you return a \code{diatonicSet} on the command line (or call \link[base:print]{print} one one),
-you'll see the \link[=diatonicRepresentations]{key interpretation} representation printed.
+you'll see the \link[=keyFunctions]{key interpretation} representation printed.
 }
 \section{Slots}{
 
@@ -153,7 +153,7 @@ Coercision methods are defined for
 \item \link[base:integer]{integer}: interpreted as root of major key
 \item \link[base:numeric]{numeric}: rounded to nearest integer and intepreted as root of major key
 \item \link[base:character]{character}: interpreted using \code{humdrumR}s \link[=regexDispatch]{regular expression dispatch system}, as
-explained fully \link[=diatonicRepresentations]{here}.
+explained fully \link[=keyFunctions]{here}.
 }
 }
 

@@ -60,8 +60,8 @@ any number of expressions as \code{...} arguments.
 These expressions may simply be \code{character} strings or symbols
 indicating existing \code{\link[=fields]{fields()}} in the data---
 For example, \code{group_by(Piece, Spine)}.
-However, the \link[=expressionEvaluation]{expressions} can also be arbitrary "expression arguments"
-which are passed to \link[=withHumdrum]{within()} to generate new fields for grouping.
+However, the \link[=evaluatingExpressions]{expressions} can also be arbitrary "expression arguments"
+which are passed to \link[=withinHumdrum]{within()} to generate new fields for grouping.
 For example, you could group spines into even and odd groups with \code{group_by(Spine \%\% 2)}.
 
 The \code{group_by()} function returns a new \link[=humdrumRclass]{humdrumR data object}
@@ -80,7 +80,7 @@ If \code{.add = FALSE}, any preexisting groups are removed before creating new g
 Groups can be explicitly removed using \code{ungroup()}.
 
 When \code{.add = TRUE}, each call to \code{group_by()} computes new fields \emph{using} the preexisting groups,
-just like any normal call to \link[=withHumdrum]{within()}.
+just like any normal call to \link[=withinHumdrum]{within()}.
 This means that you can, in some cases, create different groupings depending on the order
 you create groups.
 For example, imagine we want to divide each piece in our data into two groups:

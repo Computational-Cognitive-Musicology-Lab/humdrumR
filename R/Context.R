@@ -22,8 +22,8 @@
 #' These expressions may simply be `character` strings or symbols
 #' indicating existing [fields()] in the data---
 #' For example, `group_by(Piece, Spine)`.
-#' However, the [expressions][expressionEvaluation] can also be arbitrary "expression arguments"
-#' which are passed to [within()][withHumdrum] to generate new fields for grouping.
+#' However, the [expressions][evaluatingExpressions] can also be arbitrary "expression arguments"
+#' which are passed to [within()][withinHumdrum] to generate new fields for grouping.
 #' For example, you could group spines into even and odd groups with `group_by(Spine %% 2)`.
 #' 
 #' The `group_by()` function returns a new [humdrumR data object][humdrumRclass]
@@ -42,7 +42,7 @@
 #' Groups can be explicitly removed using `ungroup()`.
 #' 
 #' When `.add = TRUE`, each call to `group_by()` computes new fields *using* the preexisting groups,
-#' just like any normal call to [within()][withHumdrum].
+#' just like any normal call to [within()][withinHumdrum].
 #' This means that you can, in some cases, create different groupings depending on the order
 #' you create groups.
 #' For example, imagine we want to divide each piece in our data into two groups: 
@@ -270,11 +270,11 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' @details 
 #'
 #' The `context()` function determines where contextual windows will begin and end based on 
-#' [expressions][expressionEvaluation] in its `open` and `close` arguments.
+#' [expressions][evaluatingExpressions] in its `open` and `close` arguments.
 #' These `open` and `close` expressions are evaluated using a **reference** [vector], or set of vectors/[fields()] that are all
 #' the same length.
 #'
-#' In most cases, we'll apply `context()` to a [humdrumR data object], so windows are defined by
+#' In most cases, we'll apply `context()` to a [humdrumR data object][humdrumRclass], so windows are defined by
 #' evaluating the `open` and `close` arguments using the [fields()] of the humdrum table as the reference.
 #' Once this has been done, the humdrumR object will [show][humdrumRclass] how many windows
 #' have been identified when printed in the console.

@@ -49,7 +49,6 @@
 #' @importFrom rlang %|% %||% 
 #' @importFrom bit64 as.integer64 is.integer64
 #' @importFrom numbers primeFactors
-#' @importFrom data.table data.table rbindlist setorder setindex set setorderv setcolorder copy as.data.table is.data.table frank CJ setnames setkey dcast
 #' @importFrom scales ContinuousRange
 #' @importFrom dplyr summarise select filter mutate pull reframe group_by ungroup summarize count
 #' @importFrom tidyselect eval_select
@@ -152,8 +151,8 @@ setOldClass('quosures')
 #' In addition, there are xxx data types used to encode non-tonal (or [atonal](https://en.wikipedia.org/wiki/Atonality)) pitch information.
 #' 
 #' + [integers][base::integer] --- used to encode [semitones](https://en.wikipedia.org/wiki/Semitone) (as well as [MIDI](https://en.wikipedia.org/wiki/MIDI) numbers).
-#' + [xxx][xxx] --- sets?
-#' + [xxx][xxx] --- 12-tone rows?
+#' + --- sets?
+#' + --- 12-tone rows?
 #' 
 #' @name humdrumPitch
 NULL
@@ -498,7 +497,7 @@ humdrumRoption <- function(name) {
 #' 
 #' Default is `"NA2dot"`.
 #' 
-#' Must be a single character string, [partially matching][partialMatchng] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
+#' Must be a single character string, [partially matching][partialMatching] `"NA2dot"`, `"dot2NA"`, `'charNA2dot"`, or `"asis"`.
 #' `"NA2dot"` means all `NA` values are converted to `"."`; `"dot2NA` means all `"."` are converted to `NA`; `charNA2dot` means `NA` values
 #' in `character` vectors are converted to `NA`, but not in other atomic types; `"asis"` means either `NA` or `"."` values may print, depending
 #' on what is in the field.

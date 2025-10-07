@@ -20,7 +20,7 @@ Must be \code{atomic}.
 Should always be the \code{Tandem} field from a \link[=humdrumRclass]{humdrumR object}.}
 }
 \description{
-\code{extractTandem} extracts tandem interpretations from the raw \code{Tandem}
+\code{tandem} extracts tandem interpretations from the raw \code{Tandem}
 spine in \link[=humdrumRclass]{humdrumR object}.
 }
 \details{
@@ -68,19 +68,19 @@ them if they are present---in this case, they are put into the \code{Key} field 
 However, the \code{Tandem} field is retained in case your data contains any novel tandem intepretations
 that \code{humdrumR} does not recognize.
 }
-\section{extractTandem}{
+\section{tandem}{
 
 
 If your data \emph{does} contain novel/unknown tandem interpretations, you can use the
-\code{extractTandem} function to pull them out of the \code{Tandem} field.
-The first argument to \code{extractTandem} must be the \code{Tandem} field from a
+\code{tandem} function to pull them out of the \code{Tandem} field.
+The first argument to \code{tandem} must be the \code{Tandem} field from a
 \link[=humdrumRclass]{humdrumR object}.
 The second argument (\code{regex}) is a regular expression which is matched against
 the the tandem interpretations.
 For each token in \code{Tandem}, the most recent match (if any) is retained.
 
 For example, if we wanted to manually extract the key information from the \code{Tandem} field
-(which \code{humdrumR} automatically does for you), we could call \code{extractTandem(Tandem, "[A-Ga-g][#-]*:")}.
+(which \code{humdrumR} automatically does for you), we could call \code{tandem(Tandem, "[A-Ga-g][#-]*:")}.
 }
 
 \seealso{

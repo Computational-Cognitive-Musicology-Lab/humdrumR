@@ -16,7 +16,7 @@ and then re\emph{combine} them as needed.
 Various R functions specify "grouping factors" in a confusing
 variety of subtly different ways, usually as function arguments named
 things like \code{INDEX}, \code{INDICES}, \code{f}, \code{by}, or \code{groupby}.
-In \code{humdrumR}, we adopt the tidyverse \link{dplyr} approach, using the
+In \code{humdrumR}, we adopt the tidyverse \link[dplyr:dplyr-package]{dplyr::dplyr} approach, using the
 \code{group_by()} function (and/or the \code{.by} argument).
 
 Any \link[=vector]{atomic vector} with at least two

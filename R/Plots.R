@@ -2022,13 +2022,11 @@ setMethod('.draw', c('NULL', 'probability'),
           function(x, y, ...) .draw(NULL, count(y), ...))
 
 
-### humdrumR and formula ----
-
-setMethod('.draw', c('humdrumR.table', 'NULL'),
-          function(x, y, ...) {
-            class(x) <- class(x)[-1]
-            .draw(x, NULL, ...)
-          })
+# setMethod('.draw', c('humdrumR.table', 'NULL'),
+ #         function(x, y, ...) {
+  #          class(x) <- class(x)[-1]
+   #         .draw(x, NULL, ...)
+    #      })
 
 setMethod('.draw', c('humdrumR'),
           function(x, facet = NULL, ...) {
@@ -2643,6 +2641,77 @@ smartjitter <- function(x) {
 }
 
 
+# lines
+# 0 -> quantile labels
+# 1 -> axis labels
+# 2 -> second axis ticks
+# 3 -> xaxis labels
+# 4 -> legend / sub title
+# 5 -> title
+
+drawlines <- function(n = 10, outer = FALSE) {
+  for (side in 1:4) {
+    for (line in 0:n) {
+      mtext(paste0('___', line, '___'), side = side, line = line, outer = outer)
+    }
+  }
+}
+
+draw_mean <- function(x, y, col = 'black') {
+  if (length(x) == 1) col <- 'black'
+  points(x, rep(y, length.out = length(x)), pch = 3, cex = 1.4, lwd = 1.5, xpd = TRUE, col = setalpha(col, 1))
+}
+
+draw_counts <- function(x, y, counts, col, width, cex = .8) {
+  counts <- prettyN(counts, expr = TRUE)
+  
+  text(x, y, counts, xpd = NA,
+       cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
+       col = setalpha(col, 1), pos = 3)
+}
+
+
+axis.lines <- function() {
+  cexs <- par(c('cex.axis', 'cex.lab', 'cex.sub'))
+  
+  lines <- cumsum(c(0.5, unlist(cexs))) 
+  names(lines) <- c(names(lines)[-1], 'mar')
+  lines <- as.list(lines)
+  
+  par(mar = rep(lines$mar, 4))
+  plot(1:10, type='n', axes= FALSE, xlab='', ylab='')
+  box()
+  mtext(1:10, 1, at = 1:10, line = lines$cex.axis, cex = cexs$cex.axis, padj = 1)
+  mtext(1:10, 2, at = 1:10, line = lines$cex.axis, cex = cexs$cex.axis)
+  mtext('Y', side = 2, line = lines$cex.lab, cex = cexs$cex.lab)
+  mtext('X', side = 1, line = lines$cex.lab, cex = cexs$cex.lab, padj = 1)
+  
+  mtext('Main', line = lines$cex.sub, cex = cexs$cex.sub)
+  mtext('Sub', side = 1, line = lines$cex.sub, cex = cexs$cex.sub, padj=1)
+lines
+}
+
+
+#' @export
+hist.coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1) {
+  # gets x/density/counts for a numeric distribution, using either density() or hist()
+  # but returning the same format either way
+  if (smooth) {
+    dens <- stats::density.default(x, ...)
+    output <- data.table(X = dens$x, Density = dens$y)
+  } else {
+    hist <- graphics::hist.default(x, breaks = breaks, plot = FALSE)
+    
+    output <- data.table(Density = hist$density, Counts = hist$counts, Mids = hist$mids, 
+                         Delta = diff(hist$breaks))
+    output <- output[rep(1:nrow(output), each = 2)]
+    i <- c(1, rep(2:(length(hist$breaks) - 1), each = 2), length(hist$breaks))
+    output[ , X := hist$breaks[i]]
+    
+  }
+  output[, Density := Density * hist_scale]
+  output[]
+}
 
 
 cutter <- function(value, reference, maxUnique = 4, Ncuts = 4) {
@@ -3000,7 +3069,9 @@ viewKernTable <- function(table) {
 #' @export
 ggplot.humdrumR <- function(data = NULL, mapping = aes(), ..., dataTypes = 'D') {
   humtab <- getHumtab(data, dataTypes = dataTypes)
-  ggplot(as.data.frame(humtab), mapping = mapping, ...) + theme_humdrum()
+  
+  
+  ggplot(humtab, mapping = mapping, ...) + theme_humdrum()
 }
 
 

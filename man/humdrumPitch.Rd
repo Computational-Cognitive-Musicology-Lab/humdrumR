@@ -35,8 +35,8 @@ which are the bridge between the "core" pitch representations listed above and r
 In addition, there are xxx data types used to encode non-tonal (or \href{https://en.wikipedia.org/wiki/Atonality}{atonal}) pitch information.
 \itemize{
 \item \link[base:integer]{integers} --- used to encode \href{https://en.wikipedia.org/wiki/Semitone}{semitones} (as well as \href{https://en.wikipedia.org/wiki/MIDI}{MIDI} numbers).
-\item \link{xxx} --- sets?
-\item \link{xxx} --- 12-tone rows?
+\item --- sets?
+\item --- 12-tone rows?
 }
 }
 

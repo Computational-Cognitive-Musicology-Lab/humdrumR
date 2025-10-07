@@ -2,14 +2,12 @@
 % Please edit documentation in R/Distributions.R
 \name{mutual}
 \alias{mutual}
-\alias{mutual.probability}
 \alias{mutual.default}
+\alias{mutual.probability}
 \alias{pmutual}
 \title{Calculate mutual information between variables}
 \usage{
 mutual(..., base = 2)
-
-\method{mutual}{probability}(x, base = 2)
 
 \method{mutual}{default}(..., base = 2)
 
@@ -97,7 +95,7 @@ pmutual(guitar, metal)
 The HumdrumR \link[=information]{information theory} overview.
 
 Other {Information theory functions}: 
-\code{\link{entropy_by}()},
-\code{\link{entropy}()}
+\code{\link{entropy}()},
+\code{\link{entropy_by}()}
 }
 \concept{{Information theory functions}}

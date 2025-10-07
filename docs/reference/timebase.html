@@ -18,7 +18,7 @@ The timebase() function is currently in a beta-draft, so may not work well.'><!-
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,7 +107,8 @@ The <code>timebase()</code> function is currently in a beta-draft, so may not wo
 <dt>timebase</dt>
 <dd><p><em><strong>The duration of each step in the output sequence.</strong></em></p>
 <p>Defaults to a sixteenth-note.</p>
-<p>Must be a single atomic value, which can be <a href="rhythmFunctions.html">parsed as a duration</a>.</p></dd>
+<p>Must be a single atomic value, which can be <a href="rhythmFunctions.html">parsed as a duration</a>, or <code>NULL</code>.
+If <code>NULL</code>, the <code><a href="tatum.html">tatum()</a></code> of the dataset if automatically used as the time base.</p></dd>
 
 </dl></div>
 

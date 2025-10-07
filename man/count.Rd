@@ -90,10 +90,10 @@ The function of \code{pdist()} is similar to using \code{\link[base:proportions]
 }
 \details{
 The \code{count()} function is defined in the \link[dplyr:count]{dplyr} package, but only
-for working with \link[=tibble]{tibbles}.
+for working with \link[tibble:tibble]{tibbles}.
 In \code{humdrumR}, we extend the \code{count()} function to work with atomic data (like \code{\link[base:table]{base::table()}})
 as well as \link[=humdrumRclass]{humdrumR data}.
-When \code{humdrumR} is attached, \code{\link[dplyr:count]{dplyr::count()}} will only be called for \code{\link[=tibble]{tibble()}} objects specifically.
+When \code{humdrumR} is attached, \code{\link[dplyr:count]{dplyr::count()}} will only be called for \code{\link[tibble:tibble]{tibble::tibble()}} objects specifically.
 Note that \code{\link[dplyr:count]{dplyr::count()}} doesn't have all the same arguments or behaviors as \code{humdrumR}'s \code{count()}
 methods, which are described in \emph{this} documentation.
 

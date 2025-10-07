@@ -41,8 +41,8 @@ Must be a singleton \code{logical} value: an on/off switch.}
 \description{
 Rend, as in "to rend apart," splits data in separate fields into separate spines or paths.
 Under the hood, \code{rend()} essentially runs a specialized call to make the \link[=humTable]{humdrum table}
-"longer"/"taller," similar to R functions like \link[=reshape2]{melt()}, \link[=tidyr]{gather()}, or \link[=tidyr]{pivot_longer()}.
-In fact, a humdrumR method for \link[=tidyr]{pivot_longer()} is defined, which is equivalent to \code{rend()}.
+"longer"/"taller," similar to R functions like \code{\link[data.table:melt.data.table]{data.table::melt()}} (\code{reshape2}), \code{\link[tidyr:gather]{tidyr::gather()}} (\code{tidyr}), or \code{\link[tidyr:pivot_longer]{tidyr::pivot_longer()}} (\code{tidyr}).
+In fact, a humdrumR method for \link[tidyr:tidyr-package]{pivot_longer()} is defined, which is equivalent to \code{rend()}.
 The \code{rend()} function is essentially the inverse of \code{\link[=cleave]{cleave()}}.
 }
 \details{

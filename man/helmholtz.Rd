@@ -91,7 +91,7 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 
 If \code{helmholtz()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 

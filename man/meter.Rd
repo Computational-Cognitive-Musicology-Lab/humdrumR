@@ -143,7 +143,7 @@ will fill in levels at \code{"2"} and \code{"8"}.
 The \code{tick} argument can be used to directly specify a tick for the meter.
 This is especially useful if you are parsing datasets with multiple meters, but want to force them all to use
 the same tick value. For example, \code{meter(TimeSignature, tick = '32')}.
-The \code{tick} argument must be a single value which can be \link[=rhythmInteval]{parsed} as a rhythmic duration.
+The \code{tick} argument must be a single value which can be \link[=rhythmInterval]{parsed} as a rhythmic duration.
 
 The \code{subdiv} argument can be used to explicitly control how the tactus is subdivided.
 \code{subdiv} should be a natural number (greater than 1), to divide the tactus by.

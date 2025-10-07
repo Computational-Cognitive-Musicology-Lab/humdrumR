@@ -100,7 +100,7 @@ using \code{removeSubset()} or \code{unfilter()} (which are also synonyms).
 }
 \details{
 \code{subset()} and \code{filter()} are passed one or more expressions which are using the
-fields of the \link[=humTable]{humdrum table} using a call to \link[=withinHumdrumR]{within}.
+fields of the \link[=humTable]{humdrum table} using a call to \link[=withinHumdrum]{within}.
 This evaluation can thus include all of \code{\link[=within.humdrumR]{within.humdrumR()}}'s functionality (and arguments)
 including group-apply.
 The only requirement is that the expressions/functions fed to \code{subset()}/\code{filter()}

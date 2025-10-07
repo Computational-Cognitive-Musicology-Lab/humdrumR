@@ -107,7 +107,7 @@ For example, \code{"X00X00X0"} or \code{c(1, 0, 0, 1, 0, 0, 1, 0)}.
 
 If \code{grid()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
 The \code{grid()} function, is a fully vectorized \link[=rhythmFunctions]{rhythm function}, which translates

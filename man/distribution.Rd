@@ -115,7 +115,7 @@ The \code{distribution} class is essentially just a normal \code{data.frame} exc
 a special methods for printing, indexing, and combining distributions.
 These features all make the object look and behave more intuitively
 like a like a distribution of data.
-You can always use \code{as.data.frame()}, \code{as.data.table()}, or \code{as_tibble()} (if you've attached \link{tibble}) to
+You can always use \code{as.data.frame()}, \code{as.data.table()}, or \code{as_tibble()} (if you've attached \link[tibble:tibble]{tibble::tibble}) to
 get rid of the humdrumR features.
 
 Each \code{distribution} frame has \eqn{k + 1} columns, where \eqn{k} is the number of dimensions (variables).
@@ -196,7 +196,7 @@ In calls to \code{subset()}/\code{filter()}, you can refer to either the distrib
 or to the \code{n} (count) or \code{p} (proportion) column.
 For example, you can find all variables where the count is greater than one hundred
 with \code{myDist |> filter(n > 100)}.
-\subsection{Single-bracket \link{i , }}{
+\subsection{Single-bracket [i , ]}{
 
 With single-bracket indexing, the \code{i} argument is matched to rows of the underlying data.table.
 (As mentioned above, this may conflict visually with the \code{wide} printing option,
@@ -209,7 +209,7 @@ If \code{i} is \code{character}, the strings are matched against the level names
 An exact match with a level in any dimension will result in that level being returned.
 }
 
-\subsection{Single-bracket \link{ , j}}{
+\subsection{Single-bracket [ , j]}{
 
 With single-bracket indexing, the \code{j} argument is used to index the dimensions of the distribution.
 If \code{j} is either \code{logical} or \code{numeric}, indexing is exactly like conventional \code{data.frames},
@@ -219,7 +219,7 @@ as a column to index---this column is always retained.
 If \code{j} is \code{character}, the strings are matched exactly against the distribution names.
 }
 
-\subsection{Double-bracket \link{i, j, ...}}{
+\subsection{Double-bracket [i, j, ...]}{
 
 Double-bracket indexing can be used to index specific combinations of levels, across more than one distribution.
 Named index arguments are matched (exactly) to dimension names; unnamed arguments are matched
@@ -350,7 +350,7 @@ Methods for \code{\link[=mean]{mean()}} and \code{\link[=median]{median()}} are 
 All of these functions, when applied to a \code{distribution}, return an atomic vector.
 
 For more general operations with \code{distribution} values,
-use \code{\link[=mutate]{mutate()}} or \code{\link[=summarize]{summarize()}} (or \link[base:with]{with/within}), and refer to
+use \code{\link[dplyr:mutate]{dplyr::mutate()}} or \code{\link[dplyr:summarise]{dplyr::summarize()}} (or \link[base:with]{with/within}), and refer to
 the \code{n} (count) or \code{p} (probability) field.
 For example: \code{myDist |> filter(n > 70)}.
 }

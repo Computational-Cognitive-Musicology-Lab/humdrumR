@@ -120,7 +120,7 @@ wort.character <- makeHumdrumDispatcher(list('silbe', NA, silbe2wort),
 #' 
 #' If `wort()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> wort() 

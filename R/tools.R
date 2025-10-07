@@ -2303,13 +2303,12 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
   if (exprA$Type %in% applyTo) {
     hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
-      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
       exprA <- func(exprA)
     } 
   } else {
     hit <- FALSE
   }
-  
+  if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
   
   if (exprA$Type == 'call' && !(hit && stopOnHit)) {
     for (i in seq_along(exprA$Args)) {
@@ -2457,6 +2456,7 @@ ast <- function(expr) {
 }
 
 
+#' @export
 print.ast <- function(x, depth = 0L) {
     pad <- strrep(' ', depth)
     if (!inherits(x, 'ast')) {

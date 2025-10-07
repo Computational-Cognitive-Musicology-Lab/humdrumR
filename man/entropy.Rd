@@ -171,9 +171,9 @@ However, cross entropy/information-content are closely related to the more gener
 
 The output of \code{info()} is identical to the log of the modeled
 \href{https://en.wikipedia.org/wiki/Likelihood_function}{likelihood} of each data point,
-which can be computed using the \code{\link[=like]{like()}} function.
+which can be computed using the \code{\link[data.table:like]{data.table::like()}} function.
 Literally, \code{info(x, base) == log(like(x), base)}.
-The \code{\link[=like]{like()}} function works just like \code{info()}, computing pointwise probabilities for each data point based on the
+The \code{\link[data.table:like]{data.table::like()}} function works just like \code{info()}, computing pointwise probabilities for each data point based on the
 probability distribution in \code{model}.
 However, we can use it to, for example, calculate the total \emph{log likelihood} of data using \code{sum(log(like(...)))}.
 This value divided by N is the cross entropy (make sure to use the right log base!): \code{-sum(log(like(...), base = 2)) == xentropy(...)}.
