@@ -907,7 +907,7 @@ draw_density <- function(x, y, log = '',
 #' Position on the X axis corresponds to the empirical quantiles 
 #' of the data; for example, the median point (50% quantile) is exactly in the middle of the 
 #' X axis.
-#' As an alternative, a single [violin][violin plot()] diagram can be drawn by setting `violin = TRUE`.
+#' As an alternative, a single [violin][draw_violins()] diagram can be drawn by setting `violin = TRUE`.
 #' 
 #' @details
 #' 
@@ -1006,7 +1006,7 @@ draw_density <- function(x, y, log = '',
 #' Must be a single `character` string, either `""` (linear scale)
 #' of `""` (draw Y on a logarithmic scale). 
 #' 
-#' @param violin ***Should a [violin plot][violin_plot()] be drawn instead?***
+#' @param violin ***Should a [violin plot][draw_violins()] be drawn instead?***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -1033,10 +1033,9 @@ draw_Qplot <- function(x, y, log = '',
                                   normalReference = normalReference, 
                                   ..., col = col, quantiles = quantiles))
   
-  
   output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
                    xlim = xlim, 
-                   y = y, ylim = ylim , 
+                   y = y, ylim = ylim %||% range(y, na.rm = TRUE), 
                    log = gsub('x', '', log))
   output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
   output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
@@ -1083,7 +1082,7 @@ draw_Qplot <- function(x, y, log = '',
 #' If the data is instead passed to the second (`y`) argument----with `x` missing---,
 #' the bar plot is oriented horizontally, from left to right.
 #' The input table can have one or two dimensions; if more dimensions are provided
-#' the third and fourth dimension are split across draw [facets][draw()#facets].
+#' the third and fourth dimension are split across draw facets.
 #' 
 #' @details
 #' 
@@ -1106,7 +1105,7 @@ draw_Qplot <- function(x, y, log = '',
 #' Bars representing values of the first dimension are drawn in groups representing 
 #' each level of second dimension.
 #' However, if the total number of bars to draw is greater than 80, 
-#' [draw()] will dispatch [draw_heatmap()] instead.
+#' [draw()] will dispatch [draw_heat()] instead.
 #' This behavior can be overridden using the `heat` argument.
 #'
 #' ### Barplot types
@@ -1237,6 +1236,10 @@ draw_barplot <- function(counts, log = '',
 
 ### draw_heat ----
 
+#' Draw a "heatmap" of 2d data
+#'
+#' This function draws a heat map...
+#' @export
 draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
   # cex/pch aren't used obviously, but it gets passed in ... above, causing warnings below
   xlim <- c(0L, ncol(tab))
@@ -1421,6 +1424,7 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #'      y # numeric,
 #'      col = NA)
 #' @inheritParams draw
+#' @export
 draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE, 
                          mean = TRUE, quantiles = c(.25, .75), global_stats = FALSE, 
                          breaks = "Sturges", bw = 'SJ', normalReference = FALSE, showPoints = FALSE,

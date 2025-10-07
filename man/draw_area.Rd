@@ -16,6 +16,16 @@ Defaults to \code{""} (linear scale).
 Must be a single \code{character} string, either \code{""} (linear scale)
 of \code{"x"} (draw X on a logarithmic scale ).}
 
+\item{center}{\emph{\strong{Should the stacked areas be centered on the screen?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{TRUE}, the areas are centered in the Y-axis, expanding outward (up and down)
+when the density increases.
+If \code{FALSE}, the areas are stacked up from the bottom of the screen.}
+
 \item{smooth}{\emph{\strong{Should a smoothed density curve be estimated for each group?}}
 
 Defaults to \code{TRUE}.

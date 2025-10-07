@@ -66,7 +66,7 @@ If the data is passed to the first (\code{x}) argument, the bar plot is oriented
 If the data is instead passed to the second (\code{y}) argument----with \code{x} missing---,
 the bar plot is oriented horizontally, from left to right.
 The input table can have one or two dimensions; if more dimensions are provided
-the third and fourth dimension are split across draw \link[=draw()#facets]{facets}.
+the third and fourth dimension are split across draw facets.
 }
 \details{
 The \code{draw_barplot()} method will accept tabular data created
@@ -87,7 +87,7 @@ representing every combination of levels across the two dimensions;
 Bars representing values of the first dimension are drawn in groups representing
 each level of second dimension.
 However, if the total number of bars to draw is greater than 80,
-\code{\link[=draw]{draw()}} will dispatch \code{\link[=draw_heatmap]{draw_heatmap()}} instead.
+\code{\link[=draw]{draw()}} will dispatch \code{\link[=draw_heat]{draw_heat()}} instead.
 This behavior can be overridden using the \code{heat} argument.
 }
 

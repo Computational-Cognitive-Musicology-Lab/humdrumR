@@ -66,7 +66,7 @@ NULL
 #'
 #' @rdname humdrumR
 #' @export
-humdrumRroot <- system.file(package = 'humdrumR')
+humdrumRroot <- gsub("\\/_build", "", system.file(package = 'humdrumR'))
 
 
 

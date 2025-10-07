@@ -4,23 +4,8 @@
 \alias{draw}
 \title{Visualize data}
 \usage{
-draw(
-  x,
-  y,
-  facets = list(),
-  ...,
-  xlab = NULL,
-  ylab = NULL,
-  axes = 1:4,
-  legend = TRUE,
-  aspect = NULL,
-  margin = 0.2,
-  main = "",
-  sub = "",
-  col = 1,
-  cex = NULL,
-  pch = NULL
-)
+draw(x, y, ...)
+}
 \arguments{
 \item{...}{\emph{\strong{Additional parameters to pass to par().}}
 
@@ -48,7 +33,9 @@ edge of the X/Y axis. The second number specifies the right/top edge.}
 
 Defaults to \code{TRUE}.}
 
-\item{`aspect`}{Defaults to \code{NULL}.
+\item{aspect}{\emph{\strong{Control the aspect ratio of the plot.}}
+
+Defaults to \code{NULL}.
 
 Must be a single numeric value \eqn{5 \geq aspect \geq 0.2}, or \code{NULL}.
 
@@ -72,45 +59,14 @@ Defaults to \code{FALSE}, unless the input has two or more dimensions
 \emph{and} at least 80 conditions.
 
 Must be a singleton \code{logical} value: an on/off switch.}
-
-\item{normalReference}{\emph{\strong{Should a reference Normal distribution by overlayed?}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.}
-
-\item{showCounts}{\emph{\strong{Should the number of observations in each category be drawn on the plot?}}
-
-Defaults to \code{TRUE}.
-
-Must be a singleton \code{logical} value: an on/off switch.}
-
-\item{showPoints}{\emph{\strong{Should individual data points be plotted above the histogram?}}
-
-Defaults to \code{TRUE}.
-
-Must be a singleton \code{logical} value: an on/off switch.}
-
-\item{log}{\emph{\strong{Should X and/or Y axes be drawn on a logarithmic scale?}}
-
-Defaults to \code{""} (linear scale on both axes).
-
-Must be a single \code{character} string; options are \code{"x"} (X axis on log scale),
-\code{"y"} (Y axis on log scale), and \code{"xy"} (both axes on log scale).}
-
-\item{smooth}{\emph{\strong{Should continuous values be grouped using density estimation or binning?}}
-
-Defaults to \code{TRUE} for violin and area plots, but \code{FALSE} for histograms.
-
-Must be a singleton \code{logical} value: an on/off switch.}
 }
 \description{
 The \code{draw()} function is humdrumR's go-to plotting function,
 which can make a variety of graphs depending on the type of data you give it.
-For the most part, \code{draw()} is simply a easy-to-use wrapper around
+For the most part, \code{draw()} is just an easy-to-use wrapper around
 the base-R graphics functions---Anything that \code{draw()} does can be done
-using normal base-R functions (\code{\link[=plot]{plot()}}, \code{\link[=barplot]{barplot()}}, etc.),
-but \code{draw()} makes making good looking plots faster and easier.
+using normal base-R functions (\code{\link[=plot]{plot()}}, \code{\link[=barplot]{barplot()}}, etc.).
+However, \code{draw()} makes making good looking plots faster and easier.
 }
 \details{
 \code{draw()} is a generic function, which does different sorts of plots depending on the data you pass to its
@@ -143,11 +99,11 @@ Details for all these options can be found below.
 \section{General Draw Arguments}{
 
 
-\code{draw()} is built on top of R's "base" plotting system.
-This means that all the standard arguments to base-R plots can be used to customize plots
-(See \code{\link[=par]{par()}} for a full list) or add to them (for example, using \code{\link[=points]{points()}} or \code{\link[=mtext]{mtext()}}).
-However, \code{draw()} has a number of special additional features, including easily plotting "facets"
-(dividing data into multiple plots).
+\code{draw()} is built on top of R's base plotting system.
+This means that all the standard arguments to base-R plots can be used to customize \code{draw()} plots
+(see \code{\link[=par]{par()}} for a full list).
+You can also add stuff to \code{draw()} plots using base functions like \code{\link[=points]{points()}}, \code{\link[=mtext]{mtext()}}, or \code{\link[=abline]{abline()}}.
+\code{draw()} also has a number of unique features, including easily dividing data into multiple plots ("facets").
 \subsection{Plot Text}{
 
 Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis label.
@@ -211,15 +167,10 @@ a color scheme you want) \emph{or} to represent an additional dimension of data.
 
 Colors can be specified several ways:
 \itemize{
-\item As names (e.g., \code{"red"} or \verb{"darkgreen'})
-\item As hex codes (e.g., \code{"#ff0000"} or \verb{"#00ff00})
+\item As names (e.g., \code{"red"} or \code{"darkgreen"}).
+\item As \href{https://en.wikipedia.org/wiki/Web_colors#hex-triplet}{hex codes} (e.g., \code{"#ff0000"} or \verb{"#00ff00}).
 \item Using the \code{\link[=rgb]{rgb()}} function.
-\itemize{
-\item If a single \code{col} value is provided, all points are drawn this color.
-\item If the \code{col} value is the same length as \code{x} and \code{y}, a scale of colors (either discrete of continuous)
-is generated to match the values this variable takes, and a legend is drawn.
-}
-\item As natural numbers, indexing \code{humdrumR}'s flatly palette,
+\item As natural number (1,2,3, etc.), indexing \code{humdrumR}'s flatly palette,
 based on the colors \code{'#18BC9C'}, \code{'#3498DB'}, \code{'#F39C12'}, \code{'#E74C3C'}, and \code{'#2C3E50'}.
 }
 
@@ -232,294 +183,6 @@ For some plots, multiple colors are used (aesthetically) by default;
 For other types of plots, its possible to use color to represent an additional dimension of information.
 In the "Specific Plot Types" subsections below, the details of how each plot type interprets
 the \code{col} argument are explained.
-}
-}
-
-\section{Specific Plot Types}{
-
-\subsection{Density Histogram or Contour (x = numeric, y =)}{
-
-To draw a single numeric variable on the X axis, \code{draw()} either bins the numbers to create a
-histogram, or estimates a smooth density contour to draw.
-To choose which approach, use the \code{smooth} argument: \code{smooth = FALSE} (default) for histogram,
-and \code{smooth = TRUE} for density contour.
-The \code{draw()} function relies on the algorithms used by base-R's \code{\link[=hist]{hist()}} and \code{\link[=density]{density()}} functions, respectively, for
-these two tasks.
-In many cases, we can pass arguments directly through to these functions.
-For example, the \code{breaks} argument can be passed through to \code{\link[=hist]{hist()}},
-or the \code{bw} and \code{kernel} arguments to \code{\link[=density]{density()}}.
-
-Whether smoothed or binned, the Y axis represents the probability density.
-This means that the height of histogram bars does not correspond exactly to the
-the probability mass in each bin, because it depends on the width of the bins;
-For narrow bins, density can even be greater than 1.
-If bin sizes are all equal, then the relative height of he density bars does
-map exactly to the relative probability mass of each bin.
-However, if bins are not equal width---which can only happen if you manually specify
-unequal bins using the \code{breaks} argument---the heights of bars \emph{don't} map to probability mass.
-However, using the density assures that the relative \strong{area} of each bin does match the probability mass
-associated with that bin, even if the bins are of unequal width.
-This is ideal for a plot.
-
-A second dimension can be visually added to the plot using the \code{col} (color) argument.
-If you pass a single color, the whole graph is drawn that color.
-However, if you pass \code{col} a vector of values which is the exact same length as
-the input vector \code{x}, the unique values of this vector will be used to group
-the \code{x} data and a separate density-graph will be drawn for each group, with its own color.
-(A color legend will be drawn automatically.)
-The colors for each group will be chosen automatically, unless the entire \code{col} vector is
-valid color values. (Use \code{alpha} independently to change the transparency.)
-If the grouping \code{col} vector is numeric and there are more than five unique values,
-the numbers are automatically divided into (at most) five bins.
-Use the \code{conditional} argument (see below) to control how the densities of each group
-are scaled relative to each other.
-\subsection{Other histogram arguments}{
-
-In addition to Plot Text and Axes Control parameters (listed above), as well as the dimensional \code{col} argument,
-arguments understood by histogram/density plots are listed below.
-The following arguments are all singleton \code{logical} on/off switches (\code{TRUE} or \code{FALSE}),
-unless otherwise indicated.
-\itemize{
-\item \code{smooth} --- Controls whether histogram is binned or smooth.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-\item \code{showPoints} --- Controls whether individual data points from the \code{x} input vector
-are plotted in a "cloud" above the density plot.
-\itemize{
-\item Defaults to \code{TRUE}.
-\item The X-position of each point is matched to its actual value.
-\item The Y-position of each point is randomly (uniformly) selected in a range at the top of the plot window.
-This spaces out points that are close together, so it is easier to see how dense they are.
-}
-\item \code{showCounts} --- Controls whether the actual count of values associated with each
-bin (or contour) is printed above the each bar/contour.
-\itemize{
-\item Defaults to \code{TRUE}.
-\item Note that, if the data is grouped into multiple draws by \code{col} (see above), there is no guarantee
-the counts won't be drawn on top of each other.
-}
-\item \code{normalReference} --- If \code{TRUE}, a normal (Gaussian) distribution is drawn as a dashed
-black line. The mean and standard deviation of this distribution is taken from the input vector \code{x}.
-This gives a sense of how close to normally distributed \code{x} is.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-\item \code{conditional} --- If the data is grouped in multiple draws by \code{col} (see above), should the density
-of each color match it's global share in the distribution of input variable \code{x}, or be rescaled in each
-group to sum/integrate to 1? I.e., should probabilities be conditioned on the grouping factor?
-\itemize{
-\item Setting \code{conditional = TRUE} is useful if you want to see the details of how each group is distributed.
-\item \code{conditional = FALSE} (the default) is useful when you want to see the actual proportion of
-data in each group (if they are different sizes).
-}
-\item \code{quantiles} --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the default).
-\itemize{
-\item By default, \code{quantiles = c()} and no quantiles are drawn.
-\item If any quantiles are specified, each quantile is drawn as a vertical line on the plot, labeled appropriately.
-For example,
-\itemize{
-\item \code{quantiles = .5} will draw a line at the median of input vector \code{x}.
-\item \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.
-}
-}
-\item \code{mean} --- If \code{TRUE}, the mean of input vector \code{x} is marked on the X axis below the plot,
-using a cross-hair symbol.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-\item \code{global_quantiles} --- If the data is grouped into multiple draws by \code{col} (see above), and if \code{quantiles}
-or the \code{mean} are going to be drawn, should they be computed separately
-for each group or for the whole (global) distribution of the input variable \code{x}?
-\itemize{
-\item Defaults to \code{TRUE}.
-\item If \code{global_quantiles = TRUE}, the overall quantiles and/or mean of input vector \code{x} are drawn.
-If the data is grouped by \code{col} and \code{global_quantiles = FALSE}, quantiles and/or means are instead
-computed and drawn separately for each group. This can get very messy very quickly!
-}
-}
-}
-
-}
-
-\subsection{Quantile plot (x = , y = numeric)}{
-
-To draw a single numeric variable on the Y axis, \code{draw()} sorts
-the input vector \code{y} and draws each point on the Y axis,
-from lowest to highest, equally spaced across the X axis.
-This means that the position on the X axis corresponds to the empirical quantiles
-of the data; for example, the median point (50\% quantile) is exactly in the middle of the
-X axis.
-Up to three additional dimensions can be visually added to the plot using \code{col} (color),
-\code{cex} (point size), and \code{pch} (point style) arguments.
-
-If you pass a single color value to \code{col}, the whole graph is drawn that color.
-However, if you pass \code{col} a vector of values which is the exact same length as
-the input vector \code{x}, the unique values of this vector will be used to color
-the points of the quantile plot.
-(A color legend will be drawn automatically.)
-The colors for each group will be chosen automatically, unless the entire \code{col} vector is
-valid color values. (Use \code{alpha} independently to change the transparency.)
-If the grouping \code{col} vector is numeric and there are more than ten unique values,
-a continuum of colors is created to represent that numeric space.
-
-By default, \code{draw()} chooses an appropriate size to draw data points based on the
-size of the input vector \code{y} and the window size---the more data on the screen, smaller the points are drawn.
-You can override this by passing a single numeric value to \code{cex}; values between about
-\code{.2} and \code{1.5} are pretty reasonable, typically.
-However, if you pass \code{cex} vector of positive numeric values which is the same length
-as the input vector \code{y}, the point sizes are scaled so that the relative \emph{area} of drawn points
-matches the relative magnitude of numbers in the \code{cex} vector---A point-size legend is also drawn.
-Thus, if you draw two points with \code{cex = c(3, 6)}, the second point will be drawn twice
-the size (twice the area) of the first.
-If the range of values is too great, it is not feasible to represent them using points,
-because the points would either get too small to see or too big (covering the whole plot).
-Thus, if the largest \code{cex} value is more than 100 times greater than the smallest,
-the scaling will be changed to accommodate this.
-When this happens, a message will be printed, explaining how the relative area of drawn
-points relates to the relative magnitude of \code{cex} values
-For example, you might see a message like: "When comparing the point in this plot,
-a doubling of area corresponds to multiplying the value by three."
-
-By default, each data point is represented by a solid circle.
-This can be overriden by passing a \code{pch} argument.
-There are sixteen possible shapes, which are specified by the natural
-numbers from 1 to 16---try calling \code{plot(1:16, pch = 1:16)} to see them all.
-If a single value is passed to \code{pch}, all points are drawn with the corresponding shape.
-However, if you pass \code{pch} a vector which is the same length as the input
-vector \code{y}, the data is grouped relative to the unique values of this vector,
-with a shape associated with each group.
-A point-shape legend is automatically drawn.
-If the \code{pch} vector is numeric, with more than four unique values, the
-numeric range is divided into four groups automatically.
-If the \code{pch} vector is discrete (\code{character}, \code{logical}, or \code{factor}),
-each unique value is mapped to a point-shape;
-This only works up to sixteen unique values---if there are more
-unique values in a discrete \code{pch} vector, an error will occur.
-
-In addition to Plot Text and Axes Control parameters (listed above),
-and dimensional arguments \code{y}, \code{col}, \code{cex}, and \code{pch},
-arguments understood by quantile plots are listed below.
-The following arguments are all singleton \code{logical} on/off switches (\code{TRUE} or \code{FALSE}),
-unless otherwise indicated.
-\itemize{
-\item \code{normalReference} --- If \code{TRUE}, a normal (Gaussian) distribution is drawn as a dashed
-black line. The mean and standard deviation of this distribution is taken from the input vector \code{y}.
-This gives a sense of how close to normally distributed \code{y} is.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-\item \code{quantiles} --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
-\itemize{
-\item If any quantiles are specified, each quantile is drawn as a horizontal line on the plot, labeled appropriately.
-For example,
-\itemize{
-\item \code{quantiles = .5} will draw a line at the median of input vector \code{y}.
-\item \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{y} (this is the default
-for quantile plots).
-}
-}
-\item \code{mean} --- If \code{TRUE}, the mean of input vector \code{y} is marked on the Y axis at the center of plot,
-using a cross-hair symbol.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-\item \code{violin} --- If \code{TRUE}, a single violin plot is drawn instead of a quantile plot. (See details about
-these plots below.)
-}
-}
-
-\subsection{Scatter plot (x = numeric, y = numeric)}{
-
-To draw a pair of numeric variables, \code{draw()} creates a scatter plot
-with the \code{x} and \code{y} input variables mapped to position on the X and Y axes respectively.
-The input vectors must be equal length, unless one of the pair is a single scalar,
-in which case that scalar is recycled to match the length of the other input.
-(Thus, providing a scalar \code{x} or \code{y} causes the other variable to be drawn on a straight line.)
-Up to three additional dimensions can be visually added to the plot using \code{col} (color),
-\code{cex} (point size), and \code{pch} (point style) arguments.
-
-If you pass a single color value to \code{col}, the whole graph is drawn that color.
-However, if you pass \code{col} a vector of values which is the exact same length as
-the input vectors \code{x}/\code{y}, the unique values of this vector will be used to color
-the points of the scatter plot.
-(A color legend will be drawn automatically.)
-The colors for each group will be chosen automatically, unless the entire \code{col} vector is
-valid color values. (Use \code{alpha} independently to change the transparency.)
-If the grouping \code{col} vector is numeric and there are more than ten unique values,
-a continuum of colors is created to represent that numeric space.
-
-By default, \code{draw()} chooses an appropriate size to draw data points based on the
-density of the X and Y points in the window---the more data on the screen, smaller the points are drawn.
-You can override this by passing a single numeric value to \code{cex}; values between about
-\code{.2} and \code{1.5} are pretty reasonable, typically.
-However, if you pass \code{cex} vector of positive numeric values which is the same length
-as the input vector \code{y}, the point sizes are scaled so that the relative \emph{area} of drawn points
-matches the relative magnitude of numbers in the \code{cex} vector---A point-size legend is also drawn.
-Thus, if you draw two points with \code{cex = c(3, 6)}, the second point will be drawn twice
-the size (twice the area) of the first.
-If the range of values is too great, it is not feasible to represent them using points,
-because the points would either get too small to see or too big (covering the whole plot).
-Thus, if the largest \code{cex} value is more than 100 times greater than the smallest,
-the scaling will be changed to accommodate this.
-When this happens, a message will be printed, explaining how the relative area of drawn
-points relates to the relative magnitude of \code{cex} values
-For example, you might see a message like: "When comparing the point in this plot,
-a doubling of area corresponds to multiplying the value by three."
-
-By default, each data point is represented by a solid circle.
-This can be overridden by passing a \code{pch} argument.
-There are sixteen possible shapes, which are specified by the natural
-numbers from 1 to 16---try calling \code{plot(1:16, pch = 1:16)} to see them all.
-If a single value is passed to \code{pch}, all points are drawn with the corresponding shape.
-However, if you pass \code{pch} a vector which is the same length as the input
-vector \code{y}, the data is grouped relative to the unique values of this vector,
-with a shape associated with each group.
-A point-shape legend is automatically drawn.
-If the \code{pch} vector is numeric, with more than four unique values, the
-numeric range is divided into four groups automatically.
-If the \code{pch} vector is discrete (\code{character}, \code{logical}, or \code{factor}),
-each unique value is mapped to a point-shape;
-This only works up to sixteen unique values---if there are more
-unique values in a discrete \code{pch} vector, an error will occur.
-
-In addition to Plot Text and Axes Control parameters (listed above),
-and dimensional arguments \code{y}, \code{col}, \code{cex}, and \code{pch},
-arguments understood by scatter plots are listed below.
-The following arguments are all singleton \code{logical} on/off switches (\code{TRUE} or \code{FALSE}),
-unless otherwise indicated.
-\itemize{
-\item \code{normalReference} --- If \code{TRUE}, a bivariate normal (Gaussian) distribution is drawn under the scatter
-plot, using the means and variances of, and the covariance between, the input vectors \code{x} and \code{y}.
-To visualize this two dimensional distribution, a random sample of points from this bivariate
-distribution is drawn in large black, but mostly transparent points.
-This gives a sense of how close to jointly-normally distributed \code{x} and \code{y} are.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-\item \code{lm} --- If \code{TRUE}, the simple regression line is estimated using \link[=lm]{lm(y ~ x)} and
-this regression line and its 95\% confidence limits---estimated using \code{\link[=predict.lm]{predict.lm()}}---are
-drawn (as solid lines and dashed lines respectively).
-The regression coefficients themselves are also drawn in a legend at the top left corner of the plot.
-\item \code{quantiles} --- Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
-\itemize{
-\item By default, \code{quantiles = c()} and no quantiles are drawn.
-\item If any quantiles are specified, each quantile is drawn as on the plot and labeled appropriately.
-Quantiles are computed separately for input vectors \code{x} and \code{y} drawn using vertical and horizontal
-lines respectively.
-For example,
-\itemize{
-\item \code{quantiles = .5} will draw a lines which converge at the medians of \code{x} and \code{y}.
-\item \code{quantiles = c(.25, .5, .75)} will draw vertical and horizontal lines marking the four
-quartiles of \code{x} and \code{y} (creating a grid with 16 cells).
-}
-}
-\item \code{mean} --- If \code{TRUE}, a cross-hair symbol is drawn marking at the point marking the means of \code{x} and \code{y}.
-\itemize{
-\item Defaults to \code{FALSE}.
-}
-}
-}
 }
 
 \section{Facets}{

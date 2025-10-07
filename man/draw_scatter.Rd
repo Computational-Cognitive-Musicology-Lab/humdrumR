@@ -28,11 +28,10 @@ Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.
 
-If \code{TRUE}, a bivariate normal (Gaussian) distribution is drawn under the scatter
-plot, using the means and variances of, and the covariance between, the input vectors \code{x} and \code{y}.
-To visualize this two dimensional distribution, a random sample of points from this bivariate
-distribution is drawn in large black, but mostly transparent, points.
-This gives a sense of how close to jointly-normally distributed \code{x} and \code{y} are.}
+If \code{TRUE}, the 95\% and 50\% density regions of
+a bivariate normal (Gaussian) distribution are
+drawn under the scatter plot, using the means variances of, and the covariance between,
+the input vectors \code{x} and \code{y}.}
 
 \item{mean}{\emph{\strong{Should the mean of input vectors \code{x} and \code{y} be marked on the plot?}}
 

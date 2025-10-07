@@ -15,7 +15,7 @@ Defaults to \code{""} (linear scale).
 Must be a single \code{character} string, either \code{""} (linear scale)
 of \code{""} (draw Y on a logarithmic scale).}
 
-\item{violin}{\emph{\strong{Should a \link[=violin_plot]{violin plot} be drawn instead?}}
+\item{violin}{\emph{\strong{Should a \link[=draw_violins]{violin plot} be drawn instead?}}
 
 Defaults to \code{FALSE}.
 
@@ -81,7 +81,7 @@ across the screen from left to right.
 Position on the X axis corresponds to the empirical quantiles
 of the data; for example, the median point (50\% quantile) is exactly in the middle of the
 X axis.
-As an alternative, a single \link[=violin plot]{violin} diagram can be drawn by setting \code{violin = TRUE}.
+As an alternative, a single \link[=draw_violins]{violin} diagram can be drawn by setting \code{violin = TRUE}.
 }
 \details{
 Up to three additional dimensions can be visually added to the plot using \code{col} (color),

@@ -12,7 +12,6 @@ vignette: >
 
 ```{r, include = FALSE}
 source('vignette_header.R')
-
 ```
 
 
@@ -39,6 +38,7 @@ Additional functions can then be used to *add* more elements on top of the plots
 (These "adding" functions can be used with [draw()] too.)
 
 Let's load some humdrum data:
+
 
 ```{r}
 bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
