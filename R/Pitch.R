@@ -2616,6 +2616,7 @@ tonalInterval.token <- function(x, Exclusive = NULL, ...) {
 }
 
 
+#' @export
 tonalInterval.integer <- function(x, Exclusive = NULL, ...) {
   tonalInterval.numeric(as.numeric(x), Exclusive = Exclusive, ...)
 }
