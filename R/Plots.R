@@ -1844,7 +1844,9 @@ draw_facets <- function(full_data, faceted_data,
       
       # prepare args and draw
       if (facet_sizes[n] > 0) {
-        facet <- do.call('.draw', c(faceted_data[[n]], list(...))) # actual draw of plot
+        facet <- with(faceted_data[[n]], .draw(x = x,  y = y, ...,  
+                                               col = col, cex = cex, pch = pch))# actual draw of plot
+        # facet <- do.call('.draw', c(faceted_data[[n]], list(...))) 
         marginLines <- setMargins(.1, aspect = aspect)
         
         output$canvas()
@@ -2857,9 +2859,11 @@ prep_pch <- function(x, y, pch = NULL, col, ...) {
   size <- max(length(x), length(y))
   checks(pch, xnull | (xlen1 & (xwholenum & xrange(1, 16L))) | (xatomic & xlength(size)))
   
+  if (is.null(pch)) return(list(pch = 16))
+  if (length(unique(pch)) == 1L) return(list(pch = unique(pch)))
+  
   col <- if (length(unique(col)) > 1) 'black' else unique(col)
   
-  if (is.null(pch) || length(unique(pch)) == 1L) return(list(pch = 16))
   pch <- if (is.numeric(pch) & length(unique(pch)) > 4) cut(pch, breaks = 4) else factor(pch)
   if (length(unique(pch)) > 16) .stop("You can only draw at most 16 distinct groups using the pch (point type) argument.")
   categories <- levels(pch)
