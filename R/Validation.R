@@ -22,7 +22,7 @@
 #'
 #' @returns 
 #'
-#' `validateHumdrum()` returns a "error frame" data.table object, [invisibly][base::invisible()]
+#' `validateHumdrum()` returns an "error frame" data.table object, [invisibly][base::invisible()]
 #' (to "see" the output, you must save it to a variable, *then* look at it).
 #' The error frame is a `data.table` with three columns:
 #' 

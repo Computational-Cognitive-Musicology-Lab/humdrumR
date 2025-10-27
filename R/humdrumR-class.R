@@ -7,7 +7,7 @@
 #' as a single [data.table][data.table::data.table] 
 #' (A `data.table` is an "enhanced" version of R's standard [data.frame]).
 #' Humdrum tables are stored "inside" every [humdrumRclass] object that you will work with, and various `humdrumR`
-#' functions allow you to study or manipulate the them.
+#' functions allow you to study or manipulate them.
 #' If you want to directly access the humdrum table within a [humdrumRclass] object, use the [getHumtab()] function.
 #' 
 #' 
@@ -125,7 +125,7 @@
 #' 
 #' Humdrum data may, or may not, include additional *tandem* interpretations. A universal rule for parsing
 #' tandem interpretations is impossible, because A) tandem interpretations can "overwrite" each other and B)
-#' users can create their own tandem interpretations. The best we can do in all cases is 
+#' users can create their own tandem interpretations. The best we can do in all cases is to 
 #' identify *all* tandem interpretations that have appeared previously in the spine
 #' (counting most recent first). All these previous interpretations are encoded in a single
 #' character string in the `Tandem` field (see the [tandem()] docs for details). 
@@ -469,9 +469,9 @@ is.humdrumR <- function(x){
 #' 
 #' @details
 #' 
-#' Generally, coercion works by evaluating a humdrumR object's the 
+#' Generally, coercion works by evaluating a humdrumR object's 
 #' [selected fields][selectedFields] and forcing the result to be an atomic vector.
-#' When multiple field are selected, they are pasted together, separated by `", "`.
+#' When multiple fields are selected, they are pasted together, separated by `", "`.
 #' If a field is not atomic (like a `list`, or `lm` object), a concise representation of the
 #' list or object class is printed.
 #' The [as.vector(humdrumR)][humCoercion] has the additional
@@ -1344,9 +1344,9 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' The selected fields also have a role in identifying "null" data.
 #' Whenever new fields are selected, their data tokens are checked for `NA` values or null
 #' tokens (`"."`).
-#' Anywhere where *all* the selected fields are null, the `Type` field is updated to `"d"`;
+#' Wherever *all* the selected fields are null, the `Type` field is updated to `"d"`;
 #' wherever *any* field is **not** null, the `Type` field is updated to `"D"`.
-#' Many functions ignore `d` (null data) tokens by default, so selecting fields can be a way controlling which data you
+#' Many functions ignore `d` (null data) tokens by default, so selecting fields can be a way to control which data you
 #' want to analyze and which you don't.
 #'
 #'
@@ -1356,8 +1356,8 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' and can use any of `select()`'s [special select features][dplyr::select()].
 #' If you call `select()` with no argument, the original `Token` field is selected by default.
 #'
-#' If you use `select()` with a numeric selections or, like `select(1:3)`, fields are numbered in the (row) order
-#' shown in call to [fields()].
+#' If you use `select()` with a numeric selection, like `select(1:3)`, fields are numbered in the (row) order
+#' shown in the call to [fields()].
 #' Fields are always sorted first by `Type` (`Data` first), then by name.
 #' If you provide a `fieldTypes` argument, the numeric selection is reduced to only those fields you choose,
 #' matching with the row-numbers you'd see if you call [fields(humData, fieldTypes = ...)][fields()].
@@ -1405,7 +1405,7 @@ names.humdrumR <- function(humdrumR) fields(humdrumR)[ , Name]
 #' # change selection
 #' humData |> select(Spine, Record, Token) |> selectedFields()
 #'
-#' humData |> select(Structure)
+#' humData |> select(fieldTypes = 'Structure') |> selectedFields()
 #' 
 #' humData |> select(4)
 #' humData |> select(1:3, fieldTypes = 'Structure')

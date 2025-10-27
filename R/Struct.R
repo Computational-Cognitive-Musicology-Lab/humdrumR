@@ -42,7 +42,7 @@
 #' Other differences:
 #' * `struct`s can have either no dimensions (`dim(struct) == NULL`) or two dimensions. Higher dimensional `struct`s are not supported (yet).
 #' * `rowSums` and `colSums` will coerce a dimensionless struct to a column matrix.
-#' * `struct`s always throw an error if you try to index them with a index value that is greater than the length/nrow of the `struct`. 
+#' * `struct`s always throw an error if you try to index them with an index value that is greater than the length/nrow of the `struct`. 
 #'    This is different than atomic vectors, which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.
 #' * `struct`s with two dimensions have a `cartesian` indexing argument.
 #'    If `cartesian = TRUE`, the `i` and `j` arguments are treated as cartesian coordinates.

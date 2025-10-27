@@ -177,12 +177,12 @@
 #' 
 #' Another common/important automatic argument insertion is for functions with a `groupby` argument.
 #' These functions will automatically have appropriate grouping fields inserted into them.
-#' For example, the [mint()] (melodic intervals) command will *automatically* by applied using `groupby`
+#' For example, the [mint()] (melodic intervals) command will *automatically* use `groupby`
 #' `groupby = list(Piece, Spine, Path)`, which makes sure that melodic intervals are only calculated within
 #' spine paths...not between pieces/spines/paths (which wouldn't make sense!).
 #' 
 #' All `humdrumR` functions which use automatic argument interpolation will mention it in their own documentation.
-#' For example, the [?solfa] documentation mentions the treatment of `Key` in its "Key" section.
+#' For example, the [solfa] documentation mentions the treatment of `Key` in its "Key" section.
 #' 
 #' #### Lagged vectors
 #' 
@@ -235,13 +235,13 @@
 #' #### Splatted arguments
 #' 
 #' "Splatting" refers to feeding a function a list/vector of arguments.
-#' Sometimes we want to divide our data into pieces (a l\'a [group_by()][groupHumdrum]), but
+#' Sometimes we want to divide our data into pieces (with [group_by()][groupHumdrum]), but
 #' rather than applying the same expression to each piece, we want to feed
 #' the separate pieces as separate arguments to the same function.
 #' You can use some 
-#' [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic)
+#' [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar)
 #' to do just this.
-#' We can index any field in our call with a `splat` argument, which must be a `Field %in% x`.
+#' We can index any field in our call with a `splat` argument, which must be some `x %in% Field`.
 #' For example,
 #'
 #' ```
@@ -280,7 +280,7 @@
 #' Once you've quoted an expression you can pass it to 
 #' `with()`, `within()`, `mutate()`, `summarize()`, and `reframe()`.
 #'
-#' Image that you have three different datasets (`humData1`, `humData2`, and `humData3`),
+#' Imagine that you have three different datasets (`humData1`, `humData2`, and `humData3`),
 #' and you'd like to evaluate the expression `count(kern(Token, simple = TRUE))` in all three.
 #' Use the `~` operator to quote and save that expression to variable, then use it with `with()`:
 #' 
@@ -323,7 +323,7 @@
 #' + `"pad"`: the result is padded with `NA` values.
 #' + `"ifscalar"`: if the result is scalar (length 1), it is recycled; otherwise you see an error.
 #' + `"ifeven"`: if the result length evenly divides the input length, it is recycled; otherwise you see an error.
-#' + `"never"`: The result is not recycled. If the result does not match the input length, you see an error.
+#' + `"never"`: The result can never be recycled. Unlike "no", "never" treats differing input and output lengths as an error.
 #' + `"summarize"`: if the result is not scalar, *even if it matches the input length*, you see an error. The result is not recycled.
 #' 
 #' The result of padding/recycling also depends on the `alignLeft` argument:
@@ -468,9 +468,9 @@
 #' original data locations.
 #' Since [groups][groupHumdrum] are necessarily exhaustive and non-overlapping, the results
 #' location are easy to understand.
-#' On the other hand [contextual windows][context()] may overlap, which means and non-scalar results
+#' On the other hand [contextual windows][context()] may overlap, which means any non-scalar results
 #' could potentially overlap as well;
-#' in these cases, which result data lands where may be hard to predict.
+#' in these cases, it may be hard to predict which data lands where.
 #'
 #' 
 #' 

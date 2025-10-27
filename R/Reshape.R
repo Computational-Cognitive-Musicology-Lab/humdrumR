@@ -148,7 +148,7 @@ contractPaths <- function(humtab) {
 
 #' "Collapse" humdrumR data into a field
 #' 
-#' `collapseHumdrum` allows you collapse a data field across
+#' `collapseHumdrum` allows you to collapse a data field across
 #' across groups within the data indicated by the `by` argument.
 #' Data is "collapsed" either by [pasting][base::paste()] the data into a string,
 #' or by putting them into [list][base::list()].
@@ -378,7 +378,7 @@ collapseRecords <- function(humdrumR, fields = selectedFields(humdrumR), collaps
 #' + In any remaining pieces (6 or greater), no cleaves.
 #' 
 #' Alternatively, you can name the list elements with integers corresponding to pieces.
-#' For example, `cleave(humData, Path = list("1" = 0:1, 5 = 0:2"))` will cleave paths 0 and 1 in
+#' For example, `cleave(humData, Path = c("1" = 0:1, "5" = 0:2))` will cleave paths 0 and 1 in
 #' piece 1, and paths `0:2` in piece 5.
 #' 
 #' 
@@ -423,7 +423,7 @@ collapseRecords <- function(humdrumR, fields = selectedFields(humdrumR), collaps
 #' If you provide too many field names, the extra names will simply be ignored.
 #' 
 #' When cleaving by exclusive interpretation `newFields` can be used in the exact same way.
-#' However, by default (if `newFields` is `NULL`), `cleave()` will names fields by their exclusive interpretation.
+#' However, by default (if `newFields` is `NULL`), `cleave()` will name fields by their exclusive interpretation.
 #' Note that the original target field (specified by the `field`) argument will not have it's name changed.
 #' So for example, `humData |> select(Token) |> cleave(humData, c('kern', 'silbe'))` will result in the spines `Token`
 #' and `Silbe`. 
@@ -882,7 +882,7 @@ cleaveStops <- function(humdrumR, field = selectedFields(humdrumR)[1]) {
 }
 
 
-#' "Fold" grace notes into neighbos
+#' "Fold" grace notes into neighbors
 #' 
 #' 
 #' @seealso `foldGraceNotes` makes use of the more general [cleave()].
@@ -916,12 +916,12 @@ cleaveGraceNotes <- function(humdrumR) {
 #'  
 #' However, by default, spines are only rended if they contain non-null data points
 #' in the target fields.
-#' If for example, the original spine 2 had no non-null data in one of the rended fields, 
-#' if would not be rended into two spines.
+#' If, for example, the original spine 2 had no non-null data in one of the rended fields, 
+#' it would not be rended into two spines.
 #' However, if `rendEmpty` is set to `TRUE`, 
 #' *all* spines will be rended even if empty (all null data).
 #' 
-#' Note that, since differnt fields may be different data types, `rend()` will generally coerce the result to `character`.
+#' Note that, since different fields may be different data types, `rend()` will generally coerce the result to `character`.
 #' 
 #' ### Fields
 #' 
@@ -932,7 +932,7 @@ cleaveGraceNotes <- function(humdrumR) {
 #' However, certain fields, like `Token` and any [structural fields][humTable] cannot be removed from the data.
 #' Therefore, if you rend these fields, they will not be deleted, even if `removeRended = TRUE`.
 #' 
-#' If you only provide one field name to rend, is automatically take to be `Token`.
+#' If you only provide one field name to rend, `Token` is assumed as the first field automatically.
 #' Thus, `rend(humData, 'Solfa')` is equivalent to `rend(humData, 'Token', 'Solfa')`.
 #' 
 #' @param humdrumR ***HumdrumR data.***

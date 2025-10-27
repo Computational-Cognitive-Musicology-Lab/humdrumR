@@ -193,7 +193,7 @@ sec2dur <- function(x,
 #' However, all the pitch functions (like [recip()] and [dur()]) have an option to keep the "extra" information
 #' and return the result "in place"---i.e., embedded right where it was found in the input string.
 #' This is controlled with the `inPlace` argument, which is `FALSE` by default.
-#' So, `duration('4.ee-[', inPlace = TRUE)` will return `r duration('4.ee-[', inPlace = TRUE)`---keeping the `"ee-["`.
+#' So, `duration('4.ee-[', inPlace = TRUE)` will return `r duration('4.ee-[', inPlace = TRUE)`. It keeps the `"ee-["` part.
 #' Note that `inPlace = TRUE` will force functions like `duration`, which normally return `numeric` values, to return `character` strings
 #' *if* their input is a `character` string. 
 #' 
@@ -400,7 +400,7 @@ rint2ms <- function(x, BPM = 60, ...) {
 #' @details 
 #' 
 #' The underlying parser used by all `humdrumR` [rhythm functions][rhythmFunctions] can be called explicitly using the function `rhythmInterval()`.
-#' The `rhythmInterval` parser will attempt to parse any input information into a [ratioanl number][rationa] object.
+#' The `rhythmInterval` parser will attempt to parse any input information into a [rational number][rational] object.
 #' When you use one of the main [rhythm functions][rhythmFunctions], like [recip()] or [dur()], 
 #' the input is parsed into a [rational] object, then immediately [deparsed][rhythmDeparsing]
 #' to the representation you asked for (e.g., `**recip` or `**dur`).
@@ -450,7 +450,7 @@ rint2ms <- function(x, BPM = 60, ...) {
 #' For example, `seconds(x, Exclusive = 'recip')` will force the parser to interpret `x` as `**recip` data.
 #' Similarly, `recip(x, Exclusive = 'dur')` will force the parser to interpret `x` as `**dur` data.
 #' If you use any [rhythm function][rhythmFunctions] within a special call to [withinHumdrum],
-#' `humdrumR` will automatically pass the `Exclusive` field from the humdrum data to the function---this means, that in most cases, 
+#' `humdrumR` will automatically pass the `Exclusive` field from the humdrum data to the function---this means that, in most cases, 
 #' you don't need to explicitly do anything with the `Exclusive` argument!
 #' (If you want this *not* to happen, you need to explicitly specify your own `Exclusive` argument, or `Exclusive = NULL`.)
 #' 
@@ -795,7 +795,7 @@ rhythmFunctions <- list(Metric  = list(Symbolic = c('recip' = 'reciprocal note v
 #' 
 #' ## Grace notes
 #' 
-#' `**recip` and `**kern` data sometime include tokens indicating [grace notes](https://en.wikipedia.org/wiki/Grace_note)---a special
+#' `**recip` and `**kern` data sometimes include tokens indicating [grace notes](https://en.wikipedia.org/wiki/Grace_note)---a special
 #' category of duration, usually used to indicate "freely" a-metric notes in an otherwise metric context.
 #' In humdrum data, grace notes are marked with `"q"` or `"Q"`; `q` should be reserved
 #' for tokens with no (other) duration information, while `Q` should be marked along with
@@ -972,15 +972,14 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' Reciprocal representation of duration
 #' 
 #' The standard approach to representing conventional note values in humdrum 
-#' is the "reciprocal" [**recip](https://www.humdrum.org/rep/recip/index.html).
-#' Representation.
+#' is the "reciprocal" [**recip](https://www.humdrum.org/rep/recip/index.html) representation.
 #' The `**recip` rhythmic values are often used as a part of `**kern` representation,
 #' which also includes [pitch][kern()] information and notation details.
 #' 
 #' @details 
 #' 
 #' `**recip` values are literally the reciprocal of a duration value.
-#' Since most note values in conventional music notation are simple fractions
+#' Since most note values in conventional music notation are simple fractions,
 #' the reciprocal approach is highly concise and very similar to conventional western notation and terminology.
 #' A "quarter note" is represented as the reciprocal of 1/4: simply `"4"`.
 #' Full reciprocal fractions can be specified: `"2%3"` to indicate 3/2.
@@ -1002,12 +1001,10 @@ makeRhythmTransformer <- function(deparser, callname, outputClass = 'character',
 #' recip(c(.25, .25, .25, .25, .5, 1))
 #' recip(c(.25, .25, .25, .25, .5, 1), parse(unit = '4'))
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' within(B075, subset = Spine > 2,  recip(Token))
 #' 
 #' with(B075, subset = Spine > 2, recip(Token)) |> table()
-#' }
 #' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
@@ -1055,12 +1052,10 @@ recip <- humdrumRgeneric(recip.default)
 #' quarters(tokens, parse(grace = NA))
 #' quarters(tokens, inPlace = TRUE)
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' 
 #' with(B075, subset = Spine > 2, duration(Token)) 
 #' with(B075, subset = Spine > 2, quarters(Token)) 
-#' }
 #' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
@@ -1138,11 +1133,9 @@ quarters <- humdrumRgeneric(quarters.default)
 #' tokens <- c('4.GG', '8G', '16E', '16F#', '16G', '16D', 'q8D#', '4E')
 #' notehead(tokens)
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #'
 #' with(B075[[,3:4]], notehead(Token)) |> table()
-#' }
 #' 
 #' @seealso To better understand how this function works, 
 #' read about the [family of rhythm functions][rhythmFunctions], 
@@ -1215,11 +1208,9 @@ notehead <- humdrumRgeneric(notehead.default)
 #' quarternotes <- c(10, 30, 90, 310, 5000)
 #' dur(quarternotes, minutes = TRUE, BPM = '120', parse(unit = '4'))
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' 
 #' with(B075[[,3:4]], seconds(Token))
-#' }
 #' 
 #' 
 #' @family time functions
@@ -1310,7 +1301,7 @@ dur <- humdrumRgeneric(dur.default)
 #' @details 
 #' 
 #' 
-#' Both functions return "collapsed" durations are as null data tokens. 
+#' Both functions return "collapsed" durations as null data tokens. 
 #' For example, `sumTies(c('[4a', '4a]', '2g'))` returns `c('2a', '.', '2g')`, with the second (tied) duration null (`"."`).
 #' 
 #' For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no *next* onset, so there
@@ -1618,7 +1609,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 
 #' Rhythmic timeline of a piece
 #' 
-#' These functions calculate the ammount of time (either in beats, or seconds)
+#' These functions calculate the amount of time (either in beats, or seconds)
 #' that have unfolded since the beginning of a piece, giving a sense of the timeline in which events unfold.
 #' In `music21` this information is described as "offsets"---however,
 #' we prefer to reserve the words "onset" and "offset" to refer
@@ -1634,7 +1625,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' However, many (probably most) humdrum data files contain at least some information about the relative 
 #' duration of events, representing more detailed information about timing and rhythm.
 #' 
-#' `timeline()` parses and input vector `x` as [durations][duration()],
+#' `timeline()` parses an input vector `x` as [durations][duration()],
 #' computes the [cumulative sum][sigma()] of the durations, with the `start` argument appended to the beginning.
 #' The result is a `numeric` vector representing the total duration since the beginning of the vector (plus the value of `start`, which defaults to zero).
 #' The cumulative durations of `timeline()` represent musical duration units, where `1` equals a whole note.
@@ -1665,7 +1656,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' indicate a pickup.
 #' The *first* index where the `pickup` logical is `FALSE` is used as the starting point of the timeline/timecount;
 #' All the earlier (`pickup == TRUE`) points will be negative numbers, measured backwards from the start index.
-#' In `humdrumR`, and datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
+#' In `humdrumR`, any datapoints before the first barline record (`=`) are labeled `Bar == 0` in the `Bar` [field][fields()].
 #' Thus, a common use for the `pickup` argument is `within(humData, timeline(Token, pickup = Bar < 1)`, which makes the downbeat of
 #' the first complete bar `1` the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 #' 
@@ -1732,10 +1723,8 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' timeline(tokens)
 #' timestamp(tokens, BPM = '90')
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
 #' within(B075, timeline(Token))
-#' }
 #' 
 #' @seealso {The [timecount()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
 #' @family rhythm analysis tools

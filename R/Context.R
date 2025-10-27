@@ -28,7 +28,7 @@
 #' 
 #' The `group_by()` function returns a new [humdrumR data object][humdrumRclass]
 #' with grouping fields activated.
-#' The grouping fields, and the number of groups, are show when the humdrumR data
+#' The grouping fields, and the number of groups, are shown when the humdrumR data
 #' is printed.
 #' The `groups()` can be used to gather more information about groups: 
 #' `group()` returns a `data.table` with one row representing each group,
@@ -262,7 +262,7 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' into arbitrary contextual windows.
 #' Unlike [grouping vectors][groupHumdrum],
 #' `context()` windows 1) are always contiguous relative to the reference vector(s)/field(s)
-#' (which can depend on [order][order_by()]); 2) can *overlap*; and 3) don't necesarily exhaustively
+#' (which can depend on [order][order_by()]); 2) can *overlap*; and 3) don't necessarily exhaustively
 #' divide the data.
 #' The `context()` function should generally be called on 
 #' [humdrumR data][humdrumRclass], but it can also be called directly on vectors.
@@ -394,7 +394,6 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' + `end`: represents the last index of the `reference` vector(s).
 #' + `|`: As in "OR"---specify alternative window `open`/`close` criteria.
 #' 
-#' `
 #' What if we'd like each of our windows to close right before the next window opens?
 #' We can do this by making the `close` argument refer to the *next* `open`, by
 #' referring to the `nextopen` variable:
@@ -488,9 +487,9 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' @section Filtering windows:
 #' 
 #' Once `open` and `close` have identified where windows can start and end, there is still
-#' some options for which open and close indices to associate with each other to create a window.
-#' For example, as mentioned above, the `groupby` argument can be used to make sure windows to cross 
-#' grouping boundaries---even if one group has and extra open index and the next an extra close index.
+#' some options for open and close indices to associate with each other to create a window.
+#' For example, as mentioned above, the `groupby` argument can be used to make sure windows do not cross 
+#' grouping boundaries---even if one group has an extra open index and the next group has an extra close index.
 #' The minimum and maximum length of windows can also be controlled using the `min_length` and `max_length` arguments.
 #' The `overlap`, `depth`, `rightward`, and `duplicate_indices` arguments provide a number of additional options,
 #' which are useful for some use cases (details below).
@@ -503,47 +502,37 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' which we can capture with regular expressions for `open` and `close`.
 #' Here is an example:
 #' 
-#' ```
-#' nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
 #' 
+#' nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
 #' context(nesting1, open = '(', close = ')')
-#' ```
 #' 
 #' Perfect.
 #' However, what if there are nested phrasing indicators?
 #' 
-#' ```
 #' nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
-#' 
 #' context(nesting2, open = '(', close = ')')
-#' ```
+#' 
 #' 
 #' That's not what we want!
 #' By default, `context()` "pairs" each `open` with the next `close`, which often makes the most sense.
 #' But in this case, we want different behavior.
 #' We can get what we want by specifying `overlap = 'nested'`:
 #' 
-#' ```
 #' context(nesting2, open = '(', close = ')', overlap = 'nested')
-#' ```
 #' 
 #' Now context aligns each `open` with the corresponding `close` at the same *nesting level*.
 #' What if we are only interested in the highest (or lowest) level of nesting?
 #' Use the `depth` argument, which can be non-zero integers: the highest level is `1`,
 #' with "deeper" levels incrementing up.
 #' 
-#' ```
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2)
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3)
-#' ```
 #' 
 #' You can also use negative `depth` to specify from the deepest levels outward.
 #' For example, in this case  `depth == -1` should get us that deepest level:
 #' 
-#' ```
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
-#' ```
 #' 
 #' If `depth` is `NULL` (the default), all depths are returned.
 #' 
@@ -720,22 +709,6 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE)
 #' 
 #' 
-#' \dontrun{
-#' # within.humdrumR
-#' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
-#' 
-#' # 4-grams
-#' chorales |>
-#'   context(open = hop(), open + 3) |>
-#'   within(paste(Token, collapse = ','))
-#'        
-#' # phrases leading to fermatas
-#' chorales |>
-#'   context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
-#'   within(paste(Token, collapse = ','), alignLeft = FALSE)
-#'   
-#' }
-#' 
 #' @export
 context <- function(x, open, close, ...) UseMethod('context')
 #' @family {Contextual grouping functions.}
@@ -843,8 +816,9 @@ context.humdrumR <- function(humdrumR, open,  close,
 #' The `complement` must be an existing field in the data.
 #' If `uncontext()` is used with a given complement field, the currently
 #' selected data field (unless `Token` is selected) has the contents of the complement
-#' field inserted into it all points outside the contextual windows.
-#' This can be used to keep 
+#' field inserted into it at all points outside the contextual windows.
+#' This can be used to preserve non-contextual data while displaying it alongside 
+#' contextual transformations.
 #' 
 #' @examples 
 #' 

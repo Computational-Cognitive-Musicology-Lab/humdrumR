@@ -26,7 +26,7 @@
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
 #'  for diatonicSets call [key()][diatonicRepresentations].
-#' Thus, if you return a `diatonicSet` on the command line (or call [print][base::print] one one), 
+#' Thus, if you return a `diatonicSet` on the command line (or [print][base::print] one), 
 #' you'll see the [key interpretation][diatonicRepresentations] representation printed.
 #' 
 #' @slot Root integers representing the root of the key on the line-of-fifths
@@ -72,7 +72,7 @@
 #' + ± 27: raise or flatten the **2nd** scale degree.
 #' + ± 81: raise or flatten the **5th** scale degree.
 #' + ± 243: raise or flatten the **1st** scale degree.
-#' + ± 749: raise or flatten the **4th** scale degree.
+#' + ± 729: raise or flatten the **4th** scale degree.
 #' 
 #' For example, consider `Alteration == 26`:
 #' In a balanced ternary representation, the decimal integer 26 is represented as `1 0 0 1 0 -1 0`.
@@ -86,7 +86,7 @@
 #' However, though these two representations result in the same set on the line-of-fifths, some might consider them to be
 #' conceptually different in some contexts, so we consider the redundancy acceptable.
 #' Another case of encoding redundancy *is* that `Alteration - 1` (flatten the 7th) is exactly equivalent to `Signature - 1`.
-#' Similarly, `Alteration + 749` (raise the 4th) is exactly equivalent to `Signature + 1`.
+#' Similarly, `Alteration + 729` (raise the 4th) is exactly equivalent to `Signature + 1`.
 #' 
 #' 
 #' Double-flat and double-sharp degrees are **not** encodable in `diatonicSet`.
@@ -118,7 +118,7 @@
 #' 
 #' + [integer][base::integer]: interpreted as root of major key
 #' + [numeric][base::numeric]: rounded to nearest integer and intepreted as root of major key
-#' + [character][base::character]: interpreted using `humdrumR`s [regular expression dispatch system][humdrumR::regexDispatch], as 
+#' + [character][base::character]: interpreted using `humdrumR`'s [regular expression dispatch system][humdrumR::humdrumDispatch], as 
 #'   explained fully [here][diatonicRepresentations].
 #'   
 #' @seealso The main way to create `diatonicSet` S4 objects is with the [diatonicSet()] pitch parser.
@@ -225,7 +225,7 @@ is.diatonicSet <- function(x) inherits(x, 'diatonicSet')
 #' tertian or diatonic set, a logical `TRUE`/`FALSE`.
 #' These functions are not testing whether a chord is strictly
 #' a major or minor chord, but rather a "broad" major/minorness:
-#' gnerally, the presence of a minor third degree
+#' generally, the presence of a minor third degree
 #' makes a set "minor"; thus, a diminished chord is "minor"
 #' and the lydian key is "major."
 #'
@@ -464,7 +464,7 @@ setMethod('%%', signature = c('matrix', 'diatonicSet'),
 
 #' Generating ("deparsing") key representations
 #' 
-#' [humdrumR] includes a easy-to-use system for 
+#' [humdrumR] includes an easy-to-use system for 
 #' generating a variety of diatonic key representations,
 #' which can be flexibly modified by users.
 #' "Under the hood" `humdrumR` represents all tonal chord information using the [same underlying representation][diatonicSetS4],
@@ -589,10 +589,10 @@ dset2key <- function(x, Key = NULL, ...) {
 #' The later case is the standard meaning of "roman numeral."
 #' However, the former case is used as well, for instance
 #'  to represent modulation schemes in 
-#' analyses of classical music. For instance, modulate from I-V,
-#' the to vi/V.
+#' analyses of classical music (e.g, modulate from I-V,
+#' then to vi/V).
 #' More importantly, many "roman numerals" in harmonic analyses
-#' implicitely combine tertian and diatonic roman numerals:
+#' implicitly combine tertian and diatonic roman numerals:
 #' in "applied" roman numerals.
 #' Given a roman numeral like "V65/V", the "V65" represents a
 #' chord while the "/V" represents a key.
@@ -631,7 +631,7 @@ dset2romanNumeral <- function(x, flat = 'b', Key = NULL, ...) {
 
 #' Parsing key information
 #' 
-#' [humdrumR] includes a easy-to-use but powerful system for *parsing* diatonic key information:
+#' [humdrumR] includes an easy-to-use but powerful system for *parsing* diatonic key information:
 #' various basic key representations (including `numeric` and `character`-string representations) can be "parsed"---read
 #' and interpreted by `humdrumR`.
 #' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [key function][keyFunctions], like [key()]
@@ -1050,7 +1050,7 @@ makeKeyTransformer <- function(deparser, callname, outputClass = 'character') {
     deparse <- args...$deparse %||% TRUE
     
     # Parse
-    parsedDset <- do(diatonicSet, c(list(x, memoize = memoize), parseArgs), memoize = memoize, outputClass = 'diatonicSet')
+    parsedDset <- do(diatonicSet, c(list(x), parseArgs), memoize = memoize, outputClass = 'diatonicSet')
     
     deparseArgs <- c(list(parsedDset), deparseArgs)
     

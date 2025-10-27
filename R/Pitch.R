@@ -32,7 +32,7 @@
 #' various methods.
 #' The `tonalInterval` *function* is primarily a parser, [documented elsewhere][pitchParsing],
 #'  which interprets various input representations
-#' and generates `tonalInterval` S4 *objects* (documented here).
+#' and generates `tonalInterval` S4 *objects* [documented here](http://adv-r.had.co.nz/S4.html).
 #' 
 #' Alternatively, the constructor function `tint` can be used to directly create `tonalInterval` objects.
 #' The three arguments to `tint` correspond to the three slots: `octave`, `LO5th` (Fifth), and `cent`.
@@ -193,7 +193,7 @@ tint <- function(octave, LO5th = 0L, cent = numeric(length(octave)), partition =
 #'
 #' ## The Line of Fifths
 #' 
-#' Every interval in Western music is associated with a integer on the line of fifths:
+#' Every interval in Western music is associated with an integer on the line of fifths:
 #' 
 #' + Bb = m7 = -2 
 #' + F =  P4  = -1 
@@ -576,7 +576,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' Various pitch representations like `**kern`, `**solfa`, and `**semits` can be generated using predefined [pitch functions][pitchFunctions] like [kern()]
 #' [semits()], and [solfa()] respectively.
 #' All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-#' to the deparser.a
+#' to the deparser. 
 #' By modifying these *"deparsing" arguments*, you can exercise 
 #' fine control over how you want pitch information to be represented in your output.
 #' *This* documentation talks about this deparsing step.
@@ -618,7 +618,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' Various deparsing options use the `Key` argument; for example, use of `implicitSpecies` (see advanced parsing section) is dependent on the `Key`.
 #' 
 #' If you use any [pitch function][pitchFunctions] within a special call to [withinHumdrum],
-#' `humdrumR` will automatically pass the `Key` field from the humdrum data to the function---this means, that in most cases, 
+#' `humdrumR` will automatically pass the `Key` field from the humdrum data to the function---this means that, in most cases, 
 #' you don't need to explicitly do anything with the `Key` argument!
 #' (If you want this *not* to happen, you need to explicitly specify your own `Key` argument, or `Key = NULL`.)
 #'
@@ -882,7 +882,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' These symbols are controlled using the `up`, `down`, and `same` (`character`, `length == 1`) arguments.
 #' A `same` symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the `up` or `down` symbols indicate
 #' increasing positive (`up`) or negative (`down`) octaves.
-#' For example, in `lilypond` notation, `,` represents lower octaves, and `'` (single apostrophe) represents upper octaves.
+#' For example, in `lilypond` notation, `,` (comma) represents lower octaves, and `'` (single apostrophe) represents upper octaves.
 #' So the default [lilypond()] parser uses these arguments:
 #' 
 #' + `pitch(c("c", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",", octave.offset = 1))`
@@ -906,8 +906,8 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' If, on the other hand, `octave.round = round`, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C *above* them.
 #' Indeed, `octave.round = round` gets us the `-P4` <-> `+P4` behavior we mentioned earlier!
 #'
-#' When working parsing [intervals][interval()], the `octave.round` option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
-#' For example, we might think of a ascending major 12th as being an ascending octave *plus* a ascending perfect 5th: ** +P8 + P5**.
+#' When parsing [intervals][interval()], the `octave.round` option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
+#' For example, we might think of an ascending major 12th as being an ascending octave *plus* an ascending perfect 5th: ** +P8 + P5**.
 #' **Or** we could encode that same interval as *two* ascending octaves *minus* a perfect fourth: **+ P15 - P4**.
 #' The following table illustrates how different `octave.round` arguments "partition" compound intervals into simple parts and octaves:
 #'
@@ -957,7 +957,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' ### Absolute or Relative (contour) Octave
 #' 
-#' In some notation encoding schemes, the "octave" of each note is interpreted *relative* the previous note, rather than any absolute reference.
+#' In some notation encoding schemes, the "octave" of each note is interpreted *relative* to the previous note, rather than any absolute reference.
 #' The most prominent system is Lilypond's [relative octave entry](https://lilypond.org/doc/v2.22/Documentation/notation/writing-pitches#relative-octave-entry) style.
 #' This style is often used in combination with scale degree representations---as in the [RS200](http://rockcorpus.midside.com/melodic_transcriptions.html) corpus.
 #' For example, a data set might say `Do Re Mi vSo La Ti Do`, with the `"v"` indicating a jump down to `So`. 
@@ -972,7 +972,7 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #'   Octave markers indicate alterations to this assumption.
 #'   As always, this is based on scale steps, not semitones!
 #'   Any fourth is "closer" than any fifth, regardless of their quality: So *C F#* is ascending and *C Gb* is descending!
-#'   A ascending diminished 5th would be written `C ^Gb`---with `up = ^`. 
+#'   An ascending diminished 5th would be written `C ^Gb`---with `up = ^`. 
 #' + If `octave.round = floor`, a `same` marker (or no marker) indicates that the note is in the octave above the previous pitch.
 #'   Octave markers indicate alterations to this assumption.
 #'   With this setting, going from *C* down to *B* always requires a `down` mark.
@@ -987,11 +987,11 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 #' the `humdrumR` parser can be modified to handle different options.
 #' However, there are two general parsing issues/options to consider: what information is encoded, and in *what order*?
-#' The `parts` argument can be specifyied to indicate this.
+#' The `parts` argument can be specified to indicate this.
 #' The `parts` argument must be a `character` vector of length 1--3.
-#' The characters in the must [partial match][base::pmatch] either `"step"`, `"species"`, or `"octave"`.
-#' The presense of any of these strings in the `parts` vector indicate that that information should be parsed.
-#' The *order* of the strings indicates what order the pieces of pitch information are encoded in input strings.
+#' The characters must [partial match][base::pmatch] either `"step"`, `"species"`, or `"octave"`.
+#' The presence of any of these strings in the `parts` vector indicate that that information should be parsed.
+#' The *order* of the strings indicates in what order the pieces of pitch information are encoded in input strings.
 #' 
 #' To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., `M2` and `P5`---except the 
 #' quality appears *after* the step---e.g., `2M` and `5P`.
@@ -1007,12 +1007,12 @@ setMethod('%/%', signature = c('tonalInterval', 'integer'),
 #' 
 #' The [table()] will automatically generate factor levels 
 #' for pitch data using the [gamut()] function.
-#' This is makes sure tabulated data sorted in a logical order, and includes
+#' This makes sure tabulated data is sorted in a logical order, and includes
 #' missing pitches.
 #' The `simple`/`complex` and  `generic`/`specific` arguments are automatically passed to [gamut()]; additional
 #' arguments can be passed to gamut using `gamutArgs = list(...)`, or with the syntactic sugar `gamut(...)`.
 #' (Read the [gamut()] docs for an explanation of gamut generation.)
-#' This feature be used to control table layout of pitch data, as well as to assure
+#' This feature is used to control table layout of pitch data, as well as to assure
 #' consistent tables when grouping data.
 #' 
 #' When `inPlace = TRUE` no special tabulation will occur.
@@ -1617,7 +1617,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' # Dispatch
 #' 
 #' The pitch parser (`tonalInterval()`) is a generic function, meaning it accepts a variety of inputs 
-#' and automatically "dispatches" the appropriate method for parsing ehe input.
+#' and automatically "dispatches" the appropriate method for parsing the input.
 #' R's standard `S3` system is used to dispatch for either `numeric` or `character`-string input:
 #' Generally, `numeric` (or `integer`) inputs are interpreted as various *atonal* pitch representations while
 #' `character` strings are interpreted as various *tonal* pitch representations.
@@ -1682,7 +1682,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' ## Advanced Tonal Parsing Options
 #' 
-#' The eleven tonal representations listed above are parsed through a common intesrface.
+#' The eleven tonal representations listed above are parsed through a common interface.
 #' By using "advanced" parsing arguments, you can tweak how this parsing is done, so as to accommodate even more input representations!
 #' This means we are controlling the behavior of `tonalInterval()`, in the second step of our pipeline:
 #' 
@@ -1838,7 +1838,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' #### Memory
 #' 
-#' In some musical data, it is assume that a accidental on a note "stays in effect" on that scale step until the next bar,
+#' In some musical data, it is assumed that a accidental on a note "stays in effect" on that scale step until the next bar,
 #' or until a different accidental replaces it.
 #' Fortunately, the `humdrumR` parser (`tonalInterval()`) also knows how to parse data encoded with "memory" this way.
 #' If `memory = TRUE`, the accidental (or quality) of each input note is "remembered" from previous appearances of that scale step.
@@ -1985,10 +1985,10 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 #' the `humdrumR` parser can be modified to handle different options.
 #' However, there are two general parsing issues/options to consider: what information is encoded, and in *what order*?
-#' The `parts` argument can be specifyied to indicate this.
+#' The `parts` argument can be specified to indicate this.
 #' The `parts` argument must be a `character` vector of length 1--3.
-#' The characters in the must [partial match][base::pmatch] either `"step"`, `"species"`, or `"octave"`.
-#' The presense of any of these strings in the `parts` vector indicate that that information should be parsed.
+#' The characters in the vector must [partial match][base::pmatch] either `"step"`, `"species"`, or `"octave"`.
+#' The presence of any of these strings in the `parts` vector indicate that the corresponding information should be parsed.
 #' The *order* of the strings indicates what order the pieces of pitch information are encoded in input strings.
 #' 
 #' To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., `M2` and `P5`---except the 
@@ -1997,7 +1997,7 @@ tint2solfg <- partialApply(tint2tonalChroma, flat = '~b', doubleflat = '~bb', sh
 #' 
 #' 
 #' 
-#' One final string-parsing argument is `sep`, which indicates if there is a character string separating the pitch information components:
+#' One final string-parsing argument is `sep`, which indicates if there is a character string separating the pitch information components.
 #' The most common case would be a comma or space.
 #' For example, we could use a parse command like this: `kern("E flat 5", parse(flat = "flat", sep = " "))`.
 #'     
@@ -2849,11 +2849,11 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #' For example, [kern()] takes any input representation and outputs `**kern` (pitch) data.
 #' Underneath the hood, the full processing of each function looks like this:
 #' 
-#' + **Input** representation (e.g., `**pitch` or `**semits`) `|>` 
-#'   + *Parsing* (done by [tonalInterval()]) `|>`
-#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation `|>`
-#'     + **Transformation** (e.g., [transpose()]) `|>`
-#'   + *Deparsing* `|>`
+#' + **Input** representation (e.g., `**pitch` or `**semits`) 
+#'   + *Parsing* (done by [tonalInterval()]) 
+#'     + **Intermediate** ([tonalInterval][tonalIntervalS4]) representation 
+#'     + **Transformation** (e.g., [transpose()]) 
+#'   + *Deparsing* 
 #' +  **Output** representation (e.g. `**kern` or `**solfa`) 
 #' 
 #' 
@@ -2865,7 +2865,7 @@ pitchFunctions <- list(Tonal = list(Absolute = c('kern', 'pitch', 'lilypond', 'h
 #'
 #' The "partial" pitch functions [octave()], [step()], [accidental()], and [quality()] are so-called
 #' because they each only return one part/aspect of pitch information, and only that part.
-#' For example, `accidental()` only returns he accidentals (if any) of pitches.
+#' For example, `accidental()` only returns the accidentals (if any) of pitches.
 #'     
 #' @param x ***Input data to parse as pitch information.***
 #' 
@@ -3264,10 +3264,10 @@ cents.default <- makePitchTransformer(tint2cents, 'cents', 'numeric',
 #' humData |> cents(simple = TRUE)
 #' humData |> cents(Token, Key = Key)
 #' 
-#' @rdname cents
+#' @rdname semits
 #' @export
 cents.humdrumR <- humdrumRmethod(cents.default)
-#' @rdname cents
+#' @rdname semits
 #' @export
 cents <- humdrumRgeneric(cents.default)
 
@@ -3553,7 +3553,7 @@ tonh <- humdrumRgeneric(tonh.default)
 
 #' Helmholtz pitch representation
 #' 
-#' [Helmholtz notation](https://en.wikipedia.org/wiki/Helmholtz_pitch_notation)
+#' This is the representation used to represent pitches in the [Helmholtz notation](https://en.wikipedia.org/wiki/Helmholtz_pitch_notation) format.
 #' 
 #' @examples
 #' exampleToken <- c('4GG', '4G', '4E', '4F#', '4G', '4D', '4E')
@@ -3846,13 +3846,12 @@ bhatk <- humdrumRgeneric(bhatk.default)
 #' By default, `step()` will returns steps relative to the key---set `Key = NULL` if you don't want this.
 #' 
 #' @examples 
-#' \dontrun{
-#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+#' chorale[[20:30,]]
 #' 
-#' within(chorales, step(Token))
-#'
-#' within(chorales, step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-#' }
+#' within(chorale[[20:30,]], step(Token))
+#' 
+#' within(chorale[[20:30,]], step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
 #' 
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
@@ -3867,12 +3866,11 @@ step <- makePitchTransformer(partialApply(tint2step, step.labels = NULL), 'step'
 #' Set `explicitNaturals = FALSE` if you don't want explicit naturals.
 #' 
 #' @examples 
-#' \dontrun{
-#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+#' chorale[[100:110, ]]
 #' 
-#' within(chorales, accidentals(Token))
-#'
-#' }
+#' within(chorale[[100:110, ]], accidental(Token))
+#' 
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
@@ -3910,17 +3908,17 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, e
 #' Returns which octave each pitch falls in.
 #' By default, middle-C is the bottom of the zeroth-octave, but this can be changed with the `octave.offset`
 #' argument.
-#' Other octave labels (like [lilypond()]-style marks) can be used if you set `octave.integer = FALSE`.
+#' Other octave labels (like [lilypond][lilypond()]-style marks) can be used if you set `octave.integer = FALSE`.
 #' 
 #' @examples 
-#' \dontrun{
-#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+#' chorale[[20:30,]]
+#' within(chorales[[20:30,]], octave(Token))
 #' 
-#' within(chorales, octave(Token))
-#' within(chorales, octave(Token, octave.offset = 4)) # traditional octaves
+#' within(chorales[[20:30,]], octave(Token, octave.offset = 4)) # traditional octaves
 #' 
-#' within(chorales, octave(Token, octave.integer = FALSE))
-#' }
+#' within(chorales[[20:30,]], octave(Token, octave.integer = FALSE))
+#' 
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
@@ -4036,7 +4034,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' by various intervals or to target keys.
 #' Inside the box, inputs and transpositions take place as `tonalInterval`s or `diatonicSet`s,
 #' but any numeric or character string representation of pitches can be transposed as well.
-#' This function is incorporated directly into [tonalTransform], and thence, all [pitch translation][pitchRepresentations]
+#' This function is incorporated directly into [tonalTransform], and hence, all [pitch translation][pitchRepresentations]
 #' functions, so you probably won't call it directly very often.
 #' 
 #' There are two distinct types of transposition (real and tonal).
@@ -4047,7 +4045,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' 
 #' There are two different types of transposition: **real** transposition and **tonal** transposition.
 #' In *real* transposition, all inputs are transposed by the same *specific* interval.
-#' For example, the pitches `{C D E F G}` could be transposed up a major second to `{C D E F# G}`.
+#' For example, the pitches `{C D E F G}` could be transposed up a major second to `{D E F# G A}`.
 #' In *tonal* transposition, inputs are transposed by *generic* intervals, within a key.
 #' For example, the sequence `{C D E F G}`, in the key of C major, could be translated up a generic second
 #' to `{D E F G A}`.
@@ -4058,9 +4056,9 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' ### Alterations
 #' 
 #' Tonal transposition is complicated by the presence of any alterations in the input pitches.
-#' For instance, if we are given the pitches `{C F# G D# E}`` in the key of C major, how should they by tonally
+#' For instance, if we are given the pitches `{C F# G D# E}` in the key of C major, how should they by tonally
 #' transposed up a second, within C major?
-#' There is not one obvious, correct answer answer, which can be easily identified.
+#' There is not one obvious, correct answer that can be easily identified.
 #' The algorithm implemented by `humdrumR` is as follows:
 #' 
 #' 1. Alterations/accidentals in the input are identified. (In this case, F# and D#).
@@ -4074,19 +4072,19 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' 
 #' The size of `enharmonicWrap` effectively determines how extreme accidentals are allowed.
 #' The default value, `12`, assures that no output notes are enharmonically equivalent to notes in the key. 
-#' To further illustrate, here is the sequence `{C F# G D# E, B- A A- G C# D, B D- C}` transposed
+#' To further illustrate, here is the sequence `{C F# G D# E B- A A- G C# D B D- C}` transposed
 #' tonally within C major by all seven possible generic intervals, with `enharmonicWrap = 12`:
 #' 
 #' 
-# #' | Interval  | Output                                                                                                                                                              |
-# #' | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-# #' | Unison    | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P1, real = FALSE), width=3), collapse = ''), '}')`  |
-# #' | 2nd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M2, real = FALSE), width=3), collapse = ''), '}')`  |
-# #' | 3rd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M3, real = FALSE), width=3), collapse = ''), '}')`  |
-# #' | 4th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P4, real = FALSE), width=3), collapse = ''), '}')`  |
-# #' | 5th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P5, real = FALSE), width=3), collapse = ''), '}')`  |
-# #' | 6th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M6, real = FALSE), width=3), collapse = ''), '}')`  |
-# #' | 7th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M7, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | Interval  | Output                                                                                                                                                              |
+#' | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+#' | Unison    | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P1, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 2nd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M2, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 3rd       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M3, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 4th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P4, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 5th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P5, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 6th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M6, real = FALSE), width=3), collapse = ''), '}')`  |
+#' | 7th       | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M7, real = FALSE), width=3), collapse = ''), '}')`  |
 #
 #' 
 #' # Specifying Transpositions
@@ -4098,7 +4096,7 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' 
 #' 
 #' The `to` argument translates an input *to* a desired key.
-#' For example, if the input is in the key of E major but we want it transposed to G major, we could say `to = '*E:'`.
+#' For example, if the input is in the key of E major but we want it transposed to G major, we could say `to = '*G:'`.
 #' If `real = TRUE`, input is simply translated to the root of the `to` key, with all the exact same intervals.
 #' If `real = FALSE`, the input is translated to the root of the new key, with its intervals changed to match the new key as well.
 #' In either case, the result depends on what the input's key is, which is indicated by the [standard][tonalTransform] `Key` argument.
@@ -4111,16 +4109,16 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' If we specify `to = e:, real = FALSE`, the output will instead be `{B G A F# G, B A# B C B}`.
 #' 
 #' Building off the previous example, consider how the input *key* matters as well.
-#' If we use the same input notes (`{D B C A# B, D C# D E D}`) but the input `Key` is C major, then:
-#' If we specify `to = e:, real = TRUE`, the output will be `{F# D# E C## D#, F# E# F# G# F#}`.
-#' If we specify `to = e:, real = FALSE`, the output will instead be `{F# D E C# D, F# E F# G F#}`.
+#' If we use the same input notes (`{D B C A# B D C# D E D}`) but the input `Key` is C major, then:
+#' If we specify `to = e:, real = TRUE`, the output will be `{F# D# E C## D# F# E# F# G# F#}`.
+#' If we specify `to = e:, real = FALSE`, the output will instead be `{F# D E C# D F# E F# G F#}`.
 #' 
 #' If *both* `by` and `to` are specified, the `to` transposition is applied first, followed by the `by` transposition.
 #' If `real = FALSE`, the `by` transposition happens within the `to` key, not the `Key` key.
 #' 
 #' ## Relative vs Parallel
 #' 
-#' When transposing to, we have diferent approaches about to determining the relationship between the
+#' When transposing to, we have difFerent approaches to determine the relationship between the
 #' "from" key (`Key` argument) and the "to" key (`to` argument).
 #' If we think of "parallel" relationships between keys, we match the roots of the keys regardless of modes.
 #' For instance, C major and C minor are parallel keys.
@@ -4128,11 +4126,11 @@ tintPartition_specific <- function(tint, Key = dset(0L, 0L), ...) {
 #' For instance, C major and A minor are relative keys.
 #' This is similar to the distinction between "la-based minor" solfege (relative) vs "fixed-do" solfege (parallel).
 #' 
-#' When transposing using a `to` argument, if `relative = FALSE` the input key (`Key` argument) is transposed to match the *root*
+#' When transposing using a `to` argument, if `relative = FALSE`, the input key (`Key` argument) is transposed to match the *root*
 #' of the `to` argument.
-#' For example, if the input key is G minor and the `to`` key is C major, the output is transposed to G minor.
+#' For example, if the input key is G minor and the `to` key is C major, the output is transposed to C minor, the parallel minor of the `to` key.
 #' However, if `relative = TRUE` the input key is transposed to match the mode of the `to` key:
-#' A G minor input with a C major `to` would be translated to A minor, the parallel minor of the `to` key.
+#' A G minor input with a C major `to` would be translated to A minor, the relative minor of the `to` key.
 #' If the `Key` (from key) and `to` (to key) arguments have the same mode, the parallel and relative transpositions
 #' are the same.
 #' 
@@ -4395,15 +4393,15 @@ invert.factor <- invert.token
 #' and the *previous* note.
 #' Negative lags will calculate **departing** intervals: each token represents the interval 
 #' between the current note and the *next* note.
-#' Note that, by passing `directed = FALSE` through the the [deparser][pitchDeparsing], the undirected (absolute value)
+#' Note that, by passing `directed = FALSE` through the [deparser][pitchDeparsing], the undirected (absolute value)
 #' of the melodic intervals can be returned.
 #' 
 #' @section Incomplete value padding:
 #' 
-#' By default, `int` will return `NA` anywhere where `x` **or** `from` is `NA`.
+#' By default, `int` will return `NA` whereever `x` **or** `from` is `NA`.
 #' However, if `from` is `NA` but `x` is *not* `NA`, we can ask for different output for these "incomplete" pairs.
 #' using the `incomplete` argument.
-#' If `incomplete` is an atomic value, incomplete outputs indices are willed with this value.
+#' If `incomplete` is an atomic value, incomplete outputs indices are filled with this value.
 #' If the incomplete argument is a [pitch function][pitchFunctions] (like the `deparser` argument),
 #' this function is used to (re)parse the values of `x` where `from` is missing.
 #' If `bracket == TRUE`, incomplete output values are surrounded with `[]`, so they are easier to distinguish from the
@@ -4412,7 +4410,7 @@ invert.factor <- invert.token
 #' The main use of the `incomplete` argument is in `mint()` and `hint()`.
 #' The lagged `from` arguments used in `mint()`/`hint()` (see previous section) are necessarily padded by `abs(lag)` `NA`
 #' values at the beginning (positive lag) or end (negative lag).
-#' These are thus "incomplete" pairs passed to `int()`, and can controlled using the `incomplete` argument.
+#' These are thus "incomplete" pairs passed to `int()`, and can be controlled using the `incomplete` argument.
 #' By default, both `mint()` and `hint()` set `incomplete = kern(), bracket = TRUE` which cause these
 #' notes to show up as bracketed kern, like `[ee-]` or `[C#]`.
 #' If `incomplete` is `NULL`, the incomplete values are simply padded with `NA`.

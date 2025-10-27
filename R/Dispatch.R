@@ -314,7 +314,7 @@ partialApply <- function(func, ...) {
 #' Regular expression method dispatch and function application
 #' 
 #' The [humdrumR] **regular-expression method dispatch system**
-#' is a simple system for making new functions which can by smartly
+#' is a simple system for making new functions which can be smartly
 #' applied to a variety of character strings.
 #' Humdrum dispatch works like normal R method dispatch, but instead of dispatching specific methods
 #' based on their class (`integer`, `character`, etc.) it dispatches based on regular expressions.

@@ -223,8 +223,11 @@ NULL
 #' 
 #' In R, an evaluated expression always "returns" a "*result*"---a value, like a number, `character` string, or some other data.
 #' Some expressions might "return" `NULL` as their result, but it's still a result!
-#' In a multi-line expression, like `{sqrt(2); 2 + 2}` or
-#' 
+#' In a multi-line expression, like 
+#' ```
+#' {sqrt(2); 2 + 2}
+#' ```
+#' or
 #' ```
 #' {
 #'   x <- 2
@@ -258,7 +261,7 @@ NULL
 #' 
 #' One of the most annoying things that can happen in R is if you try running something and it kind just hangs,
 #' getting stuck with nothing happening no matter how many times you press enter.
-#' This is usually because you have (accidentally) provided R and *incomplete* expression.
+#' This is usually because you have (accidentally) provided R an *incomplete* expression.
 #' For example, `2 + ` is an incomplete expression---that `+` needs a number after it!
 #' Failing to have properly paired parentheses will often result in incomplete expressions:
 #' For example, `mean(sqrt(log(x))` is an incomplete expression!
@@ -281,7 +284,7 @@ NULL
 #' 
 #' #### Result is too short (pad or recycle)
 #' 
-#' What happens if I have a that outputs a result that is *shorter* than the input, but I **need**
+#' What happens if I have a function that outputs a result that is *shorter* than the input, but I **need**
 #' it to be the same length?
 #' Well, one option is to "pad" the output with `NA` values.
 #' For example, if I call `mean(1:9)`, my 9-long input results in a scalar (1-long) output (`5`).
@@ -310,7 +313,7 @@ NULL
 #' 
 #' One final note: if the result you are recycling isn't a length which evenly divides the input, you will see an *warning* message
 #' saying `longer object length is not a multiple of shorter object length`.
-#' To give an example, image if we used the `range()` function, which returns the minimum and the maximum but not the median, on our input:
+#' To give an example, imagine if we used the `range()` function, which returns the minimum and the maximum but not the median, on our input:
 #' the result of `range(1:9)` is `c(1, 9)`, and this would recycle as `c(1, 9, 1, 9, 1, 9, 1, 9, 1)`.
 #' The last repetition of the result is cut short, because two does not evenly divide nine.
 #' Since non-scalar recycling of results is often not useful or meaningful in *general*, R takes it
@@ -321,7 +324,7 @@ NULL
 #' 
 #' What happens if I have a function that outputs a result that is *longer* than the input, but I **need**
 #' it to be the same length?
-#' Well, the most obvious thing to do is cut off the excess---so something like `head(output, n = length(input)`.
+#' Well, the most obvious thing to do is cut off the excess---so something like `head(output, n = length(input))`.
 #' Of course, that may or may not make sense depending
 #' on what the function is doing!
 #' 
@@ -339,18 +342,15 @@ NULL
 #' We can treat a vector like a single object, and R will oblige us.
 #' For example, we can do math like:
 #'
-#' ```
 #'
 #' 2^(0:10) - 1
 #'
 #' (1:10) - (10:1)
 #'
 #' sqrt(c(5, 10, 16))
-#' ```
 #'
 #' Or work with strings like:
 #'
-#' ```
 #' paste(1:26, letters, sep = ': ')
 #'
 #' paste('Chord', 1:10)
@@ -358,23 +358,19 @@ NULL
 #' # Regular expressions:
 #' grepl('[aeiou]', letters)
 #' 
-#' ```
 #'
 #' Or get logical values:
 #'
-#' ```
 #' 2^(0:100) > 50
 #'
 #' 1:10 %% 2 == 0
 #'
 #' 1:20 %in% 2^(0:4)
 #' 
-#' ```
 #' 
 #' Of course, other R functions take in vectors and return totally new vectors (or just scalars).
 #' Examples:
 #'
-#' ```
 #'
 #' length(seq(50, 90, by = .2))
 #'
@@ -387,14 +383,11 @@ NULL
 #' range(c(1, 100, 2, -4))
 #' which(c(TRUE, FALSE, TRUE, TRUE))
 #' 
-#' ```
 #'
 #' Vectorization works very well when you are working with vectors that are either 1) all the same length or 2) length 1 (scalar).
 #' If vectors are different lengths, the shorter one will be "recycled" (repeated) to match the longer one.
 #'
-#' ```
 #' c(0, 5) * 1:10
-#' ```
 #' 
 #' @family {R lessons.}
 #' @name vectorization

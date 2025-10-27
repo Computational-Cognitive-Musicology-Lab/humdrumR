@@ -11,7 +11,7 @@
 
 #' Distributions
 #' 
-#' HUmdrumR has ways to...
+#' HumdrumR has ways to...
 #' 
 #' @name distributions
 NULL
@@ -636,7 +636,7 @@ setMethod('*', c('probability', 'probability'),
 #' Tabulate and/or cross-tabulate data
 #' 
 #' The `count()` function is exactly like R's fundamental [table()][base::table] function,
-#' except that 1) will give special treatment to humdrumR [token()] data 2)
+#' except that it 1) will give special treatment to humdrumR [token()] data 2)
 #' has more intuitive/simple argument names 3) makes it easier to combine/manipulate
 #' disparate output tables.
 #' 
@@ -1076,7 +1076,7 @@ pMI <- function(..., distribution, base = 2) {
 #' @details 
 #' 
 #' To calculate information content or entropy, we must assume (or estimate) a probability distribution.
-#' HumdrumR uses R's standard [table()] and [density()] functions to estimate discrte and continuous probability
+#' HumdrumR uses R's standard [table()] and [density()] functions to estimate discrete and continuous probability
 #' distributions respectively.
 #' 
 #' Entropy is the average information content of a variable.

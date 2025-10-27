@@ -243,7 +243,7 @@ meter.list <- function(x, ..., measure = NULL, tactus = NULL, tick = '16', fill.
 #' This function generates a [meter()] objects representing duple meters.
 #' The desired number of duple levels is controlled by the `nlevels` argument.
 #' The span of the meter (i.e., the highest level) is indicated by the `measure` argument.
-#' Finally, the `tactus` argument indicates which level (indexe from highest to lowest)
+#' Finally, the `tactus` argument indicates which level (indexed from highest to lowest)
 #' is the tactus.
 #' The default arguments build a 4/4 meter with levels ranging from whole-notes down
 #' to sixteenth-notes, and a quarter-note tactus.
@@ -404,7 +404,7 @@ setAs('integer', 'meter', \(from) new('meter',
 #' If can also take a [meter()] object or `character` string of the form `"MX/Y"`.
 #' 
 #' The tatum of a [meter()] is the tatum of all that meters metric levels.
-#' If meters *and* durations are provided---like `tatum(c('M4/4', '6')`---, the tatum of all the meters'
+#' If meters *and* durations are provided---like `tatum(c('M4/4', '6')`--- the tatum of all the meters'
 #' levels *and* all the durations is computed.
 #' 
 #' The `deparser` argument is a [rhythm function][rhythmFunction] which controls the output format.
@@ -433,7 +433,7 @@ setAs('integer', 'meter', \(from) new('meter',
 #' 
 #' tatum(c("M4/4"))
 #' 
-#' tatum("M4/4", '6')
+#' tatum(c('M4/4', '6'))
 #' 
 #' @family {Metric functions}
 #' @export
@@ -633,7 +633,7 @@ nbeats.NULL <- function(x) NULL
 #' However, if `offBeats = FALSE`, only onsets that *land* on a beat are counted, with offbeat values returning `NA`.
 #' 
 #' The `phase` controls how offbeat onsets are associated with nearby beats.
-#' `phase` is [parsed][rhythmParsing] as a rhythmic value and must be rhythmic values that are smaller than the smallest `beat` value.
+#' `phase` is [parsed][rhythmParsing] as a rhythmic value and must be smaller than the smallest `beat` value.
 #' The `phase` argument shifts the "boundary" between beats backwards, before the beat onset.
 #' By default, `phase = 0` so the beat-association boundary lands on the beat: only onsets on or after each beat "belong" to that beat.
 #' If `phase = '8'`, the beat boundary is pushed back to capture one eighth-note *before* the beat itself.
@@ -964,7 +964,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' Watch out! These `met...()` functions require *meter* information and their output is
 #' highly dependent on how you interpret meter from scores.
-#' For a full discussion of how meter can represented, parsed, and created in `humdrumR`,
+#' For a full discussion of how meter can be represented, parsed, and created in `humdrumR`,
 #' see the [meter()] manual.
 #' Effective use of the [meter()] function is essential to use of `metlev()`, `metcount()`, and `metsubpos()`.
 #' 
@@ -976,7 +976,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' 
 #' + An onset on the downbeat is at the highest level of all, the whole-note level;
 #' + An onset on beat three of the 4/4 measure is on the half-note level;
-#' + Onsets on the backbeats (beats two and two) fall on the quarter-note level; 
+#' + Onsets on the backbeats (beats two and four) fall on the quarter-note level; 
 #' + The next level down is the eighth-note level, in between each quarter-note beat;
 #' + etc.
 #' 
@@ -1018,7 +1018,7 @@ metric <- function(dur, meter = duple(5), start = rational(0), value = TRUE, off
 #' ## Metric counts
 #' 
 #' The `metcount()` function counts one beat level in a metric hierarchy within the span of highest ('measure') level (by default).
-#' Which level you want to count is controlled by the `level` argument, which can be either a `character` string
+#' Which level you want to count is controlled by the `level` argument, which can be either be a `character` string
 #' in [recip()] format or a natural number (`1` is top level, `2` is next lowest level, etc.).
 #' If you tell `metcount()` to count the highest (measure) level in the meter, it will count bars.
 #'
@@ -1488,7 +1488,7 @@ metsubpos <- humdrumRgeneric(metsubpos.default)
 #' 
 #' In some cases, we might want to restrict our attention to syncopations that occur
 #' at a specific metric level: for example, "eighth-note syncpations."
-#' We can proved a set of metric levels to the `levels` argument, to do this restriction.
+#' We can provide a set of metric levels to the `levels` argument to enforce this restriction.
 #' The `levels` must be parsable as durations which match the levels of the [meter()].
 #' 
 #' @inheritParams metlev

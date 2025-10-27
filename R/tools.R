@@ -614,7 +614,7 @@ tapply_inplace <- function(X, INDEX, FUN = NULL, ..., head = TRUE) {
 #' 
 #' @section Changes:
 #' 
-#' `changes` takes and input vector and finds all indices `i`
+#' `changes` takes an input vector and finds all indices `i`
 #' where the value of `x[i] != x[i-1]`---i.e., where the value at one index
 #' has "changed" since the last index.
 #' By default, `changes` returns a `logical` vector the same length as the input,
@@ -1553,7 +1553,7 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' When performing lagged calculations, we typically assume that the order of the values in the input vector
 #' (`x`) is the order we want to "lag" across.
 #' E.g., the first element is "before" the second element, which is "before" the third element, etc.
-#' [Humdrum tables][humTable] are always ordered `Piece > Piece > Spine > Path > Record > Stop`.
+#' [Humdrum tables](humTable.html) are always ordered `Piece > Piece > Spine > Path > Record > Stop`.
 #' Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 #' the *next* element is the next element in the spine path.
 #' For example, consider this data:
@@ -1568,13 +1568,13 @@ enum <- function(x, inPlace = TRUE, sep = ':') {
 #' 
 #' The default order of these tokens (in the `Token` field) would be `a b c d e f`.
 #' If we wanted to instead lag across our tokens *harmonically* (across records) we'd need to specifiy a different order
-#' For example, we could say `orderby = list(Pice, Record, Spine)`---the lagged function
+#' For example, we could say `orderby = list(Piece, Record, Spine)`---the lagged function
 #' would interpret the `Token` field above as `a d b e c f`.
 #' 
 #' For another example, note `Stop` comes last in the order.
 #' Let's consider what happens then if here are stops in our data:
 #' 
-#' ````
+#' ```
 #' **kern  **kern
 #' a       d
 #' b D     e g
@@ -1762,7 +1762,7 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' + \eqn{x_4 - x_1}
 #' + \eqn{x_5 - x_2}
 #' 
-#' However, if the `init` argument can between 1 and `abs(lag)` numeric values.
+#' The `init` argument can also be numeric values between 1 and `abs(lag)`.
 #' The result, for `lag==3` is:
 #' 
 #' + \eqn{x_1 - init_1}
@@ -1775,9 +1775,9 @@ sigma.matrix <- function(x, margin = 2L, ...) {
 #' 
 #' + \eqn{x_4 - x_1}
 #' + \eqn{x_5 - x_2} 
-#' + \eqn{init[1] - x_3}
-#' + \eqn{init[2] - x_4}
-#' + \eqn{init[3] - x_5}
+#' + \eqn{init_1 - x_3}
+#' + \eqn{init_2 - x_4}
+#' + \eqn{init_3 - x_5}
 #' 
 #' The `init` argument functions similarly to the `init` argument of [Reduce()].
 #' 
@@ -1900,7 +1900,7 @@ makeCumulative <- function(n, groupby = list()) {
 #' 
 #' @details 
 #' Each of the four base `R` functions---`round`, `ceiling`, `floor`, and `trunc`---follow
-#' a different logic in how they round real numbers to ingegers:
+#' a different logic in how they round real numbers to integers:
 #' 
 #' + `round`: round to *nearest* integer in either direction.
 #' + `floor`: round downward *towards negative infinity*.

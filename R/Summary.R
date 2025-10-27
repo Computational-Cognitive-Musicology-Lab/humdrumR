@@ -358,7 +358,7 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' 
 #' `reference` can be used to look up information about common reference
 #' codes: supply a reference code as a `character` string to `reference`
-#' and it will check it against known reference codes and print
+#' and [humdrumR][humdrumRclass] will check it against known reference codes and print
 #' information about matching codes (if there is one). For instance, `reference('OTL')`
 #' returns a description of the standard humdrum `!!!OTL` reference record
 #' (original title metadata).
@@ -410,14 +410,14 @@ print.humCensus <- function(censusTable, showEach = TRUE, screenWidth = options(
 #' If `numeric`, selects columns by index. 
 #' If `character`, [partially matched][partialMatching] against column names (reference codes).
 #'
-#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
+#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humReference` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
-#' a `humCensus` table.
+#' a `humReference` table.
 #' 
 #'       
 #' @examples 
@@ -703,14 +703,14 @@ print.humReference <- function(refTable, showEach = TRUE, screenWidth = options(
 #' If `numeric`, selects rows by index. If `character`, the string is matched
 #' as a regular expression against filenames in the corpus.
 #'     
-#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humCensus` table.***
+#' @param drop ***Whether to return normal [data.table][data.table::data.table()] or a `humSpines` table.***
 #' 
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
 #' If `drop = TRUE`, a normal [data.table][data.table::data.table()] is returned instead of 
-#' a `humCensus` table.
+#' a `humSpines` table.
 #'
 #' @examples
 #' chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")

@@ -209,10 +209,10 @@ setMethod('+', signature = c('tertianSet', 'tonalInterval'),
 
 #' Generating ("deparsing") chord representations
 #' 
-#' [humdrumR] includes a easy-to-use system for 
+#' [humdrumR] includes an easy-to-use system for 
 #' generating a variety of tertian harmony (chord) representations,
 #' which can be flexibly modified by users.
-#' "Under the hood" `humdrumR` represents all tonal chord information using the [same underlying representation][tertianSetS4],
+#' "Under the hood" `humdrumR` represents all tonal chord information using the [same underlying tertian set representation][tertianSetS4],
 #' which is typically extracted from input data using the [chord parser][chordParsing].
 #' This representation can then be "deparsed" into a variety of predefined output formats (like `**harm`), 
 #' or into new formats that you create!
@@ -690,7 +690,7 @@ tset2harte <- function(x, Key = NULL, figurationArgs = list(), flat = '-', ...) 
 
 #' Parsing chord information
 #' 
-#' [humdrumR] includes a easy-to-use but powerful system for *parsing* tertian harmony information:
+#' [humdrumR] includes an easy-to-use but powerful system for *parsing* tertian harmony information:
 #' various basic chord representations (including `numeric` and `character`-string representations) can be "parsed"---read
 #' and interpreted by `humdrumR`.
 #' For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR [chord function][chordFunctions], like [harm()]
@@ -1530,10 +1530,8 @@ NULL
 #' chord(romanNumerals)
 #' chord(romanNumerals, Key = 'A:')
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' with(B075[[ , 2]], chord(Token))
-#' } 
 #' 
 #' @inheritParams chordFunctions
 #' @export 
@@ -1557,10 +1555,8 @@ harte <- makeChordTransformer(tset2harte, 'harte')
 #' 
 #' figuredBass(tertian)
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' with(B075[[ , 2]], figuredBass(Token))
-#' }
 #' 
 #' @inheritParams chordFunctions
 #' @export 
@@ -1571,7 +1567,7 @@ figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' These functions output [roman numeral](https://en.wikipedia.org/wiki/Roman_numeral_analysis)
 #' representations of a tertian harmony.
 #' The `**harm` representation is the most widely used standard for roman numeral notation in humdrum data.
-#' Unlike traditional roman numerals, `**harm` does not indicate inversions with figuration, using lowercase letters
+#' Unlike traditional roman numerals, `**harm` does not indicate inversions with figuration. It uses lowercase letters
 #' (`a`, `b`, `c`, etc.) instead.
 #' The `roman` function however does output (relatively) traditional figures.
 #' 
@@ -1581,12 +1577,10 @@ figuredBass <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' harm(tertian, Key = 'A:')
 #' roman(tertian, Key = 'A:')
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #'
 #' with(B075[[ , 2]], harm(Token))
 #' with(B075[[ , 2]], roman(Token))
-#' }
 #' 
 #' @inheritParams chordFunctions
 #' @export 
@@ -1601,8 +1595,8 @@ harm <- makeChordTransformer(tset2harm, 'harm')
 #' , like `653`, instead of `**harm`'s simpler system (using letters).
 #' So, for example, if we take the input `E7/B` in the key of A major, we'll get:
 #'
-#' + `harm('E7/B', Key = 'A:')` => `"V7c"`
-#' + `roman('E7/B', Key = 'A:')` => `"V643"`
+#' `harm('E7/B', Key = 'A:')` => `"V7c"`
+#' `roman('E7/B', Key = 'A:')` => `"V643"`
 #' 
 #' @rdname harm
 #' @export 
@@ -1647,11 +1641,8 @@ roman <- makeChordTransformer(tset2roman, 'roman')
 #' tertian(romanNumerals)
 #' tertian(romanNumerals, Key = 'A:')
 #' 
-#' \dontrun{
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' with(B075[[,2]], tertian(Token))
-#' results
-#' }
 #' 
 #' @inheritParams chordFunctions
 #' @export 
@@ -1753,9 +1744,9 @@ setMethod('LO5th', 'tertianSet',
 #' @details 
 #' 
 #' 
-#' If `inPlace = TRUE`, sonority()` returns vectorized output,
+#' If `inPlace = TRUE`, `sonority()` returns vectorized output,
 #' with the output matching the length of the input vector.
-#' By default, `fill = FALSE`, and each output chord is repeated to align with 
+#' When `inPlace = TRUE`, by default, `fill = TRUE`, and each output chord is repeated to align with 
 #' the notes of the chord.
 #' If `fill = FALSE`, each chord is returned only once, but padded
 #' with null tokens to match length of the input.
@@ -1846,14 +1837,12 @@ setMethod('LO5th', 'tertianSet',
 #' sonority(c('C', 'b-', 'd', 'f'))
 #' sonority(c('C', 'b-', 'd', 'f'), inversions = FALSE)
 #' 
-#' \dontrun{ 
-#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+#' chorale <- within(chorales, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
+#' chorale[[20:30,]]
+#' within(chorale[[20:30,]], sonority(Token_dittoed))
+#' within(chorale[[20:30,]], sonority(Token_dittoed, deparser = harm))
 #' 
-#' chorales <- within(chorales, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
-#' 
-#' within(chorales, sonority(Token_dittoed))
-#' within(chorales, sonority(Token_dittoed, deparser = harm))
-#' }
 #' @export
 sonority <- function(x, deparser = chord, Key = NULL, 
                      inversions = TRUE, incomplete = TRUE,

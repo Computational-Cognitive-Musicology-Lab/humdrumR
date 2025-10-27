@@ -9,7 +9,7 @@
 #' @section File names:
 #' 
 #' The main option to control with `writeHumdrum` is what files to write to.
-#' `writeHumdrum` uses the original names of the files, as [read by readHumdrum][readHumdrum()],
+#' `writeHumdrum` uses the original names of the files, as read by [readHumdrum][readHumdrum()],
 #' as the basis for *new* file names.
 #' By default, `writeHumdrum` will refuse to overwrite the original files---overwriting
 #' will only be allowed if you specify `overwrite == TRUE` *and* respond with `"y"` to a prompt.
@@ -77,7 +77,7 @@
 #' 
 #' If `NULL`, files are written to the same directory (or directories) they were [read from][readHumdrum()].
 #' 
-#' @param overwrite ***Whether to overite existing files.***
+#' @param overwrite ***Whether to overwrite existing files.***
 #' 
 #' Defaults to `FALSE`.
 #' 

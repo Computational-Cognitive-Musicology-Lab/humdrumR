@@ -16,7 +16,7 @@
 #' @details
 #' 
 #' `subset()` and `filter()` are passed one or more expressions which are using the 
-#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrumR].
+#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrum].
 #' This evaluation can thus include all of [within.humdrumR()]'s functionality (and arguments)
 #' including group-apply.
 #' The only requirement is that the expressions/functions fed to `subset()`/`filter()`
@@ -313,8 +313,9 @@ removeEmptyStops <- function(x) {
 #' all data fields are unfiltered.
 #' 
 #' Normally, each data field is restored with its own complement data.
-#' However, the `complement` argument can be used to specify an field to use as the complement.
-#' This allows you to, for instance, different parts of separate fields into a single field.
+#' However, the `complement` argument can be used to specify a field to use as the complement.
+#' This allows you to, for instance, combine different parts of separate fields into a single view.
+#' See the last example in the "Examples" section for a demonstration of this argument.
 #'
 #' The `complement()` function will directly swap the data-field subsets with their complements.
 #' 
@@ -584,17 +585,6 @@ combineFields <- function(humdrumR, ...) {
 #' this example, only the kern spines (if there are any) are indexed!
 #' 
 #' 
-#' @section removeEmpty:
-#' 
-#' The `removeEmpty` argument to any humdrumR indexing controls whether
-#' filtered data is completely removed from the data, or simply set to null 
-#' This means the filtered data can be recovered using [unfilter()] (see the [subset()/filter()][subset.humdrumR()]
-#' docs for an explanation).
-#' By default, piece-indexing and spine-indexing have `removeEmpty = TRUE`,
-#' but record-indexing defaults to `removeEmpty = FALSE`.
-#' 
-#' 
-#' 
 #' @param x ***HumdrumR data to index.***
 #'
 #' Must be a [humdrumR data object][humdrumRclass].
@@ -628,13 +618,12 @@ combineFields <- function(humdrumR, ...) {
 #' 
 #' # find all records that use a flat 3
 #' humData[['b3', ]]
-#' humData[['b3', removeEmpty = TRUE]]
 #' 
 #' # Exclusive interpretation indexing
 #' humData[[deg = 1]]
 #'
 #' # pipe indexing
-#' humData |> index(1:3) |> index2(3:4)
+#' humData |> index(1:3) |> index2(20:30)
 
 #' 
 #' @seealso {For more powerful/flexible indexing options, use [subset()/filter()][subset.humdrumR].}
