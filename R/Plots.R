@@ -5,8 +5,10 @@
 # This class allows us to save the code to generate a plot
 # into an object, which can be saved, and regenerated time again.
 # Most importantly, it makes it composable.
+# the aspect slot is used by drawToFile()
 
-setClass('plot', contains = 'function', slots = c(add = 'expression', layout = 'list'))
+setClass('plot', contains = 'function', 
+         slots = c(add = 'expression', layout = 'list', aspect = 'numeric'))
 
 
 setMethod('show', 'plot',
@@ -39,7 +41,11 @@ setMethod('show', 'plot',
 }
 
 
-plot_object <- function(plotfunc, layout = list(layout = cbind(1L), layout_widths = 1, layout_heights = 1)) new('plot', plotfunc, layout = layout)
+plot_object <- function(plotfunc, 
+                        layout = list(layout = cbind(1L), layout_widths = 1, layout_heights = 1),
+                        aspect = 4/3) {
+  new('plot', plotfunc, layout = layout, aspect = aspect)
+}
 
 #' @export
 drawMore <- function(plot, ...) {
@@ -48,6 +54,7 @@ drawMore <- function(plot, ...) {
   plot
 }
 
+#' @rdname drawMore
 #' @export
 drawNothing <- function() {
   
@@ -75,17 +82,20 @@ drawNothing <- function() {
   
 }
 
+#' @rdname drawMore
 #' @export
 drawBeside <- function(..., widths = NULL) {
   .drawSet(..., sizes = widths, binder = 'cbind', 
            funcName = 'drawBeside', argName = 'widths')
 }
 
+#' @rdname drawMore
 #' @export
 drawAbove <- function(..., heights = NULL) {
   .drawSet(..., sizes = heights, binder = 'rbind', 
            funcName = 'drawAbove', argName = 'heights')
 }
+
 
 
 combineLayouts <- function(layout1, layout2, binder = 'cbind') {
@@ -101,6 +111,114 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
   
   do.call(binder, list(layout1 = layout1, layout2 = layout2))
   
+}
+
+## Exporting files ---
+
+
+#' Export [draw()] plots to files.
+#' 
+#' @param plot ***A plot object (created by [draw()]).***
+#'
+#' @param filename ***What filename to draw to?***
+#'
+#' @param overwrite ***Whether to overwrite files without asking for permission.***
+#'
+#' @param width,height ***Width and height of plot in output file.***
+#'
+#' Must be single `character` string or `numeric` values, or may be `NULL`
+#' 
+#' If a `character` string, the string must begin with a number followed immediately by 
+#' a valid unit abbreviation---either `mm` (millimeters), `cm` (centimeters), 
+#' `in` (inches) or `px` (pixels).
+#' If `numeric`, the unit is taken to be inches.
+#'
+#' The `filename` string must end with a file extension:
+#' either `.bmp`, `.jpg` (or `.jpeg`), `.pdf`, `.png`, `.svg`, or `.tiff`.
+#' 
+#' @seealso Used with the [draw()] function.
+#' @export
+drawToFile <- function(plot, filename = 'humdrumR_draw.png', overwrite = FALSE,
+                       width = NULL, height = NULL, ...) {
+  
+  checks(plot, xinherits('plot'))
+  checks(filename, xcharacter & xlen1)
+  checks(width, xnull | ((xcharnotempty | xnumber) & xlen1))
+  checks(height, xnull | ((xcharnotempty | xnumber) & xlen1))
+  checks(overwrite, xTF)
+  
+  if (!overwrite && file.exists(filename)) {
+    cat('The file', basename(filename), 'already exists.\n')
+    answer <- readline(prompt = '\t\tType "y" and press ENTER if you want to overwrite the existing file.\n')
+    if (answer != 'y') {
+      cat('drawToFile() cancelled.\n', 'No files written.\n', sep = '')
+      return(invisible(NULL))
+    }
+  }
+  
+  extension <- str_extract(filename, '\\.[a-zA-Z]+$') |> tolower()
+  if (is.na(extension)) .stop("In your call todrawToFile(), the filename you have provided has no extension.",
+                              "Please add extension, either: .bpm, .jpg, .pdf, .png, or .tiff.")
+  dim <- c(dim2inches(width), dim2inches(height))
+  
+  dim <- if (all(is.na(dim))) {
+    # default to 12inches wide, 9 inches high (or use those dimensions in combination with aspect)
+    if (plot@aspect >= 1) {
+      c(12, 12 / plot@aspect)
+    } else {
+      c(9 * plot@aspect, 9)
+    }
+  } else {
+    ifelse(is.na(dim), rev(dim) * c(plot@aspect, 1/plot@aspect), dim)
+  }
+  
+  
+  deviceFunc <- list(.pdf = grDevices::pdf,
+                     .bmp = grDevices::bmp,
+                     .jpg = grDevices::jpeg, 
+                     .jpeg = grDevices::jpeg,
+                     .png = grDevices::png,
+                     .pdf = grDevices::pdf,
+                     .svg = grDevices::svg,
+                     .tiff = grDevices::tiff)[[extension]]
+         
+  if (extension %in% c('.svg', '.pdf')) {
+    deviceFunc(file = filename, width = dim[1], height = dim[2], ...) 
+  } else {
+    deviceFunc(filename = filename, width = dim[1], height = dim[2], 
+               res = 200, units = 'in', ...) 
+  }
+  on.exit(dev.off())
+  
+  show(plot)
+                      
+  
+}
+
+dim2inches <- function(x) {
+  if (is.null(x)) return(NA_real_)
+  if (is.numeric(x)) x <- paste0(x, 'in')
+  if (!stringr::str_detect(x, '^[0-9]+(px|pt|in|cm|mm)$')) {
+      .stop("In your call to drawToFile(), the height and width
+            arguments must by character strings, indicating a number
+            followed by a unit: either 'px', 'in', 'cm', or 'mm'.",
+            "Your input '{x}' is invalid.")
+  }
+  
+  n <- stringr::str_extract(x, '^[0-9]+') |> as.numeric()
+  u <- stringr::str_extract(x, '[a-z]{2}$') |> 
+    chartr('x', 't', x = _) # change px to pt
+  
+  val <- grid::unit(n, u)
+  
+  inches <- grid::convertUnit(val, 'inches', valueOnly = TRUE)
+  
+  if (inches < 2) {
+    .stop("In drawToFile(), dimensions (height or width) less than two inches",
+          "are not supported.")
+  }
+  
+  inches
 }
 
 # draw() ----
@@ -293,7 +411,7 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' These parameters are set using `par()` (overriding humdrumR's defaults), but only for the duration of the
 #' `draw()` call---i.e., the global `par()` settings are not changed.
 #' 
-#' 
+#' @seealso Use [drawToFile()] to render these plots to files.
 #' @export
 draw <- function(x, y, ...) {
   UseMethod('draw')
@@ -340,7 +458,7 @@ draw.default <- function(x, y, facets = list(), ...,
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
   par_draw <- list(family = 'Helvetica',   col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
-  dotpars <- list(...)[intersect(names(list(...)), names(par()))]
+  dotpars  <- list(...)[intersect(names(list(...)), names(par()))]
   par_draw[names(dotpars)] <- dotpars
   oldpalette <- palette(flatly)
   on.exit(palette(oldpalette))
@@ -386,7 +504,9 @@ draw.default <- function(x, y, facets = list(), ...,
     output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
   }
   
-  plot_object(function(...) {
+  plot_object(layout = list(layout = output$layout, layout_heights = 1, layout_widths = 1),
+              aspect = aspect %||% (4/3),
+               function(...) {
     list2env(list(...), envir = environment())
     
     dotpars <- list(...)[intersect(names(list(...)), names(par()))]
@@ -429,8 +549,7 @@ draw.default <- function(x, y, facets = list(), ...,
       }
       if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
     }
-    },
-    layout = list(layout = output$layout, layout_heights = 1, layout_widths = 1))
+    })
 }
   
 
@@ -2735,6 +2854,27 @@ cutter <- function(value, reference, maxUnique = 4, Ncuts = 4) {
   }
   rep(value, length.out = length(reference))
 }
+
+
+reducePlotSize2d <- function(x, y, max = 5000) {
+  # can't get this to work in a way that seems resaonable
+  .x <- x - mean(x)
+  .y <- y - mean(y)
+  
+  z <- (.x * .y) / (sd(x) * sd(y))
+  
+  quant <- quantile(z, c(.0025, .9975))
+  
+  extreme <- z < quant[1] | z > quant[2]
+  
+  
+  i <- union(sample(length(x), max, prob = abs(z) + 1), which(extreme))
+  
+  par(mfcol=c(1,2))
+  plot(x, y,cex=.5, pch = 16, xlim = range(x), ylim = range(y))
+  plot(x[i], y[i],cex=.5, pch = 16, xlim = range(x), ylim = range(y))
+}
+
 ### argument preppers ----
 
 

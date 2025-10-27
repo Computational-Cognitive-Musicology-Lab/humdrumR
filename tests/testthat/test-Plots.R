@@ -41,7 +41,7 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
              
              output$draw <- renderPlot(height = \() plotH(), width = \() plotW(),
                                        {
-                 args <- as.list(input)
+                 args <- reactiveValuesToList(input)
                  args$Nx <- args$height <- args$width <- args$seed <- NULL
                  
                  args <- Filter(Negate(is.null), args)
@@ -82,7 +82,7 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                  args <- Filter(\(x) x != 'none', args)
                  
                  
-                 curexpr <- rlang::expr(draw(x =x , y = y, !!!args))
+                 curexpr <- rlang::expr({ plot <- draw(x =x , y = y, !!!args); show(plot)})
                  expr(curexpr)
                  rlang::eval_tidy(curexpr)
                  

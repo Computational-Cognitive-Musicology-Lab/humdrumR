@@ -77,7 +77,7 @@
 #' 
 #' If `NULL`, files are written to the same directory (or directories) they were [read from][readHumdrum()].
 #' 
-#' @param overwrite ***Whether to overite existing files.***
+#' @param overwrite ***Whether to ovewrite existing files without asking permission.***
 #' 
 #' Defaults to `FALSE`.
 #' 
@@ -189,7 +189,7 @@ writeHumdrum <- function(humdrumR,
             cat('\tYou specified the writeHumdrum(overwrite = TRUE), but are you sure you want to overwrite these files?\n')
             answer <- readline(prompt = '\t\tType "y" and press ENTER if you DO want to overwrite existing files.\n')
             if (answer != 'y') {
-                cat('writeHumdrum cancelled.\n', 'No files written.\n', sep = '')
+                cat('writeHumdrum() cancelled.\n', 'No files written.\n', sep = '')
                 return(invisible(NULL))
             }
             
