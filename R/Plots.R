@@ -2895,7 +2895,7 @@ setGeneric('prep_col',
              
              pch <- if (length(unique(pch)) > 1) 16 else unique(pch)
              
-             if (length(col) == 1L || any(isColor(as.character(col)))) return(list(col = setalpha(col, alpha)))
+             if (length(col) == 1L && isColor(as.character(col))) return(list(col = setalpha(col, alpha)))
              if (length(unique(col)) == 1L) return(list(col = setalpha(flatly[1], alpha)))
              
              standardGeneric('prep_col')
