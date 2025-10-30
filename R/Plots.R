@@ -282,10 +282,11 @@ dim2inches <- function(x) {
 #' The `draw()` function will automatically generate X and Y labels for every plot,
 #' usually just using the expression you passed; for example, if you say `draw(rnorm(100))`, the
 #' X label will be "rnorm(100)."
-#' This can be overridden using the `xlab` and/or `ylab` arguments, which can be provided a single string
-#' each---to suppress a label, provide an empty string, like `ylab = ""`.
+#' This can be overridden using the `xlabe;` and/or `ylabe;` arguments, which can be provided a single string
+#' each---to suppress a label, provide an empty string, like `ylabel = ""`.
 #' 
-#' Titles and subtitles are specified using the `main` and `sub` arguments, respectively.
+#' Titles and subtitles are specified using the `title` and `subtitle` arguments, respectively.
+#' (Alternatively, you can use the standard `main` and `sub` arguments.)
 #' No title or subtitle is drawn by default.
 #' 
 #' You can use the base-R [mtext()] function to draw additional text on plot axes.
@@ -293,12 +294,12 @@ dim2inches <- function(x) {
 #' ### Axes control
 #' 
 #' The `draw()` function will select reasonable X and Y axes ranges automatically.
-#' If you want to override the defaults, you can use `xlim` or `ylim` to control
+#' If you want to override the defaults, you can use `xlimit` or `ylimit` to control
 #' the range of values shown on each axis.
 #' Each of these must be passed a vector of two numbers, representing the left and right
-#' X-axis extremes (`xlim`) and the bottom and top Y-axis extremes (`ylim`).
+#' X-axis extremes (`xlimit`) and the bottom and top Y-axis extremes (`ylimit`).
 #' For example, to show data in the range \eqn{[10, 50]} on the X axis,
-#' specify `xlim = c(10, 50)`.
+#' specify `xlimit = c(10, 50)`.
 #' 
 #' For `numeric` axes, you can also plot data on a logarithmic scale
 #' using the `log` argument.
@@ -327,7 +328,7 @@ dim2inches <- function(x) {
 #' @section Color:
 #' 
 #' 
-#' Colors can be specified in all `draw()` plots using the `col` argument, along with the 
+#' Colors can be specified in all `draw()` plots using the `color` argument, along with the 
 #' `alpha` argument which controls the transparency of colors.
 #' Note that color control can used for entirely aesthetic purposes (picking 
 #' a color scheme you want) *or* to represent an additional dimension of data.
@@ -361,13 +362,13 @@ dim2inches <- function(x) {
 #' 
 #' See "Plot Text" section below.
 #' 
-#' @param xlim,ylim ***What range of X/Y values should drawn on the plot?***
+#' @param xlimit,ylimit ***What range of X/Y values should drawn on the plot?***
 #' 
 #' By default, X and Y limits are automatically selected.
 #' 
 #' Must be a `numeric` vector of length two.
 #' 
-#' The first number of each `xlim`/`ylim` vector specifies the left/bottom
+#' The first number of each `xlimit`/`ylimit` vector specifies the left/bottom
 #' edge of the X/Y axis. The second number specifies the right/top edge.
 #' 
 #' 
@@ -440,24 +441,37 @@ draw.humdrumR <- function(x, ...) {
   rlang::eval_tidy(quo)
 }
 
+argSubs <- c(main = 'title', cex = 'pointSize', pch = 'pointStyle')
+
 #' @export
-draw.default <- function(x, y, facets = list(), ..., 
-                         xlab = NULL, ylab = NULL, 
+draw.default <- function(x, y, facets = list(),  
+                         xlabel = NULL, ylabel = NULL, 
+                         xlimit = NULL, ylimit = NULL,
                          axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
-                         main = '', sub = '', col = 1, cex = NULL, pch = 16) {
+                         title = '', subtitle = '', color = 1, 
+                         pointSize = NULL, pointStyle = 16,
+                         ...) {
+  
+  
+  # make it so conventional R plot names (e.g., main, cex, pch) can be used
+  for (arg in names(argSubs)) {
+    if (arg %in% names(list(...))) assign(argSubs[[arg]], list(...)[[arg]], envir = environment())
+  }
   
   checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)))
   checks(margin, xlen1 & xnumeric & xmin(.1) & xmax(.4))
   checks(legend, xTF | (xcharacter & xminlength(1) & xmaxlength(2)))
   checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
-  checks(xlab, xnull | (xlen1 & xatomic))
-  checks(ylab, xnull | (xlen1 & xatomic))
-  checks(main, xatomic & xlen1)
-  checks(sub, xatomic & xlen1)
-
+  checks(xlabel, xnull | (xlen1 & xatomic))
+  checks(ylabel, xnull | (xlen1 & xatomic))
+  checks(title, xatomic & xlen1)
+  checks(subtitle, xatomic & xlen1)
+  
+  
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
-  par_draw <- list(family = 'Helvetica', col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
+  par_draw <- list(family = 'Helvetica', col.main = 5, col.axis = 5, 
+                   col.sub = 5, col.lab = 2, cex.main = 1.3, pty = 'm')
   dotpars  <- list(...)[intersect(names(list(...)), names(par()))]
   par_draw[names(dotpars)] <- dotpars
   oldpalette <- palette(flatly)
@@ -477,14 +491,14 @@ draw.default <- function(x, y, facets = list(), ...,
     formula <- xy_formula(x)
     x <- formula$x
     y <- formula$y
-    xlab <- xlab %||% formula$xlab
-    ylab <- ylab %||% formula$ylab
+    xlabel <- xlabel %||% formula$xlab
+    ylabel <- ylabel %||% formula$ylab
   } 
 
   if (length(facets)) {
     facets <- prep_facets(x, y, facets)
     
-    args <- list(x = x, y = y, col = col, cex = cex, pch = pch)
+    args <- list(x = x, y = y, col = color, cex = pointSize, pch = pointStyle)
     facets <- by(as.data.frame(args[lengths(args) == length(facets[[1]])]), 
                  facets, simplify = FALSE, 
                  FUN = \(df) {
@@ -492,16 +506,18 @@ draw.default <- function(x, y, facets = list(), ...,
                  })
     
     output <- draw_facets(args, facets, ...,
+                          xlim = xlimit, ylim = ylimit,
                           xexpr = xexpr, yexpr = yexpr,
-                          xlab = xlab, ylab = ylab, 
+                          xlab = xlabel, ylab = ylabel, 
                           axes = axes, legend = legend,
                           aspect = aspect, margin = margin)
   } else {
-    output <- .draw(x, y, ..., col = col, cex = cex, pch = pch, aspect = aspect)
+    output <- .draw(x, y, ..., xlim = xlimit, ylim = ylimit,
+                    col = color, cex = pointSize, pch = pointStyle, aspect = aspect)
     output$layout <- output$layout %||% 1L
     output$faceted <- output$faceted %||% FALSE
-    output$axisNames[[1]] <- xlab %||% (output$axisNames[[1]] %||% xexpr)
-    output$axisNames[[2]] <- ylab %||% (output$axisNames[[2]] %||% yexpr)
+    output$axisNames[[1]] <- xlabel %||% (output$axisNames[[1]] %||% xexpr)
+    output$axisNames[[2]] <- ylabel %||% (output$axisNames[[2]] %||% yexpr)
   }
   
   plot_object(layout = list(layout = output$layout, layout_heights = 1, layout_widths = 1),
@@ -523,9 +539,9 @@ draw.default <- function(x, y, facets = list(), ...,
     output$drawer()
     
     # title and subtitle
-    marginLab(marginLines, stringr::str_to_title(main), 3, 3,
+    marginLab(marginLines, stringr::str_to_title(title), 3, 3,
               col = par('col.main'), cex = par('cex.main'), font = 2)
-    marginLab(marginLines, stringr::str_to_title(sub), 3, 2,
+    marginLab(marginLines, stringr::str_to_title(subtitle), 3, 2,
               font = 2)
 
     # axes labels
