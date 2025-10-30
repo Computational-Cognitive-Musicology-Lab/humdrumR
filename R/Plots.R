@@ -16,11 +16,11 @@ setMethod('show', 'plot',
             
             on.exit(layout(1L))
             layout <- object@layout
-            if (length(layout$layout) != 1L) {
-              omi <- min(par('fin')) * .05
-              oldpar <- par(omi = c(omi, omi, omi, omi))
-              on.exit(par(oldpar), add = TRUE)
-            }
+            # if (length(layout$layout) != 1L) {
+            #   omi <- min(par('fin')) * .05
+            #   oldpar <- par(omi = c(omi, omi, omi, omi))
+            #   on.exit(par(oldpar), add = TRUE)
+            # }
             
             layout(layout$layout, 
                    widths = layout$layout_widths,
@@ -457,7 +457,7 @@ draw.default <- function(x, y, facets = list(), ...,
 
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
-  par_draw <- list(family = 'Helvetica',   col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
+  par_draw <- list(family = 'Helvetica', col.main = 5, col.axis = 5, col.sub = 5, col.lab = 2, pty = 'm')
   dotpars  <- list(...)[intersect(names(list(...)), names(par()))]
   par_draw[names(dotpars)] <- dotpars
   oldpalette <- palette(flatly)
@@ -698,7 +698,7 @@ draw.default <- function(x, y, facets = list(), ...,
 draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
                          normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
                          xlim = NULL, ylim = NULL, 
-                         col = 1, alpha = .5, cex = NULL, pch = NULL, marginLines, ...) {
+                         col = 1, alpha = .7, cex = NULL, pch = NULL, marginLines, ...) {
   checks(jitter, xcharacter & xlen1 & xlegal(c('', 'x', 'y', 'xy', 'yx')), seealso = '?draw_scatter')
   checks(lm, xTF, seealso = '?draw_scatter')
   checks(line, xTF, seealso = '?draw_scatter')
@@ -1966,12 +1966,12 @@ draw_facets <- function(full_data, faceted_data,
         facet <- with(faceted_data[[n]], .draw(x = x,  y = y, ...,  
                                                col = col, cex = cex, pch = pch))# actual draw of plot
         # facet <- do.call('.draw', c(faceted_data[[n]], list(...))) 
-        marginLines <- setMargins(.1, aspect = aspect)
+        sides <- c(bottom.side[n], left.side[n], top.side[n], right.side[n])
+        marginLines <- setMargins(.2, aspect = aspect, sides = sides)
         
         output$canvas()
         facet$drawer()
         
-        sides <- c(bottom.side[n], left.side[n], top.side[n], right.side[n])
         lapply(which(!sides), border)
         
         # # axes 
@@ -1990,14 +1990,14 @@ draw_facets <- function(full_data, faceted_data,
           text(grconvertX(marginLines[[4]][3], 'inches', 'user'), 
                grconvertY(.5, 'npc', 'user'), 
                facet_dimnames[[1]][coor[ , 'row']],
-               cex = 1.5, xpd = NA, col = par('col.axis'))
+               cex = 1.5, xpd = NA, col = par('col.lab'))
         }
         if (length(dim(facet_sizes)) > 1L && ncol(facet_sizes) > 1L && sides[3]) {
           
           text(grconvertX(.5, 'npc', 'user'),
                grconvertY(marginLines[[3]][3], 'inches', 'user'), 
                collevel <- facet_dimnames[[2]][coor[ , 'col']],
-               cex = 1.5, xpd = NA, col = par('col.axis'))
+               cex = 1.5, xpd = NA, col = par('col.lab'))
         }
       }
       
@@ -2396,7 +2396,7 @@ draw_lines <- function(n = 10, outer = FALSE) {
 # 5 -> title
 
 
-setMargins <- function(margin.percent = .2, aspect = NULL) {
+setMargins <- function(margin.percent = .2, aspect = NULL, sides = c(TRUE, TRUE, TRUE, TRUE)) {
   
 
   devsize <- par('fin')
@@ -2416,7 +2416,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL) {
   
   fullmar <- (devsize - figsize) / 2
   
-  par(mai = fullmar[c(2, 1, 2, 1)]) #, omi = fullmar[c(2, 1, 2, 1)])
+  par(mai = fullmar[c(2, 1, 2, 1)] * ifelse(sides, 1, .2)) #, omi = fullmar[c(2, 1, 2, 1)])
   
   # scale cex to size of device
   # xarea <- prod(devsize)
@@ -2456,6 +2456,13 @@ facetMargins <- function(margin.percent = .15) {
   marginLines
 }
 
+
+showMarginLines <- function(marginLines) {
+  abline(h = marginLines[[1]] |> grconvertY('inches', 'user'), xpd = TRUE, lty = 'dashed')
+  abline(v = marginLines[[2]] |> grconvertX('inches', 'user'), xpd = TRUE, lty = 'dashed')
+  abline(h = marginLines[[3]] |> grconvertY('inches', 'user'), xpd = TRUE, lty = 'dashed')
+  abline(v = marginLines[[4]] |> grconvertX('inches', 'user'), xpd = TRUE, lty = 'dashed')
+}
 
 marginLab <- function(marginLines, text, side, marginLine = 3, las = 0, ...) {
   
