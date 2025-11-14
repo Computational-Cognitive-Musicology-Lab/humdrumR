@@ -47,6 +47,9 @@ plot_object <- function(plotfunc,
   new('plot', plotfunc, layout = layout, aspect = aspect)
 }
 
+#' Draw multiple plots, or add to [draw()] plots.
+#' 
+#' 
 #' @export
 drawMore <- function(plot, ...) {
   exprs <- rlang::enexprs(...) |> as.expression()
@@ -478,8 +481,8 @@ draw.default <- function(x, y, facets = list(),
   on.exit(palette(oldpalette))
 
   # xlab and ylab
-  xexpr <- deparse1(substitute(x)) 
-  yexpr <- deparse1(substitute(y)) 
+  xexpr <- trimTokens(deparse1(substitute(x), width.cutoff = 50, collapse = '\n'), 100) 
+  yexpr <- trimTokens(deparse1(substitute(y), width.cutoff = 50, collapse = '\n'), 100)
   if (xexpr == '') xexpr <- 'x'
   if (yexpr == '') yexpr <- 'y'
   
@@ -2739,8 +2742,8 @@ border <- function(side, scale = .8) {
 canvas <- function(x, xlim = NULL, y, ylim = NULL, log = '') {
   logcheck(log, x, y)
   
-  xlim <- xlim %||% range(x) 
-  ylim <- ylim %||% range(y) 
+  xlim <- xlim %||% range(x, na.rm = TRUE) 
+  ylim <- ylim %||% range(y, na.rm = TRUE) 
   
   
   xlog <- grepl('x', log, fixed = TRUE)
