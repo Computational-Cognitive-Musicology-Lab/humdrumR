@@ -63,15 +63,6 @@ The 95\% confidence limits---estimated using \code{\link[=predict.lm]{predict.lm
 also drawn (as dashed lines).
 The regression coefficients are printed in a legend at the top left corner of the plot.}
 
-\item{xlim, ylim}{\emph{\strong{What range of X/Y values should drawn on the plot?}}
-
-By default, X and Y limits are automatically selected.
-
-Must be a \code{numeric} vector of length two.
-
-The first number of each \code{xlim}/\code{ylim} vector specifies the left/bottom
-edge of the X/Y axis. The second number specifies the right/top edge.}
-
 \item{cex}{\emph{\strong{What size of points should be drawn?}}
 
 Must be either a single positive number, or a vector

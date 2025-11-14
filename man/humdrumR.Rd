@@ -4,12 +4,17 @@
 \name{humdrumR}
 \alias{humdrumR}
 \alias{humdrumRroot}
+\alias{humdrumRdata}
 \title{humdrumR}
 \format{
 An object of class \code{character} of length 1.
+
+An object of class \code{list} of length 5.
 }
 \usage{
 humdrumRroot
+
+humdrumRdata
 
 humdrumR(
   view,

@@ -88,7 +88,7 @@ checks <- function(arg, argcheck, argname, seealso = c()) {
   # message()
   # stop(call.=FALSE)
   # .showstack()
-  .stop(paste0(alert, '\n', messages, seealso))
+  stop(paste0(alert, '\n', messages, seealso), call. = FALSE)
   # .stop(paste0(premessage, '\n', messages, seealso))
 }
 

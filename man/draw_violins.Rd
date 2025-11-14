@@ -80,15 +80,6 @@ The Y-position of each point is matched to its actual value;
 The X-position of each point is randomly (uniformly) spread across the area of each violin.
 The points will look consistent, regardless of what histogram- or density-algorithm parameters are used.}
 
-\item{xlim, ylim}{\emph{\strong{What range of X/Y values should drawn on the plot?}}
-
-By default, X and Y limits are automatically selected.
-
-Must be a \code{numeric} vector of length two.
-
-The first number of each \code{xlim}/\code{ylim} vector specifies the left/bottom
-edge of the X/Y axis. The second number specifies the right/top edge.}
-
 \item{log}{\emph{\strong{Should Y axis be drawn on a logarithmic scale?}}
 
 Defaults to \code{""} (linear scale).
@@ -165,10 +156,11 @@ Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis la
 The \code{draw()} function will automatically generate X and Y labels for every plot,
 usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
 X label will be "rnorm(100)."
-This can be overridden using the \code{xlab} and/or \code{ylab} arguments, which can be provided a single string
-each---to suppress a label, provide an empty string, like \code{ylab = ""}.
+This can be overridden using the \code{xlabe;} and/or \code{ylabe;} arguments, which can be provided a single string
+each---to suppress a label, provide an empty string, like \code{ylabel = ""}.
 
-Titles and subtitles are specified using the \code{main} and \code{sub} arguments, respectively.
+Titles and subtitles are specified using the \code{title} and \code{subtitle} arguments, respectively.
+(Alternatively, you can use the standard \code{main} and \code{sub} arguments.)
 No title or subtitle is drawn by default.
 
 You can use the base-R \code{\link[=mtext]{mtext()}} function to draw additional text on plot axes.
@@ -177,12 +169,12 @@ You can use the base-R \code{\link[=mtext]{mtext()}} function to draw additional
 \subsection{Axes control}{
 
 The \code{draw()} function will select reasonable X and Y axes ranges automatically.
-If you want to override the defaults, you can use \code{xlim} or \code{ylim} to control
+If you want to override the defaults, you can use \code{xlimit} or \code{ylimit} to control
 the range of values shown on each axis.
 Each of these must be passed a vector of two numbers, representing the left and right
-X-axis extremes (\code{xlim}) and the bottom and top Y-axis extremes (\code{ylim}).
+X-axis extremes (\code{xlimit}) and the bottom and top Y-axis extremes (\code{ylimit}).
 For example, to show data in the range \eqn{[10, 50]} on the X axis,
-specify \code{xlim = c(10, 50)}.
+specify \code{xlimit = c(10, 50)}.
 
 For \code{numeric} axes, you can also plot data on a logarithmic scale
 using the \code{log} argument.

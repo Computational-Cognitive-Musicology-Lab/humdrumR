@@ -14,80 +14,46 @@ vignette: >
 source('vignette_header.R')
 ```
 
-
 Welcome to "Making plots with `r hm`"!
-R has two major plotting systems that are widely used: R's built-in [base graphics][graphics-package] functions, and the more modern [ggplot2]. 
+R has two major plotting systems that are widely used: 1) R's built-in [base graphics][graphics-package] functions and 2) the more modern [ggplot2]. 
 `r Hm` is compatible with both of these systems.
 `r Hm` also has it's own, built-in [draw()] function, which is basically a spiffy (easier to use) extension of base-R graphics.
 
-In this vignette we'll give a few quick examples of how to use base-R graphics to plot `r hm` data, before diving into a detailed showcase of the features of [draw()].
+In this vignette we give detailed showcase of the features of [draw()].
 We'll then show you how to use [ggplot2] with `r hm` data, if that floats your boat.
+Finally, we go over some basic concepts from base-R graphics, which you can use if you want to customize [draw()] plots (or make your own custom plots from scratch).
 
-## Base R graphics
 
-The base-R graphics system is extremely powerful, giving you precise control of every aspect of plots.
-Unfortunately, though *getting started* with simple base-R plots is extremely fast and easy, as we'll show you in a moment, it takes quite a while to learn on how to precisely control your plots, and it ends up being quite verbose.
-The `r hm` [draw()] function is actually based on base-R graphics, and is fully compatible with base-R---our recommendation is to start with [draw()], then gradually learn base-R as needed.
-(Alternatively, just learn [ggplot][#ggplot].)
-If you are just getting started, you can probably skip ahead to the [Draw](#draw) or [GGplot](#ggplot) sections below, and come back to this for added context if and when you need it.
 
----
+-----
 
-Base-R graphics is centered around a few main plotting functions: [plot()], [barplot()], and [hist()].
-Additional functions can then be used to *add* more elements on top of the plots you already created: [points()], [arrows()], [abline()], [lines()], [axis()], [polygon()], etc.
-(These "adding" functions can be used with [draw()] too.)
 
-Let's load some humdrum data:
+Let's load some humdrum data, and create some data fields to plot:
 
 
 ```{r}
-bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*hum')
 
 ```
 
-The main plot functions work by passing them numbers, so let's pull out some numeric values.
-We'll use [semits()] and [duration()] to convert pitch and rhythmic information into numbers:
+
+We'll use [semits()] and [duration()] to convert pitch and rhythmic information into numbers, and [solfa()] and [recip()] to represent them in categorical form.
 
 ```{r}
 bach |>
-  mutate(Pitch = semits(Token),
-         Duration = duration(Token)) -> bach
+  mutate(Semits = semits(Token),
+         Duration = duration(Token),
+         Solfa = solfa(Token, simple = TRUE),
+         Recip = recip(Token)) -> bach
 ```
 
-We can then see what happens if we pass these numbers to [plot()] or [hist()].
-(As usual, we have to use [with()] to access the fields.)
-
-```{r}
-bach |>
-  with(hist(Duration))
-```
-
-```{r}
-bach |>
-  with(plot(Duration))
-
-bach |>
-  with(plot(Duration, Pitch))
-
-
-```
-
-To use [barplot()], the standard approach is to tabulate categorical data using [table()], then pass that to `barplot()`.
-
-```{r}
-bach |>
-  select(Token) |>
-  with(table(kern(Token, simple = TRUE))) |>
-  barplot()
-
-
-```
 
 # Draw()
 
 `r Hm`'s [draw()] function is basically a fancy wrapper around base-R functions like [plot()] and [hist()].
 Like these functions, using [draw()] is simple: just pass data ([atomic][vector] vectors) in to get a plot.
-The [draw()] function will look at the input arguments you give it, and make an appropriate plot for that input type---`draw()` currently makes seven different types of plots.
+The [draw()] function will look at the input arguments you give it, and make an appropriate plot for that input type.
+Currently, `draw()` can make seven different types of plots, depending on the input passed to it.
 
 To decide what kind of plot to make, [draw()] looks at its first two arguments, `x` and `y`, which represent (you guessed it) the X and Y axes.
 Here are the types of plots associated with different types of `x`/`y` arguments:
@@ -105,15 +71,38 @@ Here are the types of plots associated with different types of `x`/`y` arguments
 | `character`/`factor`                                     | `character`/`factor`                  | [Heat map][draw_heat()]                             |
 
 
-To see this in action, let's pass in various combinations of the fields we created in our `bach` data (in the previous section):
+To see this in action, let's see what happens if we pass our `Semits` field as either the first (`x`) or second (`y`) argument to [draw()]:
 
 ```{r}
 
-bach |> draw(Duration)
+bach |> draw(Semits)
 
-bach |> draw( , Pitch)
+bach |> draw( , Semits)
 
 ```
+
+On the X axis, numeric data is drawn as a [density histogram][draw_density()]; on the Y axis, a [quantile plot][draw_Qplot()].
+What if we pass two numeric variables (`Semits` *and* `Duration`)? We get a scatter plot:
+
+```{r}
+
+bach |> draw(Duration, Semits)
+
+```
+
+However, there are only `r humdrumR:::num2word(length(unique(bach$Duration)))` duration values in the data, so maybe it makes more sense to treat them as categories, not numbers.
+If we convert `Duration` to a `character`-string vector, see what changes:
+
+
+```{r}
+
+bach |> draw(Recip)
+
+bach |> draw(Recip, Semits)
+
+```
+### a
+
 
 # GGplot
 
@@ -126,6 +115,114 @@ library(ggplot2)
 ```{r}
 
 bach |>
-  ggplot(aes(Duration, Pitch)) + geom_point()
+  ggplot(aes(Duration, Semits)) + geom_point()
+
+```
+
+
+# Base-R 
+
+
+The base-R graphics system is extremely powerful, giving you precise control of every aspect of plots.
+Unfortunately, though *getting started* with simple base-R plots is extremely fast and easy, as we'll show you in a moment, it takes quite a while to learn on how to precisely control your plots, and it ends up being quite verbose.
+The `r hm` [draw()] function is actually based on base-R graphics, and is fully compatible with base-R---our recommendation is to start with [draw()], then gradually learn base-R as needed.
+(Alternatively, just learn [ggplot][#ggplot].)
+If you are just getting started, you can probably skip ahead to the [Draw](#draw) or [GGplot](#ggplot) sections below, and come back to this for added context if and when you need it.
+
+
+### Primary plot functions
+
+Base-R graphics is centered around a few main plotting functions: [plot()], [barplot()], and [hist()].
+Additional functions can then be used to *add* more elements on top of the plots you already created: [points()], [arrows()], [abline()], [lines()], [axis()], [polygon()], etc.
+(These "adding" functions can be used with [draw()] too.)
+
+
+We can then see what happens if we pass numeric data to [plot()] or [hist()].
+(As usual, we have to use [with()] to access the fields.)
+
+```{r}
+bach |>
+  with(hist(Duration))
+```
+
+```{r}
+bach |>
+  with(plot(Duration))
+
+bach |>
+  with(plot(Duration, Semits))
+
+
+```
+
+To use [barplot()], the standard approach is to tabulate categorical data using [table()], then pass that to `barplot()`.
+
+```{r}
+bach |>
+  with(table(Solfa)) |>
+  barplot()
+```
+### Adding plot functions
+
+Once you've created a plot with [plot()], [barplot()], or [hist()], you can add more information on top of those plots using functions like [mtext()], [points()], or [abline()].
+
+---
+
+The [points()] function acts just like [plot()], except it doesn't create a new plot, instead adding the existing plot.
+You could for example, use points to plot the average pitch value for each duration.
+We will first remake the same plot as above using [plot()], then compute the averages add them as red points using [points()].
+
+
+```{r}
+
+
+bach |> 
+  with(plot(Duration, semits())) 
+
+bach |>
+  group_by(Duration) |>
+  summarize(MeanSemits = mean(Semits)) |>
+  with(points(Duration, MeanSemits, col = 'red', pch = 16, cex = 1.2))
+  
+
+
+```
+
+The arguments `cex`, `pch`, and `col` are used with [points()] (or [plot()]) to control the point size, point shape, and color respectively.
+
+
+
+---
+
+The [abline()] function can be used to straight lines on an existing plot.
+You could, for example, draw a horizontal line separating the positive pitches from the negative pitches:
+
+
+
+```{r}
+
+
+bach |> 
+  with(plot(Duration, Semits)) 
+
+bach |> with(abline(h = 0))
+
+
+```
+
+You can also draw the linear regression line using [abline()], by passing it an [lm()] object:
+
+
+```{r}
+
+
+bach |> 
+  with(plot(Duration, Semits)) 
+
+bach |>
+  with(lm(Semits ~ Semits)) |>
+  abline()
+  
+
 
 ```
