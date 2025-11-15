@@ -542,9 +542,9 @@ draw.default <- function(x, y, facets = list(),
     output$drawer()
     
     # title and subtitle
-    marginLab(marginLines, stringr::str_to_title(title), 3, 3,
+    marginLab(marginLines, title, 3, 3,
               col = par('col.main'), cex = par('cex.main'), font = 2)
-    marginLab(marginLines, stringr::str_to_title(subtitle), 3, 2,
+    marginLab(marginLines, subtitle, 3, 2,
               font = 2)
 
     # axes labels
@@ -2504,7 +2504,8 @@ marginLab <- function(marginLines, text, side, marginLine = 3, las = 0, ...) {
                 0,
                 c(90, 0, 90, 0)[side],
                 90)
-  text(x, y, text, srt = srt, xpd = NA, adj = c(.5, if (side == 1) 0 else 1), offset = 0, ...)
+  
+  text(x, y, parseMath(text), srt = srt, xpd = NA, adj = c(.5, if (side == 1) 0 else 1), offset = 0, ...)
   
 }
 
@@ -2876,6 +2877,12 @@ cutter <- function(value, reference, maxUnique = 4, Ncuts = 4) {
     }
   }
   rep(value, length.out = length(reference))
+}
+
+parseMath <- function(text) {
+  if (text == '') return(text)
+  parsed <- try(parse(text = text), silent = TRUE)
+  if (class(parsed)[1] != 'try-error') parsed else text
 }
 
 
