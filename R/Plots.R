@@ -1856,7 +1856,11 @@ draw_area <- function(x, y, log = '',
   coordinates <- area_coor(x, y, smooth = smooth, conditional = conditional, 
                            center = center, bw = bw, breaks = breaks, ...)
   
-  output <- canvas(x, xlim, range(coordinates$Y), ylim, log = gsub('y', '', log))
+  output <- canvas(x, xlim, 
+                   range(c(coordinates$Y, 
+                          if (showPoints) min(coordinates$Y) + diff(range(coordinates$Y)) * 20/17)),  
+                              # if showPoints at 20/17 to upper margin, which draw_points() will fill in (85%)
+                   ylim, log = gsub('y', '', log))
   output$col <- prep_col_categories(col %||% categories, rev(categories), 
                                     alpha = alpha, ...)
   if (!conditional && center)  output$axes <- output$axes[side == 1]
@@ -1870,21 +1874,11 @@ draw_area <- function(x, y, log = '',
               c(coordinates$Y[ , j], rev(coordinates$Y[ , j + 1])), 
               col = output$col$col[j],
               border = FALSE, xpd = NA)
-      if (showPoints) draw_points(x, output$col$col[match(y, categories)], 
+      if (showPoints) draw_points(x, rev(output$col$col)[match(y, categories)], 
                                   coordinates$Y, output$window$ylim)
       
       
       
-      
-      if (!global_stats && length(categories) > 1) {
-        draw_quantiles(1, x[y == categories[j]], 
-                       quantiles,
-                       limits = NULL, 
-                       col =  setalpha(output$col$col[j], 1))
-        if (mean) draw_mean(mean(x[y == categories[j]]), 
-                            grconvertY(0.01, 'npc', 'user'), 
-                            col = rev(output$col$col)[j])
-      }
     }
     
     ## Draw density Key
@@ -1903,11 +1897,17 @@ draw_area <- function(x, y, log = '',
     
     
     
-    
     if (global_stats || length(coordinates) == 1L) {
-      if (mean) draw_mean(mean(x), grconvertY(0.01, 'npc', 'user'))
+      if (mean) draw_mean(mean(x), grconvertY(0.99, 'npc', 'user'))
       draw_quantiles(1, x, quantiles, limits = NULL)
-    } 
+    } else {
+      Map(\(cury, curcol) draw_quantiles(1, cury, quantiles, limits = NULL, col = curcol),
+          tapply(x, y, list), 
+          output$col$col)
+      if (mean) draw_mean(tapply(x, y, mean) |> unlist(), 
+                          grconvertY(0.99, 'npc', 'user'), 
+                          col = output$col$col)
+    }
     
   }
   
@@ -2332,9 +2332,11 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
 
 
 draw_mean <- function(x, y, col = 'black') {
-  points(x, rep(y, length.out = length(x)), 
-         pch = 3, cex = 1.4, lwd = 1.5, xpd = TRUE, col = setalpha(col, 1))
+  if (length(x) == 1) col <- 'black'
+  points(x, rep(y, length.out = length(x)), pch = 3, cex = 1.4,
+         lwd = 3, xpd = TRUE, col = setalpha(col, .8))
 }
+
 
 draw_counts <- function(x, y, counts, col, width, cex = .8) {
   counts <- prettyN(counts, expr = TRUE)
@@ -2346,11 +2348,13 @@ draw_counts <- function(x, y, counts, col, width, cex = .8) {
 
 draw_points <- function(x, col, allDens, ylim) {
   xsamp <- if (length(x) >= 10^5) sample(x, 10^5) else x
-  ysamp <- runif(length(xsamp), min(max(allDens * 1.1, mean(ylim[[1]]) * 1.5), 
-                                    grconvertY(.95, 'npc', 'user')), 
-                 grconvertY(1, 'npc', 'user'))
+  # ysamp <- runif(length(xsamp), min(max(allDens * 1.1, mean(ylim[[1]]) * 1.5), 
+                                    # grconvertY(.85, 'npc', 'user')), 
+  ysamp <- runif(length(xsamp), 
+                 grconvertY(.85, 'npc', 'user'), # .85 because in draw_area, we scale the ylim by 20/17
+                 grconvertY(.97, 'npc', 'user')) # .97 gives room for mean cross
   dotAlpha <- cex_density(xsamp, ysamp, .3)
-  points(xsamp, ysamp,  cex = .4, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
+  points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
 }
 
 draw_mvnorm <- function(x, y) {
@@ -2686,7 +2690,10 @@ area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = T
   } 
   
   # for density key
-  densKey <- unique(2^(ceiling(log(max(unlist(Y)), 2)):floor(log(median(unlist(Y)), 2)))) |> head(4)
+  maxKey <- max(unlist(Y))
+  minKey <- median(unlist(Y))
+  if (minKey == 0) minKey <- min(unlist(Y)[unlist(Y) > 0])
+  densKey <- unique(2^(ceiling(log(maxKey, 2)):floor(log(minKey, 2)))) |> head(4)
   
   Y <- do.call('cbind', Reduce('+', Y, accumulate = TRUE))
   Y <- cbind(axis = 0, Y)
@@ -2808,18 +2815,8 @@ drawlines <- function(n = 10, outer = FALSE) {
   }
 }
 
-draw_mean <- function(x, y, col = 'black') {
-  if (length(x) == 1) col <- 'black'
-  points(x, rep(y, length.out = length(x)), pch = 3, cex = 1.4, lwd = 1.5, xpd = TRUE, col = setalpha(col, 1))
-}
 
-draw_counts <- function(x, y, counts, col, width, cex = .8) {
-  counts <- prettyN(counts, expr = TRUE)
-  
-  text(x, y, counts, xpd = NA,
-       cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
-       col = setalpha(col, 1), pos = 3)
-}
+
 
 
 axis.lines <- function() {

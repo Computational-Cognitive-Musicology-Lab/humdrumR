@@ -163,8 +163,8 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                                                         textInput('sub', 'sub', value = 'none'),
                                                         selectInput('col', 'color', choices = variables[c(2,1,3:length(variables))]),
                                                         selectInput('cex', 'point size', choices = variables[c(2,1,3:length(variables))]),
-                                                        sliderInput('height', 'Plot height', min = 400, max = 1600, value = 1000, step = 100),
-                                                        sliderInput('width', 'Plot width', min = 400, max = 3000, value = 1800, step = 100)),
+                                                        sliderInput('height', 'Plot height', min = 400, max = 1600, value = 1100, step = 100),
+                                                        sliderInput('width', 'Plot width', min = 400, max = 3000, value = 2300, step = 100)),
                             mainPanel = fluidPage(textOutput('expr'), plotOutput('draw', inline = TRUE))),
          server <- function(input, output) {
              expr <- reactiveVal()
