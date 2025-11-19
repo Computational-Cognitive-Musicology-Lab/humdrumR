@@ -451,6 +451,7 @@ draw.default <- function(x, y, facets = list(),
                          xlabel = NULL, ylabel = NULL, 
                          xlimit = NULL, ylimit = NULL,
                          axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
+                         conditional = FALSE,
                          title = '', subtitle = '', color = 1, 
                          pointSize = NULL, pointStyle = 16,
                          ...) {
@@ -470,6 +471,8 @@ draw.default <- function(x, y, facets = list(),
   checks(title, xatomic & xlen1)
   checks(subtitle, xatomic & xlen1)
   
+  checks(conditional, xTF | xclass('list'))
+  
   
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
@@ -481,8 +484,8 @@ draw.default <- function(x, y, facets = list(),
   on.exit(palette(oldpalette))
 
   # xlab and ylab
-  xexpr <- trimTokens(deparse1(substitute(x), width.cutoff = 50, collapse = '\n'), 100) 
-  yexpr <- trimTokens(deparse1(substitute(y), width.cutoff = 50, collapse = '\n'), 100)
+  xexpr <- trimTokens(deparse1(substitute(x), width.cutoff = 50L, collapse = '\n'), 100L) 
+  yexpr <- trimTokens(deparse1(substitute(y), width.cutoff = 50L, collapse = '\n'), 100L)
   if (xexpr == '') xexpr <- 'x'
   if (yexpr == '') yexpr <- 'y'
   
@@ -3149,6 +3152,22 @@ legend_cex_continuous <- function(val, cex, col, pch, side, marginLines, cex.leg
   text(xpos[2], ypos, lab, pos = side, cex = .6, xpd = NA)
   
   text(xpos[2], grconvertY(.81, 'ndc', 'user'), cex.legend, pos = 3, col = par('col.lab'), xpd = NA)
+}
+
+#### prep_conditional ----
+
+prep_conditional <- function(conditional) {
+  options <- c('mean', 'quantiles', 'lm', 'normalReference', 'density')
+  
+  output <- setNames(logical(length(options)), options) # all FALSE
+  
+  if (is.logical(conditional)) {
+    if (conditional) output <- !output 
+  } else {
+    output[pmatch(conditional, options, nomatch = 0)] <- TRUE
+  }
+  as.list(output)
+ 
 }
   
 #### prep_layout ----
