@@ -120,7 +120,7 @@ Must be a singleton \code{logical} value: an on/off switch.
 This argument is conceptually similar to the \code{drop} argument in R matrices.
 If \code{drop = TRUE}, the output of \code{with()}/\code{summarize()} is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If \code{drop = FALSE}, the result is \emph{always}
-a \link{data.table}.}
+a \link[data.table:data.table]{data.table::data.table}.}
 
 \item{.by}{\emph{\strong{Optional grouping fields; an alternative to using \link[=groupHumdrum]{group_by()}.}}
 
@@ -149,7 +149,7 @@ held within a \link[=humdrumRclass]{humdrumR data object}, with convenient funct
 for ignoring null data, \link[=lag]{lagging} data, \link[=groupHumdrum]{grouping} data,
 \link[=context]{windowing}, and more.
 The \code{with()} and \code{within()} functions, which come from \link[=base]{base R}, are the core functions.
-However, the \link{dplyr} "verbs" \code{mutate()}, \code{summarize()}, and \code{reframe()} can be used as well---they
+However, the \link[dplyr:dplyr-package]{dplyr::dplyr} "verbs" \code{mutate()}, \code{summarize()}, and \code{reframe()} can be used as well---they
 are equivalent to using \code{with()}/\code{within()} with particular arguments.
 }
 \section{Overview}{
@@ -205,6 +205,12 @@ are \link[=selectedFields]{selected}.
 
 If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
 Each expression can refer variables assigned in the previous expression (examples below).
+
+\emph{Note}: Within any of these expressions, the humdrumR namespace takes priority.
+This means that, for example, if you use \code{lag()} within an expression, the humdrumR version of \code{lag()}
+will be used, even if you have loaded other packages which have their own \code{lag()} function.
+To use another package's function, you'll have to specify \verb{package::function()}---for example, \code{dplyr::lag()}.
+This is only an issue when functions have the exact same name as a humdrumR function.
 \subsection{Expression pre-processing}{
 
 These functions all do some
@@ -228,7 +234,7 @@ If any of the names in the \code{variable} list appear as symbols (variable name
 in any expression argument, their value is interpolated in place of that symbol.
 For example, in
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, kern(Token, simple = x), variable(x = TRUE))
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, kern(Token, simple = x), variables = list(x = TRUE))
 
 }\if{html}{\out{</div>}}
 
@@ -304,7 +310,7 @@ For example, the \code{\link[=mint]{mint()}} (melodic intervals) command will \e
 spine paths...not between pieces/spines/paths (which wouldn't make sense!).
 
 All \code{humdrumR} functions which use automatic argument interpolation will mention it in their own documentation.
-For example, the \link{?solfa} documentation mentions the treatment of \code{Key} in its "Key" section.
+For example, the \code{\link[=solfa]{solfa()}} documentation mentions the treatment of \code{Key} in its "Key" section.
 }
 
 \subsection{Lagged vectors}{
@@ -467,7 +473,7 @@ If \code{drop = TRUE}, these methods return whatever your code's result is, with
 This can be \emph{any} kind of R data,
 including \link[=vector]{vectors} or objects like \link[=lm]{lm fits}
 or \link[base:table]{tables}.
-If \code{drop = FALSE}, the results will instead be returned in a \code{\link[=data.table]{data.table()}}.
+If \code{drop = FALSE}, the results will instead be returned in a \code{\link[data.table:data.table]{data.table::data.table()}}.
 
 If you are working with \link[=groupHumdrum]{grouped data},
 the \code{drop = FALSE} output (\code{data.table}) will include all grouping columns as well
@@ -503,7 +509,7 @@ When running \code{within()}, \code{mutate()}, or \code{reframe()}, new \code{\l
 added to the output \link[=humdrumRclass]{humdrumR data}.
 These new fields become the \link[=selectedFields]{selected fields} in the output.
 You can explicitly name newly created fields (recommended), or allow \code{humdrumR} to automatically name them (details below).
-When using \code{with(..., drop = FALSE)} or \code{summarize(..., drop = FALSE)}, the column names of the output \link{data.table}
+When using \code{with(..., drop = FALSE)} or \code{summarize(..., drop = FALSE)}, the column names of the output \link[data.table:data.table]{data.table::data.table}
 are determined in the same way.
 
 Note that \code{within()}, \code{mutate()}, and \code{reframe()} will (attempt to) put \emph{any} result back into your

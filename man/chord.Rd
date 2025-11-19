@@ -2,8 +2,8 @@
 % Please edit documentation in R/Chords.R
 \name{chord}
 \alias{chord}
-\alias{harte}
-\title{"Pop/Jazz" chord symbols}
+\alias{harte.default}
+\title{export}
 \usage{
 chord(
   x,
@@ -14,7 +14,7 @@ chord(
   inPlace = FALSE
 )
 
-harte(
+\method{harte}{default}(
   x,
   ...,
   Key = NULL,
@@ -23,54 +23,6 @@ harte(
   inPlace = FALSE
 )
 }
-\arguments{
-\item{x}{\emph{\strong{An \code{atomic} vector.}}
-
-The \code{x} argument can be any (\link[base:vector]{atomic}) vectors}
-
-\item{Key}{\emph{\strong{The diatonic key used by the parser, deparser, and transposer.}}
-
-Defaults to \code{NULL}, which is interpreted as C major.
-
-Must be a \code{diatonicSet} or something coercable to \code{diatonicSet}; must be either length \code{1} or \code{length(x)}.}
-
-\item{transposeArgs}{\emph{\strong{An optional list of arguments passed to a \code{\link[=transpose]{transpose()}} call.}}
-
-Defaults to an empty \code{list()}.
-
-Must be a \code{list} of named arguments to \code{\link[=transpose]{transpose()}}.}
-
-\item{parseArgs}{\emph{\strong{An optional list of arguments to the \link[=chordParsing]{chord parser}.}}
-
-Defaults to an empty \code{list()}.
-
-Must be a \code{list} of named arguments to the \link[=chordParsing]{chord parser}.}
-
-\item{inPlace}{\emph{\strong{Should non-chord information be retained in the output string.}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.}
-}
 \description{
-These functions outputs jazz/pop-style chord symbols.
-There is no universal standard for how to notate such chord symbols, in particular in plain text.
-The \code{chord()} function outputs a chord symbol representation roughly consistent with "standard practices."
-}
-\details{
-For more rigorous, consistent work, we recommend the \href{https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus}{Harte} notation,
-which is the standard used by MIREX, etc.
-The \code{harte()} function will output standard Harte symbols.
-}
-\examples{
-romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')
-
-chord(romanNumerals)
-chord(romanNumerals, Key = 'A:')
-
-\dontrun{
-B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
-with(B075[[ , 2]], chord(Token))
-} 
-
+export
 }

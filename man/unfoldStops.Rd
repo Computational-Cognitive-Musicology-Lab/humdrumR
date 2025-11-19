@@ -12,5 +12,5 @@ stops in different fields, this function spreads the data from the
 smaller fields into multiple stops.
 }
 \seealso{
-The opposite (kinda) of \code{\link[=foldStops]{foldStops()}}
+The opposite (kinda) of \code{foldStops()}
 }

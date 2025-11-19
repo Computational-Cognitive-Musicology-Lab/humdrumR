@@ -31,7 +31,7 @@ Every interval in Western music is associated with a integer on the line of fift
 }
 
 The natural notes of (C) major scale---which we also call the \emph{generic intervals}---fall in the range \code{-1:5}.
-In fact, any diatonic key is a block of seven consecutive numbers of the line-of-fifths: for example, Eb major is \code{-4:2}.
+In fact, any onic key is a block of seven consecutive numbers of the line-of-fifths: for example, Eb major is \code{-4:2}.
 "Sharps" and "flats" represent \code{+7} or \code{-7} on the line-of-fifths respectively.
 }
 }

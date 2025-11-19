@@ -458,7 +458,7 @@ setGeneric('as.rational', \(x, ...) standardGeneric('as.rational'))
 
 #' @rdname rational
 #' @export
-setMethod('as.rational', 'rational', force)
+setMethod('as.rational', 'rational', \(x, ...) x)
 
 
 

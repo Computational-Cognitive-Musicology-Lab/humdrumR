@@ -5,12 +5,13 @@
 \alias{c,token-method}
 \alias{rep.token}
 \alias{unique.token}
-\alias{[,token,ANY,ANY-method}
+\alias{[,token,ANY,ANY,ANY-method}
 \alias{show,token-method}
 \alias{format.token}
 \alias{is.token}
 \alias{order.token}
 \alias{Arith,token,token-method}
+\alias{diff,token-method}
 \alias{Arith,token,character-method}
 \alias{Arith,character,token-method}
 \alias{Summary,token-method}
@@ -24,7 +25,7 @@ token(x, Exclusive = NULL, ...)
 
 \method{unique}{token}(x, ...)
 
-\S4method{[}{token,ANY,ANY}(x, i, j, ..., drop = FALSE)
+\S4method{[}{token,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
 
 \S4method{show}{token}(object)
 
@@ -41,6 +42,8 @@ order.token(
 )
 
 \S4method{Arith}{token,token}(e1, e2)
+
+\S4method{diff}{token}(x, ...)
 
 \S4method{Arith}{token,character}(e1, e2)
 

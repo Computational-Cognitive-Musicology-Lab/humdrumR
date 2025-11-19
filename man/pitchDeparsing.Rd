@@ -19,7 +19,7 @@ Deparsing is the second step in the \link[=pitchFunctions]{pitch function} proce
 \itemize{
 \item \emph{Parsing} \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 \item \strong{Transformation}  \verb{|>}
 }
 \item \emph{Deparsing} (DEPARSING ARGS GO HERE) \verb{|>}
@@ -206,8 +206,8 @@ different flat symbol, like \code{"_"}, you could modify the deparser:
 This overrides the default value for \verb{**kern}, so the output would be \code{"ee_"} instead of \code{"ee-"}.
 \subsection{Steps}{
 
-All representations of "tonal" pitch information include a representation of \emph{diatonic steps}.
-You can control how the deparser writes diatonic steps using the \code{step.labels} argument.
+All representations of "tonal" pitch information include a representation of \emph{onic steps}.
+You can control how the deparser writes onic steps using the \code{step.labels} argument.
 The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 Examples of \code{step.labels} arguments that are currently used by \code{humdrumR} \link[=pitchFunctions]{pitch functions} include:
 \itemize{

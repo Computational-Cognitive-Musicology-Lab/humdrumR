@@ -1999,14 +1999,21 @@ ints2nits <- function(n, it = 2, nits = 8) {
     out
 }
 
+extension2trit <- function(n) {
+  as.integer(3L ^ (-(((n - 1L) * 2L) + 2L) %% 7L))
+}
 
+extension2bit <- function(n) {
+  as.integer(2L ^ ((n - 1L) %/% 2L))
+}
 
 
 ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
+  
+    if (any(abs(n) > (3L ^ ntrits), na.rm = TRUE)) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to repersent in {ntrits} trits.")
+  
     tern <- ints2nits(abs(n), it = 3L, nits = ntrits)
-    
-    if (any(abs(n) > (3L ^ ntrits))) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to repersent in {ntrits} trits.")
     
     while(any(tern == 2L, na.rm = TRUE)) {
         twos <- which(tern == 2L, arr.ind = TRUE)
@@ -2241,12 +2248,16 @@ analyzeExpr <- function(expr, stripBrackets = FALSE) {
 }
 
 unanalyzeExpr <- function(exprA) {
-  
     if (exprA$Type == 'atomic' && exprA$Head == 'c' && length(exprA$Args) == 1L) exprA$Type <- 'scalar'
     expr <- switch(exprA$Type,
                    scalar = exprA$Args[[1]],
                    atomic = ,
-                   call =  do.call('call', c(exprA$Head, exprA$Args), quote = TRUE),
+                   call =  {
+                     if (grepl('::', exprA$Head)) {
+                       rlang::expr((!!(rlang::parse_expr(exprA$Head)))(!!!exprA$Args))
+                     } else {
+                       do.call('call', c(exprA$Head, exprA$Args), quote = TRUE)
+                     }},
                    symbol = rlang::sym(exprA$Head),
                    lambda = call('function', exprA$Pairlist, exprA$Args[[1]]))
     
@@ -2289,17 +2300,15 @@ exprStringMatch <- function(exprs, strings, includeSymbols = FALSE) {
 withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'call', stopOnHit = TRUE, envir = parent.frame()) {
   if (is.null(expr)) return(expr)
   exprA <- analyzeExpr(expr)
-  
   if (exprA$Type %in% applyTo) {
     hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
-      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
       exprA <- func(exprA)
     } 
   } else {
     hit <- FALSE
   }
-  
+  if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
   
   if (exprA$Type == 'call' && !(hit && stopOnHit)) {
     for (i in seq_along(exprA$Args)) {
@@ -2319,7 +2328,6 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
                                   envir = innerEnvir)
       }
     }
-    
   }
   
   unanalyzeExpr(exprA)
@@ -2448,6 +2456,7 @@ ast <- function(expr) {
 }
 
 
+#' @export
 print.ast <- function(x, depth = 0L) {
     pad <- strrep(' ', depth)
     if (!inherits(x, 'ast')) {
@@ -2916,7 +2925,7 @@ isColor <- function(x) {
   if (!is.character(x)) return(logical(length(x)))
   
   x %in% colors() |
-    stringr::str_detect(x, '^#([0-9a-f]{6}|[0-9a-f]{8})$') |
+    stringr::str_detect(x, '^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$') |
     is.na(x) |
     x == 'transparent'
 }

@@ -2,8 +2,11 @@
 % Please edit documentation in R/Metric.R
 \name{syncopation}
 \alias{syncopation}
+\alias{syncopation.default}
 \title{Identify syncopated rhythms}
 \usage{
+\method{syncopation}{default}(dur, meter = duple(5), levels = "all", groupby = list())
+
 syncopation(dur, meter = duple(5), levels = "all", groupby = list())
 }
 \arguments{

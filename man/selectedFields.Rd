@@ -109,5 +109,5 @@ humData |> select(Spine) |> count()
 }
 \seealso{
 {Use \code{\link[=fields]{fields()}} to see what fields are available, and how they are ordered.
-To actually \emph{extract} fields, see \code{\link[=pullFields]{pullFields()}}.}
+To actually \emph{extract} fields, see \code{\link[=pull]{pull()}}.}
 }

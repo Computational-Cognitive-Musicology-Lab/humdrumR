@@ -2,10 +2,24 @@
 % Please edit documentation in R/Metric.R
 \name{timecount}
 \alias{timecount}
+\alias{timecount.default}
+\alias{subpos.default}
 \alias{subpos}
+\alias{onbeat.default}
 \alias{onbeat}
 \title{Count beats or measures}
 \usage{
+\method{timecount}{default}(
+  dur,
+  unit = rational(1L),
+  start = 1L,
+  phase = 0,
+  pickup = NULL,
+  offBeats = TRUE,
+  groupby = list(),
+  ...
+)
+
 timecount(
   dur,
   unit = rational(1L),
@@ -17,6 +31,16 @@ timecount(
   ...
 )
 
+\method{subpos}{default}(
+  dur,
+  unit = rational(1L),
+  phase = 0,
+  pickup = NULL,
+  deparser = duration,
+  ...,
+  groupby = list()
+)
+
 subpos(
   dur,
   unit = rational(1L),
@@ -26,6 +50,8 @@ subpos(
   ...,
   groupby = list()
 )
+
+\method{onbeat}{default}(dur, unit = rational(1L), groupby = list(), ...)
 
 onbeat(dur, unit = rational(1L), groupby = list(), ...)
 }

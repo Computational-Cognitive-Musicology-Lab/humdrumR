@@ -2,9 +2,9 @@
 % Please edit documentation in R/Subset.R
 \name{indexHumdrum}
 \alias{indexHumdrum}
-\alias{[,humdrumR,missing,ANY-method}
-\alias{[,humdrumR,numeric,ANY-method}
-\alias{[,humdrumR,character,ANY-method}
+\alias{[,humdrumR,missing,ANY,ANY-method}
+\alias{[,humdrumR,numeric,ANY,ANY-method}
+\alias{[,humdrumR,character,ANY,ANY-method}
 \alias{[[,humdrumR,numeric,missing-method}
 \alias{[[,humdrumR,missing,numeric-method}
 \alias{[[,humdrumR,character,missing-method}
@@ -45,6 +45,12 @@ Must be a \link[=humdrumRclass]{humdrumR data object}.}
 \item{i}{\emph{\strong{Index for vectors or matrix/data.frame rows.}}
 
 A numeric vector or a \code{character} string treated as a regular expression.}
+
+\item{drop}{\emph{\strong{Should empty records/spines/pieces be removed?}}
+
+Defaults to \code{TRUE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
 
 \item{j}{\emph{\strong{Index for matrix/data.frame columns.}}
 
@@ -149,7 +155,7 @@ data records.
 
 \subsection{Character indexing:}{
 
-If you index a \link[=humdrumR:humdrumRclass]{humdrumR object}
+If you index a \link[=humdrumRclass]{humdrumR object}
 with \code{character} strings, these strings are
 treated as \href{https://en.wikipedia.org/wiki/Regular_expression}{regular expressions} (regexes),
 which are matched against non-null data tokens (\code{"D"}) in the object's first \link[=selectedFields]{selected field}.
@@ -186,15 +192,15 @@ Note that \emph{other} exclusive interpretations in each piece are unaffected---
 this example, only the kern spines (if there are any) are indexed!
 }
 }
-\section{drop}{
+\section{removeEmpty}{
 
 
-The \code{drop} argument to any humdrumR indexing controls whether
+The \code{removeEmpty} argument to any humdrumR indexing controls whether
 filtered data is completely removed from the data, or simply set to null
 This means the filtered data can be recovered using \code{\link[=unfilter]{unfilter()}} (see the \link[=subset.humdrumR]{subset()/filter()}
 docs for an explanation).
-By default, piece-indexing and spine-indexing have \code{drop = TRUE},
-but record-indexing defaults to \code{drop = FALSE}.
+By default, piece-indexing and spine-indexing have \code{removeEmpty = TRUE},
+but record-indexing defaults to \code{removeEmpty = FALSE}.
 }
 
 \examples{
@@ -212,7 +218,7 @@ humData['b3']
 
 # find all records that use a flat 3
 humData[['b3', ]]
-humData[['b3', drop = TRUE]]
+humData[['b3', removeEmpty = TRUE]]
 
 # Exclusive interpretation indexing
 humData[[deg = 1]]

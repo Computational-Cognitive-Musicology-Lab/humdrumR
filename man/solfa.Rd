@@ -89,7 +89,7 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 \description{
 If \code{solfa()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -236,8 +236,8 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 Other {relative pitch functions}: 
 \code{\link{bhatk}()},
 \code{\link{degree}()},
-\code{\link{interval}()},
-\code{\link{int}()}
+\code{\link{int}()},
+\code{\link{interval}()}
 
 Other {pitch functions}: 
 \code{\link{accidental}()},

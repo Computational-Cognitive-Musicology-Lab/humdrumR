@@ -92,7 +92,7 @@ in hindustani music---like solfege.
 
 If \code{bhatk()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \section{Basic pitch arguments}{
 
@@ -238,8 +238,8 @@ or how pitches are \link[=pitchParsing]{parsed} and \link[=pitchDeparsing]{depar
 
 Other {relative pitch functions}: 
 \code{\link{degree}()},
-\code{\link{interval}()},
 \code{\link{int}()},
+\code{\link{interval}()},
 \code{\link{solfa}()}
 
 Other {pitch functions}: 

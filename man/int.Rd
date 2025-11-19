@@ -138,7 +138,7 @@ Must be a \code{list} of named arguments to the \link[=pitchParsing]{pitch parse
 
 \item{lag}{\emph{\strong{The \code{\link[=lag]{lag()}} to calculate harmonic/melodic intervals between.}}
 
-Defaults to \code{1}, which means intervals between immediate successors in \code{x}.
+Defaults to \code{1}, which means intervals between immee successors in \code{x}.
 
 Must be either a single number, or a \code{logical} of \code{length(x)} (see "Logical lags" section in manual).}
 
@@ -164,22 +164,22 @@ These functions allow us to calculate intervals between pitches.
 
 If \code{mint()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 
 If \code{hint()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
-Input vectors \code{x} (and \code{from}) are \link[=tonalInterval]{parsed as pitches} (\link[=tonalIntervaS4]{tonal interval objects}), if possible.
+Input vectors \code{x} (and \code{from}) are \link[=tonalInterval]{parsed as pitches} (\link[=tonalIntervalS4]{tonal interval objects}), if possible.
 (Parsing arguments can be passed via the \code{parseArgs} list, or \code{parse(...)} sugar.
 \code{Key} and \code{Exclusive} arguments are also passed to the parser.)
 Any inputs that fail to parse will show up as \code{NA} in the output.
 
 Once parsed, the intervals between the pitches are calculated as \code{x - from}.
-The resulting intervals are then "\link[=pitchDeparsing]{deparsed}" into a standard representation; by default, the \code{\link[=intervals]{intervals()}}
+The resulting intervals are then "\link[=pitchDeparsing]{deparsed}" into a standard representation; by default, the \code{\link[lubridate:Interval-class]{lubridate::intervals()}}
 representation is used, but you can set the \code{deparser} argument to any \link[=pitchFunctions]{pitch function}.
-However, the only alternative deparser that would be \emph{commonly} used (besides \code{\link[=intervals]{intervals()}}) would be \code{\link[=semits]{semits()}}.
+However, the only alternative deparser that would be \emph{commonly} used (besides \code{\link[lubridate:Interval-class]{lubridate::intervals()}}) would be \code{\link[=semits]{semits()}}.
 If \code{deparser} is \code{NULL}, the raw \link[=tonalIntervalS4]{tonalIntervals} are returned.
 }
 \section{Melodic and Harmonic intervals}{

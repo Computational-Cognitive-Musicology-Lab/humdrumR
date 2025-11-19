@@ -44,8 +44,8 @@ Must be non-empty \code{character} string.}
 Cleave, as in "to cleave together," moves data from separate spines (or paths) into
 new fields in the \emph{same} spine(s).
 Under the hood, \code{cleave()} essentially runs a specialized call to make the \link[=humTable]{humdrum table}
-"wider," similar to R functions like \link[=reshape2]{cast()}, \link[=tidyr]{spread()}, or \link[=tidyr]{pivot_wider()}.
-In fact, a humdrumR method for \link[=tidyr]{pivot_wider()} is defined, which is equivalent to \code{cleave()}.
+"wider," similar to R functions like \link[reshape2:cast]{cast}, \link[tidyr:spread]{spread}, or \link[tidyr:pivot_wider]{pivot_wider}.
+In fact, a humdrumR method for \link[tidyr:pivot_wider]{pivot_wider} is defined, which is equivalent to \code{cleave()}.
 The \code{cleave()} function is essentially the inverse of \code{\link[=rend]{rend()}}.
 }
 \details{

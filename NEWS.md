@@ -1,3 +1,84 @@
+# humdrumR 7.0.7
+
+Fixed a bugs in timeline(), so it is now working, though I still hasn't been extensively tested and I consider it "under development."
+
+Also fixed a few other minor bugs.
+
+# humdrumR 7.0.6
+
+We've fixed some minor bugs which were causing major problems in important functions:
+
++ There was a bug happening if you tried to used `filter()` (or `subset()`) twice on the same data. This should be fixed now.
++ There were several bugs in `metcount()` leading to errors. These should also be fixed.
+
+While I was at it, I've added `.humdrumR()` methods for a bunch of rhythm functions (`metcount.humdrumR()`, `metsubpos.humdrum()`, `metlev.humdrumR()`, etc.) 
+so that these functions can be used directly on humdrumR data objects.
+For example:
+
+```
+
+chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*.krn')
+
+chorales |> metcount(level = '16')
+
+
+```
+
+Speaking of `metcount()`, I also made a change so that it counts the given beat `level` inside the full span of the meter, instead of always 
+within the next highest level.
+This is much more intuitive in most cases.
+You can still get the old behavior using a new argument, `withinNext = FALSE`.
+
+# humdrumR 7.0.5
+
+Version 7.0.5 includes a small patch to fix a bug related to the `::` function, as well as a new feature/behavior which builds off of that fix.
+
+
+In previous versions, an error would occur if you used `::` inside any of the fundamental humdrumR "with/within" methods (including `base` functions and `dplyr` "verbs").
+We've fixed this bug.
+
+----
+
+We've also added a new feature; specifically, we've made using `::` in humdrumR less necessary.
+Now, within a humdrumR call to any of these methods (listed below), if you use any function exported by humdrumR, humdrumR will automatically use the humdrumR version of that function, even if another package you have attached includes a function with same name.
+In other words, the humdrumR namespace will always takes priority within a humdrumR method call.
+
+For example, the `dplyr` package exports a function called `lag()` and so does humdrumR (these functions do the same thing, but humdrumR's version has a few extra features).
+Before this update, if you loaded `dplyr` *after* you loaded humdrumR, then `dplyr`'s `lag()` function would generally take priority over humdrumR's `lag()`.
+So, code like this
+
+```
+library(humdrumR)
+library(dplyr)
+
+readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn') -> chorales
+
+chorales |> mutate(Lagged = lag(Token))
+
+
+```
+
+would call `dplyr::lag()`.
+This sort of behavior can be confusing but wouldn't normally be the end of the world (this is how R is supposed to work, after all). 
+However, the `lag()` function is particularly problematic because *many* humdrumR methods rely on our special version of `lag()`.
+This is why we've implemented a change:
+Now, if you use `lag()` within a humdrumR with/within method, it will default to using the humdrumR version, regardless of what other packages are loaded.
+So the code above would use `humdrumR::lag()`.
+If you *want* to use `dplyr`'s version (or any other package), you still can by specifying (for example) `dplyr::lag()`.
+Another function which (in the past) could lead to frequent namespace confusion was `transpose()`---now, you can safely use `transpose()` and know that your system will use `humdrumR::transpose()`.
+
+
+All `.humdrumR` methods for the following functions are affected by this change:
+
++ `with()`
++ `within()`
++ `mutate()`
++ `reframe()`
++ `summarize()`
++ `filter()`
++ `subset()`
+
+
 # humdrumR 7.0.3
 
 ### count() and table()
