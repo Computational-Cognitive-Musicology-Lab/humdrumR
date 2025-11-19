@@ -471,8 +471,7 @@ draw.default <- function(x, y, facets = list(),
   checks(title, xatomic & xlen1)
   checks(subtitle, xatomic & xlen1)
   
-  checks(conditional, xTF | xclass('list'))
-  
+  checks(conditional, xTF | (xcharacter & xplegal(c('mean', 'normalReference', 'density', 'quantiles', 'lm'))) | xclass('list'))
   
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
@@ -516,9 +515,10 @@ draw.default <- function(x, y, facets = list(),
                           xexpr = xexpr, yexpr = yexpr,
                           xlab = xlabel, ylab = ylabel, 
                           axes = axes, legend = legend,
+                          conditional = conditional,
                           aspect = aspect, margin = margin)
   } else {
-    output <- .draw(x, y, ..., xlim = xlimit, ylim = ylimit,
+    output <- .draw(x, y, ..., xlim = xlimit, ylim = ylimit, conditional = conditional,
                     col = color, cex = pointSize, pch = pointStyle, aspect = aspect)
     output$layout <- output$layout %||% 1L
     output$faceted <- output$faceted %||% FALSE
@@ -719,7 +719,7 @@ draw.default <- function(x, y, facets = list(),
 #' @inheritParams draw
 draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
                          normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
-                         xlim = NULL, ylim = NULL, 
+                         xlim = NULL, ylim = NULL, conditional = FALSE,
                          col = 1, alpha = .7, cex = NULL, pch = NULL, marginLines, ...) {
   checks(jitter, xcharacter & xlen1 & xlegal(c('', 'x', 'y', 'xy', 'yx')), seealso = '?draw_scatter')
   checks(lm, xTF, seealso = '?draw_scatter')
@@ -727,6 +727,8 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
   checks(mean, xTF, seealso = '?draw_scatter')
   checks(normalReference, xTF, seealso = '?draw_scatter')
   checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_scatter')
+  
+  conditional <- prep_conditional(conditional)
   
   if (length(x) != 1L && length(x) != length(y) && length(y) != 1L) {
     .stop("You can't draw two numeric vectors if they are different lengths.",
@@ -760,9 +762,9 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
     
     
     # extra stuff
-    draw_quantiles(1, x, quantiles)
-    draw_quantiles(2, y, quantiles)
-    if (mean)  draw_mean(mean(x), mean(y)) 
+    draw_quantiles(1, x, quantiles, col = unique(output$col$col), groups = if (conditional$quantiles) output$col$col)
+    draw_quantiles(2, y, quantiles, col = unique(output$col$col), groups = if (conditional$quantiles) output$col$col)
+    if (mean)  draw_mean(x, y, col = unique(output$col$col), groups = if (conditional$mean) output$col$col)
     
     if (lm) {
       fit <- stats::lm(y ~ x)
@@ -936,7 +938,6 @@ draw_density <- function(x, y, log = '',
                            xlim = NULL, ylim = NULL,
                            col = 3, alpha = .4, cex = .7, pch = NULL, ...) {
   # pch is used only to stop it being passed to hist_coor, which causes a warning
-  checks(conditional, xTF, seealso = '?draw_density')
   checks(global_stats, xTF, seealso = '?draw_density')
   checks(mean, xTF, seealso = '?draw_density')
   checks(normalReference, xTF, seealso = '?draw_density')
@@ -944,6 +945,8 @@ draw_density <- function(x, y, log = '',
   checks(smooth, xTF, seealso = '?draw_density')
   checks(showCounts, xTF, seealso = '?draw_density')
   checks(showPoints, xTF, seealso = '?draw_density')
+  
+  conditional <- prep_conditional(conditional)
   
   cols <- prep_col(col, x, alpha = alpha, log = log, ncontinuous = 5, ...)
   
@@ -956,7 +959,7 @@ draw_density <- function(x, y, log = '',
   
   # This does the actual density stuff:
   col <- rep(cols$col, length.out = length(x)) # col may be a grouping factor
-  coordinates <- multihist_coor(x, col, conditional = conditional, bw = bw,
+  coordinates <- multihist_coor(x, col, conditional = conditional$density, bw = bw,
                                 smooth = smooth, breaks = breaks, ...)
   
   allDens <- unlist(lapply(coordinates, '[[', 'Density'))
@@ -1015,16 +1018,12 @@ draw_density <- function(x, y, log = '',
     ## dots
     if (showPoints) draw_points(x, col, allDens, output$window$ylim)
     
-    if (global_stats || length(coordinates) == 1L) {
-      means <- mean(x)
-      draw_quantiles(1, x, quantiles)
-    } else {
-      means <- if (global_stats) mean(x) else tapply(x, col, mean)
-      lapply(unique(col), \(color) {
-        draw_quantiles(1, x[col == color], quantiles, col = color)
-      })
-    }
-    if (mean) draw_mean(means, grconvertY(0.02, 'npc', 'user'), col = output$col$col)
+    draw_quantiles(1, x, quantiles, 
+                   col = if (conditional$quantiles) unique(output$col$col) else 'black',
+                   groups = if (conditional$quantiles) output$col$col)
+    if (mean) draw_mean(x,  grconvertY(0.02, 'npc', 'user'), 
+                        col = unique(output$col$col), 
+                        groups = if (conditional$mean) output$col$col)
     
     if (normalReference) {
       xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
@@ -2283,7 +2282,15 @@ setMethod('.draw', c('formula'),
 
 
 
-draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), limits = NULL, col = 'black', ...) {
+draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), groups = NULL, 
+                           limits = NULL, col = 'black', ...) {
+  
+  if (!is.null(groups)) {
+    var <- tapply(var, groups, list)
+    Map(\(curvar, curcol) draw_quantiles(side, curvar, quantiles, groups = NULL, limits = limits, col = curcol, ...),
+        var, col)
+    return(NULL)
+  } 
   
   if (length(quantiles)) {
     col <- setalpha(col, 1)
@@ -2334,9 +2341,18 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), l
 }
 
 
-draw_mean <- function(x, y, col = 'black') {
-  if (length(x) == 1) col <- 'black'
-  points(x, rep(y, length.out = length(x)), pch = 3, cex = 1.4,
+draw_mean <- function(x, y, col = 'black', groups = NULL) {
+  y <- rep(y, length.out = length(x))
+  if (!is.null(groups)) {
+    x <- tapply(x, groups, mean, na.rm = TRUE)
+    y <- tapply(y, groups, mean, na.rm = TRUE)
+  } else {
+    col <- 'black'
+    x <- mean(x, na.rm = TRUE)
+    y <- mean(y, na.rm = TRUE)
+  }
+  
+  points(x, y, pch = 3, cex = 1.4,
          lwd = 3, xpd = TRUE, col = setalpha(col, .8))
 }
 
@@ -2683,7 +2699,7 @@ area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = T
     
   } else {
     
-    coordinates <- multihist_coor(x, groups, conditional = conditional, breaks = breaks, vardim = 'X')
+    coordinates <- multihist_coor(x, groups, conditional = conditional$density, breaks = breaks, vardim = 'X')
     X <- coordinates[[1]]$X
     Y <- lapply(coordinates, \(coor) coor$Density)
   }
@@ -3156,17 +3172,25 @@ legend_cex_continuous <- function(val, cex, col, pch, side, marginLines, cex.leg
 
 #### prep_conditional ----
 
-prep_conditional <- function(conditional) {
+prep_conditional <- function(conditional, defaults = list()) {
   options <- c('mean', 'quantiles', 'lm', 'normalReference', 'density')
   
   output <- setNames(logical(length(options)), options) # all FALSE
+  output[names(defaults)] <- defaults
   
-  if (is.logical(conditional)) {
-    if (conditional) output <- !output 
+  if (is.list(conditional)) {
+    output[pmatch(names(conditional), options, nomatch = 0)] <- conditional 
   } else {
-    output[pmatch(conditional, options, nomatch = 0)] <- TRUE
+    as.list(if (is.logical(conditional)) {
+      if (conditional) output <- !output 
+    } else {
+      output[pmatch(conditional, options, nomatch = 0)] <- TRUE
+    })
+    
   }
-  as.list(output)
+
+  output
+  
  
 }
   
