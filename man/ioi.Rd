@@ -87,13 +87,13 @@ Must be a singleton  \code{logical} value: an on/off switch.}
 
 Defaults to \code{[}.
 
-Must be a single \code{character} string, interpreted as a regular expression.}
+Must be a single, non-empty \code{character} string, interpreted as a regular expression, or a \code{logical} of the same length as \code{x}.}
 
 \item{close}{\emph{\strong{How are the ends of ties indicated in \code{x}?}}
 
 Defaults to \verb{]}.
 
-Must be a single \code{character} string, interpreted as a regular expression.}
+Must be a single, non-empty \code{character} string, interpreted as a regular expression, or a \code{logical} of the same length as \code{x}.}
 }
 \description{
 These functions are used to sum (melodically) adjacent rhythmic duration values which are not associated with new onsets/attacks.
@@ -103,11 +103,11 @@ non-rest (onset) duration, to create \href{https://en.wikipedia.org/wiki/Time_po
 
 If \code{ioi()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 
 If \code{sumTies()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
 Both functions return "collapsed" durations are as null data tokens.

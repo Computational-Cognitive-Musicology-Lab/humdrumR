@@ -102,7 +102,15 @@ test_that("timeline() and timestamp() work correctly", {
   expect_equal(timestamp(x), c(":0", ":1", ":2", ":2.500", ":3", ":4", ":4.750", ":5", ":5.500", ":6"))
   expect_equal(timestamp(x, BPM = 120), c(":0", ":0.500", ":1", ":1.250", ":1.500", ":2", ":2.375", ":2.500", ":2.750", ":3"))
   
-  
+
+  chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001*.krn')
+  # 
+  expect_equivalent(chorale |> timeline() |> pull() |> mean(), 7.241266376)
+  expect_equivalent(chorale |> timeline(total = FALSE) |> pull() |> length(),
+                    getHumtab(chorale, 'D') |> nrow())
+  expect_equivalent(chorale |> timeline(total = TRUE) |> pull() |> mean(), 7.589062500)
+  expect_equivalent(chorale |> timeline(total = TRUE) |> pull() |> length(),
+                    getHumtab(chorale, 'Dd') |> nrow())
 })
 
 test_that("Grid functions work", {

@@ -137,11 +137,13 @@ memoizeParse <- function(args, ..., dispatchArgs = c(), minMemoize = 100L, memoi
     
     if (is.struct(result)) {
       uniqueArgs$i <- seq_len(nrow(uniqueArgs))
-      result[merge(memoizeArgs, uniqueArgs, sort = FALSE)$i]
+      # result[merge(memoizeArgs, uniqueArgs, by = colnames(uniqueArgs), sort = FALSE)$i]
+      result[merge(memoizeArgs, uniqueArgs,  sort = FALSE)$i]
       
     } else {
       uniqueArgs[ , Result := result]
-      merge(memoizeArgs, uniqueArgs, by = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
+      merge(memoizeArgs, uniqueArgs,  sort = FALSE)$Result
+      # merge(memoizeArgs, uniqueArgs, by = head(colnames(uniqueArgs), -1), sort = FALSE)$Result
       
     }
     
@@ -171,7 +173,6 @@ do... <- function(func, args = list(), ..., envir = parent.frame()) {
 
 do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs = TRUE, outputClass = class(args[[1]])) {
   firstArg <- args[[1]]
-  
   if (((is.atomic(firstArg) && !is.table(firstArg)) || is.list(firstArg)) && length(firstArg) == 0L) return(vectorNA(0L, outputClass))
   if (is.null(firstArg)) return(NULL)
   
@@ -207,12 +208,12 @@ do <- function(func, args, ..., doArgs = c(), memoize = TRUE, ignoreUnknownArgs 
   
 }
 
-dofunc <- function(doArgs = c(), .func) {
+dofunc <- function(doArgs = c(), .func, memoize = TRUE) {
   formals <- formals(.func)
   args <- setNames(rlang::syms(names(formals)), names(formals))
   rlang::new_function(formals, 
                       rlang::expr({
-                        do(.func, args = list(!!!args), doArgs = !!doArgs)
+                        do(.func, args = list(!!!args), doArgs = !!doArgs, memoize = !!memoize)
                       }))
   
 
@@ -739,12 +740,19 @@ humdrumRgeneric <- function(default, envir = parent.frame()) {
   generic
 }
 
-humdrumRmethod <- function(default, envir = parent.frame()) {
+humdrumRmethod <- function(default, envir = parent.frame(), dataTypes = 'D') {
   
   .default <- rlang::enexpr(default)
   args <- formals(default)
-  name <- gsub('\\..*', '', rlang::as_label(.default))
+  name <- rlang::as_label(.default)
+  # if (length(doArgs)) { # this option not currently being used
+    # assign(name, dofunc(doArgs, match.fun(name), memoize = memoize), parent.frame())
+  # }
+  
+  name <- gsub('\\..*', '', name) # generic name
   Name <- rlang::sym(stringr::str_to_title(name))
+  
+
   
   # humdrumR method
   firstArg <- names(args)[1]
@@ -753,7 +761,7 @@ humdrumRmethod <- function(default, envir = parent.frame()) {
     quos <- rlang::enquos(...)
     
     if (!any(.names(quos) %in% c(.(firstArg), ''))) quos <- c(rlang::quo(.), quos)
-    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos))))
+    rlang::eval_tidy(rlang::expr(within(.(rlang::sym(firstArg)), .(Name) <- .(.default)(!!!quos), dataTypes = .(dataTypes))))
   })
   
   rlang::new_function(setNames(alist(x = , ... = ), c(firstArg, '...')), env = envir,

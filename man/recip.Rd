@@ -75,7 +75,7 @@ which also includes \link[=kern]{pitch} information and notation details.
 
 If \code{recip()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
 \verb{**recip} values are literally the reciprocal of a duration value.

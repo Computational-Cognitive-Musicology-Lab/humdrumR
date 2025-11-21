@@ -1025,7 +1025,7 @@ recip.default <- makeRhythmTransformer(rint2recip, 'recip', extraArgs = alist(se
 #' 
 #' If `recip()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' ## humdrumR S3 method:
@@ -1070,7 +1070,7 @@ duration.default <- makeRhythmTransformer(rint2duration, 'duration', 'numeric')
 #' 
 #' If `duration()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> duration() 
@@ -1091,7 +1091,7 @@ quarters.default <- makeRhythmTransformer(rint2quarters, 'quarters', 'numeric')
 #' 
 #' If `quarters()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> quarters() 
@@ -1149,7 +1149,7 @@ notehead.default <- makeRhythmTransformer(rint2notehead, 'notehead')
 #' 
 #' If `notehead()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> notehead() 
@@ -1225,7 +1225,7 @@ seconds.default <- makeRhythmTransformer(rint2seconds, 'seconds', 'numeric', ext
 #' 
 #' If `seconds()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> seconds() 
@@ -1245,7 +1245,7 @@ ms.default <- makeRhythmTransformer(rint2ms, 'ms', 'numeric', extraArgs = alist(
 #' 
 #' If `ms()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> ms() 
@@ -1270,7 +1270,7 @@ dur.default <- makeRhythmTransformer(rint2dur, 'dur', extraArgs = alist(BPM = '*
 #' 
 #' If `dur()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> dur() 
@@ -1378,20 +1378,26 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   checks(onsets, xlogical & xmatch(x))
   checks(finalOnset, xTF)
   checks(inPlace, xTF)
+  if (!is.list(groupby)) groupby <- list(groupby)
   
-  rint <- do.call('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  na <- is.na(x) | x == '.'
+  bounds <- (if (length(groupby)) do.call('changes', groupby) else seq_along(x) == 1)[!na]
+  
+  rint <- do.call('rhythmInterval', c(list(x[!na], Exclusive = Exclusive[!na]), parseArgs))
   dispatch <- attr(rint, 'dispatch')
   
+  onsets <- onsets[!na]
   if (any(!onsets)) {
-    duration <- rint2duration(rint)
-    windowFrame <- findWindows(x, open = which(onsets),
-                               close = which(!onsets),
-                               groupby = groupby,
-                               rightward = FALSE, overlap = 'none')
-    duration <- windowsSum(duration, windowFrame, na.rm = TRUE)
-    rint <- duration2rint(duration)
+    # duration <- rint2duration(rint)
+    
+    newdur <- diff(c(cumsum(c(rational(0), head(rint, -1)))[which(onsets | bounds)],
+                     sum(rint)))
+    newdur <- newdur[which(onsets | bounds) %in% which(onsets)]
+    
+    rint[!onsets] <- rational(NA)
+    rint[onsets] <- newdur
+    # rint <- duration2rint(duration)
   }
-  
   
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
   
@@ -1405,23 +1411,24 @@ ioi.default <- function(x, onsets = !grepl('r', x) & !is.na(x) & x != '.', ...,
   
   if (!finalOnset) {
     if (length(groupby)) {
-      output[tapply(seq_along(onsets)[onsets], lapply(groupby, '[', i = onsets), max)] <- NA
-      
+      maxes <- unlist(tapply(seq_along(x)[onsets], lapply(groupby, '[', onsets), max))
+      output[maxes] <- NA
     } else {
-      output[max(which(onsets), na.rm = TRUE)] <- NA
-      
+      output[max(which(onsets))] <- NA
     }
   }
-  
+
   humdrumRattr(output) <- list(dispatch = NULL)
-  output
+  
+  x[!na] <- output
+  x
   
 }
 #' Apply to humdrumR data
 #' 
 #' If `ioi()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> ioi() 
@@ -1438,13 +1445,13 @@ ioi <- humdrumRgeneric(ioi.default)
 #' 
 #' Defaults to `[`.
 #' 
-#' Must be a single `character` string, interpreted as a regular expression.
+#' Must be a single, non-empty `character` string, interpreted as a regular expression, or a `logical` of the same length as `x`.
 #'
 #' @param close ***How are the ends of ties indicated in `x`?***
 #' 
 #' Defaults to `]`.
 #' 
-#' Must be a single `character` string, interpreted as a regular expression.
+#' Must be a single, non-empty `character` string, interpreted as a regular expression, or a `logical` of the same length as `x`.
 #' 
 #' @rdname ioi
 #' @export 
@@ -1452,40 +1459,50 @@ sumTies.default <- function(x, open = '[', close = ']', ...,
                           groupby = list(), 
                           inPlace = TRUE) {
   checks(inPlace, xTF)
+  checks(open, (xcharnotempty & xlen1) | (xlogical & xmatch(x)))
+  checks(close, (xcharnotempty & xlen1) | (xlogical & xmatch(x)))
+  if (!is.list(groupby)) groupby <- list(groupby)
   
-  rint <- rhythmInterval(x, ...)
+  na <- is.na(x) | x == '.'
+  
+  rint <- rhythmInterval(x[!na], ...)
   dispatch <- attr(rint, 'dispatch')
   
-  windows <- findWindows(x, open, close, groupby = groupby, overlap = 'nested')
+  openl <- grepl('[', x, fixed = TRUE)
+  closel <- grepl(']', x, fixed = TRUE)
   
-  if (nrow(windows)) {
-    duration <- rint2duration(rint)
-    duration <- windowsSum(duration, windows)
-    rint <- duration2rint(duration)
-  }
+  opencloses <- checkOpenClosePairs(openl, closel, groupby, 'sumTies', 
+                                    if (is.character(open) && is.character(close)) c(open, close))
   
+  openl <- openl[!na]
+  closel <- closel[!na]
+  
+  cumrint <- head(cumsum(c(rational(0), rint)), -1L)
+  
+  newrint <- rational(rep(NA, sum(!na)))
+  newrint[openl] <- (cumrint[closel] - cumrint[openl]) + rint[closel]
+  newrint[opencloses$outside[!na]] <- rint[opencloses$outside[!na]]
+  rint <- newrint
+
   output <- reParse(rint, dispatch, reParsers = c('recip', 'duration', 'notehead'), ...)
-  
-  null <- unlist(Map(":", windows$Open + 1L, windows$Close))
   
   if (inPlace) {
     output <- rePlace(as.character(output), dispatch)
-    if (is.character(open)) output <- stringr::str_remove(output, 
+    if (is.character(open)) output <- stringr::str_remove(output,
                                                           if (open %in% c('[', ']', '(', ')')) paste0('\\', open) else open)
-    output[null] <- '.'
-  } else {
-    output[null] <- NA
-  }
+    output[is.na(output)] <- '.'
+  } 
   humdrumRattr(output) <- list(dispatch = NULL)
+
+  x[!na] <- output
   
-  output
-  
+  x
 }
 #' Apply to humdrumR data
 #' 
 #' If `sumTies()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> sumTies() 
@@ -1633,12 +1650,13 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' default tempo of 60 beats per minute.
 #' If `minutes == TRUE`, the output is formatted into `"minute:seconds.milliseconds"` character strings.
 #'
-#' If a `groupby` argument is provided, [localDuration()] is used to compute the minimum durations in each group before 
-#' computing the cumulative sum only with unique values from each `Record` in the `groupby`.
-#' By default, [with(in).humdrumR][withinHumdrum] will automatically pass `groupby = list(Piece = Piece, Record = Record)`
-#' into calls to `timeline()` or `timestamp()`.
-#' Thus, a call like `within(humData, timeline(Token))` will compute the correct timeline position for *all*
-#' tokens across all spines/paths/stops---all values in the same record will be the same.
+#' When applying `timeline()` to a [humdrumR dataset][humdrumRclass], the timeline of all spines with rhythmic information
+#' (e.g., `**kern`, `**harm`) is computed separately.
+#' (Note that `timeline()` can't guarantee that your data spines contain consistent rhythmic information!
+#' In other words, if one of your spines has (for example) an extra eighth-note token, the timelines in each spine will diverge.)
+#' By default, the timeline is output only in spines/tokens where rhythmic information is encoded.
+#' However, sometimes we want to know the timing of every datapoint.
+#' We can then set `total = TRUE`, which will propagate timeline information to *all* data tokens in all spines.
 #' 
 #' 
 #' Note that, `timeline()` and `timestamp()` follow the default behavior of [duration()] by treating grace-notes as duration `0`.
@@ -1648,6 +1666,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' By default, any *other* tokens without (parsable) rhythm information are returned a `NA`.
 #' However, if `threadNA = FALSE`, rhythm-less tokens will be treated as if they have a duration of `0` as well, and thus
 #' have a (shared) position on the timeline.
+#' 
 #' 
 #' @section Pickups:
 #' 
@@ -1711,6 +1730,12 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #'
+#' @param total ***Should timeline propagate to all records in all spines?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
 #' @param parseArgs ***An optional list of arguments passed to the [rhythm parser][rhythmParsing].***
 #' 
 #' Defaults to an empty `list()`.
@@ -1731,11 +1756,13 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' @name timeline
 #' @export 
 timeline.default <- function(x, start = 0, pickup = NULL, ..., 
-                             Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
+                             Exclusive = NULL, threadNA = TRUE, total = FALSE, parseArgs = list(), groupby = list()) {
   
-  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive, ...), parseArgs))
   
-  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timeline')
+  excluded <- if (is.null(Exclusive)) logical(length(rints)) else !Exclusive %in% attributes(rints)$dispatch$Exclusive
+  
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, total = total, callname = 'timeline', excluded = excluded)
   
   rint2duration(timerints, ...)
   
@@ -1744,7 +1771,7 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' 
 #' If `timeline()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> timeline() 
@@ -1752,7 +1779,16 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
 #' 
 #' @rdname timeline
 #' @export
-timeline.humdrumR <- humdrumRmethod(timeline.default)
+timeline.humdrumR <- function(x, ..., total = FALSE, dataTypes = 'Dd') {
+  quos <- rlang::enexprs(...)
+  
+  if (!any(.names(quos) %in% c('x', ''))) quos <- c(list(x = rlang::quo(.)), quos)
+  
+  dataTypes <- if (total) 'Dd' else 'D'
+  
+  rlang::eval_tidy(rlang::quo(within(x, Timeline <- timeline.default(!!!quos, total = total), dataTypes = !!dataTypes)))
+  
+}
 #' @rdname timeline
 #' @export
 timeline <- humdrumRgeneric(timeline.default)
@@ -1761,12 +1797,12 @@ timeline <- humdrumRgeneric(timeline.default)
 #' @rdname timeline
 #' @export 
 timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., 
-                              Exclusive = NULL, threadNA = TRUE, parseArgs = list(), groupby = list()) {
+                              Exclusive = NULL, threadNA = TRUE, total = FALSE, parseArgs = list(), groupby = list()) {
   
-  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive), parseArgs))
+  rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive, ...), parseArgs))
   seconds <- rint2seconds(rints, BPM = BPM)
   rints <- as.rational(seconds)
-  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, callname = 'timestamp')
+  timerints <- pathSigma(rints, groupby = groupby, start = start, pickup = pickup, threadNA = threadNA, total = total, callname = 'timestamp')
   
   rint2dur(timerints, BPM = 240, minutes = minutes, ...) # BPM has already been incorporated, 240 is value we need now.
   
@@ -1776,7 +1812,7 @@ timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = T
 #' 
 #' If `timestamp()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> timestamp() 
@@ -1784,16 +1820,31 @@ timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = T
 #' 
 #' @rdname timeline
 #' @export
-timestamp.humdrumR <- humdrumRmethod(timestamp.default)
+timestamp.humdrumR <- function(x,  ..., total = FALSE) {
+  quos <- rlang::enexprs(...)
+  
+  quo <-  if (length(quos) > 1L) {
+    quos[[1]]
+  }  else {
+    rlang::quo(.)
+  }
+  
+  dataTypes <- if (total) 'Dd' else 'D'
+  
+  rlang::eval_tidy(rlang::quo(within(x, Timestamp <- timestamp.default(!!quo, ..., total = total), dataTypes = !!dataTypes)))
+  
+}
 #' @rdname timeline
 #' @export
 timestamp <- humdrumRgeneric(timestamp.default)
 
-pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) {
+pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, total = FALSE, callname, excluded = logical(length(rints))) {
   # this does most of work for timestamp and timeline
 
   start <- rhythmInterval(start)
   
+  # NA rints are parse fails,
+  # 0 rints are grace notes
   na <- is.na(rints)
   rints[na] <- rational(0L)
   
@@ -1802,27 +1853,37 @@ pathSigma <- function(rints, groupby, start, pickup, threadNA = TRUE, callname) 
   start <- fractions$Numerator[1]
   
   .SD <- structureTab(Numerator = fractions$Numerator[-1L], groupby = groupby)
+  .SD[ , Excluded := excluded]
   
-  .SD[Stop == 1L, Time := sigma.default(c(as.integer64(0L), head(Numerator, -1L))), by = list(Piece, Spine, Path)]
+  .SD[Stop == 1L & !Excluded, Time := sigma.default(c(as.integer64(0L), head(Numerator, -1L))), by = list(Piece, Spine, Path)]
   
-  .SD[ , Time := Time + start]
+  .SD[Excluded == FALSE, Time := Time + start]
   
   # make empty events fill from PREVIOUS event
-  .SD$Time[.SD$Numerator == 0L] <- ditto(.SD$Time, null = .SD$Numerator == 0L)[.SD$Numerator == 0L]
+  .SD$Time[.SD$Numerator == 0L & .SD$Excluded == FALSE] <- ditto(.SD$Time[.SD$Excluded == FALSE], 
+                                                                 null = .SD$Numerator[.SD$Excluded == FALSE] == 0L)[.SD$Numerator[.SD$Excluded == FALSE] == 0L]
   
-  .SD[ , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
+  .SD[Excluded == FALSE , Time := ditto.default(Time, null = Stop > 1L, groupby = list(Piece, Spine, Path))]
   
   
   if (!is.null(pickup)) {
     .SD$Pickup <- pickup
-    .SD[ , Time := {
+    .SD[Excluded == FALSE, Time := {
       if (all(!Pickup, na.rm = TRUE)) Time else Time - Time[which(!Pickup)[1]]
       }, by = list(Piece, Spine, Path)]
   }
   
   
   # .SD$Time
-  if (threadNA) .SD$Time[na] <- NA_integer64_
+  .SD[ , Na := na]
+  .SD[ , Zero := rints == rational(0L)]
+  if (!threadNA) {
+    .SD[(Na == TRUE | Zero == TRUE) & Excluded != TRUE, Time := NA_integer64_] 
+  } else {
+    .SD[Excluded == FALSE, Time := if (any(!Na)) rep(Time[!Na][1], length(Time)) else Time, by = list(Piece, Record)] 
+  }
+  if (total) .SD[, Time := if (any(!Na)) rep(Time[!Na][1], length(Time)) else Time, by = list(Piece, Record)] 
+  
   
   rational(.SD$Time, fractions$Denominator)
 }
@@ -1910,19 +1971,22 @@ timebase <- function(humdrumR, tb = '16') {
   humtab <- getHumtab(humdrumR, 'GLIMDd')
   
   humtab[ , RecordDuration := as.integer(floor(RecordDuration / tb))]
+  tmpFields <- c('..Timeline..', '..fillTimeline..', '..Duration..', 'RecordDuration')
+  
   # remove records that dont line up with tb
   keep <- humtab[ , is.na(..fillTimeline..) | (is.whole(..fillTimeline.. / tb) & ..fillTimeline.. > -1000L)]
-  if (any(!keep))  .message('### This corpus includes rhythmic passages which cannot be represented at the {recip(tb)}-note timebase you have chosed.\n',
+  if (any(!keep))  .message('### This corpus includes rhythmic passages which cannot be represented at the {recip(tb)}-note timebase you have chosen.\n',
                            '### To represent all rhythms faithfully, you need a timebase of { recip(with(humdrumR, tatum(..Duration..)))}, or smaller.\n',
                            "##### Onsets which don't fit on your desired {recip(tb)}-note grid are being removed from the output.\n\n")
   humtab <- humtab[keep == TRUE]
   humtab[ , Nrep := ifelse((RecordDuration == 0 & Type != 'd') | Type == 'G', 1, RecordDuration)]
+  # what happens to multi stop tokens?
   # humtab <- humtab[Nrep > 0]
   # humtab$.tatum.[humtab.]
   
   humtab <- humtab[rep(seq_len(nrow(humtab)), humtab$Nrep)]
   
-  humtab[ , Duplicated := duplicated(Record), by = list(File, Spine)]
+  humtab[ , Duplicated := duplicated(Record), by = list(File, Spine)] # duplicated are new
   
   tb <- paste0('*tb', recip(tb))
   humtab <- rbind(humtab[!Type %in% c('D', 'd')],
@@ -1936,11 +2000,12 @@ timebase <- function(humdrumR, tb = '16') {
   humtab <- orderHumtab(humtab)
   humtab[ , Record := seq_along(Token), by = list(File, Spine)]
   
-  for (field in fields(humdrumR, 'D')$Name) humtab[[field]][humtab$Duplicated] <- NA
+  # duplicated are new, so should be empty placeholders for all data fields
+  for (field in setdiff(fields(humdrumR, 'D')$Name, tmpFields)) humtab[[field]][humtab$Duplicated] <- NA
   humtab$Type[humtab$Duplicated] <- 'd'
   
   putHumtab(humdrumR) <- humtab
-  humdrumR@Humtable[ , c('..Timeline..', '..fillTimeline..', '..Duration..','RecordDuration', 'Duplicated', 'Nrep') := NULL]
+  humdrumR@Humtable[ , c(tmpFields, 'Duplicated', 'Nrep') := NULL]
   humdrumR <- updateFields(humdrumR)
   
   selectFields(humdrumR, selectedFields)
@@ -2138,7 +2203,7 @@ grid.default <- makeRhythmTransformer(rint2grid, 'grid', 'character')
 #' 
 #' If `grid()` is applied to a [humdrumR data class][humdrumRclass]
 #' you may use the data's [fields][fields()] as arguments.
-#' If no field names are specified, the first [selectedField] is used as `x`.
+#' If no field names are specified, the first [selected field][selectedFields] is used as `x`.
 #'
 #' @usage 
 #' humData |> select(Token) |> grid() 

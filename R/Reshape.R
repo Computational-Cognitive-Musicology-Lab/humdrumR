@@ -2,11 +2,13 @@
 # Renumbering ----
 
 renumberFiles <- function(hum) UseMethod('renumberFiles')
+#' @export
 renumberFiles.humdrumR <- function(hum) {
     humtab <- getHumtab(hum)
     putHumtab(hum) <- renumberSpines.data.table(humtab)
     hum
 }
+#' @export
 renumberFiles.data.table <- function(hum) {
     hum[ , File := match(File, sort(unique(File)))]
     hum[ , Piece := match(Piece, sort(unique(Piece)))]
@@ -14,12 +16,13 @@ renumberFiles.data.table <- function(hum) {
 }
 
 renumberSpines <- function(hum) UseMethod('renumberSpines')
+#' @export
 renumberSpines.humdrumR <- function(hum) {
     humtab <- getHumtab(hum, 'GLIMDd')
     putHumtab(hum, overwriteEmpty = c()) <- renumberSpines.data.table(humtab)
     hum
-    
 }
+#' @export
 renumberSpines.data.table <- function(hum) {
     hum[ , Spine := match(Spine, sort(unique(Spine))), by = Piece]
     
@@ -87,6 +90,7 @@ expandPaths.humdrumR <- function(x, asSpines = TRUE) {
     
     x
 }
+#' @export
 expandPaths.data.table <- function(humtab, asSpines = TRUE) {
     if (!any(humtab$Path > 0L, na.rm = TRUE)) return(humtab)
     
@@ -327,8 +331,8 @@ collapseRecords <- function(humdrumR, fields = selectedFields(humdrumR), collaps
 #' Cleave, as in "to cleave together," moves data from separate spines (or paths) into 
 #' new fields in the *same* spine(s).
 #' Under the hood, `cleave()` essentially runs a specialized call to make the [humdrum table][humTable]
-#' "wider," similar to R functions like [cast()][reshape2], [spread()][tidyr], or [pivot_wider()][tidyr].
-#' In fact, a humdrumR method for [pivot_wider()][tidyr] is defined, which is equivalent to `cleave()`.
+#' "wider," similar to R functions like [cast][reshape2::cast], [spread][tidyr::spread()], or [pivot_wider][tidyr::pivot_wider()].
+#' In fact, a humdrumR method for [pivot_wider][tidyr::pivot_wider()] is defined, which is equivalent to `cleave()`.
 #' The `cleave()` function is essentially the inverse of [rend()].
 #' 
 #' @details
@@ -899,7 +903,7 @@ cleaveGraceNotes <- function(humdrumR) {
 #' 
 #' Rend, as in "to rend apart," splits data in separate fields into separate spines or paths.
 #' Under the hood, `rend()` essentially runs a specialized call to make the [humdrum table][humTable]
-#' "longer"/"taller," similar to R functions like [melt()][reshape2], [gather()][tidyr], or [pivot_longer()][tidyr].
+#' "longer"/"taller," similar to R functions like [melt()] (`reshape2`), [gather()] (`tidyr`), or [pivot_longer()] (`tidyr`).
 #' In fact, a humdrumR method for [pivot_longer()][tidyr] is defined, which is equivalent to `rend()`.
 #' The `rend()` function is essentially the inverse of [cleave()].
 #' 
@@ -986,19 +990,25 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
   checks(removeRended, xTF)
   checks(rendEmpty, xTF)
   
-  humtab <- getHumtab(humdrumR, 'IMDd')
+  humtab <- getHumtab(humdrumR, 'LIMDd')
   
   exprs <- rlang::enexprs(...)
   fields <- if (length(exprs)) tidyselect_humdrumRfields(humdrumR, exprs, fieldTypes = 'Data', callname = 'rend()') else selectedFields(humdrumR)
   
   if (length(fields) == 1L) {
-    if (fields == 'Token') .stop("You haven't provide rend() and fields besides Token. You can't rend Token form itself.")
+    if (fields == 'Token') .stop("You haven't provide rend() and fields besides Token. You can't rend Token from itself.")
     fields <- unique(c('Token', fields))
   }
   
   fieldName <- fieldName %||% paste(fields, collapse = '.')
   
-  spines <- humtab[ , list(Field = fields, nonNull = sapply(.SD, \(field) any(!is.na(field)))), by = list(Piece, Spine), .SDcols = fields]
+  spines <- humtab[ , {
+    nonNull <- sapply(.SD, \(field) any(!is.na(field)))
+    if (!any(nonNull)) nonNull[1] <- TRUE
+           
+    list(Field = fields, nonNull = nonNull)
+    
+    }, by = list(Piece, Spine), .SDcols = fields]
   
   if (!rendEmpty) {
     spines[ , newSpine := cumsum(nonNull), by = Piece]
@@ -1044,9 +1054,8 @@ rend <- function(humdrumR, ..., fieldName = NULL, removeRended = TRUE, rendEmpty
                     })
   
   humtab <- data.table::rbindlist(humtabs, fill = TRUE)
+  putHumtab(humdrumR, overwriteEmpty = 'LIMDd') <- humtab
   
-  
-  putHumtab(humdrumR) <- humtab
   humdrumR <- updateFields(humdrumR)
   
   humdrumR <- reKey(humdrumR)
@@ -1071,7 +1080,7 @@ pivot_longer.humdrumR <- function(data, cols, ...) {
 #' stops in different fields, this function spreads the data from the 
 #' smaller fields into multiple stops.
 #' 
-#' @seealso The opposite (kinda) of [foldStops()]
+#' @seealso The opposite (kinda) of `foldStops()`
 #' @export
 unfoldStops <- function(humdrumR, fromFields = fields(humdrumR, 'D')$Name) {
   checks(humdrumR, xhumdrumR)

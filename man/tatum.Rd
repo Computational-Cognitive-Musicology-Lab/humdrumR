@@ -25,7 +25,7 @@ tatum(x, ...)
 \method{tatum}{`NULL`}(x)
 }
 \arguments{
-\item{x}{\emph{\strong{The input to compute the tatum of.}}
+\item{x}{*\strong{The input to compute the tatum of.}
 
 Must be a \code{\link[=meter]{meter()}} object, a singleton \code{character} value, or vector of either \code{character}, \code{numeric}, or \code{\link[=rational]{rational()}} values.
 
@@ -38,7 +38,7 @@ parsed as durations using \code{\link[=rhythmInterval]{rhythmInterval()}}.
 For \code{character} or \code{meter} input, the default is \code{\link[=recip]{recip()}}; for \code{numeric} input,
 the default is \code{\link[=duration]{duration()}}.
 
-Must be a \link[=rhythmFunction]{rhythm function} or \code{NULL}.}
+Must be a \link[=rhythmFunctions]{rhythm function} or \code{NULL}.}
 }
 \description{
 In \code{humdrumR}, we define a \emph{tatum} as the greatest common denominator of
@@ -54,7 +54,7 @@ The tatum of a \code{\link[=meter]{meter()}} is the tatum of all that meters met
 If meters \emph{and} durations are provided---like \verb{tatum(c('M4/4', '6')}---, the tatum of all the meters'
 levels \emph{and} all the durations is computed.
 
-The \code{deparser} argument is a \link[=rhythmFunction]{rhythm function} which controls the output format.
+The \code{deparser} argument is a \link[=rhythmFunctions]{rhythm function} which controls the output format.
 If \code{deparser} is \code{NULL}, the tatum is returned as a \code{\link[=rational]{rational()}} value.
 }
 \examples{

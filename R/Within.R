@@ -101,7 +101,7 @@
 #' For example, in
 #'
 #' ```
-#' within(humData, kern(Token, simple = x), variable(x = TRUE))
+#' within(humData, kern(Token, simple = x), variables = list(x = TRUE))
 #' 
 #' ```
 #' 
@@ -182,7 +182,7 @@
 #' spine paths...not between pieces/spines/paths (which wouldn't make sense!).
 #' 
 #' All `humdrumR` functions which use automatic argument interpolation will mention it in their own documentation.
-#' For example, the [solfa] documentation mentions the treatment of `Key` in its "Key" section.
+#' For example, the [solfa()] documentation mentions the treatment of `Key` in its "Key" section.
 #' 
 #' #### Lagged vectors
 #' 
@@ -513,9 +513,8 @@
 #' The full list of options are `"no"`, `"yes"`, `"pad"`, `"ifscalar"`, `"ifeven"`, `"never"`, and 
 #' `"summarize"`, though not all functions accept all options.
 #' See the *Parsing expression results* section below.
-
+#'
 #' @param variables ***A named `list` of values, to interpolate into your expressions.***
-#' 
 #'  
 #' Defaults to `list()`.
 #' 
@@ -1048,17 +1047,31 @@ activateQuo <- function(funcQuosure, dotField) {
 
 
 autoArgsQuo <- function(funcQuosure, fields) {
-  
   funcRegex <- paste0('^(humdrumR:::?)?', autoArgTable$Function, '(\\.default)?$')
   
-  predicate <- \(Head) any(stringr::str_detect(Head, funcRegex))
+  predicate <- \(Head) any(stringr::str_detect(Head, funcRegex)) || Head == 'lm'
   
+  modelFuncs <- c('lm', 'glm', 'lmer', 'glmer')
   do <- \(exprA) {
-    tab <- autoArgTable[stringr::str_detect(exprA$Head, funcRegex) & 
-                          !Argument %in% names(exprA$Args) &
-                          sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
-    args <- setNames(tab$Expression, tab$Argument)
-    exprA$Args <- c(exprA$Args, args)
+    
+    
+    
+    if (any(exprA$Head %in% modelFuncs)) {
+      usedFields <- namesInExprs(fields, exprA$Args[['formula']] %||% exprA$Args[[1]])
+      usedFields <- lapply(usedFields, rlang::sym)
+      
+      data <- rlang::expr(data.frame(!!!usedFields))
+      
+      exprA$Args$data <- data
+    } else {
+      tab <- autoArgTable[stringr::str_detect(exprA$Head, funcRegex) & 
+                            !Argument %in% names(exprA$Args) &
+                            sapply(Expression, \(expr) length(namesInExpr(fields, expr)) > 0L)]
+      
+      
+      args <- setNames(tab$Expression, tab$Argument)
+      exprA$Args <- c(exprA$Args, args)
+    }
     exprA
   }
   withinExpression(funcQuosure, predicate, do, stopOnHit = FALSE)

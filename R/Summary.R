@@ -20,7 +20,7 @@
 #'     + Tabulates the number of spines and spine paths in pieces in the corpus.
 #' * [interpretations()]
 #'     + Tabulates the types of exclusive and tandem interpretations in the corpus.
-#' * [sections()]
+#' * `sections()`
 #'     + Tabulates any formal data (`*>`) in the corpus, including barlines.
 #'
 #'
@@ -101,7 +101,7 @@ summary.humdrumR <- function(object) {
 #' The `by` argument to `census` indicates groupings in the data to tabulate within, grouping 
 #' across pieces in the corpus by default.
 #' `by` can be an arbitrary expression which is evaluated inside the [humdrum table][humTable],
-#' like the `groupby` argument to a [with/within][withHumdrum] call.
+#' like the `groupby` argument to a [with/within][withinHumdrum] call.
 #' The by expression must be the full length of the humdrum table.
 #'  
 #' @param humdrumR ***HumdrumR data.***
@@ -1094,8 +1094,6 @@ print.humInterpretations <- function(interps, showEach = TRUE, screenWidth = opt
 
 #### Sections ----
 
-#' @family corpus summary functions
-#' @export
 sections <- function(humdrumR) {
   checks(humdrumR, xclass('humdrumR'))
   

@@ -73,7 +73,7 @@
 #' The `tick` argument can be used to directly specify a tick for the meter.
 #' This is especially useful if you are parsing datasets with multiple meters, but want to force them all to use 
 #' the same tick value. For example, `meter(TimeSignature, tick = '32')`.
-#' The `tick` argument must be a single value which can be [parsed][rhythmInteval()] as a rhythmic duration.
+#' The `tick` argument must be a single value which can be [parsed][rhythmInterval] as a rhythmic duration.
 #' 
 #' The `subdiv` argument can be used to explicitly control how the tactus is subdivided.
 #' `subdiv` should be a natural number (greater than 1), to divide the tactus by.
@@ -407,10 +407,10 @@ setAs('integer', 'meter', \(from) new('meter',
 #' If meters *and* durations are provided---like `tatum(c('M4/4', '6')`--- the tatum of all the meters'
 #' levels *and* all the durations is computed.
 #' 
-#' The `deparser` argument is a [rhythm function][rhythmFunction] which controls the output format.
+#' The `deparser` argument is a [rhythm function][rhythmFunctions] which controls the output format.
 #' If `deparser` is `NULL`, the tatum is returned as a [rational()] value.
 #'
-#' @param x ***The input to compute the tatum of.***
+#' @param x ***The input to compute the tatum of.**
 #' 
 #' Must be a [meter()] object, a singleton `character` value, or vector of either `character`, `numeric`, or [rational()] values.
 #' 
@@ -423,7 +423,7 @@ setAs('integer', 'meter', \(from) new('meter',
 #' For `character` or `meter` input, the default is [recip()]; for `numeric` input,
 #' the default is [duration()].
 #'
-#' Must be a [rhythm function][rhythmFunction] or `NULL`.
+#' Must be a [rhythm function][rhythmFunctions] or `NULL`.
 #' 
 #' 
 #' 
@@ -506,7 +506,7 @@ tatum.NULL <- function(x) NULL
 #' 
 #' The default is [recip()].
 #'
-#' Must be a [rhythm function][rhythmFunction] or `NULL`.
+#' Must be a [rhythm function][rhythmFunctions] or `NULL`.
 #'
 #' @param sep ***Seperator between irregular beat patterns.***
 #' 

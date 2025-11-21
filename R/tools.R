@@ -1277,7 +1277,16 @@ find2Dlayout <- function(n) {
 
 pmaxmin <- function(x, min = -Inf, max = Inf) as(pmax(pmin(x, max), min), class(x))
 
+colMaxs <- function(x, na.rm = TRUE, ties.method = 'first') {
+  if (na.rm) x[is.na(x)] <- -Inf
+  
+  x[cbind(seq_len(nrow(x)), max.col(x, ties.method = ties.method))]
+  
+}
 
+colMins <- function(x, na.rm = TRUE, ties.method = 'first') {
+  -colMaxs(-x, na.rm = na.rm, ties.method = ties.method)
+}
 
 reduce_fraction <- function(n, d) {
     # Used by rational initialize method
@@ -1824,7 +1833,7 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
     if (is.null(x)) return(NULL)
     checks(x, xnumber | xclass('tonalInterval'))
     checks(lag, xwholenum & xlen1 & xnotzero)
-    checks(skip, xnull | xclass('function'))
+    checks(skip, xnull | (xlogical & xmatch(x)) | xclass('function'))
     checks(init, (xatomic | xclass('tonalInterval')) & xminlength(1) & 
              argCheck(\(arg) length(arg) <= abs(lag), 
                       "must be as short or shorter than the absolute lag",  
@@ -1839,7 +1848,8 @@ delta.default <- function(x, lag = 1, skip = is.na, init = as(NA, class(x)), rig
       x <- rev(x)
       right <- !right
     }
-    skip <- if (is.null(skip)) logical(length(x)) else skip(x)
+    if (is.null(skip)) skip <- logical(length(x))
+    if (is.function(skip)) skip <- skip(x)
     #
     if (right)  {
       skip_pad <- c(skip, logical(abs(lag)))
@@ -1989,14 +1999,21 @@ ints2nits <- function(n, it = 2, nits = 8) {
     out
 }
 
+extension2trit <- function(n) {
+  as.integer(3L ^ (-(((n - 1L) * 2L) + 2L) %% 7L))
+}
 
+extension2bit <- function(n) {
+  as.integer(2L ^ ((n - 1L) %/% 2L))
+}
 
 
 ints2baltern <- function(n, ntrits = 8L) {
     # integers to balanced ternary
+  
+    if (any(abs(n) > (3L ^ ntrits), na.rm = TRUE)) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to repersent in {ntrits} trits.")
+  
     tern <- ints2nits(abs(n), it = 3L, nits = ntrits)
-    
-    if (any(abs(n) > (3L ^ ntrits))) .stop("In call ints2baltern, the {which(n > (3L ^ ntrits))}th value is too large to repersent in {ntrits} trits.")
     
     while(any(tern == 2L, na.rm = TRUE)) {
         twos <- which(tern == 2L, arr.ind = TRUE)
@@ -2286,13 +2303,12 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
   if (exprA$Type %in% applyTo) {
     hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
-      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
       exprA <- func(exprA)
     } 
   } else {
     hit <- FALSE
   }
-  
+  if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down
   
   if (exprA$Type == 'call' && !(hit && stopOnHit)) {
     for (i in seq_along(exprA$Args)) {
@@ -2440,6 +2456,7 @@ ast <- function(expr) {
 }
 
 
+#' @export
 print.ast <- function(x, depth = 0L) {
     pad <- strrep(' ', depth)
     if (!inherits(x, 'ast')) {
@@ -2908,7 +2925,7 @@ isColor <- function(x) {
   if (!is.character(x)) return(logical(length(x)))
   
   x %in% colors() |
-    stringr::str_detect(x, '^#([0-9a-f]{6}|[0-9a-f]{8})$') |
+    stringr::str_detect(x, '^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$') |
     is.na(x) |
     x == 'transparent'
 }

@@ -185,26 +185,26 @@ nullify <- function(humtab, fields, subset, dataTypes) {
   targetTypes <- humtab$Type %in% dataTypes
   null[targetTypes] <- !subset
   
-  newFields <- lapply(fields,
-                            \(fieldName) {
+  complementFields <- paste0('_complement_', fields)
+  
+  newFields <- Map(fields, complementFields, f = \(fieldName, complementName) {
                               field <- humtab[[fieldName]]
                               subset <- complement <- field[0][1:length(field)] # makes class match
                               
+                              # This is not backwards!
                               subset[!targetTypes | !null]    <- field[!targetTypes | !null] 
                               
-                              if (paste0('_complement_', fieldName) %in% colnames(humtab)) {
-                                complement <- humtab[[paste0('_complement_', fieldName)]]
+                              if (complementName %in% colnames(humtab)) {
+                                complement <- humtab[[complementName]]
                                 complement[(!targetTypes | null) & is.na(complement)] <- field[(!targetTypes | null) & is.na(complement)]
                               } else {
                                 complement[!targetTypes | null] <- field[!targetTypes |  null]
-                                
                               }
-                              # This is not backwards!
                               
                               setNames(data.table(subset, complement), paste0(c('', '_complement_'), fieldName))
                             })
   
-  humtab <- humtab[ , !colnames(humtab) %in% c(fields, paste0('_complement_', fields)), with = FALSE]
+  humtab <- humtab[ , !colnames(humtab) %in% c(fields, complementFields), with = FALSE]
   
   for (j in seq_along(newFields)) humtab <- cbind(humtab, newFields[[j]])
  
@@ -219,6 +219,7 @@ nullify <- function(humtab, fields, subset, dataTypes) {
 removeNull <- function(hum, by, nulltypes, ...) {
   UseMethod("removeNull")
 }
+#' @export
 removeNull.humdrumR <- function(hum, by = 'Piece', nullTypes = 'd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
@@ -227,6 +228,7 @@ removeNull.humdrumR <- function(hum, by = 'Piece', nullTypes = 'd', ...) {
   updateFields(hum) # in case any complements have been deleted
  
 }
+#' @export
 removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
   nullTypes <- checkTypes(nullTypes, 'removeNull', 'nullTypes')
   
@@ -549,7 +551,7 @@ combineFields <- function(humdrumR, ...) {
 #' 
 #' ### Character indexing:
 #' 
-#' If you index a [humdrumR object][humdrumR:humdrumRclass]
+#' If you index a [humdrumR object][humdrumRclass]
 #' with `character` strings, these strings are 
 #' treated as [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) (regexes),
 #' which are matched against non-null data tokens (`"D"`) in the object's first [selected field][selectedFields].

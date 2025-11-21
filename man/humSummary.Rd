@@ -32,7 +32,7 @@ aspects of \link[=humdrumRclass]{humdrumR data objects}:
 \itemize{
 \item Tabulates the types of exclusive and tandem interpretations in the corpus.
 }
-\item \code{\link[=sections]{sections()}}
+\item \code{sections()}
 \itemize{
 \item Tabulates any formal data (\verb{*>}) in the corpus, including barlines.
 }

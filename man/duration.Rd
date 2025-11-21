@@ -59,11 +59,11 @@ Output is \code{numeric} (real number).
 
 If \code{duration()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 
 If \code{quarters()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
-If no field names are specified, the first \link{selectedField} is used as \code{x}.
+If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \examples{
 

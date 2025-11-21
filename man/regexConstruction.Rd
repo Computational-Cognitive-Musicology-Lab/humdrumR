@@ -15,7 +15,7 @@ orRE(...)
 }
 \description{
 \code{humdrumR} includes some helpful functions for creating new regular expressions which work with the
-\link{stringr} package.
+\link[stringr:stringr-package]{stringr::stringr} package.
 }
 \details{
 \code{captureRE} will take a character vector and collapse it to a "capture group."

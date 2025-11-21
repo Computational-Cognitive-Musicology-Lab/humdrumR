@@ -333,7 +333,7 @@ or otherwise \link[=humCoercion]{reshaping humdrum data} into basic R data struc
 
 
 The \code{fields()} function takes a \link[=humdrumRclass]{humdrumR object}
-and returns a \code{\link[=data.table]{data.table()}}, with each
+and returns a \code{\link[data.table:data.table]{data.table::data.table()}}, with each
 row describing an available field in the humdrum table.
 The output table has five columns:
 \itemize{
@@ -356,7 +356,7 @@ Can be \code{"Data"}, \code{"Structure"}, \code{"Interpretation"}, \code{"Formal
 }
 \item \code{GroupedBy}
 \itemize{
-\item A \code{logical} indicating which, if any, fields are currently \link[=humGrouping]{grouping} the data.
+\item A \code{logical} indicating which, if any, fields are currently \link[=groupingFactors]{grouping} the data.
 }
 }
 
@@ -375,6 +375,6 @@ getHumtab(humData, dataTypes = 'D')
 
 }
 \seealso{
-{To actually extract fields from \link{humdrumR data}, see the \code{\link[=pull]{pull()}} family of functions.}
+{To actually extract fields from \link[=humdrumRclass]{humdrumR data}, see the \code{\link[=pull]{pull()}} family of functions.}
 }
 \concept{{Core humdrum data representation}}

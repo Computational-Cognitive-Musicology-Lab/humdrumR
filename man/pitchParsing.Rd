@@ -37,7 +37,7 @@ Must be \code{NULL}, or a \code{character} vector which is either length \code{1
 
 Must be either \code{character} or \code{numeric}.}
 
-\item{Key}{\emph{\strong{The diatonic key used to interpret the pitch information.}}
+\item{Key}{\emph{\strong{The onic key used to interpret the pitch information.}}
 
 Defaults to \code{NULL}.
 
@@ -58,14 +58,14 @@ length and dimensions as \code{x}.
 various basic pitch representations (including \code{numeric} and \code{character}-string representations) can be "parsed"---read
 and interpreted by \code{humdrumR}.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=pitchFunctions]{pitch function}, like \code{\link[=kern]{kern()}}
-\code{\link[=semit]{semit()}}, or \code{\link[=solfa]{solfa()}}.
+\code{\link[=semits]{semits()}}, or \code{\link[=solfa]{solfa()}}.
 }
 \details{
 The underlying parser used by all \code{humdrumR} \link[=pitchFunctions]{pitch functions} can be called explicitly using the function \code{tonalInterval()}.
 The \code{tonalInterval} parser will attempt to parse any input information into a \link[=tonalIntervalS4]{tonalInterval} object---a back-end pitch representation
 that you probably don't need to care about!
 When you use one of the main \link[=pitchFunctions]{pitch functions}, like \code{\link[=kern]{kern()}} or \code{\link[=semits]{semits()}},
-the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immediately \link[=pitchDeparsing]{deparsed}
+the input is parsed into a \link[=tonalIntervalS4]{tonalInterval} object, then immeely \link[=pitchDeparsing]{deparsed}
 to the representation you asked for (e.g., \verb{**kern} or \verb{**semits}).
 Thus, the underlying pipeline for \code{humdrumR} \link[=pitchFunctions]{pitch functions} looks something like:
 \itemize{
@@ -73,7 +73,7 @@ Thus, the underlying pipeline for \code{humdrumR} \link[=pitchFunctions]{pitch f
 \itemize{
 \item \emph{Parsing} (done by \code{tonalInterval()}) \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 }
 \item \emph{Deparsing} \verb{|>}
 }
@@ -160,7 +160,7 @@ This means we are controlling the behavior of \code{tonalInterval()}, in the sec
 \itemize{
 \item \emph{Parsing} (done by \verb{tonalInterval(PARSE ARGS GO IN HERE!)}) \verb{|>}
 \itemize{
-\item \strong{Intermediate} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
+\item \strong{Intermee} (\link[=tonalIntervalS4]{tonalInterval}) representation \verb{|>}
 }
 \item \emph{Deparsing} \verb{|>}
 }
@@ -232,8 +232,8 @@ This overrides the default value for \verb{**kern}---notice, that it \emph{also}
 
 \subsection{Steps}{
 
-Any representation of "tonal" pitch information will include a representation of \emph{diatonic steps}.
-You can control how the parser reads diatonic steps from a pitch representation using the \code{step.labels} argument.
+Any representation of "tonal" pitch information will include a representation of \emph{onic steps}.
+You can control how the parser reads onic steps from a pitch representation using the \code{step.labels} argument.
 The \code{step.labels} argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 Examples of \code{step.labels} arguments that are currently used by preset \code{humdrumR} pitch parsers include:
 \itemize{

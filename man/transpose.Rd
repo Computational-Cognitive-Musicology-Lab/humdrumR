@@ -43,11 +43,11 @@ Only relavent if using transposing between keys (\code{Key} and \code{to}) with 
 If \code{relative == FALSE}, transposition is parallel.}
 }
 \description{
-This function \link[=https://en.wikipedia.org/wiki/Transposition_(music)]{transposes} pitches or keys
+This function \href{https://en.wikipedia.org/wiki/Transposition_(music)}{transposes} pitches or keys
 by various intervals or to target keys.
 Inside the box, inputs and transpositions take place as \code{tonalInterval}s or \code{diatonicSet}s,
 but any numeric or character string representation of pitches can be transposed as well.
-This function is incorporated directly into \link{tonalTransform}, and thence, all \link[=pitchRepresentations]{pitch translation}
+This function is incorporated directly into \link[=diatonicSet]{pitch functions}, and thence, all \link[=pitchFunctions]{pitch translation}
 functions, so you probably won't call it directly very often.
 }
 \details{
@@ -73,7 +73,7 @@ For instance, if we are given the pitches \verb{\{C F# G D# E\}`` in the key of 
 \item Alterations/accidentals in the input are identified. (In this case, F# and D#).
 \item The generic pitches are transposed within the key, resulting in \verb{\{D G A E F\}}.
 \item Alterations in the input are added to the output \emph{unless} the resulting pitches are interpreted as a comma
-by a call to \link{tintPartion}, with a given enharmonic wrap value (the default is \code{12}).
+by a call to \code{tintPartition}, with a given enharmonic wrap value (the default is \code{12}).
 In this example, adding the first accidental results in \verb{\{G#\}} which is not a comma.
 However, the second accidental results in \verb{\{E#\}} which \emph{is} a comma away from the natural \code{{F}}.
 Thus, this accidental is not added to the output, resulting in \code{{E}}, not \verb{\{E#\}}.
@@ -97,7 +97,7 @@ The \code{to} argument translates an input \emph{to} a desired key.
 For example, if the input is in the key of E major but we want it transposed to G major, we could say \code{to = '*E:'}.
 If \code{real = TRUE}, input is simply translated to the root of the \code{to} key, with all the exact same intervals.
 If \code{real = FALSE}, the input is translated to the root of the new key, with its intervals changed to match the new key as well.
-In either case, the result depends on what the input's key is, which is indicated by the \link[=tonalTransform]{standard} \code{Key} argument.
+In either case, the result depends on what the input's key is, which is indicated by the \link[=pitchFunctions]{standard} \code{Key} argument.
 The \code{Key} arguments is like the "from" key.
 If \code{Key = NULL}, the input key is interpreted as C major.
 
