@@ -934,11 +934,10 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 draw_density <- function(x, y, log = '', 
                            breaks = 'Sturges', bw = 'SJ', normalReference = FALSE, 
                            smooth = FALSE, conditional = FALSE, showCounts = FALSE, showPoints = FALSE,
-                           mean = FALSE, quantiles = c(), global_stats = FALSE,
+                           mean = FALSE, quantiles = c(), 
                            xlim = NULL, ylim = NULL,
                            col = 3, alpha = .4, cex = .7, pch = NULL, ...) {
   # pch is used only to stop it being passed to hist_coor, which causes a warning
-  checks(global_stats, xTF, seealso = '?draw_density')
   checks(mean, xTF, seealso = '?draw_density')
   checks(normalReference, xTF, seealso = '?draw_density')
   checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_density')
@@ -1027,8 +1026,31 @@ draw_density <- function(x, y, log = '',
     
     if (normalReference) {
       xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
-      points(xpoints, dnorm(xpoints, mean(x), sd(x)), type = 'l',
-             lwd = .5, lty = 'dashed')
+      if (conditional$normalReference) {
+        
+        lapply(unique(output$col$col),
+               \(curcol) {
+                 scale <- if (conditional$density) 1 else mean(output$col$col == curcol) 
+                 points(xpoints,
+                        dnorm(xpoints, 
+                              mean(x[output$col$col == curcol]), 
+                              sd(x[output$col$col == curcol])) * scale, 
+                        col = setalpha(curcol, 1), 
+                        type = 'l', lwd = .5, lty = 'dashed')
+               })
+   
+      } else {
+        if (conditional$density) {
+          warning("Drawing a non-conditional normalReference is misleading when ",
+                  "the density plot itself is conditional.")
+        }
+        points(xpoints,
+               dnorm(xpoints,  mean(x),  sd(x)), 
+               type = 'l', lwd = .5, lty = 'dashed')
+      }
+      
+
+
     }
   } 
   
@@ -1159,6 +1181,7 @@ draw_density <- function(x, y, log = '',
 draw_Qplot <- function(x, y, log = '', 
                        violin = FALSE, normalReference = FALSE, 
                        mean = FALSE, quantiles = c(.25, .5, .75),
+                       conditional = FALSE,
                        xlim = NULL, ylim = NULL, 
                        col = 1, alpha = .8, cex = NULL, pch = NULL, 
                        ...) {
@@ -1167,6 +1190,8 @@ draw_Qplot <- function(x, y, log = '',
   checks(normalReference, xTF, seealso = '?draw_Qplot')
   checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_Qplot')
   checks(violin, xTF, seealso = '?draw_Qplot')
+  
+  conditional <- prep_conditional(conditional)
   
   if (violin) return(draw_violins(integer(length(y)), y,  mean = mean,
                                   xlim = xlim, ylim = ylim, alpha = alpha, 
@@ -1188,21 +1213,66 @@ draw_Qplot <- function(x, y, log = '',
     if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
     
     y <- sort(y)
-    x <- seq(0, 1, length.out = length(y))
+    x <- if (conditional$density) {
+      tapply_inplace(y, output$col$col, \(cury) seq(0, 1, length.out = length(cury)))
+      } else {
+      seq(0, 1, length.out = length(y))
+    }
+
     points(x = x, y = y, col = output$col$col, cex = output$cex$cex, 
            pch = output$pch$pch, ...)
     
+ 
+    
     # extra stuff
-    draw_quantiles(2, y, quantiles = quantiles)
-    if (mean)  draw_mean(0.5, mean(y))
+    draw_quantiles(2, y, quantiles = quantiles, 
+                   col = if (conditional$quantiles) unique(output$col$col) else 'black',
+                   groups = if (conditional$quantiles) (output$col$col))
+    if (mean) draw_mean(x, y, col = unique(output$col$col),
+                        groups = if (conditional$mean) output$col$col)
     
     if (normalReference) {
-      points(x, qnorm(x, mean(y), sd(y)), type = 'l', col = 'black',
-             lwd = .5, lty = 'dashed', xpd = TRUE)
+      if (conditional$normalReference) {
+          lapply(unique(output$col$col),
+                 \(curcol) {
+                   cur <- output$col$col == curcol
+                   cury <- if (conditional$density) {
+                     x[cur]
+                   } else {
+                     seq(0, 1, length.out = sum(cur))
+                   }
+                   points(x[cur],  qnorm(cury, mean(y[cur]), sd(y[cur])),
+                          type = 'l', col = curcol,
+                          lwd = .5, lty = 'dashed', xpd = TRUE)
+                 })
+          
+        } else {
+        if (conditional$density) {
+          .x <- seq(0, 1, length.out = length(y))
+          lapply(unique(output$col$col),
+                        \(curcol) {
+                          cur <- output$col$col == curcol
+                          points(.x[cur],  qnorm(x[cur], mean(y), sd(y)),
+                                 type = 'l', col = 'black',
+                                 lwd = .5, lty = 'dashed', xpd = TRUE)
+                        })
+        } else {
+          points(sort(x), qnorm(sort(x), mean(y), sd(y)), type = 'l', col = 'black',
+                 lwd = .5, lty = 'dashed', xpd = TRUE)
+          
+        }
+      }
+        
       
       legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
              col = 'black', text.col = 'black', cex = .8, 
-             legend = quote(N(mu[y], sigma[y])) )
+             legend = if (conditional$normalReference) {
+               quote(N(paste(mu[y], ' | ', 'color'), 
+                       paste(sigma[y], ' | ', 'color')))
+               } else {
+                
+               quote(N(mu[y], sigma[y]))
+               })
     }
     
     
@@ -1570,14 +1640,13 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
                          breaks = "Sturges", bw = 'SJ', normalReference = FALSE, showPoints = FALSE,
                          xlim = NULL, ylim = NULL, log = '',
                          col = 1, ...) {
-  checks(conditional, xTF, seealso = '?draw_violins')
-  checks(global_stats, xTF, seealso = '?draw_violins')
   checks(mean, xTF, seealso = '?draw_violins')
   checks(normalReference, xTF, seealso = '?draw_violins')
   checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_violins')
   checks(smooth, xTF, seealso = '?draw_violins')
   checks(showPoints, xTF, seealso = '?draw_violins')
   
+  conditional <- prep_conditional(conditional)
   
   groups <- x
   
@@ -1602,7 +1671,7 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
   values <- tapply(y, groups, list)
   ptable <- proportions(table(groups))
   coordinates <- multihist_coor(y, groups, vardim = 'Y', bw = bw,
-                                conditional = conditional, smooth = smooth, breaks = breaks)
+                                conditional = conditional$density, smooth = smooth, breaks = breaks)
   
   # need to figure out x-limit width
   allDens <- unlist(lapply(coordinates, '[[', 'Density'))
@@ -1681,16 +1750,18 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
           points(xsamp + N , ysamp,  cex = .3, col = setalpha('black', dotAlpha), pch = 16, xpd = NA)
         }
         
-        if (!global_stats && length(coordinates) > 1L) {
-          draw_quantiles(2, vals, quantiles, limits = c(N - .5, N + .5)) 
-          if (mean) draw_mean(N, mean(vals), col = 'black')
-        }
+        # if (length(coordinates) > 1L) {
+        #   draw_quantiles(2, vals, quantiles, limits = c(N - .5, N + .5)) 
+        #   if (mean) draw_mean(N, mean(vals), col = 'black')
+        # }
       }]
       
     }, coordinates, col$col, violinN, values, ptable)
-    if (global_stats || length(coordinates) == 1L) {
+    if (length(coordinates) == 1L) {
       draw_quantiles(2, y, quantiles)
-      draw_mean(violinN, mean(y))
+      browser()
+      # if (mean) draw_mean(violinN, mean(y), col = col$col,
+                          # groups = if (conditional$mean) 
       
     }
   }
@@ -2342,7 +2413,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), g
 
 
 draw_mean <- function(x, y, col = 'black', groups = NULL) {
-  y <- rep(y, length.out = length(x))
+  match_size(x = x, y = y, toEnv = TRUE)
   if (!is.null(groups)) {
     x <- tapply(x, groups, mean, na.rm = TRUE)
     y <- tapply(y, groups, mean, na.rm = TRUE)
@@ -2664,9 +2735,12 @@ multihist_coor <- function(x, groups, conditional = TRUE, ...) {
   coor_grouped
 }
 
-hist_coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., groups = NULL, hist_scale = 1, vardim = 'X') {
+hist_coor <- function(x, smooth = FALSE, breaks = "Sturges", ..., 
+                      groups = NULL, hist_scale = 1, vardim = 'X',
+                      aspect) {
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way
+  # aspect isn't used, but this stops it from getting passed to density, which casues a warning
   if (smooth) {
     dens <- stats::density.default(x, ...)
     output <- data.table(Dim = dens$x, Density = dens$y)
@@ -3176,20 +3250,20 @@ prep_conditional <- function(conditional, defaults = list()) {
   options <- c('mean', 'quantiles', 'lm', 'normalReference', 'density')
   
   output <- setNames(logical(length(options)), options) # all FALSE
-  output[names(defaults)] <- defaults
+  output[names(defaults)] <- unlist(defaults)
   
   if (is.list(conditional)) {
-    output[pmatch(names(conditional), options, nomatch = 0)] <- conditional 
+    output[pmatch(names(conditional), options, nomatch = 0)] <- unlist(conditional )
   } else {
-    as.list(if (is.logical(conditional)) {
+    if (is.logical(conditional)) {
       if (conditional) output <- !output 
     } else {
       output[pmatch(conditional, options, nomatch = 0)] <- TRUE
-    })
+    }
     
   }
 
-  output
+  as.list(output)
   
  
 }
