@@ -453,7 +453,8 @@ draw.default <- function(x, y, facets = list(),
                          axes = 1:4, legend = TRUE, aspect = NULL, margin = .2,
                          conditional = FALSE,
                          title = '', subtitle = '', color = 1, 
-                         pointSize = NULL, pointStyle = 16,
+                         cex = NULL, pointSize = cex,
+                         pch = 16, pointStyle = pch,
                          ...) {
   
   
@@ -471,7 +472,7 @@ draw.default <- function(x, y, facets = list(),
   checks(title, xatomic & xlen1)
   checks(subtitle, xatomic & xlen1)
   
-  checks(conditional, xTF | (xcharacter & xplegal(c('mean', 'normalReference', 'density', 'quantiles', 'lm'))) | xclass('list'))
+  checks(conditional, xTF | xnull | (xcharacter & xplegal(c('mean', 'normalReference', 'density', 'quantiles', 'lm'))) | xclass('list'))
   
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
@@ -556,7 +557,7 @@ draw.default <- function(x, y, facets = list(),
     # legends
     if (is.character(legend) || legend) {
 
-      sides <- c(4, 2, 3)
+      sides <- c(4, 3, 2)
       side_i <- 1
       if (is.logical(legend)) legend <- ''
       legend <- rep(legend, length.out = 3)
@@ -745,11 +746,14 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
   output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
   output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
   
+  groups <- match_size(x = x, y = y, col = output$col$col, pch = output$pch$pch)[c('col', 'pch')]
+  
+  
   if (grepl('x', jitter)) x <- smartjitter(x)
   if (grepl('y', jitter)) y <- smartjitter(y)
   
   output$drawer <- function() {
-    if (normalReference) draw_mvnorm(x, y)
+    if (normalReference) draw_mvnorm(x, y, 'black', groups, conditional$normalReference)
     
     if (line) {
       y <- y[order(x)]
@@ -762,9 +766,9 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
     
     
     # extra stuff
-    draw_quantiles(1, x, quantiles, col = unique(output$col$col), groups = if (conditional$quantiles) output$col$col)
-    draw_quantiles(2, y, quantiles, col = unique(output$col$col), groups = if (conditional$quantiles) output$col$col)
-    if (mean)  draw_mean(x, y, col = unique(output$col$col), groups = if (conditional$mean) output$col$col)
+    draw_quantiles(1, x, quantiles, groups, conditional = conditional$quantiles)
+    draw_quantiles(2, y, quantiles, groups, conditional = conditional$quantiles)
+    if (mean)  draw_mean(x, y, groups, cex = max(output$cex$cex),  conditional = conditional$mean)
     
     if (lm) {
       fit <- stats::lm(y ~ x)
@@ -1017,12 +1021,9 @@ draw_density <- function(x, y, log = '',
     ## dots
     if (showPoints) draw_points(x, col, allDens, output$window$ylim)
     
-    draw_quantiles(1, x, quantiles, 
-                   col = if (conditional$quantiles) unique(output$col$col) else 'black',
-                   groups = if (conditional$quantiles) output$col$col)
-    if (mean) draw_mean(x,  grconvertY(0.02, 'npc', 'user'), 
-                        col = unique(output$col$col), 
-                        groups = if (conditional$mean) output$col$col)
+    draw_quantiles(1, x, quantiles,  groups = list(col = col), conditional = conditional$quantiles)
+    if (mean) draw_mean(x,  rep(grconvertY(0.02, 'npc', 'user'), length(x)),  
+                        groups = list(col = col), conditional = conditional$mean)
     
     if (normalReference) {
       xpoints <- seq(output$window$xlim[[1]][1], output$window$xlim[[1]][2], length.out = 100)
@@ -1046,7 +1047,7 @@ draw_density <- function(x, y, log = '',
         }
         points(xpoints,
                dnorm(xpoints,  mean(x),  sd(x)), 
-               type = 'l', lwd = .5, lty = 'dashed')
+               type = 'l', lwd = .8, lty = 'dashed')
       }
       
 
@@ -1205,6 +1206,9 @@ draw_Qplot <- function(x, y, log = '',
   output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
   output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
   output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
+  
+  groups <- match_size(y = y, col = output$col$col, pch = output$pch$pch)[c('col', 'pch')]
+  
   output$axisNames[[1]] <- 'Quantile'
   
   output$drawer <- function() {
@@ -1225,11 +1229,8 @@ draw_Qplot <- function(x, y, log = '',
  
     
     # extra stuff
-    draw_quantiles(2, y, quantiles = quantiles, 
-                   col = if (conditional$quantiles) unique(output$col$col) else 'black',
-                   groups = if (conditional$quantiles) (output$col$col))
-    if (mean) draw_mean(x, y, col = unique(output$col$col),
-                        groups = if (conditional$mean) output$col$col)
+    draw_quantiles(2, y, quantiles = quantiles,  groups = groups, conditional = conditional$quantiles)
+    if (mean) draw_mean(x, y, groups, cex = output$cex$cex, conditional = conditional$mean)
     
     if (normalReference) {
       if (conditional$normalReference) {
@@ -1243,7 +1244,7 @@ draw_Qplot <- function(x, y, log = '',
                    }
                    points(x[cur],  qnorm(cury, mean(y[cur]), sd(y[cur])),
                           type = 'l', col = curcol,
-                          lwd = .5, lty = 'dashed', xpd = TRUE)
+                          lwd = .8, lty = 'dashed', xpd = TRUE)
                  })
           
         } else {
@@ -2354,40 +2355,40 @@ setMethod('.draw', c('formula'),
 
 
 draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), groups = NULL, 
-                           limits = NULL, col = 'black', ...) {
-  
-  if (!is.null(groups)) {
-    var <- tapply(var, groups, list)
-    Map(\(curvar, curcol) draw_quantiles(side, curvar, quantiles, groups = NULL, limits = limits, col = curcol, ...),
-        var, col)
-    return(NULL)
-  } 
-  
+                           limits = NULL, conditional = FALSE, ...) {
   if (length(quantiles)) {
-    col <- setalpha(col, 1)
     quantiles <- unique(quantiles)
     
+    if (conditional) {
+      quants <- do.call('rbind', tapply(var, do.call('paste', groups), quantile, prob = quantiles, simplify = FALSE))
+      col <- tapply(groups$col, do.call('paste', groups), unique)
+    } else {
+      quants <- rbind(quantile(var, prob = quantiles))
+      col <- 'black'
+      pch <- 3
+    }
+    
+    col <- setalpha(col, 1)
+    colMatrix <- array(col, dim = dim(quants))
+    
     sides <- side %% 2 == 0
-    quants <- quantile(var, prob = quantiles)
-    
-    
     if (is.null(limits)) limits <- if (sides) grconvertX(c(0, 1), 'npc', 'user') else grconvertY(c(0, 1), 'npc', 'user')
     
     
     # labels
-    q <- paste0(round(quantiles       * 100, 1), '%')
-    p <- paste0(round((1 - quantiles) * 100, 1), '%')
+    q <- t(array(paste0(round(quantiles       * 100, 1), '%'), dim = dim(quants)))
+    p <- t(array(paste0(round((1 - quantiles) * 100, 1), '%'), dim = dim(quants)))
     
     if (sides) {
       text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
-           cex = .4, xpd = NA, adj = c(0, .5), col = col)
+           cex = .4, xpd = NA, adj = c(0, .5), col = colMatrix)
       text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
-           cex = .4, xpd = NA, adj = c(1, .5), col = col)
+           cex = .4, xpd = NA, adj = c(1, .5), col = colMatrix)
     } else {
       text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
-           cex = .4, xpd = NA, adj = c(.5, 1), col = col)
+           cex = .4, xpd = NA, adj = c(.5, 1), col = colMatrix)
       text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), 
-           cex = .4, xpd = NA, adj = c(.5, 0), col = col)
+           cex = .4, xpd = NA, adj = c(.5, 0), col = colMatrix)
     }
     
     # lines
@@ -2398,7 +2399,7 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), g
     }
     lineArgs <- list(limits[1] + strwidth,
                      limits[2] - strwidth, quants, quants, lty = 'dashed', 
-                     lwd = .5, col = col)
+                     lwd = .6, col = col)
     names(lineArgs)[1:4] <- if (sides) {
       c('x0', 'x1', 'y0', 'y1')
     } else {
@@ -2412,18 +2413,21 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), g
 }
 
 
-draw_mean <- function(x, y, col = 'black', groups = NULL) {
-  match_size(x = x, y = y, toEnv = TRUE)
-  if (!is.null(groups)) {
+draw_mean <- function(x, y, groups, cex = 1, conditional) {
+  
+  if (conditional) {
     x <- tapply(x, groups, mean, na.rm = TRUE)
     y <- tapply(y, groups, mean, na.rm = TRUE)
+    col <- if (length(unique(groups$col)) == 1L) 'black' else tapply(groups$col, groups, unique)  
+    pch <- if (is.null(groups$pch) || length(unique(groups$pch)) == 1L) 3 else tapply(groups$pch, groups, unique)
   } else {
     col <- 'black'
+    pch <- 3
     x <- mean(x, na.rm = TRUE)
     y <- mean(y, na.rm = TRUE)
   }
   
-  points(x, y, pch = 3, cex = 1.4,
+  points(x, y, pch = pch, cex = cex * 2.5,
          lwd = 3, xpd = TRUE, col = setalpha(col, .8))
 }
 
@@ -2447,7 +2451,13 @@ draw_points <- function(x, col, allDens, ylim) {
   points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
 }
 
-draw_mvnorm <- function(x, y) {
+draw_mvnorm <- function(x, y, col = 'black', groups = NULL, conditional = FALSE) {
+  if (all(is.na(x)) || all(is.na(y))) return(NULL)
+  
+  if (conditional) {
+    Map(draw_mvnorm, tapply(x, groups, list), tapply(y, groups, list), tapply(groups$col, groups, unique))
+    return(invisible(NULL))
+  } 
   
   sigma <- matrix(cov(x, y), nrow = 2, ncol = 2)
   sigma[1, 1] <- var(x)
@@ -2455,10 +2465,10 @@ draw_mvnorm <- function(x, y) {
   means <- c(mean(x), mean(y))
   
   npoints <- 100
-  xseq <- seq(min(x, means[1] - sigma[1, 1] * 3), 
-              max(x, means[1] + sigma[1, 1] * 3), length.out = npoints)
-  yseq <- seq(min(y, means[2] - sigma[2, 2] * 3), 
-              max(y, means[2] + sigma[2, 2] * 3), length.out = npoints)
+  xseq <- seq(min(x, means[1] - sigma[1, 1] * 3, na.rm = TRUE), 
+              max(x, means[1] + sigma[1, 1] * 3, na.rm = TRUE), length.out = npoints)
+  yseq <- seq(min(y, means[2] - sigma[2, 2] * 3, na.rm = TRUE), 
+              max(y, means[2] + sigma[2, 2] * 3, na.rm = TRUE), length.out = npoints)
   xy <- expand.grid(x = xseq, y = yseq)
   
   # copied code from mvtnorm package:
@@ -2481,10 +2491,10 @@ draw_mvnorm <- function(x, y) {
   pmat <- matrix(cumsum(sort(density) * dx * dy)[rank(density)],
                  npoints, npoints)
   contour(xseq, yseq, pmat,
-          add = TRUE, levels = c(.05, .5),
-          labels = c('95%', '50%'),
+          add = TRUE, levels = c(.05, .5, .75),
+          labels = c('95%', '50%', '25%'),
           drawlabels = TRUE, 
-          col = 'grey70', xpd = NA)
+          col = setalpha(col, .8), xpd = NA)
   
   
   
@@ -3062,7 +3072,7 @@ legend_col_discrete <- function(categories, palette, pch, side, marginLines, col
   
   y <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
   
-  points(rep(xpos[2], length(y)), y, pch = pch, xpd = NA, col = palette, cex = 2)
+  points(rep(xpos[2], length(y)), y, pch = pch, xpd = NA, col = palette, cex = 1.2)
   text(xpos[2], y, categories, cex = .6, xpd = NA, pos = 4)
 
   text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
@@ -3147,7 +3157,7 @@ legend_pch_discrete <- function(categories, pch, side, marginLines, col = 'black
     xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user')
     ypos <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
     
-    points(rep(xpos[2], length(ypos)), ypos, pch = pch, xpd = NA, cex = 1, col = col)
+    points(rep(xpos[2], length(ypos)), ypos, pch = pch, xpd = NA, cex = 1.2, col = col)
     text(xpos[2], ypos, categories, cex = .6, xpd = NA, pos = 4)
   }
   
