@@ -114,7 +114,7 @@ variables <- list(
 aspects <- c(2, 16/9, 4/3, 1)
 
 plotArguments <- list(lm = c(TRUE, FALSE),
-                      conditional = c(TRUE, FALSE),
+                      conditional = c('mean', 'quantiles', 'density', 'normalReference', 'lm'),
                       normalReference = c(TRUE, FALSE),
                       legend = c(TRUE, FALSE),
                       margin = c(.15, .2, .4),
@@ -142,8 +142,11 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                                                         sliderInput('aspect', 'log(aspect, 2)', min = -2, max = 2, step = .1, value = 1),
                                                         selectInput('x', 'x', choices = variables),
                                                         selectInput('y', 'y', choices = variables),
+                                                        selectInput('col', 'color', choices = variables[c(2,1,3:length(variables))]),
+                                                        selectInput('pch', 'point shape', choices = variables[c(2,1,3:length(variables))]),
+                                                        selectInput('cex', 'point size', choices = variables[c(2,1,3:length(variables))]),
+                                                        selectInput('conditional', 'conditional', choices = plotArguments$conditional, multiple=TRUE),
                                                         checkboxInput('lm', 'lm', value = FALSE),
-                                                        checkboxInput('conditional', 'conditional', value = FALSE),
                                                         checkboxInput('center', 'center', value = FALSE),
                                                         checkboxInput('smooth', 'smooth', value = FALSE),
                                                         checkboxInput('normalReference', 'normalReference', value = FALSE),
@@ -161,8 +164,7 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                                                         textInput('ylab', 'ylab', value = 'none'),
                                                         textInput('main', 'main', value = 'none'),
                                                         textInput('sub', 'sub', value = 'none'),
-                                                        selectInput('col', 'color', choices = variables[c(2,1,3:length(variables))]),
-                                                        selectInput('cex', 'point size', choices = variables[c(2,1,3:length(variables))]),
+
                                                         sliderInput('height', 'Plot height', min = 400, max = 1600, value = 1100, step = 100),
                                                         sliderInput('width', 'Plot width', min = 400, max = 3000, value = 2300, step = 100)),
                             mainPanel = fluidPage(textOutput('expr'), plotOutput('draw', inline = TRUE))),
@@ -213,6 +215,9 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                    rlang::expr(if (is.factor(!!cex)) cex else abs(!!cex) + 1)
                  }
 
+                 pch <- rlang::parse_expr(args$pch)
+                 args$pch <- if (!is.null(pch)) pch
+                 
                  args <- Filter(\(x) x != 'none', args)
 
 

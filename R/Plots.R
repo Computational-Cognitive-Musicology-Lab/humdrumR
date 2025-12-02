@@ -753,7 +753,7 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
   if (grepl('y', jitter)) y <- smartjitter(y)
   
   output$drawer <- function() {
-    if (normalReference) draw_mvnorm(x, y, 'black', groups, conditional$normalReference)
+    if (normalReference) draw_mvnorm(x, y, 'black', groups['col'], conditional$normalReference)
     
     if (line) {
       y <- y[order(x)]
@@ -761,30 +761,39 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
       points(x, y, col = output$col$col[1], type = 'l', ...)
       
     } else {
-      points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch, ...)
+      points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch)
     }
     
     
     # extra stuff
-    draw_quantiles(1, x, quantiles, groups, conditional = conditional$quantiles)
-    draw_quantiles(2, y, quantiles, groups, conditional = conditional$quantiles)
+    draw_quantiles(1, x, quantiles, groups['col'], conditional = conditional$quantiles)
+    draw_quantiles(2, y, quantiles, groups['col'], conditional = conditional$quantiles)
     if (mean)  draw_mean(x, y, groups, cex = max(output$cex$cex),  conditional = conditional$mean)
     
     if (lm) {
-      fit <- stats::lm(y ~ x)
-      
       xseq <-  seq(output$window$xlim[[1]][1], 
-                   output$window$xlim[[1]][2], length.out = 300L)
-      conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
+                   output$window$xlim[[1]][2], length.out = length(x))
       
-      lmcol <- 'grey30'
-      points(xseq, conf[ , 1], type = 'l', lwd = .5, col = lmcol)
-      points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
-      points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = lmcol)
-      
-      legend('topleft', bty = 'n', lwd = .5, col = lmcol, text.col = 'black', cex = .8,
-             legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
-                                  b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
+      if (conditional$lm && length(unique(groups$col)) > 1L) {
+        fit <- stats::lm(.y ~ .x * group, data = data.frame(.x = x, .y = y, group = groups$col))
+        lapply(unique(groups$col), \(curcol) {
+          conf <- predict(fit,  newdata = data.frame(.x = xseq, group = curcol), interval = 'confidence', ...)
+          points(xseq, conf[ , 1], type = 'l', lwd = .8, col = setalpha(curcol, .8))
+          polygon(c(xseq, rev(xseq)), 
+                  c(conf[, 2], rev(conf[ , 3])),
+                  border = NA, col = setalpha(curcol, .1))
+        })
+      } else {
+        fit <- stats::lm(y ~ x)
+   
+        conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
+        points(xseq, conf[ , 1], type = 'l', lwd = .8, col = setalpha('black', .8))
+        points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = setalpha('black', .6))
+        points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = setalpha('black', .6))
+        legend('topleft', bty = 'n', lwd = .8, cex = .8,
+               legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
+                                    b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
+      }
     }
   }
   output
@@ -1037,7 +1046,7 @@ draw_density <- function(x, y, log = '',
                               mean(x[output$col$col == curcol]), 
                               sd(x[output$col$col == curcol])) * scale, 
                         col = setalpha(curcol, 1), 
-                        type = 'l', lwd = .5, lty = 'dashed')
+                        type = 'l', lwd = .8, lty = 'dashed')
                })
    
       } else {
@@ -1343,7 +1352,7 @@ draw_barplot <- function(counts, log = '',
                          quantiles = c(), mean = FALSE, showCounts = FALSE,
                          col = NULL,  alpha = .9, ...) { 
   
-  checks(beside, xTF, seealso = '?draw_barplot')
+  checks(beside, xTF | xnull, seealso = '?draw_barplot')
   checks(heat, xTF, seealso = '?draw_barplot')
   checks(horizontal, xTF, seealso = '?draw_barplot')
   checks(mean, xTF, seealso = '?draw_barplot')
@@ -1436,8 +1445,10 @@ draw_barplot <- function(counts, log = '',
     }
     
     # draw extra stuff
-    draw_quantiles(if (horizontal) 1 else 2, counts, quantiles = quantiles, limits = grconvertX(c(-.01, 1.01), 'nfc', 'user'))
-    if (mean) draw_mean(colMeans(barx), colMeans(counts))
+    draw_quantiles(if (horizontal) 1 else 2, counts, conditional = FALSE,
+                   quantiles = quantiles,
+                   limits = if (horizontal) grconvertY(c(0, 1.0), 'npc', 'user') else  grconvertX(c(-.03, 1.03), 'npc', 'user'))
+    if (mean) draw_mean(colMeans(barx), colMeans(counts), conditional = FALSE)
     if (showCounts) draw_counts(barx, counts, counts, col =col$col,min(diff(counts)))
     
   }
@@ -2197,7 +2208,7 @@ setMethod('.draw', c('NULL', 'discrete'),
           function(x, y, ...) draw_barplot(table(y), horizontal = TRUE, ...))
 
 setMethod('.draw', c('discrete', 'discrete'),
-          function(x, y, ...) draw_heat(table(x, y), ...))
+          function(x, y, ...) draw_barplot(table(x, y), ...))
 
 ### tables ----
 
@@ -2428,7 +2439,7 @@ draw_mean <- function(x, y, groups, cex = 1, conditional) {
   }
   
   points(x, y, pch = pch, cex = cex * 2.5,
-         lwd = 3, xpd = TRUE, col = setalpha(col, .8))
+         lwd = 3, xpd = TRUE, col = setalpha(col, .6))
 }
 
 
@@ -2494,7 +2505,7 @@ draw_mvnorm <- function(x, y, col = 'black', groups = NULL, conditional = FALSE)
           add = TRUE, levels = c(.05, .5, .75),
           labels = c('95%', '50%', '25%'),
           drawlabels = TRUE, 
-          col = setalpha(col, .8), xpd = NA)
+          col = setalpha(col, .6), xpd = NA)
   
   
   
