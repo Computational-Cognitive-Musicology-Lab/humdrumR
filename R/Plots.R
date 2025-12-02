@@ -738,6 +738,10 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
   
   match_size(x = x, y = y, toEnv = TRUE)
   
+  xy <- point_density_sample(x, y) # 
+  x <- xy$x
+  y <- xy$y
+  
   output <- canvas(x = x, xlim = xlim, 
                    y = y, ylim = ylim,
                    log = log)
@@ -755,15 +759,7 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
   output$drawer <- function() {
     if (normalReference) draw_mvnorm(x, y, 'black', groups['col'], conditional$normalReference)
     
-    if (line) {
-      y <- y[order(x)]
-      x <- x[order(x)]
-      points(x, y, col = output$col$col[1], type = 'l', ...)
-      
-    } else {
-      points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch)
-    }
-    
+   
     
     # extra stuff
     draw_quantiles(1, x, quantiles, groups['col'], conditional = conditional$quantiles)
@@ -794,6 +790,17 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
                legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
                                     b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
       }
+    }
+    
+   
+    
+    if (line) {
+      y <- y[order(x)]
+      x <- x[order(x)]
+      points(x, y, col = output$col$col[1], type = 'l', ...)
+      
+    } else {
+      points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch)
     }
   }
   output
@@ -3239,16 +3246,79 @@ cex_scale <- function(str, targetWidth, cex = .8) {
 }
 
 cex_density <- function(x, y, scalar = .225) {
-  vars <- Filter(length, list(x, y))
-  
-  cuts <- lapply(vars, cut, breaks = if (length(vars) == 1L) 100 else 10)
-  
+  if (length(x) > 1e6L) x <- sample(x, 1e6)
+  if (length(y) > 1e6L) y <- sample(y, 1e6)
+  density <- point_density(x, y)
   # forced to be between 1 and 250
-  maxdensity <- min(floor(log10(max(do.call('table', cuts)))), 4)
+  maxdensity <- min(floor(log10(max(density))), 4)
 
   1 - (maxdensity * scalar)
   
 }
+
+point_density <- function(x, y) {
+  vars <- Filter(length, list(x, y))
+  
+  cuts <- lapply(vars, cut, breaks = if (length(vars) == 1L) 100 else 10)
+  do.call('table', cuts)
+}
+
+point_density_sample  <- function(x, y, maxPointsPerInch = 25e3, n = 500e3) {
+ 
+  if (length(x) < n) return(list(x = x, y = y))
+  if (length(x) > 7e6) {
+    # computing the maxPointsPerInch is too slow with this many data points
+    oversizeRatio <-  length(x) / n
+    inchmessage <- NULL
+  } else {
+  # compute dots per square inch
+    ngrid <- 10
+    cuts <- lapply(list(x, y), cut, breaks = ngrid)
+    binsize <- prod(par('din')) / ngrid^2 # square-inches per bin
+    # 
+    countsPerInch <- floor(do.call('table', cuts)/binsize) # points per square inch
+    
+    oversizeRatio <- max(countsPerInch) / maxPointsPerInch 
+    inchmessage <-  paste0(", which would require drawing as many as ", num2str(max(countsPerInch)), " points per square inch")
+  }
+
+  
+  
+  output <-  data.frame(x = x, y = y)
+  if (oversizeRatio > 1) {
+    # 
+    newsize <- floor(length(x) / oversizeRatio)
+    
+    # approximate probabiltiy density of points
+    # xdens <- approxfun(density(x))(x)
+    # ydens <- approxfun(density(y))(y)
+    #  
+    # xydens <- xdens * ydens # indeendent joint density
+    # xydens <- xydens / sum(xydens)
+    
+    
+    
+    # newind <- sample(seq_along(x), newsize, prob = xydens)
+    newind <- sample(length(x), newsize)
+    
+    # keepbottom <- 1000 # keep keepbottom-most extreme values (based on independent-joint density)
+    # keep <- which(rank(xydens) <= keepbottom)
+    # newind <- union(newind, keep)
+    
+    .message(sep = '', "You are asking to draw() {num2str(length(x))} points", 
+             inchmessage, ". ",
+             "Since this many points can't really be distinguished, draw() will save time by drawing only ",
+             "a sample of {num2str(length(newind))} of your data points.")#,
+    #"Note that the {num2str(keepbottom)} most extreme values are always plotted.")
+    output <- output[newind, ]
+  }
+  
+  
+  output
+  
+  
+}
+
 
 legend_cex_continuous <- function(val, cex, col, pch, side, marginLines, cex.legend = '') {
   
