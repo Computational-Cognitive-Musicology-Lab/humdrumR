@@ -736,16 +736,16 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
           "In your call, length(x) = {length(x)} and length(y) = {length(y)}.")
   }
   
-  match_size(x = x, y = y, toEnv = TRUE)
-  
-  xy <- point_density_sample(x, y) # 
-  x <- xy$x
-  y <- xy$y
   
   output <- canvas(x = x, xlim = xlim, 
                    y = y, ylim = ylim,
                    log = log)
   
+  # these two commands changes variables in place!
+  match_size(x = x, y = y, toEnv = TRUE)
+  reduce_size(x, y, col = col, cex = cex, pch = pch) 
+  
+  # 3rd dimensions
   output$col <- prep_col(col, y, alpha = alpha, log = log, ...)
   output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
   output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
@@ -758,8 +758,6 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
   
   output$drawer <- function() {
     if (normalReference) draw_mvnorm(x, y, 'black', groups['col'], conditional$normalReference)
-    
-   
     
     # extra stuff
     draw_quantiles(1, x, quantiles, groups['col'], conditional = conditional$quantiles)
@@ -795,9 +793,14 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
    
     
     if (line) {
-      y <- y[order(x)]
-      x <- x[order(x)]
-      points(x, y, col = output$col$col[1], type = 'l', ...)
+      by(data.frame(.x = x, .y = y, .col = output$col$col), output$col$col,
+         \(df) {
+           with(df, {
+             .y <- .y[order(.x)]
+             .x <- .x[order(.x)]
+             points(.x, .y, col = .col[1], type = 'l', ...)
+           })
+         })
       
     } else {
       points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch)
@@ -1195,7 +1198,7 @@ draw_density <- function(x, y, log = '',
 #'      col = NA)
 #' @inheritParams draw
 #' @inheritParams draw_scatter
-draw_Qplot <- function(x, y, log = '', 
+draw_Qplot <- function(x, y, log = '', line = FALSE, 
                        violin = FALSE, normalReference = FALSE, 
                        mean = FALSE, quantiles = c(.25, .5, .75),
                        conditional = FALSE,
@@ -1215,32 +1218,54 @@ draw_Qplot <- function(x, y, log = '',
                                   normalReference = normalReference, 
                                   ..., col = col, quantiles = quantiles))
   
+
+  
+  
   output <- canvas(x = if (violin) c(.5, 1.5) else c(0, 1), 
                    xlim = xlim, 
                    y = y, ylim = ylim %||% range(y, na.rm = TRUE), 
                    log = gsub('x', '', log))
+  
+  # this command changes variables in place!
+  reduce_size(seq(0, 1, length.out = length(y)), y, col = col, cex = cex, pch = pch) 
+  
+ 
+ 
   output$col <- prep_col(col, y, ..., alpha = alpha, pch = pch, log = log)
   output$cex <- prep_cex(x, y, cex = cex, col = output$col$col, log = log, ...)
   output$pch <- prep_pch(x, y, pch = pch, log = log, col = output$col$col)
+  
+
+  
+  
+  if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
+  if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
+  if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
+  y <- sort(y)
+  
+  x <- if (conditional$density) {
+    tapply_inplace(y, output$col$col, \(cury) seq(0, 1, length.out = length(cury)))
+  } else {
+    seq(0, 1, length.out = length(y))
+  }
   
   groups <- match_size(y = y, col = output$col$col, pch = output$pch$pch)[c('col', 'pch')]
   
   output$axisNames[[1]] <- 'Quantile'
   
   output$drawer <- function() {
-    if (length(output$col$col) == length(y)) output$col$col <- output$col$col[order(y)]
-    if (length(output$cex$cex) == length(y)) output$cex$cex <- output$cex$cex[order(y)]
-    if (length(output$pch$pch) == length(y)) output$pch$pch <- output$pch$pch[order(y)]
     
-    y <- sort(y)
-    x <- if (conditional$density) {
-      tapply_inplace(y, output$col$col, \(cury) seq(0, 1, length.out = length(cury)))
-      } else {
-      seq(0, 1, length.out = length(y))
+    if (line) {
+      by(data.frame(.x = x, .y = y, .col = output$col$col), output$col$col,
+         \(df) {
+           with(df,  points(x = .x, y = .y, type = 'l', col = .col[1], ...))
+         })
+    } else {
+      points(x = x, y = y, type = if (line) 'l' else 'p',
+             col = output$col$col, cex = output$cex$cex, 
+             pch = output$pch$pch, ...)
     }
 
-    points(x = x, y = y, col = output$col$col, cex = output$cex$cex, 
-           pch = output$pch$pch, ...)
     
  
     
@@ -3263,10 +3288,11 @@ point_density <- function(x, y) {
   do.call('table', cuts)
 }
 
-point_density_sample  <- function(x, y, maxPointsPerInch = 25e3, n = 500e3) {
- 
-  if (length(x) < n) return(list(x = x, y = y))
-  if (length(x) > 7e6) {
+reduce_size <- function(x, y, ..., maxPointsPerInch = 25e3, n = 500e3) {
+  args <- Filter(\(var) length(x) > 1L & length(var) == length(x), list(...))
+  
+  if (length(x) < n) return(NULL)
+  if (length(x) > 8e6) {
     # computing the maxPointsPerInch is too slow with this many data points
     oversizeRatio <-  length(x) / n
     inchmessage <- NULL
@@ -3284,7 +3310,7 @@ point_density_sample  <- function(x, y, maxPointsPerInch = 25e3, n = 500e3) {
 
   
   
-  output <-  data.frame(x = x, y = y)
+  
   if (oversizeRatio > 1) {
     # 
     newsize <- floor(length(x) / oversizeRatio)
@@ -3310,12 +3336,13 @@ point_density_sample  <- function(x, y, maxPointsPerInch = 25e3, n = 500e3) {
              "Since this many points can't really be distinguished, draw() will save time by drawing only ",
              "a sample of {num2str(length(newind))} of your data points.")#,
     #"Note that the {num2str(keepbottom)} most extreme values are always plotted.")
-    output <- output[newind, ]
+    
+    newvar <- data.frame(x = x, y = y, args)[newind, ]
+    list2env(newvar, envir = parent.frame(1))
   }
   
   
-  output
-  
+   NULL
   
 }
 
