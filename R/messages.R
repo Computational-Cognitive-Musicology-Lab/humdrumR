@@ -188,7 +188,7 @@ dochecks <- function(arg, ...) {
 ## Common Messages ----
 
 
-.show_values <- function(bad, n = 6) {
+.show_values <- function(bad, n = 6, thing = 'value') {
   
   uniq <- unique(bad)
   
@@ -196,9 +196,9 @@ dochecks <- function(arg, ...) {
     "your 'argname' is empty: {class(bad)[1]}(0)."
   } else {
     if (length(uniq) == 1L) {
-      "your 'argname' includes the value {if (is.character(bad)) quotemark(bad) else bad}" 
+      "your 'argname' includes the {thing} {if (is.character(bad)) quotemark(bad) else bad}" 
     } else {
-      "your 'argname' includes the values {harvard(head(uniq, n), 'and', is.character(bad))}"
+      "your 'argname' includes the {thing}s {harvard(head(uniq, n), 'and', is.character(bad))}"
     }
   }
   
@@ -421,8 +421,23 @@ xlegal <- function(values) {
 
 xplegal <- function(values) {
   xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values, conj = 'or')}"),
-                     \(arg) .show_values(arg[is.na(pmatch(arg, values))]))
+                     \(arg) .show_values(arg[is.na(pmatch(arg, values))]),
+                     explanation = 'See ?partialMatching for an explanation of partial matching')
 }
+
+xnamesAll <- argCheck(\(arg) all(.names(arg) != ''), glue::glue("must have all named indices"),
+                      \(arg) glue::glue("your 'argname' includes {sum(.names(arg) == '')} unnamed {plural(sum(.names(arg) == ''), 'indices', 'index')}"))
+      
+xnamesAny <- argCheck(\(arg) !is.null(names(arg)), glue::glue("must have at least one named index"),
+                      \(arg) "our 'argname' contains no named indices")
+
+xlegalNames <- function(values) {
+  xnamesAll & argCheck(\(arg)  all(!is.na(pmatch(.names(arg), values))),
+                       glue::glue("must have named indices that partially match {.values(values, conj = 'or')}"),
+                       \(arg) .show_values(.names(arg)[is.na(pmatch(.names(arg), values))], thing = 'name'),
+                       explanation = 'See ?partialMatching for an explanation of partial matching')
+}
+
 
 xrounding <- argCheck(\(arg) any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = arg)),
                       "must be a rounding function: round(), floor(), ceiling(), trunc(), or expand()",
@@ -472,7 +487,8 @@ checkRecycle <- function(recycle, options = c("yes", "no", "pad", "ifscalar", "i
   
 }
 
-##
+
+
 
 
 ## Common predicates ----
@@ -487,6 +503,10 @@ is.whole <- function(x) x %% 1 == 0
 
 is.positive <- function(x, strict = FALSE) if (is.numeric(x)) (if (strict) x > 0 else x >= 0) else logical(length(x))
 is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 else x <= 0) else logical(length(x))
+
+## checking lists of values ----
+
+# need this
 
 # Error messages ----
 
