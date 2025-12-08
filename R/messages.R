@@ -196,9 +196,9 @@ dochecks <- function(arg, ...) {
     "your 'argname' is empty: {class(bad)[1]}(0)."
   } else {
     if (length(uniq) == 1L) {
-      "your 'argname' includes the {thing} {if (is.character(bad)) quotemark(bad) else bad}" 
+      "your 'argname' argument includes the {thing} {if (is.character(bad)) quotemark(bad) else bad}" 
     } else {
-      "your 'argname' includes the {thing}s {harvard(head(uniq, n), 'and', is.character(bad))}"
+      "your 'argname' argument includes the {thing}s {harvard(head(uniq, n), 'and', is.character(bad))}"
     }
   }
   
@@ -408,9 +408,18 @@ xmatchclass <- function(match) {
 
 xnotna <- argCheck(\(arg) all(!is.na(arg)), "must not include NA values", \(arg) "'argname' includes {sum(is.na(arg))} {plural(sum(is.na(arg)), 'NAs', 'NA')}")
 
-xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L && !is.na(arg),
+xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
                   "must be a single TRUE or FALSE value (an on/off switch)",
-                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), if (length(arg) != 1L) .mismatch(length)(arg))) & xnotna
+                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), 
+                           if (length(arg) != 1L) .mismatch(length)(arg))) & xnotna
+
+
+xTFunnamed <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L  && is.null(names(arg)),
+                "must be a single (unnamed) TRUE or FALSE value (an on/off switch)",
+                \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), 
+                         if (length(arg) != 1L) .mismatch(length)(arg),
+                         if (!is.null(names(arg))) "your argument has the index name '{names(arg)}'")) & xnotna
+
 
 
 xlegal <- function(values) {
