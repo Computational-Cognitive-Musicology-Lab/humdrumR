@@ -163,8 +163,8 @@ docheck_recurse <- function(argcheck, arg) {
       if (!any(good) && sum(depths > 0) == 1) which.max(depths) else 1:2
     }
     
-    
-    rule <- paste0(rules[targets], collapse =  if (logic == '&&') ' and ' else ' or ')
+    rules[targets[-1]] <- gsub('must be( or inherit)? ', '', rules[targets[-1]])
+    rule <- paste0(rules[targets], collapse =  if (logic == '&&') ' AND ' else ' OR ')
     description <- unique(descriptions[targets])
     explanation <- unique(unlist(explanations[targets]))
     
@@ -408,8 +408,8 @@ xmatchclass <- function(match) {
 
 xnotna <- argCheck(\(arg) all(!is.na(arg)), "must not include NA values", \(arg) "'argname' includes {sum(is.na(arg))} {plural(sum(is.na(arg)), 'NAs', 'NA')}")
 
-xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
-                  "is an on/off switch: It must be a single TRUE or FALSE value",
+xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L && !is.na(arg),
+                  "must be a single TRUE or FALSE value (an on/off switch)",
                   \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), if (length(arg) != 1L) .mismatch(length)(arg))) & xnotna
 
 
