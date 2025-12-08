@@ -431,7 +431,14 @@ xnamesAll <- argCheck(\(arg) all(.names(arg) != ''), glue::glue("must have all n
 xnamesAny <- argCheck(\(arg) !is.null(names(arg)), glue::glue("must have at least one named index"),
                       \(arg) "our 'argname' contains no named indices")
 
+
+
 xlegalNames <- function(values) {
+  xnamesAll & argCheck(\(arg)  all(.names(args) %in% values),
+                       glue::glue("must have named indices that partially match {.values(values, conj = 'or')}"),
+                       \(arg) .show_values(.names(arg)[!.names(args) %in% values], thing = 'name'))
+}
+xplegalNames <- function(values) {
   xnamesAll & argCheck(\(arg)  all(!is.na(pmatch(.names(arg), values))),
                        glue::glue("must have named indices that partially match {.values(values, conj = 'or')}"),
                        \(arg) .show_values(.names(arg)[is.na(pmatch(.names(arg), values))], thing = 'name'),
