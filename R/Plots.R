@@ -465,14 +465,13 @@ draw.default <- function(x, y, facets = list(),
   
   checks(aspect, xnull | (xlen1 & xnumeric & xmin(.2) & xmax(5)))
   checks(margin, xlen1 & xnumeric & xmin(.1) & xmax(.4))
-  checks(legend, xTF | (xcharacter & xminlength(1) & xmaxlength(2)))
   checks(axes, xwholenum & xmaxlength(4L) & xmax(4) & xmin(1))
   checks(xlabel, xnull | (xlen1 & xatomic))
   checks(ylabel, xnull | (xlen1 & xatomic))
   checks(title, xatomic & xlen1)
   checks(subtitle, xatomic & xlen1)
   
-  checks(conditional, xTF | xnull | (xcharacter & xplegal(c('mean', 'normalReference', 'density', 'quantiles', 'lm'))) | xclass('list'))
+  legend <- prep_legend(legend)
   
   # this sets default par(...) values for for draw(), 
   # but overrides them with args from list(...)
@@ -555,22 +554,22 @@ draw.default <- function(x, y, facets = list(),
     humaxes(output$axes, output$axisNames, axes, marginLines)
 
     # legends
-    if (is.character(legend) || legend) {
+    if (length(legend)) {
 
       sides <- c(4, 3, 2)
       side_i <- 1
-      if (is.logical(legend)) legend <- ''
-      legend <- rep(legend, length.out = 3)
-
-      if (!is.null(output$col$legend)) {
-        output$col$legend(side = sides[side_i], marginLines = marginLines, col.legend = legend[2])
+      
+      if (!is.null(legend$color) && !is.null(output$col$legend)) {
+        output$col$legend(side = sides[side_i], marginLines = marginLines, col.legend = legend$color)
         side_i <- side_i + 1
       }
-      if (!is.null(output$cex$legend)) {
-        output$cex$legend(side = sides[side_i], marginLines = marginLines, cex.legend = legend[1])
+      if (!is.null(legend$pointSize) && !is.null(output$cex$legend)) {
+        output$cex$legend(side = sides[side_i], marginLines = marginLines, cex.legend = legend$pointSize)
         side_i <- side_i + 1
       }
-      if (!is.null(output$pch$legend)) output$pch$legend(side = sides[side_i], marginLines = marginLines)
+      if (!is.null(legend$pointStyle) && !is.null(output$pch$legend)) {
+        output$pch$legend(side = sides[side_i], marginLines = marginLines, pch.legend = legend$pointStyle)
+      }  
     }
     })
 }
@@ -2494,11 +2493,15 @@ draw_points <- function(x, col, allDens, ylim) {
   points(xsamp, ysamp,  cex = .3, col = setalpha(col, dotAlpha), pch = 16, xpd = NA)
 }
 
-draw_mvnorm <- function(x, y, col = 'black', groups = NULL, conditional = FALSE) {
+draw_mvnorm <- function(x, y, col = 'black', groups = NULL, conditional = FALSE, quantiles =  c(.05, .5)) {
   if (all(is.na(x)) || all(is.na(y))) return(NULL)
   
   if (conditional) {
-    Map(draw_mvnorm, tapply(x, groups, list), tapply(y, groups, list), tapply(groups$col, groups, unique))
+    Map(draw_mvnorm, 
+        tapply(x, groups, list), 
+        tapply(y, groups, list), 
+        tapply(groups$col, groups, unique),
+        MoreArgs = list(quantiles = .5))
     return(invisible(NULL))
   } 
   
@@ -2534,8 +2537,8 @@ draw_mvnorm <- function(x, y, col = 'black', groups = NULL, conditional = FALSE)
   pmat <- matrix(cumsum(sort(density) * dx * dy)[rank(density)],
                  npoints, npoints)
   contour(xseq, yseq, pmat,
-          add = TRUE, levels = c(.05, .5, .75),
-          labels = c('95%', '50%', '25%'),
+          add = TRUE, levels = quantiles,
+          labels = paste0((1 - quantiles) * 100, '%'),
           drawlabels = TRUE, 
           col = setalpha(col, .6), xpd = NA)
   
@@ -3186,25 +3189,27 @@ prep_pch <- function(x, y, pch = NULL, col, ...) {
   pchfav <- c(16, 1, 3,2, 8, 13, 4, 5, 15, 6, 7, 9, 10, 11,14, 12)
   pch <- pchfav[as.integer(pch)]
   list(pch = pch,
-       legend = \(side, marginLines) legend_pch_discrete(categories, pchfav[seq_along(categories)], side, marginLines, col))
+       legend = \(side, marginLines, pch.legend = '') legend_pch_discrete(categories, pchfav[seq_along(categories)], side, marginLines, col, pch.legend))
 }
 
-legend_pch_discrete <- function(categories, pch, side, marginLines, col = 'black') {
+legend_pch_discrete <- function(categories, pch, side, marginLines, col = 'black', pch.legend = '') {
   if (side == 3) {
-    ypos <- grconvertY(marginLines[[side]][1:2], 'inches', 'user')
+    ypos <- grconvertY(marginLines[[side]][3:4], 'inches', 'user')
     xpos <- grconvertX(seq(.2, .8, along = categories), 'ndc', 'user')
     
     points(xpos, rep(ypos[2], length(xpos)), pch = pch, xpd = NA, cex = 1, col = col)
-    text(xpos, ypos[2], categories, cex = .6, xpd = NA, pos = 3)
+    text(xpos, ypos[2], categories, cex = .6, xpd = NA, pos = 4)
+    text(grconvertX(.81, 'ndc', 'user'), ypos[2], pch.legend, xpd = NA, col = par('col.lab'), pos = 4)
   } else {
     xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user')
     ypos <- grconvertY(seq(.2, .8, along = categories), 'ndc', 'user')
     
     points(rep(xpos[2], length(ypos)), ypos, pch = pch, xpd = NA, cex = 1.2, col = col)
     text(xpos[2], ypos, categories, cex = .6, xpd = NA, pos = 4)
+    text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, pch.legend, col = par('col.lab'), xpd = NA)
   }
   
-  
+
   
   # text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
 }
@@ -3348,25 +3353,38 @@ reduce_size <- function(x, y, ..., maxPointsPerInch = 25e3, n = 500e3) {
 
 
 legend_cex_continuous <- function(val, cex, col, pch, side, marginLines, cex.legend = '') {
-  
   lab <- format(val, big.mark = ',', digits = 2)
   
-  ypos <- grconvertY(seq(.2, .8, along = val), 'ndc', 'user')
+  if (side == 3) {
+    xpos <- grconvertX(seq(.2, .8, along = val), 'ndc', 'user')
+    ypos <- grconvertY(marginLines[[side]][3:4], 'inches', 'user') 
+    
+    points(xpos, rep(ypos[2], length(xpos)), pch = pch, col = col[1], cex = cex, xpd = NA)
+    text(xpos, ypos[2],  lab, pos = side, cex = .6, xpd = NA)
+    
+    # legend name
+    text(grconvertX(.81, 'ndc', 'user'), ypos[2], cex.legend, pos = 4, col = par('col.lab'), xpd = NA)
+  } else {
+    ypos <- grconvertY(seq(.2, .8, along = val), 'ndc', 'user')
+    xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user') 
+    
+    points(rep(xpos[2], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = NA)
+    text(xpos[2], ypos, lab, pos = side, cex = .6, xpd = NA)
+    
+    # legend name
+    text(xpos[2], grconvertY(.81, 'ndc', 'user'), cex.legend, pos = 3, col = par('col.lab'), xpd = NA)
+  }
   
-  xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user') 
   
-  points(rep(xpos[2], length(ypos)), ypos, pch = pch, col = col[1], cex = cex, xpd = NA)
-  
-  text(xpos[2], ypos, lab, pos = side, cex = .6, xpd = NA)
-  
-  text(xpos[2], grconvertY(.81, 'ndc', 'user'), cex.legend, pos = 3, col = par('col.lab'), xpd = NA)
 }
 
-#### prep_conditional ----
+#### prep_ other args ----
 
 prep_conditional <- function(conditional, defaults = list()) {
   options <- c('mean', 'quantiles', 'lm', 'normalReference', 'density')
   
+  checks(conditional, xnull | xTF | (xcharacter & xplegal(options)) | (xclass('list') & xplegalNames(options)), seealso = '?draw')
+
   output <- setNames(logical(length(options)), options) # all FALSE
   output[names(defaults)] <- unlist(defaults)
   
@@ -3384,6 +3402,30 @@ prep_conditional <- function(conditional, defaults = list()) {
   as.list(output)
   
  
+}
+
+
+
+prep_legend <- function(legend) {
+  # returns a list of legend names (defaulting to '')
+  labels <- list(color = '', pointSize = '', pointStyle = '')
+  
+  checks(legend, xTF | (xclass('list') & xplegalNames(names(labels))), seealso = '?draw')
+  
+  
+  if (is.logical(legend)) {
+    if (!legend) labels <- list() 
+  } else {
+    
+    matches <- pmatch(names(legend), names(labels), nomatch = 0)
+    
+    labels[matches] <- legend[matches > 0]
+    
+    labels <- lapply(labels, \(x) if (is.logical(x)) {if (!is.na(x[1]) && x[1]) ''} else x) # NULL if false
+    labels <- Filter(Negate(is.null), labels)
+  }
+    
+  labels
 }
   
 #### prep_layout ----
