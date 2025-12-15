@@ -40,14 +40,15 @@ for representing and manipulating musical pitch information."></head><body>
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -58,7 +59,7 @@ for representing and manipulating musical pitch information."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>humdrumR and pitch</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-package.R" class="external-link"><code>R/humdrumR-package.R</code></a></small>
+
       <div class="d-none name"><code>humdrumPitch.Rd</code></div>
     </div>
 
@@ -75,8 +76,8 @@ for representing and manipulating musical pitch information.</p>
 
 <p>There are four data types extensively used in <code>humdrumR</code> to encode/process <a href="https://en.wikipedia.org/wiki/Tonality" class="external-link">tonal</a> musical information:</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integers</a> — used to encode "<a href="https://en.wikipedia.org/wiki/Circle_of_fifths" class="external-link">line-of-fifths</a>" tonal information</p></li>
 <li><p><a href="tonalIntervalS4.html">tonalInterval</a> — embeds line-of-fifth tonal integers alongside <a href="https://en.wikipedia.org/wiki/Octave" class="external-link">octave</a>
-and <a href="%22https://en.wikipedia.org/wiki/Cent_(music)%22" class="external-link">cent</a> information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)</p></li>
-<li><p><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> — combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).</p></li>
+and <a href='"https://en.wikipedia.org/wiki/Cent_(music)"' class="external-link">cent</a> information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)</p></li>
+<li><p><a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a> — combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).</p></li>
 <li><p><a href="chordParsing.html">tertianSet</a> — an extension of <code>diatonicSet</code> used to encode  <a href="https://en.wikipedia.org/wiki/Tertian" class="external-link">tertian</a> diatonic harmonies.</p></li>
 </ul><p>Users will rarely need to engage with these data types.
 Rather, users will work with humdrum data where pitch information is encoded in strings, and wish to manipulate and analyze such data.
@@ -92,8 +93,8 @@ which are the bridge between the "core" pitch representations listed above and r
 
 <p><strong>THIS SECTION IS INCOMPLETE</strong></p>
 <p>In addition, there are xxx data types used to encode non-tonal (or <a href="https://en.wikipedia.org/wiki/Atonality" class="external-link">atonal</a>) pitch information.</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integers</a> — used to encode <a href="https://en.wikipedia.org/wiki/Semitone" class="external-link">semitones</a> (as well as <a href="https://en.wikipedia.org/wiki/MIDI" class="external-link">MIDI</a> numbers).</p></li>
-<li><p>xxx — sets?</p></li>
-<li><p>xxx — 12-tone rows?</p></li>
+<li><p>— sets?</p></li>
+<li><p>— 12-tone rows?</p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -101,11 +102,11 @@ which are the bridge between the "core" pitch representations listed above and r
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

@@ -54,6 +54,8 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
@@ -63,7 +65,6 @@
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
@@ -86,7 +87,7 @@ Condit-Schultz</h4>
             
             <h4 data-toc-skip class="date">July 2022</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/RPrimer.Rmd" class="external-link"><code>vignettes/RPrimer.Rmd</code></a></small>
+
       <div class="d-none name"><code>RPrimer.Rmd</code></div>
     </div>
 
@@ -138,7 +139,7 @@ or more input arguments:</p>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2025-10-24 13:15:17 EDT"</span></span></code></pre></div>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2025-12-15 16:53:36 EST"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -391,13 +392,13 @@ too…</p>
 which keep track of all the possible values (“levels”) you expect in
 your data, <em>even when some of those levels are missing from the
 vector</em>. This is mainly useful when we are counting data with
-<code><a href="../reference/distributions.html">table()</a></code>.</p>
+<code><a href="../reference/distribution.html">table()</a></code>.</p>
 <p>For example, let’s consider the built-in R object called
 <code>letters</code>:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>letters</span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="sc">&gt;</span>     [<span class="dv">1</span>] <span class="st">"a"</span> <span class="st">"b"</span> <span class="st">"c"</span> <span class="st">"d"</span> <span class="st">"e"</span> <span class="st">"f"</span> <span class="st">"g"</span> <span class="st">"h"</span> <span class="st">"i"</span> <span class="st">"j"</span> <span class="st">"k"</span> <span class="st">"l"</span> <span class="st">"m"</span> <span class="st">"n"</span> <span class="st">"o"</span> <span class="st">"p"</span> <span class="st">"q"</span> <span class="st">"r"</span> <span class="st">"s"</span></span>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">20</span>] <span class="st">"t"</span> <span class="st">"u"</span> <span class="st">"v"</span> <span class="st">"w"</span> <span class="st">"x"</span> <span class="st">"y"</span> <span class="st">"z"</span></span></code></pre></div>
-<p>What happens if we call <code><a href="../reference/distributions.html">table()</a></code> on
+<p>What happens if we call <code><a href="../reference/distribution.html">table()</a></code> on
 <code>letters</code>?:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a></span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">table</span>(letters)</span>
@@ -790,7 +791,7 @@ also be used to randomize the order of a vector.</li>
 </h3>
 <ul>
 <li>
-<code><a href="../reference/distributions.html">table()</a></code> — Tabulate all unique values in vector, or
+<code><a href="../reference/distribution.html">table()</a></code> — Tabulate all unique values in vector, or
 cross-tabulate across multiple vectors.
 <ul>
 <li>When using
@@ -867,11 +868,11 @@ less keystrokes using the command <code>\()</code> instead of
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer>

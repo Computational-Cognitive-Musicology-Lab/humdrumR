@@ -54,6 +54,8 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
@@ -63,7 +65,6 @@
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
@@ -84,9 +85,9 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2025-10-24</h4>
+            <h4 data-toc-skip class="date">2025-12-15</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/PitchAndTonality.Rmd" class="external-link"><code>vignettes/PitchAndTonality.Rmd</code></a></small>
+
       <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
     </div>
 
@@ -382,7 +383,7 @@ values:</p>
 <span>  <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pullHumdrum.html">pull</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span>main <span class="op">=</span> <span class="st">'Histogram of semits() in 10 chorales'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
 <div class="section level4">
 <h4 id="keys">Keys<a class="anchor" aria-label="anchor" href="#keys"></a>
 </h4>
@@ -622,22 +623,22 @@ if you want to tabulate pitch classes, for example:</p>
 <span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" width="700"></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>generic <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" width="700"></p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span>, generic <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-18-1.png" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="transposition">Transposition<a class="anchor" aria-label="anchor" href="#transposition"></a>
@@ -672,16 +673,16 @@ from a data set, this makes it very easy to, say, transpose all
 <span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span>, transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>to <span class="op">=</span> <span class="st">'C:'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-21-1.png" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" width="700"></p>
 <p>This looks exactly like calling <code><a href="../reference/solfa.html">solfa()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/solfa.html">solfa</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-22-1.png" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -1132,11 +1133,11 @@ for details.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer>

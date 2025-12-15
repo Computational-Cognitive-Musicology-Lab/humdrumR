@@ -4,10 +4,10 @@
 \alias{chordDeparsing}
 \title{Generating ("deparsing") chord representations}
 \description{
-\link{humdrumR} includes a easy-to-use system for
+\link{humdrumR} includes an easy-to-use system for
 generating a variety of tertian harmony (chord) representations,
 which can be flexibly modified by users.
-"Under the hood" \code{humdrumR} represents all tonal chord information using the \link[=tertianSetS4]{same underlying representation},
+"Under the hood" \code{humdrumR} represents all tonal chord information using the \link[=tertianSetS4]{same underlying tertian set representation},
 which is typically extracted from input data using the \link[=chordParsing]{chord parser}.
 This representation can then be "deparsed" into a variety of predefined output formats (like \verb{**harm}),
 or into new formats that you create!

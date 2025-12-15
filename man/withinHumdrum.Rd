@@ -305,7 +305,7 @@ If you \emph{don't} want this to happen, you need to explicitly give a different
 
 Another common/important automatic argument insertion is for functions with a \code{groupby} argument.
 These functions will automatically have appropriate grouping fields inserted into them.
-For example, the \code{\link[=mint]{mint()}} (melodic intervals) command will \emph{automatically} by applied using \code{groupby}
+For example, the \code{\link[=mint]{mint()}} (melodic intervals) command will \emph{automatically} use \code{groupby}
 \code{groupby = list(Piece, Spine, Path)}, which makes sure that melodic intervals are only calculated within
 spine paths...not between pieces/spines/paths (which wouldn't make sense!).
 
@@ -359,13 +359,13 @@ these are true "melodic" n-grams, only created within spine-paths within each pi
 \subsection{Splatted arguments}{
 
 "Splatting" refers to feeding a function a list/vector of arguments.
-Sometimes we want to divide our data into pieces (a l\'a \link[=groupHumdrum]{group_by()}), but
+Sometimes we want to divide our data into pieces (with \link[=groupHumdrum]{group_by()}), but
 rather than applying the same expression to each piece, we want to feed
 the separate pieces as separate arguments to the same function.
 You can use some
-\href{https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic}{syntactic sugar}
+\href{https://en.wikipedia.org/wiki/Syntactic_sugar}{syntactic sugar}
 to do just this.
-We can index any field in our call with a \code{splat} argument, which must be a \code{Field \%in\% x}.
+We can index any field in our call with a \code{splat} argument, which must be some \code{x \%in\% Field}.
 For example,
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> with(list(Token[splat = Spine \%in\% 1:2]))
@@ -404,7 +404,7 @@ You can also quote expressions, using \code{\link[=quote]{quote()}}.
 Once you've quoted an expression you can pass it to
 \code{with()}, \code{within()}, \code{mutate()}, \code{summarize()}, and \code{reframe()}.
 
-Image that you have three different datasets (\code{humData1}, \code{humData2}, and \code{humData3}),
+Imagine that you have three different datasets (\code{humData1}, \code{humData2}, and \code{humData3}),
 and you'd like to evaluate the expression \code{count(kern(Token, simple = TRUE))} in all three.
 Use the \code{~} operator to quote and save that expression to variable, then use it with \code{with()}:
 
@@ -449,7 +449,7 @@ There are seven options:
 \item \code{"pad"}: the result is padded with \code{NA} values.
 \item \code{"ifscalar"}: if the result is scalar (length 1), it is recycled; otherwise you see an error.
 \item \code{"ifeven"}: if the result length evenly divides the input length, it is recycled; otherwise you see an error.
-\item \code{"never"}: The result is not recycled. If the result does not match the input length, you see an error.
+\item \code{"never"}: The result can never be recycled. Unlike "no", "never" treats differing input and output lengths as an error.
 \item \code{"summarize"}: if the result is not scalar, \emph{even if it matches the input length}, you see an error. The result is not recycled.
 }
 
@@ -607,9 +607,9 @@ Finally, the results are then pieced back together in locations corresponding to
 original data locations.
 Since \link[=groupHumdrum]{groups} are necessarily exhaustive and non-overlapping, the results
 location are easy to understand.
-On the other hand \link[=context]{contextual windows} may overlap, which means and non-scalar results
+On the other hand \link[=context]{contextual windows} may overlap, which means any non-scalar results
 could potentially overlap as well;
-in these cases, which result data lands where may be hard to predict.
+in these cases, it may be hard to predict which data lands where.
 }
 
 \examples{

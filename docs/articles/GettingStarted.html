@@ -54,6 +54,8 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
@@ -63,7 +65,6 @@
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
@@ -84,9 +85,9 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2025-10-24</h4>
+            <h4 data-toc-skip class="date">2025-12-15</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/GettingStarted.Rmd" class="external-link"><code>vignettes/GettingStarted.Rmd</code></a></small>
+
       <div class="d-none name"><code>GettingStarted.Rmd</code></div>
     </div>
 
@@ -101,7 +102,7 @@ analyses of humdrum data. Before you continue, make sure
 humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>
 is installed: <a href="https://humdrumr.ccml.gtcmt.gatech.edu/#installing-humdrum_mathbbr" title="Installing humdrumR" class="external-link">how to install humdrumR</a>.<br>
 Once it’s installed, you can open an R session and load the library
-using the command <code><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">library(humdrumR)</a></code>—now you are ready to
+using the command <code><a href="https://humdrumR.ccml.gtcmt.gatech.edu">library(humdrumR)</a></code>—now you are ready to
 rock!</p>
 <p>This article, like all of our articles, closely parallels information
 in
@@ -444,113 +445,129 @@ tutorial</a>.</p>
 </h3>
 <p>Once we have some data loaded, the next thing a good computational
 musicologist does is start counting! To count the contents of data, we
-can use the <code>count()</code> function.</p>
+can use the <code><a href="../reference/count.html">count()</a></code> function.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    humdrumR count distribution 
 &gt;      Token    n
+&gt;        [2d    1
+&gt;        [2e    1
+&gt;        [4a    1
+&gt;        [4A    2
+&gt;        [4B    1
+&gt;        [4c    1
+&gt;        [4d    1
+&gt;        [4e    2
+&gt;        [4E    2
+&gt;        [4f    1
+&gt;       [4f#    1
+&gt;        [4g    4
+&gt;        [4G    2
+&gt;       [8cJ    1
+&gt;       [8CJ    1
+&gt;       [8gJ    1
 &gt;       16AL    1
 &gt;     16B-Jk    1
+&gt;    16b-XJJ    1
 &gt;     16BBJJ    1
 &gt;      16BJJ    1
 &gt;      16C#L    1
-&gt;      16EJJ    1
-&gt;      16F#L    1
-&gt;    16b-XJJ    1
 &gt;     16c#LL    1
 &gt;      16ccL    1
 &gt;     16ccLL    1
 &gt;     16d#JJ    1
-&gt;      16dJJ    2
 &gt;     16ddJJ    1
+&gt;      16dJJ    2
+&gt;      16EJJ    1
 &gt;       16eL    2
+&gt;      16F#L    1
 &gt;        1e;    1
+&gt;       2.a;    1
 &gt;       2.A;    1
 &gt;      2.AA;    1
-&gt;       2.B;    1
-&gt;      2.BB;    1
-&gt;       2.C#    1
-&gt;      2.FF;    1
-&gt;      2.GG;    1
-&gt;       2.a;    1
 &gt;        2.b    1
 &gt;       2.b;    1
-&gt;      2.c#;    1
+&gt;       2.B;    1
+&gt;      2.BB;    1
 &gt;       2.c;    1
+&gt;       2.C#    1
+&gt;      2.c#;    1
 &gt;        2.d    1
 &gt;       2.d;    2
 &gt;        2.e    1
 &gt;       2.e;    1
 &gt;       2.ee    1
-&gt;      2.f#;    1
 &gt;       2.f;    1
+&gt;      2.f#;    1
+&gt;      2.FF;    1
 &gt;       2.g;    1
+&gt;      2.GG;    1
+&gt;         2a   17
 &gt;         2A   10
+&gt;       2a-;    1
 &gt;       2A-;    2
+&gt;        2a;    9
 &gt;        2A;    2
 &gt;      2AA-;    1
 &gt;       2AA;    4
+&gt;         2b   10
 &gt;         2B    2
+&gt;       2b-;    1
+&gt;        2b;    3
 &gt;        2B;    8
 &gt;        2BB    2
 &gt;      2BB-;    1
 &gt;       2BB;    1
-&gt;         2C    1
-&gt;        2C;    1
-&gt;         2D    5
-&gt;        2D#    1
-&gt;        2D;    5
-&gt;       2DnX    1
-&gt;         2E    4
-&gt;        2E#    1
-&gt;        2E;    5
-&gt;       2EE;    1
-&gt;        2F#    4
-&gt;       2F#;    1
-&gt;      2FF#;    1
-&gt;       2FF;    3
-&gt;         2G    1
-&gt;        2G#    1
-&gt;       2G#;    4
-&gt;      2G#X;    1
-&gt;        2G;    1
-&gt;       2GG;    2
-&gt;         2a   17
-&gt;       2a-;    1
-&gt;        2a;    9
-&gt;         2b   10
-&gt;       2b-;    1
-&gt;        2b;    3
 &gt;         2c    1
+&gt;         2C    1
+&gt;        2c;    6
+&gt;        2C;    1
 &gt;        2c#    5
 &gt;       2c#;    3
-&gt;        2c;    6
 &gt;        2cc    3
 &gt;       2cc#    3
 &gt;      2cc#;    1
 &gt;         2d    6
-&gt;        2d#    1
-&gt;       2d#;    1
+&gt;         2D    5
 &gt;       2d-;    1
 &gt;        2d;    6
+&gt;        2D;    5
+&gt;        2d#    1
+&gt;        2D#    1
+&gt;       2d#;    1
 &gt;        2dd    8
+&gt;       2DnX    1
 &gt;         2e   13
+&gt;         2E    4
 &gt;       2e-;    1
 &gt;        2e;    9
-&gt;        2f#   10
-&gt;       2f#;    5
+&gt;        2E;    5
+&gt;        2E#    1
+&gt;       2EE;    1
 &gt;        2f;    4
+&gt;        2f#   10
+&gt;        2F#    4
+&gt;       2f#;    5
+&gt;       2F#;    1
+&gt;       2FF;    3
+&gt;      2FF#;    1
 &gt;         2g    7
-&gt;        2g#    4
-&gt;       2g#;    1
+&gt;         2G    1
 &gt;        2g;    3
-&gt;        4.B    3
-&gt;       4.BB    2
+&gt;        2G;    1
+&gt;        2g#    4
+&gt;        2G#    1
+&gt;       2g#;    1
+&gt;       2G#;    4
+&gt;      2G#X;    1
+&gt;       2GG;    2
 &gt;        4.a    2
 &gt;       4.a-    1
 &gt;        4.b    2
+&gt;        4.B    3
 &gt;       4.b-    2
+&gt;       4.BB    2
 &gt;        4.c    1
 &gt;      4.cc#    1
 &gt;        4.d    1
@@ -561,278 +578,262 @@ can use the <code>count()</code> function.</p>
 &gt;        4.f    3
 &gt;       4.f#    1
 &gt;        4.g    5
+&gt;         4a   90
 &gt;         4A   58
-&gt;        4A#    2
+&gt;        4a-   15
 &gt;        4A-    4
+&gt;       4a-;    2
 &gt;       4A-;    2
+&gt;       4a-X    1
+&gt;        4a;    8
 &gt;        4A;    3
+&gt;        4a#    4
+&gt;        4A#    2
 &gt;        4AA   20
-&gt;       4AA#    1
 &gt;       4AA-    2
 &gt;      4AA-;    1
 &gt;       4AA;    5
+&gt;       4AA#    1
+&gt;       4anX    1
+&gt;         4b   81
 &gt;         4B   56
+&gt;        4b-   16
 &gt;        4B-   10
 &gt;       4B-X    1
+&gt;        4b;    9
 &gt;        4B;    9
+&gt;        4B]    1
 &gt;        4BB   25
 &gt;       4BB-    7
 &gt;       4BB;    3
-&gt;        4B]    1
-&gt;         4C   23
-&gt;        4C#   19
-&gt;       4C#;    1
-&gt;        4C;    2
-&gt;       4CnX    1
-&gt;         4D   30
-&gt;        4D#    8
-&gt;        4D-    4
-&gt;        4D;    4
-&gt;        4DD    1
-&gt;       4DnX    1
-&gt;         4E   43
-&gt;        4E#    2
-&gt;       4E#X    1
-&gt;        4E-    6
-&gt;        4E;    7
-&gt;        4EE    2
-&gt;       4EE;    2
-&gt;        4E]    1
-&gt;       4EnX    1
-&gt;         4F   12
-&gt;        4F#   30
-&gt;       4F#;    2
-&gt;       4F#X    1
-&gt;      4F#X;    1
-&gt;        4F;    2
-&gt;        4FF    3
-&gt;       4FF#    2
-&gt;       4FF;    1
-&gt;         4G   33
-&gt;        4G#   21
-&gt;       4G#;    3
-&gt;       4G#X    1
-&gt;      4G#X;    1
-&gt;        4G;    3
-&gt;        4GG   15
-&gt;       4GG#    2
-&gt;       4GG;    5
-&gt;        4G]    1
-&gt;       4GnX    1
-&gt;         4a   90
-&gt;        4a#    4
-&gt;        4a-   15
-&gt;       4a-;    2
-&gt;       4a-X    1
-&gt;        4a;    8
-&gt;       4anX    1
-&gt;         4b   81
-&gt;        4b-   16
-&gt;        4b;    9
 &gt;         4c   49
-&gt;        4c#   27
-&gt;       4c#;    2
+&gt;         4C   23
 &gt;        4c;    8
+&gt;        4C;    2
 &gt;        4c]    1
+&gt;        4c#   27
+&gt;        4C#   19
+&gt;       4c#;    2
+&gt;       4C#;    1
 &gt;        4cc   48
-&gt;       4cc#   28
 &gt;       4cc;    3
+&gt;       4cc#   28
 &gt;      4ccnX    1
+&gt;       4CnX    1
 &gt;         4d   53
-&gt;        4d#    9
-&gt;       4d#;    3
+&gt;         4D   30
 &gt;        4d-    9
+&gt;        4D-    4
 &gt;        4d;    8
+&gt;        4D;    4
 &gt;        4d]    1
+&gt;        4d#    9
+&gt;        4D#    8
+&gt;       4d#;    3
 &gt;        4dd   29
-&gt;       4dd#    3
+&gt;        4DD    1
 &gt;       4dd-    7
 &gt;       4dd;    2
+&gt;       4dd#    3
 &gt;       4dnX    2
+&gt;       4DnX    1
 &gt;         4e  103
-&gt;        4e#    3
-&gt;       4e#;    1
+&gt;         4E   43
 &gt;        4e-    7
+&gt;        4E-    6
 &gt;       4e-;    2
 &gt;        4e;   14
+&gt;        4E;    7
 &gt;        4e]    1
+&gt;        4E]    1
+&gt;        4e#    3
+&gt;        4E#    2
+&gt;       4e#;    1
+&gt;       4E#X    1
 &gt;        4ee   20
+&gt;        4EE    2
 &gt;       4ee-    3
 &gt;      4ee-X    1
 &gt;       4ee;    1
+&gt;       4EE;    2
 &gt;       4enX    1
+&gt;       4EnX    1
 &gt;         4f   50
-&gt;        4f#   47
-&gt;       4f#;    4
+&gt;         4F   12
 &gt;        4f;    2
+&gt;        4F;    2
+&gt;        4f#   47
+&gt;        4F#   30
+&gt;       4f#;    4
+&gt;       4F#;    2
+&gt;       4F#X    1
+&gt;      4F#X;    1
 &gt;        4ff    6
-&gt;       4ff#    1
+&gt;        4FF    3
 &gt;       4ff;    1
+&gt;       4FF;    1
+&gt;       4ff#    1
+&gt;       4FF#    2
 &gt;         4g   66
-&gt;        4g#   34
-&gt;       4g#;    5
+&gt;         4G   33
 &gt;        4g-    1
 &gt;        4g;    8
+&gt;        4G;    3
 &gt;        4g]    2
+&gt;        4G]    1
+&gt;        4g#   34
+&gt;        4G#   21
+&gt;       4g#;    5
+&gt;       4G#;    3
+&gt;       4G#X    1
+&gt;      4G#X;    1
 &gt;        4gg    1
+&gt;        4GG   15
+&gt;       4GG;    5
+&gt;       4GG#    2
 &gt;       4gnX    1
+&gt;       4GnX    1
 &gt;         4r    2
 &gt;        4ry    2
 &gt;       8.cL    1
+&gt;         8a    5
 &gt;         8A    5
-&gt;        8A#    2
-&gt;       8A#J    1
+&gt;        8a-    2
 &gt;        8A-    1
+&gt;       8a-J    2
 &gt;       8A-J    1
+&gt;       8a-L    4
 &gt;       8A-L    1
+&gt;      8a-XJ    1
+&gt;        8A#    2
+&gt;       8a#J    1
+&gt;       8A#J    1
 &gt;        8AA    3
 &gt;       8AA-    1
 &gt;       8AAJ    7
 &gt;       8AAL    4
+&gt;        8aJ   15
 &gt;        8AJ   17
+&gt;        8aL   10
 &gt;        8AL   12
+&gt;       8aL]    1
 &gt;       8AL]    2
 &gt;      8AnXL    1
+&gt;         8b    2
+&gt;        8b-    1
 &gt;        8B-    1
+&gt;       8b-J    1
 &gt;       8B-J    6
+&gt;       8b-L    2
 &gt;        8BB    3
 &gt;      8BB-J    6
 &gt;      8BB-L    3
 &gt;       8BBJ    6
 &gt;       8BBL    4
+&gt;        8bJ   11
 &gt;        8BJ   15
+&gt;        8bL   14
 &gt;        8BL   18
+&gt;         8c    1
 &gt;         8C    5
 &gt;        8C#    2
-&gt;       8C#J    2
-&gt;       8C#L    4
-&gt;        8CJ    8
-&gt;        8CL   14
-&gt;       8CL]    1
-&gt;         8D    3
-&gt;       8D#J    1
-&gt;       8D#L    2
-&gt;        8D-    6
-&gt;       8D-J    4
-&gt;       8D-L    2
-&gt;        8DJ   15
-&gt;        8DL    6
-&gt;         8E    2
-&gt;        8E-    6
-&gt;       8E-J    1
-&gt;       8E-L    4
-&gt;       8EEJ    1
-&gt;       8EEL    1
-&gt;        8EJ    7
-&gt;        8EL   15
-&gt;       8EL]    1
-&gt;         8F    4
-&gt;        8F#    3
-&gt;       8F#J   14
-&gt;       8F#L    7
-&gt;      8F#XJ    1
-&gt;      8FF#J    2
-&gt;       8FFL    2
-&gt;        8FJ    5
-&gt;        8FL    6
-&gt;      8FnXL    1
-&gt;         8G    4
-&gt;        8G#    4
-&gt;       8G#J    7
-&gt;       8G#L    3
-&gt;        8GG    2
-&gt;       8GGJ    2
-&gt;       8GGL    2
-&gt;        8GJ    8
-&gt;        8GL   17
-&gt;       8GL]    1
-&gt;      8GnXL    1
-&gt;         8a    5
-&gt;       8a#J    1
-&gt;        8a-    2
-&gt;       8a-J    2
-&gt;       8a-L    4
-&gt;      8a-XJ    1
-&gt;        8aJ   15
-&gt;        8aL   10
-&gt;       8aL]    1
-&gt;         8b    2
-&gt;        8b-    1
-&gt;       8b-J    1
-&gt;       8b-L    2
-&gt;        8bJ   11
-&gt;        8bL   14
-&gt;         8c    1
 &gt;       8c#J    3
+&gt;       8C#J    2
 &gt;       8c#L    5
+&gt;       8C#L    4
 &gt;      8c#XJ    1
-&gt;        8cJ   15
-&gt;        8cL   14
-&gt;       8cL]    1
 &gt;        8cc    2
 &gt;      8cc#J    2
 &gt;      8cc#L    2
 &gt;       8ccJ    7
 &gt;       8ccL    7
+&gt;        8cJ   15
+&gt;        8CJ    8
+&gt;        8cL   14
+&gt;        8CL   14
+&gt;       8cL]    1
+&gt;       8CL]    1
 &gt;      8cnXJ    1
 &gt;         8d    5
-&gt;       8d#J    5
-&gt;       8d#L    1
+&gt;         8D    3
 &gt;        8d-    1
+&gt;        8D-    6
+&gt;       8D-J    4
+&gt;       8D-L    2
 &gt;      8d-XJ    1
-&gt;        8dJ   19
-&gt;        8dL   24
-&gt;       8dL]    1
+&gt;       8d#J    5
+&gt;       8D#J    1
+&gt;       8d#L    1
+&gt;       8D#L    2
 &gt;        8dd    1
 &gt;      8dd#J    1
 &gt;       8ddJ    2
 &gt;       8ddL    4
+&gt;        8dJ   19
+&gt;        8DJ   15
+&gt;        8dL   24
+&gt;        8DL    6
+&gt;       8dL]    1
 &gt;       8dnJ    1
 &gt;         8e    6
+&gt;         8E    2
+&gt;        8E-    6
 &gt;       8e-J    1
+&gt;       8E-J    1
 &gt;       8e-L    1
-&gt;        8eJ   20
-&gt;        8eL   35
-&gt;       8eL]    2
+&gt;       8E-L    4
+&gt;       8EEJ    1
 &gt;       8eeL    2
+&gt;       8EEL    1
+&gt;        8eJ   20
+&gt;        8EJ    7
+&gt;        8eL   35
+&gt;        8EL   15
+&gt;       8eL]    2
+&gt;       8EL]    1
 &gt;         8f    3
+&gt;         8F    4
 &gt;        8f#    2
+&gt;        8F#    3
 &gt;       8f#J   26
+&gt;       8F#J   14
 &gt;       8f#L   12
+&gt;       8F#L    7
 &gt;      8f#L]    1
+&gt;      8F#XJ    1
 &gt;      8f#XL    1
+&gt;      8FF#J    2
+&gt;       8FFL    2
 &gt;        8fJ    4
+&gt;        8FJ    5
 &gt;        8fL    5
+&gt;        8FL    6
 &gt;       8fL]    1
+&gt;      8FnXL    1
 &gt;         8g    3
+&gt;         8G    4
 &gt;        8g#    4
+&gt;        8G#    4
 &gt;       8g#J    7
+&gt;       8G#J    7
 &gt;       8g#L    5
+&gt;       8G#L    3
 &gt;      8g#XJ    1
+&gt;        8GG    2
+&gt;       8GGJ    2
+&gt;       8GGL    2
 &gt;        8gJ   14
+&gt;        8GJ    8
 &gt;        8gL   14
+&gt;        8GL   17
 &gt;       8gL]    3
+&gt;       8GL]    1
 &gt;      8gnXL    2
-&gt;        [2d    1
-&gt;        [2e    1
-&gt;        [4A    2
-&gt;        [4B    1
-&gt;        [4E    2
-&gt;        [4G    2
-&gt;        [4a    1
-&gt;        [4c    1
-&gt;        [4d    1
-&gt;        [4e    2
-&gt;        [4f    1
-&gt;       [4f#    1
-&gt;        [4g    4
-&gt;       [8CJ    1
-&gt;       [8cJ    1
-&gt;       [8gJ    1
+&gt;      8GnXL    1
 &gt;      Token    n
 &gt;    humdrumR count distribution</code></pre>
 <p>That’s quite a mess! What have we done? When we pass our
-<code>chorales</code> data to <code>count()</code>, it counted all the
+<code>chorales</code> data to <code><a href="../reference/count.html">count()</a></code>, it counted all the
 unique data tokens (ignoring non-data tokens, like barline and
 interpretations) in the data. There are a <em>lot</em> of unique tokens
 in this data, so it’s not super helpful. Maybe we’d like to look at just
@@ -966,7 +967,7 @@ pitch</a> notation. Let’s pass <em>that</em> to count:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    humdrumR count distribution 
 &gt;    Pitch    n
 &gt;       C2    .
@@ -1080,9 +1081,9 @@ humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semant
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="GettingStarted_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<p><img src="GettingStarted_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
 <p>Instead of pitch, we could do the same sort of counting of rhythm
 information, for example, using the <code><a href="../reference/notehead.html">notehead()</a></code>
 function:</p>
@@ -1090,9 +1091,9 @@ function:</p>
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/notehead.html">notehead</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">count</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="GettingStarted_files/figure-html/unnamed-chunk-15-1.png" width="700"></p>
+<p><img src="GettingStarted_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" width="700"></p>
 </div>
 </div>
 <div class="section level3">
@@ -1193,11 +1194,11 @@ complex humdrum data sets.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer>

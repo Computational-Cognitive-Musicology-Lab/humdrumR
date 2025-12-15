@@ -81,7 +81,7 @@ Must be \code{character}.}
 }
 \description{
 The \link{humdrumR} \strong{regular-expression method dispatch system}
-is a simple system for making new functions which can by smartly
+is a simple system for making new functions which can be smartly
 applied to a variety of character strings.
 Humdrum dispatch works like normal R method dispatch, but instead of dispatching specific methods
 based on their class (\code{integer}, \code{character}, etc.) it dispatches based on regular expressions.

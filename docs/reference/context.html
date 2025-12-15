@@ -3,26 +3,26 @@
 into arbitrary contextual windows.
 Unlike grouping vectors,
 context() windows 1) are always contiguous relative to the reference vector(s)/field(s)
-(which can depend on order); 2) can overlap; and 3) don't necesarily exhaustively
+(which can depend on order); 2) can overlap; and 3) don't necessarily exhaustively
 divide the data.
 The context() function should generally be called on
 humdrumR data, but it can also be called directly on vectors.
 The uncontext() function removes contextual windows
 from a humdrumR data object.
 Once contextual windows are created, the windows() function can be used to
-view a data.table representing these windows.
+view a data.table::data.table representing these windows.
 The Open and Close columns indicate row indices in the humdrum table."><meta property="og:description" content="The context() command can be used to group input data (vectors or fields)
 into arbitrary contextual windows.
 Unlike grouping vectors,
 context() windows 1) are always contiguous relative to the reference vector(s)/field(s)
-(which can depend on order); 2) can overlap; and 3) don't necesarily exhaustively
+(which can depend on order); 2) can overlap; and 3) don't necessarily exhaustively
 divide the data.
 The context() function should generally be called on
 humdrumR data, but it can also be called directly on vectors.
 The uncontext() function removes contextual windows
 from a humdrumR data object.
 Once contextual windows are created, the windows() function can be used to
-view a data.table representing these windows.
+view a data.table::data.table representing these windows.
 The Open and Close columns indicate row indices in the humdrum table."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -62,14 +62,15 @@ The Open and Close columns indicate row indices in the humdrum table."></head><b
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -80,7 +81,7 @@ The Open and Close columns indicate row indices in the humdrum table."></head><b
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Group vectors into contextual windows</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Context.R" class="external-link"><code>R/Context.R</code></a></small>
+
       <div class="d-none name"><code>context.Rd</code></div>
     </div>
 
@@ -89,14 +90,14 @@ The Open and Close columns indicate row indices in the humdrum table."></head><b
 into arbitrary contextual windows.
 Unlike <a href="groupHumdrum.html">grouping vectors</a>,
 <code>context()</code> windows 1) are always contiguous relative to the reference vector(s)/field(s)
-(which can depend on order); 2) can <em>overlap</em>; and 3) don't necesarily exhaustively
+(which can depend on <a href="https://dplyr.tidyverse.org/reference/order_by.html" class="external-link">order</a>); 2) can <em>overlap</em>; and 3) don't necessarily exhaustively
 divide the data.
 The <code>context()</code> function should generally be called on
 <a href="humdrumRclass.html">humdrumR data</a>, but it can also be called directly on vectors.</p>
 <p>The <code>uncontext()</code> function removes contextual windows
 from a <a href="humdrumRclass.html">humdrumR data object</a>.</p>
 <p>Once contextual windows are created, the <code>windows()</code> function can be used to
-view a data.table representing these windows.
+view a <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a> representing these windows.
 The <code>Open</code> and <code>Close</code> columns indicate row indices in the <a href="humTable.html">humdrum table</a>.</p>
     </div>
 
@@ -264,10 +265,10 @@ In calls to <a href="withinHumdrum.html">with/within.humdrumR</a>, <code>groupby
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The <code>context()</code> function determines where contextual windows will begin and end based on
-expressions in its <code>open</code> and <code>close</code> arguments.
+<a href="evaluatingExpressions.html">expressions</a> in its <code>open</code> and <code>close</code> arguments.
 These <code>open</code> and <code>close</code> expressions are evaluated using a <strong>reference</strong> <a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a>, or set of vectors/<code><a href="humTable.html">fields()</a></code> that are all
 the same length.</p>
-<p>In most cases, we'll apply <code>context()</code> to a humdrumR data object, so windows are defined by
+<p>In most cases, we'll apply <code>context()</code> to a <a href="humdrumRclass.html">humdrumR data object</a>, so windows are defined by
 evaluating the <code>open</code> and <code>close</code> arguments using the <code><a href="humTable.html">fields()</a></code> of the humdrum table as the reference.
 Once this has been done, the humdrumR object will <a href="humdrumRclass.html">show</a> how many windows
 have been identified when printed in the console.
@@ -370,7 +371,9 @@ once windowing is done.</p>
 <li><p><code>prevclose</code>: represents the index of the <em>previous</em> close—can only be used in the <code>open</code> argument.</p></li>
 <li><p><code>end</code>: represents the last index of the <code>reference</code> vector(s).</p></li>
 <li><p><code>|</code>: As in "OR"—specify alternative window <code>open</code>/<code>close</code> criteria.</p></li>
-</ul><p><code>What if we'd like each of our windows to close right before the next window opens? We can do this by making the</code>close<code>argument refer to the *next*</code>open<code>, by referring to the </code>nextopen` variable:</p>
+</ul><p>What if we'd like each of our windows to close right before the next window opens?
+We can do this by making the <code>close</code> argument refer to the <em>next</em> <code>open</code>, by
+referring to the <code>nextopen</code> variable:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> <span class="st">'[aeiou]'</span>, <span class="at">close =</span> nextopen <span class="sc">-</span> <span class="dv">1</span><span class="dt">L</span>)</span></code></pre><p></p></div>
 <p>Conversely, <code>open</code> can refer to the <code>prevclose</code> close:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(letters, <span class="at">open =</span> prevclose <span class="sc">+</span> <span class="dv">1</span>, <span class="at">close =</span> <span class="st">'[aeiou]'</span>, <span class="at">alignToOpen =</span> <span class="cn">FALSE</span>)</span></code></pre><p></p></div>
@@ -446,9 +449,9 @@ This can be overrriden by providing your own explicit <code>groupby</code> argum
 
 
 <p>Once <code>open</code> and <code>close</code> have identified where windows can start and end, there is still
-some options for which open and close indices to associate with each other to create a window.
-For example, as mentioned above, the <code>groupby</code> argument can be used to make sure windows to cross
-grouping boundaries—even if one group has and extra open index and the next an extra close index.
+some options for open and close indices to associate with each other to create a window.
+For example, as mentioned above, the <code>groupby</code> argument can be used to make sure windows do not cross
+grouping boundaries—even if one group has an extra open index and the next group has an extra close index.
 The minimum and maximum length of windows can also be controlled using the <code>min_length</code> and <code>max_length</code> arguments.
 The <code>overlap</code>, <code>depth</code>, <code>rightward</code>, and <code>duplicate_indices</code> arguments provide a number of additional options,
 which are useful for some use cases (details below).</p><div class="section">
@@ -460,28 +463,43 @@ In <code>**kern</code>, phrases are indicated with opening (<code>(</code>) and 
 which we can capture with regular expressions for <code>open</code> and <code>close</code>.
 Here is an example:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>nesting1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'(a'</span>, <span class="st">'b)'</span>, <span class="st">'(c'</span>, <span class="st">'d'</span>, <span class="st">'e)'</span>, <span class="st">'(d'</span>, <span class="st">'e'</span>, <span class="st">'f)'</span>, <span class="st">'(e'</span>, <span class="st">'f'</span>, <span class="st">'f#'</span>, <span class="st">'g'</span>, <span class="st">'g#'</span>, <span class="st">'a)'</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">context</span>(nesting1, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>)</span></code></pre><p></p></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">context</span>(nesting1, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; [1] "(a,b)"           "(c,d,e)"         "(d,e,f)"         "(e,f,f#,g,g#,a)"</span></span></code></pre><p></p></div>
 <p>Perfect.
 However, what if there are nested phrasing indicators?</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>nesting2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">'(a'</span>, <span class="st">'b)'</span>, <span class="st">'(c'</span>, <span class="st">'(d'</span>, <span class="st">'e)'</span>,  <span class="st">'(d'</span>, <span class="st">'e)'</span>, <span class="st">'f)'</span>, <span class="st">'(e'</span>, <span class="st">'(f'</span>, <span class="st">'(f#'</span>, <span class="st">'g)'</span>, <span class="st">'g#)'</span>, <span class="st">'a)'</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>)</span></code></pre><p></p></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; [1] "(a,b)"         "(c,(d,e)"      "(d,e),(d,e)"   "(d,e),f)"      "(e,(f,(f#,g)"  "(f,(f#,g),g#)" "(f#,g),g#),a)"</span></span></code></pre><p></p></div>
 <p>That's not what we want!
 By default, <code>context()</code> "pairs" each <code>open</code> with the next <code>close</code>, which often makes the most sense.
 But in this case, we want different behavior.
 We can get what we want by specifying <code>overlap = 'nested'</code>:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(d,e)"               "(d,e)"</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; [5] "(e,(f,(f#,g),g#),a)" "(f,(f#,g),g#)"       "(f#,g)"</span></span></code></pre><p></p></div>
 <p>Now context aligns each <code>open</code> with the corresponding <code>close</code> at the same <em>nesting level</em>.
 What if we are only interested in the highest (or lowest) level of nesting?
 Use the <code>depth</code> argument, which can be non-zero integers: the highest level is <code>1</code>,
 with "deeper" levels incrementing up.</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="dv">1</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="dv">2</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>)</span></code></pre><p></p></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(e,(f,(f#,g),g#),a)"</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="dv">2</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)"</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)" "(f#,g)"</span></span></code></pre><p></p></div>
 <p>You can also use negative <code>depth</code> to specify from the deepest levels outward.
 For example, in this case  <code>depth == -1</code> should get us that deepest level:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="sc">-</span><span class="dv">1</span>)</span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">context</span>(nesting2, <span class="at">open =</span> <span class="st">'('</span>, <span class="at">close =</span> <span class="st">')'</span>, <span class="at">overlap =</span> <span class="st">'nested'</span>, <span class="at">depth =</span> <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [1] "(f#,g)"</span></span></code></pre><p></p></div>
 <p>If <code>depth</code> is <code>NULL</code> (the default), all depths are returned.</p>
 </div>
 
@@ -541,8 +559,9 @@ by using a <code>complement</code> argument, similar to the <code><a href="subse
 The <code>complement</code> must be an existing field in the data.
 If <code>uncontext()</code> is used with a given complement field, the currently
 selected data field (unless <code>Token</code> is selected) has the contents of the complement
-field inserted into it all points outside the contextual windows.
-This can be used to keep</p>
+field inserted into it at all points outside the contextual windows.
+This can be used to preserve non-contextual data while displaying it alongside
+contextual transformations.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -585,26 +604,10 @@ This can be used to keep</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># within.humdrumR</span></span></span>
-<span class="r-in"><span><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/.*.krn"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># 4-grams</span></span></span>
-<span class="r-in"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">context</span><span class="op">(</span>open <span class="op">=</span> <span class="fu"><a href="hop.html">hop</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">open</span> <span class="op">+</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Token</span>, collapse <span class="op">=</span> <span class="st">','</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span>       </span></span>
-<span class="r-in"><span><span class="co"># phrases leading to fermatas</span></span></span>
-<span class="r-in"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu">context</span><span class="op">(</span>open <span class="op">=</span> <span class="fl">1</span> <span class="op">|</span> <span class="va">prevclose</span> <span class="op">+</span> <span class="fl">1</span>, close <span class="op">=</span> <span class="st">';'</span>, overlap <span class="op">=</span> <span class="st">'none'</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Token</span>, collapse <span class="op">=</span> <span class="st">','</span><span class="op">)</span>, alignLeft <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  </span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/Users/ling/Desktop/humdrumR/inst/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -718,11 +721,11 @@ This can be used to keep</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

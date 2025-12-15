@@ -5,25 +5,25 @@ dur() outputs a character string encoding the humdrum **dur
 representation of time.
 If seconds() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x.
+If no field names are specified, the first selected field is used as x.
 If ms() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x.
+If no field names are specified, the first selected field is used as x.
 If dur() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x."><meta property="og:description" content="These functions convert duration values to clock-time representations.
+If no field names are specified, the first selected field is used as x."><meta property="og:description" content="These functions convert duration values to clock-time representations.
 seconds() and ms() output numeric values.
 dur() outputs a character string encoding the humdrum **dur
 representation of time.
 If seconds() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x.
+If no field names are specified, the first selected field is used as x.
 If ms() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x.
+If no field names are specified, the first selected field is used as x.
 If dur() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x."></head><body>
+If no field names are specified, the first selected field is used as x."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -62,14 +62,15 @@ If no field names are specified, the first selectedField is used as x."></head><
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -80,7 +81,7 @@ If no field names are specified, the first selectedField is used as x."></head><
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Clock-time representations of duration</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Rhythm.R" class="external-link"><code>R/Rhythm.R</code></a></small>
+
       <div class="d-none name"><code>time.Rd</code></div>
     </div>
 
@@ -91,13 +92,13 @@ If no field names are specified, the first selectedField is used as x."></head><
 representation of time.</p>
 <p>If <code>seconds()</code> is applied to a <a href="humdrumRclass.html">humdrumR data class</a>
 you may use the data's <a href="humTable.html">fields</a> as arguments.
-If no field names are specified, the first selectedField is used as <code>x</code>.</p>
+If no field names are specified, the first <a href="selectedFields.html">selected field</a> is used as <code>x</code>.</p>
 <p>If <code>ms()</code> is applied to a <a href="humdrumRclass.html">humdrumR data class</a>
 you may use the data's <a href="humTable.html">fields</a> as arguments.
-If no field names are specified, the first selectedField is used as <code>x</code>.</p>
+If no field names are specified, the first <a href="selectedFields.html">selected field</a> is used as <code>x</code>.</p>
 <p>If <code>dur()</code> is applied to a <a href="humdrumRclass.html">humdrumR data class</a>
 you may use the data's <a href="humTable.html">fields</a> as arguments.
-If no field names are specified, the first selectedField is used as <code>x</code>.</p>
+If no field names are specified, the first <a href="selectedFields.html">selected field</a> is used as <code>x</code>.</p>
     </div>
 
     <div class="section level2">
@@ -257,7 +258,7 @@ For example, if <code>minutes = FALSE</code>, an input of 90 seconds will return
 read about the <a href="rhythmFunctions.html">family of rhythm functions</a>,
 or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDeparsing.html">deparsed</a>.</p>
 <p>Other time functions:
-<code><a href="bpm2sec.html">bpm2sec</a>()</code></p></div>
+<code><a href="bpm2sec.html">bpm2sec()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -296,11 +297,21 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-out co"><span class="r-pr">#&gt;</span> **dur (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] :5     :15    :45    :2:35  :41:40</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">B075</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing one file...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">B075</span><span class="op">[[</span>,<span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span>, <span class="fu">seconds</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **seconds (numeric)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1.0 2.0 2.0 1.0 1.0 1.0 1.0 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 1.0 1.0 1.0 1.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [20] 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.0 0.0 1.0 1.0 1.0 1.0 0.5 0.5 0.5 0.5 0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [39] 0.5 0.5 0.5 1.0 1.0 1.0</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
@@ -310,11 +321,11 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

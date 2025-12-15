@@ -38,14 +38,15 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -56,7 +57,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+
     </div>
 
     <div class="section level2">
@@ -83,7 +84,7 @@
 <p>In previous versions, an error would occur if you used <code>::</code> inside any of the fundamental humdrumR “with/within” methods (including <code>base</code> functions and <code>dplyr</code> “verbs”). We’ve fixed this bug.</p>
 <hr><p>We’ve also added a new feature; specifically, we’ve made using <code>::</code> in humdrumR less necessary. Now, within a humdrumR call to any of these methods (listed below), if you use any function exported by humdrumR, humdrumR will automatically use the humdrumR version of that function, even if another package you have attached includes a function with same name. In other words, the humdrumR namespace will always takes priority within a humdrumR method call.</p>
 <p>For example, the <code>dplyr</code> package exports a function called <code><a href="../reference/lag.html">lag()</a></code> and so does humdrumR (these functions do the same thing, but humdrumR’s version has a few extra features). Before this update, if you loaded <code>dplyr</code> <em>after</em> you loaded humdrumR, then <code>dplyr</code>’s <code><a href="../reference/lag.html">lag()</a></code> function would generally take priority over humdrumR’s <code><a href="../reference/lag.html">lag()</a></code>. So, code like this</p>
-<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR" class="external-link">humdrumR</a></span><span class="op">)</span></span>
+<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://humdrumR.ccml.gtcmt.gatech.edu">humdrumR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span>
@@ -104,12 +105,12 @@
 <h2 class="pkg-version" data-toc-text="7.0.3" id="humdrumr-703">humdrumR 7.0.3<a class="anchor" aria-label="anchor" href="#humdrumr-703"></a></h2>
 <div class="section level4">
 <h4 id="count-and-table-7-0-3">count() and table()<a class="anchor" aria-label="anchor" href="#count-and-table-7-0-3"></a></h4>
-<p>We wanted to use the <code>tally()</code> as humdrumR’s main “count stuff” function. Unfortunately, we found that <code>tally()</code> already exists in <code>dplyr</code> and it (the generic <code>tally</code>) can’t really be extended as we’d like. We’ve reimplemented everything focusing on an extension of the <code><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">dplyr::count()</a></code> function. This also necessitated renaming a <em>our</em> (metric) <code>count()</code> function to <code><a href="../reference/timecount.html">timecount()</a></code>. Our <code>count()</code> method now generates a cool “distribution” table, which is easily to manipulate. This is all mostly working pretty well, but is still a work in progress and not documented.</p>
-<p>We’ve also extended <code><a href="https://rdrr.io/r/base/table.html" class="external-link">base::table()</a></code> to work with humdrumR data, but we’ll be emphasizing using <code>count()</code> in our documentation.</p>
+<p>We wanted to use the <code>tally()</code> as humdrumR’s main “count stuff” function. Unfortunately, we found that <code>tally()</code> already exists in <code>dplyr</code> and it (the generic <code>tally</code>) can’t really be extended as we’d like. We’ve reimplemented everything focusing on an extension of the <code><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">dplyr::count()</a></code> function. This also necessitated renaming a <em>our</em> (metric) <code><a href="../reference/count.html">count()</a></code> function to <code><a href="../reference/timecount.html">timecount()</a></code>. Our <code><a href="../reference/count.html">count()</a></code> method now generates a cool “distribution” table, which is easily to manipulate. This is all mostly working pretty well, but is still a work in progress and not documented.</p>
+<p>We’ve also extended <code><a href="https://rdrr.io/r/base/table.html" class="external-link">base::table()</a></code> to work with humdrumR data, but we’ll be emphasizing using <code><a href="../reference/count.html">count()</a></code> in our documentation.</p>
 </div>
 <div class="section level4">
 <h4 id="harte-7-0-3">harte()<a class="anchor" aria-label="anchor" href="#harte-7-0-3"></a></h4>
-<p>We’ve implemented parsing and deparsing of the <a href="https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus" class="external-link">Harte</a> syntax for representing chords. All our chord functions should be able to read harte notation, and there is now a <code><a href="../reference/chord.html">harte()</a></code> function for outputting (deparsing) **harte.</p>
+<p>We’ve implemented parsing and deparsing of the <a href="https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus" class="external-link">Harte</a> syntax for representing chords. All our chord functions should be able to read harte notation, and there is now a <code><a href="../reference/harte.html">harte()</a></code> function for outputting (deparsing) **harte.</p>
 </div>
 </div>
     <div class="section level2">
@@ -162,11 +163,11 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

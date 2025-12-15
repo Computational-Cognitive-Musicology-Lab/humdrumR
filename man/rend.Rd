@@ -58,8 +58,8 @@ New spines are generated from existing spines; if we start with spines 1, 2, 3, 
 
 However, by default, spines are only rended if they contain non-null data points
 in the target fields.
-If for example, the original spine 2 had no non-null data in one of the rended fields,
-if would not be rended into two spines.
+If, for example, the original spine 2 had no non-null data in one of the rended fields,
+it would not be rended into two spines.
 However, if \code{rendEmpty} is set to \code{TRUE},
 \emph{all} spines will be rended even if empty (all null data).
 
@@ -73,7 +73,7 @@ If \code{removeRended = TRUE} (the default), the original fields are removed fro
 However, certain fields, like \code{Token} and any \link[=humTable]{structural fields} cannot be removed from the data.
 Therefore, if you rend these fields, they will not be deleted, even if \code{removeRended = TRUE}.
 
-If you only provide one field name to rend, is automatically take to be \code{Token}.
+If you only provide one field name to rend, \code{Token} is assumed as the first field automatically.
 Thus, \code{rend(humData, 'Solfa')} is equivalent to \code{rend(humData, 'Token', 'Solfa')}.
 }
 }

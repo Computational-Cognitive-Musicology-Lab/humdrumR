@@ -46,14 +46,15 @@ the key (Key) argument.'></head><body>
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -64,7 +65,7 @@ the key (Key) argument.'></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Test the properties of tonal information</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Pitch.R" class="external-link"><code>R/Pitch.R</code></a></small>
+
       <div class="d-none name"><code>is.simple.Rd</code></div>
     </div>
 
@@ -112,9 +113,9 @@ the key (<code>Key</code>) argument.</p>
 
 
 <dt id="arg-key">Key<a class="anchor" aria-label="anchor" href="#arg-key"></a></dt>
-<dd><p><em><strong>The diatonic key used to defined generic pitches.</strong></em></p>
+<dd><p><em><strong>The onic key used to defined generic pitches.</strong></em></p>
 <p>Defaults to <code>NULL</code>.</p>
-<p>Must be something that can be <a href="keyParsing.html">parsed as a diatonic key</a>; must be either length <code>1</code> or <code>length(x)</code>.</p></dd>
+<p>Must be something that can be <a href="keyParsing.html">parsed as a onic key</a>; must be either length <code>1</code> or <code>length(x)</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,7 +133,7 @@ See the <a href="pitchDeparsing.html">pitch deparsing docs</a> for a more detail
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other Tonal feature functions:
-<code><a href="is.major.html">is.major</a>()</code></p></div>
+<code><a href="is.major.html">is.major()</a></code></p></div>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -140,11 +141,11 @@ See the <a href="pitchDeparsing.html">pitch deparsing docs</a> for a more detail
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

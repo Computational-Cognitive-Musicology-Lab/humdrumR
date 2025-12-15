@@ -93,7 +93,7 @@ For example, the call \code{cleave(humData, list(1:2, 2:3, 3:4, NULL, 1:3))} wil
 }
 
 Alternatively, you can name the list elements with integers corresponding to pieces.
-For example, \verb{cleave(humData, Path = list("1" = 0:1, 5 = 0:2"))} will cleave paths 0 and 1 in
+For example, \code{cleave(humData, Path = c("1" = 0:1, "5" = 0:2))} will cleave paths 0 and 1 in
 piece 1, and paths \code{0:2} in piece 5.
 }
 
@@ -141,7 +141,7 @@ If you provide too few field names, your name(s) will have numbers appended as n
 If you provide too many field names, the extra names will simply be ignored.
 
 When cleaving by exclusive interpretation \code{newFields} can be used in the exact same way.
-However, by default (if \code{newFields} is \code{NULL}), \code{cleave()} will names fields by their exclusive interpretation.
+However, by default (if \code{newFields} is \code{NULL}), \code{cleave()} will name fields by their exclusive interpretation.
 Note that the original target field (specified by the \code{field}) argument will not have it's name changed.
 So for example, \code{humData |> select(Token) |> cleave(humData, c('kern', 'silbe'))} will result in the spines \code{Token}
 and \code{Silbe}.

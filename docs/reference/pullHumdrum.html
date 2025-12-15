@@ -44,14 +44,15 @@ You can also use the $ operator to extract a single field, just like pull()."></
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -62,7 +63,7 @@ You can also use the $ operator to extract a single field, just like pull()."></
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Extract field(s) from <a href="humdrumRclass.html">humdrumR data</a></h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R" class="external-link"><code>R/humdrumR-class.R</code></a></small>
+
       <div class="d-none name"><code>pullHumdrum.Rd</code></div>
     </div>
 
@@ -99,7 +100,7 @@ You can also use the <code>$</code> operator to extract a single field, just lik
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p><em><strong>Which fields to output.</strong></em></p>
-<p>If no arguments are provided, the object's selected fields are pulled.</p>
+<p>If no arguments are provided, the object's <a href="selectedFields.html">selected fields</a> are pulled.</p>
 <p>These arguments can be any combination of <code>character</code> strings, numbers, or symbols used
 to match fields in the <code>humdrumR</code> input using <a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">tidyverse</a> semantics.</p>
 <p>Unlike in tidyverse <code><a href="selectedFields.html">select()</a></code>, field names can be <a href="partialMatching.html">partially matched</a>.
@@ -119,7 +120,7 @@ or any combination of these (e.g., <code>"LIM"</code>).
 <dt id="arg-null">null<a class="anchor" aria-label="anchor" href="#arg-null"></a></dt>
 <dd><p><em><strong>How should null data points be output?</strong></em></p>
 <p>Default is <code>"charNA2dot"</code>.</p>
-<p>Must be a single character string, partially matching <code>"NA2dot"</code>, <code>"dot2NA"</code>, <code>'charNA2dot"</code>, or <code>"asis"</code>.</p></dd>
+<p>Must be a single character string, <a href="partialMatching.html">partially matching</a> <code>"NA2dot"</code>, <code>"dot2NA"</code>, <code>'charNA2dot"</code>, or <code>"asis"</code>.</p></dd>
 
 
 <dt id="arg-var">var<a class="anchor" aria-label="anchor" href="#arg-var"></a></dt>
@@ -146,7 +147,7 @@ only non-null data (<code>Type == "D"</code>) is pulled.
 The <code>$</code> operator can only grab non-null data.</p>
 <p>The <code>null</code> argument controls how null data is returned, with four options:</p><ul><li><p><code>"NA2dot"</code> means all <code>NA</code> values are converted to <code>"."</code>; note that this will cause all output to be coerced to <code>character</code>.</p></li>
 <li><p><code>"dot2NA"</code> means all <code>"."</code> are converted to <code>NA</code>.</p></li>
-<li><p><code>"charNA2dot"</code> means <code>NA</code> values in <code>character</code> vectors are converted to <code>NA</code>, but not in other atomic types.</p></li>
+<li><p><code>"charNA2dot"</code> means <code>NA</code> values in <code>character</code> vectors are converted to <code>"."</code>, but not in other atomic types.</p></li>
 <li><p><code>"asis"</code> means either <code>NA</code> or <code>"."</code> values may print, depending on what is in the field.</p></li>
 </ul><p>Note that <code>pull_tibble()</code> won't work if you don't independently load the <code>tibble</code> (or <code>tidyverse</code>) package—
 i.e., call <code><a href="https://tibble.tidyverse.org/" class="external-link">library(tibble)</a></code>.</p>
@@ -162,7 +163,7 @@ To know what fields are selected—the default fields to pull—use <code><a hre
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -386,40 +387,40 @@ To know what fields are selected—the default fields to pull—use <code><a hre
 <span class="r-out co"><span class="r-pr">#&gt;</span> [841] "4d#"    "4e;"   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">pull_data.table</span><span class="op">(</span><span class="va">Token</span>, <span class="va">Spine</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       Token  Spine</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt; &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1:    4GG      1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2:     4G      1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3:     4E      1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4:    4F#      1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5:     4G      1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  ---              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 838:    4g#      4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 839:    4f#      4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 840:    4c#      4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 841:    4d#      4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 842:    4e;      4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       Token Spine</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      &lt;char&gt; &lt;int&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1:    4GG     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2:     4G     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3:     4E     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   4:    4F#     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5:     4G     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  ---             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 838:    4g#     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 839:    4f#     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 840:    4c#     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 841:    4d#     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 842:    4e;     4</span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">pull_tibble</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 842 × 42</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Token Bar   BarLabel DoubleBar Formal BPM   Clef   Exclusive Instrument</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 4GG   0     *        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 4G    1     1        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 4E    1     1        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 4F#   1     1        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 4G    2     2        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 4D    2     2        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 4E    2     2        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 4C    3     3        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 8BBL  3     3        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 8AAJ  3     3        0         A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Token   Bar BarLabel DoubleBar Formal BPM   Clef   Exclusive Instrument</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 4GG       0 .                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 4G        1 1                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 4E        1 1                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 4F#       1 1                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 4G        2 2                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 4D        2 2                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 4E        2 2                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 4C        3 3                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 8BBL      3 3                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 8AAJ      3 3                0 A      MM100 clefF4 kern      <span style="color: #949494;">"</span>I\"Bass<span style="color: #949494;">"</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 832 more rows</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 33 more variables: InstrumentClass &lt;chr&gt;, Key &lt;chr&gt;, KeySignature &lt;chr&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Mensuration &lt;chr&gt;, Tandem &lt;chr&gt;, TimeSignature &lt;chr&gt;, AGN &lt;chr&gt;, CDT &lt;chr&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   COM &lt;chr&gt;, EED &lt;chr&gt;, EEV &lt;chr&gt;, OPR &lt;chr&gt;, `OTL@@DE` &lt;chr&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   `OTL@EN` &lt;chr&gt;, `PC#` &lt;chr&gt;, SCT &lt;chr&gt;, SMS &lt;chr&gt;, YOR &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   hum2abc &lt;chr&gt;, title &lt;chr&gt;, DataRecord &lt;chr&gt;, File &lt;chr&gt;, Filename &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Filepath &lt;chr&gt;, Global &lt;chr&gt;, Label &lt;chr&gt;, ParentPath &lt;chr&gt;, Path &lt;chr&gt;, …</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   hum2abc &lt;chr&gt;, title &lt;chr&gt;, DataRecord &lt;int&gt;, File &lt;int&gt;, Filename &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Filepath &lt;chr&gt;, Global &lt;lgl&gt;, Label &lt;chr&gt;, ParentPath &lt;int&gt;, Path &lt;int&gt;, …</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -428,11 +429,11 @@ To know what fields are selected—the default fields to pull—use <code><a hre
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

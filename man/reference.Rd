@@ -21,14 +21,14 @@ reference(humdata)
 
 Must be a \code{character} string (to look up a reference code) or a \link[=humdrumRclass]{humdrumR}.}
 
-\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humReference} table.}}
 
 Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
-a \code{humCensus} table.}
+a \code{humReference} table.}
 
 \item{i}{\emph{\strong{Index for rows.}}
 
@@ -50,7 +50,7 @@ basic \link[=humSummary]{corpus summary functions}.
 \details{
 \code{reference} can be used to look up information about common reference
 codes: supply a reference code as a \code{character} string to \code{reference}
-and it will check it against known reference codes and print
+and \link[=humdrumRclass]{humdrumR} will check it against known reference codes and print
 information about matching codes (if there is one). For instance, \code{reference('OTL')}
 returns a description of the standard humdrum \code{!!!OTL} reference record
 (original title metadata).

@@ -100,7 +100,7 @@ using \code{removeSubset()} or \code{unfilter()} (which are also synonyms).
 }
 \details{
 \code{subset()} and \code{filter()} are passed one or more expressions which are using the
-fields of the \link[=humTable]{humdrum table} using a call to \link[=withinHumdrum]{within}.
+fields of the \link[=humTable]{humdrum table} using a call to \link[=withinHumdrumR]{within}.
 This evaluation can thus include all of \code{\link[=within.humdrumR]{within.humdrumR()}}'s functionality (and arguments)
 including group-apply.
 The only requirement is that the expressions/functions fed to \code{subset()}/\code{filter()}
@@ -169,8 +169,9 @@ The \code{fields} argument can be used to control which data fields are unfilter
 all data fields are unfiltered.
 
 Normally, each data field is restored with its own complement data.
-However, the \code{complement} argument can be used to specify an field to use as the complement.
-This allows you to, for instance, different parts of separate fields into a single field.
+However, the \code{complement} argument can be used to specify a field to use as the complement.
+This allows you to, for instance, combine different parts of separate fields into a single view.
+See the last example in the "Examples" section for a demonstration of this argument.
 
 The \code{complement()} function will directly swap the data-field subsets with their complements.
 }

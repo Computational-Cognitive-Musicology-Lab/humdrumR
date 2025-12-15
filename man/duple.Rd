@@ -25,7 +25,7 @@ Must be a singleton, positive natural number; must be less than or equal to \cod
 This function generates a \code{\link[=meter]{meter()}} objects representing duple meters.
 The desired number of duple levels is controlled by the \code{nlevels} argument.
 The span of the meter (i.e., the highest level) is indicated by the \code{measure} argument.
-Finally, the \code{tactus} argument indicates which level (indexe from highest to lowest)
+Finally, the \code{tactus} argument indicates which level (indexed from highest to lowest)
 is the tactus.
 The default arguments build a 4/4 meter with levels ranging from whole-notes down
 to sixteenth-notes, and a quarter-note tactus.

@@ -38,7 +38,7 @@ like \code{\link[=recip]{recip()}}, \code{\link[=dur]{dur()}}, or \code{\link[=d
 }
 \details{
 The underlying parser used by all \code{humdrumR} \link[=rhythmFunctions]{rhythm functions} can be called explicitly using the function \code{rhythmInterval()}.
-The \code{rhythmInterval} parser will attempt to parse any input information into a \link[=rational]{ratioanl number} object.
+The \code{rhythmInterval} parser will attempt to parse any input information into a \link[=rational]{rational number} object.
 When you use one of the main \link[=rhythmFunctions]{rhythm functions}, like \code{\link[=recip]{recip()}} or \code{\link[=dur]{dur()}},
 the input is parsed into a \link{rational} object, then immediately \link[=rhythmDeparsing]{deparsed}
 to the representation you asked for (e.g., \verb{**recip} or \verb{**dur}).
@@ -94,7 +94,7 @@ table above.
 For example, \code{seconds(x, Exclusive = 'recip')} will force the parser to interpret \code{x} as \verb{**recip} data.
 Similarly, \code{recip(x, Exclusive = 'dur')} will force the parser to interpret \code{x} as \verb{**dur} data.
 If you use any \link[=rhythmFunctions]{rhythm function} within a special call to \link{withinHumdrum},
-\code{humdrumR} will automatically pass the \code{Exclusive} field from the humdrum data to the function---this means, that in most cases,
+\code{humdrumR} will automatically pass the \code{Exclusive} field from the humdrum data to the function---this means that, in most cases,
 you don't need to explicitly do anything with the \code{Exclusive} argument!
 (If you want this \emph{not} to happen, you need to explicitly specify your own \code{Exclusive} argument, or \code{Exclusive = NULL}.)
 }

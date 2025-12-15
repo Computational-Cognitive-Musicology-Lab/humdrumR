@@ -73,17 +73,15 @@ discarding octave and step information.
 }
 \examples{
 
-\dontrun{
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
 
-within(chorales, quality(Token))
+within(chorale[[20:30,]], quality(Token))
 
 # Harmonic interval qualities:
 
-within(chorales, hint(Token, deparser = quality))
-with(chorales, hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
+within(chorale[[20:30,]], hint(Token, deparser = quality))
+with(chorale[[20:30,]], hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
 
-}
 }
 \seealso{
 Other {pitch functions}: 

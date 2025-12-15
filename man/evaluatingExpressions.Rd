@@ -42,7 +42,12 @@ This exactly what the R "interpreter" does when you "run" some R code.
 
 In R, an evaluated expression always "returns" a "\emph{result}"---a value, like a number, \code{character} string, or some other data.
 Some expressions might "return" \code{NULL} as their result, but it's still a result!
-In a multi-line expression, like \code{{sqrt(2); 2 + 2}} or
+In a multi-line expression, like
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{\{sqrt(2); 2 + 2\}
+}\if{html}{\out{</div>}}
+
+or
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{\{
   x <- 2
@@ -75,7 +80,7 @@ The humdrumR \link[=withinHumdrum]{with(in)} (and their tidyverse equivalents) u
 
 One of the most annoying things that can happen in R is if you try running something and it kind just hangs,
 getting stuck with nothing happening no matter how many times you press enter.
-This is usually because you have (accidentally) provided R and \emph{incomplete} expression.
+This is usually because you have (accidentally) provided R an \emph{incomplete} expression.
 For example, \verb{2 + } is an incomplete expression---that \code{+} needs a number after it!
 Failing to have properly paired parentheses will often result in incomplete expressions:
 For example, \verb{mean(sqrt(log(x))} is an incomplete expression!

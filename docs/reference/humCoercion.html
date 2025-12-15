@@ -46,14 +46,15 @@ basic R data types."></head><body>
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -64,7 +65,7 @@ basic R data types."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>humdrumR coercion</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R" class="external-link"><code>R/humdrumR-class.R</code></a></small>
+
       <div class="d-none name"><code>humCoercion.Rd</code></div>
     </div>
 
@@ -150,9 +151,9 @@ or any combination of these (e.g., <code>"LIM"</code>).
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Generally, coercion works by evaluating a humdrumR object's the
+    <p>Generally, coercion works by evaluating a humdrumR object's
 <a href="selectedFields.html">selected fields</a> and forcing the result to be an atomic vector.
-When multiple field are selected, they are pasted together, separated by <code>", "</code>.
+When multiple fields are selected, they are pasted together, separated by <code>", "</code>.
 If a field is not atomic (like a <code>list</code>, or <code>lm</code> object), a concise representation of the
 list or object class is printed.
 The as.vector(humdrumR) has the additional
@@ -173,7 +174,7 @@ Each line is a single row from a <code>as.matrix.humdrumR</code>, with padded va
 The matrix's <code>Piece.Record</code> <a href="https://rdrr.io/r/base/colnames.html" class="external-link">row names</a> are preserved as the lines' <a href="https://rdrr.io/r/base/names.html" class="external-link">names</a>.</p>
 <p>Note that multiple-stop token (where <code>Stop &gt; 1L</code>) cannot by incorporated into the two
 dimensional <code>matrix</code>/<code>data.frame</code>. Thus, <code>as.matrix(humdrumR)</code> calls
-collapseStops(collapseAtomic = TRUE, sep = " ")
+<a href="collapseHumdrum.html">collapseStops(collapseAtomic = TRUE, sep = " ")</a>
 on the <a href="humdrumRclass.html">humdrumR object</a> before creating a matrix.</p>
     </div>
     <div class="section level2">
@@ -220,11 +221,11 @@ This is the default behavior for <code>as.matrix(humdrumR)</code>.</p></li>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

@@ -218,7 +218,7 @@ you could manually set \code{groupby = list(Piece, Record)}.
 When performing lagged calculations, we typically assume that the order of the values in the input vector
 (\code{x}) is the order we want to "lag" across.
 E.g., the first element is "before" the second element, which is "before" the third element, etc.
-[Humdrum tables][humTable] are always ordered \verb{Piece > Piece > Spine > Path > Record > Stop}.
+\href{humTable.html}{Humdrum tables} are always ordered \verb{Piece > Piece > Spine > Path > Record > Stop}.
 Thus, any lagged calculations across fields of the humtable will be, by default, "melodic":
 the \emph{next} element is the next element in the spine path.
 For example, consider this data:
@@ -232,7 +232,7 @@ c       f
 
 The default order of these tokens (in the \code{Token} field) would be \verb{a b c d e f}.
 If we wanted to instead lag across our tokens \emph{harmonically} (across records) we'd need to specifiy a different order
-For example, we could say \code{orderby = list(Pice, Record, Spine)}---the lagged function
+For example, we could say \code{orderby = list(Piece, Record, Spine)}---the lagged function
 would interpret the \code{Token} field above as \verb{a d b e c f}.
 
 For another example, note \code{Stop} comes last in the order.
@@ -243,17 +243,12 @@ a       d
 b D     e g
 c A     f a
 *-      *-
-```
-
-The default ordering here (`Piece > Spine > Record > Stop`) "sees" this in the order `a b D c A d e g f a`.
-That may or may not be what you want!
-If we wanted, we could reorder such that `Stop` takes precedence over `Record`: `orderby = list(Piece, Spine, Stop, Record)`.
-The resulting order would be `a b c d e f D G g a`.
-
-   
-
-[humTable]: R:humTable
 }\if{html}{\out{</div>}}
+
+The default ordering here (\verb{Piece > Spine > Record > Stop}) "sees" this in the order \verb{a b D c A d e g f a}.
+That may or may not be what you want!
+If we wanted, we could reorder such that \code{Stop} takes precedence over \code{Record}: \code{orderby = list(Piece, Spine, Stop, Record)}.
+The resulting order would be \verb{a b c d e f D G g a}.
 }
 
 \seealso{

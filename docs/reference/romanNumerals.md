@@ -1,0 +1,10 @@
+# Roman Numeral
+
+Roman numerals can be calculated for diatonicSets (keys) and for tertian
+sets (chords). The later case is the standard meaning of "roman
+numeral." However, the former case is used as well, for instance to
+represent modulation schemes in analyses of classical music (e.g,
+modulate from I-V, then to vi/V). More importantly, many "roman
+numerals" in harmonic analyses implicitly combine tertian and diatonic
+roman numerals: in "applied" roman numerals. Given a roman numeral like
+"V65/V", the "V65" represents a chord while the "/V" represents a key.

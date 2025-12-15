@@ -4,7 +4,7 @@
 \alias{keyDeparsing}
 \title{Generating ("deparsing") key representations}
 \description{
-\link{humdrumR} includes a easy-to-use system for
+\link{humdrumR} includes an easy-to-use system for
 generating a variety of diatonic key representations,
 which can be flexibly modified by users.
 "Under the hood" \code{humdrumR} represents all tonal chord information using the \link[=diatonicSetS4]{same underlying representation},

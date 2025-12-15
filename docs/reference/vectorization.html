@@ -38,14 +38,15 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -56,7 +57,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>What is "vectorization"?</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-package.R" class="external-link"><code>R/humdrumR-package.R</code></a></small>
+
       <div class="d-none name"><code>vectorization.Rd</code></div>
     </div>
 
@@ -74,44 +75,71 @@
 This means that we, as programmers, don't need to worry about each element of the vector;
 We can treat a vector like a single object, and R will oblige us.
 For example, we can do math like:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; [1]    0    1    3    7   15   31   63  127  255  511 1023</span></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">-</span> (<span class="dv">10</span><span class="sc">:</span><span class="dv">1</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">16</span>))</span></code></pre><p></p></div>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; [1] -9 -7 -5 -3 -1  1  3  5  7  9</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">16</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; [1] 2.236068 3.162278 4.000000</span></span></code></pre><p></p></div>
 <p>Or work with strings like:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">paste</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">26</span>, letters, <span class="at">sep =</span> <span class="st">': '</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">'Chord'</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Regular expressions:</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">grepl</span>(<span class="st">'[aeiou]'</span>, letters)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span></code></pre><p></p></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; [1] "1: a"  "2: b"  "3: c"  "4: d"  "5: e"  "6: f"  "7: g"  "8: h"  "9: i"  "10: j" "11: k" "12: l"</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; [13] "13: m" "14: n" "15: o" "16: p" "17: q" "18: r" "19: s" "20: t" "21: u" "22: v" "23: w" "24: x"</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; [25] "25: y" "26: z"</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">paste</span>(<span class="st">'Chord'</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; [1] "Chord 1"  "Chord 2"  "Chord 3"  "Chord 4"  "Chord 5"  "Chord 6"  "Chord 7"  "Chord 8"</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; [9] "Chord 9"  "Chord 10"</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co"># Regular expressions:</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">grepl</span>(<span class="st">'[aeiou]'</span>, letters)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt;  [1]  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;  [17] FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE</span></span></code></pre><p></p></div>
 <p>Or get logical values:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">100</span>) <span class="sc">&gt;</span> <span class="dv">50</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span> <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">20</span> <span class="sc">%in%</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">4</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span></code></pre><p></p></div>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt;  [1] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt;  [17]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt;  [33]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt;  [49]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;  [65]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;  [81]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt;  [97]  TRUE  TRUE  TRUE  TRUE  TRUE</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span> <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">20</span> <span class="sc">%in%</span> <span class="dv">2</span><span class="sc">^</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; [1]  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; [17] FALSE FALSE FALSE FALSE</span></span></code></pre><p></p></div>
 <p>Of course, other R functions take in vectors and return totally new vectors (or just scalars).
 Examples:</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">seq</span>(<span class="dv">50</span>, <span class="dv">90</span>, <span class="at">by =</span> .<span class="dv">2</span>))</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">seq</span>(<span class="dv">50</span>, <span class="dv">90</span>, <span class="at">by =</span> .<span class="dv">2</span>))</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; [1] 201</span></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">length</span>(letters) <span class="co"># letters is a built-in vector which is always there!</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>))</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>))</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; [1] 26</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; [1] 15</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">range</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">100</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">4</span>))</span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">which</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span></code></pre><p></p></div>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>))</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; [1] 5</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">9</span>))</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; [1] 9</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="fu">range</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">100</span>, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">4</span>))</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; [1] -4 100</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="fu">which</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>))</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; [1] 1 3 4</span></span></code></pre><p></p></div>
 <p>Vectorization works very well when you are working with vectors that are either 1) all the same length or 2) length 1 (scalar).
 If vectors are different lengths, the shorter one will be "recycled" (repeated) to match the longer one.</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>) <span class="sc">*</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span></code></pre><p></p></div>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>) <span class="sc">*</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; [1]  0 10  0 20  0 30  0 40  0 50</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span></code></pre><p></p></div>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -127,11 +155,11 @@ If vectors are different lengths, the shorter one will be "recycled" (repeated) 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

@@ -81,7 +81,13 @@ By default, \link[=withinHumdrum]{with/within.humdrumR} will automatically pass
 so chords are estimated for each record in the dataset.
 }
 \details{
-If \code{inPlace = TRUE}, sonority()\verb{returns vectorized output, with the output matching the length of the input vector. By default,}fill = FALSE\verb{, and each output chord is repeated to align with  the notes of the chord. If }fill = FALSE\verb{, each chord is returned only once, but padded with null tokens to match length of the input. Finally, if }inPlace = FALSE\verb{only one chord is returned for each group in}groupby`.
+If \code{inPlace = TRUE}, \code{sonority()} returns vectorized output,
+with the output matching the length of the input vector.
+When \code{inPlace = TRUE}, by default, \code{fill = TRUE}, and each output chord is repeated to align with
+the notes of the chord.
+If \code{fill = FALSE}, each chord is returned only once, but padded
+with null tokens to match length of the input.
+Finally, if \code{inPlace = FALSE} only one chord is returned for each group in \code{groupby}.
 
 If \code{inversions = TRUE}, the notes are interpreted
 in the chordal inversion that is most compact (triad like)
@@ -113,12 +119,10 @@ sonority(c('G', 'BB', 'd', 'f', 'a'))
 sonority(c('C', 'b-', 'd', 'f'))
 sonority(c('C', 'b-', 'd', 'f'), inversions = FALSE)
 
-\dontrun{ 
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+chorale <- within(chorale, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
+chorale[[20:30,]]
+within(chorale[[20:30,]], sonority(Token_dittoed))
+within(chorale[[20:30,]], sonority(Token_dittoed, deparser = harm))
 
-chorales <- within(chorales, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
-
-within(chorales, sonority(Token_dittoed))
-within(chorales, sonority(Token_dittoed, deparser = harm))
-}
 }

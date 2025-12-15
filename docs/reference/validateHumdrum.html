@@ -42,14 +42,15 @@ Detailed error reports can be generated, pointing to specific problematic record
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -60,7 +61,7 @@ Detailed error reports can be generated, pointing to specific problematic record
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Validate humdrum files</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Validation.R" class="external-link"><code>R/Validation.R</code></a></small>
+
       <div class="d-none name"><code>validateHumdrum.Rd</code></div>
     </div>
 
@@ -95,7 +96,7 @@ the <code>recursive</code> and/or <code>contains</code> arguments to <code><a hr
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p><code>validateHumdrum()</code> returns a "error frame" data.table object, <a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisibly</a>
+    <p><code>validateHumdrum()</code> returns an "error frame" data.table object, <a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisibly</a>
 (to "see" the output, you must save it to a variable, <em>then</em> look at it).
 The error frame is a <code>data.table</code> with three columns:</p><ul><li><p><code>Filepath</code>: The file name.</p></li>
 <li><p><code>Record</code>: Which record contains the error.</p></li>
@@ -147,29 +148,29 @@ The output looks like this:</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">validateHumdrum</span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B.*.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BeethovenVariations/B.*.krn' matches 12 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BeethovenVariations/B.*.krn' matches 12 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Twelve files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating twelve files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">errorFrame</span> <span class="op">&lt;-</span> <span class="fu">validateHumdrum</span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/InvalidFile.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> eight errors in one files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> zero valid files.</span>
 <span class="r-in"><span><span class="va">errorFrame</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                             Filepath</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                               &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                              Filepath</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                &lt;char&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/InvalidFile.krn</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Record                                                 Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;int&gt;                                                &lt;char&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1:      4 ** and *- records in file are missing or don't add up</span>
@@ -188,11 +189,11 @@ The output looks like this:</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

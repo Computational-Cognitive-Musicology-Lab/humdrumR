@@ -26,7 +26,7 @@ diatonicSet(...)
 \method{diatonicSet}{character}(x, ..., Key = NULL, Exclusive = NULL, multiDispatch = FALSE)
 }
 \description{
-\link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} diatonic key information:
+\link{humdrumR} includes an easy-to-use but powerful system for \emph{parsing} diatonic key information:
 various basic key representations (including \code{numeric} and \code{character}-string representations) can be "parsed"---read
 and interpreted by \code{humdrumR}.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=keyFunctions]{key function}, like \code{\link[=key]{key()}}

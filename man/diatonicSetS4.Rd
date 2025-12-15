@@ -50,7 +50,7 @@ The \code{root} argument will attempt to coerce character strings to \link[=tona
 
 By default, the \link[base:character]{as.character} method, and thus (via \link{struct}) the \link[methods:show]{show} method,
 for diatonicSets call \link[=keyFunctions]{key()}.
-Thus, if you return a \code{diatonicSet} on the command line (or call \link[base:print]{print} one one),
+Thus, if you return a \code{diatonicSet} on the command line (or \link[base:print]{print} one),
 you'll see the \link[=keyFunctions]{key interpretation} representation printed.
 }
 \section{Slots}{
@@ -103,7 +103,7 @@ The ternary arrangement maps powers of three to each scale degree, as so that in
 \item ± 27: raise or flatten the \strong{2nd} scale degree.
 \item ± 81: raise or flatten the \strong{5th} scale degree.
 \item ± 243: raise or flatten the \strong{1st} scale degree.
-\item ± 749: raise or flatten the \strong{4th} scale degree.
+\item ± 729: raise or flatten the \strong{4th} scale degree.
 }
 
 For example, consider \code{Alteration == 26}:
@@ -118,7 +118,7 @@ minor scale (\code{Signature - Root == -3}) with raised 6ths and 7ths (\code{Alt
 However, though these two representations result in the same set on the line-of-fifths, some might consider them to be
 conceptually different in some contexts, so we consider the redundancy acceptable.
 Another case of encoding redundancy \emph{is} that \code{Alteration - 1} (flatten the 7th) is exactly equivalent to \code{Signature - 1}.
-Similarly, \code{Alteration + 749} (raise the 4th) is exactly equivalent to \code{Signature + 1}.
+Similarly, \code{Alteration + 729} (raise the 4th) is exactly equivalent to \code{Signature + 1}.
 
 Double-flat and double-sharp degrees are \strong{not} encodable in \code{diatonicSet}.
 However, in combination with the \code{Signature} slot, sets with double-flat/sharps (like doubly-diminished 7ths) can be encoded.
@@ -152,7 +152,7 @@ Coercision methods are defined for
 \itemize{
 \item \link[base:integer]{integer}: interpreted as root of major key
 \item \link[base:numeric]{numeric}: rounded to nearest integer and intepreted as root of major key
-\item \link[base:character]{character}: interpreted using \code{humdrumR}s \link[=regexDispatch]{regular expression dispatch system}, as
+\item \link[base:character]{character}: interpreted using \code{humdrumR}'s \link[=humdrumDispatch]{regular expression dispatch system}, as
 explained fully \link[=keyFunctions]{here}.
 }
 }

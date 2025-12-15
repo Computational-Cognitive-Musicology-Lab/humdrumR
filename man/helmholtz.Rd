@@ -87,7 +87,7 @@ If so, and \code{inPlace = TRUE}, the output will be placed into an output strin
 If \code{inPlace = FALSE}, only the pitch output information will be returned (details below).}
 }
 \description{
-\href{https://en.wikipedia.org/wiki/Helmholtz_pitch_notation}{Helmholtz notation}
+This is the representation used to represent pitches in the \href{https://en.wikipedia.org/wiki/Helmholtz_pitch_notation}{Helmholtz notation} format.
 
 If \code{helmholtz()} is applied to a \link[=humdrumRclass]{humdrumR data class}
 you may use the data's \link[=fields]{fields} as arguments.
@@ -130,7 +130,7 @@ an alternate \code{Key} is passed to \code{transposeArgs} or \code{parseArgs}.
 Various deparsing options use the \code{Key} argument; for example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
 
 If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum},
-\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means, that in most cases,
+\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means that, in most cases,
 you don't need to explicitly do anything with the \code{Key} argument!
 (If you want this \emph{not} to happen, you need to explicitly specify your own \code{Key} argument, or \code{Key = NULL}.)
 }
@@ -210,12 +210,12 @@ Note that \code{inPlace = TRUE} will force functions like \code{semits}, which n
 
 The \code{\link[=table]{table()}} will automatically generate factor levels
 for pitch data using the \code{\link[=gamut]{gamut()}} function.
-This is makes sure tabulated data sorted in a logical order, and includes
+This makes sure tabulated data is sorted in a logical order, and includes
 missing pitches.
 The \code{simple}/\code{complex} and  \code{generic}/\code{specific} arguments are automatically passed to \code{\link[=gamut]{gamut()}}; additional
 arguments can be passed to gamut using \code{gamutArgs = list(...)}, or with the syntactic sugar \code{gamut(...)}.
 (Read the \code{\link[=gamut]{gamut()}} docs for an explanation of gamut generation.)
-This feature be used to control table layout of pitch data, as well as to assure
+This feature is used to control table layout of pitch data, as well as to assure
 consistent tables when grouping data.
 
 When \code{inPlace = TRUE} no special tabulation will occur.

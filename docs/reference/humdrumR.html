@@ -60,14 +60,15 @@ the viewing of humdrumR datasets."></head><body>
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -78,7 +79,7 @@ the viewing of humdrumR datasets."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>humdrumR</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-package.R" class="external-link"><code>R/humdrumR-package.R</code></a></small>
+
       <div class="d-none name"><code>humdrumR.Rd</code></div>
     </div>
 
@@ -151,7 +152,7 @@ or any combination of these (e.g., <code>"LIM"</code>).
 <dt id="arg-nullprint">nullPrint<a class="anchor" aria-label="anchor" href="#arg-nullprint"></a></dt>
 <dd><p><em><strong>How should null data points print?</strong></em></p>
 <p>Default is <code>"NA2dot"</code>.</p>
-<p>Must be a single character string, partially matching <code>"NA2dot"</code>, <code>"dot2NA"</code>, <code>'charNA2dot"</code>, or <code>"asis"</code>.
+<p>Must be a single character string, <a href="partialMatching.html">partially matching</a> <code>"NA2dot"</code>, <code>"dot2NA"</code>, <code>'charNA2dot"</code>, or <code>"asis"</code>.
 <code>"NA2dot"</code> means all <code>NA</code> values are converted to <code>"."</code>; <code>"dot2NA</code> means all <code>"."</code> are converted to <code>NA</code>; <code>charNA2dot</code> means <code>NA</code> values
 in <code>character</code> vectors are converted to <code>NA</code>, but not in other atomic types; <code>"asis"</code> means either <code>NA</code> or <code>"."</code> values may print, depending
 on what is in the field.</p></dd>
@@ -182,7 +183,7 @@ the <a href="humTable.html">humdrum table</a>.</p></li>
 <li><p>To filter <code>humdrumR</code> data, we have the <a href="subset.humdrumR.html">subset()/filter()</a> functions, as well as methhods for
 <code>R</code>'s standard <a href="https://rdrr.io/r/base/Extract.html" class="external-link">indexing operators</a> (<code>[]</code> and <code>[[]]</code>).</p></li>
 <li><p>To manipulate and modify <code>humdrumR</code> data, we have the <a href="withinHumdrum.html">with and within</a> methods for <code>humdrumR</code> objects, and tidyverse
-aliases <code>mutate()</code>, <code>summarise()</code>, and <code>reframe()</code>.</p></li>
+aliases <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">dplyr::mutate()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">dplyr::summarise()</a></code>, and <code><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">dplyr::reframe()</a></code>.</p></li>
 <li><p>To facilitate the development of functions to work with humdrum tokens—which are simple character strings packed with information—,
 a useful API we call our <a href="humdrumDispatch.html">regular-expression dispatch system</a>.</p></li>
 <li><p>Several <a href="humdrumPitch.html">modules</a> for representing and manipulating musical pitch information,
@@ -223,11 +224,11 @@ These package options are all enumerated and explained in the <strong>Arguments<
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

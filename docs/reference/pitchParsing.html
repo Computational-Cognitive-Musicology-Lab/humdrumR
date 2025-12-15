@@ -3,11 +3,11 @@
 various basic pitch representations (including numeric and character-string representations) can be "parsed"—read
 and interpreted by humdrumR.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR pitch function, like kern()
-semit(), or solfa().'><meta property="og:description" content='humdrumR includes a easy-to-use but powerful system for parsing pitch information:
+semits(), or solfa().'><meta property="og:description" content='humdrumR includes a easy-to-use but powerful system for parsing pitch information:
 various basic pitch representations (including numeric and character-string representations) can be "parsed"—read
 and interpreted by humdrumR.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR pitch function, like kern()
-semit(), or solfa().'></head><body>
+semits(), or solfa().'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -46,14 +46,15 @@ semit(), or solfa().'></head><body>
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -64,7 +65,7 @@ semit(), or solfa().'></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Parsing pitch information</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Pitch.R" class="external-link"><code>R/Pitch.R</code></a></small>
+
       <div class="d-none name"><code>pitchParsing.Rd</code></div>
     </div>
 
@@ -73,7 +74,7 @@ semit(), or solfa().'></head><body>
 various basic pitch representations (including <code>numeric</code> and <code>character</code>-string representations) can be "parsed"—read
 and interpreted by <code>humdrumR</code>.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR <a href="pitchFunctions.html">pitch function</a>, like <code><a href="kern.html">kern()</a></code>
-<code>semit()</code>, or <code><a href="solfa.html">solfa()</a></code>.</p>
+<code><a href="semits.html">semits()</a></code>, or <code><a href="solfa.html">solfa()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -117,7 +118,7 @@ For the most part, parsing automatically happens "behind the scenes" whenever yo
 
 
 <dt id="arg-key">Key<a class="anchor" aria-label="anchor" href="#arg-key"></a></dt>
-<dd><p><em><strong>The diatonic key used to interpret the pitch information.</strong></em></p>
+<dd><p><em><strong>The onic key used to interpret the pitch information.</strong></em></p>
 <p>Defaults to <code>NULL</code>.</p>
 <p>Must be a <code>diatonicSet</code> or something coercable to <code>diatonicSet</code>; must be either length <code>1</code> or <code>length(x)</code></p>
 <p>For example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.
@@ -138,9 +139,9 @@ length and dimensions as <code>x</code>.
 The <code>tonalInterval</code> parser will attempt to parse any input information into a <a href="tonalIntervalS4.html">tonalInterval</a> object—a back-end pitch representation
 that you probably don't need to care about!
 When you use one of the main <a href="pitchFunctions.html">pitch functions</a>, like <code><a href="kern.html">kern()</a></code> or <code><a href="semits.html">semits()</a></code>,
-the input is parsed into a <a href="tonalIntervalS4.html">tonalInterval</a> object, then immediately <a href="pitchDeparsing.html">deparsed</a>
+the input is parsed into a <a href="tonalIntervalS4.html">tonalInterval</a> object, then immeely <a href="pitchDeparsing.html">deparsed</a>
 to the representation you asked for (e.g., <code>**kern</code> or <code>**semits</code>).
-Thus, the underlying pipeline for <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> looks something like:</p><ul><li><p><strong>Input</strong> representation (e.g., <code>**pitch</code> or <code>**semits</code>) <code>|&gt;</code></p><ul><li><p><em>Parsing</em> (done by <code>tonalInterval()</code>) <code>|&gt;</code></p><ul><li><p><strong>Intermediate</strong> (<a href="tonalIntervalS4.html">tonalInterval</a>) representation <code>|&gt;</code></p></li>
+Thus, the underlying pipeline for <code>humdrumR</code> <a href="pitchFunctions.html">pitch functions</a> looks something like:</p><ul><li><p><strong>Input</strong> representation (e.g., <code>**pitch</code> or <code>**semits</code>) <code>|&gt;</code></p><ul><li><p><em>Parsing</em> (done by <code>tonalInterval()</code>) <code>|&gt;</code></p><ul><li><p><strong>Intermee</strong> (<a href="tonalIntervalS4.html">tonalInterval</a>) representation <code>|&gt;</code></p></li>
 </ul></li>
 <li><p><em>Deparsing</em> <code>|&gt;</code></p></li>
 </ul></li>
@@ -153,7 +154,7 @@ for example, call <code><a href="kern.html">?kern</a></code> to learn about <cod
     <div class="section level2">
     <h2 id="dispatch">Dispatch<a class="anchor" aria-label="anchor" href="#dispatch"></a></h2>
     <p>The pitch parser (<code>tonalInterval()</code>) is a generic function, meaning it accepts a variety of inputs
-and automatically "dispatches" the appropriate method for parsing ehe input.
+and automatically "dispatches" the appropriate method for parsing the input.
 R's standard <code>S3</code> system is used to dispatch for either <code>numeric</code> or <code>character</code>-string input:
 Generally, <code>numeric</code> (or <code>integer</code>) inputs are interpreted as various <em>atonal</em> pitch representations while
 <code>character</code> strings are interpreted as various <em>tonal</em> pitch representations.
@@ -210,9 +211,9 @@ Various <a href="pitchFunctions.html">pitch parsing functions</a> have an option
 <h3 id="advanced-tonal-parsing-options">Advanced Tonal Parsing Options<a class="anchor" aria-label="anchor" href="#advanced-tonal-parsing-options"></a></h3>
 
 
-<p>The eleven tonal representations listed above are parsed through a common intesrface.
+<p>The eleven tonal representations listed above are parsed through a common interface.
 By using "advanced" parsing arguments, you can tweak how this parsing is done, so as to accommodate even more input representations!
-This means we are controlling the behavior of <code>tonalInterval()</code>, in the second step of our pipeline:</p><ul><li><p><strong>Input</strong> representation <code>|&gt;</code></p><ul><li><p><em>Parsing</em> (done by <code>tonalInterval(PARSE ARGS GO IN HERE!)</code>) <code>|&gt;</code></p><ul><li><p><strong>Intermediate</strong> (<a href="tonalIntervalS4.html">tonalInterval</a>) representation <code>|&gt;</code></p></li>
+This means we are controlling the behavior of <code>tonalInterval()</code>, in the second step of our pipeline:</p><ul><li><p><strong>Input</strong> representation <code>|&gt;</code></p><ul><li><p><em>Parsing</em> (done by <code>tonalInterval(PARSE ARGS GO IN HERE!)</code>) <code>|&gt;</code></p><ul><li><p><strong>Intermee</strong> (<a href="tonalIntervalS4.html">tonalInterval</a>) representation <code>|&gt;</code></p></li>
 </ul></li>
 <li><p><em>Deparsing</em> <code>|&gt;</code></p></li>
 </ul></li>
@@ -258,8 +259,8 @@ This overrides the default value for <code>**kern</code>—notice, that it <em>a
 <h3 id="steps">Steps<a class="anchor" aria-label="anchor" href="#steps"></a></h3>
 
 
-<p>Any representation of "tonal" pitch information will include a representation of <em>diatonic steps</em>.
-You can control how the parser reads diatonic steps from a pitch representation using the <code>step.labels</code> argument.
+<p>Any representation of "tonal" pitch information will include a representation of <em>onic steps</em>.
+You can control how the parser reads onic steps from a pitch representation using the <code>step.labels</code> argument.
 The <code>step.labels</code> argument must be an atomic vector of unique values, with a length which is a positive multiple of seven.
 Examples of <code>step.labels</code> arguments that are currently used by preset <code>humdrumR</code> pitch parsers include:</p><ul><li><p><code>parse(step.labels = c('A', 'B', 'C', 'D', 'E', 'F', 'G'))</code> — (<code>**Tonh</code>)</p></li>
 <li><p><code>parse(step.labels = c('d', 'r', 'm', 'f', 's', 'l', 't'))</code> — (<code>**solfa</code>)</p></li>
@@ -346,7 +347,7 @@ If this is how your data is encoded, use <code>absoluteSpecies = FALSE</code>.</
 <h5 id="memory">Memory<a class="anchor" aria-label="anchor" href="#memory"></a></h5>
 
 
-<p>In some musical data, it is assume that a accidental on a note "stays in effect" on that scale step until the next bar,
+<p>In some musical data, it is assumed that a accidental on a note "stays in effect" on that scale step until the next bar,
 or until a different accidental replaces it.
 Fortunately, the <code>humdrumR</code> parser (<code>tonalInterval()</code>) also knows how to parse data encoded with "memory" this way.
 If <code>memory = TRUE</code>, the accidental (or quality) of each input note is "remembered" from previous appearances of that scale step.
@@ -458,15 +459,15 @@ string-parsing issues that we can consider/control.</p><div class="section">
 <p>So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 the <code>humdrumR</code> parser can be modified to handle different options.
 However, there are two general parsing issues/options to consider: what information is encoded, and in <em>what order</em>?
-The <code>parts</code> argument can be specifyied to indicate this.
+The <code>parts</code> argument can be specified to indicate this.
 The <code>parts</code> argument must be a <code>character</code> vector of length 1–3.
-The characters in the must <a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partial match</a> either <code>"step"</code>, <code>"species"</code>, or <code>"octave"</code>.
-The presense of any of these strings in the <code>parts</code> vector indicate that that information should be parsed.
+The characters in the vector must <a href="https://rdrr.io/r/base/pmatch.html" class="external-link">partial match</a> either <code>"step"</code>, <code>"species"</code>, or <code>"octave"</code>.
+The presence of any of these strings in the <code>parts</code> vector indicate that the corresponding information should be parsed.
 The <em>order</em> of the strings indicates what order the pieces of pitch information are encoded in input strings.</p>
 <p>To illustrate, imagine that we had input data which was identical to a standard interval representation—e.g., <code>M2</code> and <code>P5</code>—except the
 quality appears <em>after</em> the step—e.g., <code>2M</code> and <code>5P</code>.
 We could call <code>interval(c("2M", "5P"), parse(parts = c("step", "species")))</code> and sure enough we'd get the correct parse!</p>
-<p>One final string-parsing argument is <code>sep</code>, which indicates if there is a character string separating the pitch information components:
+<p>One final string-parsing argument is <code>sep</code>, which indicates if there is a character string separating the pitch information components.
 The most common case would be a comma or space.
 For example, we could use a parse command like this: <code>kern("E flat 5", parse(flat = "flat", sep = " "))</code>.</p>
 </div>
@@ -479,7 +480,7 @@ For example, we could use a parse command like this: <code>kern("E flat 5", pars
     <h2 id="atonal-parsing-numeric-inputs-">Atonal Parsing (<code>numeric</code> inputs)<a class="anchor" aria-label="anchor" href="#atonal-parsing-numeric-inputs-"></a></h2>
     <p>The <code>humdrumR</code> pitch parser (<code>tonalInterval()</code>) will interpret numeric inputs as atonal pitch information.
 By default, numbers are interpreted as semitones.
-However, parses for <code><a href="semits.html">midi()</a></code>, <code><a href="cents.html">cents()</a></code>,  and <a href="freq.html">frequencies</a> are also defined.
+However, parses for <code><a href="semits.html">midi()</a></code>, <code><a href="semits.html">cents()</a></code>,  and <a href="freq.html">frequencies</a> are also defined.
 Dispatch to these different parsers is controlled by the <code>Exclusive</code> argument.</p><table class="table table"><tr><td>Representation</td><td>Exclusive</td><td>Example</td></tr><tr><td>Semitones</td><td>**semits (or <code>NULL</code>)</td><td><code>3</code> -&gt; <code>e-</code></td></tr><tr><td>MIDI</td><td>**midi</td><td><code>63</code> -&gt; <code>e-</code></td></tr><tr><td>Cents</td><td>**cents</td><td><code>300</code> -&gt; <code>e-</code></td></tr><tr><td>Frequency (Hz)</td><td></td><td></td></tr></table><div class="section">
 <h3 id="enharmonic-interpretation">Enharmonic Interpretation<a class="anchor" aria-label="anchor" href="#enharmonic-interpretation"></a></h3>
 
@@ -536,11 +537,11 @@ For example, while <code>kern(0:2)</code> returns <code>c("c", "d-", "d")</code>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

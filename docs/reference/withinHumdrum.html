@@ -6,7 +6,7 @@ held within a humdrumR data object, with convenient functionality
 for ignoring null data, lagging data, grouping data,
 windowing, and more.
 The with() and within() functions, which come from base R, are the core functions.
-However, the dplyr "verbs" mutate(), summarize(), and reframe() can be used as well—they
+However, the dplyr::dplyr "verbs" mutate(), summarize(), and reframe() can be used as well—they
 are equivalent to using with()/within() with particular arguments.'><meta property="og:description" content='These functions are the primary means of working with
 humdrumR data.
 They allow us to perform arbitrary (free form) manipulation of data fields
@@ -14,7 +14,7 @@ held within a humdrumR data object, with convenient functionality
 for ignoring null data, lagging data, grouping data,
 windowing, and more.
 The with() and within() functions, which come from base R, are the core functions.
-However, the dplyr "verbs" mutate(), summarize(), and reframe() can be used as well—they
+However, the dplyr::dplyr "verbs" mutate(), summarize(), and reframe() can be used as well—they
 are equivalent to using with()/within() with particular arguments.'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -54,14 +54,15 @@ are equivalent to using with()/within() with particular arguments.'></head><body
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -72,7 +73,7 @@ are equivalent to using with()/within() with particular arguments.'></head><body
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Working <em>with</em> humdrum data fields</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Within.R" class="external-link"><code>R/Within.R</code></a>, <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Plots.R" class="external-link"><code>R/Plots.R</code></a></small>
+
       <div class="d-none name"><code>withinHumdrum.Rd</code></div>
     </div>
 
@@ -84,7 +85,7 @@ held within a <a href="humdrumRclass.html">humdrumR data object</a>, with conven
 for ignoring null data, <a href="lag.html">lagging</a> data, <a href="groupHumdrum.html">grouping</a> data,
 <a href="context.html">windowing</a>, and more.
 The <code>with()</code> and <code>within()</code> functions, which come from <a href="https://rdrr.io/r/base/base-package.html" class="external-link">base R</a>, are the core functions.
-However, the dplyr "verbs" <code>mutate()</code>, <code>summarize()</code>, and <code>reframe()</code> can be used as well—they
+However, the <a href="https://dplyr.tidyverse.org/reference/dplyr-package.html" class="external-link">dplyr::dplyr</a> "verbs" <code>mutate()</code>, <code>summarize()</code>, and <code>reframe()</code> can be used as well—they
 are equivalent to using <code>with()</code>/<code>within()</code> with particular arguments.</p>
     </div>
 
@@ -207,7 +208,7 @@ After evaluation, the expanded locations are removed from the output.</p></dd>
 <p>This argument is conceptually similar to the <code>drop</code> argument in R matrices.
 If <code>drop = TRUE</code>, the output of <code>with()</code>/<code>summarize()</code> is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If <code>drop = FALSE</code>, the result is <em>always</em>
-a data.table.</p></dd>
+a <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a>.</p></dd>
 
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
@@ -304,7 +305,7 @@ There are currently five pre-processing steps:</p><ol><li><p>Explicit variable i
 If any of the names in the <code>variable</code> list appear as symbols (variable names)
 in any expression argument, their value is interpolated in place of that symbol.
 For example, in</p>
-<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">within</span>(humData, <span class="fu">kern</span>(Token, <span class="at">simple =</span> x), <span class="fu">variable</span>(<span class="at">x =</span> <span class="cn">TRUE</span>))</span>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">within</span>(humData, <span class="fu">kern</span>(Token, <span class="at">simple =</span> x), <span class="at">variables =</span> <span class="fu">list</span>(<span class="at">x =</span> <span class="cn">TRUE</span>))</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span></code></pre><p></p></div>
 <p>the variable <code>x</code> will be changed to <code>TRUE</code>, resulting in:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">within</span>(humData, <span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
@@ -324,7 +325,7 @@ For example, in</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="fu">select</span>(Token) <span class="sc">|&gt;</span></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">count</span>(.))</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span></code></pre><p></p></div>
-<p>will run <code>count()</code> on the <code>Token</code> field.</p>
+<p>will run <code><a href="count.html">count()</a></code> on the <code>Token</code> field.</p>
 <p>Because new fields created by <code>within()</code>/<code>mutate()</code>/<code>reframe()</code> become the <a href="selectedFields.html">selected fields</a>
 (details below), the <code>.</code> makes it easy to refer to the <em>last</em> new field in pipes.
 For example, in</p>
@@ -332,7 +333,7 @@ For example, in</p>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>   <span class="fu">with</span>(<span class="fu">count</span>(.))</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span></code></pre><p></p></div>
-<p>the <code>count()</code> function is run on the output of the <code>mutate(kern(Token, simpe = TRUE))</code> expression.</p>
+<p>the <code><a href="count.html">count()</a></code> function is run on the output of the <code>mutate(kern(Token, simpe = TRUE))</code> expression.</p>
 </div>
 
 <div class="section">
@@ -357,11 +358,11 @@ So, for example, if you run</p>
 <p>(The <code>Key</code> argument can also be set to <code>NULL</code>).</p>
 <p>Another common/important automatic argument insertion is for functions with a <code>groupby</code> argument.
 These functions will automatically have appropriate grouping fields inserted into them.
-For example, the <code><a href="int.html">mint()</a></code> (melodic intervals) command will <em>automatically</em> by applied using <code>groupby</code>
+For example, the <code><a href="int.html">mint()</a></code> (melodic intervals) command will <em>automatically</em> use <code>groupby</code>
 <code>groupby = list(Piece, Spine, Path)</code>, which makes sure that melodic intervals are only calculated within
 spine paths...not between pieces/spines/paths (which wouldn't make sense!).</p>
 <p>All <code>humdrumR</code> functions which use automatic argument interpolation will mention it in their own documentation.
-For example, the ?solfa documentation mentions the treatment of <code>Key</code> in its "Key" section.</p>
+For example, the <code><a href="solfa.html">solfa()</a></code> documentation mentions the treatment of <code>Key</code> in its "Key" section.</p>
 </div>
 
 <div class="section">
@@ -403,13 +404,13 @@ these are true "melodic" n-grams, only created within spine-paths within each pi
 
 
 <p>"Splatting" refers to feeding a function a list/vector of arguments.
-Sometimes we want to divide our data into pieces (a l\'a <a href="groupHumdrum.html">group_by()</a>), but
+Sometimes we want to divide our data into pieces (with <a href="groupHumdrum.html">group_by()</a>), but
 rather than applying the same expression to each piece, we want to feed
 the separate pieces as separate arguments to the same function.
 You can use some
-<a href="https://en.wikipedia.org/wiki/Syntactic_sugarsyntactic" class="external-link">syntactic sugar</a>
+<a href="https://en.wikipedia.org/wiki/Syntactic_sugar" class="external-link">syntactic sugar</a>
 to do just this.
-We can index any field in our call with a <code>splat</code> argument, which must be a <code>Field %in% x</code>.
+We can index any field in our call with a <code>splat</code> argument, which must be some <code>x %in% Field</code>.
 For example,</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">with</span>(<span class="fu">list</span>(Token[<span class="at">splat =</span> Spine <span class="sc">%in%</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]))</span></code></pre><p></p></div>
 <p>In this call, the <code>Token</code> field will be divided into two groups, one where <code>Spine == 1</code> and the other where
@@ -442,7 +443,7 @@ quote an expression in R is using the <a href="https://rdrr.io/r/base/tilde.html
 You can also quote expressions, using <code><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote()</a></code>.
 Once you've quoted an expression you can pass it to
 <code>with()</code>, <code>within()</code>, <code>mutate()</code>, <code>summarize()</code>, and <code>reframe()</code>.</p>
-<p>Image that you have three different datasets (<code>humData1</code>, <code>humData2</code>, and <code>humData3</code>),
+<p>Imagine that you have three different datasets (<code>humData1</code>, <code>humData2</code>, and <code>humData3</code>),
 and you'd like to evaluate the expression <code>count(kern(Token, simple = TRUE))</code> in all three.
 Use the <code>~</code> operator to quote and save that expression to variable, then use it with <code>with()</code>:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>countKern <span class="ot">&lt;-</span> <span class="er">~</span><span class="fu">count</span>(<span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>))</span>
@@ -486,7 +487,7 @@ There are seven options:</p><ul><li><p><code>"no"</code>: The result is not recy
 <li><p><code>"pad"</code>: the result is padded with <code>NA</code> values.</p></li>
 <li><p><code>"ifscalar"</code>: if the result is scalar (length 1), it is recycled; otherwise you see an error.</p></li>
 <li><p><code>"ifeven"</code>: if the result length evenly divides the input length, it is recycled; otherwise you see an error.</p></li>
-<li><p><code>"never"</code>: The result is not recycled. If the result does not match the input length, you see an error.</p></li>
+<li><p><code>"never"</code>: The result can never be recycled. Unlike "no", "never" treats differing input and output lengths as an error.</p></li>
 <li><p><code>"summarize"</code>: if the result is not scalar, <em>even if it matches the input length</em>, you see an error. The result is not recycled.</p></li>
 </ul><p>The result of padding/recycling also depends on the <code>alignLeft</code> argument:
 If <code>alignLeft = TRUE</code>, results are padded to the right: like <code>c(result, NA, NA, ...)</code>;
@@ -505,7 +506,7 @@ The only difference between the <code>with()</code> and <code>summarize()</code>
 This can be <em>any</em> kind of R data,
 including <a href="https://rdrr.io/r/base/vector.html" class="external-link">vectors</a> or objects like <a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm fits</a>
 or <a href="https://rdrr.io/r/base/table.html" class="external-link">tables</a>.
-If <code>drop = FALSE</code>, the results will instead be returned in a <code>data.table()</code>.</p>
+If <code>drop = FALSE</code>, the results will instead be returned in a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table()</a></code>.</p>
 <p>If you are working with <a href="groupHumdrum.html">grouped data</a>,
 the <code>drop = FALSE</code> output (<code>data.table</code>) will include all grouping columns as well
 as the results of your expressions.
@@ -535,7 +536,7 @@ The only differences between these methods is their default <code>recycle</code>
 added to the output <a href="humdrumRclass.html">humdrumR data</a>.
 These new fields become the <a href="selectedFields.html">selected fields</a> in the output.
 You can explicitly name newly created fields (recommended), or allow <code>humdrumR</code> to automatically name them (details below).
-When using <code>with(..., drop = FALSE)</code> or <code>summarize(..., drop = FALSE)</code>, the column names of the output data.table
+When using <code>with(..., drop = FALSE)</code> or <code>summarize(..., drop = FALSE)</code>, the column names of the output <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a>
 are determined in the same way.</p>
 <p>Note that <code>within()</code>, <code>mutate()</code>, and <code>reframe()</code> will (attempt to) put <em>any</em> result back into your
 <a href="humdrumRclass.html">humdrumR data</a>...even if it doesn't make much sense.
@@ -618,9 +619,9 @@ Finally, the results are then pieced back together in locations corresponding to
 original data locations.
 Since <a href="groupHumdrum.html">groups</a> are necessarily exhaustive and non-overlapping, the results
 location are easy to understand.
-On the other hand <a href="context.html">contextual windows</a> may overlap, which means and non-scalar results
+On the other hand <a href="context.html">contextual windows</a> may overlap, which means any non-scalar results
 could potentially overlap as well;
-in these cases, which result data lands where may be hard to predict.</p>
+in these cases, it may be hard to predict which data lands where.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -636,7 +637,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -644,72 +645,72 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">with</span><span class="op">(</span><span class="fu">count</span><span class="op">(</span><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">with</span><span class="op">(</span><span class="fu"><a href="count.html">count</a></span><span class="op">(</span><span class="fu"><a href="kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span>, simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="va">Spine</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">humdrumR:::kern(Token, simple = TRUE, Exclusive = Exclusive, </span>  <span style="color: #000000; font-style: italic;">Spine</span>  <span style="color: #000000; font-style: italic;"> n</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">12</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">22</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">25</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">42</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">12</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">19</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">10</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">43</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">46</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">20</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">18</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">41</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">23</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">24</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">13</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">11</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">13</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">25</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 9</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">29</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">27</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">33</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    1</span>  <span style="color: #BBBB00;">33</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">22</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">42</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">18</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">17</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;"> 1</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    2</span>  <span style="color: #BBBB00;">37</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">12</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">46</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">41</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">24</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">25</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">27</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    3</span>  <span style="color: #BBBB00;">15</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            c</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           c#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            d</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">19</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           d#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            e</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">16</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           e#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            f</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           f#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            g</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           g#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            a</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">33</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           a#</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                           b-</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;"> .</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BB00BB;">                                                            b</span>  <span style="color: #BB00BB;">    4</span>  <span style="color: #BBBB00;">53</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">humdrumR:::kern(Token, simple = TRUE, Exclusive = Exclusive, </span>  <span style="color: #000000; font-style: italic;">Spine</span>  <span style="color: #000000; font-style: italic;"> n</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">humdrumR count distribution</span> </span>
@@ -750,7 +751,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -986,7 +987,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                          :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	        *paste(Token, seq_along(Token)) :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (sixteen groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (eight groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece                          :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine                          :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1115,7 +1116,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Semits     :: integer (**semits tokens)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token      :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (sixteen groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (eight groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece      :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine      :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1245,7 +1246,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Semits  :: integer (**semits tokens)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token   :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (248 groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (140 groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Bar     :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece   :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine   :: integer</span>
@@ -1374,7 +1375,7 @@ in these cases, which result data lands where may be hard to predict.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Semits  :: integer (**semits tokens)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token   :: character</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (248 groups)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Grouping fields: (140 groups)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Bar     :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Piece   :: integer</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 	         Spine   :: integer</span>
@@ -1390,11 +1391,11 @@ in these cases, which result data lands where may be hard to predict.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

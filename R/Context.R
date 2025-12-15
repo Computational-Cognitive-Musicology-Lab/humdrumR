@@ -502,37 +502,62 @@ parseContextExpression <- function(expr, other, parseOpenClose) {
 #' which we can capture with regular expressions for `open` and `close`.
 #' Here is an example:
 #' 
-#' 
+#' ```
 #' nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
 #' context(nesting1, open = '(', close = ')')
+#' 
+#' #> [1] "(a,b)"           "(c,d,e)"         "(d,e,f)"         "(e,f,f#,g,g#,a)"
+#' ```
 #' 
 #' Perfect.
 #' However, what if there are nested phrasing indicators?
 #' 
+#' ```
 #' nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
 #' context(nesting2, open = '(', close = ')')
 #' 
+#' #> [1] "(a,b)"         "(c,(d,e)"      "(d,e),(d,e)"   "(d,e),f)"      "(e,(f,(f#,g)"  "(f,(f#,g),g#)" "(f#,g),g#),a)"
+#' ```
 #' 
 #' That's not what we want!
 #' By default, `context()` "pairs" each `open` with the next `close`, which often makes the most sense.
 #' But in this case, we want different behavior.
 #' We can get what we want by specifying `overlap = 'nested'`:
 #' 
+#' ```
 #' context(nesting2, open = '(', close = ')', overlap = 'nested')
+#' 
+#' #> [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(d,e)"               "(d,e)"              
+#' #> [5] "(e,(f,(f#,g),g#),a)" "(f,(f#,g),g#)"       "(f#,g)"  
+#' ```
 #' 
 #' Now context aligns each `open` with the corresponding `close` at the same *nesting level*.
 #' What if we are only interested in the highest (or lowest) level of nesting?
 #' Use the `depth` argument, which can be non-zero integers: the highest level is `1`,
 #' with "deeper" levels incrementing up.
 #' 
+#' ```
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
+#' 
+#' #> [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(e,(f,(f#,g),g#),a)"
+#' 
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2)
+#' 
+#' #> [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)"
+#' 
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3)
+#' 
+#' #> [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)" "(f#,g)"   
+#' ```
 #' 
 #' You can also use negative `depth` to specify from the deepest levels outward.
 #' For example, in this case  `depth == -1` should get us that deepest level:
 #' 
+#' ```
 #' context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
+#' 
+#' #> [1] "(f#,g)"
+#' ```
 #' 
 #' If `depth` is `NULL` (the default), all depths are returned.
 #' 

@@ -134,7 +134,7 @@ or type \code{?func} in the R command line: for example, \code{?kern}.
 
 The "partial" pitch functions \code{\link[=octave]{octave()}}, \code{\link[=step]{step()}}, \code{\link[=accidental]{accidental()}}, and \code{\link[=quality]{quality()}} are so-called
 because they each only return one part/aspect of pitch information, and only that part.
-For example, \code{accidental()} only returns he accidentals (if any) of pitches.
+For example, \code{accidental()} only returns the accidentals (if any) of pitches.
 }
 \seealso{
 To better understand how these functions work, read about

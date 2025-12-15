@@ -73,12 +73,11 @@ discarding octave and step information.
 Set \code{explicitNaturals = FALSE} if you don't want explicit naturals.
 }
 \examples{
-\dontrun{
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+chorale[[100:110, ]]
 
-within(chorales, accidentals(Token))
+within(chorale[[100:110, ]], accidental(Token))
 
-}
 }
 \seealso{
 Other {pitch functions}: 

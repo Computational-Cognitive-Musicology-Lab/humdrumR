@@ -54,6 +54,8 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
@@ -63,7 +65,6 @@
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
@@ -86,7 +87,7 @@ Condit-Schultz</h4>
             
             <h4 data-toc-skip class="date">July 2022</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/Filtering.Rmd" class="external-link"><code>vignettes/Filtering.Rmd</code></a></small>
+
       <div class="d-none name"><code>Filtering.Rmd</code></div>
     </div>
 
@@ -2139,7 +2140,7 @@ recycled to fill the whole group.</p>
 <span id="cb40-78"><a href="#cb40-78" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
 <span id="cb40-79"><a href="#cb40-79" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span>
 <span id="cb40-80"><a href="#cb40-80" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb40-81"><a href="#cb40-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (twenty<span class="sc">-</span>seven groups)</span>
+<span id="cb40-81"><a href="#cb40-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (two groups)</span>
 <span id="cb40-82"><a href="#cb40-82" tabindex="-1"></a><span class="sc">&gt;</span>                Bar   <span class="sc">::</span> integer</span>
 <span id="cb40-83"><a href="#cb40-83" tabindex="-1"></a><span class="sc">&gt;</span>                Piece <span class="sc">::</span> integer</span></code></pre></div>
 <p>Not enough context for you? Maybe we should group the bars into
@@ -2224,7 +2225,7 @@ even-odd pairs:</p>
 <span id="cb41-78"><a href="#cb41-78" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
 <span id="cb41-79"><a href="#cb41-79" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token        <span class="sc">::</span> character</span>
 <span id="cb41-80"><a href="#cb41-80" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb41-81"><a href="#cb41-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (seventeen groups)</span>
+<span id="cb41-81"><a href="#cb41-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (two groups)</span>
 <span id="cb41-82"><a href="#cb41-82" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="fu">floor</span>(Bar<span class="sc">/</span><span class="dv">2</span>) <span class="sc">::</span> numeric</span>
 <span id="cb41-83"><a href="#cb41-83" tabindex="-1"></a><span class="sc">&gt;</span>                Piece        <span class="sc">::</span> integer</span></code></pre></div>
 </div>
@@ -2925,7 +2926,7 @@ leading up to them.</p>
 &gt;                FermataN :: integer
 &gt;               *Token    :: character
 &gt;    
-&gt;       Grouping fields: (forty groups)
+&gt;       Grouping fields: (eight groups)
 &gt;                Piece    :: integer
 &gt;                Spine    :: integer</code></pre>
 <p>Luckily, we can <code><a href="../reference/subset.humdrumR.html">unfilter()</a></code>, then filter again by
@@ -3012,7 +3013,7 @@ bar:</p>
 &gt;                FermataN :: integer
 &gt;               *Token    :: character
 &gt;    
-&gt;       Grouping fields: (176 groups)
+&gt;       Grouping fields: (thirty-six groups)
 &gt;                Bar      :: integer
 &gt;                File     :: integer</code></pre>
 </div>
@@ -3104,7 +3105,7 @@ keep the other voices the same? Well, we could try:</p>
 &gt;                Token      :: character
 &gt;               *Transposed :: character
 &gt;    
-&gt;       Grouping fields: (forty groups)
+&gt;       Grouping fields: (eight groups)
 &gt;                Piece      :: integer
 &gt;                Spine      :: integer</code></pre>
 <p>We successfully unfiltered…but the <code>Token</code> field was
@@ -3196,7 +3197,7 @@ until after the filter was applied. Luckily, we can tell
 &gt;                Token      :: character
 &gt;               *Transposed :: character
 &gt;    
-&gt;       Grouping fields: (forty groups)
+&gt;       Grouping fields: (eight groups)
 &gt;                Piece      :: integer
 &gt;                Spine      :: integer</code></pre>
 <p>Thus, <code><a href="../reference/subset.humdrumR.html">unfilter()</a></code> can be used to combine the content of
@@ -3210,11 +3211,11 @@ different fields into one field!</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer>

@@ -54,6 +54,8 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
@@ -63,7 +65,6 @@
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
@@ -86,7 +87,7 @@ Condit-Schultz</h4>
             
             <h4 data-toc-skip class="date">July 2022</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/Reshaping.Rmd" class="external-link"><code>vignettes/Reshaping.Rmd</code></a></small>
+
       <div class="d-none name"><code>Reshaping.Rmd</code></div>
     </div>
 
@@ -490,20 +491,20 @@ separate spines—i.e., into their rows in the humdrum table? Use
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>example <span class="sc">|&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="fu">rend</span>(Rhythm, Pitch)</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">################### vvv Reshaping_example.hum vvv ####################</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="er">&gt;</span>       <span class="dv">1</span><span class="sc">:</span>       <span class="er">**</span>recip     <span class="sc">**</span>recip     <span class="sc">**</span>recip     <span class="sc">**</span>recip     <span class="sc">**</span>recip</span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">2</span><span class="sc">:</span>             .           .           .           .           .</span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">3</span><span class="sc">:</span>             .           .           .           .           .</span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">4</span><span class="sc">:</span>         <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>       <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>       <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>       <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>           .</span>
-<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">5</span><span class="sc">:</span>             .           .           .           .           .</span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">6</span><span class="sc">:</span>            <span class="fl">4.</span>           c          <span class="fl">4.</span>           e           .</span>
-<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">7</span><span class="sc">:</span>             <span class="dv">8</span>           d           <span class="dv">8</span>           f           .</span>
-<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">8</span><span class="sc">:</span>             <span class="dv">4</span>           e           <span class="dv">4</span>           g           .</span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">9</span><span class="sc">:</span>             <span class="dv">4</span>           f           <span class="dv">4</span>           a           .</span>
-<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">10</span><span class="sc">:</span>             <span class="er">=</span>           <span class="er">=</span>           <span class="er">=</span>           <span class="er">=</span>           <span class="er">=</span></span>
-<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">11</span><span class="sc">:</span>             <span class="dv">2</span>           g           <span class="dv">4</span>          dd          <span class="dv">64</span></span>
-<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">12</span><span class="sc">:</span>             .           .           <span class="dv">4</span>          cc           .</span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">13</span><span class="sc">:</span>             <span class="dv">2</span>           g           <span class="dv">2</span>           b           .</span>
-<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">14</span><span class="sc">:</span>            <span class="er">*</span><span class="sc">-</span>          <span class="er">*</span><span class="sc">-</span>          <span class="er">*</span><span class="sc">-</span>          <span class="er">*</span><span class="sc">-</span>          <span class="er">*</span><span class="sc">-</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="er">&gt;</span>       <span class="dv">1</span><span class="sc">:</span>    <span class="er">**</span>recip  <span class="sc">**</span>recip  <span class="sc">**</span>recip  <span class="sc">**</span>recip  <span class="sc">**</span>recip  <span class="sc">**</span>recip  <span class="sc">**</span>recip</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">2</span><span class="sc">:</span>     <span class="er">*</span>ICvox   <span class="sc">*</span>ICvox        <span class="sc">*</span>   <span class="er">*</span>ICvox   <span class="sc">*</span>ICvox        <span class="sc">*</span>        <span class="er">*</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="er">&gt;</span>       <span class="dv">3</span><span class="sc">:</span>     <span class="er">*</span>Ialto   <span class="sc">*</span>Ialto        <span class="sc">*</span>  <span class="er">*</span>Isoprn  <span class="sc">*</span>Isoprn        <span class="sc">*</span>        <span class="er">*</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="er">&gt;</span>       <span class="dv">4</span><span class="sc">:</span>      <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>    <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>        <span class="sc">*</span>    <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>    <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>        <span class="sc">*</span>        <span class="er">*</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="er">&gt;</span>       <span class="dv">5</span><span class="sc">:</span>        <span class="er">*</span>C<span class="sc">:</span>      <span class="er">*</span>C<span class="sc">:</span>        <span class="er">*</span>      <span class="er">*</span>C<span class="sc">:</span>      <span class="er">*</span>C<span class="sc">:</span>        <span class="er">*</span>      <span class="er">*</span>C<span class="sc">:</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="er">&gt;</span>       <span class="dv">6</span><span class="sc">:</span>         <span class="fl">4.</span>        c        .       <span class="fl">4.</span>        e        .        .</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">7</span><span class="sc">:</span>          <span class="dv">8</span>        d        .        <span class="dv">8</span>        f        .        .</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">8</span><span class="sc">:</span>          <span class="dv">4</span>        e        .        <span class="dv">4</span>        g        .        .</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="sc">&gt;</span>       <span class="dv">9</span><span class="sc">:</span>          <span class="dv">4</span>        f        .        <span class="dv">4</span>        a        .        .</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">10</span><span class="sc">:</span>          <span class="er">=</span>        <span class="er">=</span>        <span class="er">=</span>        <span class="er">=</span>        <span class="er">=</span>        <span class="er">=</span>        <span class="er">=</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">11</span><span class="sc">:</span>          <span class="dv">2</span>        g        .        <span class="dv">4</span>       dd        .       <span class="dv">64</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">12</span><span class="sc">:</span>          .        .        .        <span class="dv">4</span>       cc        .        .</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">13</span><span class="sc">:</span>          <span class="dv">2</span>        g        .        <span class="dv">2</span>        b        .        .</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">14</span><span class="sc">:</span>         <span class="er">*</span><span class="sc">-</span>       <span class="er">*</span><span class="sc">-</span>       <span class="er">*</span><span class="sc">-</span>       <span class="er">*</span><span class="sc">-</span>       <span class="er">*</span><span class="sc">-</span>       <span class="er">*</span><span class="sc">-</span>       <span class="er">*</span><span class="sc">-</span></span>
 <span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">################### ^^^ Reshaping_example.hum ^^^ ####################</span></span>
 <span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="er">&gt;</span>    </span>
 <span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
@@ -881,11 +882,11 @@ starting from <code>0</code>.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer>

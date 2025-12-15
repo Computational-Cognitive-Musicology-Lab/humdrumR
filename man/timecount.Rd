@@ -129,7 +129,7 @@ the output of \code{timecount()} assigns (rounds) each onset to the previous bea
 However, if \code{offBeats = FALSE}, only onsets that \emph{land} on a beat are counted, with offbeat values returning \code{NA}.
 
 The \code{phase} controls how offbeat onsets are associated with nearby beats.
-\code{phase} is \link[=rhythmParsing]{parsed} as a rhythmic value and must be rhythmic values that are smaller than the smallest \code{beat} value.
+\code{phase} is \link[=rhythmParsing]{parsed} as a rhythmic value and must be smaller than the smallest \code{beat} value.
 The \code{phase} argument shifts the "boundary" between beats backwards, before the beat onset.
 By default, \code{phase = 0} so the beat-association boundary lands on the beat: only onsets on or after each beat "belong" to that beat.
 If \code{phase = '8'}, the beat boundary is pushed back to capture one eighth-note \emph{before} the beat itself.

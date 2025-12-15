@@ -47,7 +47,7 @@ A humdrum table encodes all the information in a collection of one or more humdr
 as a single \link[data.table:data.table]{data.table}
 (A \code{data.table} is an "enhanced" version of R's standard \link{data.frame}).
 Humdrum tables are stored "inside" every \link{humdrumRclass} object that you will work with, and various \code{humdrumR}
-functions allow you to study or manipulate the them.
+functions allow you to study or manipulate them.
 If you want to directly access the humdrum table within a \link{humdrumRclass} object, use the \code{\link[=getHumtab]{getHumtab()}} function.
 
 The \code{getHumtab()} function extracts the humdrum table from a \link[=humdrumRclass]{humdrumR object}.
@@ -203,7 +203,7 @@ exclusive interpretation associated with each token/row of the \code{Token} fiel
 
 Humdrum data may, or may not, include additional \emph{tandem} interpretations. A universal rule for parsing
 tandem interpretations is impossible, because A) tandem interpretations can "overwrite" each other and B)
-users can create their own tandem interpretations. The best we can do in all cases is
+users can create their own tandem interpretations. The best we can do in all cases is to
 identify \emph{all} tandem interpretations that have appeared previously in the spine
 (counting most recent first). All these previous interpretations are encoded in a single
 character string in the \code{Tandem} field (see the \code{\link[=tandem]{tandem()}} docs for details).

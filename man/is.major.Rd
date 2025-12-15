@@ -27,7 +27,7 @@ These functions test the majorness/minorness of a
 tertian or diatonic set, a logical \code{TRUE}/\code{FALSE}.
 These functions are not testing whether a chord is strictly
 a major or minor chord, but rather a "broad" major/minorness:
-gnerally, the presence of a minor third degree
+generally, the presence of a minor third degree
 makes a set "minor"; thus, a diminished chord is "minor"
 and the lydian key is "major."
 }

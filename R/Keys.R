@@ -26,7 +26,7 @@
 #' 
 #' By default, the [as.character][base::character] method, and thus (via [struct]) the [show][methods::show] method,
 #'  for diatonicSets call [key()][keyFunctions].
-#' Thus, if you return a `diatonicSet` on the command line (or call [print][base::print] one one), 
+#' Thus, if you return a `diatonicSet` on the command line (or [print][base::print] one), 
 #' you'll see the [key interpretation][keyFunctions] representation printed.
 #' 
 #' @slot Root integers representing the root of the key on the line-of-fifths
@@ -118,7 +118,7 @@
 #' 
 #' + [integer][base::integer]: interpreted as root of major key
 #' + [numeric][base::numeric]: rounded to nearest integer and intepreted as root of major key
-#' + [character][base::character]: interpreted using `humdrumR`s [regular expression dispatch system][humdrumR::regexDispatch], as 
+#' + [character][base::character]: interpreted using `humdrumR`'s [regular expression dispatch system][humdrumR::humdrumDispatch], as 
 #'   explained fully [here][keyFunctions].
 #'   
 #' @seealso The main way to create `diatonicSet` S4 objects is with the [diatonicSet()] pitch parser.
@@ -549,7 +549,7 @@ dset2signature <- function(x, Key = NULL, ...) {
     tints <- tint( , LO5ths) %<-matchdim% NULL
     
     notes <- tint2tonalChroma(tints, parts = c('step', 'species'),
-                              flat = '-', qualities = FALSE, Key = x(0, 0),
+                              flat = '-', qualities = FALSE, Key = dset(0, 0),
                               step.labels = c('c', 'd', 'e', 'f', 'g', 'a', 'b')) %<-matchdim% LO5ths
     
     notes[LO5ths <= 5L & LO5ths >= -1L] <- ""

@@ -61,9 +61,9 @@ you can just put a \code{.}!
 The selected fields also have a role in identifying "null" data.
 Whenever new fields are selected, their data tokens are checked for \code{NA} values or null
 tokens (\code{"."}).
-Anywhere where \emph{all} the selected fields are null, the \code{Type} field is updated to \code{"d"};
+Wherever \emph{all} the selected fields are null, the \code{Type} field is updated to \code{"d"};
 wherever \emph{any} field is \strong{not} null, the \code{Type} field is updated to \code{"D"}.
-Many functions ignore \code{d} (null data) tokens by default, so selecting fields can be a way controlling which data you
+Many functions ignore \code{d} (null data) tokens by default, so selecting fields can be a way to control which data you
 want to analyze and which you don't.
 \subsection{Selecting fields}{
 
@@ -71,8 +71,8 @@ Fields can be selected using the tidyverse \code{select()} function,
 and can use any of \code{select()}'s \link[dplyr:select]{special select features}.
 If you call \code{select()} with no argument, the original \code{Token} field is selected by default.
 
-If you use \code{select()} with a numeric selections or, like \code{select(1:3)}, fields are numbered in the (row) order
-shown in call to \code{\link[=fields]{fields()}}.
+If you use \code{select()} with a numeric selection, like \code{select(1:3)}, fields are numbered in the (row) order
+shown in the call to \code{\link[=fields]{fields()}}.
 Fields are always sorted first by \code{Type} (\code{Data} first), then by name.
 If you provide a \code{fieldTypes} argument, the numeric selection is reduced to only those fields you choose,
 matching with the row-numbers you'd see if you call \link[=fields]{fields(humData, fieldTypes = ...)}.
@@ -96,7 +96,7 @@ selectedFields(humData)
 # change selection
 humData |> select(Spine, Record, Token) |> selectedFields()
 
-humData |> select(Structure)
+humData |> select(fieldTypes = 'Structure') |> selectedFields()
 
 humData |> select(4)
 humData |> select(1:3, fieldTypes = 'Structure')

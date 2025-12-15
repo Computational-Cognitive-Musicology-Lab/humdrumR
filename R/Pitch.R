@@ -3891,17 +3891,16 @@ accidental <- makePitchTransformer(partialApply(tint2specifier, flat = 'b', qual
 #' 
 #' @examples 
 #'
-#' \dontrun{
-#' chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+#' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
 #' 
-#' within(chorales, quality(Token))
+#' within(chorale[[20:30,]], quality(Token))
 #' 
 #' # Harmonic interval qualities:
 #' 
-#' within(chorales, hint(Token, deparser = quality))
-#' with(chorales, hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
+#' within(chorale[[20:30,]], hint(Token, deparser = quality))
+#' with(chorale[[20:30,]], hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
 #' 
-#' }
+#' @export
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}
 #' @family {partial pitch functions}
@@ -3919,11 +3918,11 @@ quality <- makePitchTransformer(partialApply(tint2specifier, qualities = TRUE, e
 #' @examples 
 #' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
 #' chorale[[20:30,]]
-#' within(chorales[[20:30,]], octave(Token))
+#' within(chorale[[20:30,]], octave(Token))
 #' 
-#' within(chorales[[20:30,]], octave(Token, octave.offset = 4)) # traditional octaves
+#' within(chorale[[20:30,]], octave(Token, octave.offset = 4)) # traditional octaves
 #' 
-#' within(chorales[[20:30,]], octave(Token, octave.integer = FALSE))
+#' within(chorale[[20:30,]], octave(Token, octave.integer = FALSE))
 #' 
 #' @inheritParams pitchFunctions
 #' @family {pitch functions}

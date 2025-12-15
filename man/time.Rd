@@ -180,11 +180,9 @@ dur(wholenotes, minutes = TRUE, hours = TRUE)
 quarternotes <- c(10, 30, 90, 310, 5000)
 dur(quarternotes, minutes = TRUE, BPM = '120', parse(unit = '4'))
 
-\dontrun{
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 
 with(B075[[,3:4]], seconds(Token))
-}
 
 
 }

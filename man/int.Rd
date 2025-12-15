@@ -214,17 +214,17 @@ Positive lags (the default) will calculate \strong{approaching} intervals: each 
 and the \emph{previous} note.
 Negative lags will calculate \strong{departing} intervals: each token represents the interval
 between the current note and the \emph{next} note.
-Note that, by passing \code{directed = FALSE} through the the \link[=pitchDeparsing]{deparser}, the undirected (absolute value)
+Note that, by passing \code{directed = FALSE} through the \link[=pitchDeparsing]{deparser}, the undirected (absolute value)
 of the melodic intervals can be returned.
 }
 
 \section{Incomplete value padding}{
 
 
-By default, \code{int} will return \code{NA} anywhere where \code{x} \strong{or} \code{from} is \code{NA}.
+By default, \code{int} will return \code{NA} whereever \code{x} \strong{or} \code{from} is \code{NA}.
 However, if \code{from} is \code{NA} but \code{x} is \emph{not} \code{NA}, we can ask for different output for these "incomplete" pairs.
 using the \code{incomplete} argument.
-If \code{incomplete} is an atomic value, incomplete outputs indices are willed with this value.
+If \code{incomplete} is an atomic value, incomplete outputs indices are filled with this value.
 If the incomplete argument is a \link[=pitchFunctions]{pitch function} (like the \code{deparser} argument),
 this function is used to (re)parse the values of \code{x} where \code{from} is missing.
 If \code{bracket == TRUE}, incomplete output values are surrounded with \verb{[]}, so they are easier to distinguish from the
@@ -233,7 +233,7 @@ actual intervals.
 The main use of the \code{incomplete} argument is in \code{mint()} and \code{hint()}.
 The lagged \code{from} arguments used in \code{mint()}/\code{hint()} (see previous section) are necessarily padded by \code{abs(lag)} \code{NA}
 values at the beginning (positive lag) or end (negative lag).
-These are thus "incomplete" pairs passed to \code{int()}, and can controlled using the \code{incomplete} argument.
+These are thus "incomplete" pairs passed to \code{int()}, and can be controlled using the \code{incomplete} argument.
 By default, both \code{mint()} and \code{hint()} set \verb{incomplete = kern(), bracket = TRUE} which cause these
 notes to show up as bracketed kern, like \verb{[ee-]} or \verb{[C#]}.
 If \code{incomplete} is \code{NULL}, the incomplete values are simply padded with \code{NA}.

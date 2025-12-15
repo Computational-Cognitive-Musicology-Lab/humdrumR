@@ -52,14 +52,15 @@ Test is an object/variable is a humdrumR dataset using is.humdrumR().'></head><b
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -70,7 +71,7 @@ Test is an object/variable is a humdrumR dataset using is.humdrumR().'></head><b
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1><code>humdrumR</code> class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/humdrumR-class.R" class="external-link"><code>R/humdrumR-class.R</code></a></small>
+
       <div class="d-none name"><code>humdrumRclass.Rd</code></div>
     </div>
 
@@ -101,7 +102,8 @@ Test is an object/variable is a <code>humdrumR</code> dataset using <code>is.hum
 <span>  maxRecordsPerFile <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">humdrumR</span><span class="op">)</span> <span class="op">==</span> <span class="fl">1L</span><span class="op">)</span> <span class="fl">800L</span> <span class="kw">else</span></span>
 <span>    <span class="fu">humdrumRoption</span><span class="op">(</span><span class="st">"maxRecordsPerFile"</span><span class="op">)</span>,</span>
 <span>  maxTokenLength <span class="op">=</span> <span class="fu">humdrumRoption</span><span class="op">(</span><span class="st">"maxTokenLength"</span><span class="op">)</span>,</span>
-<span>  censorEmptyRecords <span class="op">=</span> <span class="fu">humdrumRoption</span><span class="op">(</span><span class="st">"censorEmptyRecords"</span><span class="op">)</span></span>
+<span>  censorEmptyRecords <span class="op">=</span> <span class="fu">humdrumRoption</span><span class="op">(</span><span class="st">"censorEmptyRecords"</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -190,7 +192,7 @@ and were read into the <code>humdrumR</code> object, with <code><a href="https:/
 
 
 <dt><code>Fields</code></dt>
-<dd><p>A data.table indicating the existing fields in the <code>humdrumR</code> object's
+<dd><p>A <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a> indicating the existing fields in the <code>humdrumR</code> object's
 <a href="humTable.html">humdrum table</a>.
 The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."</p></dd>
 
@@ -201,7 +203,7 @@ called to create this <code>humdrumR</code> object.</p></dd>
 
 
 <dt><code>Context</code></dt>
-<dd><p>A data.table with two columns: <code>Open</code> and <code>Close</code>.
+<dd><p>A <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a> with two columns: <code>Open</code> and <code>Close</code>.
 Each row represents a contextual window to apply to the data.</p></dd>
 
 
@@ -256,7 +258,7 @@ You can set printing options globally using the <code><a href="humdrumR.html">hu
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -506,11 +508,11 @@ You can set printing options globally using the <code><a href="humdrumR.html">hu
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

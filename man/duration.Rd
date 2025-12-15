@@ -73,12 +73,10 @@ duration(tokens)
 quarters(tokens, parse(grace = NA))
 quarters(tokens, inPlace = TRUE)
 
-\dontrun{
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 
 with(B075, subset = Spine > 2, duration(Token)) 
 with(B075, subset = Spine > 2, quarters(Token)) 
-}
 
 }
 \seealso{

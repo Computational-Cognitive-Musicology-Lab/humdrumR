@@ -65,7 +65,7 @@ Other differences:
 \itemize{
 \item \code{struct}s can have either no dimensions (\code{dim(struct) == NULL}) or two dimensions. Higher dimensional \code{struct}s are not supported (yet).
 \item \code{rowSums} and \code{colSums} will coerce a dimensionless struct to a column matrix.
-\item \code{struct}s always throw an error if you try to index them with a index value that is greater than the length/nrow of the \code{struct}.
+\item \code{struct}s always throw an error if you try to index them with an index value that is greater than the length/nrow of the \code{struct}.
 This is different than atomic vectors, which will pad the vector up to the length of the index you give---a sometimes useful but quirky behavior.
 \item \code{struct}s with two dimensions have a \code{cartesian} indexing argument.
 If \code{cartesian = TRUE}, the \code{i} and \code{j} arguments are treated as cartesian coordinates.

@@ -2,12 +2,12 @@
 % Please edit documentation in R/Reshape.R
 \name{cleaveGraceNotes}
 \alias{cleaveGraceNotes}
-\title{"Fold" grace notes into neighbos}
+\title{"Fold" grace notes into neighbors}
 \usage{
 cleaveGraceNotes(humdrumR)
 }
 \description{
-"Fold" grace notes into neighbos
+"Fold" grace notes into neighbors
 }
 \seealso{
 \code{foldGraceNotes} makes use of the more general \code{\link[=cleave]{cleave()}}.

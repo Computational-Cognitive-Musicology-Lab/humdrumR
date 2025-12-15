@@ -58,7 +58,7 @@ There are also two different approaches to \emph{specifying} transpositions: "to
 \section{Types of Transposition}{
 There are two different types of transposition: \strong{real} transposition and \strong{tonal} transposition.
 In \emph{real} transposition, all inputs are transposed by the same \emph{specific} interval.
-For example, the pitches \verb{\{C D E F G\}} could be transposed up a major second to \verb{\{C D E F# G\}}.
+For example, the pitches \verb{\{C D E F G\}} could be transposed up a major second to \verb{\{D E F# G A\}}.
 In \emph{tonal} transposition, inputs are transposed by \emph{generic} intervals, within a key.
 For example, the sequence \verb{\{C D E F G\}}, in the key of C major, could be translated up a generic second
 to \verb{\{D E F G A\}}.
@@ -68,7 +68,10 @@ To choose between real and tonal transposition, use the \code{real} argument:
 \subsection{Alterations}{
 
 Tonal transposition is complicated by the presence of any alterations in the input pitches.
-For instance, if we are given the pitches \verb{\{C F# G D# E\}`` in the key of C major, how should they by tonally transposed up a second, within C major? There is not one obvious, correct answer answer, which can be easily identified. The algorithm implemented by }humdrumR` is as follows:
+For instance, if we are given the pitches \verb{\{C F# G D# E\}} in the key of C major, how should they by tonally
+transposed up a second, within C major?
+There is not one obvious, correct answer that can be easily identified.
+The algorithm implemented by \code{humdrumR} is as follows:
 \enumerate{
 \item Alterations/accidentals in the input are identified. (In this case, F# and D#).
 \item The generic pitches are transposed within the key, resulting in \verb{\{D G A E F\}}.
@@ -82,8 +85,18 @@ The resulting output is \verb{\{D G# A E F\}}.
 
 The size of \code{enharmonicWrap} effectively determines how extreme accidentals are allowed.
 The default value, \code{12}, assures that no output notes are enharmonically equivalent to notes in the key.
-To further illustrate, here is the sequence \verb{\{C F# G D# E, B- A A- G C# D, B D- C\}} transposed
-tonally within C major by all seven possible generic intervals, with \code{enharmonicWrap = 12}:
+To further illustrate, here is the sequence \verb{\{C F# G D# E B- A A- G C# D B D- C\}} transposed
+tonally within C major by all seven possible generic intervals, with \code{enharmonicWrap = 12}:\tabular{ll}{
+   Interval \tab Output \cr
+   Unison \tab {C  F# G  D  E  B- A  A- G  C  D  B  D- C  } \cr
+   2nd \tab {D  G  A  E  F  c  B  B- A  D  E  c  E- D  } \cr
+   3rd \tab {E  A  B  F# G  d- c  c  B  E  F  d  F  E  } \cr
+   4th \tab {F  B  c  G  A  e- d  d- c  F# G  e  G  F  } \cr
+   5th \tab {G  c  d  A  B  f  e  e- d  G  A  f  A- G  } \cr
+   6th \tab {A  d  e  B  c  g  f  f  e  A  B  g  B- A  } \cr
+   7th \tab {B  e  f  c  d  a- g  g  f  B  c  a  c  B  } \cr
+}
+
 }
 }
 
@@ -94,7 +107,7 @@ If the \code{by} interval is specific but \code{real = FALSE}, the input is trea
 and tranposition takes place within the key indicated by the \code{Key} argument.
 
 The \code{to} argument translates an input \emph{to} a desired key.
-For example, if the input is in the key of E major but we want it transposed to G major, we could say \code{to = '*E:'}.
+For example, if the input is in the key of E major but we want it transposed to G major, we could say \code{to = '*G:'}.
 If \code{real = TRUE}, input is simply translated to the root of the \code{to} key, with all the exact same intervals.
 If \code{real = FALSE}, the input is translated to the root of the new key, with its intervals changed to match the new key as well.
 In either case, the result depends on what the input's key is, which is indicated by the \link[=pitchFunctions]{standard} \code{Key} argument.
@@ -107,15 +120,15 @@ If we specify \verb{to = e:, real = TRUE}, the output will be \verb{\{B G# A F##
 If we specify \verb{to = e:, real = FALSE}, the output will instead be \verb{\{B G A F# G, B A# B C B\}}.
 
 Building off the previous example, consider how the input \emph{key} matters as well.
-If we use the same input notes (\verb{\{D B C A# B, D C# D E D\}}) but the input \code{Key} is C major, then:
-If we specify \verb{to = e:, real = TRUE}, the output will be \verb{\{F# D# E C## D#, F# E# F# G# F#\}}.
-If we specify \verb{to = e:, real = FALSE}, the output will instead be \verb{\{F# D E C# D, F# E F# G F#\}}.
+If we use the same input notes (\verb{\{D B C A# B D C# D E D\}}) but the input \code{Key} is C major, then:
+If we specify \verb{to = e:, real = TRUE}, the output will be \verb{\{F# D# E C## D# F# E# F# G# F#\}}.
+If we specify \verb{to = e:, real = FALSE}, the output will instead be \verb{\{F# D E C# D F# E F# G F#\}}.
 
 If \emph{both} \code{by} and \code{to} are specified, the \code{to} transposition is applied first, followed by the \code{by} transposition.
 If \code{real = FALSE}, the \code{by} transposition happens within the \code{to} key, not the \code{Key} key.
 \subsection{Relative vs Parallel}{
 
-When transposing to, we have diferent approaches about to determining the relationship between the
+When transposing to, we have difFerent approaches to determine the relationship between the
 "from" key (\code{Key} argument) and the "to" key (\code{to} argument).
 If we think of "parallel" relationships between keys, we match the roots of the keys regardless of modes.
 For instance, C major and C minor are parallel keys.
@@ -123,9 +136,12 @@ If we instead think of "relative" relationships between keys, we match the modes
 For instance, C major and A minor are relative keys.
 This is similar to the distinction between "la-based minor" solfege (relative) vs "fixed-do" solfege (parallel).
 
-When transposing using a \code{to} argument, if \code{relative = FALSE} the input key (\code{Key} argument) is transposed to match the \emph{root}
+When transposing using a \code{to} argument, if \code{relative = FALSE}, the input key (\code{Key} argument) is transposed to match the \emph{root}
 of the \code{to} argument.
-For example, if the input key is G minor and the \verb{to`` key is C major, the output is transposed to G minor. However, if }relative = TRUE\verb{the input key is transposed to match the mode of the}to\verb{key: A G minor input with a C major}to\verb{would be translated to A minor, the parallel minor of the}to\verb{key. If the}Key\verb{(from key) and}to` (to key) arguments have the same mode, the parallel and relative transpositions
+For example, if the input key is G minor and the \code{to} key is C major, the output is transposed to C minor, the parallel minor of the \code{to} key.
+However, if \code{relative = TRUE} the input key is transposed to match the mode of the \code{to} key:
+A G minor input with a C major \code{to} would be translated to A minor, the relative minor of the \code{to} key.
+If the \code{Key} (from key) and \code{to} (to key) arguments have the same mode, the parallel and relative transpositions
 are the same.
 }
 }

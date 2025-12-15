@@ -651,34 +651,24 @@ shortFilenames <- function(fileFrame) {
 #' 
 #' @examples 
 #' # loads all valid humdrum files in the current directory.
-#' ```
-#' readHumdrum()
-#' ```
+#' \dontrun{readHumdrum()}
 #' 
 #' # loads all files ending with "krn" in the currect directory
-#' ```
-#' readHumdrum(".*krn$") 
-#' ```
+#' \dontrun{readHumdrum(".*krn$")}
 #' 
 #' # Goes inside the directory "Composers".
 #' # Inside "Composers" looks for directories that start with "Be" or "Mo".
 #' # If there are any "Be|Mo" matching directories within "Composers", matches all directories within them.
 #' # Within these directories, looks for directories called "Joined".
 #' # If there are any directories called "Joined", loads all files (if any) that end with "krn".
-#' ```
-#' readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$") 
-#' ```
+#' \dontrun{readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$")}
 #' 
 #' # exactly the same as the previous!
-#' ```
-#' readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")
-#' ```
+#' \dontrun{readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")}
 #'  
 #' # exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
 #' # in the Label field as "Beethoven" and "Mozart" respectively.
-#' ```
-#' readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$")
-#' ```
+#' \dontrun{readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$")}
 #' 
 #' @name readHumdrum
 #' @export

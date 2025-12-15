@@ -50,14 +50,15 @@ a logical vector for indicating where onsets fall on or off beat."></head><body>
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -68,7 +69,7 @@ a logical vector for indicating where onsets fall on or off beat."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Count beats or measures</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Metric.R" class="external-link"><code>R/Metric.R</code></a></small>
+
       <div class="d-none name"><code>timecount.Rd</code></div>
     </div>
 
@@ -200,7 +201,7 @@ Every rhythmic onset is associated with one beat, but multiple onsets may occur 
 the output of <code>timecount()</code> assigns (rounds) each onset to the previous beat onset.
 However, if <code>offBeats = FALSE</code>, only onsets that <em>land</em> on a beat are counted, with offbeat values returning <code>NA</code>.</p>
 <p>The <code>phase</code> controls how offbeat onsets are associated with nearby beats.
-<code>phase</code> is <a href="rhythmParsing.html">parsed</a> as a rhythmic value and must be rhythmic values that are smaller than the smallest <code>beat</code> value.
+<code>phase</code> is <a href="rhythmParsing.html">parsed</a> as a rhythmic value and must be smaller than the smallest <code>beat</code> value.
 The <code>phase</code> argument shifts the "boundary" between beats backwards, before the beat onset.
 By default, <code>phase = 0</code> so the beat-association boundary lands on the beat: only onsets on or after each beat "belong" to that beat.
 If <code>phase = '8'</code>, the beat boundary is pushed back to capture one eighth-note <em>before</em> the beat itself.
@@ -280,7 +281,7 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -534,11 +535,11 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

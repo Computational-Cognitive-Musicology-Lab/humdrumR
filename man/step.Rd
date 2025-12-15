@@ -73,13 +73,12 @@ arguments \code{generic = TRUE}, \code{simple = TRUE}, and \code{step.labels = N
 By default, \code{step()} will returns steps relative to the key---set \code{Key = NULL} if you don't want this.
 }
 \examples{
-\dontrun{
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+chorale[[20:30,]]
 
-within(chorales, step(Token))
+within(chorale[[20:30,]], step(Token))
 
-within(chorales, step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
-}
+within(chorale[[20:30,]], step(Token, step.labels = c('C', 'D', 'E', 'F', 'G', 'A', 'B')))
 
 }
 \seealso{

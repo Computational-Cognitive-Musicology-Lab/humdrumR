@@ -60,6 +60,6 @@ metric level that it lands on.
 
 In some cases, we might want to restrict our attention to syncopations that occur
 at a specific metric level: for example, "eighth-note syncpations."
-We can proved a set of metric levels to the \code{levels} argument, to do this restriction.
+We can provide a set of metric levels to the \code{levels} argument to enforce this restriction.
 The \code{levels} must be parsable as durations which match the levels of the \code{\link[=meter]{meter()}}.
 }

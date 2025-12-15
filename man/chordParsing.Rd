@@ -32,7 +32,7 @@ tertianSet(...)
 \method{tertianSet}{token}(x, Exclusive = NULL, ...)
 }
 \description{
-\link{humdrumR} includes a easy-to-use but powerful system for \emph{parsing} tertian harmony information:
+\link{humdrumR} includes an easy-to-use but powerful system for \emph{parsing} tertian harmony information:
 various basic chord representations (including \code{numeric} and \code{character}-string representations) can be "parsed"---read
 and interpreted by \code{humdrumR}.
 For the most part, parsing automatically happens "behind the scenes" whenever you use any humdrumR \link[=chordFunctions]{chord function}, like \code{\link[=harm]{harm()}}

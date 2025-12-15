@@ -110,7 +110,7 @@ you may use the data's \link[=fields]{fields} as arguments.
 If no field names are specified, the first \link[=selectedFields]{selected field} is used as \code{x}.
 }
 \details{
-Both functions return "collapsed" durations are as null data tokens.
+Both functions return "collapsed" durations as null data tokens.
 For example, \code{sumTies(c('[4a', '4a]', '2g'))} returns \code{c('2a', '.', '2g')}, with the second (tied) duration null (\code{"."}).
 
 For interonset intervals, the last duration in a string of durations is undefined---there is a final onset, but no \emph{next} onset, so there

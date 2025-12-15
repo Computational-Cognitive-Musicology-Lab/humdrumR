@@ -22,7 +22,7 @@ Must be a single \code{character} string.
 If \code{NULL} (the default), no error report files are written.}
 }
 \value{
-\code{validateHumdrum()} returns a "error frame" data.table object, \link[base:invisible]{invisibly}
+\code{validateHumdrum()} returns an "error frame" data.table object, \link[base:invisible]{invisibly}
 (to "see" the output, you must save it to a variable, \emph{then} look at it).
 The error frame is a \code{data.table} with three columns:
 \itemize{

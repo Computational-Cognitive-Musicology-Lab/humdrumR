@@ -56,7 +56,7 @@ Generally, \code{tonalIntervals} are created using the \code{\link[=tonalInterva
 various methods.
 The \code{tonalInterval} \emph{function} is primarily a parser, \link[=pitchParsing]{documented elsewhere},
 which interprets various input representations
-and generates \code{tonalInterval} S4 \emph{objects} (documented here).
+and generates \code{tonalInterval} S4 \emph{objects} \href{http://adv-r.had.co.nz/S4.html}{documented here}.
 
 Alternatively, the constructor function \code{tint} can be used to directly create \code{tonalInterval} objects.
 The three arguments to \code{tint} correspond to the three slots: \code{octave}, \code{LO5th} (Fifth), and \code{cent}.

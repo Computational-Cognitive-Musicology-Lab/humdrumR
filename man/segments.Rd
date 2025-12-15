@@ -56,7 +56,7 @@ It can be particularly useful to use \code{segments()} to create
 \section{Changes}{
 
 
-\code{changes} takes and input vector and finds all indices \code{i}
+\code{changes} takes an input vector and finds all indices \code{i}
 where the value of \code{x[i] != x[i-1]}---i.e., where the value at one index
 has "changed" since the last index.
 By default, \code{changes} returns a \code{logical} vector the same length as the input,

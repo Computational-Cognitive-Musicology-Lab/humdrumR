@@ -30,7 +30,7 @@ Deparsing is the second step in the \link[=pitchFunctions]{pitch function} proce
 Various pitch representations like \verb{**kern}, \verb{**solfa}, and \verb{**semits} can be generated using predefined \link[=pitchFunctions]{pitch functions} like \code{\link[=kern]{kern()}}
 \code{\link[=semits]{semits()}}, and \code{\link[=solfa]{solfa()}} respectively.
 All of these functions use a common deparsing framework, and are specified using different combinations of arguments
-to the deparser.a
+to the deparser.
 By modifying these \emph{"deparsing" arguments}, you can exercise
 fine control over how you want pitch information to be represented in your output.
 \emph{This} documentation talks about this deparsing step.
@@ -73,7 +73,7 @@ an alternate \code{Key} is passed to \code{transposeArgs} or \code{parseArgs}.
 Various deparsing options use the \code{Key} argument; for example, use of \code{implicitSpecies} (see advanced parsing section) is dependent on the \code{Key}.
 
 If you use any \link[=pitchFunctions]{pitch function} within a special call to \link{withinHumdrum},
-\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means, that in most cases,
+\code{humdrumR} will automatically pass the \code{Key} field from the humdrum data to the function---this means that, in most cases,
 you don't need to explicitly do anything with the \code{Key} argument!
 (If you want this \emph{not} to happen, you need to explicitly specify your own \code{Key} argument, or \code{Key = NULL}.)
 }
@@ -386,7 +386,7 @@ If \code{octave.integer = FALSE}, the \code{humdrumR} parser instead looks for t
 These symbols are controlled using the \code{up}, \code{down}, and \code{same} (\code{character}, \code{length == 1}) arguments.
 A \code{same} symbol, or no symbol, is interpreted as the "central" octave; repeating strings of the \code{up} or \code{down} symbols indicate
 increasing positive (\code{up}) or negative (\code{down}) octaves.
-For example, in \code{lilypond} notation, \verb{,} represents lower octaves, and \verb{'} (single apostrophe) represents upper octaves.
+For example, in \code{lilypond} notation, \verb{,} (comma) represents lower octaves, and \verb{'} (single apostrophe) represents upper octaves.
 So the default \code{\link[=lilypond]{lilypond()}} parser uses these arguments:
 \itemize{
 \item \code{pitch(c("c", "c", "c'"), parse(octave.integer = FALSE, up = "'", down = ",", octave.offset = 1))}
@@ -413,8 +413,8 @@ So B is associated with the C 7 steps below it.
 If, on the other hand, \code{octave.round = round}, then scale-steps are "rounded" to the closest C, so B and A are associated with the closer C \emph{above} them.
 Indeed, \code{octave.round = round} gets us the \code{-P4} <-> \code{+P4} behavior we mentioned earlier!
 
-When working parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
-For example, we might think of a ascending major 12th as being an ascending octave \emph{plus} a ascending perfect 5th: ** +P8 + P5**.
+When parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
+For example, we might think of an ascending major 12th as being an ascending octave \emph{plus} an ascending perfect 5th: ** +P8 + P5**.
 \strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
 The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
@@ -460,7 +460,7 @@ The following table illustrates:\tabular{llllll}{
 
 \subsection{Absolute or Relative (contour) Octave}{
 
-In some notation encoding schemes, the "octave" of each note is interpreted \emph{relative} the previous note, rather than any absolute reference.
+In some notation encoding schemes, the "octave" of each note is interpreted \emph{relative} to the previous note, rather than any absolute reference.
 The most prominent system is Lilypond's \href{https://lilypond.org/doc/v2.22/Documentation/notation/writing-pitches#relative-octave-entry}{relative octave entry} style.
 This style is often used in combination with scale degree representations---as in the \href{http://rockcorpus.midside.com/melodic_transcriptions.html}{RS200} corpus.
 For example, a data set might say \verb{Do Re Mi vSo La Ti Do}, with the \code{"v"} indicating a jump down to \code{So}.
@@ -474,7 +474,7 @@ Different combinations of \code{octave.round} allow us to parse different behavi
 Octave markers indicate alterations to this assumption.
 As always, this is based on scale steps, not semitones!
 Any fourth is "closer" than any fifth, regardless of their quality: So \emph{C F#} is ascending and \emph{C Gb} is descending!
-A ascending diminished 5th would be written \code{C ^Gb}---with \verb{up = ^}.
+An ascending diminished 5th would be written \code{C ^Gb}---with \verb{up = ^}.
 \item If \code{octave.round = floor}, a \code{same} marker (or no marker) indicates that the note is in the octave above the previous pitch.
 Octave markers indicate alterations to this assumption.
 With this setting, going from \emph{C} down to \emph{B} always requires a \code{down} mark.
@@ -492,11 +492,11 @@ string-parsing issues that we can consider/control.
 So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 the \code{humdrumR} parser can be modified to handle different options.
 However, there are two general parsing issues/options to consider: what information is encoded, and in \emph{what order}?
-The \code{parts} argument can be specifyied to indicate this.
+The \code{parts} argument can be specified to indicate this.
 The \code{parts} argument must be a \code{character} vector of length 1--3.
-The characters in the must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
-The presense of any of these strings in the \code{parts} vector indicate that that information should be parsed.
-The \emph{order} of the strings indicates what order the pieces of pitch information are encoded in input strings.
+The characters must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
+The presence of any of these strings in the \code{parts} vector indicate that that information should be parsed.
+The \emph{order} of the strings indicates in what order the pieces of pitch information are encoded in input strings.
 
 To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., \code{M2} and \code{P5}---except the
 quality appears \emph{after} the step---e.g., \verb{2M} and \verb{5P}.
@@ -515,12 +515,12 @@ For example, we could use a parse command like this: \code{kern("E flat 5", pars
 
 The \code{\link[=table]{table()}} will automatically generate factor levels
 for pitch data using the \code{\link[=gamut]{gamut()}} function.
-This is makes sure tabulated data sorted in a logical order, and includes
+This makes sure tabulated data is sorted in a logical order, and includes
 missing pitches.
 The \code{simple}/\code{complex} and  \code{generic}/\code{specific} arguments are automatically passed to \code{\link[=gamut]{gamut()}}; additional
 arguments can be passed to gamut using \code{gamutArgs = list(...)}, or with the syntactic sugar \code{gamut(...)}.
 (Read the \code{\link[=gamut]{gamut()}} docs for an explanation of gamut generation.)
-This feature be used to control table layout of pitch data, as well as to assure
+This feature is used to control table layout of pitch data, as well as to assure
 consistent tables when grouping data.
 
 When \code{inPlace = TRUE} no special tabulation will occur.

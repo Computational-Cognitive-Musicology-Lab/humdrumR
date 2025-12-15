@@ -71,17 +71,17 @@ If \code{inPlace = FALSE}, only the pitch output information will be returned (d
 Returns which octave each pitch falls in.
 By default, middle-C is the bottom of the zeroth-octave, but this can be changed with the \code{octave.offset}
 argument.
-Other octave labels (like \code{\link[=lilypond]{lilypond()}}-style marks) can be used if you set \code{octave.integer = FALSE}.
+Other octave labels (like \link[=lilypond]{lilypond}-style marks) can be used if you set \code{octave.integer = FALSE}.
 }
 \examples{
-\dontrun{
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+chorale[[20:30,]]
+within(chorale[[20:30,]], octave(Token))
 
-within(chorales, octave(Token))
-within(chorales, octave(Token, octave.offset = 4)) # traditional octaves
+within(chorale[[20:30,]], octave(Token, octave.offset = 4)) # traditional octaves
 
-within(chorales, octave(Token, octave.integer = FALSE))
-}
+within(chorale[[20:30,]], octave(Token, octave.integer = FALSE))
+
 }
 \seealso{
 Other {pitch functions}: 

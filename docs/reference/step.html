@@ -42,14 +42,15 @@ By default, step() will returns steps relative to the key—set Key = NULL if yo
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -60,7 +61,7 @@ By default, step() will returns steps relative to the key—set Key = NULL if yo
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Extract scale step.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Pitch.R" class="external-link"><code>R/Pitch.R</code></a></small>
+
       <div class="d-none name"><code>step.Rd</code></div>
     </div>
 
@@ -143,37 +144,115 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other pitch functions:
-<code><a href="accidental.html">accidental</a>()</code>,
-<code><a href="bhatk.html">bhatk</a>()</code>,
-<code><a href="degree.html">degree</a>()</code>,
-<code><a href="freq.html">freq</a>()</code>,
-<code><a href="helmholtz.html">helmholtz</a>()</code>,
-<code><a href="interval.html">interval</a>()</code>,
-<code><a href="kern.html">kern</a>()</code>,
-<code><a href="lilypond.html">lilypond</a>()</code>,
-<code><a href="octave.html">octave</a>()</code>,
-<code><a href="pc.html">pc</a>()</code>,
-<code><a href="pitch.html">pitch</a>()</code>,
-<code><a href="quality.html">quality</a>()</code>,
-<code><a href="semits.html">semits</a>()</code>,
-<code><a href="solfa.html">solfa</a>()</code>,
-<code><a href="solfg.html">solfg</a>()</code>,
-<code><a href="tonh.html">tonh</a>()</code></p>
+<code><a href="accidental.html">accidental()</a></code>,
+<code><a href="bhatk.html">bhatk()</a></code>,
+<code><a href="degree.html">degree()</a></code>,
+<code><a href="freq.html">freq()</a></code>,
+<code><a href="helmholtz.html">helmholtz()</a></code>,
+<code><a href="interval.html">interval()</a></code>,
+<code><a href="kern.html">kern()</a></code>,
+<code><a href="lilypond.html">lilypond()</a></code>,
+<code><a href="octave.html">octave()</a></code>,
+<code><a href="pc.html">pc()</a></code>,
+<code><a href="pitch.html">pitch()</a></code>,
+<code><a href="quality.html">quality()</a></code>,
+<code><a href="semits.html">semits()</a></code>,
+<code><a href="solfa.html">solfa()</a></code>,
+<code><a href="solfg.html">solfg()</a></code>,
+<code><a href="tonh.html">tonh()</a></code></p>
 <p>Other partial pitch functions:
-<code><a href="accidental.html">accidental</a>()</code>,
-<code><a href="octave.html">octave</a>()</code>,
-<code><a href="quality.html">quality</a>()</code></p></div>
+<code><a href="accidental.html">accidental()</a></code>,
+<code><a href="octave.html">octave()</a></code>,
+<code><a href="quality.html">quality()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">chorale</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/chor001.krn'</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Parsing one file...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-in"><span><span class="va">chorale</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span>,<span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **kern         **kern         **kern         **kern</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   20:  </span><span style="color: #BBBB00;">            4GG             4B             4d             4g</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   22:  </span><span style="color: #BBBB00;">             4G             4B             4d             2g</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   23:  </span><span style="color: #BBBB00;">             4E            8cL             4e</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   24:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">            8BJ</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   25:  </span><span style="color: #BBBB00;">            4F#             4A             4d            4dd</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   27:  </span><span style="color: #BBBB00;">             4G             4G             2d            4.b</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   28:  </span><span style="color: #BBBB00;">             4D            4F#</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   29:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span><span style="color: #BBBB00;">             8a</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   30:  </span><span style="color: #BBBB00;">             4E             4G             4B             4g</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *Token :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu">step</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorale</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span>,<span class="op">]</span><span class="op">]</span>, <span class="fu">step</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **step         **step         **step         **step</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   20:  </span><span style="color: #BBBB00;">              1              3              5              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   22:  </span><span style="color: #BBBB00;">              1              3              5              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   23:  </span><span style="color: #BBBB00;">              6              4              6</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   24:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              3</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   25:  </span><span style="color: #BBBB00;">              7              2              5              5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   27:  </span><span style="color: #BBBB00;">              1              1              5              3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   28:  </span><span style="color: #BBBB00;">              5              7</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   29:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span><span style="color: #BBBB00;">              2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   30:  </span><span style="color: #BBBB00;">              6              1              3              1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                  :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::step(Token) :: integer (**step tokens)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorales</span>, <span class="fu">step</span><span class="op">(</span><span class="va">Token</span>, step.labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'C'</span>, <span class="st">'D'</span>, <span class="st">'E'</span>, <span class="st">'F'</span>, <span class="st">'G'</span>, <span class="st">'A'</span>, <span class="st">'B'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorale</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span>,<span class="op">]</span><span class="op">]</span>, <span class="fu">step</span><span class="op">(</span><span class="va">Token</span>, step.labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'C'</span>, <span class="st">'D'</span>, <span class="st">'E'</span>, <span class="st">'F'</span>, <span class="st">'G'</span>, <span class="st">'A'</span>, <span class="st">'B'</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **step         **step         **step         **step</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   20:  </span><span style="color: #BBBB00;">              C              E              G              C</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   22:  </span><span style="color: #BBBB00;">              C              E              G              C</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   23:  </span><span style="color: #BBBB00;">              A              F              A</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   24:  </span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              E</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   25:  </span><span style="color: #BBBB00;">              B              D              G              G</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   27:  </span><span style="color: #BBBB00;">              C              C              G              E</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   28:  </span><span style="color: #BBBB00;">              G              B</span><span style="color: #BBBB00; font-weight: 100;">              .              .</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   29:  </span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span><span style="color: #BBBB00;">              D</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   30:  </span><span style="color: #BBBB00;">              A              C              E              C</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::step(...) :: character (**step tokens)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -182,11 +261,11 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

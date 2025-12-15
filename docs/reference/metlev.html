@@ -50,14 +50,15 @@ metcount() and metsubpos() parallel the more general timecount() and subpos() fu
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -68,7 +69,7 @@ metcount() and metsubpos() parallel the more general timecount() and subpos() fu
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Count or measure metric position</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Metric.R" class="external-link"><code>R/Metric.R</code></a></small>
+
       <div class="d-none name"><code>metlev.Rd</code></div>
     </div>
 
@@ -241,7 +242,7 @@ A numeric input directly indicates a level in the meter, starting from the highe
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Watch out! These <code>met...()</code> functions require <em>meter</em> information and their output is
 highly dependent on how you interpret meter from scores.
-For a full discussion of how meter can represented, parsed, and created in <code>humdrumR</code>,
+For a full discussion of how meter can be represented, parsed, and created in <code>humdrumR</code>,
 see the <code><a href="meter.html">meter()</a></code> manual.
 Effective use of the <code><a href="meter.html">meter()</a></code> function is essential to use of <code>metlev()</code>, <code>metcount()</code>, and <code>metsubpos()</code>.</p><div class="section">
 <h3 id="metric-levels">Metric levels<a class="anchor" aria-label="anchor" href="#metric-levels"></a></h3>
@@ -250,7 +251,7 @@ Effective use of the <code><a href="meter.html">meter()</a></code> function is e
 <p><code>metlev()</code> identifies the "highest" (longest) metric level that each onset lands in/on:
 For example, in 4/4 time:</p><ul><li><p>An onset on the downbeat is at the highest level of all, the whole-note level;</p></li>
 <li><p>An onset on beat three of the 4/4 measure is on the half-note level;</p></li>
-<li><p>Onsets on the backbeats (beats two and two) fall on the quarter-note level;</p></li>
+<li><p>Onsets on the backbeats (beats two and four) fall on the quarter-note level;</p></li>
 <li><p>The next level down is the eighth-note level, in between each quarter-note beat;</p></li>
 <li><p>etc.</p></li>
 </ul><p>The <code>metlev()</code> output expresses beat levels as the duration of
@@ -282,7 +283,7 @@ i.e., the quarter-note level (of 4/4) would be <code>3</code>, while the sixteen
 
 
 <p>The <code>metcount()</code> function counts one beat level in a metric hierarchy within the span of highest ('measure') level (by default).
-Which level you want to count is controlled by the <code>level</code> argument, which can be either a <code>character</code> string
+Which level you want to count is controlled by the <code>level</code> argument, which can be either be a <code>character</code> string
 in <code><a href="recip.html">recip()</a></code> format or a natural number (<code>1</code> is top level, <code>2</code> is next lowest level, etc.).
 If you tell <code>metcount()</code> to count the highest (measure) level in the meter, it will count bars.</p>
 <p>An additional option is to count beats within the next <em>highest</em> beat (which is not necessarily the full bar).
@@ -343,7 +344,7 @@ Within each piece/group, any block of <code>TRUE</code> values at the <em>beginn
 indicate a pickup.
 The <em>first</em> index where the <code>pickup</code> logical is <code>FALSE</code> is used as the starting point of the timeline/timecount;
 All the earlier (<code>pickup == TRUE</code>) points will be negative numbers, measured backwards from the start index.
-In <code>humdrumR</code>, and datapoints before the first barline record (<code>=</code>) are labeled <code>Bar == 0</code> in the <code>Bar</code> <a href="humTable.html">field</a>.
+In <code>humdrumR</code>, any datapoints before the first barline record (<code>=</code>) are labeled <code>Bar == 0</code> in the <code>Bar</code> <a href="humTable.html">field</a>.
 Thus, a common use for the <code>pickup</code> argument is <code>within(humData, timeline(Token, pickup = Bar &lt; 1)</code>, which makes the downbeat of
 the first complete bar <code>1</code> the starting point of the timeline—any notes in pickup bars are negative on the timeline.</p>
     </div>
@@ -373,7 +374,7 @@ based only on counting a <em>single</em> beat level, rather then a hierarchy of 
 <span class="r-in"><span><span class="co"># chorales</span></span></span>
 <span class="r-in"><span><span class="va">chorales</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span> </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BachChorales/.*krn' matches 10 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/.*krn' matches 10 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Ten files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating ten files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -626,11 +627,11 @@ based only on counting a <em>single</em> beat level, rather then a hierarchy of 
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

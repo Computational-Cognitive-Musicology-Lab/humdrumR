@@ -87,7 +87,7 @@ for example, call \code{?kern} to learn about \code{\link[=kern]{kern()}}.
 }
 \section{Dispatch}{
 The pitch parser (\code{tonalInterval()}) is a generic function, meaning it accepts a variety of inputs
-and automatically "dispatches" the appropriate method for parsing ehe input.
+and automatically "dispatches" the appropriate method for parsing the input.
 R's standard \code{S3} system is used to dispatch for either \code{numeric} or \code{character}-string input:
 Generally, \code{numeric} (or \code{integer}) inputs are interpreted as various \emph{atonal} pitch representations while
 \code{character} strings are interpreted as various \emph{tonal} pitch representations.
@@ -152,7 +152,7 @@ Various \link[=pitchFunctions]{pitch parsing functions} have an option to keep t
 
 \subsection{Advanced Tonal Parsing Options}{
 
-The eleven tonal representations listed above are parsed through a common intesrface.
+The eleven tonal representations listed above are parsed through a common interface.
 By using "advanced" parsing arguments, you can tweak how this parsing is done, so as to accommodate even more input representations!
 This means we are controlling the behavior of \code{tonalInterval()}, in the second step of our pipeline:
 \itemize{
@@ -349,7 +349,7 @@ If this is how your data is encoded, use \code{absoluteSpecies = FALSE}.
 
 \subsection{Memory}{
 
-In some musical data, it is assume that a accidental on a note "stays in effect" on that scale step until the next bar,
+In some musical data, it is assumed that a accidental on a note "stays in effect" on that scale step until the next bar,
 or until a different accidental replaces it.
 Fortunately, the \code{humdrumR} parser (\code{tonalInterval()}) also knows how to parse data encoded with "memory" this way.
 If \code{memory = TRUE}, the accidental (or quality) of each input note is "remembered" from previous appearances of that scale step.
@@ -508,17 +508,17 @@ string-parsing issues that we can consider/control.
 So far (above) we've discussed various ways that tonal pitch information (step, species, and octave) can be encoded, and how
 the \code{humdrumR} parser can be modified to handle different options.
 However, there are two general parsing issues/options to consider: what information is encoded, and in \emph{what order}?
-The \code{parts} argument can be specifyied to indicate this.
+The \code{parts} argument can be specified to indicate this.
 The \code{parts} argument must be a \code{character} vector of length 1--3.
-The characters in the must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
-The presense of any of these strings in the \code{parts} vector indicate that that information should be parsed.
+The characters in the vector must \link[base:pmatch]{partial match} either \code{"step"}, \code{"species"}, or \code{"octave"}.
+The presence of any of these strings in the \code{parts} vector indicate that the corresponding information should be parsed.
 The \emph{order} of the strings indicates what order the pieces of pitch information are encoded in input strings.
 
 To illustrate, imagine that we had input data which was identical to a standard interval representation---e.g., \code{M2} and \code{P5}---except the
 quality appears \emph{after} the step---e.g., \verb{2M} and \verb{5P}.
 We could call \code{interval(c("2M", "5P"), parse(parts = c("step", "species")))} and sure enough we'd get the correct parse!
 
-One final string-parsing argument is \code{sep}, which indicates if there is a character string separating the pitch information components:
+One final string-parsing argument is \code{sep}, which indicates if there is a character string separating the pitch information components.
 The most common case would be a comma or space.
 For example, we could use a parse command like this: \code{kern("E flat 5", parse(flat = "flat", sep = " "))}.
 }

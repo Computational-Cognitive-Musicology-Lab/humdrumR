@@ -131,7 +131,7 @@ Must be a singleton \code{logical} value: an on/off switch.
 If \code{TRUE}, output seconds are converted to a character string encoding minutes, seconds, and milliseconds in the format \code{MM.SS.ms}.}
 }
 \description{
-These functions calculate the ammount of time (either in beats, or seconds)
+These functions calculate the amount of time (either in beats, or seconds)
 that have unfolded since the beginning of a piece, giving a sense of the timeline in which events unfold.
 In \code{music21} this information is described as "offsets"---however,
 we prefer to reserve the words "onset" and "offset" to refer
@@ -154,7 +154,7 @@ The \code{Record} and \code{DataRecord} \link[=fields]{fields} capture this orde
 However, many (probably most) humdrum data files contain at least some information about the relative
 duration of events, representing more detailed information about timing and rhythm.
 
-\code{timeline()} parses and input vector \code{x} as \link[=duration]{durations},
+\code{timeline()} parses an input vector \code{x} as \link[=duration]{durations},
 computes the \link[=sigma]{cumulative sum} of the durations, with the \code{start} argument appended to the beginning.
 The result is a \code{numeric} vector representing the total duration since the beginning of the vector (plus the value of \code{start}, which defaults to zero).
 The cumulative durations of \code{timeline()} represent musical duration units, where \code{1} equals a whole note.
@@ -186,7 +186,7 @@ Within each piece/group, any block of \code{TRUE} values at the \emph{beginning}
 indicate a pickup.
 The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/timecount;
 All the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
-In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
+In \code{humdrumR}, any datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
 Thus, a common use for the \code{pickup} argument is \verb{within(humData, timeline(Token, pickup = Bar < 1)}, which makes the downbeat of
 the first complete bar \code{1} the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 }
@@ -197,10 +197,8 @@ tokens <- c('4.GG', '8G', '16E', '16F#', '16G', '16D', 'q8D#', '4E')
 timeline(tokens)
 timestamp(tokens, BPM = '90')
 
-\dontrun{
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
 within(B075, timeline(Token))
-}
 
 }
 \seealso{

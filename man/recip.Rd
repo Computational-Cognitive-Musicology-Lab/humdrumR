@@ -68,8 +68,7 @@ See "Grace notes" section below.}
 }
 \description{
 The standard approach to representing conventional note values in humdrum
-is the "reciprocal" \href{https://www.humdrum.org/rep/recip/index.html}{**recip}.
-Representation.
+is the "reciprocal" \href{https://www.humdrum.org/rep/recip/index.html}{**recip} representation.
 The \verb{**recip} rhythmic values are often used as a part of \verb{**kern} representation,
 which also includes \link[=kern]{pitch} information and notation details.
 
@@ -79,7 +78,7 @@ If no field names are specified, the first \link[=selectedFields]{selected field
 }
 \details{
 \verb{**recip} values are literally the reciprocal of a duration value.
-Since most note values in conventional music notation are simple fractions
+Since most note values in conventional music notation are simple fractions,
 the reciprocal approach is highly concise and very similar to conventional western notation and terminology.
 A "quarter note" is represented as the reciprocal of 1/4: simply \code{"4"}.
 Full reciprocal fractions can be specified: \code{"2\%3"} to indicate 3/2.
@@ -100,12 +99,10 @@ recip(tokens, scale = 2)
 recip(c(.25, .25, .25, .25, .5, 1))
 recip(c(.25, .25, .25, .25, .5, 1), parse(unit = '4'))
 
-\dontrun{
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 within(B075, subset = Spine > 2,  recip(Token))
 
 with(B075, subset = Spine > 2, recip(Token)) |> table()
-}
 
 }
 \seealso{

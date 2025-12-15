@@ -54,6 +54,8 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
@@ -63,7 +65,6 @@
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
       </ul>
 <ul class="navbar-nav">
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
@@ -84,9 +85,9 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2025-10-24</h4>
+            <h4 data-toc-skip class="date">2025-12-15</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/vignettes/DataFields.Rmd" class="external-link"><code>vignettes/DataFields.Rmd</code></a></small>
+
       <div class="d-none name"><code>DataFields.Rmd</code></div>
     </div>
 
@@ -406,9 +407,9 @@ which you can always get by calling <code><a href="../reference/humTable.html">?
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>example1 <span class="sc">|&gt;</span> <span class="fu">select</span>(Token, Spine, Key, Bar)</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="sc">&gt;</span>      Piece     Spine     Record               Token     Key      Bar</span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">###################### vvv BasicExample.krn vvv ######################</span></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span>      <span class="sc">&lt;</span><span class="cn">NA</span><span class="sc">&gt;</span>          <span class="dv">1</span>   <span class="sc">!!!</span>OTL<span class="sc">:</span> Example <span class="dv">1</span>       <span class="sc">*</span>     <span class="er">&lt;</span><span class="cn">NA</span><span class="sc">&gt;</span></span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">2</span>              <span class="sc">**</span>kern       <span class="sc">*</span>        <span class="dv">0</span></span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">3</span>               <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>       <span class="sc">*</span>        <span class="dv">0</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span>      <span class="sc">&lt;</span><span class="cn">NA</span><span class="sc">&gt;</span>          <span class="dv">1</span>   <span class="sc">!!!</span>OTL<span class="sc">:</span> Example <span class="dv">1</span>       .     <span class="sc">&lt;</span><span class="cn">NA</span><span class="sc">&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="er">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">2</span>              <span class="sc">**</span>kern       .        <span class="dv">0</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">3</span>               <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>       .        <span class="dv">0</span></span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">4</span>                 <span class="sc">*</span>C<span class="sc">:</span>      C<span class="sc">:</span>        <span class="dv">0</span></span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">5</span>                   <span class="ot">=</span>      C<span class="sc">:</span>        <span class="dv">1</span></span>
 <span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">6</span>                  <span class="dv">2</span>G      C<span class="sc">:</span>        <span class="dv">1</span></span>
@@ -416,8 +417,8 @@ which you can always get by calling <code><a href="../reference/humTable.html">?
 <span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">8</span>                  <span class="dv">2</span>C      C<span class="sc">:</span>        <span class="dv">1</span></span>
 <span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>          <span class="dv">9</span>                  <span class="sc">==</span>      C<span class="sc">:</span>        <span class="dv">2</span></span>
 <span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">1</span>         <span class="dv">10</span>                  <span class="sc">*-</span>      C<span class="sc">:</span>        <span class="dv">2</span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">2</span>              <span class="sc">**</span>kern       <span class="sc">*</span>        <span class="dv">0</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">3</span>               <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>       <span class="sc">*</span>        <span class="dv">0</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">2</span>              <span class="sc">**</span>kern       .        <span class="dv">0</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">3</span>               <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>       .        <span class="dv">0</span></span>
 <span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">4</span>                 <span class="sc">*</span>C<span class="sc">:</span>      C<span class="sc">:</span>        <span class="dv">0</span></span>
 <span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">5</span>                   <span class="ot">=</span>      C<span class="sc">:</span>        <span class="dv">1</span></span>
 <span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="sc">&gt;</span>          <span class="dv">1</span>         <span class="dv">2</span>          <span class="dv">6</span>                  <span class="dv">4</span>g      C<span class="sc">:</span>        <span class="dv">1</span></span>
@@ -634,13 +635,13 @@ you really want to work in “normal” R:</p>
 <span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span>          <span class="dv">1</span>    <span class="dv">1</span> BasicExample.krn</span>
 <span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span>          <span class="dv">2</span>    <span class="dv">1</span> BasicExample.krn</span>
 <span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span>          <span class="dv">3</span>    <span class="dv">1</span> BasicExample.krn</span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="sc">&gt;</span>                                                                                                                             Filepath</span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>Rtmp7gg2ZS<span class="sc">/</span>temp_libpathe7996b012478<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
-<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>Rtmp7gg2ZS<span class="sc">/</span>temp_libpathe7996b012478<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
-<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>Rtmp7gg2ZS<span class="sc">/</span>temp_libpathe7996b012478<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
-<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>Rtmp7gg2ZS<span class="sc">/</span>temp_libpathe7996b012478<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>Rtmp7gg2ZS<span class="sc">/</span>temp_libpathe7996b012478<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
-<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>Rtmp7gg2ZS<span class="sc">/</span>temp_libpathe7996b012478<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="sc">&gt;</span>                                                                                                                              Filepath</span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>RtmpgxrtCu<span class="sc">/</span>temp_libpath14125129ec8b8<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>RtmpgxrtCu<span class="sc">/</span>temp_libpath14125129ec8b8<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">3</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>RtmpgxrtCu<span class="sc">/</span>temp_libpath14125129ec8b8<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">4</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>RtmpgxrtCu<span class="sc">/</span>temp_libpath14125129ec8b8<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">5</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>RtmpgxrtCu<span class="sc">/</span>temp_libpath14125129ec8b8<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">6</span> <span class="sc">/</span>private<span class="sc">/</span>var<span class="sc">/</span>folders<span class="sc">/</span>z2<span class="sc">/</span><span class="dv">2</span>l9p7g8n0jjb9kjwgl6q8slw0000gn<span class="sc">/</span>T<span class="sc">/</span>RtmpgxrtCu<span class="sc">/</span>temp_libpath14125129ec8b8<span class="sc">/</span>humdrumR<span class="sc">/</span>examples<span class="sc">/</span>BasicExample.krn</span>
 <span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="sc">&gt;</span>      Global Label ParentPath Path Piece Record Spine Stop Type</span>
 <span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">1</span>  <span class="cn">FALSE</span>    _1          <span class="dv">0</span>    <span class="dv">0</span>     <span class="dv">1</span>      <span class="dv">6</span>     <span class="dv">1</span>    <span class="dv">1</span>    D</span>
 <span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">2</span>  <span class="cn">FALSE</span>    _1          <span class="dv">0</span>    <span class="dv">0</span>     <span class="dv">1</span>      <span class="dv">7</span>     <span class="dv">1</span>    <span class="dv">1</span>    D</span>
@@ -849,7 +850,7 @@ continue the pipe:</p>
 <span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a><span class="sc">&gt;</span>    Pitch    n</span>
 <span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR count distribution</span></code></pre></div>
 <p>The <code><a href="../reference/pitch.html">pitch()</a></code> function creates a new <code>Pitch</code>
-field, and selects it; the <code>count()</code> function is then applied
+field, and selects it; the <code><a href="../reference/count.html">count()</a></code> function is then applied
 to the <code>Pitch</code> field!</p>
 <hr>
 <p>When a new field is created, it can immediately by piped to a
@@ -973,71 +974,71 @@ field:</p>
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/selectedFields.html">select</a></span><span class="op">(</span><span class="va">Pitch</span>, <span class="va">Token</span>, <span class="va">Key</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span>view <span class="op">=</span> <span class="st">"table"</span><span class="op">)</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;      Piece    Spine    Record    Pitch               Token    Key
 &gt;    ####################### vvv chor001.krn vvv ########################
-&gt;          1     &lt;NA&gt;         1       !!!!!COM: Bach, J...nn      *
-&gt;          1     &lt;NA&gt;         2       !!!!!CDT: 1685/02.../-      *
-&gt;          1     &lt;NA&gt;         3       !!!!!OTL@@DE: Aus...in      *
-&gt;          1     &lt;NA&gt;         4       !!!!!OTL@EN:     ...om      *
-&gt;          1     &lt;NA&gt;         5       !!     !!!SCT: BWV 269      *
-&gt;          1     &lt;NA&gt;         6       !!           !!!PC#: 1      *
-&gt;          1     &lt;NA&gt;         7       !!     !!!AGN: chorale      *
-&gt;          1     &lt;NA&gt;       125       !!   !!!hum2abc: -Q ''      *
-&gt;          1     &lt;NA&gt;       126       !!!!!title: @{PC#...@{      *
-&gt;          1     &lt;NA&gt;       127       !!!!!YOR1: 371 vi...ti      *
-&gt;          1     &lt;NA&gt;       128       !!!!!YOR2: 4th ed...y       *
-&gt;          1     &lt;NA&gt;       129       !!!!!YOR3: c.1875...17      *
-&gt;          1     &lt;NA&gt;       130       !!!!!YOR4: Choral...(N      *
-&gt;          1     &lt;NA&gt;       131       !!!!!SMS: B&amp;H, 4t...d,      *
-&gt;          1     &lt;NA&gt;       132       !!!!!EED:  Craig ...ar      *
-&gt;          1     &lt;NA&gt;       133       !! !!!EEV:  2009/05/22      *
-&gt;          1        1         8       **              **kern      *
-&gt;          1        1         9        *              *ICvox      *
-&gt;          1        1        10        *              *Ibass      *
-&gt;          1        1        11        *             *I"Bass      *
-&gt;          1        1        12        *           *&gt;[A,A,B]      *
-&gt;          1        1        13        *        *&gt;norep[A,B]      *
-&gt;          1        1        14        *                 *&gt;A      *
-&gt;          1        1        15        *             *clefF4      *
-&gt;          1        1        16        *              *k[f#]      *
-&gt;          1        1        17        *                 *G:     G:
-&gt;          1        1        18        *               *M3/4     G:
-&gt;          1        1        19        *              *MM100     G:
+&gt;          1     &lt;NA&gt;         1        .!!!COM: Bach, J...nn      .
+&gt;          1     &lt;NA&gt;         2        .!!!CDT: 1685/02.../-      .
+&gt;          1     &lt;NA&gt;         3        .!!!OTL@@DE: Aus...in      .
+&gt;          1     &lt;NA&gt;         4        .!!!OTL@EN:     ...om      .
+&gt;          1     &lt;NA&gt;         5        .     !!!SCT: BWV 269      .
+&gt;          1     &lt;NA&gt;         6        .           !!!PC#: 1      .
+&gt;          1     &lt;NA&gt;         7        .     !!!AGN: chorale      .
+&gt;          1     &lt;NA&gt;       125        .   !!!hum2abc: -Q ''      .
+&gt;          1     &lt;NA&gt;       126        .!!!title: @{PC#...@{      .
+&gt;          1     &lt;NA&gt;       127        .!!!YOR1: 371 vi...ti      .
+&gt;          1     &lt;NA&gt;       128        .!!!YOR2: 4th ed...y       .
+&gt;          1     &lt;NA&gt;       129        .!!!YOR3: c.1875...17      .
+&gt;          1     &lt;NA&gt;       130        .!!!YOR4: Choral...(N      .
+&gt;          1     &lt;NA&gt;       131        .!!!SMS: B&amp;H, 4t...d,      .
+&gt;          1     &lt;NA&gt;       132        .!!!EED:  Craig ...ar      .
+&gt;          1     &lt;NA&gt;       133        . !!!EEV:  2009/05/22      .
+&gt;          1        1         8        .              **kern      .
+&gt;          1        1         9        .              *ICvox      .
+&gt;          1        1        10        .              *Ibass      .
+&gt;          1        1        11        .             *I"Bass      .
+&gt;          1        1        12        .           *&gt;[A,A,B]      .
+&gt;          1        1        13        .        *&gt;norep[A,B]      .
+&gt;          1        1        14        .                 *&gt;A      .
+&gt;          1        1        15        .             *clefF4      .
+&gt;          1        1        16        .              *k[f#]      .
+&gt;          1        1        17        .                 *G:     G:
+&gt;          1        1        18        .               *M3/4     G:
+&gt;          1        1        19        .              *MM100     G:
 &gt;          1        1        20        G                 4GG     G:
-&gt;          1        1        21        =                  =1     G:
+&gt;          1        1        21        .                  =1     G:
 &gt;    ####################### ^^^ chor001.krn ^^^ ########################
 &gt;    
 &gt;           (eight more pieces...)
 &gt;    
 &gt;    ####################### vvv chor010.krn vvv ########################
 &gt;         10        4        62        C                 2cc     a:
-&gt;         10        4        63        =                  =9     a:
+&gt;         10        4        63        .                  =9     a:
 &gt;         10        4        64        B                  4b     a:
 &gt;         10        4        65        C                 4cc     a:
 &gt;         10        4        66        .                   .     a:
 &gt;         10        4        67        D                 4dd     a:
 &gt;         10        4        68        .                   .     a:
 &gt;         10        4        69        G                  4g     a:
-&gt;         10        4        70        =                 =10     a:
+&gt;         10        4        70        .                 =10     a:
 &gt;         10        4        71        B                  4b     a:
 &gt;         10        4        72        .                   .     a:
 &gt;         10        4        73        A                  4a     a:
 &gt;         10        4        74        .                   .     a:
 &gt;         10        4        75        G                 2g;     a:
-&gt;         10        4        76        =                 =11     a:
+&gt;         10        4        76        .                 =11     a:
 &gt;         10        4        77        G                  2g     a:
 &gt;         10        4        78        C                 4cc     a:
 &gt;         10        4        79        B                  4b     a:
 &gt;         10        4        80        .                   .     a:
-&gt;         10        4        81        =                 =12     a:
+&gt;         10        4        81        .                 =12     a:
 &gt;         10        4        82        A                  4a     a:
 &gt;         10        4        83        E                  4e     a:
 &gt;         10        4        84        G                  4g     a:
 &gt;         10        4        85        F                  4f     a:
-&gt;         10        4        86        =                 =13     a:
+&gt;         10        4        86        .                 =13     a:
 &gt;         10        4        87        E                 1e;     a:
 &gt;         10        4        88        .                   .     a:
 &gt;         10        4        89        .                   .     a:
-&gt;         10        4        90        =                  ==     a:
-&gt;         10        4        91        *                  *-     a:
+&gt;         10        4        90        .                  ==     a:
+&gt;         10        4        91        .                  *-     a:
 &gt;    ####################### ^^^ chor010.krn ^^^ ########################
 &gt;      Piece    Spine    Record    Pitch               Token    Key
 &gt;    
@@ -1232,7 +1233,7 @@ to use the “humdrum style.” Most
 humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>
 function wills only pipe the <em>first</em> selected field, so it
 doesn’t matter if you select multiple fields. However, the
-<code>count()</code> function can accept multiple fields. Now that we’ve
+<code><a href="../reference/count.html">count()</a></code> function can accept multiple fields. Now that we’ve
 created a <code>Pitch</code> <em>and</em> <code>Duration</code> fields,
 we can do stuff like:</p>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span> </span>
@@ -2361,11 +2362,11 @@ data</a></li>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer>

@@ -57,7 +57,7 @@ Must be a single \code{character} string.
 
 If \code{NULL}, files are written to the same directory (or directories) they were \link[=readHumdrum]{read from}.}
 
-\item{overwrite}{\emph{\strong{Whether to overite existing files.}}
+\item{overwrite}{\emph{\strong{Whether to overwrite existing files.}}
 
 Defaults to \code{FALSE}.
 
@@ -93,7 +93,7 @@ The written output should match the printout if printing the data in the \code{R
 
 
 The main option to control with \code{writeHumdrum} is what files to write to.
-\code{writeHumdrum} uses the original names of the files, as \link[=readHumdrum]{read by readHumdrum},
+\code{writeHumdrum} uses the original names of the files, as read by \link[=readHumdrum]{readHumdrum},
 as the basis for \emph{new} file names.
 By default, \code{writeHumdrum} will refuse to overwrite the original files---overwriting
 will only be allowed if you specify \code{overwrite == TRUE} \emph{and} respond with \code{"y"} to a prompt.

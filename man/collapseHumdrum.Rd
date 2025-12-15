@@ -81,7 +81,7 @@ Must be a single \code{character} string.
 Only has an effect if \code{collapseAtomic == TRUE}.}
 }
 \description{
-\code{collapseHumdrum} allows you collapse a data field across
+\code{collapseHumdrum} allows you to collapse a data field across
 across groups within the data indicated by the \code{by} argument.
 Data is "collapsed" either by \link[base:paste]{pasting} the data into a string,
 or by putting them into \link[base:list]{list}.

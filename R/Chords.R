@@ -8,7 +8,7 @@
 #' 
 #' `tertianSet` is one of [humdrumR's][humdrumR] 
 #' types of tonal data, representing Western tertian harmonies.
-#' `tertianSet` is a subclass of `diatonicSet` (and thence, `struct`).
+#' `tertianSet` is a subclass of `diatonicSet` (and hence, `struct`).
 #' 
 #' The only structural addition, compared to `diatonicSet`, is the `Extensions` slot.
 #' This slot indicates which tertian chord members are active in the chord.
@@ -870,6 +870,7 @@ figurationFill <- function(species, third, step, Explicit, ...) {
                new = !newthird %in% third, Explicit = FALSE)
 }
 
+#' @importFrom data.table as.data.table
 parseFiguration <- function(str, figureFill = TRUE, flat = 'b', qualities = FALSE, inverting = TRUE, ...) {
   
   # str[str == ''] <- '35'
@@ -1505,12 +1506,14 @@ NULL
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' with(B075[[ , 2]], chord(Token))
 #' 
+#' @rdname chord
+#' @name chord
 #' @inheritParams chordFunctions
 #' @export 
 chord.default <- makeChordTransformer(tset2chord, 'chord')
 #' @export
 chord.humdrumR <- humdrumRmethod(chord.default)
-#' export
+#' @export
 chord <- humdrumRgeneric(chord.default)
 
 #' @rdname chord
@@ -1538,12 +1541,14 @@ harte <- humdrumRgeneric(harte.default)
 #' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #' with(B075[[ , 2]], figuredBass(Token))
 #' 
+#' @name figuredBass
 #' @inheritParams chordFunctions
+#' @rdname figuredBass
 #' @export 
 figuredBass.default <- makeChordTransformer(tset2figuredBass, 'figuredBass')
 #' @export
 figuredBass.humdrumR <- humdrumRmethod(figuredBass.default)
-#' export
+#' @export
 figuredBass <- humdrumRgeneric(figuredBass.default)
 
 #' Roman numeral representations of harmony
@@ -1567,11 +1572,13 @@ figuredBass <- humdrumRgeneric(figuredBass.default)
 #' with(B075[[ , 2]], roman(Token))
 #' 
 #' @inheritParams chordFunctions
+#' @name harm
+#' @rdname harm
 #' @export 
 harm.default <- makeChordTransformer(tset2harm, 'harm')
 #' @export
 harm.humdrumR <- humdrumRmethod(harm.default)
-#' export
+#' @export
 harm <- humdrumRgeneric(harm.default)
 
 
@@ -1589,9 +1596,10 @@ harm <- humdrumRgeneric(harm.default)
 #' @rdname harm
 #' @export 
 roman.default <- makeChordTransformer(tset2roman, 'roman')
+#' @rdname harm
 #' @export
 roman.humdrumR <- humdrumRmethod(roman.default)
-#' export
+#' @export
 roman <- humdrumRgeneric(roman.default)
 
 
@@ -1637,11 +1645,13 @@ roman <- humdrumRgeneric(roman.default)
 #' with(B075[[,2]], tertian(Token))
 #' 
 #' @inheritParams chordFunctions
+#' @name tertian
+#' @rdname tertianSetS4
 #' @export 
 tertian.default <- makeChordTransformer(tset2tertian, 'tertian')
 #' @export
 tertian.humdrumR <- humdrumRmethod(tertian.default)
-#' export
+#' @export
 tertian <- humdrumRgeneric(tertian.default)
 
 ### humdrumR methods ----
@@ -2061,7 +2071,7 @@ setMethod('LO5th', 'tertianSet',
 #' sonority(c('C', 'b-', 'd', 'f'), inversions = FALSE)
 #' 
 #' chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
-#' chorale <- within(chorales, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
+#' chorale <- within(chorale, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
 #' chorale[[20:30,]]
 #' within(chorale[[20:30,]], sonority(Token_dittoed))
 #' within(chorale[[20:30,]], sonority(Token_dittoed, deparser = harm))

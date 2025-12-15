@@ -156,6 +156,7 @@ reference:
   - signature
   - romanKey
   - harm
+  - harte
   - chord
   - tertian
   - figuredBass
@@ -224,7 +225,7 @@ reference:
   desc: "Other useful tools."
 - contents: 
   - draw
-  - distributions
+  - distribution
 - subtitle: "Information theory"
   contents:
   - information

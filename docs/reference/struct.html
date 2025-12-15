@@ -38,14 +38,15 @@
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -56,7 +57,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>struct</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Struct.R" class="external-link"><code>R/Struct.R</code></a></small>
+
       <div class="d-none name"><code>struct.Rd</code></div>
     </div>
 
@@ -80,7 +81,7 @@ make all the new types we <em>do</em> define act as much like atomic vectors as 
 atomic vectors as a single vector/matrix-like object—simply make your new subclass <a href="https://en.wikipedia.org/wiki/Inheritance_(object-oriented_programming)" class="external-link">inherit</a> <code>struct</code>
 and it is all taken care of. (To do this, specify <code>contains = "struct"</code> in your call to <a href="https://rdrr.io/r/methods/setClass.html" class="external-link">setClass</a>.)</p>
 <p>Important <code>humdrumR</code> classes which inherit from <code>struct</code> include:</p><ul><li><p><a href="tonalIntervalS4.html">tonal intervals</a></p></li>
-<li><p><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a></p></li>
+<li><p><a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a></p></li>
 <li><p><a href="chordParsing.html">tertianSet</a></p></li>
 <li><p><code><a href="rational.html">rational()</a></code></p></li>
 </ul><p>Be warned, R's S4 object-system is limited in this regard: you can't really define S4 classes that act <em>fully</em> like R atomics, as
@@ -125,7 +126,7 @@ If any <code>struct</code> arguments to <code>c</code> have dimensions, the <cod
 Of course, the (resulting) number of columns must all be the same or an error will occur!</p>
 <p>Other differences:</p><ul><li><p><code>struct</code>s can have either no dimensions (<code>dim(struct) == NULL</code>) or two dimensions. Higher dimensional <code>struct</code>s are not supported (yet).</p></li>
 <li><p><code>rowSums</code> and <code>colSums</code> will coerce a dimensionless struct to a column matrix.</p></li>
-<li><p><code>struct</code>s always throw an error if you try to index them with a index value that is greater than the length/nrow of the <code>struct</code>.
+<li><p><code>struct</code>s always throw an error if you try to index them with an index value that is greater than the length/nrow of the <code>struct</code>.
 This is different than atomic vectors, which will pad the vector up to the length of the index you give—a sometimes useful but quirky behavior.</p></li>
 <li><p><code>struct</code>s with two dimensions have a <code>cartesian</code> indexing argument.
 If <code>cartesian = TRUE</code>, the <code>i</code> and <code>j</code> arguments are treated as cartesian coordinates.
@@ -174,7 +175,7 @@ If these definitions don't work for your subclass, you'll need to create your ow
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="pitchParsing.html">tonalInterval</a> <a href="rhythmParsing.html">rhythmInterval</a> <a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> <a href="chordParsing.html">tertianSet</a></p></div>
+    <div class="dont-index"><p>Examples of <code>struct</code> subclasses: <a href="pitchParsing.html">tonalInterval</a> <a href="rhythmParsing.html">rhythmInterval</a> <a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a> <a href="chordParsing.html">tertianSet</a></p></div>
     </div>
 
     <div class="section level2">
@@ -221,11 +222,11 @@ If these definitions don't work for your subclass, you'll need to create your ow
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

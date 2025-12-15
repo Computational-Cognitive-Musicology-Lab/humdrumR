@@ -97,7 +97,7 @@ To read more details about each specific function, click on the links in the lis
 or type \code{?func} in the R command line: for example, \code{?notehead}.
 \subsection{Grace notes}{
 
-\verb{**recip} and \verb{**kern} data sometime include tokens indicating \href{https://en.wikipedia.org/wiki/Grace_note}{grace notes}---a special
+\verb{**recip} and \verb{**kern} data sometimes include tokens indicating \href{https://en.wikipedia.org/wiki/Grace_note}{grace notes}---a special
 category of duration, usually used to indicate "freely" a-metric notes in an otherwise metric context.
 In humdrum data, grace notes are marked with \code{"q"} or \code{"Q"}; \code{q} should be reserved
 for tokens with no (other) duration information, while \code{Q} should be marked along with

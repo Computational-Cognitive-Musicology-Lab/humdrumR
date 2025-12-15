@@ -118,7 +118,7 @@ For instance, \verb{readHumdrum(c("mozart", "beethoven")}---this command will se
 filenames containing "mozart" OR "beethoven."
 This works for directories too: \code{readHumdrum(c("Mozart", "Beethoven"), ".*krn$")} will
 look for any kern files in directories containing "Mozart" OR "Beethoven."
-If patterns are named, these names will show up as identifying patterns in the \verb{[humdrumR][humdrumR]} object's
+If patterns are named, these names will show up as identifying patterns in the \link[=humdrumRclass]{humdrumR} object's
 \code{Label} field. Unnamed patterns are simply labeled with numbers.
 We refer to files matched from regex patterns to be "subcorpora" of the total corpus.
 
@@ -264,24 +264,25 @@ the patterns they match, the directories they were found in, \emph{and} the raw 
 }
 
 \examples{
+# loads all valid humdrum files in the current directory.
+\dontrun{readHumdrum()}
 
-readHumdrum() # loads all valid humdrum files in the current directory.
+# loads all files ending with "krn" in the currect directory
+\dontrun{readHumdrum(".*krn$")}
 
-readHumdrum(".*krn$") # loads all files ending with "krn" in the currect directory
-
-readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$") 
 # Goes inside the directory "Composers".
 # Inside "Composers" looks for directories that start with "Be" or "Mo".
 # If there are any "Be|Mo" matching directories within "Composers", matches all directories within them.
 # Within these directories, looks for directories called "Joined".
 # If there are any directories called "Joined", loads all files (if any) that end with "krn".
+\dontrun{readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$")}
 
-readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")
 # exactly the same as the previous!
-
-readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$") 
+\dontrun{readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$")}
+ 
 # exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
 # in the Label field as "Beethoven" and "Mozart" respectively.
+\dontrun{readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$")}
 
 }
 \keyword{datasets}

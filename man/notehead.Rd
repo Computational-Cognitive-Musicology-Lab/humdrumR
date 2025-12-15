@@ -72,11 +72,9 @@ with(chorales, barplot(table(notehead(Token)), cex.names = 2))
 tokens <- c('4.GG', '8G', '16E', '16F#', '16G', '16D', 'q8D#', '4E')
 notehead(tokens)
 
-\dontrun{
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 
 with(B075[[,3:4]], notehead(Token)) |> table()
-}
 
 }
 \seealso{

@@ -164,7 +164,7 @@ The \code{context()} command can be used to group input data (vectors or \link{f
 into arbitrary contextual windows.
 Unlike \link[=groupHumdrum]{grouping vectors},
 \code{context()} windows 1) are always contiguous relative to the reference vector(s)/field(s)
-(which can depend on \link[dplyr:order_by]{order}); 2) can \emph{overlap}; and 3) don't necesarily exhaustively
+(which can depend on \link[dplyr:order_by]{order}); 2) can \emph{overlap}; and 3) don't necessarily exhaustively
 divide the data.
 The \code{context()} function should generally be called on
 \link[=humdrumRclass]{humdrumR data}, but it can also be called directly on vectors.
@@ -303,7 +303,9 @@ The \code{open} and \code{close} expressions will understand a few special varia
 \item \code{|}: As in "OR"---specify alternative window \code{open}/\code{close} criteria.
 }
 
-\verb{What if we'd like each of our windows to close right before the next window opens? We can do this by making the}close\verb{argument refer to the *next*}open\verb{, by referring to the }nextopen` variable:
+What if we'd like each of our windows to close right before the next window opens?
+We can do this by making the \code{close} argument refer to the \emph{next} \code{open}, by
+referring to the \code{nextopen} variable:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(letters, open = '[aeiou]', close = nextopen - 1L)
 }\if{html}{\out{</div>}}
@@ -391,9 +393,9 @@ This can be overrriden by providing your own explicit \code{groupby} argument.
 
 
 Once \code{open} and \code{close} have identified where windows can start and end, there is still
-some options for which open and close indices to associate with each other to create a window.
-For example, as mentioned above, the \code{groupby} argument can be used to make sure windows to cross
-grouping boundaries---even if one group has and extra open index and the next an extra close index.
+some options for open and close indices to associate with each other to create a window.
+For example, as mentioned above, the \code{groupby} argument can be used to make sure windows do not cross
+grouping boundaries---even if one group has an extra open index and the next group has an extra close index.
 The minimum and maximum length of windows can also be controlled using the \code{min_length} and \code{max_length} arguments.
 The \code{overlap}, \code{depth}, \code{rightward}, and \code{duplicate_indices} arguments provide a number of additional options,
 which are useful for some use cases (details below).
@@ -405,16 +407,18 @@ which we can capture with regular expressions for \code{open} and \code{close}.
 Here is an example:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
-
 context(nesting1, open = '(', close = ')')
+
+#> [1] "(a,b)"           "(c,d,e)"         "(d,e,f)"         "(e,f,f#,g,g#,a)"
 }\if{html}{\out{</div>}}
 
 Perfect.
 However, what if there are nested phrasing indicators?
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
-
 context(nesting2, open = '(', close = ')')
+
+#> [1] "(a,b)"         "(c,(d,e)"      "(d,e),(d,e)"   "(d,e),f)"      "(e,(f,(f#,g)"  "(f,(f#,g),g#)" "(f#,g),g#),a)"
 }\if{html}{\out{</div>}}
 
 That's not what we want!
@@ -423,6 +427,9 @@ But in this case, we want different behavior.
 We can get what we want by specifying \code{overlap = 'nested'}:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested')
+
+#> [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(d,e)"               "(d,e)"              
+#> [5] "(e,(f,(f#,g),g#),a)" "(f,(f#,g),g#)"       "(f#,g)"  
 }\if{html}{\out{</div>}}
 
 Now context aligns each \code{open} with the corresponding \code{close} at the same \emph{nesting level}.
@@ -431,14 +438,24 @@ Use the \code{depth} argument, which can be non-zero integers: the highest level
 with "deeper" levels incrementing up.
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
+
+#> [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(e,(f,(f#,g),g#),a)"
+
 context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2)
+
+#> [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)"
+
 context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3)
+
+#> [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)" "(f#,g)"   
 }\if{html}{\out{</div>}}
 
 You can also use negative \code{depth} to specify from the deepest levels outward.
 For example, in this case  \code{depth == -1} should get us that deepest level:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
+
+#> [1] "(f#,g)"
 }\if{html}{\out{</div>}}
 
 If \code{depth} is \code{NULL} (the default), all depths are returned.
@@ -505,8 +522,9 @@ by using a \code{complement} argument, similar to the \code{\link[=unfilter]{unf
 The \code{complement} must be an existing field in the data.
 If \code{uncontext()} is used with a given complement field, the currently
 selected data field (unless \code{Token} is selected) has the contents of the complement
-field inserted into it all points outside the contextual windows.
-This can be used to keep
+field inserted into it at all points outside the contextual windows.
+This can be used to preserve non-contextual data while displaying it alongside
+contextual transformations.
 }
 
 \examples{
@@ -519,22 +537,6 @@ context(letters, open = "[aeiou]", close = nextopen - 1 | end)
 context(letters, open = "[aeiou]", close = nextopen - 1 | end, inPlace = TRUE)
 context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE)
 
-
-\dontrun{
-# within.humdrumR
-chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/.*.krn")
-
-# 4-grams
-chorales |>
-  context(open = hop(), open + 3) |>
-  within(paste(Token, collapse = ','))
-       
-# phrases leading to fermatas
-chorales |>
-  context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
-  within(paste(Token, collapse = ','), alignLeft = FALSE)
-  
-}
 
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")

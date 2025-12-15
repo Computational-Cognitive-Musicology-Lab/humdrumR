@@ -66,7 +66,7 @@ For example, you could group spines into even and odd groups with \code{group_by
 
 The \code{group_by()} function returns a new \link[=humdrumRclass]{humdrumR data object}
 with grouping fields activated.
-The grouping fields, and the number of groups, are show when the humdrumR data
+The grouping fields, and the number of groups, are shown when the humdrumR data
 is printed.
 The \code{groups()} can be used to gather more information about groups:
 \code{group()} returns a \code{data.table} with one row representing each group,

@@ -16,7 +16,7 @@ the "line-of-fifths" value from various pitch objects and representations.
 \details{
 \subsection{The Line of Fifths}{
 
-Every interval in Western music is associated with a integer on the line of fifths:
+Every interval in Western music is associated with an integer on the line of fifths:
 \itemize{
 \item Bb = m7 = -2
 \item F =  P4  = -1

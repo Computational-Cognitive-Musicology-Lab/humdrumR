@@ -17,14 +17,14 @@ spines(humdrumR, drop = FALSE)
 
 Must be a \link[=humdrumRclass]{humdrumR data object}.}
 
-\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humCensus} table.}}
+\item{drop}{\emph{\strong{Whether to return normal \link[data.table:data.table]{data.table} or a \code{humSpines} table.}}
 
 Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{drop = TRUE}, a normal \link[data.table:data.table]{data.table} is returned instead of
-a \code{humCensus} table.}
+a \code{humSpines} table.}
 
 \item{i}{\emph{\strong{Index for rows.}}
 

@@ -87,7 +87,7 @@ format is seen a lot in computational linguistics.
 By default, the syllable separators are retained in the collapsed output: this makes it possible to recreate the syllables if
 necessary.
 Any mid-word melismas (indicated by \code{"_"}) are kept collapsed as well, for the same reason.
-However, if \code{keep.sep = TRUE}, seperators (and mid-word melismas) are removed, making the function non invertible (you can't easily get
+However, if \code{keep.sep = FALSE}, seperators (and mid-word melismas) are removed, making the function non invertible (you can't easily get
 back to the syllables).
 }
 \examples{

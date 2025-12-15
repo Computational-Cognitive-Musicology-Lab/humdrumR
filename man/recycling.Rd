@@ -18,7 +18,7 @@ The key idea of vectorization is that we want the length/size of function inputs
 If I give a 100-long vector to a function as input, I want a 100-long vector as output.
 \subsection{Result is too short (pad or recycle)}{
 
-What happens if I have a that outputs a result that is \emph{shorter} than the input, but I \strong{need}
+What happens if I have a function that outputs a result that is \emph{shorter} than the input, but I \strong{need}
 it to be the same length?
 Well, one option is to "pad" the output with \code{NA} values.
 For example, if I call \code{mean(1:9)}, my 9-long input results in a scalar (1-long) output (\code{5}).
@@ -47,7 +47,7 @@ sure it is what you want.
 
 One final note: if the result you are recycling isn't a length which evenly divides the input, you will see an \emph{warning} message
 saying \verb{longer object length is not a multiple of shorter object length}.
-To give an example, image if we used the \code{range()} function, which returns the minimum and the maximum but not the median, on our input:
+To give an example, imagine if we used the \code{range()} function, which returns the minimum and the maximum but not the median, on our input:
 the result of \code{range(1:9)} is \code{c(1, 9)}, and this would recycle as \code{c(1, 9, 1, 9, 1, 9, 1, 9, 1)}.
 The last repetition of the result is cut short, because two does not evenly divide nine.
 Since non-scalar recycling of results is often not useful or meaningful in \emph{general}, R takes it
@@ -58,7 +58,7 @@ as a particularly bad sign that your result does not evenly divide your input, w
 
 What happens if I have a function that outputs a result that is \emph{longer} than the input, but I \strong{need}
 it to be the same length?
-Well, the most obvious thing to do is cut off the excess---so something like \verb{head(output, n = length(input)}.
+Well, the most obvious thing to do is cut off the excess---so something like \code{head(output, n = length(input))}.
 Of course, that may or may not make sense depending
 on what the function is doing!
 }

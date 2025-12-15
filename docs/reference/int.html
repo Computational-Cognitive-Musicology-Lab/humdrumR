@@ -4,18 +4,18 @@ int() is the most basic form, calculating the interval(s) between two input vect
 mint() and hint() are special forms for calculating intervals &quot;melodically&quot; or &quot;harmonically,&quot; respectively.
 If mint() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x.
+If no field names are specified, the first selected field is used as x.
 If hint() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x."><meta property="og:description" content="These functions allow us to calculate intervals between pitches.
+If no field names are specified, the first selected field is used as x."><meta property="og:description" content="These functions allow us to calculate intervals between pitches.
 int() is the most basic form, calculating the interval(s) between two input vectors.
 mint() and hint() are special forms for calculating intervals &quot;melodically&quot; or &quot;harmonically,&quot; respectively.
 If mint() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x.
+If no field names are specified, the first selected field is used as x.
 If hint() is applied to a humdrumR data class
 you may use the data's fields as arguments.
-If no field names are specified, the first selectedField is used as x."></head><body>
+If no field names are specified, the first selected field is used as x."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -54,14 +54,15 @@ If no field names are specified, the first selectedField is used as x."></head><
     <li><a class="dropdown-item" href="../articles/Summary.html">Getting to know your humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Grouping.html">Grouping humdrum data</a></li>
     <li><a class="dropdown-item" href="../articles/Context.html">Contextualizing humdrum data</a></li>
+    <li><a class="dropdown-item" href="../articles/Information.html">Counts, Probability, and Information</a></li>
+    <li><a class="dropdown-item" href="../articles/Plots.html">Making plots with humdrumR</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Musical tools</h6></li>
     <li><a class="dropdown-item" href="../articles/PitchAndTonality.html">Pitch and tonality in humdrumR</a></li>
     <li><a class="dropdown-item" href="../articles/RhythmAndMeter.html">Time, rhythm, and meter in humdrumR</a></li>
   </ul></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://ccml.music.gatech.edu/humdrumR">GUI</a></li>
-      </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
-<li class="nav-item"><form class="form-inline" role="search">
+      </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
 
@@ -72,7 +73,7 @@ If no field names are specified, the first selectedField is used as x."></head><
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate intervals between pitches</h1>
-      <small class="dont-index">Source: <a href="https://github.com/Computational-Cognitive-Musicology-Lab/humdrumR/blob/HEAD/R/Pitch.R" class="external-link"><code>R/Pitch.R</code></a></small>
+
       <div class="d-none name"><code>int.Rd</code></div>
     </div>
 
@@ -82,10 +83,10 @@ If no field names are specified, the first selectedField is used as x."></head><
 <code>mint()</code> and <code>hint()</code> are special forms for calculating intervals "melodically" or "harmonically," respectively.</p>
 <p>If <code>mint()</code> is applied to a <a href="humdrumRclass.html">humdrumR data class</a>
 you may use the data's <a href="humTable.html">fields</a> as arguments.
-If no field names are specified, the first selectedField is used as <code>x</code>.</p>
+If no field names are specified, the first <a href="selectedFields.html">selected field</a> is used as <code>x</code>.</p>
 <p>If <code>hint()</code> is applied to a <a href="humdrumRclass.html">humdrumR data class</a>
 you may use the data's <a href="humTable.html">fields</a> as arguments.
-If no field names are specified, the first selectedField is used as <code>x</code>.</p>
+If no field names are specified, the first <a href="selectedFields.html">selected field</a> is used as <code>x</code>.</p>
     </div>
 
     <div class="section level2">
@@ -223,7 +224,7 @@ Must be <a href="pitchParsing.html">parsable as pitch information</a>.</p></dd>
 
 <dt id="arg-lag">lag<a class="anchor" aria-label="anchor" href="#arg-lag"></a></dt>
 <dd><p><em><strong>The <code><a href="lag.html">lag()</a></code> to calculate harmonic/melodic intervals between.</strong></em></p>
-<p>Defaults to <code>1</code>, which means intervals between immediate successors in <code>x</code>.</p>
+<p>Defaults to <code>1</code>, which means intervals between immee successors in <code>x</code>.</p>
 <p>Must be either a single number, or a <code>logical</code> of <code>length(x)</code> (see "Logical lags" section in manual).</p></dd>
 
 
@@ -243,14 +244,14 @@ order, but the output is returned in the original order.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Input vectors <code>x</code> (and <code>from</code>) are <a href="pitchParsing.html">parsed as pitches</a> (tonal interval objects), if possible.
+    <p>Input vectors <code>x</code> (and <code>from</code>) are <a href="pitchParsing.html">parsed as pitches</a> (<a href="tonalIntervalS4.html">tonal interval objects</a>), if possible.
 (Parsing arguments can be passed via the <code>parseArgs</code> list, or <code>parse(...)</code> sugar.
 <code>Key</code> and <code>Exclusive</code> arguments are also passed to the parser.)
 Any inputs that fail to parse will show up as <code>NA</code> in the output.</p>
 <p>Once parsed, the intervals between the pitches are calculated as <code>x - from</code>.
-The resulting intervals are then "<a href="pitchDeparsing.html">deparsed</a>" into a standard representation; by default, the <code>intervals()</code>
+The resulting intervals are then "<a href="pitchDeparsing.html">deparsed</a>" into a standard representation; by default, the <code><a href="https://lubridate.tidyverse.org/reference/Interval-class.html" class="external-link">lubridate::intervals()</a></code>
 representation is used, but you can set the <code>deparser</code> argument to any <a href="pitchFunctions.html">pitch function</a>.
-However, the only alternative deparser that would be <em>commonly</em> used (besides <code>intervals()</code>) would be <code><a href="semits.html">semits()</a></code>.
+However, the only alternative deparser that would be <em>commonly</em> used (besides <code><a href="https://lubridate.tidyverse.org/reference/Interval-class.html" class="external-link">lubridate::intervals()</a></code>) would be <code><a href="semits.html">semits()</a></code>.
 If <code>deparser</code> is <code>NULL</code>, the raw <a href="tonalIntervalS4.html">tonalIntervals</a> are returned.</p>
     </div>
     <div class="section level2">
@@ -285,7 +286,7 @@ Positive lags (the default) will calculate <strong>approaching</strong> interval
 and the <em>previous</em> note.
 Negative lags will calculate <strong>departing</strong> intervals: each token represents the interval
 between the current note and the <em>next</em> note.
-Note that, by passing <code>directed = FALSE</code> through the the <a href="pitchDeparsing.html">deparser</a>, the undirected (absolute value)
+Note that, by passing <code>directed = FALSE</code> through the <a href="pitchDeparsing.html">deparser</a>, the undirected (absolute value)
 of the melodic intervals can be returned.</p>
     </div>
     <div class="section level2">
@@ -293,10 +294,10 @@ of the melodic intervals can be returned.</p>
 
 
 
-<p>By default, <code>int</code> will return <code>NA</code> anywhere where <code>x</code> <strong>or</strong> <code>from</code> is <code>NA</code>.
+<p>By default, <code>int</code> will return <code>NA</code> whereever <code>x</code> <strong>or</strong> <code>from</code> is <code>NA</code>.
 However, if <code>from</code> is <code>NA</code> but <code>x</code> is <em>not</em> <code>NA</code>, we can ask for different output for these "incomplete" pairs.
 using the <code>incomplete</code> argument.
-If <code>incomplete</code> is an atomic value, incomplete outputs indices are willed with this value.
+If <code>incomplete</code> is an atomic value, incomplete outputs indices are filled with this value.
 If the incomplete argument is a <a href="pitchFunctions.html">pitch function</a> (like the <code>deparser</code> argument),
 this function is used to (re)parse the values of <code>x</code> where <code>from</code> is missing.
 If <code>bracket == TRUE</code>, incomplete output values are surrounded with <code>[]</code>, so they are easier to distinguish from the
@@ -304,7 +305,7 @@ actual intervals.</p>
 <p>The main use of the <code>incomplete</code> argument is in <code>mint()</code> and <code>hint()</code>.
 The lagged <code>from</code> arguments used in <code>mint()</code>/<code>hint()</code> (see previous section) are necessarily padded by <code>abs(lag)</code> <code>NA</code>
 values at the beginning (positive lag) or end (negative lag).
-These are thus "incomplete" pairs passed to <code>int()</code>, and can controlled using the <code>incomplete</code> argument.
+These are thus "incomplete" pairs passed to <code>int()</code>, and can be controlled using the <code>incomplete</code> argument.
 By default, both <code>mint()</code> and <code>hint()</code> set <code>incomplete = kern(), bracket = TRUE</code> which cause these
 notes to show up as bracketed kern, like <code>[ee-]</code> or <code>[C#]</code>.
 If <code>incomplete</code> is <code>NULL</code>, the incomplete values are simply padded with <code>NA</code>.</p>
@@ -403,15 +404,15 @@ you could manually set <code>groupby = list(Piece, Record)</code>.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code>mint</code> uses <code><a href="lag.html">lag()</a></code> to "lag" the input pitches, and also makes use of <a href="pitchParsing.html">pitch parsers</a> and <a href="pitchFunctions.html">pitch functions</a>.</p>
 <p>Other relative pitch functions:
-<code><a href="bhatk.html">bhatk</a>()</code>,
-<code><a href="degree.html">degree</a>()</code>,
-<code><a href="interval.html">interval</a>()</code>,
-<code><a href="solfa.html">solfa</a>()</code></p>
+<code><a href="bhatk.html">bhatk()</a></code>,
+<code><a href="degree.html">degree()</a></code>,
+<code><a href="interval.html">interval()</a></code>,
+<code><a href="solfa.html">solfa()</a></code></p>
 <p>Other Lagged vector functions:
-<code><a href="delta.html">delta</a>()</code>,
-<code><a href="ditto.html">ditto</a>()</code>,
-<code><a href="lag.html">lag</a>()</code>,
-<code><a href="sigma.html">sigma</a>()</code></p></div>
+<code><a href="delta.html">delta()</a></code>,
+<code><a href="ditto.html">ditto()</a></code>,
+<code><a href="lag.html">lag()</a></code>,
+<code><a href="sigma.html">sigma()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -428,7 +429,7 @@ you could manually set <code>groupby = list(Piece, Record)</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">exampleHumdrum</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/Rtmp7gg2ZS/temp_libpathe7996b012478/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -456,11 +457,11 @@ you could manually set <code>groupby = list(Piece, Record)</code>.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Nathaniel Condit-Schultz, Claire Arthur.</p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Developed by Nat Condit-Schultz and Claire Arthur<br><a href="https://gatech.edu" class="external-link">Georgia Tech</a><br><a href="https://music.gatech.edu" class="external-link">School of Music</a><br><a href="https://ccml.gtcmt.gatech.edu" class="external-link">Computational and Cognitive Musicology Lab</a></p>
 </div>
 
     </footer></div>

@@ -80,9 +80,9 @@ Rather, you'd like to just get "normal" \code{R} objects out of your humdrum dat
 basic \code{R} data types.
 }
 \details{
-Generally, coercion works by evaluating a humdrumR object's the
+Generally, coercion works by evaluating a humdrumR object's
 \link[=selectedFields]{selected fields} and forcing the result to be an atomic vector.
-When multiple field are selected, they are pasted together, separated by \code{", "}.
+When multiple fields are selected, they are pasted together, separated by \code{", "}.
 If a field is not atomic (like a \code{list}, or \code{lm} object), a concise representation of the
 list or object class is printed.
 The \link[=humCoercion]{as.vector(humdrumR)} has the additional

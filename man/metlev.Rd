@@ -170,7 +170,7 @@ between an onset and the nearest metric beat.
 \details{
 Watch out! These \code{met...()} functions require \emph{meter} information and their output is
 highly dependent on how you interpret meter from scores.
-For a full discussion of how meter can represented, parsed, and created in \code{humdrumR},
+For a full discussion of how meter can be represented, parsed, and created in \code{humdrumR},
 see the \code{\link[=meter]{meter()}} manual.
 Effective use of the \code{\link[=meter]{meter()}} function is essential to use of \code{metlev()}, \code{metcount()}, and \code{metsubpos()}.
 \subsection{Metric levels}{
@@ -180,7 +180,7 @@ For example, in 4/4 time:
 \itemize{
 \item An onset on the downbeat is at the highest level of all, the whole-note level;
 \item An onset on beat three of the 4/4 measure is on the half-note level;
-\item Onsets on the backbeats (beats two and two) fall on the quarter-note level;
+\item Onsets on the backbeats (beats two and four) fall on the quarter-note level;
 \item The next level down is the eighth-note level, in between each quarter-note beat;
 \item etc.
 }
@@ -225,7 +225,7 @@ i.e., the quarter-note level (of 4/4) would be \code{3}, while the sixteenth-not
 \subsection{Metric counts}{
 
 The \code{metcount()} function counts one beat level in a metric hierarchy within the span of highest ('measure') level (by default).
-Which level you want to count is controlled by the \code{level} argument, which can be either a \code{character} string
+Which level you want to count is controlled by the \code{level} argument, which can be either be a \code{character} string
 in \code{\link[=recip]{recip()}} format or a natural number (\code{1} is top level, \code{2} is next lowest level, etc.).
 If you tell \code{metcount()} to count the highest (measure) level in the meter, it will count bars.
 
@@ -330,7 +330,7 @@ Within each piece/group, any block of \code{TRUE} values at the \emph{beginning}
 indicate a pickup.
 The \emph{first} index where the \code{pickup} logical is \code{FALSE} is used as the starting point of the timeline/timecount;
 All the earlier (\code{pickup == TRUE}) points will be negative numbers, measured backwards from the start index.
-In \code{humdrumR}, and datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
+In \code{humdrumR}, any datapoints before the first barline record (\code{=}) are labeled \code{Bar == 0} in the \code{Bar} \link[=fields]{field}.
 Thus, a common use for the \code{pickup} argument is \verb{within(humData, timeline(Token, pickup = Bar < 1)}, which makes the downbeat of
 the first complete bar \code{1} the starting point of the timeline---any notes in pickup bars are negative on the timeline.
 }

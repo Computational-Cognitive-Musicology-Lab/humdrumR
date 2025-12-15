@@ -51,7 +51,7 @@ which can measure any of the other durations
 If can also take a \code{\link[=meter]{meter()}} object or \code{character} string of the form \code{"MX/Y"}.
 
 The tatum of a \code{\link[=meter]{meter()}} is the tatum of all that meters metric levels.
-If meters \emph{and} durations are provided---like \verb{tatum(c('M4/4', '6')}---, the tatum of all the meters'
+If meters \emph{and} durations are provided---like \verb{tatum(c('M4/4', '6')}--- the tatum of all the meters'
 levels \emph{and} all the durations is computed.
 
 The \code{deparser} argument is a \link[=rhythmFunctions]{rhythm function} which controls the output format.
@@ -63,7 +63,7 @@ tatum(c("4", "8", "12"))
 
 tatum(c("M4/4"))
 
-tatum("M4/4", '6')
+tatum(c('M4/4', '6'))
 
 }
 \seealso{

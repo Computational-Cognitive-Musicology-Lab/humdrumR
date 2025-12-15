@@ -1,472 +1,184 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/404.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/ComplexSyntax.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Context.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Filtering.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/GettingStarted.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Grouping.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/KeysAndChord.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/PitchAndTonality.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/RPrimer.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/ReadWrite.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Reshaping.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/RhythmAndMeter.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Summary.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/index.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/LO5th.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/P.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/REparser.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/RegexFind.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/accidental.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/analyzeChords.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bhatk.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bpm2sec.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/census.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cents.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordDeparsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordFunctions.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cleave.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cleaveGraceNotes.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/collapseHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/combineFields.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/counts.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/crossEntropy.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/degree.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/delta.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/distributions.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ditto.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duple.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duration.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/enum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/evaluatingExpressions.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expand.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expandPaths.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/figuredBass.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/freq.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/gamut.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/grid.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupingFactors.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/helmholtz.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humCoercion.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humMerge.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humMeter.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSize.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumDispatch.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumPitch.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumR.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/indexHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/information.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/interpretations.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/interval.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/invert.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ioi.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/is.major.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/is.simple.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/kern.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/key.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyDeparsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyFunctions.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyParsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lag.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lilypond.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/manipulateChords.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/meter.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutual.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutualInfo.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/nbeats.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/notehead.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/octave.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/p.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/partialMatching.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pc.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pdist.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitch.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchDeparsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchFunctions.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchParsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pullHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/quality.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rational.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recip.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recordDuration.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recycling.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/reference.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/regexConstruction.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rend.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmDeparsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmFunctions.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmParsing.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanKey.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanNumerals.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/segments.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/selectedFields.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/semits.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/sigma.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/signature.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/silbeFormat.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfa.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfg.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/sonority.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/spines.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/step.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/struct.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/syncopation.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tabulation.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tactus.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tandem.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tatum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertian.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertianSetS4.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/time.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timebase.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timecount.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/token.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonalIntervalS4.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonh.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/transpose.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/unfoldStops.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/validateHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/vectorization.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/wort.html</loc>
-  </url>
-  <url>
-    <loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/writeHumdrum.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/404.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/LICENSE-text.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/ComplexSyntax.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Context.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Filtering.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/GettingStarted.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Grouping.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Information.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/KeysAndChord.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/PitchAndTonality.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Plots.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/RPrimer.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/ReadWrite.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Reshaping.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/RhythmAndMeter.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/Summary.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/articles/index.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/authors.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/index.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/news/index.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/LO5th.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/REparser.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/RegexFind.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/accidental.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/analyzeChords.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bhatk.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bpm2sec.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/census.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordDeparsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordFunctions.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cleave.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/cleaveGraceNotes.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/collapseHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/combineFields.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.table.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/counts.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/crossEntropy.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/degree.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/delta.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/distribution.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/distributions.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ditto.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,count,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,discrete,discrete-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,discrete,missing-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,discrete,numeric-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,formula,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,humdrumR,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,humdrumR.table,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,list,numeric-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,missing,numeric-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,missing,token-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,numeric,missing-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,numeric,numeric-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,probability,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,table,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,token,missing-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,token,token-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duple.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duration.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/enum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/evaluatingExpressions.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expand.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/expandPaths.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/figuredBass.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/freq.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/gamut.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/grid.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupingFactors.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/harte.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/helmholtz.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humCoercion.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humMerge.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humMeter.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSize.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumDispatch.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumPitch.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumR.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/indexHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/information.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/interpretations.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/interval.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/invert.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/ioi.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/is.major.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/is.simple.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/kern.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/key.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyDeparsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyFunctions.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyParsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lag.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/lilypond.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/manipulateChords.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/meter.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutual.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutualInfo.default.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutualInfo.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutualInfo.probability.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/nbeats.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/notehead.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/octave.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/p.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/partialMatching.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pc.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pdist.count.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pdist.probability.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pdist.table.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitch.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchDeparsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchFunctions.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchParsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/pullHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/quality.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rational.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recip.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recordDuration.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/recycling.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/reference.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/regexConstruction.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rend.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmDeparsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmFunctions.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmParsing.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/roman.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanKey.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanNumerals.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/segments.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/selectedFields.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/semits.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/show,distribution-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/sigma.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/signature.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/silbeFormat.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfa.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfg.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/sonority.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/spines.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/step.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/struct.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/syncopation.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tabulation.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tactus.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tandem.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tatum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertian.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertianSetS4.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/time.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timebase.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timecount.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/token.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonalIntervalS4.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonh.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/transpose.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/unfoldStops.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/validateHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/vectorization.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/wort.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/writeHumdrum.html</loc></url>
 </urlset>
 
