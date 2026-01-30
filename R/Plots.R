@@ -1255,12 +1255,13 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
   output$drawer <- function() {
     
     if (line) {
-      by(data.frame(.x = x, .y = y, .col = output$col$col), output$col$col,
+      by(data.frame(.x = x, .y = y, .col = groups$col), groups$col,
          \(df) {
-           with(df,  points(x = .x, y = .y, type = 'l', col = .col[1], ...))
+           with(df,  points(x = .x, y = .y, type = 'l', lwd = 3, col = .col[1], ...))
          })
     } else {
       points(x = x, y = y, type = if (line) 'l' else 'p',
+             lwd = 3,
              col = output$col$col, cex = output$cex$cex, 
              pch = output$pch$pch, ...)
     }
@@ -1305,7 +1306,7 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
       }
         
       
-      legend('topleft', bty = 'n', lty = 'dashed', lwd = .5, 
+      legend('topleft', bty = 'n', lty = 'dashed', lwd = 2,  
              col = 'black', text.col = 'black', cex = .8, 
              legend = if (conditional$normalReference) {
                quote(N(paste(mu[y], ' | ', 'color'), 
@@ -1953,23 +1954,23 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 draw_area <- function(x, y, log = '', 
                       center = TRUE, smooth = TRUE, conditional = FALSE, 
                       breaks = 40, bw = 'SJ', 
-                      mean = TRUE, quantiles = c(), global_stats = TRUE,
+                      mean = FALSE, quantiles = c(), 
                       showPoints = FALSE,
                       xlim = NULL, ylim = NULL, 
                       col = NULL, alpha = .7, ...) {
   checks(center, xTF, seealso = '?draw_area')
-  checks(conditional, xTF, seealso = '?draw_area')
-  checks(global_stats, xTF, seealso = '?draw_area')
   checks(mean, xTF, seealso = '?draw_area')
   checks(quantiles, xnull | (xnumeric & xrange(0, 1)), seealso = '?draw_area')
   checks(smooth, xTF, seealso = '?draw_area')
   checks(showPoints, xTF, seealso = '?draw_area')
   
+  conditional <- prep_conditional(conditional)
+  
   categories <- sort(unique(y), decreasing = TRUE)
   
   breaks <- hist.default(x, breaks = breaks, plot = FALSE)$breaks 
   
-  coordinates <- area_coor(x, y, smooth = smooth, conditional = conditional, 
+  coordinates <- area_coor(x, y, smooth = smooth, conditional = conditional$density, 
                            center = center, bw = bw, breaks = breaks, ...)
   
   output <- canvas(x, xlim, 
@@ -1979,9 +1980,12 @@ draw_area <- function(x, y, log = '',
                    ylim, log = gsub('y', '', log))
   output$col <- prep_col_categories(col %||% categories, rev(categories), 
                                     alpha = alpha, ...)
-  if (!conditional && center)  output$axes <- output$axes[side == 1]
+  if (!conditional$density && center)  output$axes <- output$axes[side == 1]
   output$axisNames[[2]] <-'Probability density' 
   # if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
+  
+  groups <- match_size(x = x, y = y, col = output$col$col, pch = output$pch$pch)[c('col', 'pch')]
+  
   
   X <- coordinates$X
   output$drawer <- function() {
@@ -1999,7 +2003,7 @@ draw_area <- function(x, y, log = '',
     
     ## Draw density Key
     
-    if (!conditional && center) {
+    if (!conditional$density && center) {
       xkey <- grconvertX(seq(-.04, 0.0, length.out = length(coordinates$DensityKey)), 'npc', 'user')
       ykey <- coordinates$DensityKey / 2
       
@@ -2012,18 +2016,11 @@ draw_area <- function(x, y, log = '',
     }
     
     
+    draw_quantiles(1, x, quantiles,  groups = groups['col'], conditional = conditional$quantiles)
+    if (mean) draw_mean(x,  rep(grconvertY(0.99, 'npc', 'user'), length(x)),  
+                        groups = groups['col'], conditional = conditional$mean)
+      
     
-    if (global_stats || length(coordinates) == 1L) {
-      if (mean) draw_mean(mean(x), grconvertY(0.99, 'npc', 'user'))
-      draw_quantiles(1, x, quantiles, limits = NULL)
-    } else {
-      Map(\(cury, curcol) draw_quantiles(1, cury, quantiles, limits = NULL, col = curcol),
-          tapply(x, y, list), 
-          output$col$col)
-      if (mean) draw_mean(tapply(x, y, mean) |> unlist(), 
-                          grconvertY(0.99, 'npc', 'user'), 
-                          col = output$col$col)
-    }
     
   }
   
