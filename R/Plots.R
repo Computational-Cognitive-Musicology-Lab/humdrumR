@@ -690,14 +690,6 @@ draw.default <- function(x, y, facets = list(),
 #' Must be a single whole number from 1 to 16, or a vector of 
 #' discrete values of the same length as `x`/`y`.
 #' 
-#' @param conditional ***Should normal reference, regression slope, means, and/or quantiles be computed separately for each color/pointStyle group?***
-#'
-#' Defaults to `TRUE`.
-#' 
-#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
-#' Legal names can be `"normalReference"`, `"lm"`, `"mean"`, or `"quantiles"`.
-#'
-#' If no `color` or `pointStyle` groups are provided, this argument has no effect.
 #' 
 #' @param line ***Should a line be drawn through the `x`/`y` coordinates, instead of points?***
 #' 
@@ -746,7 +738,16 @@ draw.default <- function(x, y, facets = list(),
 #' The 95% confidence limits---estimated using [predict.lm()]---are
 #' also drawn (as dashed lines).
 #' The regression coefficients are printed in a legend at the top left corner of the plot.
+#' 
+#' @param conditional ***Should normal reference, regression slope, means, and/or quantiles be computed separately for each color/pointStyle group?***
 #'
+#' Defaults to `TRUE`.
+#' 
+#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+#' Legal names can be `"normalReference"`, `"lm"`, `"mean"`, or `"quantiles"`.
+#'
+#' If no `color` or `pointStyle` groups are provided, this argument has no effect.
+#' 
 #' @param log ***Should X and/or Y axes be drawn on a logarithmic scale?***
 #' 
 #' Defaults to `""` (linear scale on both axes).
@@ -911,7 +912,7 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 #' If a `color` argument is provided to group the data by color, you can use the `conditional`
 #' argument to control how information is drawn for each group.
 #' If `conditional = list(density = TRUE)`, the histogram/contour for each color is scaled
-#' to the same sum---this is good to see the details of the distribution within each group.
+#' to sum to 1---this is good to see the details of the distribution within each group.
 #' If `density = FALSE`, each color is drawn in its true proportion in the data.
 #' Other `conditional` options can be paired with the `normalReference`, `mean`, and `quantiles` arguments,
 #' controlling whether these descriptive values are computed separately in each group,
@@ -964,15 +965,6 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 #' black line. The mean and standard deviation of this distribution is taken from the input vector `x`.
 #' This gives a sense of how close to normally distributed `x` is.
 #'
-#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each color group?***
-#'
-#' Defaults to `TRUE`.
-#' 
-#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
-#' Legal names can be `"normalReference"`, `"density"`, `"mean"`, or `"quantiles"`.
-#'
-#' If no `color` groups are provided, this argument has no effect.
-#'
 #' @param quantiles ***Should distribution quantiles of `x` be marked?***
 #'
 #' Defaults to `c()`, so no quantiles are drawn.
@@ -988,7 +980,15 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
+#'
+#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each color group?***
+#'
+#' Defaults to `TRUE`.
 #' 
+#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+#' Legal names can be `"normalReference"`, `"density"`, `"mean"`, or `"quantiles"`.
+#'
+#' If no `color` groups are provided, this argument has no effect. 
 #'
 #' @param log ***Should X axis be drawn on a logarithmic scale?***
 #' 
@@ -1658,9 +1658,9 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' 
 #' ### Conditional features
 #' 
-#' You can use the `conditional` #' argument to control how information is drawn for each violin.
-#' If `conditional = list(density = TRUE)`, theeach violin  is scaled
-#' to the same sum---this is good to see the details of the distribution within each group.
+#' You can use the `conditional` argument to control how information is drawn for each violin.
+#' If `conditional = list(density = TRUE)`, each violin  is scaled
+#' to sum to 1---this is good to see the details of the distribution within each group.
 #' If `density = FALSE`, each violin is drawn in its true proportion in the data.
 #' Other `conditional` options can be paired with the `normalReference`, `mean`, and `quantiles` arguments,
 #' controlling whether these descriptive values are computed separately for each violin,
@@ -1704,12 +1704,6 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' black line. The mean and standard deviation of this distribution is taken from the input vector `y`.
 #' This gives a sense of how close to normally distributed `y` is within.
 #'
-#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each violin?***
-#'
-#' Defaults to `TRUE`.
-#' 
-#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
-#' Legal names can be `"normalReference"`, `"density"`, `"mean"`, or `"quantiles"`.
 #'
 #'
 #' @param quantiles ***Should distribution quantiles of `y` be marked?***
@@ -1731,7 +1725,13 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' The X-position of the mean mark is determined by the relative frequency of the three groups, as arranged
 #' on the screen. Groups with more data will pull the mean-X position toward them.
 #' 
+#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each violin?***
 #'
+#' Defaults to `TRUE`.
+#' 
+#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+#' Legal names can be `"normalReference"`, `"density"`, `"mean"`, or `"quantiles"`.
+#' 
 #' @param log ***Should Y axis be drawn on a logarithmic scale?***
 #' 
 #' Defaults to `""` (linear scale).
@@ -1929,7 +1929,22 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #'  the number of categories (unique values in `y`).
 #' These colors are mapped to the areas, from bottom up.
 #' (Use `alpha` independently to change the transparency.)
+#'
+#' ### Conditional features
 #' 
+#' You can use the `conditional` argument to control how information is drawn for each violin.
+#' If `conditional = list(density = TRUE)`, each color area is scaled
+#' to sum to 1---this is good to see the details of the distribution within each group.
+#' If `density = FALSE`, each color area is drawn in its true proportion in the data.
+#' Other `conditional` options can be paired with the `mean`, and `quantiles` arguments,
+#' controlling whether these descriptive values are computed separately for each area,
+#' or across the entire input vector `x`.
+#'
+#' The `conditional` argument can be specified be either a list of named `logical` values, with
+#' valid names being `mean`, `quantiles`, or `density`.
+#' Alternatively, a `character` vector of these names can be provided.
+#' If a singleton `logical` value is provided, the provided value (`TRUE` or `FALSE`) is used for all the conditional arguments.
+
 #' @inheritSection draw General Draw Arguments
 #' 
 #' @param smooth ***Should a smoothed density curve be estimated for each group?***
@@ -1953,18 +1968,6 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' The Y-position of each point is randomly (uniformly) selected in a range at the top of the plot window.
 #' This spaces out points that are close together, so it is easier to see how dense they are.
 #' 
-#' @param conditional ***Should probability density be calculated separately within each group?***
-#'
-#' Defaults to `FALSE`.
-#' 
-#' Must be a singleton `logical` value: an on/off switch.
-#' 
-#' This controls whether the density
-#' of color area matches its global share in the distribution of input variable `x`, or is rescaled in each
-#' group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
-#' Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
-#' `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
-#' data in each group (i.e., if the groups are different sizes).
 #'
 #' @param center ***Should the stacked areas be centered on the screen?***
 #' 
@@ -1985,23 +1988,20 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' If any quantiles are specified, each quantile is drawn as a vetical line on the plot, labeled appropriately.
 #' For example, `quantiles = .5` will draw a line at the median of input vector `x`;
 #' `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `x`.
-#' (Depends on `global_stats` argument.)
 #' 
 #' @param mean ***Should the mean of input vector `x` be marked below the plot?***
 #'
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
-#' 
-#' @param global_stats ***Should quantiles and/or means be drawn within each group?***
-#' 
-#' Defaults to `FALSE`.
-#' 
-#' Must be a singleton `logical` value: an on/off switch.
-#' 
-#' If `global_stats = FALSE`, quantiles and/or means are drawn separately for each group. 
-#' This can get very messy very quickly!
 #'
+#' @param conditional ***Should density, means, and/or quantiles be computed separately for each color area?***
+#'
+#' Defaults to `TRUE`.
+#' 
+#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+#' Legal names can be `"density"`, `"mean"`, or `"quantiles"`.
+#' 
 #' @param log ***Should X axis be drawn on a logarithmic scale?***
 #' 
 #' Defaults to `""` (linear scale).
@@ -2046,8 +2046,7 @@ draw_area <- function(x, y, log = '',
   output$axisNames[[2]] <-'Probability density' 
   # if (center) output$axes[ , ticks := lapply(ticks, \(t) {names(t) <- abs(t) ; t})]
   
-  groups <- match_size(x = x, y = y, col = output$col$col, pch = output$pch$pch)[c('col', 'pch')]
-  
+  groups <- match_size(x = x, y = y, col = output$col$col)[c('col')]
   
   X <- coordinates$X
   output$drawer <- function() {
@@ -2058,9 +2057,6 @@ draw_area <- function(x, y, log = '',
               border = FALSE, xpd = NA)
       if (showPoints) draw_points(x, rev(output$col$col)[match(y, categories)], 
                                   coordinates$Y, output$window$ylim)
-      
-      
-      
     }
     
     ## Draw density Key
@@ -2076,18 +2072,14 @@ draw_area <- function(x, y, log = '',
            adj = c(0, 1), 
            cex = .4, xpd = NA)
     }
-    
-    
-    draw_quantiles(1, x, quantiles,  groups = groups['col'], conditional = conditional$quantiles)
+    groups <- list(col = output$col$col[tapply(y, y)])
+    draw_quantiles(1, x, quantiles,  groups = groups, conditional = conditional$quantiles)
     if (mean) draw_mean(x,  rep(grconvertY(0.99, 'npc', 'user'), length(x)),  
-                        groups = groups['col'], conditional = conditional$mean)
-      
-    
+                        groups = groups, conditional = conditional$mean)
     
   }
   
   output
-  
 }
 
 
@@ -2478,8 +2470,8 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), g
     
     
     # labels
-    q <- t(array(paste0(round(quantiles       * 100, 1), '%'), dim = dim(quants)))
-    p <- t(array(paste0(round((1 - quantiles) * 100, 1), '%'), dim = dim(quants)))
+    q <- (array(paste0(round(quantiles       * 100, 1), '%'), dim = dim(quants)))
+    p <- (array(paste0(round((1 - quantiles) * 100, 1), '%'), dim = dim(quants)))
     
     if (sides) {
       text(limits[, 1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
@@ -2890,7 +2882,7 @@ area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = T
     
   } else {
     
-    coordinates <- multihist_coor(x, groups, conditional = conditional$density, breaks = breaks, vardim = 'X')
+    coordinates <- multihist_coor(x, groups, conditional = conditional, breaks = breaks, vardim = 'X')
     X <- coordinates[[1]]$X
     Y <- lapply(coordinates, \(coor) coor$Density)
   }

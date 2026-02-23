@@ -34,7 +34,7 @@ Must be a singleton \code{logical} value: an on/off switch.
 If \code{TRUE}, a smooth density contour is estimated for \code{x}, using \code{\link[=density]{density()}}.
 If \code{FALSE}, \code{x} values are binned using \code{\link[=hist]{hist()}}.}
 
-\item{conditional}{*\strong{Should normal reference, density, means, and/or quantiles be computed separately for each color group?}
+\item{conditional}{\emph{\strong{Should normal reference, density, means, and/or quantiles be computed separately for each color group?}}
 
 Defaults to \code{TRUE}.
 
@@ -134,7 +134,7 @@ the numbers are automatically divided into (at most) five bins.
 If a \code{color} argument is provided to group the data by color, you can use the \code{conditional}
 argument to control how information is drawn for each group.
 If \code{conditional = list(density = TRUE)}, the histogram/contour for each color is scaled
-to the same sum---this is good to see the details of the distribution within each group.
+to sum to 1---this is good to see the details of the distribution within each group.
 If \code{density = FALSE}, each color is drawn in its true proportion in the data.
 Other \code{conditional} options can be paired with the \code{normalReference}, \code{mean}, and \code{quantiles} arguments,
 controlling whether these descriptive values are computed separately in each group,

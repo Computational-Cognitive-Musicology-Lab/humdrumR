@@ -35,18 +35,12 @@ Must be a singleton \code{logical} value: an on/off switch.
 If \code{TRUE}, a smooth density contour is estimated from each group of \code{x} values, using \code{\link[=density]{density()}}.
 If \code{FALSE}, \code{x} values are binned using \code{\link[=hist]{hist()}}.}
 
-\item{conditional}{\emph{\strong{Should probability density be calculated separately within each group?}}
+\item{conditional}{\emph{\strong{Should density, means, and/or quantiles be computed separately for each color area?}}
 
-Defaults to \code{FALSE}.
+Defaults to \code{TRUE}.
 
-Must be a singleton \code{logical} value: an on/off switch.
-
-This controls whether the density
-of color area matches its global share in the distribution of input variable \code{x}, or is rescaled in each
-group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
-Setting \code{conditional = TRUE} is useful if you want to see the details of how each group is distributed.
-\code{conditional = FALSE} (the default) is useful when you want to see the actual proportion of
-data in each group (i.e., if the groups are different sizes).}
+Must be either a singleton \code{logical} value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+Legal names can be \code{"density"}, \code{"mean"}, or \code{"quantiles"}.}
 
 \item{mean}{\emph{\strong{Should the mean of input vector \code{x} be marked below the plot?}}
 
@@ -62,8 +56,7 @@ Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
 
 If any quantiles are specified, each quantile is drawn as a vetical line on the plot, labeled appropriately.
 For example, \code{quantiles = .5} will draw a line at the median of input vector \code{x};
-\code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.
-(Depends on \code{global_stats} argument.)}
+\code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.}
 
 \item{showPoints}{\emph{\strong{Should individual points from \code{x} be shown above the density plot?}}
 
@@ -83,15 +76,6 @@ Any base-R graphing parameters that can be set using the \code{\link[=par]{par()
 may be passed to \code{draw()}.
 These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
 \code{draw()} call---i.e., the global \code{par()} settings are not changed.}
-
-\item{global_stats}{\emph{\strong{Should quantiles and/or means be drawn within each group?}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.
-
-If \code{global_stats = FALSE}, quantiles and/or means are drawn separately for each group.
-This can get very messy very quickly!}
 }
 \description{
 This method draws the distribution of a categorical (discrete) \code{y} variable
@@ -139,6 +123,21 @@ you can provide a vector of unique colors exactly the same length as
 the number of categories (unique values in \code{y}).
 These colors are mapped to the areas, from bottom up.
 (Use \code{alpha} independently to change the transparency.)
+\subsection{Conditional features}{
+
+You can use the \code{conditional} argument to control how information is drawn for each violin.
+If \code{conditional = list(density = TRUE)}, each color area is scaled
+to sum to 1---this is good to see the details of the distribution within each group.
+If \code{density = FALSE}, each color area is drawn in its true proportion in the data.
+Other \code{conditional} options can be paired with the \code{mean}, and \code{quantiles} arguments,
+controlling whether these descriptive values are computed separately for each area,
+or across the entire input vector \code{x}.
+
+The \code{conditional} argument can be specified be either a list of named \code{logical} values, with
+valid names being \code{mean}, \code{quantiles}, or \code{density}.
+Alternatively, a \code{character} vector of these names can be provided.
+If a singleton \code{logical} value is provided, the provided value (\code{TRUE} or \code{FALSE}) is used for all the conditional arguments.
+}
 }
 
 \section{General Draw Arguments}{

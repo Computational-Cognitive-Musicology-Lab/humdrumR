@@ -56,7 +56,7 @@ If any quantiles are specified, each quantile is drawn as a horizontal line on t
 For example, \code{quantiles = .5} will draw a line at the median of input vector \code{y};
 \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{y}.}
 
-\item{conditional}{*\strong{Should normal reference, density, means, and/or quantiles be computed separately for each color/pointStyle group?}
+\item{conditional}{\emph{\strong{Should normal reference, density, means, and/or quantiles be computed separately for each color/pointStyle group?}}
 
 Defaults to \code{TRUE}.
 

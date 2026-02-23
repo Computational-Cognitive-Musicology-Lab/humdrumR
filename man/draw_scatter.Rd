@@ -73,7 +73,7 @@ The 95\% confidence limits---estimated using \code{\link[=predict.lm]{predict.lm
 also drawn (as dashed lines).
 The regression coefficients are printed in a legend at the top left corner of the plot.}
 
-\item{conditional}{*\strong{Should normal reference, regression slope, means, and/or quantiles be computed separately for each color/pointStyle group??}
+\item{conditional}{\emph{\strong{Should normal reference, regression slope, means, and/or quantiles be computed separately for each color/pointStyle group?}}
 
 Defaults to \code{TRUE}.
 

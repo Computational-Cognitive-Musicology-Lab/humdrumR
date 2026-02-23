@@ -5,8 +5,7 @@
 \title{Draw "violin" plot}
 \usage{
 draw(x # discrete,  
-     y # numeric,
-     col = NA)
+     y # numeric)
 }
 \arguments{
 \item{smooth}{\emph{\strong{Should a smoothed density curve be estimated for each group?}}
@@ -18,7 +17,7 @@ Must be a singleton \code{logical} value: an on/off switch.
 If \code{TRUE}, a smooth density contour is estimated from each group of \code{y} values, using \code{\link[=density]{density()}}.
 If \code{FALSE}, \code{y} values are binned using \code{\link[=hist]{hist()}}.}
 
-\item{conditional}{*\strong{Should normal reference, density, means, and/or quantiles be computed separately for each violin?}
+\item{conditional}{\emph{\strong{Should normal reference, density, means, and/or quantiles be computed separately for each violin?}}
 
 Defaults to \code{TRUE}.
 
@@ -127,9 +126,9 @@ These colors are mapped to the violins, from left to right.
 (Use \code{alpha} independently to change the transparency.)
 \subsection{Conditional features}{
 
-You can use the \code{conditional} #' argument to control how information is drawn for each violin.
-If \code{conditional = list(density = TRUE)}, theeach violin  is scaled
-to the same sum---this is good to see the details of the distribution within each group.
+You can use the \code{conditional} argument to control how information is drawn for each violin.
+If \code{conditional = list(density = TRUE)}, each violin  is scaled
+to sum to 1---this is good to see the details of the distribution within each group.
 If \code{density = FALSE}, each violin is drawn in its true proportion in the data.
 Other \code{conditional} options can be paired with the \code{normalReference}, \code{mean}, and \code{quantiles} arguments,
 controlling whether these descriptive values are computed separately for each violin,
