@@ -13,7 +13,7 @@ draw( , y # numeric,
 Defaults to \code{""} (linear scale).
 
 Must be a single \code{character} string, either \code{""} (linear scale)
-of \code{""} (draw Y on a logarithmic scale).}
+of \code{"y"} (draw Y on a logarithmic scale).}
 
 \item{line}{\emph{\strong{Should a line be drawn through the \code{x}/\code{y} coordinates, instead of points?}}
 
@@ -25,7 +25,9 @@ Must be a singleton \code{logical} value: an on/off switch.}
 
 Defaults to \code{FALSE}.
 
-Must be a singleton \code{logical} value: an on/off switch.}
+Must be a singleton \code{logical} value: an on/off switch.
+
+See \link{draw_violins}.}
 
 \item{normalReference}{\emph{\strong{Should a Gaussian reference distribution be drawn?}}
 
@@ -44,7 +46,7 @@ Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
-\item{quantiles}{\emph{\strong{Should distribution quantiles of \code{x} be marked?}}
+\item{quantiles}{\emph{\strong{Should distribution quantiles of \code{y} be marked?}}
 
 Defaults to \code{c(.25, .5, .75)}, so the quartiles are drawn.
 
@@ -54,15 +56,14 @@ If any quantiles are specified, each quantile is drawn as a horizontal line on t
 For example, \code{quantiles = .5} will draw a line at the median of input vector \code{y};
 \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{y}.}
 
-\item{cex}{\emph{\strong{What size of points should be drawn?}}
+\item{conditional}{*\strong{Should normal reference, density, means, and/or quantiles be computed separately for each color/pointStyle group?}
 
-Must be either a single positive number, or a vector
-of numbers or color \code{character} values of the same length as \code{x}/\code{y}.}
+Defaults to \code{TRUE}.
 
-\item{pch}{\emph{\strong{What shape should points be drawn?}}
+Must be either a singleton \code{logical} value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+Legal names can be \code{"normalReference"}, \code{"density"}, \code{"mean"}, or \code{"quantiles"}.
 
-Must be a single whole number from 1 to 16, or a vector of
-discrete values of the same length as \code{x}/\code{y}.}
+If no \code{color} or \code{pointStyle} groups are provided, this argument has no effect.}
 
 \item{...}{\emph{\strong{Additional parameters to pass to par().}}
 
@@ -70,6 +71,16 @@ Any base-R graphing parameters that can be set using the \code{\link[=par]{par()
 may be passed to \code{draw()}.
 These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
 \code{draw()} call---i.e., the global \code{par()} settings are not changed.}
+
+\item{pointSize}{\emph{\strong{What size of points should be drawn?}}
+
+Must be either a single positive number, or a vector
+of numeric values of the same length as \code{y}.}
+
+\item{pointStyle}{\emph{\strong{What shape should points be drawn?}}
+
+Must be a single whole number from 1 to 16, or a vector of
+discrete values of the same length as \code{y}.}
 }
 \description{
 This method draws the distribution of a numeric (continuous) \code{y} argument
@@ -81,20 +92,20 @@ X axis.
 As an alternative, a single \link[=draw_violins]{violin} diagram can be drawn by setting \code{violin = TRUE}.
 }
 \details{
-Up to three additional dimensions can be visually added to the plot using \code{col} (color),
-\code{cex} (point size), and \code{pch} (point style) arguments.
+Up to three additional dimensions can be visually added to the plot using \code{color} (color),
+\code{pointSize} (point size), and \code{pointStyle} (point style) arguments.
 }
 \section{Color}{
 
 
-If you pass a single color value to \code{col}, the whole graph is drawn that color.
-However, if you pass \code{col} a vector of values which is the exact same length as
+If you pass a single color value to \code{color}, the whole graph is drawn that color.
+However, if you pass \code{color} a vector of values which is the exact same length as
 the input vector \code{y}, the unique values of this vector will be used to color
 the points of the quantile plot.
 (A color legend will be drawn automatically.)
-The colors for each group will be chosen automatically, unless the entire \code{col} vector is
+The colors for each group will be chosen automatically, unless the entire \code{color} vector is
 valid color values. (Use \code{alpha} independently to change the transparency.)
-If the grouping \code{col} vector is numeric and there are more than ten unique values,
+If the grouping \code{color} vector is numeric and there are more than ten unique values,
 a continuum of colors is created to represent that numeric space.
 }
 
@@ -104,21 +115,21 @@ a continuum of colors is created to represent that numeric space.
 By default, \code{draw()} chooses an appropriate size to draw data points based on the
 size of the input vector \code{y} and the window size---the more data on the screen
 the smaller the points are drawn.
-You can override this by passing a single numeric value to \code{cex}; values between about
+You can override this by passing a single numeric value to \code{pointSize}; values between about
 \code{.2} and \code{1.5} are pretty reasonable, typically.
-However, if you pass \code{cex} vector of positive numeric values which is the same length
+However, if you pass \code{pointSize} vector of positive numeric values which is the same length
 as the input vector \code{y}, the point sizes are scaled so that the relative \emph{area} of drawn points
-matches the relative magnitude of numbers in the \code{cex} vector.
+matches the relative magnitude of numbers in the \code{pointSize} vector.
 (A point-size legend will be drawn automatically.)
-Thus, if you draw two points with \code{cex = c(3, 6)}, the second point will be drawn twice
+Thus, if you draw two points with \code{pointSize = c(3, 6)}, the second point will be drawn twice
 the size (twice the area) of the first.
 
 If the range of values is too great, it is not feasible to represent them using points,
 because the points would either get too small to see or too big (covering the whole plot).
-Thus, if the largest \code{cex} value is more than 100 times greater than the smallest,
+Thus, if the largest \code{pointSize} value is more than 100 times greater than the smallest,
 the scaling will be changed to accommodate this.
 When this happens, a message will be printed, explaining how the relative area of drawn
-points relates to the relative magnitude of \code{cex} values.
+points relates to the relative magnitude of \code{pointSize} values.
 For example, you might see a message like: "When comparing the points in this plot,
 a doubling of area corresponds to multiplying the value by three."
 }
@@ -127,22 +138,41 @@ a doubling of area corresponds to multiplying the value by three."
 
 
 By default, each data point is represented by a solid circle;
-This can be overridden by passing a \code{pch} argument.
+This can be overridden by passing a \code{pointStyle} argument.
 There are sixteen possible shapes, which are specified by the natural
 numbers from 1 to 16---try calling \code{plot(1:16, pch = 1:16)} to see them all.
 
-If a single value is passed to \code{pch}, all points are drawn with the corresponding shape.
-However, if you pass \code{pch} a vector which is the same length as the input
+If a single value is passed to \code{pointStyle}, all points are drawn with the corresponding shape.
+However, if you pass \code{pointStyle} a vector which is the same length as the input
 vector \code{y}, the data is grouped relative to the unique values of this vector,
 and a shape is used to represent each group.
 (A point-shape legend will be drawn automatically.)
 
-If the \code{pch} vector is \code{numeric}, and with more than four unique values, the
+If the \code{pointStyle} vector is \code{numeric}, and with more than four unique values, the
 numeric range is divided into four groups automatically.
-If the \code{pch} vector is discrete (\code{character}, \code{logical}, or \code{factor}),
+If the \code{pointStyle} vector is discrete (\code{character}, \code{logical}, or \code{factor}),
 each unique value is mapped to a point-shape;
 This only works up to sixteen unique values---if there are more than 16
-unique values in a discrete \code{pch} vector, an error will occur.
+unique values in a discrete \code{pointStyle} vector, an error will occur.
+}
+
+\section{Conditional features}{
+
+
+If \code{color} or \code{pointStyle} arguments are provided to group the data, you can use the \code{conditional}
+argument to control how information is drawn for each group.
+If \code{conditional = list(density = TRUE)}, data is drawn to represent the quantiles
+within each group separately;
+If \code{density = FALSE}, the data points are drawn at their quantile position
+within the entire input vector \code{y}.
+Other \code{conditional} options can be paired with the \code{normalReference}, \code{mean}, and \code{quantiles} arguments,
+controlling whether these descriptive values are computed separately in each group,
+or across the entire input vector \code{y}.
+
+The \code{conditional} argument can be specified be either a list of named \code{logical} values, with
+valid names being \code{normalReference}, \code{mean}, \code{quantiles}, or \code{density}.
+Alternatively, a \code{character} vector of these names can be provided.
+If a singleton \code{logical} value is provided, the provided value (\code{TRUE} or \code{FALSE}) is used for all the conditional arguments.
 }
 
 \section{General Draw Arguments}{
@@ -160,7 +190,7 @@ Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis la
 The \code{draw()} function will automatically generate X and Y labels for every plot,
 usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
 X label will be "rnorm(100)."
-This can be overridden using the \code{xlabe;} and/or \code{ylabe;} arguments, which can be provided a single string
+This can be overridden using the \code{xlabel} and/or \code{ylabel} arguments, which can be provided a single string
 each---to suppress a label, provide an empty string, like \code{ylabel = ""}.
 
 Titles and subtitles are specified using the \code{title} and \code{subtitle} arguments, respectively.
@@ -176,7 +206,7 @@ The \code{draw()} function will select reasonable X and Y axes ranges automatica
 If you want to override the defaults, you can use \code{xlimit} or \code{ylimit} to control
 the range of values shown on each axis.
 Each of these must be passed a vector of two numbers, representing the left and right
-X-axis extremes (\code{xlimit}) and the bottom and top Y-axis extremes (\code{ylimit}).
+X-axis extremes (\code{xlimit}) or the bottom and top Y-axis extremes (\code{ylimit}).
 For example, to show data in the range \eqn{[10, 50]} on the X axis,
 specify \code{xlimit = c(10, 50)}.
 
@@ -192,7 +222,7 @@ and will simply ignore attempts to do that.
 
 \subsection{Window control}{
 
-Normally, when you use \code{draw()}, the plot is drawn to fill the available graphical device,
+Normally, a plot is drawn to fill the available graphical device
 using base-R's normal algorithm.
 However, the \code{aspect} argument can override this, controlling the aspect
 ratio of the plot.
@@ -202,6 +232,7 @@ Try settings like \code{aspect = 4/3} or \code{aspect = 16/9}.
 
 The \code{margin} argument controls the portion of the screen used for the plot margins,
 with legal values ranging from \code{0.4} to \code{0.1}.
+The margins are used to draw all text (axis labels, title, etc.), so they are needed.
 The default value is \code{0.2}---using other margins may result in less optimal placement
 of plot text and legends.
 }

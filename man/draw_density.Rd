@@ -5,7 +5,7 @@
 \title{Draw density plot (histogram or contour)}
 \usage{
 draw(x # numeric,  
-     col = NA)
+     color = NA)
 }
 \arguments{
 \item{log}{\emph{\strong{Should X axis be drawn on a logarithmic scale?}}
@@ -22,8 +22,7 @@ Defaults to \code{FALSE}.
 Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{TRUE}, a normal (Gaussian) distribution is drawn as a dashed
-black line. The mean and standard deviation of this distribution is taken from the input vector \code{x},
-within each group.
+black line. The mean and standard deviation of this distribution is taken from the input vector \code{x}.
 This gives a sense of how close to normally distributed \code{x} is.}
 
 \item{smooth}{\emph{\strong{Should a smoothed density curve be estimated for each group?}}
@@ -35,19 +34,14 @@ Must be a singleton \code{logical} value: an on/off switch.
 If \code{TRUE}, a smooth density contour is estimated for \code{x}, using \code{\link[=density]{density()}}.
 If \code{FALSE}, \code{x} values are binned using \code{\link[=hist]{hist()}}.}
 
-\item{conditional}{\emph{\strong{Should probability density be calculated separately within each color group?}}
+\item{conditional}{*\strong{Should normal reference, density, means, and/or quantiles be computed separately for each color group?}
 
-Defaults to \code{FALSE}.
+Defaults to \code{TRUE}.
 
-Must be a singleton \code{logical} value: an on/off switch.
+Must be either a singleton \code{logical} value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+Legal names can be \code{"normalReference"}, \code{"density"}, \code{"mean"}, or \code{"quantiles"}.
 
-If the \code{col} argument is used to draw multiply density graphs,
-this controls whether the density
-of each color matches its global share in the distribution of input variable \code{x}, or is rescaled in each
-group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
-Setting \code{conditional = TRUE} is useful if you want to see the details of how each group is distributed.
-\code{conditional = FALSE} (the default) is useful when you want to see the actual proportion of
-data in each group (i.e., if the groups are different sizes).}
+If no \code{color} groups are provided, this argument has no effect.}
 
 \item{showCounts}{\emph{\strong{Should the counts of values in each bin/count be printed above the bar/contour?}}
 
@@ -55,7 +49,7 @@ Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.
 
-Note that, if the data is grouped into multiple draws by \code{col} (see above), there is no guarantee
+Note that, if the data is grouped into multiple draws by \code{color} (see above), there is no guarantee
 the counts won't be drawn on top of each other.}
 
 \item{showPoints}{\emph{\strong{Should individual points from \code{x} be shown above the density plot?}}
@@ -84,8 +78,7 @@ Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector (the
 
 If any quantiles are specified, each quantile is drawn as a vertical line on the plot, labeled appropriately.
 For example, \code{quantiles = .5} will draw a line at the median of input vector \code{x};
-\code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.
-(Depends on \code{global_stats} argument.)}
+\code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.}
 
 \item{...}{\emph{\strong{Additional parameters to pass to par().}}
 
@@ -93,24 +86,14 @@ Any base-R graphing parameters that can be set using the \code{\link[=par]{par()
 may be passed to \code{draw()}.
 These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
 \code{draw()} call---i.e., the global \code{par()} settings are not changed.}
-
-\item{global_stats}{\emph{\strong{Should quantiles and/or means be drawn within each color group?}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.
-
-If the \code{col} argument is used to draw multiply density graphs,
-and \code{global_stats = FALSE}, quantiles and/or means are drawn separately for each group.
-This can get very messy very quickly!}
 }
 \description{
 This method draws the density distribution of a numeric (continuous) \code{x} argument,
 either as a binned histogram (binned) or a smoothed contour plot.
 To choose which approach, use the \code{smooth} argument: \code{smooth = FALSE} (default) for histogram,
 and \code{smooth = TRUE} for contour.
-An additional dimension can be added to the plot using the \code{col} argument,
-drawing multiple density graphs in different colors.
+An additional dimension can be added to the plot using the \code{color} argument,
+drawing multiple density/contour graphs in different colors.
 }
 \details{
 The \code{draw_density()} method relies on the algorithms used by base-R's \code{\link[=hist]{hist()}} and \code{\link[=density]{density()}} functions
@@ -135,19 +118,33 @@ associated with that bin, even if the bins are of unequal width.
 \section{Color}{
 
 
-A second dimension can be added to the density plot using the \code{col} (color) argument.
+A second dimension can be added to the density plot using the \code{color} argument.
 If you pass a single color, the whole graph is drawn that color.
-However, if you pass \code{col} a vector of values which is the exact same length as
+However, if you pass \code{color} a vector of values which is the exact same length as
 the input vector \code{x}, the unique values of this vector will be used to group
 the \code{x} data, and a separate density plot will be drawn for each group, with its own color.
 (A color legend will be drawn automatically.)
 
-The colors for each group will be chosen automatically, unless the entire \code{col} vector is
+The colors for each group will be chosen automatically, unless the entire \code{color} vector is
 valid color values. (Use \code{alpha} independently to change the transparency.)
-If the grouping \code{col} vector is numeric and there are more than five unique values,
+If the grouping \code{color} vector is numeric and there are more than five unique values,
 the numbers are automatically divided into (at most) five bins.
-Use the \code{conditional} argument to control how the densities of each group
-are scaled relative to each other.
+\subsection{Conditional features}{
+
+If a \code{color} argument is provided to group the data by color, you can use the \code{conditional}
+argument to control how information is drawn for each group.
+If \code{conditional = list(density = TRUE)}, the histogram/contour for each color is scaled
+to the same sum---this is good to see the details of the distribution within each group.
+If \code{density = FALSE}, each color is drawn in its true proportion in the data.
+Other \code{conditional} options can be paired with the \code{normalReference}, \code{mean}, and \code{quantiles} arguments,
+controlling whether these descriptive values are computed separately in each group,
+or across the entire input vector \code{x}.
+
+The \code{conditional} argument can be specified be either a list of named \code{logical} values, with
+valid names being \code{normalReference}, \code{mean}, \code{quantiles}, or \code{density}.
+Alternatively, a \code{character} vector of these names can be provided.
+If a singleton \code{logical} value is provided, the provided value (\code{TRUE} or \code{FALSE}) is used for all the conditional arguments.
+}
 }
 
 \section{General Draw Arguments}{
@@ -165,7 +162,7 @@ Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis la
 The \code{draw()} function will automatically generate X and Y labels for every plot,
 usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
 X label will be "rnorm(100)."
-This can be overridden using the \code{xlabe;} and/or \code{ylabe;} arguments, which can be provided a single string
+This can be overridden using the \code{xlabel} and/or \code{ylabel} arguments, which can be provided a single string
 each---to suppress a label, provide an empty string, like \code{ylabel = ""}.
 
 Titles and subtitles are specified using the \code{title} and \code{subtitle} arguments, respectively.
@@ -181,7 +178,7 @@ The \code{draw()} function will select reasonable X and Y axes ranges automatica
 If you want to override the defaults, you can use \code{xlimit} or \code{ylimit} to control
 the range of values shown on each axis.
 Each of these must be passed a vector of two numbers, representing the left and right
-X-axis extremes (\code{xlimit}) and the bottom and top Y-axis extremes (\code{ylimit}).
+X-axis extremes (\code{xlimit}) or the bottom and top Y-axis extremes (\code{ylimit}).
 For example, to show data in the range \eqn{[10, 50]} on the X axis,
 specify \code{xlimit = c(10, 50)}.
 
@@ -197,7 +194,7 @@ and will simply ignore attempts to do that.
 
 \subsection{Window control}{
 
-Normally, when you use \code{draw()}, the plot is drawn to fill the available graphical device,
+Normally, a plot is drawn to fill the available graphical device
 using base-R's normal algorithm.
 However, the \code{aspect} argument can override this, controlling the aspect
 ratio of the plot.
@@ -207,6 +204,7 @@ Try settings like \code{aspect = 4/3} or \code{aspect = 16/9}.
 
 The \code{margin} argument controls the portion of the screen used for the plot margins,
 with legal values ranging from \code{0.4} to \code{0.1}.
+The margins are used to draw all text (axis labels, title, etc.), so they are needed.
 The default value is \code{0.2}---using other margins may result in less optimal placement
 of plot text and legends.
 }

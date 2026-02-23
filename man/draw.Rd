@@ -14,7 +14,7 @@ may be passed to \code{draw()}.
 These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
 \code{draw()} call---i.e., the global \code{par()} settings are not changed.}
 
-\item{xlab, ylab}{\emph{\strong{What X and/or Y axis labels should be used?}}
+\item{xlabel, ylabel}{\emph{\strong{What X and/or Y axis labels should be used?}}
 
 Must be single \code{character} strings.
 
@@ -60,6 +60,9 @@ Defaults to \code{FALSE}, unless the input has two or more dimensions
 
 Must be a singleton \code{logical} value: an on/off switch.}
 }
+\value{
+Returns a \code{draw_object}, which renders the plot when printed, or can be passed to other functions.
+}
 \description{
 The \code{draw()} function is humdrumR's go-to plotting function,
 which can make a variety of graphs depending on the type of data you give it.
@@ -73,7 +76,7 @@ However, \code{draw()} makes making good looking plots faster and easier.
 \code{x} and \code{y} arguments.
 The following table indicates the seven possible plot types, and which combinations of \code{x} and \code{y} variable classes
 result in each type.
-Separate sections below explaining the detailed features of each type of plot.\tabular{lll}{
+The links in the table lead to detailed documentation for each type of plot.\tabular{lll}{
    \code{x} \tab \code{y} \tab Plot type \cr
    \code{numeric} \tab (missing) \tab \link[=draw_density]{Density Histogram/Contour} \cr
    (missing) \tab \code{numeric} \tab \link[=draw_Qplot]{Quantile plot} \cr
@@ -81,8 +84,8 @@ Separate sections below explaining the detailed features of each type of plot.\t
    \code{numeric} \tab \code{numeric} \tab \link[=draw_scatter]{Scatter/line plot} \cr
    \code{character}/\code{factor} \tab \code{numeric} \tab \link[=draw_violins]{Violin plot} \cr
    \code{numeric} \tab \code{character} or \code{factor} \tab \link[=draw_area]{Area chart} \cr
-   \code{character}/ \code{factor} \tab (missing) \tab \link[=draw_barplot]{barplot} \cr
-   (missing) \tab \code{character}/\code{factor} \tab \link[=draw_barplot]{barplot} \cr
+   \code{character}/ \code{factor} \tab (missing) \tab \link[=draw_barplot]{Bar plot} \cr
+   (missing) \tab \code{character}/\code{factor} \tab \link[=draw_barplot]{Bar plot} \cr
    \code{character}/\code{factor} \tab \code{character}/\code{factor} \tab \link[=draw_heat]{Heat map} \cr
 }
 
@@ -90,7 +93,7 @@ Separate sections below explaining the detailed features of each type of plot.\t
 
 \code{draw()} is equipped to visualize data in up to five dimensions in one plot.
 The main dimensions are, of course, the X and Y axes, controlled by the \code{x} and \code{y} arguments.
-The other two dimensions are color (\code{col}), point size (\code{cex}), and point shape (\code{pch}).
+The other two dimensions are color (\code{color}), point size (\code{pointSize}), and point shape (\code{pointStyle}).
 Another approach is to draw multiple plots at the same time in a grid, with each sub
 plot called a "facet."
 Details for all these options can be found below.
@@ -111,7 +114,7 @@ Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis la
 The \code{draw()} function will automatically generate X and Y labels for every plot,
 usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
 X label will be "rnorm(100)."
-This can be overridden using the \code{xlabe;} and/or \code{ylabe;} arguments, which can be provided a single string
+This can be overridden using the \code{xlabel} and/or \code{ylabel} arguments, which can be provided a single string
 each---to suppress a label, provide an empty string, like \code{ylabel = ""}.
 
 Titles and subtitles are specified using the \code{title} and \code{subtitle} arguments, respectively.
@@ -127,7 +130,7 @@ The \code{draw()} function will select reasonable X and Y axes ranges automatica
 If you want to override the defaults, you can use \code{xlimit} or \code{ylimit} to control
 the range of values shown on each axis.
 Each of these must be passed a vector of two numbers, representing the left and right
-X-axis extremes (\code{xlimit}) and the bottom and top Y-axis extremes (\code{ylimit}).
+X-axis extremes (\code{xlimit}) or the bottom and top Y-axis extremes (\code{ylimit}).
 For example, to show data in the range \eqn{[10, 50]} on the X axis,
 specify \code{xlimit = c(10, 50)}.
 
@@ -143,7 +146,7 @@ and will simply ignore attempts to do that.
 
 \subsection{Window control}{
 
-Normally, when you use \code{draw()}, the plot is drawn to fill the available graphical device,
+Normally, a plot is drawn to fill the available graphical device
 using base-R's normal algorithm.
 However, the \code{aspect} argument can override this, controlling the aspect
 ratio of the plot.
@@ -153,6 +156,7 @@ Try settings like \code{aspect = 4/3} or \code{aspect = 16/9}.
 
 The \code{margin} argument controls the portion of the screen used for the plot margins,
 with legal values ranging from \code{0.4} to \code{0.1}.
+The margins are used to draw all text (axis labels, title, etc.), so they are needed.
 The default value is \code{0.2}---using other margins may result in less optimal placement
 of plot text and legends.
 }
@@ -182,14 +186,27 @@ It is always possible to specify a single color value for a plot.
 However, \code{draw()} can also (generally) accept more color values, depending on the type of plot.
 For some plots, multiple colors are used (aesthetically) by default;
 For other types of plots, its possible to use color to represent an additional dimension of information.
-In the "Specific Plot Types" subsections below, the details of how each plot type interprets
-the \code{col} argument are explained.
+The details of how each plot type interprets the \code{color} argument are explained in their
+respective documentation pages (see links in table above).
 }
 
 \section{Facets}{
 
 }
 
+\examples{
+
+x <- rnorm(1000, 30, 4)
+
+draw(x)
+draw( , x)
+
+y <- x * 1.2 + rnorm(1000, 0, 4)
+
+draw(x, y, title = "Linear regression", lm = TRUE)
+
+
+}
 \seealso{
-Use \code{\link[=drawToFile]{drawToFile()}} to render these plots to files.
+Use \code{\link[=drawToFile]{drawToFile()}} to render these plots to files. See \link{drawMore} to see how to draw plots next to each other.
 }

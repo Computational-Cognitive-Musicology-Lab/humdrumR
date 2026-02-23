@@ -690,7 +690,7 @@ draw.default <- function(x, y, facets = list(),
 #' Must be a single whole number from 1 to 16, or a vector of 
 #' discrete values of the same length as `x`/`y`.
 #' 
-#' @param conditional ***Should normal reference, regression slope, means, and/or quantiles be computed separately for each color/pointStyle group??**
+#' @param conditional ***Should normal reference, regression slope, means, and/or quantiles be computed separately for each color/pointStyle group?***
 #'
 #' Defaults to `TRUE`.
 #' 
@@ -964,7 +964,7 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 #' black line. The mean and standard deviation of this distribution is taken from the input vector `x`.
 #' This gives a sense of how close to normally distributed `x` is.
 #'
-#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each color group?**
+#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each color group?***
 #'
 #' Defaults to `TRUE`.
 #' 
@@ -1255,7 +1255,7 @@ draw_density <- function(x, y, log = '',
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #'
-#'@param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each color/pointStyle group?**
+#'@param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each color/pointStyle group?***
 #'
 #' Defaults to `TRUE`.
 #' 
@@ -1541,7 +1541,7 @@ draw_barplot <- function(counts, log = '',
     # draw extra stuff
     draw_quantiles(if (horizontal) 1 else 2, counts, conditional = FALSE,
                    quantiles = quantiles,
-                   limits = if (horizontal) grconvertY(c(0, 1.0), 'npc', 'user') else  grconvertX(c(-.03, 1.03), 'npc', 'user'))
+                   limits = rbind(if (horizontal) grconvertY(c(0, 1.0), 'npc', 'user') else  grconvertX(c(-.03, 1.03), 'npc', 'user')))
     if (mean) draw_mean(colMeans(barx), colMeans(counts), conditional = FALSE)
     if (showCounts) draw_counts(barx, counts, counts, col =col$col,min(diff(counts)))
     
@@ -1656,6 +1656,21 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' These colors are mapped to the violins, from left to right.
 #' (Use `alpha` independently to change the transparency.)
 #' 
+#' ### Conditional features
+#' 
+#' You can use the `conditional` #' argument to control how information is drawn for each violin.
+#' If `conditional = list(density = TRUE)`, theeach violin  is scaled
+#' to the same sum---this is good to see the details of the distribution within each group.
+#' If `density = FALSE`, each violin is drawn in its true proportion in the data.
+#' Other `conditional` options can be paired with the `normalReference`, `mean`, and `quantiles` arguments,
+#' controlling whether these descriptive values are computed separately for each violin,
+#' or across the entire input vector `y`.
+#'
+#' The `conditional` argument can be specified be either a list of named `logical` values, with
+#' valid names being `normalReference`, `mean`, `quantiles`, or `density`.
+#' Alternatively, a `character` vector of these names can be provided.
+#' If a singleton `logical` value is provided, the provided value (`TRUE` or `FALSE`) is used for all the conditional arguments.
+#' 
 #' @inheritSection draw General Draw Arguments
 #' 
 #' @param smooth ***Should a smoothed density curve be estimated for each group?***
@@ -1686,22 +1701,16 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' Must be a singleton `logical` value: an on/off switch.
 #'
 #' If `TRUE`, a normal (Gaussian) distribution is drawn as a dashed
-#' black line. The mean and standard deviation of this distribution is taken from the input vector `y`,
-#' within each group.
-#' This gives a sense of how close to normally distributed `y` is within each group.
+#' black line. The mean and standard deviation of this distribution is taken from the input vector `y`.
+#' This gives a sense of how close to normally distributed `y` is within.
 #'
-#' @param conditional ***Should probability density be calculated separately within each group?***
+#' @param conditional ***Should normal reference, density, means, and/or quantiles be computed separately for each violin?***
 #'
-#' Defaults to `FALSE`.
+#' Defaults to `TRUE`.
 #' 
-#' Must be a singleton `logical` value: an on/off switch.
-#' 
-#' This controls whether the density
-#' of each violin matches its global share in the distribution of input variable `y`, or is rescaled in each
-#' group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
-#' Setting `conditional = TRUE` is useful if you want to see the details of how each group is distributed.
-#' `conditional = FALSE` (the default) is useful when you want to see the actual proportion of
-#' data in each group (i.e., if the groups are different sizes).
+#' Must be either a singleton `logical` value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+#' Legal names can be `"normalReference"`, `"density"`, `"mean"`, or `"quantiles"`.
+#'
 #'
 #' @param quantiles ***Should distribution quantiles of `y` be marked?***
 #'
@@ -1712,22 +1721,16 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' If any quantiles are specified, each quantile is drawn as a horizontal line on the plot, labeled appropriately.
 #' For example, `quantiles = .5` will draw a line at the median of input vector `y`;
 #' `quantiles = c(.25, .5, .75)` will draw lines marking the four quartiles of `y`.
-#' (Depends on `global_stats` argument.)
 #' 
-#' @param mean ***Should the mean of input vector `y` be marked at the center of each violin?***
+#' @param mean ***Should the mean of input vector `y` be marked?***
 #'
 #' Defaults to `FALSE`.
 #' 
 #' Must be a singleton `logical` value: an on/off switch.
 #' 
-#' @param global_stats ***Should quantiles and/or means be drawn within each group?***
+#' The X-position of the mean mark is determined by the relative frequency of the three groups, as arranged
+#' on the screen. Groups with more data will pull the mean-X position toward them.
 #' 
-#' Defaults to `FALSE`.
-#' 
-#' Must be a singleton `logical` value: an on/off switch.
-#' 
-#' If `global_stats = FALSE`, quantiles and/or means are drawn separately for each group. 
-#' This can get very messy very quickly!
 #'
 #' @param log ***Should Y axis be drawn on a logarithmic scale?***
 #' 
@@ -1737,8 +1740,7 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
 #' of `"y"` (draw Y on a logarithmic scale ).
 #'  
 #' @usage draw(x # discrete,  
-#'      y # numeric,
-#'      col = NA)
+#'      y # numeric)
 #' @inheritParams draw
 #' @export
 draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE, 
@@ -1754,18 +1756,17 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
   
   conditional <- prep_conditional(conditional)
   
-  groups <- x
+  categories <- sort(unique(x[!is.na(x)]))
   
-  groups <- groups[!is.na(y)]
-  y <- y[!is.na(y)]
-  categories <- sort(unique(groups))
   if (length(categories) > 25L) {
     .stop("You can't draw a violin plot with more than 25 categories---it would result in the world's ",
           "smallest violins. ",
-          "You have provided an grouping argument with {num2word(length(categories))} unique values.")
+          "You have provided a grouping argument with {num2word(length(categories))} unique values.")
   }
   
   col <- prep_col_categories(col %||% categories, categories, ...)
+  
+  groups <- tapply(x, x)
   
   breaks <- if (!smooth && length(breaks) == 1L && pmatch(breaks, 'quantiles', 0)) {
     quantile(y, c(0, if (length(quantiles)) sort(unique(quantiles)) else c(.25, .5, .75), 1))
@@ -1840,8 +1841,13 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
         
         if (normalReference) {
           ypoints <- seq(output$window$ylim[[1]][1], output$window$ylim[[1]][2], length.out = 100)
-          norm <- dnorm(ypoints, mean(vals), sd(vals)) / (xkeyWidths[1] * 2)
-          if (!conditional) norm <- norm * proportion
+          norm <- if (conditional$normalReference) {
+            dnorm(ypoints, mean(vals), sd(vals)) / (xkeyWidths[1] * 2)
+          } else {
+            dnorm(ypoints, mean(y), sd(y)) / (xkeyWidths[1] * 2)
+          }
+          
+          if (!conditional$density) norm <- norm * proportion
           points(N + norm, ypoints, type = 'l',
                  lwd = .5, lty = 'dashed')
           points(N - norm, ypoints, type = 'l',
@@ -1855,21 +1861,15 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
           dotAlpha <- cex_density(xsamp, ysamp, .3)
           points(xsamp + N , ysamp,  cex = .3, col = setalpha('black', dotAlpha), pch = 16, xpd = NA)
         }
-        
-        # if (length(coordinates) > 1L) {
-        #   draw_quantiles(2, vals, quantiles, limits = c(N - .5, N + .5)) 
-        #   if (mean) draw_mean(N, mean(vals), col = 'black')
-        # }
       }]
       
-    }, coordinates, col$col, violinN, values, ptable)
-    if (length(coordinates) == 1L) {
-      draw_quantiles(2, y, quantiles)
-      browser()
-      # if (mean) draw_mean(violinN, mean(y), col = col$col,
-                          # groups = if (conditional$mean) 
+    }, coordinates, col$col, violinN, values, ptable) # end of Map()
+    
+    grouparg <- list(col = rep('black', length(y)), groups)
+    draw_quantiles(2, y, quantiles, limits = if (conditional$quantiles) cbind(violinN - .5, violinN + .5),
+                   groups = grouparg, conditional = conditional$quantiles)
+    if (mean) draw_mean(groups, y,  groups = grouparg, conditional = conditional$mean)
       
-    }
   }
   
   output
@@ -2457,12 +2457,16 @@ setMethod('.draw', c('formula'),
 
 draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), groups = NULL, 
                            limits = NULL, conditional = FALSE, ...) {
-  if (length(quantiles)) {
+  # limits must me matrix, left column for left limit, right column for right limit,
+  if (length(quantiles)) {    
+    sides <- side %% 2 == 0
+    if (is.null(limits)) limits <- rbind(if (sides) grconvertX(c(0, 1), 'npc', 'user') else grconvertY(c(0, 1), 'npc', 'user'))
+    
     quantiles <- unique(quantiles)
     
     if (conditional) {
       quants <- do.call('rbind', tapply(var, do.call('paste', groups), quantile, prob = quantiles, simplify = FALSE))
-      col <- tapply(groups$col, do.call('paste', groups), unique)
+      col <- tapply(groups$col, groups, unique)
     } else {
       quants <- rbind(quantile(var, prob = quantiles))
       col <- 'black'
@@ -2472,34 +2476,32 @@ draw_quantiles <- function(side, var, quantiles = c(.025, .25, .5, .75, .975), g
     col <- setalpha(col, 1)
     colMatrix <- array(col, dim = dim(quants))
     
-    sides <- side %% 2 == 0
-    if (is.null(limits)) limits <- if (sides) grconvertX(c(0, 1), 'npc', 'user') else grconvertY(c(0, 1), 'npc', 'user')
-    
     
     # labels
     q <- t(array(paste0(round(quantiles       * 100, 1), '%'), dim = dim(quants)))
     p <- t(array(paste0(round((1 - quantiles) * 100, 1), '%'), dim = dim(quants)))
     
     if (sides) {
-      text(limits[1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
+      text(limits[, 1], quants, as.expression(lapply(q, \(q) bquote('' %down% .(q)))), 
            cex = .4, xpd = NA, adj = c(0, .5), col = colMatrix)
-      text(limits[2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
+      text(limits[, 2], quants, as.expression(lapply(p, \(q) bquote(.(q) %up% ''))),  
            cex = .4, xpd = NA, adj = c(1, .5), col = colMatrix)
     } else {
-      text(quants, limits[1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
+      text(quants, limits[, 1], as.expression(lapply(q, \(q) bquote('' %<-% .(q)))), 
            cex = .4, xpd = NA, adj = c(.5, 1), col = colMatrix)
-      text(quants, limits[2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), 
+      text(quants, limits[, 2], as.expression(lapply(p, \(q) bquote(.(q) %->% ''))), 
            cex = .4, xpd = NA, adj = c(.5, 0), col = colMatrix)
     }
     
     # lines
     strwidth <- if (sides) {
-      max(strwidth(paste0('|', names(quants)), cex = .4) )
+      max(strwidth(paste0('||||', colnames(quants)), cex = .4) )
     } else {
-      max(strheight(names(quants), cex = .4))
+      max(strheight(colnames(quants), cex = .4))
     }
-    lineArgs <- list(limits[1] + strwidth,
-                     limits[2] - strwidth, quants, quants, lty = 'dashed', 
+    
+    lineArgs <- list(limits[ , 1] + strwidth,
+                     limits[ , 2] - strwidth, quants, quants, lty = 'dashed', 
                      lwd = .6, col = col)
     names(lineArgs)[1:4] <- if (sides) {
       c('x0', 'x1', 'y0', 'y1')
@@ -2802,7 +2804,7 @@ checkStrFit_13 <- function(slotSize, ticks, labels, cex) {
   overlap <- tail(strStart, -1) <= head(strEnd, -1)
   
   
-  !(any(overlap) || any(tootall))
+  !(any(overlap, na.rm = TRUE) || any(tootall, na.rm = TRUE))
   
 }
 
@@ -2817,7 +2819,7 @@ checkStrFit_24 <- function(slotSize, ticks, labels, cex) {
   toowide <- max(strWidth) >= slotSize
   overlap <- tail(strBottom, -1) <= head(strTop, -1)
   
-  !(any(overlap) || any(toowide))
+  !(any(overlap, na.rm = TRUE) || any(toowide, na.rm = TRUE))
   
 }
 

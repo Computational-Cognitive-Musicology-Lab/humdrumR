@@ -134,7 +134,7 @@ to the left of the plot.
 By default, colors are automatically chosen to represent
 the categories in the \code{y} variable.
 (A color legend will be drawn automatically.)
-However, these colors can be controlled using the \code{col} argument;
+However, these colors can be controlled using the \code{color} argument;
 you can provide a vector of unique colors exactly the same length as
 the number of categories (unique values in \code{y}).
 These colors are mapped to the areas, from bottom up.
@@ -156,7 +156,7 @@ Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis la
 The \code{draw()} function will automatically generate X and Y labels for every plot,
 usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
 X label will be "rnorm(100)."
-This can be overridden using the \code{xlabe;} and/or \code{ylabe;} arguments, which can be provided a single string
+This can be overridden using the \code{xlabel} and/or \code{ylabel} arguments, which can be provided a single string
 each---to suppress a label, provide an empty string, like \code{ylabel = ""}.
 
 Titles and subtitles are specified using the \code{title} and \code{subtitle} arguments, respectively.
@@ -172,7 +172,7 @@ The \code{draw()} function will select reasonable X and Y axes ranges automatica
 If you want to override the defaults, you can use \code{xlimit} or \code{ylimit} to control
 the range of values shown on each axis.
 Each of these must be passed a vector of two numbers, representing the left and right
-X-axis extremes (\code{xlimit}) and the bottom and top Y-axis extremes (\code{ylimit}).
+X-axis extremes (\code{xlimit}) or the bottom and top Y-axis extremes (\code{ylimit}).
 For example, to show data in the range \eqn{[10, 50]} on the X axis,
 specify \code{xlimit = c(10, 50)}.
 
@@ -188,7 +188,7 @@ and will simply ignore attempts to do that.
 
 \subsection{Window control}{
 
-Normally, when you use \code{draw()}, the plot is drawn to fill the available graphical device,
+Normally, a plot is drawn to fill the available graphical device
 using base-R's normal algorithm.
 However, the \code{aspect} argument can override this, controlling the aspect
 ratio of the plot.
@@ -198,6 +198,7 @@ Try settings like \code{aspect = 4/3} or \code{aspect = 16/9}.
 
 The \code{margin} argument controls the portion of the screen used for the plot margins,
 with legal values ranging from \code{0.4} to \code{0.1}.
+The margins are used to draw all text (axis labels, title, etc.), so they are needed.
 The default value is \code{0.2}---using other margins may result in less optimal placement
 of plot text and legends.
 }

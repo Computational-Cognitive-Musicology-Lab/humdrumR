@@ -18,24 +18,21 @@ Must be a singleton \code{logical} value: an on/off switch.
 If \code{TRUE}, a smooth density contour is estimated from each group of \code{y} values, using \code{\link[=density]{density()}}.
 If \code{FALSE}, \code{y} values are binned using \code{\link[=hist]{hist()}}.}
 
-\item{conditional}{\emph{\strong{Should probability density be calculated separately within each group?}}
+\item{conditional}{*\strong{Should normal reference, density, means, and/or quantiles be computed separately for each violin?}
+
+Defaults to \code{TRUE}.
+
+Must be either a singleton \code{logical} value (an on/off switch), a named list of singleton logicals, or a character vector of names.
+Legal names can be \code{"normalReference"}, \code{"density"}, \code{"mean"}, or \code{"quantiles"}.}
+
+\item{mean}{\emph{\strong{Should the mean of input vector \code{y} be marked?}}
 
 Defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.
 
-This controls whether the density
-of each violin matches its global share in the distribution of input variable \code{y}, or is rescaled in each
-group to sum/integrate to 1. I.e., should probabilities be conditioned on the grouping factor?
-Setting \code{conditional = TRUE} is useful if you want to see the details of how each group is distributed.
-\code{conditional = FALSE} (the default) is useful when you want to see the actual proportion of
-data in each group (i.e., if the groups are different sizes).}
-
-\item{mean}{\emph{\strong{Should the mean of input vector \code{y} be marked at the center of each violin?}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.}
+The X-position of the mean mark is determined by the relative frequency of the three groups, as arranged
+on the screen. Groups with more data will pull the mean-X position toward them.}
 
 \item{quantiles}{\emph{\strong{Should distribution quantiles of \code{y} be marked?}}
 
@@ -45,17 +42,7 @@ Must be a vector of numbers between 0 and 1 (inclusive), or an empty vector.
 
 If any quantiles are specified, each quantile is drawn as a horizontal line on the plot, labeled appropriately.
 For example, \code{quantiles = .5} will draw a line at the median of input vector \code{y};
-\code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{y}.
-(Depends on \code{global_stats} argument.)}
-
-\item{global_stats}{\emph{\strong{Should quantiles and/or means be drawn within each group?}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.
-
-If \code{global_stats = FALSE}, quantiles and/or means are drawn separately for each group.
-This can get very messy very quickly!}
+\code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{y}.}
 
 \item{normalReference}{\emph{\strong{Should a Gaussian reference distribution be drawn?}}
 
@@ -64,9 +51,8 @@ Defaults to \code{FALSE}.
 Must be a singleton \code{logical} value: an on/off switch.
 
 If \code{TRUE}, a normal (Gaussian) distribution is drawn as a dashed
-black line. The mean and standard deviation of this distribution is taken from the input vector \code{y},
-within each group.
-This gives a sense of how close to normally distributed \code{y} is within each group.}
+black line. The mean and standard deviation of this distribution is taken from the input vector \code{y}.
+This gives a sense of how close to normally distributed \code{y} is within.}
 
 \item{showPoints}{\emph{\strong{Should individual points from \code{y} be overlaid on the violin(s)?}}
 
@@ -133,12 +119,27 @@ The scale of the densities in the plot is shown through the width of a set of li
 By default, each violin is automatically drawn a different color, with
 a color legend drawn as well.
 (A color legend will be drawn automatically.)
-However, these colors can be controlled using the \code{col} argument;
+However, these colors can be controlled using the \code{color} argument;
 you can provide a single color for all the violins or
 a vector of unique colors exactly the same length as the number of categories
 (unique values in \code{x}).
 These colors are mapped to the violins, from left to right.
 (Use \code{alpha} independently to change the transparency.)
+\subsection{Conditional features}{
+
+You can use the \code{conditional} #' argument to control how information is drawn for each violin.
+If \code{conditional = list(density = TRUE)}, theeach violin  is scaled
+to the same sum---this is good to see the details of the distribution within each group.
+If \code{density = FALSE}, each violin is drawn in its true proportion in the data.
+Other \code{conditional} options can be paired with the \code{normalReference}, \code{mean}, and \code{quantiles} arguments,
+controlling whether these descriptive values are computed separately for each violin,
+or across the entire input vector \code{y}.
+
+The \code{conditional} argument can be specified be either a list of named \code{logical} values, with
+valid names being \code{normalReference}, \code{mean}, \code{quantiles}, or \code{density}.
+Alternatively, a \code{character} vector of these names can be provided.
+If a singleton \code{logical} value is provided, the provided value (\code{TRUE} or \code{FALSE}) is used for all the conditional arguments.
+}
 }
 
 \section{General Draw Arguments}{
@@ -156,7 +157,7 @@ Every \code{draw()} plot can have a title, subtitle, X-axis label, and Y-axis la
 The \code{draw()} function will automatically generate X and Y labels for every plot,
 usually just using the expression you passed; for example, if you say \code{draw(rnorm(100))}, the
 X label will be "rnorm(100)."
-This can be overridden using the \code{xlabe;} and/or \code{ylabe;} arguments, which can be provided a single string
+This can be overridden using the \code{xlabel} and/or \code{ylabel} arguments, which can be provided a single string
 each---to suppress a label, provide an empty string, like \code{ylabel = ""}.
 
 Titles and subtitles are specified using the \code{title} and \code{subtitle} arguments, respectively.
@@ -172,7 +173,7 @@ The \code{draw()} function will select reasonable X and Y axes ranges automatica
 If you want to override the defaults, you can use \code{xlimit} or \code{ylimit} to control
 the range of values shown on each axis.
 Each of these must be passed a vector of two numbers, representing the left and right
-X-axis extremes (\code{xlimit}) and the bottom and top Y-axis extremes (\code{ylimit}).
+X-axis extremes (\code{xlimit}) or the bottom and top Y-axis extremes (\code{ylimit}).
 For example, to show data in the range \eqn{[10, 50]} on the X axis,
 specify \code{xlimit = c(10, 50)}.
 
@@ -188,7 +189,7 @@ and will simply ignore attempts to do that.
 
 \subsection{Window control}{
 
-Normally, when you use \code{draw()}, the plot is drawn to fill the available graphical device,
+Normally, a plot is drawn to fill the available graphical device
 using base-R's normal algorithm.
 However, the \code{aspect} argument can override this, controlling the aspect
 ratio of the plot.
@@ -198,6 +199,7 @@ Try settings like \code{aspect = 4/3} or \code{aspect = 16/9}.
 
 The \code{margin} argument controls the portion of the screen used for the plot margins,
 with legal values ranging from \code{0.4} to \code{0.1}.
+The margins are used to draw all text (axis labels, title, etc.), so they are needed.
 The default value is \code{0.2}---using other margins may result in less optimal placement
 of plot text and legends.
 }
