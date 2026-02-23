@@ -15,6 +15,12 @@ Defaults to \code{""} (linear scale).
 Must be a single \code{character} string, either \code{""} (linear scale)
 of \code{""} (draw Y on a logarithmic scale).}
 
+\item{line}{\emph{\strong{Should a line be drawn through the \code{x}/\code{y} coordinates, instead of points?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
 \item{violin}{\emph{\strong{Should a \link[=draw_violins]{violin plot} be drawn instead?}}
 
 Defaults to \code{FALSE}.

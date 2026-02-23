@@ -50,9 +50,8 @@ setMethod('+', c('argCheck', 'character'),
 ## Checking functionality ----
 
 checks <- function(arg, argcheck, argname, seealso = c()) {
-  
-  callstack <- sys.calls() |>
-    Filter(f = \(x) !stringr::str_detect(rlang::expr_text(x), 'new\\('))
+  callstack <- sys.calls() #|>
+    #Filter(f = \(x) !stringr::str_detect(rlang::expr_text(x), 'new\\('))
   if (length(callstack) > 20L) return(arg) 
   
   if (missing(argname)) argname <- rlang::expr_name(rlang::enexpr(arg))

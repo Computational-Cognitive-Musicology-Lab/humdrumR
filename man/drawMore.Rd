@@ -4,7 +4,7 @@
 \alias{drawMore}
 \alias{drawNothing}
 \alias{drawBeside}
-\alias{drawAbove}
+\alias{drawBelow}
 \title{Draw multiple plots, or add to \code{\link[=draw]{draw()}} plots.}
 \usage{
 drawMore(plot, ...)
@@ -13,7 +13,7 @@ drawNothing()
 
 drawBeside(..., widths = NULL)
 
-drawAbove(..., heights = NULL)
+drawBelow(..., heights = NULL)
 }
 \description{
 Draw multiple plots, or add to \code{\link[=draw]{draw()}} plots.

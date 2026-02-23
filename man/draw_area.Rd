@@ -65,15 +65,6 @@ For example, \code{quantiles = .5} will draw a line at the median of input vecto
 \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.
 (Depends on \code{global_stats} argument.)}
 
-\item{global_stats}{\emph{\strong{Should quantiles and/or means be drawn within each group?}}
-
-Defaults to \code{FALSE}.
-
-Must be a singleton \code{logical} value: an on/off switch.
-
-If \code{global_stats = FALSE}, quantiles and/or means are drawn separately for each group.
-This can get very messy very quickly!}
-
 \item{showPoints}{\emph{\strong{Should individual points from \code{x} be shown above the density plot?}}
 
 Defaults to \code{FALSE}.
@@ -92,6 +83,15 @@ Any base-R graphing parameters that can be set using the \code{\link[=par]{par()
 may be passed to \code{draw()}.
 These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
 \code{draw()} call---i.e., the global \code{par()} settings are not changed.}
+
+\item{global_stats}{\emph{\strong{Should quantiles and/or means be drawn within each group?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.
+
+If \code{global_stats = FALSE}, quantiles and/or means are drawn separately for each group.
+This can get very messy very quickly!}
 }
 \description{
 This method draws the distribution of a categorical (discrete) \code{y} variable

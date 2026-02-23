@@ -87,6 +87,13 @@ For example, \code{quantiles = .5} will draw a line at the median of input vecto
 \code{quantiles = c(.25, .5, .75)} will draw lines marking the four quartiles of \code{x}.
 (Depends on \code{global_stats} argument.)}
 
+\item{...}{\emph{\strong{Additional parameters to pass to par().}}
+
+Any base-R graphing parameters that can be set using the \code{\link[=par]{par()}} function
+may be passed to \code{draw()}.
+These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
+\code{draw()} call---i.e., the global \code{par()} settings are not changed.}
+
 \item{global_stats}{\emph{\strong{Should quantiles and/or means be drawn within each color group?}}
 
 Defaults to \code{FALSE}.
@@ -96,13 +103,6 @@ Must be a singleton \code{logical} value: an on/off switch.
 If the \code{col} argument is used to draw multiply density graphs,
 and \code{global_stats = FALSE}, quantiles and/or means are drawn separately for each group.
 This can get very messy very quickly!}
-
-\item{...}{\emph{\strong{Additional parameters to pass to par().}}
-
-Any base-R graphing parameters that can be set using the \code{\link[=par]{par()}} function
-may be passed to \code{draw()}.
-These parameters are set using \code{par()} (overriding humdrumR's defaults), but only for the duration of the
-\code{draw()} call---i.e., the global \code{par()} settings are not changed.}
 }
 \description{
 This method draws the density distribution of a numeric (continuous) \code{x} argument,
