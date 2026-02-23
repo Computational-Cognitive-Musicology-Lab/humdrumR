@@ -1425,12 +1425,37 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
 #' ### Barplot types
 #' 
 #' By default, bars are drawn side by side, so their relative height is easiest to compare.
-#' However, is `beside = FALSE`, a "stacked" bar plot will be drawn, with bars stacked on top of each other.
-#' If `beside = NULL`, side-by-side *and* stacked plots are drawn---the bars are drawn side by side,
+#' However, is `stacked = TRUE`, a "stacked" bar plot will be drawn, with bars stacked on top of each other.
+#' If `stacked = NULL`, side-by-side *and* stacked plots are drawn---the bars are drawn side by side,
 #' but then redrawn (with more transparency) stacked on top of the right-most bar.
 #'
-#' @section Color
+#' @param stacked ***Should bars be stacked on top of each other?***
 #' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value, or `Null`.
+#' If `Null`, both stacked *and* side-by-side bars are drawn.
+#
+#' @param showCounts ***Should the counts of values in each bar be printed above the bar?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
+#' @param horizontal ***Should bars be drawn horizontally?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
+#' @param heat ***Should a heat map be drawn, instead of a barplot?***
+#' 
+#' Defaults to `TRUE`, if there are two dimensions and the total number of
+#' bars is greater than `80`. 
+#' Otherwise, defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#'
 #' @inheritSection draw General Draw Arguments
 #' 
 #' @usage draw(x # table/counts, 
@@ -1441,12 +1466,12 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
 #' @inheritParams draw
 #' @inheritParams draw_scatter
 draw_barplot <- function(counts, log = '', 
-                         horizontal = FALSE, beside = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
+                         horizontal = FALSE, stacked = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
                          xlim = NULL, ylim = NULL, 
                          quantiles = c(), mean = FALSE, showCounts = FALSE,
                          col = NULL,  alpha = .9, ...) { 
   
-  checks(beside, xTF | xnull, seealso = '?draw_barplot')
+  checks(stacked, xTF | xnull, seealso = '?draw_barplot')
   checks(heat, xTF, seealso = '?draw_barplot')
   checks(horizontal, xTF, seealso = '?draw_barplot')
   checks(mean, xTF, seealso = '?draw_barplot')
@@ -1469,10 +1494,10 @@ draw_barplot <- function(counts, log = '',
   
   if (dim(counts)[1] == 1L) counts <- t(counts)
   
-  type <- if (is.null(beside)) 'both' else { if (beside) 'beside' else 'stacked'}
+  type <- if (is.null(stacked)) 'both' else { if (stacked) 'stacked' else 'beside'}
   space <- if (type == 'stacked') .5 else c(0, 1 + nrow(counts) %/% 8) 
   
-  ylim <- ylim %||% c(0, if (is.null(beside) || type == 'beside') max(counts) else max(colSums(counts)))
+  ylim <- ylim %||% c(0, if (type != 'beside') max(colSums(counts)) else  max(counts))
   
   col <- prep_col_categories(col %||% rownames(counts), rownames(counts), alpha = alpha, log = log, ...)
   col$legend <- NULL
@@ -1481,8 +1506,7 @@ draw_barplot <- function(counts, log = '',
   barx <-  barplot(plot = FALSE, counts, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
                    space = space, beside = type != 'stacked')
   
-  
-  xlim <- xlim %||% c(1, ceiling(max(barx)))
+  xlim <- xlim %||% (mean(barx)) + c(-.5, .5) * max(barx)
   output$window <- data.table(layout = 1L,
                               xlim = list(xlim, ylim)[[horizontal + 1L]], 
                               ylim = list(ylim, xlim)[[horizontal + 1L]],
@@ -1496,7 +1520,6 @@ draw_barplot <- function(counts, log = '',
                                   unique(round(axTicks((!horizontal) + 1, 
                                                        log = grepl(if (horizontal) 'x' else 'y', log, fixed = TRUE))))),
                      line = 1L)
-  
   if (ncol(counts) > 1) axes <- rbind(axes,
                                       data.table(side = if (horizontal) 2 else 1,
                                                  ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(counts))),
@@ -1536,6 +1559,22 @@ draw_barplot <- function(counts, log = '',
               names.arg = logical(ncol(counts)), axes = FALSE,
               horiz = horizontal,
               add = TRUE, beside = FALSE, space = nrow(counts) + space[2] - 1)
+      
+      # code to draw lines between tops of bars:
+      # barwidth <- diff(barx[1:2, 1]) / 2
+      # 
+      # shiftedHeight <- head(apply(counts, 2, \(col) rev(cumsum(rev(col)))), n = -1)
+      # for (j in 1:ncol(barx)) {
+      #   graphics::segments(x0 = head(barx, n = -1)[, j] - barwidth,  x1 = barx[nrow(barx), j] - barwidth, 
+      #                      y0 = head(counts, n = -1)[, j], y1 = shiftedHeight[, j], 
+      #                      lty = 'dashed', setalpha('black', .2),
+      #                      xpd = NA)
+      #   graphics::segments(x0 = head(barx, n = -1)[, j] + barwidth,  x1 = barx[nrow(barx), j] + barwidth, 
+      #                      y0 = head(counts, n = -1)[, j], y1 = shiftedHeight[, j], 
+      #                      lty = 'dashed', setalpha('black', .2),
+      #                      xpd = NA)
+      # }
+      
     }
     
     # draw extra stuff
@@ -1543,7 +1582,7 @@ draw_barplot <- function(counts, log = '',
                    quantiles = quantiles,
                    limits = rbind(if (horizontal) grconvertY(c(0, 1.0), 'npc', 'user') else  grconvertX(c(-.03, 1.03), 'npc', 'user')))
     if (mean) draw_mean(colMeans(barx), colMeans(counts), conditional = FALSE)
-    if (showCounts) draw_counts(barx, counts, counts, col =col$col,min(diff(counts)))
+    if (showCounts) draw_counts(barx, counts, counts, col = col$col, min(diff(counts)), type = type, horizontal = horizontal)
     
   }
   
@@ -2287,7 +2326,7 @@ setMethod('.draw', c('discrete', 'NULL'),
           function(x, y, ...) draw_barplot(table(x), ...))
 
 setMethod('.draw', c('NULL', 'discrete'),
-          function(x, y, ...) draw_barplot(table(y), horizontal = TRUE, ...))
+          function(x, y, ...) draw_barplot(table(y), ...))
 
 setMethod('.draw', c('discrete', 'discrete'),
           function(x, y, ...) draw_barplot(table(x, y), ...))
@@ -2312,7 +2351,7 @@ setMethod('.draw', c('table', 'NULL'),
               
             }
             })
-setMethod('.draw', c('NULL', 'table'), function(x, y, ...) draw_barplot(y, horizontal = TRUE, ...))
+setMethod('.draw', c('NULL', 'table'), function(x, y, horizontal = TRUE, ...) draw_barplot(y, horizontal = horizontal, ...))
 
 
 setMethod('.draw', c('count', 'NULL'),
@@ -2321,8 +2360,8 @@ setMethod('.draw', c('count', 'NULL'),
             })
 
 setMethod('.draw', c('NULL', 'count'),
-          function(x, y, ...) {
-            draw_barplot(as.table(y), horizontal = TRUE, ...)
+          function(x, y, horizontal = TRUE, ...) {
+            draw_barplot(as.table(y), horizontal = horizontal, ...)
             
             })
 
@@ -2527,12 +2566,38 @@ draw_mean <- function(x, y, groups, cex = 1, conditional) {
 }
 
 
-draw_counts <- function(x, y, counts, col, width, cex = .8) {
+draw_counts <- function(x, y, counts, col, width, cex = .8, type = 'beside', horizontal = TRUE) {
   counts <- prettyN(counts, expr = TRUE)
   
-  text(x, y, counts, xpd = NA,
-       cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
-       col = setalpha(col, 1), pos = 3)
+  if (type == 'stacked') {
+    y <- apply(y, 2, cumsum)
+    y <- rbind(0, y)
+    y <- (head(y, n = -1) + tail(y, n = -1)) / 2
+    
+    if (horizontal) {
+      text(y, rep(x, each = nrow(y)), counts, xpd = NA,
+           cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
+           col = 'black')
+    } else {
+      text(rep(x, each = nrow(y)), y, counts, xpd = NA,
+           cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
+           col = 'black')
+    }
+    
+    
+  } else {
+    if (horizontal) {
+      text(y, x, counts, xpd = NA,
+           cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
+           col = setalpha(col, 1), pos = 4)
+    } else {
+      text(x, y, counts, xpd = NA,
+           cex = cex_scale(counts, targetWidth = width * .8, cex = cex), 
+           col = setalpha(col, 1), pos = 3)
+    }
+  
+  }
+
 }
 
 draw_points <- function(x, col, allDens, ylim) {
