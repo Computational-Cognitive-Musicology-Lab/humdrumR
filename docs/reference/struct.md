@@ -49,8 +49,8 @@ their features are hard-coded into R itself and can't be replicated. The
 most important limitation of `struct` that you may encounter is that,
 though `struct` classes work (ok) in
 [data.frames](https://rdrr.io/r/base/data.frame.html),
-[data.tables](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
-and [tibbles](https://tibble.tidyverse.org/reference/tibble.html) will
+[data.tables](https://rdrr.io/pkg/data.table/man/data.table.html) and
+[tibbles](https://tibble.tidyverse.org/reference/tibble.html) will
 either not work or give strange behaviors if you put `struct`s into
 them.
 

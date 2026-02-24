@@ -82,7 +82,7 @@ writeHumdrum(
 
 - overwrite:
 
-  ***Whether to overwrite existing files.***
+  ***Whether to ovewrite existing files without asking permission.***
 
   Defaults to `FALSE`.
 

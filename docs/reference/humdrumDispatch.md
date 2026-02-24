@@ -116,7 +116,7 @@ function will recognize that the input string is a token in the
 ### dispatchDF
 
 The `dispatchDF` must be a
-[`data.table::data.table()`](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+[`data.table::data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html)
 created using the `makeDispatchDF` function. `makeDispatchDF` takes one
 or more arguments, each a list with three components (ordered, not
 nameed):

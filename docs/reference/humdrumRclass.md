@@ -79,7 +79,7 @@ print(
 
   Defaults to `TRUE`.
 
-  Must be a singleton logical value; an on/off switch.
+  Must be a singleton `logical` value; an on/off switch.
 
 - maxRecordsPerFile:
 
@@ -161,7 +161,7 @@ are the tools it gives you to...
   A [humdrum
   tables](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md)—i.e,
   a
-  [`data.table::data.table()`](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+  [`data.table::data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html)
   with particular fields.
 
 - `Files`:
@@ -178,7 +178,7 @@ are the tools it gives you to...
 - `Fields`:
 
   A
-  [data.table::data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+  [data.table::data.table](https://rdrr.io/pkg/data.table/man/data.table.html)
   indicating the existing fields in the `humdrumR` object's [humdrum
   table](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md).
   The fields are divided into five categories: "Data", "Structure",
@@ -194,7 +194,7 @@ are the tools it gives you to...
 - `Context`:
 
   A
-  [data.table::data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+  [data.table::data.table](https://rdrr.io/pkg/data.table/man/data.table.html)
   with two columns: `Open` and `Close`. Each row represents a contextual
   window to apply to the data.
 
@@ -280,7 +280,7 @@ function.
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.

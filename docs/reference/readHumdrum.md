@@ -306,3 +306,25 @@ names, the patterns they match, the directories they were found in,
 object](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md).
 
 ## Examples
+
+``` r
+# loads all valid humdrum files in the current directory.
+if (FALSE) readHumdrum() # \dontrun{}
+
+# loads all files ending with "krn" in the currect directory
+if (FALSE) readHumdrum(".*krn$") # \dontrun{}
+
+# Goes inside the directory "Composers".
+# Inside "Composers" looks for directories that start with "Be" or "Mo".
+# If there are any "Be|Mo" matching directories within "Composers", matches all directories within them.
+# Within these directories, looks for directories called "Joined".
+# If there are any directories called "Joined", loads all files (if any) that end with "krn".
+if (FALSE) readHumdrum("^Composers$/^Be|^Mo/.*/^Joined$/.*krn$") # \dontrun{}
+
+# exactly the same as the previous!
+if (FALSE) readHumdrum("^Composers$", "^Be|^Mo", ".*", "^Joined$", ".*krn$") # \dontrun{}
+ 
+# exactly the same as the previous, except now the two matching patterns ("^Be", or "^Mo") will be grouped
+# in the Label field as "Beethoven" and "Mozart" respectively.
+if (FALSE) readHumdrum("^Composers$", c(Beethoven = "^Be", Mozart = "^Mo"), ".*", "^Joined$", ".*krn$") # \dontrun{}
+```

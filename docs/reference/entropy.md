@@ -221,9 +221,9 @@ concept of *likelihood* (see the next section).
 The output of `info()` is identical to the log of the modeled
 [likelihood](https://en.wikipedia.org/wiki/Likelihood_function) of each
 data point, which can be computed using the
-[`data.table::like()`](https://rdatatable.gitlab.io/data.table/reference/like.html)
+[`data.table::like()`](https://rdrr.io/pkg/data.table/man/like.html)
 function. Literally, `info(x, base) == log(like(x), base)`. The
-[`data.table::like()`](https://rdatatable.gitlab.io/data.table/reference/like.html)
+[`data.table::like()`](https://rdrr.io/pkg/data.table/man/like.html)
 function works just like `info()`, computing pointwise probabilities for
 each data point based on the probability distribution in `model`.
 However, we can use it to, for example, calculate the total *log

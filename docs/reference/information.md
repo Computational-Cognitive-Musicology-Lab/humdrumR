@@ -26,7 +26,7 @@ descriptive statistics can be computed using the
 (mutual information) functions. In contrast, other information theory
 metrics are calculated "point-wise": one value for each data
 observation. Our point-wise information theory functions are
-[`data.table::like()`](https://rdatatable.gitlab.io/data.table/reference/like.html)
+[`data.table::like()`](https://rdrr.io/pkg/data.table/man/like.html)
 (likelihood),
 [`info()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md)
 (information content),

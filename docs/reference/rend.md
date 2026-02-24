@@ -5,7 +5,7 @@ separate spines or paths. Under the hood, `rend()` essentially runs a
 specialized call to make the [humdrum
 table](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md)
 "longer"/"taller," similar to R functions like
-[`data.table::melt()`](https://rdatatable.gitlab.io/data.table/reference/melt.data.table.html)
+[`data.table::melt()`](https://rdrr.io/pkg/data.table/man/melt.data.table.html)
 (`reshape2`),
 [`tidyr::gather()`](https://tidyr.tidyverse.org/reference/gather.html)
 (`tidyr`), or
@@ -128,7 +128,7 @@ Other Humdrum table pivoting functions:
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.

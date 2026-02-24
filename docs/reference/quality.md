@@ -130,15 +130,71 @@ Other partial pitch functions:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
+#> Finding and reading files...
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
+#> One file read from disk.
+#> Validating one file...
+#> all valid.
+#> Parsing one file...
+#> Assembling corpus...
+#> Done!
 
-within(chorales, quality(Token))
+within(chorale[[20:30,]], quality(Token))
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:        **quality      **quality      **quality      **quality
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:                P              M              P              P
+#>    21:               =1             =1             =1             =1
+#>    22:                P              M              P              P
+#>    23:                M              P              M              .
+#>    24:                .              M              .              .
+#>    25:                M              M              P              P
+#>    26:               =2             =2             =2             =2
+#>    27:                P              P              P              M
+#>    28:                P              M              .              .
+#>    29:                .              .              .              M
+#>    30:                M              P              M              P
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                     :: character
+#>          *humdrumR:::quality(Token) :: character (**quality tokens)
+#> 
 
 # Harmonic interval qualities:
 
-within(chorales, hint(Token, deparser = quality))
-with(chorales, hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
-
-} # }
+within(chorale[[20:30,]], hint(Token, deparser = quality))
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:        **quality      **quality      **quality      **quality
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:             [GG]              M              m              P
+#>    21:               =1             =1             =1             =1
+#>    22:              [G]              M              m              P
+#>    23:              [E]              m              M              .
+#>    24:                .            [B]              .              .
+#>    25:             [F#]              m              P              P
+#>    26:               =2             =2             =2             =2
+#>    27:              [G]              P              P              M
+#>    28:              [D]              M              .              .
+#>    29:                .              .              .            [a]
+#>    30:              [E]              m              M              m
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                                      :: character
+#>          *humdrumR:::hint(Token, deparser = quality) :: character (**quality tokens)
+#> 
+with(chorale[[20:30,]], hint(Token, deparser = quality, incomplete = NA, bracket = FALSE)) |> table()
+#> 
+#> P A M m 
+#> 6 0 6 6 
 ```

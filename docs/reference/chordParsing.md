@@ -9,7 +9,8 @@ happens "behind the scenes" whenever you use any humdrumR [chord
 function](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordFunctions.md),
 like
 [`harm()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md)
-`roman()`, or
+[`roman()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md),
+or
 [`chord()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.md).
 
 ## Usage

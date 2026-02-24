@@ -159,7 +159,7 @@ ggplot(data = NULL, mapping = aes(), ..., dataTypes = "D")
   simplified as much as possible (trying to return the "raw" vector,
   list, table, etc. within it). If `drop = FALSE`, the result is
   *always* a
-  [data.table::data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html).
+  [data.table::data.table](https://rdrr.io/pkg/data.table/man/data.table.html).
 
 - .by:
 
@@ -583,7 +583,7 @@ with no parsing. This can be *any* kind of R data, including
 fits](https://rdrr.io/r/stats/lm.html) or
 [tables](https://rdrr.io/r/base/table.html). If `drop = FALSE`, the
 results will instead be returned in a
-[`data.table::data.table()`](https://rdatatable.gitlab.io/data.table/reference/data.table.html).
+[`data.table::data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html).
 
 If you are working with [grouped
 data](https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.md),
@@ -627,7 +627,7 @@ in the output. You can explicitly name newly created fields
 (recommended), or allow `humdrumR` to automatically name them (details
 below). When using `with(..., drop = FALSE)` or
 `summarize(..., drop = FALSE)`, the column names of the output
-[data.table::data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+[data.table::data.table](https://rdrr.io/pkg/data.table/man/data.table.html)
 are determined in the same way.
 
 Note that `within()`, `mutate()`, and `reframe()` will (attempt to) put
@@ -753,7 +753,7 @@ commands.
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -867,7 +867,7 @@ humData |>
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.

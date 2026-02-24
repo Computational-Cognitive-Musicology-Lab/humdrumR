@@ -61,7 +61,7 @@ Other corpus summary functions:
 ``` r
 chorales <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/*.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/*.krn' matches 10 text files in 1 directory.
 #> Ten files read from disk.
 #> Validating ten files...
 #> all valid.

@@ -48,7 +48,7 @@ c(1, 2, 3) # three arguments
 >    [1] 1 2 3
 
 Sys.time() # no arguments!
->    [1] "2025-12-15 16:53:36 EST"
+>    [1] "2026-02-24 16:54:54 EST"
 ```
 
 Different functions have different arguments they recognize, with

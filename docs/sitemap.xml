@@ -22,8 +22,13 @@
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/index.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/news/index.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/LO5th.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/P.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/REparser.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/RegexFind.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/[,humdrumR,character,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/[,humdrumR,missing,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/[,humdrumR,numeric,ANY-method.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/[,token,ANY,ANY-method.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/accidental.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/analyzeChords.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/bhatk.html</loc></url>
@@ -65,6 +70,16 @@
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,token,missing-method.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw,token,token-method.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawMore.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawMultiple.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawToFile.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_Qplot.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_area.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_density.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_heat.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_scatter.html</loc></url>
+<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_violins.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duple.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/duration.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.html</loc></url>
@@ -142,7 +157,6 @@
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmDeparsing.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmFunctions.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmParsing.html</loc></url>
-<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/roman.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanKey.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/romanNumerals.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/segments.html</loc></url>
@@ -164,7 +178,6 @@
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tactus.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tandem.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tatum.html</loc></url>
-<url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertian.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertianSetS4.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/time.html</loc></url>
 <url><loc>https://humdrumR.ccml.gtcmt.gatech.edu/reference/timebase.html</loc></url>

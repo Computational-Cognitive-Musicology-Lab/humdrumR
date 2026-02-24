@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Nathaniel Condit-Schultz**. Author, maintainer.
+- **Nat Condit-Schultz**. Author, maintainer.
 
 - **Claire Arthur**. Author.
 

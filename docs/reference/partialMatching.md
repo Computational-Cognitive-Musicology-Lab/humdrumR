@@ -11,9 +11,9 @@ list of options. This is achieved using the base-`R` function
 make use of it, as do *many* `humdrumR` functions.
 
 For example, let's say we have a `data.frame` (let's call it `df`) with
-three columns: `"Number"`, `"Letter"`, and `"Date"`:
-
-    df <- data.frame(Number = 1:2, Letter = c('A', 'B'), Date = c("January", "February"))
+three columns: `"Number"`, `"Letter"`, and `"Date"`: df \<-
+data.frame(Number = 1:2, Letter = c('A', 'B'), Date = c("January",
+"February"))
 
 If I want to access the `Number` column, most programming languages
 would require I write at very least `df$Number`. However, `R` will give

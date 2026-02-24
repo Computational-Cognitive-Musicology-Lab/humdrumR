@@ -3,7 +3,7 @@
 `tertianSet` is one of
 [humdrumR's](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumR.md)
 types of tonal data, representing Western tertian harmonies.
-`tertianSet` is a subclass of `diatonicSet` (and thence, `struct`).
+`tertianSet` is a subclass of `diatonicSet` (and hence, `struct`).
 
 This functions a generic form of tertian harmony representation,
 commonly used in music theory. In this representation, the root of a
@@ -163,13 +163,13 @@ Other Tonal S4 classes:
 romanNumerals <- c('2I', '2IV7', '1V', '2vi', '2-VI', '2iio7', '2Vb9')
 
 tertian(romanNumerals)
-#> Error in tertian(romanNumerals): could not find function "tertian"
+#> [1] "CM"   "FMM"  "GM"   "Am"   "AbM"  "Dom"  "GbMm"
 tertian(romanNumerals, Key = 'A:')
-#> Error in tertian(romanNumerals, Key = "A:"): could not find function "tertian"
+#> [1] "AM"   "DMM"  "EM"   "F#m"  "FM"   "Bom"  "EbMm"
 
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.
@@ -177,5 +177,5 @@ B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.
 #> Assembling corpus...
 #> Done!
 with(B075[[,2]], tertian(Token))
-#> Error in tertian(Token, Exclusive = Exclusive, Key = Key): could not find function "tertian"
+#> [1] "FM"  "FM"  "CMm" "FM"  "BbM" "CMm" "FM" 
 ```

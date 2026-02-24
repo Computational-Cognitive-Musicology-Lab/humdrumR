@@ -443,6 +443,8 @@ reference <- function(x, ...) UseMethod('reference')
 #' @export
 reference.character <- function(str) {
   str <- gsub('^!*', '', str)
+
+  data(ReferenceCodes) # this is defined in Data/ReferenceCodes.rda
   
   ReferenceCodes$Examples <- sapply(ReferenceCodes$Examples, paste, collapse = '\n\t\t\t')
   ReferenceCodes[] <- lapply(ReferenceCodes, as.character)

@@ -75,8 +75,8 @@
 match a <strong>incomplete</strong> character string or variable name with a list of options.
 This is achieved using the base-<code>R</code> function <code><a href="https://rdrr.io/r/base/pmatch.html" class="external-link">pmatch()</a></code>, but many <code>R</code> functions make use of it,
 as do <em>many</em> <code>humdrumR</code> functions.</p>
-<p>For example, let's say we have a <code>data.frame</code> (let's call it <code>df</code>) with three columns: <code>"Number"</code>, <code>"Letter"</code>, and <code>"Date"</code>:</p>
-<p></p><div class="sourceCode r"><pre><code><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Number <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, Letter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'A'</span>, <span class="st">'B'</span><span class="op">)</span>, Date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"January"</span>, <span class="st">"February"</span><span class="op">)</span><span class="op">)</span></span></code></pre><p></p></div>
+<p>For example, let's say we have a <code>data.frame</code> (let's call it <code>df</code>) with three columns: <code>"Number"</code>, <code>"Letter"</code>, and <code>"Date"</code>:
+df &lt;- data.frame(Number = 1:2, Letter = c('A', 'B'), Date = c("January", "February"))</p>
 <p>If I want to access the <code>Number</code> column, most programming languages would require I write at very least <code>df$Number</code>.
 However, <code>R</code> will give me the correct field even if I write <code>df$Numb</code>, <code>df$Num</code>, or even <code>df$N</code>.
 This is partial matching!
