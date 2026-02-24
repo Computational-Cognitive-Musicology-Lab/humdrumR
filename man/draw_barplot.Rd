@@ -18,10 +18,24 @@ Defaults to \code{""} (linear scale on both axes).
 Must be a single \code{character} string; options are \code{"x"} (X axis on log scale),
 \code{"y"} (Y axis on log scale), and \code{"xy"} (both axes on log scale).}
 
-\item{heat}{\emph{\strong{Should a heatmap be drawn?}}
+\item{horizontal}{\emph{\strong{Should bars be drawn horizontally?}}
 
-Defaults to \code{FALSE}, unless the input has two or more dimensions
-\emph{and} at least 80 conditions.
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{stacked}{\emph{\strong{Should bars be stacked on top of each other?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value, or \code{NULL}.
+If \code{NULL}, both stacked \emph{and} side-by-side bars are drawn.}
+
+\item{heat}{\emph{\strong{Should a heat map be drawn, instead of a barplot?}}
+
+Defaults to \code{TRUE}, if there are two dimensions and the total number of
+bars is greater than \code{80}.
+Otherwise, defaults to \code{FALSE}.
 
 Must be a singleton \code{logical} value: an on/off switch.}
 
@@ -39,6 +53,12 @@ For example, \code{quantiles = .5} will draw a lines which converge at the media
 quartiles of \code{x} and \code{y} (creating a grid with 16 cells).}
 
 \item{mean}{\emph{\strong{Should the mean of input vectors \code{x} and \code{y} be marked on the plot?}}
+
+Defaults to \code{FALSE}.
+
+Must be a singleton \code{logical} value: an on/off switch.}
+
+\item{showCounts}{\emph{\strong{Should the counts of values in each bar be printed above the bar?}}
 
 Defaults to \code{FALSE}.
 
@@ -85,15 +105,11 @@ This behavior can be overridden using the \code{heat} argument.
 \subsection{Barplot types}{
 
 By default, bars are drawn side by side, so their relative height is easiest to compare.
-However, is \code{beside = FALSE}, a "stacked" bar plot will be drawn, with bars stacked on top of each other.
-If \code{beside = NULL}, side-by-side \emph{and} stacked plots are drawn---the bars are drawn side by side,
+However, is \code{stacked = TRUE}, a "stacked" bar plot will be drawn, with bars stacked on top of each other.
+If \code{stacked = NULL}, side-by-side \emph{and} stacked plots are drawn---the bars are drawn side by side,
 but then redrawn (with more transparency) stacked on top of the right-most bar.
 }
 }
-\section{Color}{
-NA
-}
-
 \section{General Draw Arguments}{
 
 

@@ -1433,8 +1433,8 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
 #' 
 #' Defaults to `FALSE`.
 #' 
-#' Must be a singleton `logical` value, or `Null`.
-#' If `Null`, both stacked *and* side-by-side bars are drawn.
+#' Must be a singleton `logical` value, or `NULL`.
+#' If `NULL`, both stacked *and* side-by-side bars are drawn.
 #
 #' @param showCounts ***Should the counts of values in each bar be printed above the bar?***
 #' 
@@ -1466,9 +1466,10 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
 #' @inheritParams draw
 #' @inheritParams draw_scatter
 draw_barplot <- function(counts, log = '', 
-                         horizontal = FALSE, stacked = TRUE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
+                         horizontal = FALSE, stacked = FALSE, heat = length(dim(counts) == 2L) && length(counts) > 80L,
                          xlim = NULL, ylim = NULL, 
                          quantiles = c(), mean = FALSE, showCounts = FALSE,
+                         minColor = flatly[5], maxColor = flatly[4],
                          col = NULL,  alpha = .9, ...) { 
   
   checks(stacked, xTF | xnull, seealso = '?draw_barplot')
@@ -1489,8 +1490,9 @@ draw_barplot <- function(counts, log = '',
     
     dimnames(counts) <- c(dn, list(''))
   }
-
-  if (heat) return(draw_heat(counts, log = log, ...))
+  
+  if (heat) return(draw_heat(counts, log = log, showCounts = showCounts, xlim = xlim, ylim = ylim,
+                             minColor = minColor, maxColor = maxColor))
   
   if (dim(counts)[1] == 1L) counts <- t(counts)
   
@@ -1500,10 +1502,11 @@ draw_barplot <- function(counts, log = '',
   ylim <- ylim %||% c(0, if (type != 'beside') max(colSums(counts)) else  max(counts))
   
   col <- prep_col_categories(col %||% rownames(counts), rownames(counts), alpha = alpha, log = log, ...)
-  col$legend <- NULL
+  if (type != 'stacked' && length(dim(counts))) col$legend <- NULL
   output <- list(col = col)
   
-  barx <-  barplot(plot = FALSE, counts, col = if (type == 'stacked' ) rev(col$col) else col$col, log = gsub('x', '', log), 
+  if (type == 'stacked') counts <- counts[nrow(counts):1, , drop = FALSE]
+  barx <-  barplot(plot = FALSE, counts, log = gsub('x', '', log), 
                    space = space, beside = type != 'stacked')
   
   xlim <- xlim %||% (mean(barx)) + c(-.5, .5) * max(barx)
@@ -1511,15 +1514,14 @@ draw_barplot <- function(counts, log = '',
                               xlim = list(xlim, ylim)[[horizontal + 1L]], 
                               ylim = list(ylim, xlim)[[horizontal + 1L]],
                               log = log)
-  
   # axes
   proportions <- pretty(ylim / sum(counts), n = 10L, min.n = 5L)
   proportions <- setNames(proportions * sum(counts), proportions)
+  
   axes <- data.table(side = if (horizontal) c(1, 3) else c(2, 4),
-                     ticks = list(proportions,
-                                  unique(round(axTicks((!horizontal) + 1, 
-                                                       log = grepl(if (horizontal) 'x' else 'y', log, fixed = TRUE))))),
+                     ticks = list(proportions, pretty(ylim, n = 10L, min.n = 5L)),
                      line = 1L)
+  
   if (ncol(counts) > 1) axes <- rbind(axes,
                                       data.table(side = if (horizontal) 2 else 1,
                                                  ticks = list(setNames(if (type == 'stacked') barx else colMeans(barx), colnames(counts))),
@@ -1543,47 +1545,47 @@ draw_barplot <- function(counts, log = '',
   output$canvas <- function() plot.window(xlim = output$window$xlim, ylim = output$window$ylim)
   output$drawer <- function() {
     
-    barx <- barplot(counts, col = if (type == 'stacked' ) rev(col$col) else col$col, 
-                    log = gsub(if (horizontal) 'y' else 'x', '', log), space = space,
-                    axisnames = FALSE, 
-                    horiz = horizontal,
-                    add = TRUE,
-                    ylab = '', xlab = '',
-                    beside = type != 'stacked', axes = FALSE, 
-                    ylim =  if (horizontal) xlim else ylim,
-                    xlim = if (horizontal) ylim else xlim,
-                    border = rgb(.2,.2,.2,.2))
+  barx <- barplot(counts, col = if (type == 'stacked' ) rev(col$col) else col$col, 
+                  log = gsub(if (horizontal) 'y' else 'x', '', log), space = space,
+                  axisnames = FALSE, 
+                  horiz = horizontal,
+                  add = TRUE,
+                  ylab = '', xlab = '',
+                  beside = type != 'stacked', axes = FALSE, 
+                  ylim =  if (horizontal) xlim else ylim,
+                  xlim = if (horizontal) ylim else xlim,
+                  border = rgb(.2,.2,.2,.2))
     
-    if (type == 'both') {
-      barplot(counts[nrow(counts):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
-              names.arg = logical(ncol(counts)), axes = FALSE,
-              horiz = horizontal,
-              add = TRUE, beside = FALSE, space = nrow(counts) + space[2] - 1)
-      
-      # code to draw lines between tops of bars:
-      # barwidth <- diff(barx[1:2, 1]) / 2
-      # 
-      # shiftedHeight <- head(apply(counts, 2, \(col) rev(cumsum(rev(col)))), n = -1)
-      # for (j in 1:ncol(barx)) {
-      #   graphics::segments(x0 = head(barx, n = -1)[, j] - barwidth,  x1 = barx[nrow(barx), j] - barwidth, 
-      #                      y0 = head(counts, n = -1)[, j], y1 = shiftedHeight[, j], 
-      #                      lty = 'dashed', setalpha('black', .2),
-      #                      xpd = NA)
-      #   graphics::segments(x0 = head(barx, n = -1)[, j] + barwidth,  x1 = barx[nrow(barx), j] + barwidth, 
-      #                      y0 = head(counts, n = -1)[, j], y1 = shiftedHeight[, j], 
-      #                      lty = 'dashed', setalpha('black', .2),
-      #                      xpd = NA)
-      # }
-      
-    }
+  if (type == 'both') {
+    barplot(counts[nrow(counts):1, ], col = setalpha(rev(col$col), alpha / 4), border = rgb(.2,.2,.2, alpha / 3),
+            names.arg = logical(ncol(counts)), axes = FALSE,
+            horiz = horizontal,
+            add = TRUE, beside = FALSE, space = nrow(counts) + space[2] - 1)
     
-    # draw extra stuff
-    draw_quantiles(if (horizontal) 1 else 2, counts, conditional = FALSE,
-                   quantiles = quantiles,
-                   limits = rbind(if (horizontal) grconvertY(c(0, 1.0), 'npc', 'user') else  grconvertX(c(-.03, 1.03), 'npc', 'user')))
-    if (mean) draw_mean(colMeans(barx), colMeans(counts), conditional = FALSE)
-    if (showCounts) draw_counts(barx, counts, counts, col = col$col, min(diff(counts)), type = type, horizontal = horizontal)
+    # code to draw lines between tops of bars:
+    # barwidth <- diff(barx[1:2, 1]) / 2
+    # 
+    # shiftedHeight <- head(apply(counts, 2, \(col) rev(cumsum(rev(col)))), n = -1)
+    # for (j in 1:ncol(barx)) {
+    #   graphics::segments(x0 = head(barx, n = -1)[, j] - barwidth,  x1 = barx[nrow(barx), j] - barwidth, 
+    #                      y0 = head(counts, n = -1)[, j], y1 = shiftedHeight[, j], 
+    #                      lty = 'dashed', setalpha('black', .2),
+    #                      xpd = NA)
+    #   graphics::segments(x0 = head(barx, n = -1)[, j] + barwidth,  x1 = barx[nrow(barx), j] + barwidth, 
+    #                      y0 = head(counts, n = -1)[, j], y1 = shiftedHeight[, j], 
+    #                      lty = 'dashed', setalpha('black', .2),
+    #                      xpd = NA)
+    # }
     
+  }
+  
+  # draw extra stuff
+  draw_quantiles(if (horizontal) 1 else 2, counts, conditional = FALSE,
+                 quantiles = quantiles,
+                 limits = rbind(if (horizontal) grconvertY(c(0, 1.0), 'npc', 'user') else  grconvertX(c(-.03, 1.03), 'npc', 'user')))
+  if (mean) draw_mean(colMeans(barx), colMeans(counts), conditional = FALSE)
+  if (showCounts) draw_counts(barx, counts, counts, col = col$col, min(diff(barx)), type = type, horizontal = horizontal)
+  
   }
   
   output
@@ -1593,15 +1595,40 @@ draw_barplot <- function(counts, log = '',
 
 #' Draw a "heatmap" of 2d data
 #'
-#' This function draws a heat map...
+#' This function draws a heat map, with color indicating value.
+#' 
+#' 
+#' 
+#' @param showCounts ***Should the counts of values in cell be printed on the bar?***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' Must be a singleton `logical` value: an on/off switch.
+#' 
+#' @param minColor ***What color should be used to represent 0?***
+#' 
+#' Defaults to `"#2C3E50"`.
+#' 
+#' Must be a single `character` (color name or hexcode) or `integer` (index of flatly palette).
+#' 
+#' @param maxColor ***What color should be used to represent the maximum value?***
+#' 
+#' Defaults to `"#E74C3C""`.
+#' 
+#' Must be a single `character` (color name or hexcode) or `integer` (index of flatly palette).
+#' 
 #' @export
-draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
-  # cex/pch aren't used obviously, but it gets passed in ... above, causing warnings below
+draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, showCounts = FALSE, minColor = flatly[5], maxColor = flatly[4]) {
   xlim <- c(0L, ncol(tab))
   ylim <- c(0L, nrow(tab))
+  breaks <- seq(0, max(tab), length.out = 100L)
   
-  
-  col <- prep_col(c(tab), c(tab), log = log, pch = NULL)
+  palette <- colorRampPalette(c(minColor, maxColor))(100L)
+  cols <- palette[as.integer(cut(tab, breaks = breaks, include.lowest = TRUE))]
+  col <- list(col = cols,
+              legend = \(side = 3, marginLines, col.legend = 'Counts') legend_col_continuous(tab, palette, col.legend = col.legend,
+                                                                                side = side, marginLines = marginLines))
+  # col <- prep_col(c(tab), c(tab), log = log, pch = NULL, ncontinuous = 100L, contrast = TRUE)
   colarray <- array(col$col, dim = dim(tab))
   
  
@@ -1611,7 +1638,6 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
                             ticks = list(setNames(1:ncol(tab) - .5, colnames(tab)),
                                          setNames(1:nrow(tab) - .5, rev(rownames(tab)))),
                             line = 1)
-  
   output$col <- col
   
   window <- data.table(layout,
@@ -1632,6 +1658,7 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, ...) {
       
     }, col(tab), nrow(tab) + 1L - row(tab), colarray)
     
+    if (showCounts) draw_counts(nrow(tab) - row(tab) + 0.5, col(tab) - 0.5 , tab, width = .8, col = flatly[2])
   }
   output
 }
@@ -3210,7 +3237,7 @@ setMethod('prep_col', c('discrete'),
             col <- palette[match(col, categories)]
             
             list(col = col,
-                 legend = \(side = 3, marginLines, col.legend = '')  legend_col_discrete(categories, palette, pch, col.legend = col.legend,
+                 legend = \(side = 3, marginLines, col.legend = NULL)  legend_col_discrete(categories, palette, pch, col.legend = col.legend,
                                                                                          side = side, marginLines = marginLines))
           })
 
@@ -3283,9 +3310,8 @@ prep_col_categories <- function(col, categories, pch = 16, alpha = 1, contrast =
     }
   }
   if (length(col) == 1L) return(list(col = rep(setalpha(col, alpha), length(categories))))
-  
   list(col = col,
-       legend = \(side = 3, marginLines, col.legend = '') legend_col_discrete(categories, col, pch, col.legend = col.legend,
+       legend = \(side = 3, marginLines, col.legend = '') legend_col_discrete(rev(categories), rev(col), pch, col.legend = col.legend,
                                                                               side = side, marginLines = marginLines))
 }
 
