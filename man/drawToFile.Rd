@@ -16,9 +16,20 @@ drawToFile(
 \arguments{
 \item{plot}{\emph{\strong{A plot object (created by \code{\link[=draw]{draw()}}).}}}
 
-\item{filename}{\emph{\strong{What filename to draw to?}}}
+\item{filename}{\emph{\strong{What filename to draw to?}}
 
-\item{overwrite}{\emph{\strong{Whether to overwrite files without asking for permission.}}}
+Must be a single \code{character} string.
+
+The \code{filename} string must end with a file extension:
+either \code{.bmp}, \code{.jpg} (or \code{.jpeg}), \code{.pdf}, \code{.png}, \code{.svg}, or \code{.tiff}.
+This determines what format is used.}
+
+\item{overwrite}{\emph{\strong{Whether to overwrite files without asking for permission.}}
+
+Defaults to \code{FALSE}.
+
+If \code{TRUE}, \code{drawToFile()} will overwrite files without asking for permission.
+Otherwise, it will ask for keyboard confirmation before overwriting.}
 
 \item{width, height}{\emph{\strong{Width and height of plot in output file.}}
 
@@ -29,8 +40,7 @@ a valid unit abbreviation---either \code{mm} (millimeters), \code{cm} (centimete
 \verb{in} (inches) or \code{px} (pixels).
 If \code{numeric}, the unit is taken to be inches.
 
-The \code{filename} string must end with a file extension:
-either \code{.bmp}, \code{.jpg} (or \code{.jpeg}), \code{.pdf}, \code{.png}, \code{.svg}, or \code{.tiff}.}
+If \code{NULL}, sizes are selected based on plot itself.}
 }
 \description{
 Export \code{\link[=draw]{draw()}} plots to files.

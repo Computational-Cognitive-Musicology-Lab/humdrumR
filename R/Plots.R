@@ -505,7 +505,7 @@ dim2inches <- function(x) {
 #' These parameters are set using `par()` (overriding humdrumR's defaults), but only for the duration of the
 #' `draw()` call---i.e., the global `par()` settings are not changed.
 #' 
-#' @seealso Use [drawToFile()] to render these plots to files. To add to plots, [drawMore]. To draw multiple plots, [drawNext].
+#' @seealso Use [drawToFile()] to render these plots to files. To add to plots, [drawMore]. To draw multiple plots, [drawMultiple].
 #' 
 #' @examples
 #' 

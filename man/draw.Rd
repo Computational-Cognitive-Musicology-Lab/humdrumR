@@ -208,5 +208,5 @@ draw(x, y, title = "Linear regression", lm = TRUE)
 
 }
 \seealso{
-Use \code{\link[=drawToFile]{drawToFile()}} to render these plots to files. See \link{drawMore} to see how to draw plots next to each other.
+Use \code{\link[=drawToFile]{drawToFile()}} to render these plots to files. To add to plots, \link{drawMore}. To draw multiple plots, \link{drawMultiple}.
 }

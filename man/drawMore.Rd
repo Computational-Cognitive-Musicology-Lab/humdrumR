@@ -2,23 +2,34 @@
 % Please edit documentation in R/Plots.R
 \name{drawMore}
 \alias{drawMore}
-\alias{drawNothing}
-\alias{drawBeside}
-\alias{drawBelow}
-\title{Draw multiple plots, or add to \code{\link[=draw]{draw()}} plots.}
+\title{Add content to \code{\link[=draw]{draw()}} plots.}
 \usage{
-drawMore(plot, ...)
+drawMore(drawPlot, ...)
+}
+\arguments{
+\item{drawPlot}{\emph{\strong{A plot to add to.}}
 
-drawNothing()
-
-drawBeside(..., widths = NULL)
-
-drawBelow(..., heights = NULL)
+Must be a \code{plot_object}, created by \code{\link[=draw]{draw()}}.}
 }
 \description{
-Draw multiple plots, or add to \code{\link[=draw]{draw()}} plots.
+Add content to \code{\link[=draw]{draw()}} plots.
 }
 \details{
-These functions can be used to draw multiple plots created by \code{\link[=draw]{draw()}}
-(using \code{drawBeside()} or \code{drawBelow()}) or \emph{add} additional stuff to a \code{\link[=draw]{draw()}} plot.
+Use this function to add arbitrary content to a plot created by \code{\link[=draw]{draw()}}.
+The \code{...} arguments can be one or more expressions that are evaluated to add to the
+existing plot.
+These expressions should make use of base-R graphics functions like \code{\link[=mtext]{mtext()}}, \code{\link[=abline]{abline()}}, \code{\link[=points]{points()}},
+\code{\link[graphics:arrows]{graphics::arrows()}}, or \code{\link[graphics:segments]{graphics::segments()}}.
+These expressions can reference variables from the original plot, notably the \code{x} and/or \code{y} variables.
+}
+\examples{
+
+x <- rnorm(200, mean = 10, sd = 10)
+
+draw(x) |> drawMore(abline(v = mean(x)))
+
+draw( , y = x) |> drawMore(mtext(paste0('SD: ', sd(y) |> round(2)), side = 3, cex = 1.2),
+                           abline(h = mean(y), col = 'red'))
+
+
 }
