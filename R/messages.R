@@ -50,8 +50,8 @@ setMethod('+', c('argCheck', 'character'),
 ## Checking functionality ----
 
 checks <- function(arg, argcheck, argname, seealso = c()) {
-  
-  callstack <- sys.calls()
+  callstack <- sys.calls() #|>
+    #Filter(f = \(x) !stringr::str_detect(rlang::expr_text(x), 'new\\('))
   if (length(callstack) > 20L) return(arg) 
   
   if (missing(argname)) argname <- rlang::expr_name(rlang::enexpr(arg))
@@ -87,7 +87,7 @@ checks <- function(arg, argcheck, argname, seealso = c()) {
   # message()
   # stop(call.=FALSE)
   # .showstack()
-  .stop(paste0(alert, '\n', messages, seealso))
+  stop(paste0(alert, '\n', messages, seealso), call. = FALSE)
   # .stop(paste0(premessage, '\n', messages, seealso))
 }
 
@@ -162,8 +162,8 @@ docheck_recurse <- function(argcheck, arg) {
       if (!any(good) && sum(depths > 0) == 1) which.max(depths) else 1:2
     }
     
-    
-    rule <- paste0(rules[targets], collapse =  if (logic == '&&') ' and ' else ' or ')
+    rules[targets[-1]] <- gsub('must be( or inherit)? ', '', rules[targets[-1]])
+    rule <- paste0(rules[targets], collapse =  if (logic == '&&') ' AND ' else ' OR ')
     description <- unique(descriptions[targets])
     explanation <- unique(unlist(explanations[targets]))
     
@@ -187,7 +187,7 @@ dochecks <- function(arg, ...) {
 ## Common Messages ----
 
 
-.show_values <- function(bad, n = 6) {
+.show_values <- function(bad, n = 6, thing = 'value') {
   
   uniq <- unique(bad)
   
@@ -195,9 +195,9 @@ dochecks <- function(arg, ...) {
     "your 'argname' is empty: {class(bad)[1]}(0)."
   } else {
     if (length(uniq) == 1L) {
-      "your 'argname' includes the value {if (is.character(bad)) quotemark(bad) else bad}" 
+      "your 'argname' argument includes the {thing} {if (is.character(bad)) quotemark(bad) else bad}" 
     } else {
-      "your 'argname' includes the values {harvard(head(uniq, n), 'and', is.character(bad))}"
+      "your 'argname' argument includes the {thing}s {harvard(head(uniq, n), 'and', is.character(bad))}"
     }
   }
   
@@ -408,8 +408,17 @@ xmatchclass <- function(match) {
 xnotna <- argCheck(\(arg) all(!is.na(arg)), "must not include NA values", \(arg) "'argname' includes {sum(is.na(arg))} {plural(sum(is.na(arg)), 'NAs', 'NA')}")
 
 xTF <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L,
-                  "is an on/off switch: It must be a single TRUE or FALSE value",
-                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), if (length(arg) != 1L) .mismatch(length)(arg))) & xnotna
+                  "must be a single TRUE or FALSE value (an on/off switch)",
+                  \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), 
+                           if (length(arg) != 1L) .mismatch(length)(arg))) & xnotna
+
+
+xTFunnamed <- argCheck(\(arg) is.logical(arg) && length(arg) == 1L  && is.null(names(arg)),
+                "must be a single (unnamed) TRUE or FALSE value (an on/off switch)",
+                \(arg) c(if (!is.logical(arg)) .mismatch(class)(arg), 
+                         if (length(arg) != 1L) .mismatch(length)(arg),
+                         if (!is.null(names(arg))) "your argument has the index name '{names(arg)}'")) & xnotna
+
 
 
 xlegal <- function(values) {
@@ -420,8 +429,30 @@ xlegal <- function(values) {
 
 xplegal <- function(values) {
   xatomic & argCheck(\(arg) all(!is.na(pmatch(arg, values))), glue::glue("must partial match {.values(values, conj = 'or')}"),
-                     \(arg) .show_values(arg[is.na(pmatch(arg, values))]))
+                     \(arg) .show_values(arg[is.na(pmatch(arg, values))]),
+                     explanation = 'See ?partialMatching for an explanation of partial matching')
 }
+
+xnamesAll <- argCheck(\(arg) all(.names(arg) != ''), glue::glue("must have all named indices"),
+                      \(arg) glue::glue("your 'argname' includes {sum(.names(arg) == '')} unnamed {plural(sum(.names(arg) == ''), 'indices', 'index')}"))
+      
+xnamesAny <- argCheck(\(arg) !is.null(names(arg)), glue::glue("must have at least one named index"),
+                      \(arg) "our 'argname' contains no named indices")
+
+
+
+xlegalNames <- function(values) {
+  xnamesAll & argCheck(\(arg)  all(.names(args) %in% values),
+                       glue::glue("must have named indices that partially match {.values(values, conj = 'or')}"),
+                       \(arg) .show_values(.names(arg)[!.names(args) %in% values], thing = 'name'))
+}
+xplegalNames <- function(values) {
+  xnamesAll & argCheck(\(arg)  all(!is.na(pmatch(.names(arg), values))),
+                       glue::glue("must have named indices that partially match {.values(values, conj = 'or')}"),
+                       \(arg) .show_values(.names(arg)[is.na(pmatch(.names(arg), values))], thing = 'name'),
+                       explanation = 'See ?partialMatching for an explanation of partial matching')
+}
+
 
 xrounding <- argCheck(\(arg) any(sapply(list(round, floor, ceiling, trunc, expand), identical,  y = arg)),
                       "must be a rounding function: round(), floor(), ceiling(), trunc(), or expand()",
@@ -471,7 +502,8 @@ checkRecycle <- function(recycle, options = c("yes", "no", "pad", "ifscalar", "i
   
 }
 
-##
+
+
 
 
 ## Common predicates ----
@@ -486,6 +518,10 @@ is.whole <- function(x) x %% 1 == 0
 
 is.positive <- function(x, strict = FALSE) if (is.numeric(x)) (if (strict) x > 0 else x >= 0) else logical(length(x))
 is.negative <- function(x, strict = TRUE) if (is.numeric(x)) (if (strict) x < 0 else x <= 0) else logical(length(x))
+
+## checking lists of values ----
+
+# need this
 
 # Error messages ----
 
