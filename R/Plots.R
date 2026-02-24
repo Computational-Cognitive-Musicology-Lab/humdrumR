@@ -602,7 +602,19 @@ draw.default <- function(x, y, facets = list(),
     xlabel <- xlabel %||% formula$xlab
     ylabel <- ylabel %||% formula$ylab
   } 
-
+  
+  na <-  (if (is.null(x)) FALSE else is.na(x)) | (if (is.null(y)) FALSE else is.na(y))
+  if (any(na)) {
+    .message('The data you are drawing includes {num2word(sum(na))} NA values. These are being ignored.')
+    
+    x <- x[!na]
+    y <- y[!na]
+    if (length(color) == length(na)) color <- color[!na]
+    if (length(pointSize) == length(na)) pointSize <- pointSize[!na]
+    if (length(pointStyle) == length(na)) pointStyle <- pointStyle[!na]
+    facets <- lapply(facets, '[', i = !na)
+  }
+  
   if (length(facets)) {
     facets <- prep_facets(x, y, facets)
     
@@ -629,6 +641,8 @@ draw.default <- function(x, y, facets = list(),
     output$axisNames[[2]] <- ylabel %||% (output$axisNames[[2]] %||% yexpr)
   }
   
+ 
+  
   plot_object(layout = list(layout = output$layout, layout_heights = 1, layout_widths = 1),
               aspect = aspect %||% (4/3),
                function(...) {
@@ -645,6 +659,8 @@ draw.default <- function(x, y, facets = list(),
       plot.new()
       marginLines <- setMargins(margin, aspect)
       output$canvas()
+    } else {
+      marginLines <- setMargins(margin, aspect)
     }
     output$drawer()
     
@@ -912,22 +928,20 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
           points(xseq, conf[ , 1], type = 'l', lwd = .8, col = setalpha(curcol, .8))
           polygon(c(xseq, rev(xseq)), 
                   c(conf[, 2], rev(conf[ , 3])),
-                  border = NA, col = setalpha(curcol, .1))
+                  border = NA, col = setalpha(curcol, .1), xpd = TRUE)
         })
       } else {
         fit <- stats::lm(y ~ x)
    
         conf <- predict(fit,  newdata = data.frame(x = xseq), interval = 'confidence', ...)
-        points(xseq, conf[ , 1], type = 'l', lwd = .8, col = setalpha('black', .8))
-        points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = setalpha('black', .6))
-        points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = setalpha('black', .6))
-        legend('topleft', bty = 'n', lwd = .8, cex = .8,
+        points(xseq, conf[ , 1], type = 'l', lwd = .8, col = setalpha('black', .8), xpd = TRUE)
+        points(xseq, conf[ , 2], type = 'l', lwd = .3, lty = 'longdash', col = setalpha('black', .6), xpd = TRUE)
+        points(xseq, conf[ , 3], type = 'l', lwd = .3, lty = 'longdash', col = setalpha('black', .6), xpd = TRUE)
+        legend('topleft', bty = 'n', lwd = .8, cex = .8, xpd = TRUE,
                legend = bquote(list(a == .(format(coef(fit)[1], big.mark = ',', digits = 3)),
                                     b == .(format(coef(fit)[2], big.mark = ',', digits = 3)))))
       }
     }
-    
-   
     
     if (line) {
       by(cbind(data.frame(.x = x, .y = y), groups), groups,
@@ -940,7 +954,7 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
          })
       
     } else {
-      points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch)
+      points(x, y, col = output$col$col, cex = output$cex$cex, pch = output$pch$pch, xpd = TRUE)
     }
   }
   output
@@ -1089,7 +1103,7 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 #'      color = NA)
 #' @inheritParams draw
 draw_density <- function(x, y, log = '', 
-                           breaks = 'Sturges', bw = 'SJ', normalReference = FALSE, 
+                           breaks = 'Sturges', bw = 'nrd', normalReference = FALSE, 
                            smooth = FALSE, conditional = FALSE, showCounts = FALSE, showPoints = FALSE,
                            mean = FALSE, quantiles = c(), 
                            xlim = NULL, ylim = NULL,
@@ -1898,7 +1912,7 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, showCounts = FALS
 #' @export
 draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE, 
                          mean = TRUE, quantiles = c(.25, .75), global_stats = FALSE, 
-                         breaks = "Sturges", bw = 'SJ', normalReference = FALSE, showPoints = FALSE,
+                         breaks = "Sturges", bw = 'nrd', normalReference = FALSE, showPoints = FALSE,
                          xlim = NULL, ylim = NULL, log = '',
                          col = 1, ...) {
   checks(mean, xTF, seealso = '?draw_violins')
@@ -2168,7 +2182,7 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' @inheritParams draw
 draw_area <- function(x, y, log = '', 
                       center = TRUE, smooth = TRUE, conditional = FALSE, 
-                      breaks = 40, bw = 'SJ', 
+                      breaks = 40, bw = 'nrd', 
                       mean = FALSE, quantiles = c(), 
                       showPoints = FALSE,
                       xlim = NULL, ylim = NULL, 
@@ -2384,9 +2398,10 @@ draw_facets <- function(full_data, faceted_data,
 
 prep_facets <- function(x, y, facets) {
   if (!is.list(facets)) facets <- list(facets)
+  facets <- lapply(facets, \(facet) facet %||% integer(length(x)))
   
   if (length(facets) > 2L) .stop("The draw() function can't handle more than two faceting variables.",
-                                 "You have provided {num2print(length(facet))}.")
+                                 "You have provided {num2print(length(facets))}.")
   
   vecsize <- max(length(x), length(y))
   if (!all(lengths(facets) == vecsize)) {
@@ -2831,7 +2846,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL, sides = c(TRUE, TRUE,
   par(cex = cex)
   
   # everything is currently inches
-  lines <- c(0, .2, .5, .8, 1) * min(figmar)
+  lines <- c(0, .25, .5, .8, 1) * min(figmar)
   
   marginLines <- list(grconvertY(0, 'npc', 'inches') - lines,
                       grconvertX(0, 'npc', 'inches') - lines,
@@ -3012,8 +3027,10 @@ bar_coor <- function(x, type) {
   dim <- dim(x)
 }
 
-multihist_coor <- function(x, groups, conditional = TRUE, ...) {
-  coor_grouped <- tapply(x, groups, hist_coor, ..., simplify = FALSE)
+multihist_coor <- function(x, groups, conditional = TRUE, smooth = FALSE, ...) {
+
+  
+  coor_grouped <- tapply(x, groups, hist_coor, smooth = smooth, ..., simplify = FALSE)
   
   if (length(coor_grouped) > 1L && !conditional) {
     coor_grouped <- Map(\(coor, prop) {
@@ -3030,7 +3047,8 @@ hist_coor <- function(x, smooth = FALSE, breaks = "Sturges", ...,
   # gets x/density/counts for a numeric distribution, using either density() or hist()
   # but returning the same format either way
   # aspect isn't used, but this stops it from getting passed to density, which casues a warning
-  if (smooth) {
+  
+  if (smooth && length(x) > 5) {
     dens <- stats::density.default(x, ...)
     output <- data.table(Dim = dens$x, Density = dens$y)
   } else {
@@ -3049,11 +3067,10 @@ hist_coor <- function(x, smooth = FALSE, breaks = "Sturges", ...,
 }
 
 
-area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = TRUE, bw = 'SJ', breaks = 40, ...) {
-  range <- range(x)
+area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = TRUE, bw = 'nrd', breaks = 40, ...) {
   
   if (smooth) {
-    densities <- tapply(x, groups, density, bw = bw, from = range[1], to = range[2], simplify = FALSE)
+    densities <- tapply(x, groups, density, bw = bw, from = min(x), to = max(x), simplify = FALSE)
     
     X <- densities[[1]]$x
     Y <- lapply(densities, \(dens) dens$y)
@@ -3082,9 +3099,7 @@ area_coor <- function(x, groups,  smooth = TRUE, conditional = FALSE, center = T
   Y <- cbind(axis = 0, Y)
   if (center && !conditional) Y <- sweep(Y, 1, rowMeans(Y), '-')  
   
-  
   list(X = X, Y = Y, DensityKey = densKey)
-  
   
 }
 

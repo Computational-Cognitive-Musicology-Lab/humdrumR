@@ -216,19 +216,3 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                  }
 
                  pch <- rlang::parse_expr(args$pch)
-                 args$pch <- if (!is.null(pch)) pch
-                 
-                 args <- Filter(\(x) x != 'none', args)
-
-
-                 curexpr <- rlang::expr({ plot <- draw(x =x , y = y, !!!args); show(plot)})
-                 expr(curexpr)
-                 rlang::eval_tidy(curexpr)
-
-                 })
-
-             output$expr <- renderText({deparse(expr())})
-
-
-             })
-}
