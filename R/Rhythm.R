@@ -1982,19 +1982,22 @@ timebase <- function(humdrumR, tb = '16') {
   humtab <- getHumtab(humdrumR, 'GLIMDd')
   
   humtab[ , RecordDuration := as.integer(floor(RecordDuration / tb))]
+  tmpFields <- c('..Timeline..', '..fillTimeline..', '..Duration..', 'RecordDuration')
+  
   # remove records that dont line up with tb
   keep <- humtab[ , is.na(..fillTimeline..) | (is.whole(..fillTimeline.. / tb) & ..fillTimeline.. > -1000L)]
-  if (any(!keep))  .message('### This corpus includes rhythmic passages which cannot be represented at the {recip(tb)}-note timebase you have chosed.\n',
+  if (any(!keep))  .message('### This corpus includes rhythmic passages which cannot be represented at the {recip(tb)}-note timebase you have chosen.\n',
                            '### To represent all rhythms faithfully, you need a timebase of { recip(with(humdrumR, tatum(..Duration..)))}, or smaller.\n',
                            "##### Onsets which don't fit on your desired {recip(tb)}-note grid are being removed from the output.\n\n")
   humtab <- humtab[keep == TRUE]
   humtab[ , Nrep := ifelse((RecordDuration == 0 & Type != 'd') | Type == 'G', 1, RecordDuration)]
+  # what happens to multi stop tokens?
   # humtab <- humtab[Nrep > 0]
   # humtab$.tatum.[humtab.]
   
   humtab <- humtab[rep(seq_len(nrow(humtab)), humtab$Nrep)]
   
-  humtab[ , Duplicated := duplicated(Record), by = list(File, Spine)]
+  humtab[ , Duplicated := duplicated(Record), by = list(File, Spine)] # duplicated are new
   
   tb <- paste0('*tb', recip(tb))
   humtab <- rbind(humtab[!Type %in% c('D', 'd')],
@@ -2008,11 +2011,12 @@ timebase <- function(humdrumR, tb = '16') {
   humtab <- orderHumtab(humtab)
   humtab[ , Record := seq_along(Token), by = list(File, Spine)]
   
-  for (field in fields(humdrumR, 'D')$Name) humtab[[field]][humtab$Duplicated] <- NA
+  # duplicated are new, so should be empty placeholders for all data fields
+  for (field in setdiff(fields(humdrumR, 'D')$Name, tmpFields)) humtab[[field]][humtab$Duplicated] <- NA
   humtab$Type[humtab$Duplicated] <- 'd'
   
   putHumtab(humdrumR) <- humtab
-  humdrumR@Humtable[ , c('..Timeline..', '..fillTimeline..', '..Duration..','RecordDuration', 'Duplicated', 'Nrep') := NULL]
+  humdrumR@Humtable[ , c(tmpFields, 'Duplicated', 'Nrep') := NULL]
   humdrumR <- updateFields(humdrumR)
   
   selectFields(humdrumR, selectedFields)
