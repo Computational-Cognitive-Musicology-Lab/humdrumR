@@ -7,8 +7,8 @@
 # Most importantly, it makes it composable.
 # the aspect slot is used by drawToFile()
 
-setClass('draw_object', 
-         slots = c(func = 'function', add = 'expression', layout = 'list', aspect = 'numeric'))
+setClass('draw_object', contains = 'function',
+         slots = c(add = 'expression', layout = 'list', aspect = 'numeric'))
 
 
 setMethod('show', 'draw_object',
@@ -35,8 +35,9 @@ setMethod('show', 'draw_object',
 
 
 .drawSelf <- function(object) {
-  object@func()
+  object@.Data()
   envir <- environment(object)
+  
   for (expr in object@add) eval(expr, envir = envir)
 }
 
@@ -44,26 +45,43 @@ setMethod('show', 'draw_object',
 plot_object <- function(plotfunc, 
                         layout = list(layout = cbind(1L), layout_widths = 1, layout_heights = 1),
                         aspect = 4/3) {
-  new('draw_object', func = plotfunc, layout = layout, aspect = aspect)
+  new('draw_object', plotfunc, layout = layout, aspect = aspect)
 }
 
-#' Draw multiple plots, or add to [draw()] plots.
+#' Add content to [draw()] plots.
 #' 
+#' 
+#' @details
+#' 
+#' Use this function to add arbitrary content to a plot created by [draw()].
+#' The `...` arguments can be one or more expressions that are evaluated to add to the
+#' existing plot.
+#' These expressions should make use of base-R graphics functions like [mtext()], [abline()], [points()],
+#' [graphics::arrows()], or [graphics::segments()].
+#' These expressions can reference variables from the original plot, notably the `x` and/or `y` variables.
+#' 
+#' @examples
+#' 
+#' x <- rnorm(200, mean = 10, sd = 10)
+#' 
+#' draw(x) |> drawMore(abline(v = mean(x)))
+#' 
+#' draw( , y = x) |> drawMore(mtext(paste0('SD: ', sd(y) |> round(2)), side = 3, cex = 1.2),
+#'                            abline(h = mean(y), col = 'red'))
+#' 
+#' 
+#' @param drawPlot ***A plot to add to.***
+#' 
+#' Must be a `plot_object`, created by [draw()].
 #' 
 #' @export
-drawMore <- function(plot, ...) {
+drawMore <- function(drawPlot, ...) {
   exprs <- rlang::enexprs(...) |> as.expression()
-  plot@add <- c(plot@add, exprs)
-  plot
+  drawPlot@add <- c(plot@add, exprs)
+  drawPlot
 }
 
-#' @rdname drawMore
-#' @export
-drawNothing <- function() {
-  
-  plot_object(function() plot.new())
-  
-}
+
 
 
 .drawSet <- function(..., widths = NULL, heights = NULL, binder, funcName, argName) {
@@ -87,21 +105,78 @@ drawNothing <- function() {
   
 }
 
-#' @rdname drawMore
+#' Draw multiple plots next to each other.
+#' 
+#' @details
+#' 
+#' 
+#' Use this function to draw multiple, aribitrary [draw()] plots.
+#' The `...` arguments can be one or more [draw()] plots, which are placed
+#' beside (or below) each other.
+#' 
+#' The `heights` or `widths` arguments can be used control the relative height (`drawBelow`)
+#' or width (`drawBeside`) of the plots.
+#'
+#' `drawNothing()` can be used to put an empty space in a layout.
+#'  
+#' @examples
+#' 
+#' x1 <- rnorm(200, mean = 10, sd = 10)
+#' x2 <- rnorm(200, mean = 10, sd = 10)
+#' 
+#' draw(x1) |> drawBeside(x2)
+#' draw(x1) |> drawBelow(x2)
+#' 
+#' draw(x1, title = 'Histogram of x1') |> drawBeside(draw( ,x1, title = 'Q-plot of x1'))
+#'
+#' draw(x1, title = 'Histogram of x1') |> drawBeside(draw( ,x1, title = 'Thinner Q-plot of x1'), widths = c(2,1))
+#' 
+#' draw(x1) |> drawBeside(draw(x2)) |> drawBeside(draw(x1, x2))
+#' 
+#' draw(x1) |> drawBeside(draw(x2), draw(x1, x2)) 
+#' 
+#' draw(x1) |> drawBeside(draw(x2)) |> drawBelow(draw(x1, x2))
+#' 
+#' # Using draw nothing
+#' 
+#' drawBeside(draw(x1), draw(, x1)) |> drawBelow(drawBeside(draw(x2), drawNothing() |> drawMore(text(.5, .5, "Blank space"))))
+#' 
+#' @param ... ***Plots to combine.***
+#' 
+#' Must be `plot_object`s, created by [draw()].
+#' 
+#' @param widths ***How should horizontal space be divided up between plots?***
+#' 
+#' Defaults to `NULL`, leading to equal spacing.
+#' 
+#' 
+#' @param heights ***How should vertical space be divided up between plots?***
+#' 
+#' Defaults to `NULL`, leading to equal spacing.
+#' 
+#' @seealso Combines plots created with [draw()]. Use [drawMore()] to *add* to existing plots.
+#' 
+#' @name drawMultiple
 #' @export
 drawBeside <- function(..., widths = NULL) {
   .drawSet(..., widths = widths, binder = 'cbind', 
            funcName = 'drawBeside', argName = 'widths')
 }
 
-#' @rdname drawMore
+#' @rdname drawMultiple
 #' @export
 drawBelow <- function(..., heights = NULL) {
   .drawSet(..., heights = heights, binder = 'rbind', 
            funcName = 'drawBelow', argName = 'heights')
 }
 
-
+#' @rdname drawMultiple
+#' @export
+drawNothing <- function() {
+  
+  plot_object(function() plot.new())
+  
+}
 
 combineLayouts <- function(layout1, layout2, binder = 'cbind') {
   layout2 <- layout2 + max(layout1)
@@ -126,8 +201,19 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' @param plot ***A plot object (created by [draw()]).***
 #'
 #' @param filename ***What filename to draw to?***
-#'
+#' 
+#' Must be a single `character` string.
+#' 
+#' The `filename` string must end with a file extension:
+#' either `.bmp`, `.jpg` (or `.jpeg`), `.pdf`, `.png`, `.svg`, or `.tiff`.
+#' This determines what format is used.
+#' 
 #' @param overwrite ***Whether to overwrite files without asking for permission.***
+#' 
+#' Defaults to `FALSE`.
+#' 
+#' If `TRUE`, `drawToFile()` will overwrite files without asking for permission.
+#' Otherwise, it will ask for keyboard confirmation before overwriting.
 #'
 #' @param width,height ***Width and height of plot in output file.***
 #'
@@ -137,16 +223,16 @@ combineLayouts <- function(layout1, layout2, binder = 'cbind') {
 #' a valid unit abbreviation---either `mm` (millimeters), `cm` (centimeters), 
 #' `in` (inches) or `px` (pixels).
 #' If `numeric`, the unit is taken to be inches.
+#' 
+#' If `NULL`, sizes are selected based on plot itself.
 #'
-#' The `filename` string must end with a file extension:
-#' either `.bmp`, `.jpg` (or `.jpeg`), `.pdf`, `.png`, `.svg`, or `.tiff`.
 #' 
 #' @seealso Used with the [draw()] function.
 #' @export
 drawToFile <- function(plot, filename = 'humdrumR_draw.png', overwrite = FALSE,
                        width = NULL, height = NULL, ...) {
   
-  checks(plot, xinherits('plot'))
+  checks(plot, xinherits('draw_object'))
   checks(filename, xcharacter & xlen1)
   checks(width, xnull | ((xcharnotempty | xnumber) & xlen1))
   checks(height, xnull | ((xcharnotempty | xnumber) & xlen1))
@@ -419,7 +505,7 @@ dim2inches <- function(x) {
 #' These parameters are set using `par()` (overriding humdrumR's defaults), but only for the duration of the
 #' `draw()` call---i.e., the global `par()` settings are not changed.
 #' 
-#' @seealso Use [drawToFile()] to render these plots to files. See [drawMore] to see how to draw plots next to each other.
+#' @seealso Use [drawToFile()] to render these plots to files. To add to plots, [drawMore]. To draw multiple plots, [drawNext].
 #' 
 #' @examples
 #' 
@@ -554,9 +640,10 @@ draw.default <- function(x, y, facets = list(),
     oldpar <- do.call('par', par_draw)
     on.exit({par(oldpar, no.readonly = TRUE)})
     
-    marginLines <- setMargins(margin, aspect)
+   
     if (!output$faceted) {
       plot.new()
+      marginLines <- setMargins(margin, aspect)
       output$canvas()
     }
     output$drawer()
@@ -1340,7 +1427,7 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
     } else {
       points(x = x, y = y, 
              col = output$col$col, cex = output$cex$cex,
-             pch = output$pch$pch, ...)
+             pch = output$pch$pch)
     }
     
     # extra stuff
@@ -2714,6 +2801,7 @@ setMargins <- function(margin.percent = .2, aspect = NULL, sides = c(TRUE, TRUE,
   
 
   devsize <- par('fin')
+  
   figsize <- devsize * (1 - margin.percent*2)
   figmar <- devsize * margin.percent 
   

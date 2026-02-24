@@ -18,3 +18,7 @@ drawBelow(..., heights = NULL)
 \description{
 Draw multiple plots, or add to \code{\link[=draw]{draw()}} plots.
 }
+\details{
+These functions can be used to draw multiple plots created by \code{\link[=draw]{draw()}}
+(using \code{drawBeside()} or \code{drawBelow()}) or \emph{add} additional stuff to a \code{\link[=draw]{draw()}} plot.
+}
