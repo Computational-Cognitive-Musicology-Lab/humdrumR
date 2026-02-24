@@ -99,10 +99,10 @@ basic <a href="humSummary.html">corpus summary functions</a>.</p>
 
 
 <dt id="arg-drop">drop<a class="anchor" aria-label="anchor" href="#arg-drop"></a></dt>
-<dd><p><em><strong>Whether to return normal <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> or a <code>humReference</code> table.</strong></em></p>
+<dd><p><em><strong>Whether to return normal <a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a> or a <code>humReference</code> table.</strong></em></p>
 <p>Defaults to <code>FALSE</code>.</p>
 <p>Must be a singleton <code>logical</code> value: an on/off switch.</p>
-<p>If <code>drop = TRUE</code>, a normal <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table</a> is returned instead of
+<p>If <code>drop = TRUE</code>, a normal <a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table</a> is returned instead of
 a <code>humReference</code> table.</p></dd>
 
 
@@ -168,25 +168,13 @@ unique reference records.</p></li>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="st">'COM'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Authorship Information)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!COM  =  Composer's name</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	Examples:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM: Chopin, Fryderyk; Chopin, Frederick</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM1: Composer, A. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 			x!!COM2: Composer, B.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reference.character("COM"):</span> object 'ReferenceCodes' not found</span>
 <span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="st">'OTL'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Work Identification Information)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!OTL  =  Title</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reference.character("OTL"):</span> object 'ReferenceCodes' not found</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">rs</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/RollingStone/.*hum"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmprWKXoC/temp_libpath1ece19b07056/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Thirteen files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating thirteen files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -223,10 +211,7 @@ unique reference records.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              (six columns not displayed due to screensize***)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="st">'COC'</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Authorship Information)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 	!!!COC  =  Composer(s) corporate name</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reference.character("COC"):</span> object 'ReferenceCodes' not found</span>
 <span class="r-in"><span><span class="fu">reference</span><span class="op">(</span><span class="va">rs</span><span class="op">)</span><span class="op">[</span> , <span class="st">'COC'</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ###### Reference records in humdrumR corpus "rs[, j]" (thirteen pieces):</span>

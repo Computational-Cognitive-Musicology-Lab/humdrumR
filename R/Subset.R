@@ -16,7 +16,7 @@
 #' @details
 #' 
 #' `subset()` and `filter()` are passed one or more expressions which are using the 
-#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrumR].
+#' fields of the [humdrum table][humTable] using a call to [within][withinHumdrum].
 #' This evaluation can thus include all of [within.humdrumR()]'s functionality (and arguments)
 #' including group-apply.
 #' The only requirement is that the expressions/functions fed to `subset()`/`filter()`

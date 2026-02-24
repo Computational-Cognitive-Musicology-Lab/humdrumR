@@ -1599,6 +1599,7 @@ roman.default <- makeChordTransformer(tset2roman, 'roman')
 #' @rdname harm
 #' @export
 roman.humdrumR <- humdrumRmethod(roman.default)
+#' @rdname harm
 #' @export
 roman <- humdrumRgeneric(roman.default)
 

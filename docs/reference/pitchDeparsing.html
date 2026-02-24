@@ -137,7 +137,7 @@ see the pitch deparsing documentation.</p>
 <h3 id="key">Key<a class="anchor" aria-label="anchor" href="#key"></a></h3>
 
 
-<p>The <code>Key</code> argument must be a diatonicSet, or something that can be parsed into one.
+<p>The <code>Key</code> argument must be a <a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a>, or something that can be parsed into one.
 The <code>Key</code> argument is passed to the <a href="pitchParsing.html">parser</a>, deparser, <em>and</em> transpose—<em>unless</em>
 an alternate <code>Key</code> is passed to <code>transposeArgs</code> or <code>parseArgs</code>.
 Various deparsing options use the <code>Key</code> argument; for example, use of <code>implicitSpecies</code> (see advanced parsing section) is dependent on the <code>Key</code>.</p>
@@ -167,8 +167,8 @@ For example, we can get the exact same result as before by typing <code>kern('CX
 to <code><a href="transpose.html">transpose()</a></code>, allowing us to easily transpose pitch information.
 For example, we could type <code>kern(c('C', 'D', 'E'), transposeArgs = list(by = 'M9'))</code> can get the output <code>c('d', 'e', 'f#')</code>.
 The possible transpose args are:</p><ul><li><p><code>by</code> (<a href="tonalIntervalS4.html">tonalInterval</a>, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>from</code> (diatonicSet, <code>length == 1 | length == (x)</code>)</p></li>
-<li><p><code>to</code>  (diatonicSet, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>from</code> (<a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
+<li><p><code>to</code>  (<a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a>, <code>length == 1 | length == (x)</code>)</p></li>
 <li><p><code>real</code> (<code>logical</code>, <code>length == 1</code>) Should transposition be real or tonal?</p></li>
 <li><p><code>relative</code> (<code>logical</code>, <code>length == 1</code>) Should key-wise transposition be based on relative or parallel keys?</p></li>
 </ul><p>As a convenient shorthand, or "syntactic sugar," you can specify <code>transposeArgs</code> in an alternate way:

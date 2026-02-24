@@ -223,11 +223,22 @@ reference:
   - struct
 - title: "Other Functions"
   desc: "Other useful tools."
+- subtitle: "Plotting tools"
 - contents: 
   - draw
-  - distribution
-- subtitle: "Information theory"
+  - drawMore
+  - drawMultiple
+  - drawToFile
+  - draw_area
+  - draw_barplot
+  - draw_density
+  - draw_heat
+  - draw_Qplot
+  - draw_scatter
+  - draw_violins
+- subtitle: "Probability/Information theory"
   contents:
+  - distribution
   - information
   - pdist
   - entropy

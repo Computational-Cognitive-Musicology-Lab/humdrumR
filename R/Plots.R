@@ -77,7 +77,7 @@ plot_object <- function(plotfunc,
 #' @export
 drawMore <- function(drawPlot, ...) {
   exprs <- rlang::enexprs(...) |> as.expression()
-  drawPlot@add <- c(plot@add, exprs)
+  drawPlot@add <- c(drawPlot@add, exprs)
   drawPlot
 }
 

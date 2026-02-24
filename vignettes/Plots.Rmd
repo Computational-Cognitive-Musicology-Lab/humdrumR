@@ -19,9 +19,9 @@ R has two major plotting systems that are widely used: 1) R's built-in [base gra
 `r Hm` is compatible with both of these systems.
 `r Hm` also has it's own, built-in [draw()] function, which is basically a spiffy (easier to use) extension of base-R graphics.
 
-In this vignette we give detailed showcase of the features of [draw()].
-We'll then show you how to use [ggplot2] with `r hm` data, if that floats your boat.
-Finally, we go over some basic concepts from base-R graphics, which you can use if you want to customize [draw()] plots (or make your own custom plots from scratch).
+In this vignette we give a detailed showcase of the features of [draw()].
+We'll then we go over some basic concepts from base-R graphics, which you can use if you want to customize [draw()] plots.
+Finally, we'll show you how to use [ggplot2] with `r hm` data, if that floats your boat.
 
 
 
@@ -429,6 +429,67 @@ drawToFile(violins, 'Violins.svg')
 
 ```
 
+
+# Customizing draw() plots
+
+We've shown here that `r hm`'s [draw()] function has a lot of great options.
+However, it's inevitable that you might want to make plots that can't be done with [draw()]---or `ggplot`.
+Fortunately, [draw()] is built on top of R's base graphics system, which is extremely powerful, giving you precise control of every aspect of plots.
+
+The simplest option to customize [draw()] plots is to *add* to them using base-R graph functions.
+However, for more complex/customized plots, you'll eventually need to dive deep into base-R graphics (or [ggplot2][#ggplot2]).
+
+---
+
+Base-R graphics is centered around a few main plotting functions: [plot()], [barplot()], and [hist()].
+These functions actually work, under the hood, at the core of [draw()].
+Additional functions can then be used to *add* elements on top of plots you already created: [points()], [arrows()], [abline()], [lines()], [axis()], [polygon()], etc.
+These "adding" functions can be used with [draw()] too.
+
+
+### Adding plot functions
+
+
+The best way to "add" content to [draw()] plots by writing code using base-R adding functions, and then using [drawMore].
+For example, we know that [draw()] has the `mean` argument to mark the mean of the data with a cross---but what if you wanted to draw a line across the screen marking the mean?
+There is no [draw()] argument for that (yet), but you can use the base-R [abline()] function to do this---specifically, the `v` argument can be used to draw a vertical line.
+So we could do something like this:
+
+```{r}
+
+bach |>
+  draw(Duration, Semits, jitter = 'x') |>
+  drawMore(abline(v = mean(x), col = 'red', lwd = 2))
+
+```
+Maybe we 'd also like to add some text, like the exact value of that mean?
+Use the base-R [mtext()] function:
+
+```{r}
+
+bach |>
+  draw(Duration, Semits, jitter = 'x') |>
+  drawMore(abline(v = mean(x), col = 'red', lwd = 2),
+           mtext(paste0('mean duration:\n', round(mean(x), 2)), side = 3, at = mean(x), col = 'red'))
+
+```
+Or maybe you'd like to shade the area containing pitches below middle C, with durations longer than a quarter note.
+We can do this with base-R [polygon()], though it's a bit complicated:
+
+```{r}
+
+bach |>
+  draw(Duration, Semits, jitter = 'x') |>
+  drawMore(polygon(x = c(.25, 1, 1, .25), 
+                   y = c(-25, -25, 0, 0),
+                   col = rgb(.5, .5,1 ,.5, alpha = .1), border = FALSE))
+
+
+
+```
+
+Other functions you might want to read about are [arrows()], [graphics::segements()], [points()], [text()].
+
 # GGplot2
 
 [GGplot2](https://ggplot2.tidyverse.org/) is probably R's most popular graphing library.
@@ -467,109 +528,3 @@ bach |>
 
 ```
 
-# Base-R 
-
-
-The base-R graphics system is extremely powerful, giving you precise control of every aspect of plots.
-Unfortunately, though *getting started* with simple base-R plots is extremely fast and easy, as we'll show you in a moment, it takes quite a while to learn on how to precisely control your plots, and it ends up being quite verbose.
-The `r hm` [draw()] function is actually based on base-R graphics, and is fully compatible with base-R---our recommendation is to start with [draw()], then gradually learn base-R as needed.
-(Alternatively, just learn [ggplot][#ggplot].)
-
-
-### Primary plot functions
-
-Base-R graphics is centered around a few main plotting functions: [plot()], [barplot()], and [hist()].
-Additional functions can then be used to *add* more elements on top of the plots you already created: [points()], [arrows()], [abline()], [lines()], [axis()], [polygon()], etc.
-(These "adding" functions can be used with [draw()] too.)
-
-
-We can then see what happens if we pass numeric data to [plot()] or [hist()].
-(As usual, we have to use [with()] to access the fields.)
-
-```{r}
-bach |>
-  with(hist(Duration))
-```
-
-```{r}
-bach |>
-  with(plot(Duration))
-
-bach |>
-  with(plot(Duration, Semits))
-
-
-```
-
-To use [barplot()], the standard approach is to tabulate categorical data using [table()], then pass that to `barplot()`.
-
-```{r}
-bach |>
-  with(table(Solfa)) |>
-  barplot()
-```
-
-### Adding plot functions
-
-Once you've created a plot with [plot()], [barplot()], or [hist()], you can add more information on top of those plots using functions like [mtext()], [points()], or [abline()].
-
----
-
-The [points()] function acts just like [plot()], except it doesn't create a new plot, instead adding the existing plot.
-You could for example, use points to plot the average pitch value for each duration.
-We will first remake the same plot as above using [plot()], then compute the averages add them as red points using [points()].
-
-
-```{r}
-
-
-bach |> 
-  with(plot(Duration, semits())) 
-
-bach |>
-  group_by(Duration) |>
-  summarize(MeanSemits = mean(Semits)) |>
-  with(points(Duration, MeanSemits, col = 'red', pch = 16, cex = 1.2))
-  
-
-
-```
-
-The arguments `cex`, `pch`, and `col` are used with [points()] (or [plot()]) to control the point size, point shape, and color respectively.
-
-
-
----
-
-The [abline()] function can be used to straight lines on an existing plot.
-You could, for example, draw a horizontal line separating the positive pitches from the negative pitches:
-
-
-
-```{r}
-
-
-bach |> 
-  with(plot(Duration, Semits)) 
-
-bach |> with(abline(h = 0))
-
-
-```
-
-You can also draw the linear regression line using [abline()], by passing it an [lm()] object:
-
-
-```{r}
-
-
-bach |> 
-  with(plot(Duration, Semits)) 
-
-bach |>
-  with(lm(Semits ~ Semits)) |>
-  abline()
-  
-
-
-```

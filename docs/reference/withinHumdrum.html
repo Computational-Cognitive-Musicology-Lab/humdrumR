@@ -208,7 +208,7 @@ After evaluation, the expanded locations are removed from the output.</p></dd>
 <p>This argument is conceptually similar to the <code>drop</code> argument in R matrices.
 If <code>drop = TRUE</code>, the output of <code>with()</code>/<code>summarize()</code> is simplified as much as possible (trying to return
 the "raw" vector, list, table, etc. within it). If <code>drop = FALSE</code>, the result is <em>always</em>
-a <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a>.</p></dd>
+a <a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table</a>.</p></dd>
 
 
 <dt id="arg--by">.by<a class="anchor" aria-label="anchor" href="#arg--by"></a></dt>
@@ -506,7 +506,7 @@ The only difference between the <code>with()</code> and <code>summarize()</code>
 This can be <em>any</em> kind of R data,
 including <a href="https://rdrr.io/r/base/vector.html" class="external-link">vectors</a> or objects like <a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm fits</a>
 or <a href="https://rdrr.io/r/base/table.html" class="external-link">tables</a>.
-If <code>drop = FALSE</code>, the results will instead be returned in a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table()</a></code>.</p>
+If <code>drop = FALSE</code>, the results will instead be returned in a <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table()</a></code>.</p>
 <p>If you are working with <a href="groupHumdrum.html">grouped data</a>,
 the <code>drop = FALSE</code> output (<code>data.table</code>) will include all grouping columns as well
 as the results of your expressions.
@@ -536,7 +536,7 @@ The only differences between these methods is their default <code>recycle</code>
 added to the output <a href="humdrumRclass.html">humdrumR data</a>.
 These new fields become the <a href="selectedFields.html">selected fields</a> in the output.
 You can explicitly name newly created fields (recommended), or allow <code>humdrumR</code> to automatically name them (details below).
-When using <code>with(..., drop = FALSE)</code> or <code>summarize(..., drop = FALSE)</code>, the column names of the output <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a>
+When using <code>with(..., drop = FALSE)</code> or <code>summarize(..., drop = FALSE)</code>, the column names of the output <a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table</a>
 are determined in the same way.</p>
 <p>Note that <code>within()</code>, <code>mutate()</code>, and <code>reframe()</code> will (attempt to) put <em>any</em> result back into your
 <a href="humdrumRclass.html">humdrumR data</a>...even if it doesn't make much sense.
@@ -637,7 +637,7 @@ in these cases, it may be hard to predict which data lands where.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmprWKXoC/temp_libpath1ece19b07056/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -751,7 +751,7 @@ in these cases, it may be hard to predict which data lands where.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmprWKXoC/temp_libpath1ece19b07056/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

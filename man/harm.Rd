@@ -5,6 +5,7 @@
 \alias{harm.default}
 \alias{roman.default}
 \alias{roman.humdrumR}
+\alias{roman}
 \title{Roman numeral representations of harmony}
 \usage{
 \method{harm}{default}(
@@ -26,6 +27,15 @@
 )
 
 \method{roman}{humdrumR}(x, ...)
+
+roman(
+  x,
+  ...,
+  Key = NULL,
+  transposeArgs = list(),
+  parseArgs = list(),
+  inPlace = FALSE
+)
 }
 \arguments{
 \item{x}{\emph{\strong{An \code{atomic} vector.}}
