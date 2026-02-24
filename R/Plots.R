@@ -930,12 +930,12 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
    
     
     if (line) {
-      by(data.frame(.x = x, .y = y, .col = output$col$col), output$col$col,
+      by(cbind(data.frame(.x = x, .y = y), groups), groups,
          \(df) {
            with(df, {
              .y <- .y[order(.x)]
              .x <- .x[order(.x)]
-             points(.x, .y, col = .col[1], type = 'l', ...)
+             points(.x, .y, col = col[1], type = 'l')
            })
          })
       
@@ -2680,7 +2680,7 @@ draw_mean <- function(x, y, groups, cex = 1, conditional) {
 }
 
 
-draw_counts <- function(x, y, counts, col, width, cex = .8, type = 'beside', horizontal = TRUE) {
+draw_counts <- function(x, y, counts, col, width, cex = .8, type = 'beside', horizontal = FALSE) {
   counts <- prettyN(counts, expr = TRUE)
   
   if (type == 'stacked') {

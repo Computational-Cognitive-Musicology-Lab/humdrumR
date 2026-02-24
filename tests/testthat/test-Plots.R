@@ -98,7 +98,7 @@ if (FALSE) {
 
 
 
-if (TRUE) {
+if (FALSE) {
 # These tests must be inspected manually ,so if (FALSE)
 
 
@@ -152,18 +152,18 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                                                         checkboxInput('normalReference', 'normalReference', value = FALSE),
                                                         checkboxInput('showCounts', 'showCounts', value = FALSE),
                                                         checkboxInput('showPoints', 'showPoints', value = FALSE),
-                                                        checkboxInput('global_stats', 'global_stats', value = FALSE),
                                                         checkboxInput('mean', 'mean', value = FALSE),
                                                         checkboxInput('line', 'line', value = FALSE),
                                                         checkboxInput('heat', 'heat', value = FALSE),
+                                                        checkboxInput('horizontal', 'horizontal', value = FALSE),
                                                         checkboxInput('violin', 'violin', value = FALSE),
                                                         selectInput('jitter', 'jitter', choices = c('none', 'x', 'y', 'xy')),
                                                         selectInput('log', 'log', choices =  c('none', 'x', 'y', 'xy')),
                                                         textInput('quantiles', 'Quantiles', value = ''),
-                                                        textInput('xlab', 'xlab', value = 'none'),
-                                                        textInput('ylab', 'ylab', value = 'none'),
-                                                        textInput('main', 'main', value = 'none'),
-                                                        textInput('sub', 'sub', value = 'none'),
+                                                        textInput('xlabel', 'xlabel', value = 'none'),
+                                                        textInput('ylabel', 'ylabel', value = 'none'),
+                                                        textInput('title', 'title', value = 'none'),
+                                                        textInput('subtitle', 'subtitle', value = 'none'),
 
                                                         sliderInput('height', 'Plot height', min = 400, max = 1600, value = 1100, step = 100),
                                                         sliderInput('width', 'Plot width', min = 400, max = 3000, value = 2300, step = 100)),
