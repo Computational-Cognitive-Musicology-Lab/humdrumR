@@ -24,18 +24,18 @@ This article explains some of the features R and  `r hm` have for extracting cou
 # Counting things
 
 Nearly all of our articles, from the very [start](GettingStarted.html#counting-things "Getting started with humdrumR > Counting things"), have made use of the `count()` function.
-This is a `r hm` workhorse function, which is used to count the number of unique values in a vector, or unique combinations of values across combinations of vectors.
+This is a `r hm` workhorse function, which is used to count the number of unique values in a singe vector, or unique *combinations of values* across multiple of vectors.
 
 
 Let's take a moment to explain all of what `count()` can do, starting from the basics.
 The `count()` function accepts one or more atomic vectors, all of which must be the same length.
-It counts all the unique combination of values across the vectors.
+It counts all the unique combination of values across the vectors, and builds a table.
 This can be illustrates with some simple examples:
 
 ```{r}
 
-v1 <- c('a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c')
-v2 <- c('A', 'A', 'B', 'B', 'B', 'C', 'C', 'C', 'C')
+v1 <- c('a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a')
+v2 <- c('A', 'A', 'A', 'B', 'B', 'C', 'C', 'C', 'C', 'C')
 
 
 count(v1)
@@ -45,11 +45,38 @@ count(v1, v2)
 
 ```
 
+Each input vector is considered on data dimension.
+You can name your dimensions by naming the input arguments:
+
+```{r}
+count(lowercase = v1, uppercase = v2)
+
+```
+
+If there are `NA` values in your data, they will be counted unless you specify `na.rm = TRUE`.
+
+```{r}
+
+v1[3] <- NA
+
+count(v1, v2)
+
+count(v1, v2, na.rm = TRUE)
+
+```
+
+There is also an option to sort the table. 
+You can use `-1` for increasing sort.
+
+```{r}
+count(v1, v2, sort = TRUE)
+count(v1, v2, sort = -1)
+```
 
 ### Counting Numbers 
 
 If you have a distribution of continuous numbers, you don't want to count every unique value (because there will be one of each).
-So in `r hm`, `count()` will (attempt) to treat numeric values in a smart way, by binning them into ranges using the base R `hist()` function's binning algorithm.
+So`count()` will (attempt) to treat numeric values in a smart way by binning them into ranges using the base R `hist()` function's binning algorithm.
 So for example:
 
 ```{r}
@@ -62,8 +89,8 @@ count(numbers)
 ```
 
 
-Deatils of this process can be controlled using the `binArgs` argument, which must be a list of arguments.
-In particular, you pass arguments to the `hist()` alrgorithm, such as `breaks` (to control the number of bins).
+Details of this process can be controlled using the `binArgs` argument, which must be a list of arguments passed to [hist()].
+A particularly useful one is `breaks`, which controls the number of, or locations of, bins.
 
 ```{r}
 
@@ -88,8 +115,255 @@ numbers |> round(1) |> as.character() |> count()
 > However, `count()` is fully integrated into the `dplyr` universe and workflow, so we recommend using it.
 
 
+## Probabilities
+
+A close partner to [count()] is the [pdist()] function, which computes the *proportion* of input data is each unique value.
+
+```{r}
+
+pdist(v1)
+pdist(v2)
+
+pdist(v1, v2)
+
+
+```
+
+Pdist has all the same functions as [count()], plus one other important argument: `condition`.
+This argument can be used to calculate the conditional proportions.
+You can indicate one dimension to condition on, either by number of name:
+
+```{r}
+
+pdist(v1, v2, condition = 2)
+
+pdist(lower = v1, upper = v2, condition = 'lower')
+
+```
+
+### Marginal disributions
+
+When you have a multi-dimensional count/proportion table, you might want to "collapse" one dimension to get what's called the marginal distribution.
+You can do this with a [count()]/[pdist()] table by simply indexing by dimension (by name or index):
+
+```{r}
+
+mytable <- pdist(lower = v1, upper = v2)
+
+mytable[ , 'lower']
+
+mytable[ , 2]
+
+
+```
+
+
+## Combining tables
+
+Sometimes, we make multiple tables of different data samples:
 
 
 
+```{r}
+
+bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*.krn')
 
 
+chor1 <- bach |> filter(File == 1) |> kern(simple = TRUE) |> count()
+chor2 <- bach |> filter(File == 2) |> kern(simple = TRUE) |> count()
+
+chor1
+chor2
+
+```
+
+Notice that our `chor1` and `chor2` tables have slightly different categories---for example, the second chorale includes D#s, G#s and A#s which never occur in the first chorale.
+What if we want to compare, or combine these two tables?
+Luckily, `r hm` makes this easy:
+
+```{r}
+chor1 + chor2
+
+cbind(chor1, chor2)
+
+```
+Note that this won't work unless the tables have the same dimension names---it worked here because both tables have one dimension called `Kern`.
+
+
+# Modeling probability and likelihood
+
+We can consider the empirical distribution of data in a sample as an estimate of a true probability distribution.
+The empirical distribution is a simple *model* of the true data distribution.
+Sometimes, we'd like to ask what probability does our model assign to each data point.
+This kind of "retrospective" probability assignment is called a *likelihood*.
+We can do this quite easily, using the [like()] function.
+
+Consider this simple vector again:
+
+```{r}
+
+v1 <- c('a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a')
+v2 <- c('A', 'A', 'A', 'B', 'B', 'C', 'C', 'C', 'C', 'C')
+
+p1 <- pdist(v1)
+
+```
+
+If we imagine that `v1` is created by randomly drawing from an underlying probability distribution, then `p1` is an estimate of that probability distribution---`p1` is our "model" of `v1`.
+We can then compute the estimated likelihood of observing each data point, given that model:
+
+```{r}
+
+like(v1)
+
+```
+
+What's happening here?
+Notice that [like()] assigns each data point a likelihood by looking that value up in the `p1` table.
+For example, `b` makes up `.3` of the `v1`, so every time there is `b` in the input, [like()] assigns `.3`.
+
+We can do the same thing with two dimensions.
+
+
+
+```{r}
+
+pdist(v1, v2)
+
+like(v1, v2)
+
+```
+
+[like()] now looks at the empirical probability of every pair of values (using [pdist()] under the hood), and assigns that likelihood to each index.
+
+But, what if we knew about the uppercase numbers (`v2`) in advance?
+Well, then we would want to look at the conditional distribution, which we can do:
+
+
+```{r}
+
+like(lower = v1, upper = v2, condition = 'upper')
+
+```
+### Using a different model
+
+There is no "true" or correct probability model for a given data.
+Part of our job is to figure out good models of our data.
+Estimating models from the data (like we with [pdist()]) is a one simple approach.
+However, we might sometimes want to assign probabilities to data based on a different model.
+For example, what if we observed a different sample of lowercase letters:
+
+```{r}
+v3 <- c('a', 'a','b','b','b','b','b','c','c')
+```
+
+There's a much bigger proportion of bs here then we same in `v1`.
+What if we, for whatever reason, think the `v1` model we had is a better model of the "true" probability distribution we are intrested in?
+We could assign likelihoods to `v3` but use the `v1` probability model.
+Look what the difference is:
+
+
+```{r}
+
+like(lower = v3)
+
+like(lower = v3, model = pdist(lower = v1))
+
+```
+
+We can do this sort of thing with real data all the time.
+For example, what if we want to assign probabilities to the notes in the first Bach chorale, based on the empirical probabilities observed in all the *other* chorales?
+
+```{r}
+
+
+bach |>
+   filter(File != 1) |>
+   kern(simple = TRUE)  |>
+   pdist() -> allExcept1
+
+bach |>
+  kern(simple = TRUE) |>
+  within(like(Kern, model = allExcept1))
+   
+
+
+```
+
+# Information Theory
+
+
+You might not realize it, but we're almost doing information theory!
+
+
+Working with actually likelihoods, as we do above, is rarely a good idea, because in practice the likelihoods can get so small that we run into problems representing them in our computers.
+Thus, we usually, compute the log of the likelihood, like this:
+
+```{r}
+bach |>
+  kern(simple = TRUE) |>
+  within(log(like(Kern, model = allExcept1)))
+   
+
+```
+
+That's the "log likelihood".
+
+Log likelihoods are always negative numbers, with more negative numbers indicating lower probability.
+In many fields, we like to invert that by multiplying the log likelihood by `-1`.
+If we do this, we have whats called the *information content*.
+The smaller the information content the *more likely*, and thus predictable and less informative, a data point is.
+The higher the information content, the *less likely*, and thus more surprising and more informative, a data point is.
+These ideas are the core of **information theory**.
+We can estimate the information content directly using the [info()] function, which we can use just like the [like()] function:
+
+```{r}
+
+info(v1)
+
+bach |>
+  kern(simple = TRUE) |>
+  within(info(Kern, model = allExcept1))
+
+```
+
+
+## Entropy
+
+Our information content values are our *estimates* of how much information each data point communicates.
+If we ask how much information a distribution has *on average*, this is called the **entropy**.
+Entropy is simply the average information content.
+It is actually a property of a probability distribution:
+
+```{r}
+
+v1 |> pdist() |> entropy()
+
+
+bach |>
+  kern(simple = TRUE) |>
+  entropy()
+
+```
+
+### Cross entropy
+
+The entropy of the conditional probability distribution is called the conditional entropy.
+
+
+### Using a different model
+
+If we compute entropy of one dataset using a different probability mode, this is called the cross entropy:
+
+```{r}
+
+bach |>
+  kern(simple = TRUE) |>
+  with(xentropy(Kern, model = allExcept1))
+```
+
+Notice that the cross entropy is always going to be higher than the entropy, because the entropy is estimated directly on itself, it "fits" its distribution as well as it can.
+The difference between the cross entropy and the entropy is called the [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence), more commonly *kld*.
+If the kld is small, it means the model matches the data pretty closely.
+
+## Mutual Information

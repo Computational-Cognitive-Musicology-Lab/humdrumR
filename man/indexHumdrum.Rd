@@ -2,9 +2,9 @@
 % Please edit documentation in R/Subset.R
 \name{indexHumdrum}
 \alias{indexHumdrum}
-\alias{[,humdrumR,missing,ANY,ANY-method}
-\alias{[,humdrumR,numeric,ANY,ANY-method}
-\alias{[,humdrumR,character,ANY,ANY-method}
+\alias{[,humdrumR,missing,ANY-method}
+\alias{[,humdrumR,numeric,ANY-method}
+\alias{[,humdrumR,character,ANY-method}
 \alias{[[,humdrumR,numeric,missing-method}
 \alias{[[,humdrumR,missing,numeric-method}
 \alias{[[,humdrumR,character,missing-method}
