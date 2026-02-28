@@ -2404,12 +2404,7 @@ mutual.default <- function(..., base = 2) {
 ### like() ----
 
 
-#' @export
-like <- function(..., model) {
-  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
-  
-  UseMethod('like')
-}
+
 
 #' @rdname entropy
 #' @export
@@ -2417,6 +2412,14 @@ info <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = 
   -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
        base = base)
 }
+
+#' @export
+like <- function(..., model) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
+  
+  UseMethod('like')
+}
+
 
 #' @export
 like.default <- function(..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
@@ -2445,6 +2448,25 @@ like.data.frame <- function(df, ..., model) {
   
 }
 
+
+#' @export 
+# like.humdrumR <- humdrumRmethod(like.default)
+like.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FALSE, sort = FALSE, .drop = FALSE, binArgs = list()) {
+
+  quos <- rlang::enexprs(...)
+
+  humtab <- getHumtab(x, 'D')
+  if (length(quos)) {
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
+   } else {
+    selectedFields <- lapply(rlang::sym, selectedFields(x))
+    names(selectedFields) <- selectedFields
+  }
+  rlang::eval_tidy(rlang::expr(within(x, like(!!!quos, model = !!model, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs))))
+
+}
+
+# like <- humdrumRgeneric(like.default)
 
 ### pentropy() ----
 

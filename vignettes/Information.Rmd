@@ -45,7 +45,7 @@ count(v1, v2)
 
 ```
 
-Each input vector is considered on data dimension.
+Each input vector is considered one data dimension.
 You can name your dimensions by naming the input arguments:
 
 ```{r}
@@ -73,10 +73,13 @@ count(v1, v2, sort = TRUE)
 count(v1, v2, sort = -1)
 ```
 
-### Counting Numbers 
 
-If you have a distribution of continuous numbers, you don't want to count every unique value (because there will be one of each).
-So`count()` will (attempt) to treat numeric values in a smart way by binning them into ranges using the base R `hist()` function's binning algorithm.
+
+
+#### Counting Real Numbers 
+
+If you have a distribution of continuous numbers, you probably don't want to count every unique value (because there will be one of each).
+Thus, `count()` will (attempt) to treat numeric values in a smart way by binning them into ranges using the base R `hist()` function's binning algorithm.
 So for example:
 
 ```{r}
@@ -89,7 +92,7 @@ count(numbers)
 ```
 
 
-Details of this process can be controlled using the `binArgs` argument, which must be a list of arguments passed to [hist()].
+The binning process can be controlled using the `binArgs` argument, which must be a list of arguments passed to [hist()].
 A particularly useful one is `breaks`, which controls the number of, or locations of, bins.
 
 ```{r}
@@ -115,9 +118,64 @@ numbers |> round(1) |> as.character() |> count()
 > However, `count()` is fully integrated into the `dplyr` universe and workflow, so we recommend using it.
 
 
+### Counting real data
+
+
+Enough with the artificial examples; let's have a go at using [count()] on some musical data.
+This should feel familiar, given we've done similar stuff before in other articles:
+
+```{r}
+
+bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
+
+bach |> 
+  mutate(Pitch = kern(Token, simple = TRUE),
+         Rhythm = recip(Token)) -> bach
+
+bach |> count(Pitch, na.rm = TRUE)
+
+bach |> count(Rhythm)
+
+bach |> count(Pitch, Rhythm, sort = TRUE)
+
+```
+
+Woh, there are a lot of `.` values in that last table, which is a shorthand for "zero."
+This is because [count()], by default, recognizes every possible combination of values that could occur, even if they never occur.
+Do get rid of these unused levels, we can set `.drop = TRUE`.
+
+```{r}
+bach |> count(Pitch, Rhythm, sort = TRUE, .drop = TRUE)
+
+```
+
+
+However, we might find all those `1`s uninteresting as well.
+Luckily, the output of `count()` is a data.frame, and we can filter it:
+
+```{r}
+
+bach |> 
+  count(Pitch, Rhythm, sort = TRUE) |>
+  filter(n > 20)
+
+```
+
+Or maybe we'd like to see only the counts for quarter and eighth notes:
+
+```{r}
+
+bach |> 
+  count(Pitch, Rhythm, sort = TRUE) |>
+  filter(Rhythm %in% c('4', '8'))
+
+```
+
+
 ## Probabilities
 
-A close partner to [count()] is the [pdist()] function, which computes the *proportion* of input data is each unique value.
+A close partner to [count()] is the [pdist()] function, which computes the *proportion* of input data is each unique value---which we can interpret as *probabilities*:
+
 
 ```{r}
 
@@ -129,9 +187,9 @@ pdist(v1, v2)
 
 ```
 
-Pdist has all the same functions as [count()], plus one other important argument: `condition`.
-This argument can be used to calculate the conditional proportions.
-You can indicate one dimension to condition on, either by number of name:
+Pdist has all the same arguments as [count()] (`sort`, `.drop`, etc.), plus one other important argument: `condition`.
+This argument can be used to calculate the *conditional probabilities*.
+You can indicate one dimension to condition on, either by index of name:
 
 ```{r}
 
@@ -139,21 +197,31 @@ pdist(v1, v2, condition = 2)
 
 pdist(lower = v1, upper = v2, condition = 'lower')
 
+bach |>
+  pdist(Pitch, Rhythm, condition = 'Rhythm')
+
 ```
 
-### Marginal disributions
+So here we are seeing the probability of each pitch value *given* each possible rhythmic value.
+
+## Marginal disributions
 
 When you have a multi-dimensional count/proportion table, you might want to "collapse" one dimension to get what's called the marginal distribution.
-You can do this with a [count()]/[pdist()] table by simply indexing by dimension (by name or index):
+You can do this with a [count()]/[pdist()] table by simply indexing by dimension (either by name or index):
 
 ```{r}
 
-mytable <- pdist(lower = v1, upper = v2)
+bach |>
+  count(Pitch, Rhythm) -> twodim
 
-mytable[ , 'lower']
+bach |> 
+  pdist(Pitch, Rhythm, Spine) -> threedim
 
-mytable[ , 2]
 
+twodim[ , 'Rhythm']
+
+threedim[ , 'Rhythm']
+threedim[ , 2:3]
 
 ```
 
@@ -165,8 +233,6 @@ Sometimes, we make multiple tables of different data samples:
 
 
 ```{r}
-
-bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*.krn')
 
 
 chor1 <- bach |> filter(File == 1) |> kern(simple = TRUE) |> count()
@@ -187,23 +253,30 @@ chor1 + chor2
 cbind(chor1, chor2)
 
 ```
-Note that this won't work unless the tables have the same dimension names---it worked here because both tables have one dimension called `Kern`.
 
+Note that this won't work unless the tables have the same dimension names---it worked here because both tables have one dimension called `Kern`.
+Also, notice that the result of using `cbind` is now a "plain" R data.frame---this is because it is not a single distribution of data anymore, but rather, two distriubutions pasted together.
 
 # Modeling probability and likelihood
 
-We can consider the empirical distribution of data in a sample as an estimate of a true probability distribution.
-The empirical distribution is a simple *model* of the true data distribution.
-Sometimes, we'd like to ask what probability does our model assign to each data point.
-This kind of "retrospective" probability assignment is called a *likelihood*.
-We can do this quite easily, using the [like()] function.
 
+Statisticians refer to the sorts of distributions created by [count()] or and [pdist()] as *empirical distributions*---distributions of a sample of data.
+We will often regard an empirical distribution as an estimate, or *model*, of some real-world probability distribution.
+For example, the Bach chorles are often considered an idealized model of "common practice tonality" in general.
+If we observe, for example, that $\approx$1.04% of notes in our Bach chorale data are E flats, we can (if would be so bold) that aboud 1.04% of notes in "common practice music" more generally are E flats.
+Or to put it in a probabilistic way, if we randomly select a note from a common-practice piece, the probability of that note being an E flat is about 1.04%---according to our model, which is based on our empirical analysis of the first 10 chorales.
+
+
+### Likelihood
+
+Sometimes, we'd like to ask what probability a model assign to each data point.
+This kind of "retrospective probability" assignment is called a *likelihood*.
+In `r hm`, we can assign likelihoods quite easily using the [like()] function.
 Consider this simple vector again:
 
 ```{r}
 
 v1 <- c('a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'a')
-v2 <- c('A', 'A', 'A', 'B', 'B', 'C', 'C', 'C', 'C', 'C')
 
 p1 <- pdist(v1)
 
@@ -220,46 +293,54 @@ like(v1)
 
 What's happening here?
 Notice that [like()] assigns each data point a likelihood by looking that value up in the `p1` table.
-For example, `b` makes up `.3` of the `v1`, so every time there is `b` in the input, [like()] assigns `.3`.
-
-We can do the same thing with two dimensions.
-
+For example, `b` makes up `.3` of `v1`, so every time there is `b` in the input, [like()] assigns `.3`.
+If we do this with our Bach data, we'd see that every E flat that appears gets that 1.04% value that we just talked about:
 
 
 ```{r}
 
-pdist(v1, v2)
-
-like(v1, v2)
+bach |>
+  like(Pitch)
 
 ```
 
-[like()] now looks at the empirical probability of every pair of values (using [pdist()] under the hood), and assigns that likelihood to each index.
 
-But, what if we knew about the uppercase numbers (`v2`) in advance?
-Well, then we would want to look at the conditional distribution, which we can do:
-
+We can extend this to two (or more) dimensions, where each likelihood is determined as th empirical joint probability of the input variables:
 
 ```{r}
 
-like(lower = v1, upper = v2, condition = 'upper')
+bach |> 
+  like(Pitch, Rhythm)
 
 ```
+
+
+Here's a thought: what if we know the rhythm value in advance, and we want to estimate the likelihood of each pitch given the rhythm.
+This is the "conditional likelihood," and we already say how we can do this with [pdist()]:
+
+```{r}
+
+bach |> 
+  within(like(Pitch, Rhythm, condition = 'Rhythm'))
+
+```
+
 ### Using a different model
 
-There is no "true" or correct probability model for a given data.
-Part of our job is to figure out good models of our data.
-Estimating models from the data (like we with [pdist()]) is a one simple approach.
-However, we might sometimes want to assign probabilities to data based on a different model.
+Remember, there is no "true" or correct probability model for a given data.
+We should never say the "probability of E flat *is* 1.04%"---rather, the "estimated probability of E flat."
+It is very common, as a basic analysis step, to compute the empirical distribution of a data sample, then immediately use that distribution as a probability model of that data...essentially, using the data as a model of itself.
+This is what [like()] does by default.
+However, we might sometimes want to take a different tack, assigning likelihoods to our data based on a different model.
 For example, what if we observed a different sample of lowercase letters:
 
 ```{r}
 v3 <- c('a', 'a','b','b','b','b','b','c','c')
 ```
 
-There's a much bigger proportion of bs here then we same in `v1`.
-What if we, for whatever reason, think the `v1` model we had is a better model of the "true" probability distribution we are intrested in?
-We could assign likelihoods to `v3` but use the `v1` probability model.
+There's a much bigger proportion of bs here then we saw in `v1`.
+If we, for whatever reason, think the `v1` model we had is a better model of the "true" probability distribution we are interested in, we could assign likelihoods to `v3` but use the `v1` probability model.
+To do this, use the `model` argument.
 Look what the difference is:
 
 
@@ -271,8 +352,8 @@ like(lower = v3, model = pdist(lower = v1))
 
 ```
 
-We can do this sort of thing with real data all the time.
-For example, what if we want to assign probabilities to the notes in the first Bach chorale, based on the empirical probabilities observed in all the *other* chorales?
+We do this sort of thing with real data all the time.
+For example, we might want to assign probabilities to the notes in the first Bach chorale, based on the empirical probabilities observed in all the *other* chorales?
 
 ```{r}
 
@@ -285,15 +366,12 @@ bach |>
 bach |>
   kern(simple = TRUE) |>
   within(like(Kern, model = allExcept1))
-   
-
-
 ```
+
+
 
 # Information Theory
 
-
-You might not realize it, but we're almost doing information theory!
 
 
 Working with actually likelihoods, as we do above, is rarely a good idea, because in practice the likelihoods can get so small that we run into problems representing them in our computers.
@@ -310,12 +388,12 @@ bach |>
 That's the "log likelihood".
 
 Log likelihoods are always negative numbers, with more negative numbers indicating lower probability.
-In many fields, we like to invert that by multiplying the log likelihood by `-1`.
-If we do this, we have whats called the *information content*.
-The smaller the information content the *more likely*, and thus predictable and less informative, a data point is.
-The higher the information content, the *less likely*, and thus more surprising and more informative, a data point is.
-These ideas are the core of **information theory**.
-We can estimate the information content directly using the [info()] function, which we can use just like the [like()] function:
+By convention, we like to invert that relationship by multiplying the log likelihood by `-1`.
+If we do this, we get whats called the *information content* of each data point.
+The smaller the information content the *more likely*---and thus more predictable and less informative---a data point is.
+The higher the information content, the *less likely*---and thus more surprising and more informative---a data point is.
+This way of interpreting inverted log probabilities is the core of **information theory**.
+We can estimate the information content directly using the [info()] function, which is used just like the [like()] function:
 
 ```{r}
 
@@ -324,16 +402,15 @@ info(v1)
 bach |>
   kern(simple = TRUE) |>
   within(info(Kern, model = allExcept1))
-
 ```
 
 
 ## Entropy
 
-Our information content values are our *estimates* of how much information each data point communicates.
-If we ask how much information a distribution has *on average*, this is called the **entropy**.
-Entropy is simply the average information content.
-It is actually a property of a probability distribution:
+Information content is related to the (log)likelihood, in that we are assigning a value to every data point.
+If we have a random variable (or sample from one), we can also ask how much information each data point has on average.
+This is called the (Shannon) **entropy**.
+Entropy is simply the average information content---which is really a property of the probability distribution.
 
 ```{r}
 
@@ -346,10 +423,48 @@ bach |>
 
 ```
 
+We should remind ourselves that what we are computing here is the *empirical entropy*---the entropy of the probability distribution we are estimating from our data.
+The *true* entropy of pitch in common practice music is certainly not this exact number, but we might argue/hope that the empirical entropy we observe in these ten Bach chorales is a reasonable estimate of the true entropy of common practice music.
+
+### Multi-dimensional entropy
+
+The idea of entropy can be extended to multiple dimensions---its really no different than what we've been doing throughout this article.
+We can compute the empirical *joint* entropy of two or more variables like this:
+
+
+```{r}
+
+bach |>
+  entropy(Pitch, Rhythm)
+
+bach |>
+  entropy(Pitch, Rhythm, Spine)
+
+```
+
+
+Alternatively, we can compute the *conditional entropy*---which is simply the average information content of the *conditional probabilities*.
+As before, we just need to provide that `conditional` argument:
+
+```{r}
+bach |>
+  entropy(Pitch, Rhythm, condition = 'Rhythm')
+
+bach |> with(entropy(Pitch, Pitch[lag = -1], condition=2))
+
+```
+
+
+### Mutual Information
+
+
+
+
 ### Cross entropy
 
 The entropy of the conditional probability distribution is called the conditional entropy.
 
+## Mutual Information
 
 ### Using a different model
 
@@ -366,4 +481,3 @@ Notice that the cross entropy is always going to be higher than the entropy, bec
 The difference between the cross entropy and the entropy is called the [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence), more commonly *kld*.
 If the kld is small, it means the model matches the data pretty closely.
 
-## Mutual Information
