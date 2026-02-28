@@ -2431,6 +2431,8 @@ like.data.frame <- function(df, ..., model) {
   if (missing(model) || is.null(model))  {
     model <- if (is.numeric(df[[1]])) lm(df[,ncol(df):1]) else model <- do.call('pdist', list(df, ...))
     
+  } else {
+    checks(model, xclass(c('lm', 'probability')), argname = 'model', seealso = '?like')
   }
   
   if (inherits(model, 'probability')) {
