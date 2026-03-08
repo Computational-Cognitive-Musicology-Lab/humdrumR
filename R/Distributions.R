@@ -2046,14 +2046,17 @@ entropy.probability <-  function(pdist, model, condition = NULL, base = 2) {
             } else {
               # cross entropy of q and p
               aligned <- alignDistributions(pdist, model, funcname = 'xentropy')
-              observed <- aligned$X[[1]]
               expected <- aligned$X[[2]]
+              observed <- aligned$X[[1]]
               equation <- 'H(p, q)'
           }
 
-          expected <- ifelse(expected > 0L, log(expected, base = base), 0) 
+          # expected <- ifelse(expected > 0L, log(expected, base = base), 0) 
+          valid <- expected > 0
+          expected <- expected[valid]
+          observed <- observed[valid] / sum(observed[valid])
             
-          setNames(-sum(observed * expected), equation)
+          setNames(-sum(observed * log(expected, base = base)), equation)
 }
 
 

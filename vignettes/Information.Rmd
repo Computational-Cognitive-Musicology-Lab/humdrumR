@@ -24,7 +24,7 @@ This article explains some of the features R and  `r hm` have for extracting cou
 # Counting things
 
 Nearly all of our articles, from the very [start](GettingStarted.html#counting-things "Getting started with humdrumR > Counting things"), have made use of the `count()` function.
-This is a `r hm` workhorse function, which is used to count the number of unique values in a singe vector, or unique *combinations of values* across multiple of vectors.
+This function can be used to count the number of unique values in a singe vector, or the unique *combinations of values* across multiple of vectors.
 
 
 Let's take a moment to explain all of what `count()` can do, starting from the basics.
@@ -45,7 +45,7 @@ count(v1, v2)
 
 ```
 
-Each input vector is considered one data dimension.
+Each input vector is considered one data "dimension."
 You can name your dimensions by naming the input arguments:
 
 ```{r}
@@ -73,13 +73,16 @@ count(v1, v2, sort = TRUE)
 count(v1, v2, sort = -1)
 ```
 
+> In base R, the `table()` function serves basically the same role of the `count()` function.
+> You can use `table()` in many areas where you can use `count()`---you'll see that their output is essentially equivalent, but in a different structure (a `matrix` rather than a `data.frame`).
+> However, `count()` is fully integrated into the `dplyr` universe and workflow, so we recommend using it.
 
 
 
 #### Counting Real Numbers 
 
 If you have a distribution of continuous numbers, you probably don't want to count every unique value (because there will be one of each).
-Thus, `count()` will (attempt) to treat numeric values in a smart way by binning them into ranges using the base R `hist()` function's binning algorithm.
+Thus, `count()` will (attempt) to treat numeric values in a smart way by binning them into ranges using the base-R `hist()` function's binning algorithm.
 So for example:
 
 ```{r}
@@ -93,7 +96,7 @@ count(numbers)
 
 
 The binning process can be controlled using the `binArgs` argument, which must be a list of arguments passed to [hist()].
-A particularly useful one is `breaks`, which controls the number of, or locations of, bins.
+A particularly useful one is `breaks`, which controls the number of, or location of, bins.
 
 ```{r}
 
@@ -112,10 +115,6 @@ numbers |> round(1) |> as.character() |> count()
 
 ```
 
-
-> In base R, the `table()` function serves basically the same role of the `count()` function.
-> You can use `table()` in many areas where you can use `count()`---you'll see that their output is essentially equivalent, but in a different structure (a `matrix` rather than a `data.frame`).
-> However, `count()` is fully integrated into the `dplyr` universe and workflow, so we recommend using it.
 
 
 ### Counting real data
@@ -140,9 +139,9 @@ bach |> count(Pitch, Rhythm, sort = TRUE)
 
 ```
 
-Woh, there are a lot of `.` values in that last table, which is a shorthand for "zero."
-This is because [count()], by default, recognizes every possible combination of values that could occur, even if they never occur.
-Do get rid of these unused levels, we can set `.drop = TRUE`.
+Woh, there are a lot of `.` values in that last table!---that dot is a shorthand for "zero."
+The reason there are so many zeros is because [count()], by default, recognizes every possible combination of values that could occur, even if they never occur.
+To get rid of these unused levels, we can set `.drop = TRUE`.
 
 ```{r}
 bach |> count(Pitch, Rhythm, sort = TRUE, .drop = TRUE)
@@ -150,8 +149,8 @@ bach |> count(Pitch, Rhythm, sort = TRUE, .drop = TRUE)
 ```
 
 
-However, we might find all those `1`s uninteresting as well.
-Luckily, the output of `count()` is a data.frame, and we can filter it.
+What if don't care about combinations that only occurred once either?
+Luckily, the output of `count()` is a data.frame, and thus we can filter it.
 The count value in our table is stored in the field called `n`, which we can reference:
 
 ```{r}
@@ -175,7 +174,8 @@ bach |>
 
 ## Probabilities
 
-A close partner to [count()] is the [pdist()] function, which computes the *proportion* of input data is each unique value---which we can interpret as *probabilities*.
+The [pdist()] function is a partner to the [count()] function.
+It computes the *proportion* of input data which equals each unique value---which we can interpret as *probabilities*.
 Note that [pdist()] has all the same arguments as [count()] (`sort`, `.drop`, etc.).
 
 
@@ -194,9 +194,9 @@ bach |>
 
 ```
 
-Cool, but what are the `~` and `m` about?
+Cool! But what are the `~` and `m` about?
 The tilde (`~`) means that the probability printed in the table is being rounded---because who wants to see their screen filled with numbers like `0.0012449583492384`? 
-By rounding off probabilities when showing you the [pdist()] table, `r hm` keeps the (relatively) readable.
+By rounding off probabilities when showing you the [pdist()] table, `r hm` keeps it (relatively) readable.
 The little `m` serves a similar purpose: the "m" is short for "milli," which means the probability is actually one thousand times smaller than printed.
 Thus, the probability `0.000012` will print as `0.012m`---again, to keep things (relatively) readable.
 If you get really small values, you might see a $\mu$ printed, which is short for "micro" (one millionth).
@@ -206,7 +206,7 @@ If we really want a readable table, we might just want to filter out the really 
 ```{r}
 bach |>  
   pdist(Pitch, Rhythm) |>
-  filter(p > .0001)
+  filter(p > .001)
 
 ```
 
@@ -214,8 +214,8 @@ bach |>
 
 ### Joint and conditional probabilities
 
-When we apply [pdist()] to two or more variables, it computes the *joint probability*: the probability of each combination of values.
-These probabilites (the entire multidimensional table) will sum to 1.
+When we apply [pdist()] to two or more variables, it by default computes the *joint probability*: the probability of each combination of values.
+These probabilities (the entire multidimensional table) will sum to 1.
 It is often useful to instead compute *conditional probabilities*: the probabilities of observing some variables *given* other variables.
 We can do this with the `condition` argument.
 Simply indicate which dimension(s) to condition on, either by index or by name:
@@ -237,7 +237,7 @@ Each *column* in this table will sum to 1.
 ## Marginal distributions
 
 When you have a multi-dimensional count/proportion table, you might want to "collapse" some dimensions, to get what's called the marginal distribution.
-You can do this with a [count()]/[pdist()] table by simply indexing by dimension (either by name or by index):
+You can do this with a [count()]/[pdist()] table simply, by indexing by dimension (either by name or by index):
 
 ```{r}
 
@@ -268,8 +268,8 @@ Sometimes, we make multiple tables of different data samples:
 ```{r}
 
 
-chor1 <- bach |> filter(File == 1) |> kern(simple = TRUE) |> count()
-chor2 <- bach |> filter(File == 2) |> kern(simple = TRUE) |> count()
+chor1 <- bach |> filter(File == 1) |> kern(simple = TRUE) |> count(Pitch)
+chor2 <- bach |> filter(File == 2) |> kern(simple = TRUE) |> count(Pitch)
 
 chor1
 chor2
@@ -286,19 +286,19 @@ chor1 + chor2
 cbind(chor1, chor2)
 
 ```
-
+They correctly combined (by level).
 Note that this won't work unless the tables have the same dimension names---it worked here because both tables have one dimension called `Kern`.
-Also, notice that the result of using `cbind` is now a "plain" R data.frame---this is because it is not a single distribution of data anymore, but rather, two distriubutions pasted together.
+Also, notice that the result of using `cbind` is now a "plain" R data.frame---this is because it is not a single distribution of data anymore, but rather, two distributions pasted together.
 
 
 ### Estimating joint probabilities
 
 We've [seen][#marginal-distributions] that we can take a two (or more) dimensional table and "collapse" one dimension to get a 1-dimensional marginal distribution.
 What if want to reverse this?
-Combine two one-dimensional distributions to get a two dimensional one.
+Combine two one-dimensional distributions to get a two dimensional one?
 Wait! 
-There is not general way to correctly to do this---just because we know the marginal distributions of two variables doesn't mean we know what their joint distribution would be.
-However, if we **assume** that the two distributions are *independent* of each other, we can compute what their joint distribution would be---it ends up being the product of the marginal distributions.
+There is *no a general way to correctly to do this*---just because we know the marginal distributions of two variables doesn't mean we know what their joint distribution would be.
+However, if we **assume** that the two distributions are *independent* of each other, we can compute what their joint distribution *would* be---it ends up being the product of the marginal distributions.
 We can think of this as a simple, "naive" estimate of the joint probability.
 
 To illustrate this, let's compute Rhythm and Pitch for our Bach chorales, then combine them.
@@ -324,7 +324,7 @@ bach |>
 
 ```
 
-These tables are, obviously, not exactly the same, because pitch information and rhythm information in the Chorales are not totally independent of each other.
+These tables are, obviously, not exactly the same, because pitch information and rhythm information in the Chorales are *not* totally independent of each other.
 However, if you look closely, they are actually not *that* different.
 Comparing the "naive" (independent) joint distribution of variables with their *actual* joint distribution can be quite useful, as we'll see more below.
 
@@ -346,15 +346,15 @@ bach |>
 
 
 Statisticians refer to the sorts of distributions created by [count()] or and [pdist()] as *empirical distributions*---distributions of a sample of data.
-We will often regard an empirical distribution as an estimate, or *model*, of some real-world probability distribution.
-For example, the Bach chorles are often considered an idealized model of "common practice tonality" in general.
-If we observe, for example, that $\approx$1.04% of notes in our Bach chorale data are E flats, we can (if would be so bold) that aboud 1.04% of notes in "common practice music" more generally are E flats.
-Or to put it in a probabilistic way, if we randomly select a note from a common-practice piece, the probability of that note being an E flat is about 1.04%---according to our model, which is based on our empirical analysis of the first 10 chorales.
+We will often regard a empirical distribution as an estimate, or "model," of some real-world probability distribution.
+For example, the Bach chorales are often considered an idealized model of "common practice tonality" in general.
+If we observe, for example, that $\approx$1.04% of notes in our Bach chorale data are E flats, we might estimate that about 1.04% of notes in "common practice music" more generally are E flats.
+Or to put it in a probabilistic way, if we randomly select a note from a common-practice piece, the *estimated* probability of that note being an E flat is about 1.04%---this is based on our current model, which is based on our empirical analysis of the first 10 chorales.
 
 
 ### Likelihood
 
-Sometimes, we'd like to ask what probability a model assign to each data point.
+Sometimes, we'd like to ask what probability a model assigns to each data point in sample.
 This kind of "retrospective probability" assignment is called a *likelihood*.
 In `r hm`, we can assign likelihoods quite easily using the [like()] function.
 Consider this simple vector again:
@@ -379,7 +379,7 @@ like(v1)
 What's happening here?
 Notice that [like()] assigns each data point a likelihood by looking that value up in the `p1` table.
 For example, `b` makes up `.3` of `v1`, so every time there is `b` in the input, [like()] assigns `.3`.
-If we do this with our Bach data, we'd see that every E flat that appears gets that 1.04% value that we just talked about:
+If we do this with our Bach data, we'd see that every E flat that appears gets that 1.04% (`0.0104`) value that we just talked about:
 
 
 ```{r}
@@ -390,7 +390,7 @@ bach |>
 ```
 
 
-We can extend this to two (or more) dimensions, where each likelihood is determined as th empirical joint probability of the input variables:
+We can extend this to two (or more) dimensions, where each likelihood is estimated from the empirical joint probability of the input variables:
 
 ```{r}
 
@@ -400,8 +400,8 @@ bach |>
 ```
 
 
-Here's a thought: what if we know the rhythm value in advance, and we want to estimate the likelihood of each pitch given the rhythm.
-This is the "conditional likelihood," and we already say how we can do this with [pdist()]:
+Here's a thought: what if we know the rhythm value in advance, and we want to estimate the likelihood of each pitch given the rhythm?
+This is the "conditional likelihood," and we can compute it using the same `condition` rgument we used with [pdist()]:
 
 ```{r}
 
@@ -413,7 +413,7 @@ bach |>
 ### Using a different model
 
 Remember, there is no "true" or correct probability model for a given data.
-We should never say the "probability of E flat *is* 1.04%"---rather, the "estimated probability of E flat."
+We should never say the "probability of E flat *is* 1.04%"---rather, that is our "estimated probability of E flat."
 It is very common, as a basic analysis step, to compute the empirical distribution of a data sample, then immediately use that distribution as a probability model of that data...essentially, using the data as a model of itself.
 This is what [like()] does by default.
 However, we might sometimes want to take a different tack, assigning likelihoods to our data based on a different model.
@@ -424,7 +424,7 @@ v3 <- c('a', 'a','b','b','b','b','b','c','c')
 ```
 
 There's a much bigger proportion of bs here then we saw in `v1`.
-If we, for whatever reason, think the `v1` model we had is a better model of the "true" probability distribution we are interested in, we could assign likelihoods to `v3` but use the `v1` probability model.
+If we, for whatever reason, think the `v1` model we had is a better model of the "true" probability distribution we are interested in, we could assign likelihoods to `v3` but using the `v1` probability model.
 To do this, use the `model` argument.
 Look what the difference is:
 
@@ -438,7 +438,7 @@ like(lower = v3, model = pdist(lower = v1))
 ```
 
 We do this sort of thing with real data all the time.
-For example, we might want to assign probabilities to the notes in the first Bach chorale, based on the empirical probabilities observed in all the *other* chorales?
+For example, we might want to assign probabilities to the notes in the first Bach chorale, based on the empirical probabilities observed in all the *other* chorales.
 
 ```{r}
 
@@ -463,7 +463,7 @@ Thus, we usually, compute the log of the likelihood, like this:
 ```{r}
 bach |>
   kern(simple = TRUE) |>
-  within(log(like(Kern, model = allExcept1)))
+  within(like(Pitch, model = allExcept1) |> log(base = 2))
    
 
 ```
@@ -474,9 +474,9 @@ That's the "log likelihood."
 > This means that the values we get are "bits"---each bit is equivalent to a 50/50 chance, or one fair coin flip.
 > You can use other bases by setting the `base` argument in our information-theory functions.
 
-Log likelihoods are always negative numbers, with more negative numbers indicating lower probability.
+Log likelihoods are always negative numbers, with larger negative numbers indicating lower probability.
 By convention, we like to invert that relationship by multiplying the log likelihood by `-1`.
-If we do this, we get whats called the *information content* of each data point.
+If we do this, we get whats called the **information content** of each data point.
 The smaller the information content the *more likely*---and thus more predictable and less informative---a data point is.
 The higher the information content, the *less likely*---and thus more surprising and more informative---a data point is.
 This way of interpreting inverted log probabilities is the core of **information theory**.
@@ -488,16 +488,20 @@ info(v1)
 
 bach |>
   kern(simple = TRUE) |>
-  within(info(Kern, model = allExcept1))
+  within(info(Pitch, model = allExcept1))
 ```
 
+Notice that is exactly like the log likelihood, just negated (`-3.42` becomes `3.42`).
+So the fancy sounding term "information content" just means the negated log of the likelihood assigned to a data point by a probability model.
 
 ## Entropy
 
-Information content is related to the (log)likelihood, in that we are assigning a value to every data point.
-If we have a random variable (or sample from one), we can also ask how much information each data point has on average.
+Information content and (log)likelihood associate values with each and every data point.
+If we have a random variable (or sample from one), we can also ask how much information each data point contains *on average*.
 This is called the (Shannon) **entropy**.
 Entropy is simply the average information content---which is really a property of the probability distribution.
+To compute entropy, we can pass a probability distribution (created with [pdist()]) to the [entropy()] function.
+(You can also pass variables straight to [entropy()], and it will run [pdist()] automatically.)
 
 ```{r}
 
@@ -505,8 +509,7 @@ v1 |> pdist() |> entropy()
 
 
 bach |>
-  kern(simple = TRUE) |>
-  entropy()
+  entropy(Pitch)
 
 ```
 
@@ -543,9 +546,9 @@ bach |>
 #### Mutual Information
 
 
-Notice that the conditional entropy of pitch, given rhythm, is slightly lower than the marginal entropy of pitch.
-This shows us that *knowing* the rhythm (slightly) reduces our uncertainty with regard to pitch---or, the rhythm information provides us a little bit of information about the pitch.
-Any "shared" information like this, between two or more variables, is called the *mutual information*.
+Notice that the conditional entropy of pitch *given rhythm* (`r round(bach |> entropy(Pitch, Rhythm, condition = 'Rhythm'), 2)`), is slightly lower than the marginal entropy of pitch (`r round(bach |> entropy(Pitch), 2)`).
+This shows us that *knowing* the rhythm reduces our uncertainty with regard to pitch (slightly)---or we can say that the rhythm information provides us a little bit of information about the pitch.
+Any "shared" information like this, between two or more variables, is called their *mutual information*.
 We can compute the mutual information directly using the [mutual()] function:
 
 ```{r}
@@ -574,8 +577,10 @@ bach |> entropy(Instrument)
 ```
 
 What we see here makes sense: the entropy of the voice is almost exactly two bits, because there are four categories that are just about equally common.
-the entropy of the complex pitch is quite a bit higher (greater than five bits) than the entropy of the simple pitch was (around `3.61`)---in information theory terms, complex pitch contains more information than simple pitch.
-But what if we know the vocal part we are looking at? How does this affect our uncertainty/knowledge about the complex pitch?
+The entropy of the complex pitch is quite a bit higher (`r round(bach |> entropy(ComplexPitch), 2)`) than the entropy of the simple pitch was (`r round(bach |> entropy(Pitch), 2)`).
+In information theory terms, complex pitch contains more information than simple pitch (that makes sense right?).
+But what if we know the vocal part we are looking at? 
+How does this affect our uncertainty/knowledge about the complex pitch?
 
 
 ```{r}
@@ -586,9 +591,9 @@ bach |>
 ```
 
 Woh, it knocks it down to about `3.77` bits, almost as low as the entropy of the simple pitch information!
-Basically, for chorale music, the distribution of pitches *within* each voice is pretty much the same as the distribution of simple pitces.
-This makes sense, because each voice in a chorale will very rarely cover more than one octave anyway, right?
-The fact that the conditional entropy of complex pitch is a little bit higher than the entropy of simple pitch probably reflects that the voices do occasionally use more than one octave (especially the bass).
+Basically, for chorale music, the distribution of pitches *within* each voice is pretty much the same as the distribution of simple pitches in general.
+This makes sense because each voice in a chorale will very rarely cover more than one octave anyway, right?
+The fact that the conditional entropy of complex pitch is a little bit higher than the entropy of simple pitch probably reflects that the voices do occasionally use more than one octave (especially the bass), so knowing the octave information does convey a little information beyond just knowing the voice.
 
 Based on what we see here, we should know that the mutual information between complex pitch and vocal part must be fairly large:
 
@@ -597,8 +602,8 @@ bach |> mutual(ComplexPitch, Instrument)
 
 ```
 
-The mutual information in our data is about `1.24` bits.
-We can interpret this as saying that knowing the voice provides us with `1.24` bits of information about the complex pitch (and vice versa).
+The mutual information in our data is about `r round(bach |> mutual(ComplexPitch, Instrument), 2)` bits.
+We can interpret this as saying that knowing which voice is singing provides us with `1.24` bits of information about the complex pitch (and vice versa).
 
 
 #### Pointwise mutual information
@@ -607,11 +612,11 @@ We aren't quite done with mutual information yet.
 We've [already learned][#entropy] that the entropy of a distribution is the average of the information content of all the observations.
 Similarly, we can view mutual information as an average.
 But an average of what?
-Basically, if look at each data point (with multiple variables) we can compare the estimated information content based on the actual (observed) joint probability compared to the "naive" joint probability which we would observe if the variables were independent.
+Basically, if we look at each data point (with multiple variables) we can compare the estimated information content based on the actual (observed) joint probability with the "naive" joint probability which we would observe if the variables were independent.
 When they are different, it means that a data combination is more or less probable than we'd expect *if the variables were independent*.
-The average of these differences is the mutual information;
-We can then call the individual differences (one for each data point) as the *pointwise mutual information*.
-Luckily for us, `r hm` includes the [pmutual()] function, which we can use just like [info()] or [like()].
+The average of the log of the ratio between the two values is the mutual information;
+The individual log ratios (one for each data point) are then the *pointwise mutual information*.
+Luckily for us, `r hm` includes the [pmutual()] function, which we can use just like [info()] or [like()]:
 
 ```{r}
 bach |>
@@ -630,13 +635,16 @@ If is negative, this indicates that it is *less* likely to occur.
 
 ### Using a different model (cross entropy)
 
-[Above][#using-a-different-model], we saw that we could assign likelihoods to one set of data based on data model extracted from different data.
-For example, assigning likelihoods to notes in one chorale based on the distribution of pitches in the other nine chorales.
+[Above][#using-a-different-model], we saw that we could assign likelihoods to one set of data based on a model extracted from different data.
+For example, assigning likelihoods to pitches in one chorale based on the distribution of pitches in the other nine chorales.
 We can do the same thing when computing entropy.
 The result is called the *cross entropy*, and it is an excellent measure of how well a model "fits" some data.
-We can compute the cross entropy using the [entropy()] function, with the `model` argument, it is better to use the explicit [xentropy()] function:
+We can compute the cross entropy using the [xentropy()] function, which requires a `model` argument.
 
 ```{r}
+bach |>
+  with(entropy(Pitch))
+
 
 bach |>
   with(xentropy(Pitch, model = allExcept1))
@@ -644,21 +652,70 @@ bach |>
 
 Notice that the cross entropy is *always* going to be higher than the "self entropy" of a dataset---because that "self entropy" is estimated directly on itself, it "fits" the data distribution as well as it possibly can.
 However, if the fit is good, the cross entropy will be close to the "self entropy" of the data.
-The difference between the cross entropy and the entropy is called the [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence), more commonly *kld*.
+
+Here the cross entropy is very close to the self entropy---this suggests that the distribution of pitches in the first Chorale is very similar to the distribution in the other nine.
+To better understand this concept, lets explore some examples where the cross entropy will fit better or worse.
+Take a moment to check what keys our nine chorales are in:
+
+```{r}
+bach |> group_by(File) |> with(unique(Key))
+```
+
+Lets try computing the (cross) entropy of Chorale 1 using either (1) Chorale 5, which is also in G major or (2) Chorale 4, which is in E major.
+
+```{r}
+
+bach |> filter(File == 5) |> pdist(Pitch) -> GmajorP
+bach |> filter(File == 4) |> pdist(Pitch) -> EmajorP
+
+bach |> filter(File == 1) |> entropy(Pitch)
+bach |> filter(File == 1) |> with(xentropy(Pitch, model = GmajorP))
+bach |> filter(File == 1) |>  with(xentropy(Pitch, model = EmajorP))
+
+```
+
+If we compute the (cross) entropy of pitches in the first G major chorale using the distribution of pitches in the other G major Chorale (#5), the fit is really good---only slightly higher than the first Chorale's "self" entropy.
+On the other hand, if we use the E major Chorale as the model, the fit is quite a bit worse (`r bach |> filter(File == 1) |>  with(xentropy(Pitch, model = EmajorP)) |> round(2)`).
+How would we interpret that?
+Well, if our goal is to generalize about how frequently different pitches occur common practice music which is composted *in G major*, but we use E major Chorales to come up with those probabilities, we'll end up underestimating a lot.
+For example, our `EmajorP` model says that the note D natural should only occur about 2% of the time, and that the note G natural should occur...never.
+That is obviously a bad model of *G major* music!
+This is why the cross entropy for predicting the first (G major) chorale using the `EmajorP` data is high---it's a bad fit.
+
+Obviously, `EmajorP` would be a better model of common practice music that is composed in E major!
+But...that doesn't mean we believe that `EmajorP` is a great model of the distribution of pitches in common practice E major major, or that `GmajorP` is a great model of music composed in G major---they are each only based on one short piece by Bach!
+If we want better estimates of the *true* distribution of pitches in common practice music (in whatever key), it would be base them on larger and more representative samples of music.
+We could, for a starting point, look at the distribution of pitches in *all* Bach's G major or E major chorales---this would give us much better estimates than models based on *one* piece.
+Still, whether analyzing Bach's chorales really tells us useful information about all "common practice" music is another question.
+Based on the observations of many expert music theorists, it seems that Bach's music is a *pretty good* approximation of general common practice, but that doesn't mean it is a perfect model.
+So whenever we calculate statistics (entropy, likelihoods, etc.) from data, we should always remember that we are not computing "the" entropy or "the" information content.
+We are (at best) *estimating* the real values that interest us based on the sample of data that we happen to have.
+
+
+
+
+#### Log likelihood
+
+The cross entropy metric is one of the main "loss functions" used in machine learning.
+Cross entropy is also closely related to the *log likelihood* statistic, which is often used in statistical tests.
+The log-likelihood statistic is the *sum* of all the estimated pointwise-log-likelihood values (the negative of the sum of the information content), rather than the average.
+This means that the log-likelihood statistic is the same as the cross entropy multiplied by `N` (the number of data points).
+
+
+
+#### kld
+
+The difference between the cross entropy and the "self" entropy is called the [Kullback-Leibler Divergence](https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence), more commonly *kld*.
 If the kld is small, it means the model matches the data pretty closely.
 You can get the kld directly using the [kld()] function:
 
 
 ```{r}
 
-bach |>
-  with(kld(Pitch, model = allExcept1))
+bach |> filter(File == 1) |> with(kld(Pitch, model = GmajorP))
+bach |> filter(File == 1) |>  with(kld(Pitch, model = EmajorP))
 ```
 
-
-The cross entropy is one of the main "loss functions" used in machine learning.
-The cross entropy is also closely related to the *log likelihood* statistic, which is often used in statistical tests.
-The log-likelihood statistic is the *sum* of all the estimated pointwise-log-likelihood values (the negative of the sum of the information content).
-This means that the log-likelihood statistic is the same as the cross entropy multiplies by `N` (the number of data points).
-
+This is the same information we saw before, really, but perhaps easier to interpret.
+Close to zero is good fit; Larger numbers are worse fit.
 
