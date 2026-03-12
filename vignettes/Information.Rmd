@@ -268,8 +268,8 @@ Sometimes, we make multiple tables of different data samples:
 ```{r}
 
 
-chor1 <- bach |> filter(File == 1) |> kern(simple = TRUE) |> count(Pitch)
-chor2 <- bach |> filter(File == 2) |> kern(simple = TRUE) |> count(Pitch)
+chor1 <- bach |> filter(File == 1) |> count(Pitch)
+chor2 <- bach |> filter(File == 2) |> count(Pitch)
 
 chor1
 chor2
@@ -384,8 +384,7 @@ If we do this with our Bach data, we'd see that every E flat that appears gets t
 
 ```{r}
 
-bach |>
-  within(like(Pitch))
+bach |> like(Pitch)
 
 ```
 
@@ -394,8 +393,7 @@ We can extend this to two (or more) dimensions, where each likelihood is estimat
 
 ```{r}
 
-bach |> 
-  within(like(Pitch, Rhythm))
+bach |> like(Pitch, Rhythm)
 
 ```
 
@@ -405,8 +403,7 @@ This is the "conditional likelihood," and we can compute it using the same `cond
 
 ```{r}
 
-bach |> 
-  within(like(Pitch, Rhythm, condition = 'Rhythm'))
+bach |> like(Pitch, Rhythm, condition = 'Rhythm')
 
 ```
 
@@ -447,8 +444,7 @@ bach |>
    filter(File != 1) |>
    pdist(Pitch) -> allExcept1
 
-bach |>
-  within(like(Pitch, model = allExcept1))
+bach |> like(Pitch, model = allExcept1)
 ```
 
 
@@ -462,8 +458,8 @@ Thus, we usually, compute the log of the likelihood, like this:
 
 ```{r}
 bach |>
-  kern(simple = TRUE) |>
-  within(like(Pitch, model = allExcept1) |> log(base = 2))
+  like(Pitch, model = allExcept1) |>
+  within(log(., base = 2))
    
 
 ```
@@ -488,7 +484,7 @@ info(v1)
 
 bach |>
   kern(simple = TRUE) |>
-  within(info(Pitch, model = allExcept1))
+  info(Pitch, model = allExcept1)
 ```
 
 Notice that is exactly like the log likelihood, just negated (`-3.42` becomes `3.42`).
@@ -508,8 +504,7 @@ To compute entropy, we can pass a probability distribution (created with [pdist(
 v1 |> pdist() |> entropy()
 
 
-bach |>
-  entropy(Pitch)
+bach |> entropy(Pitch)
 
 ```
 
@@ -557,7 +552,7 @@ bach |>
 
 ```
 
-Remember [above][#estimating-joint-probabilities], where we saw that we could compare the "naive" joint probability of two (or more) variables with the actual, observed, joint distribution?
+Remember [above](#estimating-joint-probabilities), where we saw that we could compare the "naive" joint probability of two (or more) variables with the actual, observed, joint distribution?
 As it happens, the mutual information quantifies exactly how different the naive and actual joint distributions are.
 If they are very different, that would mean there is a lot of shared (mutual) information.
 If not (like here), the mutual information is low.
@@ -621,7 +616,7 @@ Luckily for us, `r hm` includes the [pmutual()] function, which we can use just 
 ```{r}
 bach |>
   filter(File == 1) |>
-  within(pmutual(Pitch, Rhythm))
+  mutual(Pitch, Rhythm)
 
 ```
 
@@ -670,21 +665,21 @@ bach |> filter(File == 4) |> pdist(Pitch) -> EmajorP
 
 bach |> filter(File == 1) |> entropy(Pitch)
 bach |> filter(File == 1) |> with(xentropy(Pitch, model = GmajorP))
-bach |> filter(File == 1) |>  with(xentropy(Pitch, model = EmajorP))
+bach |> filter(File == 1) |> with(xentropy(Pitch, model = EmajorP))
 
 ```
 
 If we compute the (cross) entropy of pitches in the first G major chorale using the distribution of pitches in the other G major Chorale (#5), the fit is really good---only slightly higher than the first Chorale's "self" entropy.
 On the other hand, if we use the E major Chorale as the model, the fit is quite a bit worse (`r bach |> filter(File == 1) |>  with(xentropy(Pitch, model = EmajorP)) |> round(2)`).
 How would we interpret that?
-Well, if our goal is to generalize about how frequently different pitches occur common practice music which is composted *in G major*, but we use E major Chorales to come up with those probabilities, we'll end up underestimating a lot.
+Well, if our goal is to generalize about how frequently different pitches occur common practice music which is composed *in G major*, but we use E major Chorales to come up with those probabilities, we'll end up underestimating a lot.
 For example, our `EmajorP` model says that the note D natural should only occur about 2% of the time, and that the note G natural should occur...never.
 That is obviously a bad model of *G major* music!
 This is why the cross entropy for predicting the first (G major) chorale using the `EmajorP` data is high---it's a bad fit.
 
 Obviously, `EmajorP` would be a better model of common practice music that is composed in E major!
-But...that doesn't mean we believe that `EmajorP` is a great model of the distribution of pitches in common practice E major major, or that `GmajorP` is a great model of music composed in G major---they are each only based on one short piece by Bach!
-If we want better estimates of the *true* distribution of pitches in common practice music (in whatever key), it would be base them on larger and more representative samples of music.
+But...that doesn't mean we believe that `EmajorP` is a great model of the distribution of pitches in common practice E major, or that `GmajorP` is a great model of music composed in G major---they are each only based on one short piece by Bach!
+If we want better estimates of the *true* distribution of pitches in common practice music (in whatever key), it would be better to base them on larger and more representative samples of music.
 We could, for a starting point, look at the distribution of pitches in *all* Bach's G major or E major chorales---this would give us much better estimates than models based on *one* piece.
 Still, whether analyzing Bach's chorales really tells us useful information about all "common practice" music is another question.
 Based on the observations of many expert music theorists, it seems that Bach's music is a *pretty good* approximation of general common practice, but that doesn't mean it is a perfect model.
@@ -712,10 +707,19 @@ You can get the kld directly using the [kld()] function:
 
 ```{r}
 
-bach |> filter(File == 1) |> with(kld(Pitch, model = GmajorP))
-bach |> filter(File == 1) |>  with(kld(Pitch, model = EmajorP))
+bach |> filter(File == 1) |> kld(Pitch, model = GmajorP)
+bach |> filter(File == 1) |> kld(Pitch, model = EmajorP)
 ```
 
 This is the same information we saw before, really, but perhaps easier to interpret.
 Close to zero is good fit; Larger numbers are worse fit.
 
+## Contextual Entropy
+
+Many researchers reading this article so far might be a little confused---particularly regarding the definition of "conditional entropy" we've used so far.
+This is because there is another very common way that "conditional entropy" has been used extensivly in music research, which we haven't discussed so far.
+This approach, because it has become so common, is often called "conditional entropy"---or just "entropy"---in papers, even though this is a *slight* abuse/simplification of the terminology.
+
+Properly, as described in the previous section, entropy and conditional entropy are properties of a probability distribution over one or more variables: you get one value for the whole distribution.
+However, it can be interesting and fruitful to consider, as we progress through a piece of music and we make (likely unconscious) probabilistic guesses about what notes will happen to next, what the entropy of those probabilities are at each moment.
+This is, essentially, a conditional entropy, but its the entropy conditioned on the current musical context (based on some probability model) *in isolation*.

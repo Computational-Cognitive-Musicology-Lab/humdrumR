@@ -34,15 +34,7 @@ kld(..., model, base = 2)
 
 \method{kld}{default}(..., model, base = 2)
 
-info(
-  ...,
-  model,
-  base = 2,
-  condition = NULL,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+info(..., model, base = 2)
 }
 \arguments{
 \item{...}{\emph{\strong{Distribution (or atomic vectors) to compute entropy/information of.}}
