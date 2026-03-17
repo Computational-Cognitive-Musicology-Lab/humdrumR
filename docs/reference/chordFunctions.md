@@ -63,13 +63,13 @@ are:
 
   - [`figuredBass()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/figuredBass.md)
 
-  - [`tertian()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertian.md)
+  - [`tertian()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertianSetS4.md)
 
   - *Roman Numerals*
 
     - [`harm()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md)
 
-    - `roman()`
+    - [`roman()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md)
 
 ## See also
 

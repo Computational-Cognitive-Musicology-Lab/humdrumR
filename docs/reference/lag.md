@@ -3,7 +3,7 @@
 The `lag` and `lead` functions take input vectors, matrices, or
 data.frames and shifts their data by `n` indices. They are similar to
 the
-[`data.table::shift()`](https://rdatatable.gitlab.io/data.table/reference/shift.html)
+[`data.table::shift()`](https://rdrr.io/pkg/data.table/man/shift.html)
 function, but with a few additional options.
 
 ## Usage
@@ -123,7 +123,7 @@ manually set `groupby = list(Piece, Record)`.
 
 ## See also
 
-[`data.table::shift()`](https://rdatatable.gitlab.io/data.table/reference/shift.html)
+[`data.table::shift()`](https://rdrr.io/pkg/data.table/man/shift.html)
 
 Other Lagged vector functions:
 [`delta()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/delta.md),

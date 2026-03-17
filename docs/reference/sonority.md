@@ -44,7 +44,8 @@ sonority(
 
   Must be a [chord
   function](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordFunctions.md),
-  like `roman()`,
+  like
+  [`roman()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md),
   [`harm()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md)
   or
   [`chord()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.md).
@@ -154,15 +155,14 @@ sonority(c('C', 'b-', 'd', 'f'), inversions = FALSE)
 
 chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.
 #> Parsing one file...
 #> Assembling corpus...
 #> Done!
-chorale <- within(chorales, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
-#> Error: object 'chorales' not found
+chorale <- within(chorale, dataTypes = 'Dd', ditto(Token) -> Token_dittoed) 
 chorale[[20:30,]]
 #> ######################## vvv chor001.krn vvv #########################
 #>     8:           **kern         **kern         **kern         **kern
@@ -172,23 +172,72 @@ chorale[[20:30,]]
 #>    20:              4GG             4B             4d             4g
 #>    21:               =1             =1             =1             =1
 #>    22:               4G             4B             4d             2g
-#>    23:               4E            8cL             4e              .
-#>    24:                .            8BJ              .              .
+#>    23:               4E            8cL             4e             2g
+#>    24:               4E            8BJ             4e             2g
 #>    25:              4F#             4A             4d            4dd
 #>    26:               =2             =2             =2             =2
 #>    27:               4G             4G             2d            4.b
-#>    28:               4D            4F#              .              .
-#>    29:                .              .              .             8a
+#>    28:               4D            4F#             2d            4.b
+#>    29:               4D            4F#             2d             8a
 #>    30:               4E             4G             4B             4g
 #>    52:              *>B            *>B            *>B            *>B
 #>   124:               *-             *-             *-             *-
 #> ######################## ^^^ chor001.krn ^^^ #########################
 #> 
 #>    Data fields: 
-#>          *Token :: character
+#>           Token         :: character
+#>          *Token_dittoed :: character
 #> 
 within(chorale[[20:30,]], sonority(Token_dittoed))
-#> Error: object 'Token_dittoed' not found
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:           **kern         **kern         **kern         **kern
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:                G              G              G              G
+#>    21:               =1             =1             =1             =1
+#>    22:                G              G              G              G
+#>    23:              C/E            C/E            C/E            C/E
+#>    24:             Emin           Emin           Emin           Emin
+#>    25:             D/F#           D/F#           D/F#           D/F#
+#>    26:               =2             =2             =2             =2
+#>    27:                G              G              G              G
+#>    28:           Bmin/D         Bmin/D         Bmin/D         Bmin/D
+#>    29:                D              D              D              D
+#>    30:             Emin           Emin           Emin           Emin
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                              :: character
+#>           Token_dittoed                      :: character
+#>          *humdrumR:::sonority(Token_dittoed) :: character
+#> 
 within(chorale[[20:30,]], sonority(Token_dittoed, deparser = harm))
-#> Error: object 'Token_dittoed' not found
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:           **kern         **kern         **kern         **kern
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:                I              I              I              I
+#>    21:               =1             =1             =1             =1
+#>    22:                I              I              I              I
+#>    23:              IVb            IVb            IVb            IVb
+#>    24:               vi             vi             vi             vi
+#>    25:               Vb             Vb             Vb             Vb
+#>    26:               =2             =2             =2             =2
+#>    27:                I              I              I              I
+#>    28:             iiib           iiib           iiib           iiib
+#>    29:                V              V              V              V
+#>    30:               vi             vi             vi             vi
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                                               :: character
+#>           Token_dittoed                                       :: character
+#>          *humdrumR:::sonority(Token_dittoed, deparser = harm) :: character
+#> 
 ```

@@ -1599,6 +1599,7 @@ roman.default <- makeChordTransformer(tset2roman, 'roman')
 #' @rdname harm
 #' @export
 roman.humdrumR <- humdrumRmethod(roman.default)
+#' @rdname harm
 #' @export
 roman <- humdrumRgeneric(roman.default)
 
@@ -1697,7 +1698,8 @@ inversion <- function(x, inversion.labels = NULL, parseArgs = list()) {
 #' @rdname analyzeChords
 #' @export
 is.major.default <- function(x, ...) {
-  parsed <- tertianSet(x, ...)
+  # parsed <- tertianSet(x, ...)
+  parsed <- diatonicSet(x, ...)
   if (any(is.na(parsed))) {
     keys <- diatonicSet(x, ...)
     if (all(!is.na(keys)[!is.na(parsed)]) && any(!is.na(keys)[is.na(parsed)])) parsed <- keys

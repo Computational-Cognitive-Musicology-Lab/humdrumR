@@ -32,16 +32,16 @@ refTable[i, j, drop = FALSE]
 - drop:
 
   ***Whether to return normal
-  [data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
-  or a `humReference` table.***
+  [data.table](https://rdrr.io/pkg/data.table/man/data.table.html) or a
+  `humReference` table.***
 
   Defaults to `FALSE`.
 
   Must be a singleton `logical` value: an on/off switch.
 
   If `drop = TRUE`, a normal
-  [data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
-  is returned instead of a `humReference` table.
+  [data.table](https://rdrr.io/pkg/data.table/man/data.table.html) is
+  returned instead of a `humReference` table.
 
 - i:
 
@@ -133,7 +133,7 @@ reference('OTL')
 
 rs <- readHumdrum(humdrumRroot, "HumdrumData/RollingStone/.*hum")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.
 #> Thirteen files read from disk.
 #> Validating thirteen files...
 #> all valid.

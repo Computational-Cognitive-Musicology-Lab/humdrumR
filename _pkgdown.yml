@@ -27,7 +27,7 @@ footer:
     left: logo
     right: ccml
   components:
-    logo: <a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a>
+    logo: <a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a>
     ccml: Developed by Nat Condit-Schultz and Claire Arthur<br/>[Georgia Tech](https://gatech.edu)<br/>[School of Music](https://music.gatech.edu)<br/>[Computational and Cognitive Musicology Lab](https://ccml.gtcmt.gatech.edu)</span>
   
 template:
@@ -223,11 +223,22 @@ reference:
   - struct
 - title: "Other Functions"
   desc: "Other useful tools."
+- subtitle: "Plotting tools"
 - contents: 
   - draw
-  - distribution
-- subtitle: "Information theory"
+  - drawMore
+  - drawMultiple
+  - drawToFile
+  - draw_area
+  - draw_barplot
+  - draw_density
+  - draw_heat
+  - draw_Qplot
+  - draw_scatter
+  - draw_violins
+- subtitle: "Probability/Information theory"
   contents:
+  - distribution
   - information
   - pdist
   - entropy

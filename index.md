@@ -1,6 +1,6 @@
 
 
-<img src='humdrumR_logo.svg' style="padding-top:50px;"/>
+<img src='humdrumR_logo.svg' style="padding-top:50px; width:300px;"/>
 
 Welcome to the main website of humdrum$_{\mathbb{R}}$!
 

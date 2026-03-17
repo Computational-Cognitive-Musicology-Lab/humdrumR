@@ -4,12 +4,17 @@
 \name{humdrumR}
 \alias{humdrumR}
 \alias{humdrumRroot}
+\alias{humdrumRdata}
 \title{humdrumR}
 \format{
 An object of class \code{character} of length 1.
+
+An object of class \code{list} of length 5.
 }
 \usage{
 humdrumRroot
+
+humdrumRdata
 
 humdrumR(
   view,
@@ -63,7 +68,7 @@ on what is in the field.}
 
 Defaults to \code{TRUE}.
 
-Must be a singleton logical value; an on/off switch.}
+Must be a singleton \code{logical} value; an on/off switch.}
 
 \item{censorEmptyRecords}{\emph{\strong{Should consecutive records be "censored" (compressed) in printout?}}
 

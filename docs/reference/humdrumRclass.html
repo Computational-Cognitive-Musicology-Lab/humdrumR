@@ -135,7 +135,7 @@ or any combination of these (e.g., <code>"LIM"</code>).
 <dt id="arg-syntaxhighlight">syntaxHighlight<a class="anchor" aria-label="anchor" href="#arg-syntaxhighlight"></a></dt>
 <dd><p><em><strong>Should syntax highlighting (coloring) be used in printout?</strong></em></p>
 <p>Defaults to <code>TRUE</code>.</p>
-<p>Must be a singleton logical value; an on/off switch.</p></dd>
+<p>Must be a singleton <code>logical</code> value; an on/off switch.</p></dd>
 
 
 <dt id="arg-maxrecordsperfile">maxRecordsPerFile<a class="anchor" aria-label="anchor" href="#arg-maxrecordsperfile"></a></dt>
@@ -181,7 +181,7 @@ and related tidyverse commands (<code>mutate()</code>, <code>summarize()</code>,
 
 
 <dl><dt><code>Humtable</code></dt>
-<dd><p>A <a href="humTable.html">humdrum tables</a>—i.e, a <code><a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table()</a></code> with particular fields.</p></dd>
+<dd><p>A <a href="humTable.html">humdrum tables</a>—i.e, a <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table()</a></code> with particular fields.</p></dd>
 
 
 <dt><code>Files</code></dt>
@@ -192,7 +192,7 @@ and were read into the <code>humdrumR</code> object, with <code><a href="https:/
 
 
 <dt><code>Fields</code></dt>
-<dd><p>A <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a> indicating the existing fields in the <code>humdrumR</code> object's
+<dd><p>A <a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table</a> indicating the existing fields in the <code>humdrumR</code> object's
 <a href="humTable.html">humdrum table</a>.
 The fields are divided into five categories: "Data", "Structure", "Interpretation", "Formal", and "Reference."</p></dd>
 
@@ -203,7 +203,7 @@ called to create this <code>humdrumR</code> object.</p></dd>
 
 
 <dt><code>Context</code></dt>
-<dd><p>A <a href="https://rdatatable.gitlab.io/data.table/reference/data.table.html" class="external-link">data.table::data.table</a> with two columns: <code>Open</code> and <code>Close</code>.
+<dd><p>A <a href="https://rdrr.io/pkg/data.table/man/data.table.html" class="external-link">data.table::data.table</a> with two columns: <code>Open</code> and <code>Close</code>.
 Each row represents a contextual window to apply to the data.</p></dd>
 
 
@@ -258,7 +258,7 @@ You can set printing options globally using the <code><a href="humdrumR.html">hu
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

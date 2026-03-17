@@ -18,7 +18,7 @@ object](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md).
 
 Once contextual windows are created, the `windows()` function can be
 used to view a
-[data.table::data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
+[data.table::data.table](https://rdrr.io/pkg/data.table/man/data.table.html)
 representing these windows. The `Open` and `Close` columns indicate row
 indices in the [humdrum
 table](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md).
@@ -497,21 +497,27 @@ music. In `**kern`, phrases are indicated with opening (`(`) and close
 (`)`) parentheses, which we can capture with regular expressions for
 `open` and `close`. Here is an example:
 
-nesting1 \<- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f',
-'f#', 'g', 'g#', 'a)') context(nesting1, open = '(', close = ')')
+    nesting1 <- c('(a', 'b)', '(c', 'd', 'e)', '(d', 'e', 'f)', '(e', 'f', 'f#', 'g', 'g#', 'a)')
+    context(nesting1, open = '(', close = ')')
+
+    #> [1] "(a,b)"           "(c,d,e)"         "(d,e,f)"         "(e,f,f#,g,g#,a)"
 
 Perfect. However, what if there are nested phrasing indicators?
 
-nesting2 \<- c('(a', 'b)', '(c', '(d', 'e)', '(d', 'e)', 'f)', '(e',
-'(f', '(f#', 'g)', 'g#)', 'a)') context(nesting2, open = '(', close =
-')')
+    nesting2 <- c('(a', 'b)', '(c', '(d', 'e)',  '(d', 'e)', 'f)', '(e', '(f', '(f#', 'g)', 'g#)', 'a)')
+    context(nesting2, open = '(', close = ')')
+
+    #> [1] "(a,b)"         "(c,(d,e)"      "(d,e),(d,e)"   "(d,e),f)"      "(e,(f,(f#,g)"  "(f,(f#,g),g#)" "(f#,g),g#),a)"
 
 That's not what we want! By default, `context()` "pairs" each `open`
 with the next `close`, which often makes the most sense. But in this
 case, we want different behavior. We can get what we want by specifying
 `overlap = 'nested'`:
 
-context(nesting2, open = '(', close = ')', overlap = 'nested')
+    context(nesting2, open = '(', close = ')', overlap = 'nested')
+
+    #> [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(d,e)"               "(d,e)"
+    #> [5] "(e,(f,(f#,g),g#),a)" "(f,(f#,g),g#)"       "(f#,g)"
 
 Now context aligns each `open` with the corresponding `close` at the
 same *nesting level*. What if we are only interested in the highest (or
@@ -519,17 +525,25 @@ lowest) level of nesting? Use the `depth` argument, which can be
 non-zero integers: the highest level is `1`, with "deeper" levels
 incrementing up.
 
-context(nesting2, open = '(', close = ')', overlap = 'nested', depth
-= 1) context(nesting2, open = '(', close = ')', overlap = 'nested',
-depth = 2) context(nesting2, open = '(', close = ')', overlap =
-'nested', depth = 2:3)
+    context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 1)
+
+    #> [1] "(a,b)"               "(c,(d,e),(d,e),f)"   "(e,(f,(f#,g),g#),a)"
+
+    context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2)
+
+    #> [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)"
+
+    context(nesting2, open = '(', close = ')', overlap = 'nested', depth = 2:3)
+
+    #> [1] "(d,e)"         "(d,e)"         "(f,(f#,g),g#)" "(f#,g)"
 
 You can also use negative `depth` to specify from the deepest levels
 outward. For example, in this case `depth == -1` should get us that
 deepest level:
 
-context(nesting2, open = '(', close = ')', overlap = 'nested', depth =
--1)
+    context(nesting2, open = '(', close = ')', overlap = 'nested', depth = -1)
+
+    #> [1] "(f#,g)"
 
 If `depth` is `NULL` (the default), all depths are returned.
 
@@ -643,7 +657,7 @@ context(letters, open = "[aeiou]", close = nextopen - 1 | end, collapse = FALSE)
 
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.

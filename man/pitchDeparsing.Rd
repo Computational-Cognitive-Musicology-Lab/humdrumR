@@ -416,7 +416,10 @@ Indeed, \code{octave.round = round} gets us the \code{-P4} <-> \code{+P4} behavi
 When parsing \link[=interval]{intervals}, the \code{octave.round} option allows you to control how the "simple part" (less than an octave) of a compound interval is represented.
 For example, we might think of an ascending major 12th as being an ascending octave \emph{plus} an ascending perfect 5th: ** +P8 + P5**.
 \strong{Or} we could encode that same interval as \emph{two} ascending octaves \emph{minus} a perfect fourth: \strong{+ P15 - P4}.
-The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\tabular{llllll}{
+The following table illustrates how different \code{octave.round} arguments "partition" compound intervals into simple parts and octaves:\if{html}{\out{
+<!-- KNITR_ASIS_OUTPUT_TOKEN -->
+}}
+\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    -P12: \tab -P15 + P4 \tab -P15 + P4 \tab -P8  - P5 \tab -P8  - P5 \tab -P15 + P4 \cr
    -P11: \tab -P8  - P4 \tab -P15 + P5 \tab -P8  - P4 \tab -P8  - P4 \tab -P15 + P5 \cr
@@ -433,12 +436,18 @@ The following table illustrates how different \code{octave.round} arguments "par
    +P18: \tab +P15 + P4 \tab +P15 + P4 \tab +P22 - P5 \tab +P15 + P4 \tab +P22 - P5 \cr
    +P19: \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \tab +P15 + P5 \tab +P22 - P4 \cr
 }
+\if{html}{\out{
+<!-- KNITR_ASIS_OUTPUT_TOKEN -->
+}}
 
 
 Notice that, if \code{octave.floor} is being used, all simple intervals are represented as ascending.
 
 When parsing \link[=pitch]{"absolute" pitch} representations, the \code{octave.round} option allows you to control which octave notes are associated with.
-The following table illustrates:\tabular{llllll}{
+The following table illustrates:\if{html}{\out{
+<!-- KNITR_ASIS_OUTPUT_TOKEN -->
+}}
+\tabular{llllll}{
     \tab round \tab floor \tab ceiling \tab trunc \tab expand \cr
    FF: \tab F2 \tab F2 \tab F3 \tab F3 \tab F2 \cr
    GG: \tab G3 \tab G2 \tab G3 \tab G3 \tab G2 \cr
@@ -455,6 +464,9 @@ The following table illustrates:\tabular{llllll}{
    fff: \tab F6 \tab F6 \tab F7 \tab F6 \tab F7 \cr
    ggg: \tab G7 \tab G6 \tab G7 \tab G6 \tab G7 \cr
 }
+\if{html}{\out{
+<!-- KNITR_ASIS_OUTPUT_TOKEN -->
+}}
 
 }
 

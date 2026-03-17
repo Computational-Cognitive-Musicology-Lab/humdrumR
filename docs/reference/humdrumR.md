@@ -25,6 +25,8 @@ datasets](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md).
 ``` r
 humdrumRroot
 
+humdrumRdata
+
 humdrumR(
   view,
   dataTypes,
@@ -39,6 +41,8 @@ humdrumR(
 ## Format
 
 An object of class `character` of length 1.
+
+An object of class `list` of length 5.
 
 ## Arguments
 
@@ -113,7 +117,7 @@ An object of class `character` of length 1.
 
   Defaults to `TRUE`.
 
-  Must be a singleton logical value; an on/off switch.
+  Must be a singleton `logical` value; an on/off switch.
 
 - censorEmptyRecords:
 
@@ -192,6 +196,6 @@ humdrumR(view = 'humdrum', maxRecordsPerFile = 50)
 # see the humdrumR package directory contents
 dir(humdrumRroot) 
 #>  [1] "CITATION"    "DESCRIPTION" "HumdrumData" "INDEX"       "LICENSE"    
-#>  [6] "Meta"        "NAMESPACE"   "NEWS.md"     "R"           "examples"   
-#> [11] "extdata"     "help"        "html"       
+#>  [6] "Meta"        "NAMESPACE"   "NEWS.md"     "R"           "data"       
+#> [11] "examples"    "extdata"     "help"        "html"       
 ```

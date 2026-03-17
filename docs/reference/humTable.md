@@ -5,8 +5,8 @@ In the
 package, the fundamental data structure is called a **humdrum table**. A
 humdrum table encodes all the information in a collection of one or more
 humdrum-syntax files as a single
-[data.table](https://rdatatable.gitlab.io/data.table/reference/data.table.html)
-(A `data.table` is an "enhanced" version of R's standard
+[data.table](https://rdrr.io/pkg/data.table/man/data.table.html) (A
+`data.table` is an "enhanced" version of R's standard
 [data.frame](https://rdrr.io/r/base/data.frame.html)). Humdrum tables
 are stored "inside" every
 [humdrumRclass](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md)
@@ -412,7 +412,7 @@ into basic R data structures you might prefer.
 The `fields()` function takes a [humdrumR
 object](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md)
 and returns a
-[`data.table::data.table()`](https://rdatatable.gitlab.io/data.table/reference/data.table.html),
+[`data.table::data.table()`](https://rdrr.io/pkg/data.table/man/data.table.html),
 with each row describing an available field in the humdrum table. The
 output table has five columns:
 
@@ -459,7 +459,7 @@ family of functions.
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -645,19 +645,19 @@ getHumtab(humData)
 #> 1686:   -Q '' @{PC#}. @{OTL@@DE}         61     4 chor004.krn
 #> 1687:   -Q '' @{PC#}. @{OTL@@DE}         NA     4 chor004.krn
 #> 1688:   -Q '' @{PC#}. @{OTL@@DE}         NA     4 chor004.krn
-#>                                                                                                                                          Filepath
-#>                                                                                                                                            <char>
-#>    1: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    2: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    3: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    4: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    5: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   ---                                                                                                                                            
-#> 1684: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1685: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1686: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1687: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1688: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
+#>                                                                                               Filepath
+#>                                                                                                 <char>
+#>    1: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    2: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    3: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    4: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    5: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   ---                                                                                                 
+#> 1684: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1685: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1686: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1687: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1688: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
 #>       Global  Label ParentPath  Path Piece Record Spine  Stop   Type
 #>       <lgcl> <char>      <int> <int> <int>  <int> <int> <int> <char>
 #>    1:   TRUE     _1         NA    NA     1      1    NA    NA      G
@@ -802,19 +802,19 @@ getHumtab(humData, dataTypes = 'D')
 #> 840:   -Q '' @{PC#}. @{OTL@@DE}         59     4 chor004.krn
 #> 841:   -Q '' @{PC#}. @{OTL@@DE}         60     4 chor004.krn
 #> 842:   -Q '' @{PC#}. @{OTL@@DE}         61     4 chor004.krn
-#>                                                                                                                                         Filepath
-#>                                                                                                                                           <char>
-#>   1: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   2: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   3: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   4: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   5: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>  ---                                                                                                                                            
-#> 838: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 839: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 840: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 841: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 842: /private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor004.krn
+#>                                                                                              Filepath
+#>                                                                                                <char>
+#>   1: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   2: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   3: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   4: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   5: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>  ---                                                                                                 
+#> 838: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 839: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 840: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 841: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 842: /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor004.krn
 #>      Global  Label ParentPath  Path Piece Record Spine  Stop   Type
 #>      <lgcl> <char>      <int> <int> <int>  <int> <int> <int> <char>
 #>   1:  FALSE     _1          0     0     1     20     1     1      D

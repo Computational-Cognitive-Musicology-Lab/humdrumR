@@ -57,7 +57,7 @@ Must be a single \code{character} string.
 
 If \code{NULL}, files are written to the same directory (or directories) they were \link[=readHumdrum]{read from}.}
 
-\item{overwrite}{\emph{\strong{Whether to overwrite existing files.}}
+\item{overwrite}{\emph{\strong{Whether to ovewrite existing files without asking permission.}}
 
 Defaults to \code{FALSE}.
 

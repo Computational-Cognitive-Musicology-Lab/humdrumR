@@ -64,12 +64,31 @@ NULL
 #' When you installed `humdrumR` a few basic humdrum files were stored here as well, 
 #' in subdirectories `examples` and `HumdrumData`.
 #'
+#' @name humdrumR
+#' @export
+humdrumRroot <- gsub("\\/_build", "", system.file(package = 'humdrumR'))
+
+
+
+#' The `humdrumRdata` object is simply a named list of information about each of the five small humdrum datasets that are packaged
+#' with `humdrumR`.
+#' It includes the directory path (where the corpus is on your machine) of each dataset, the number of files, and the file extension of files in the dataset.
+#' To see the dataset names, write `names(humdrumRdata)`, or type `humdrumRdata$`, then press tab in RStudio.
+#'  
 #' @rdname humdrumR
 #' @export
-humdrumRroot <- system.file(package = 'humdrumR')
-
-
-
+humdrumRdata <- local({
+  data <- setNames(lapply(c('BachChorales', 'BeethovenVariations', 'MozartVariations', 'RapFlow', 'RollingStoneCorpus'),
+                          \(dir) list(Path = paste0(humdrumRroot, '/HumdrumData/', dir), Extension = '.krn')),
+                              c('BachChorales', 'BeethovenVariations', 'MozartVariations', 'RapFlow', 'RollingStoneCorpus'))
+  data$RapFlow$Extension <- '.rap'
+  data$RollingStoneCorpus$Extension <- '.hum'
+  
+  data <- lapply(data, \(d) { d$N <- length(dir(d$Path)) ; d })
+  
+  data
+  
+})
 # Package global data ----
 
 
@@ -534,7 +553,7 @@ humdrumRoption <- function(name) {
 #' 
 #' Defaults to `TRUE`.
 #' 
-#' Must be a singleton logical value; an on/off switch.
+#' Must be a singleton `logical` value; an on/off switch.
 #' 
 #' @param censorEmptyRecords ***Should consecutive records be "censored" (compressed) in printout?***
 #' 

@@ -135,7 +135,7 @@ Other partial pitch functions:
 ``` r
 chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
 #> Finding and reading files...
-#>  REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.
@@ -166,12 +166,81 @@ chorale[[20:30,]]
 #>    Data fields: 
 #>          *Token :: character
 #> 
-within(chorales[[20:30,]], octave(Token))
-#> Error: object 'chorales' not found
+within(chorale[[20:30,]], octave(Token))
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:         **octave       **octave       **octave       **octave
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:               -2             -1             -1              0
+#>    21:               =1             =1             =1             =1
+#>    22:               -1             -1             -1              0
+#>    23:               -2             -1             -1              .
+#>    24:                .             -1              .              .
+#>    25:               -2             -1             -1              0
+#>    26:               =2             =2             =2             =2
+#>    27:               -1             -1             -1              0
+#>    28:               -2             -2              .              .
+#>    29:                .              .              .              0
+#>    30:               -2             -1             -1              0
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                    :: character
+#>          *humdrumR:::octave(Token) :: integer (**octave tokens)
+#> 
 
-within(chorales[[20:30,]], octave(Token, octave.offset = 4)) # traditional octaves
-#> Error: object 'chorales' not found
+within(chorale[[20:30,]], octave(Token, octave.offset = 4)) # traditional octaves
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:         **octave       **octave       **octave       **octave
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:                2              3              3              4
+#>    21:               =1             =1             =1             =1
+#>    22:                3              3              3              4
+#>    23:                2              3              3              .
+#>    24:                .              3              .              .
+#>    25:                2              3              3              4
+#>    26:               =2             =2             =2             =2
+#>    27:                3              3              3              4
+#>    28:                2              2              .              .
+#>    29:                .              .              .              4
+#>    30:                2              3              3              4
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                                       :: character
+#>          *humdrumR:::octave(Token, octave.offset = 4) :: integer (**octave tokens)
+#> 
 
-within(chorales[[20:30,]], octave(Token, octave.integer = FALSE))
-#> Error: object 'chorales' not found
+within(chorale[[20:30,]], octave(Token, octave.integer = FALSE))
+#> ######################## vvv chor001.krn vvv #########################
+#>     8:         **octave       **octave       **octave       **octave
+#>    12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>    13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>    14:              *>A            *>A            *>A            *>A
+#>    20:               vv              v              v              '
+#>    21:               =1             =1             =1             =1
+#>    22:                v              v              v              '
+#>    23:               vv              v              v              .
+#>    24:                .              v              .              .
+#>    25:               vv              v              v              '
+#>    26:               =2             =2             =2             =2
+#>    27:                v              v              v              '
+#>    28:               vv             vv              .              .
+#>    29:                .              .              .              '
+#>    30:               vv              v              v              '
+#>    52:              *>B            *>B            *>B            *>B
+#>   124:               *-             *-             *-             *-
+#> ######################## ^^^ chor001.krn ^^^ #########################
+#> 
+#>    Data fields: 
+#>           Token                                            :: character
+#>          *humdrumR:::octave(Token, octave.integer = FALSE) :: character (**octave tokens)
+#> 
 ```

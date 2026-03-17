@@ -124,7 +124,7 @@ except with a special methods for printing, indexing, and combining
 distributions. These features all make the object look and behave more
 intuitively like a like a distribution of data. You can always use
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html),
-[`as.data.table()`](https://rdatatable.gitlab.io/data.table/reference/as.data.table.html),
+[`as.data.table()`](https://rdrr.io/pkg/data.table/man/as.data.table.html),
 or `as_tibble()` (if you've attached
 [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)) to
 get rid of the humdrumR features.

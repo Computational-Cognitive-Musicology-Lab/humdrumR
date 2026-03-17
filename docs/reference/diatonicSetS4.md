@@ -60,8 +60,8 @@ method, and thus (via
 the [show](https://rdrr.io/r/methods/show.html) method, for diatonicSets
 call
 [key()](https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyFunctions.md).
-Thus, if you return a `diatonicSet` on the command line (or call
-[print](https://rdrr.io/r/base/print.html) one one), you'll see the [key
+Thus, if you return a `diatonicSet` on the command line (or
+[print](https://rdrr.io/r/base/print.html) one), you'll see the [key
 interpretation](https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyFunctions.md)
 representation printed.
 
@@ -199,7 +199,9 @@ Coercision methods are defined for
   integer and intepreted as root of major key
 
 - [character](https://rdrr.io/r/base/character.html): interpreted using
-  `humdrumR`s regular expression dispatch system, as explained fully
+  `humdrumR`'s [regular expression dispatch
+  system](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumDispatch.md),
+  as explained fully
   [here](https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyFunctions.md).
 
 ## See also

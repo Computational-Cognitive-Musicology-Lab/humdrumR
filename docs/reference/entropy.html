@@ -239,9 +239,9 @@ However, cross entropy/information-content are closely related to the more gener
 
 <p>The output of <code>info()</code> is identical to the log of the modeled
 <a href="https://en.wikipedia.org/wiki/Likelihood_function" class="external-link">likelihood</a> of each data point,
-which can be computed using the <code><a href="https://rdatatable.gitlab.io/data.table/reference/like.html" class="external-link">data.table::like()</a></code> function.
+which can be computed using the <code><a href="https://rdrr.io/pkg/data.table/man/like.html" class="external-link">data.table::like()</a></code> function.
 Literally, <code>info(x, base) == log(like(x), base)</code>.
-The <code><a href="https://rdatatable.gitlab.io/data.table/reference/like.html" class="external-link">data.table::like()</a></code> function works just like <code>info()</code>, computing pointwise probabilities for each data point based on the
+The <code><a href="https://rdrr.io/pkg/data.table/man/like.html" class="external-link">data.table::like()</a></code> function works just like <code>info()</code>, computing pointwise probabilities for each data point based on the
 probability distribution in <code>model</code>.
 However, we can use it to, for example, calculate the total <em>log likelihood</em> of data using <code>sum(log(like(...)))</code>.
 This value divided by N is the cross entropy (make sure to use the right log base!): <code>-sum(log(like(...), base = 2)) == xentropy(...)</code>.</p>

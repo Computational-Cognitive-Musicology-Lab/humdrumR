@@ -35,12 +35,13 @@ Various pitch representations can be generated using predefined [chord
 functions](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordFunctions.md)
 like
 [`chord()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.md)
-[`tertian()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertian.md),
-and `roman()`. All of these functions use a common deparsing framework,
-and are specified using different combinations of arguments to the
-deparser. By modifying these *"deparsing" arguments*, you can exercise
-fine control over how you want pitch information to be represented in
-your output.
+[`tertian()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/tertianSetS4.md),
+and
+[`roman()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harm.md).
+All of these functions use a common deparsing framework, and are
+specified using different combinations of arguments to the deparser. By
+modifying these *"deparsing" arguments*, you can exercise fine control
+over how you want pitch information to be represented in your output.
 
 ## See also
 

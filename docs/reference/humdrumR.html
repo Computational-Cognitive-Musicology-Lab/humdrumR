@@ -102,6 +102,8 @@ the viewing of <a href="humdrumRclass.html">humdrumR datasets</a>.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="va">humdrumRroot</span></span>
 <span></span>
+<span><span class="va">humdrumRdata</span></span>
+<span></span>
 <span><span class="fu">humdrumR</span><span class="op">(</span></span>
 <span>  <span class="va">view</span>,</span>
 <span>  <span class="va">dataTypes</span>,</span>
@@ -116,6 +118,7 @@ the viewing of <a href="humdrumRclass.html">humdrumR datasets</a>.</p>
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
     <p>An object of class <code>character</code> of length 1.</p>
+<p>An object of class <code>list</code> of length 5.</p>
     </div>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
@@ -161,7 +164,7 @@ on what is in the field.</p></dd>
 <dt id="arg-syntaxhighlight">syntaxHighlight<a class="anchor" aria-label="anchor" href="#arg-syntaxhighlight"></a></dt>
 <dd><p><em><strong>Should syntax highlighting (coloring) be used in printout?</strong></em></p>
 <p>Defaults to <code>TRUE</code>.</p>
-<p>Must be a singleton logical value; an on/off switch.</p></dd>
+<p>Must be a singleton <code>logical</code> value; an on/off switch.</p></dd>
 
 
 <dt id="arg-censoremptyrecords">censorEmptyRecords<a class="anchor" aria-label="anchor" href="#arg-censoremptyrecords"></a></dt>
@@ -214,8 +217,8 @@ These package options are all enumerated and explained in the <strong>Arguments<
 <span class="r-in"><span><span class="co"># see the humdrumR package directory contents</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">dir</a></span><span class="op">(</span><span class="va">humdrumRroot</span><span class="op">)</span> </span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "CITATION"    "DESCRIPTION" "HumdrumData" "INDEX"       "LICENSE"    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "Meta"        "NAMESPACE"   "NEWS.md"     "R"           "examples"   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "extdata"     "help"        "html"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6] "Meta"        "NAMESPACE"   "NEWS.md"     "R"           "data"       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11] "examples"    "extdata"     "help"        "html"       </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

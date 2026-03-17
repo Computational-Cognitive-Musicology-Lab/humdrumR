@@ -72,7 +72,7 @@ The rend() function is essentially the inverse of cleave().'></head><body>
     <div class="ref-description section level2">
     <p>Rend, as in "to rend apart," splits data in separate fields into separate spines or paths.
 Under the hood, <code>rend()</code> essentially runs a specialized call to make the <a href="humTable.html">humdrum table</a>
-"longer"/"taller," similar to R functions like <code><a href="https://rdatatable.gitlab.io/data.table/reference/melt.data.table.html" class="external-link">data.table::melt()</a></code> (<code>reshape2</code>), <code><a href="https://tidyr.tidyverse.org/reference/gather.html" class="external-link">tidyr::gather()</a></code> (<code>tidyr</code>), or <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">tidyr::pivot_longer()</a></code> (<code>tidyr</code>).
+"longer"/"taller," similar to R functions like <code><a href="https://rdrr.io/pkg/data.table/man/melt.data.table.html" class="external-link">data.table::melt()</a></code> (<code>reshape2</code>), <code><a href="https://tidyr.tidyverse.org/reference/gather.html" class="external-link">tidyr::gather()</a></code> (<code>tidyr</code>), or <code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">tidyr::pivot_longer()</a></code> (<code>tidyr</code>).
 In fact, a humdrumR method for <a href="https://tidyr.tidyverse.org/reference/tidyr-package.html" class="external-link">pivot_longer()</a> is defined, which is equivalent to <code>rend()</code>.
 The <code>rend()</code> function is essentially the inverse of <code><a href="cleave.html">cleave()</a></code>.</p>
     </div>
@@ -164,7 +164,7 @@ Thus, <code>rend(humData, 'Solfa')</code> is equivalent to <code>rend(humData, '
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/private/var/folders/z2/2l9p7g8n0jjb9kjwgl6q8slw0000gn/T/RtmpgxrtCu/temp_libpath14125129ec8b8/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
