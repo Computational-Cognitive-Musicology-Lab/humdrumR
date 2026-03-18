@@ -15,7 +15,7 @@ source('vignette_header.R')
 ```
 
 Welcome to "Making plots with `r hm`"!
-R has two major plotting systems that are widely used: 1) R's built-in [base graphics][graphics-package] functions and 2) the more modern [ggplot2]. 
+R has two major plotting systems that are widely used: 1) R's built-in base graphics functions (`?graphics-package`) and 2) the more modern [ggplot2]. 
 `r Hm` is compatible with both of these systems.
 `r Hm` also has it's own, built-in [draw()] function, which is basically a spiffy (easier to use) extension of base-R graphics.
 
@@ -37,7 +37,7 @@ bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 ```
 
 
-We'll use [semits()] and [duration()] to convert pitch and rhythmic information into numbers, and [solfa()] and [recip()] to represent them in categorical form.
+We'll use `semits()` and `duration()` to convert pitch and rhythmic information into numbers, and `solfa()` and `recip()` to represent them in categorical form.
 
 ```{r}
 bach |>
@@ -49,25 +49,25 @@ bach |>
 
 # Draw()
 
-`r Hm`'s [draw()] function is basically a fancy wrapper around base-R functions like [plot()] and [hist()].
-Like these functions, using [draw()] is simple: just pass data ([atomic][vector] vectors) in to get a plot.
+`r Hm`'s [draw()] function is basically a fancy wrapper around base-R functions like `plot()` and `hist()`.
+Like these functions, using [draw()] is simple: just pass data (atomic vectors `?vector`) in to get a plot.
 The [draw()] function will look at the input arguments you give it, and make an appropriate plot for that input type.
 Currently, `draw()` can make seven different types of plots, depending on the input passed to it.
 
 To decide what kind of plot to make, [draw()] looks at its first two arguments, `x` and `y`, which represent (you guessed it) the X and Y axes.
 Here are the types of plots associated with different types of `x`/`y` arguments:
 
-| `x`                                                      | `y`                                   | Plot type                                           |
-|----------------------------------------------------------|---------------------------------------|-----------------------------------------------------|
-| `numeric`                                                | (missing)                             | [Density Histogram/Contour][draw_density()]         |
-| (missing)                                                | `numeric`                             | [Quantile plot][draw_Qplot()]                       |
+| `x`                                                      | `y`                                   | Plot type                                           | Function                                           
+|----------------------------------------------------------|---------------------------------------|-----------------------------------------------------|-----------------------------------------------------|
+| `numeric`                                                | (missing)                             | Density Histogram/Contour | `draw_density()`         |
+| (missing)                                                | `numeric`                             | Quantile plot | `draw_Qplot()`                      |
 |                                                          |                                       | (or Violin plot)                                    |
-| `numeric`                                                | `numeric`                             | [Scatter/line plot][draw_scatter()]                 |                  
-| `character`/`factor`                                     | `numeric`                             | [Violin plot][draw_violins]                         |
-| `numeric`                                                | `character` or `factor`               | [Area chart][draw_area()]                           |
-| `character`/ `factor`                                    | (missing)                             | [barplot][draw_barplot()]                           |
-| (missing)                                                | `character`/`factor`                  | [barplot][draw_barplot()]                           |
-| `character`/`factor`                                     | `character`/`factor`                  | [Heat map][draw_heat()]                             |
+| `numeric`                                                | `numeric`                             | Scatter/line plot | `draw_scatter()`                 |                  
+| `character`/`factor`                                     | `numeric`                             | Violin plot | `draw_violins()`                        |
+| `numeric`                                                | `character` or `factor`               | Area chart | `draw_area()`                           |
+| `character`/ `factor`                                    | (missing)                             | barplot | `draw_barplot()`                           |
+| (missing)                                                | `character`/`factor`                  | barplot | `draw_barplot()`                           |
+| `character`/`factor`                                     | `character`/`factor`                  | Heat map | `draw_heat()`                             |
 
 
 To see this in action, let's see what happens if we pass our `Semits` field as either the first (`x`) or second (`y`) argument to [draw()]:
@@ -80,7 +80,7 @@ bach |> draw( , Semits)
 
 ```
 
-On the X axis, numeric data is drawn as a [density histogram][draw_density()]; on the Y axis, a [quantile plot][draw_Qplot()].
+On the X axis, numeric data is drawn as a density histogram (`draw_density()`); on the Y axis, a quantile plot (`draw_Qplot()`).
 What if we pass two numeric variables (`Semits` *and* `Duration`)? 
 We get a scatter plot:
 
@@ -91,7 +91,7 @@ bach |> draw(Duration, Semits)
 ```
 
 We can see that there are really only `r humdrumR:::num2word(length(unique(bach$Duration)))` duration values in the data (because durations in music scores aren't really continuous numbers).
-To make the data easier to make sense of, we can use the `jitter` argument to randomly move points a little bit, so you can see how many there are.
+To make the data easier to interpret, we can use the `jitter` argument to randomly move points a little bit, so you can see how many there are.
 (Also check out the `lm` argument.)
 
 ```{r}
@@ -99,6 +99,7 @@ To make the data easier to make sense of, we can use the `jitter` argument to ra
 bach |> draw(Duration, Semits, jitter = 'xy', lm = TRUE)
 
 ```
+
 Maybe it would make more sense with duration on a logarithmic scale?
 
 ```{r}
@@ -137,7 +138,7 @@ bach |> draw(Recip, Semits)
 ```
 
 The relationship between duration and pitch height does seem plausible, though it is weak.
-What about a relationship we'd expect to be a bit stronger.
+What about a relationship we'd expect to be a bit stronger?
 Let's look at voice type vs pitch height (we'll make two plots, flipping the X and Y axes):
 
 ```{r}
@@ -151,14 +152,12 @@ bach |> draw(Semits, Instrument)
 There is a clear relationship between voice type and pitch height---which is, of course, what we'd expect!
 
 
-### Title and Axis Labels
+## Title and Axis Labels
  
 Use the `title` (and/or `subtitle`) arguments to set a plot title.
-You an also use `xlabel` and `ylabel` to set the axis labels.
+You can also use `xlabel` and `ylabel` to set the axis labels.
 
 ```{r}
-
-
 bach |> draw(Instrument, Semits, 
              title = 'Violin Plot of Pitch by Voice Type', subtitle = 'In 371 Bach Chorales',
              ylabel = 'Semitones')
@@ -166,6 +165,7 @@ bach |> draw(Instrument, Semits,
 
 
 ```
+
 ## Plotting more dimensions
 
 
@@ -181,7 +181,7 @@ bach |> draw(color = Instrument, Semits, smooth = TRUE,
 
 ```
 
-We can also use `color` to *add* dimensional to a plot.
+We can also use `color` to *add* dimensionality to a plot.
 For example, we can go back to our duration-pitch plot, but use color to represent voice types:
 
 ```{r}
@@ -209,7 +209,7 @@ We can also use `pointStyle` and `pointSize` arguments to represent dimensions o
 ## Other arguments
 
 The [draw()] function has a bunch more cool arguments.
-Below we show a bunch of arguments used when plotting a 1-dimensional distrubution of numeric values.
+Below we show a bunch of arguments used when plotting a 1-dimensional distribution of numeric values.
 Many (but not all) of the arguments shown below can be used with other types of plots---and other types of plots also have their own special arguments, which you can read about in the manual pages.
 
 ### Mean and quantiles
@@ -220,12 +220,12 @@ For example, looking at the semitone value, we can mark the mean semitone and th
 
 
 ```{r}
-
 bach |> draw(Semits, mean = TRUE, quantiles = c(.25, .75),
              title = 'Distribution of pitch in Chorales',
              subtitle = 'Showing the mean and interquartile range')
 
 ```
+
 The median value is the 50% quantile, so you could use that instead:
 
 ```{r}
@@ -234,12 +234,12 @@ bach |> draw(Semits, quantiles = .5,
              title = 'Distribution of pitch in Chorales', subtitle = 'Showing the median')
 
 ```
+
 If you want to group the histogram by color again, you can use the `conditional` argument to control whether you compute the mean/quantiles separately for each group, or not.
 As before, let's turn on `smooth = TRUE`, cause otherwise the histogram gets a bit messy:
 
 
 ```{r}
-
 bach |> draw(Semits, color = Instrument,
              mean = TRUE, quantiles = .5, smooth = TRUE, 
              title = 'Distribution of pitch in Chorales', subtitle = 'Showing the overall mean and median')
@@ -258,7 +258,6 @@ Notably, the *ammount* of of data isn't shown in a histogram.
 It can be a good idea to take a look at how much data there is using `showCounts`:
 
 ```{r}
-
 bach |> draw(Semits, mean = TRUE,
              showCounts = TRUE,
              title = 'Distribution of pitch in Chorales',
@@ -269,7 +268,6 @@ bach |> draw(Semits, mean = TRUE,
 You can also use `showPoints` to actually *show* all the data points, spread out above the histogram:
 
 ```{r}
-
 bach |> draw(Semits, mean = TRUE,
              showPoints = TRUE,
              title = 'Distribution of pitch in Chorales',
@@ -281,16 +279,14 @@ Ah! Using `showPoints` reminds us that the semitone data is not really continuou
 
 ----
 
-We can also manipulate our histogram/density plots by passing arguments through to the underlying [hist()] and [density()] functions.
+We can also manipulate our histogram/density plots by passing arguments through to the underlying `hist()` and `density()` functions.
 You can look at those function manuals to learn all the possibilities, but for now, you can focus on the `breaks` argument (for histograms) and the `bw` (bandwidth) argument (for smooth density contours):
 
 
 
 ```{r}
-
 bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
              breaks = 20)
-
 bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
              breaks = 40)
 
@@ -301,11 +297,9 @@ bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
 
 
 ```{r}
-
 bach |> draw(Semits, mean = TRUE, smooth = TRUE,
              title = 'Distribution of pitch in Chorales',
              bw = 1)
-
 bach |> draw(Semits, mean = TRUE, smooth = TRUE,
              title = 'Distribution of pitch in Chorales',
              bw = .5)
@@ -317,9 +311,9 @@ bach |> draw(Semits, mean = TRUE, smooth = TRUE,
 ### Normal Reference
 
 
-Anotehr cool argument is `normalReference`, which can be used to overlay a "reference" normal (Gaussian) distribution on a plot of numeric data.
+Another cool argument is `normalReference`, which can be used to overlay a "reference" normal (Gaussian) distribution on a plot of numeric data.
 The mean and standard deviation of this "reference" distribution are taken from the data.
-If the data is normally distributed, it should come close to the reference distribution---if the data clearly mismatches the reference, this means the data is not well approximated by a normal distribution.
+If the data is normally distributed, it should come close to the reference distribution; if the data clearly mismatches the reference, this means the data is not well approximated by a normal distribution.
 
 ```{r}
 bach |> draw(Semits, mean = TRUE, smooth = TRUE,
@@ -348,7 +342,7 @@ The data in each voice group is a bit less skewed, but still diverges from norma
 
 Another approach is to create multiple plots for different groups.
 We can do this with the `facets` argument.
-See what happens we pass `list(Instrument(` to `facets`, instead of color:
+See what happens we pass `list(Instrument)` to `facets`, instead of color:
 
 
 ```{r}
@@ -378,7 +372,7 @@ bach |> draw(Recip, Semits, mean = TRUE, smooth = TRUE,
 
 ### Beside/Below
 
-Another option is to explicitly place plots side-by-side (or one above the other) using the [drawBeside()] or [drawBelow()] functions, which can be combined:
+Another option is to explicitly place plots side-by-side (or one above the other) using the `drawBeside()` or `drawBelow()` functions, which can be combined:
 
 ```{r}
 
@@ -407,12 +401,10 @@ drawBelow(drawBeside(histogram, violins), drawBeside(scatter, drawNothing()))
 ## Saving plots
 
 Making pretty plots on the fly is all well and good, but what if want to save them for later, or use them in a paper?
-We can save any plot created by [draw()] to a file by passing it to [drawToFile()].
-The only the thing you need is a filename with an extension (either `bmp`, `jpg`, `pdf`, `png`, `svg`, or `tiff`)---[drawToFile()] will use the extension of your filename to determine what kind of file to create.
+We can save any plot created by [draw()] to a file by passing it to `drawToFile()`.
+The only the thing you need is a filename with an extension (either `bmp`, `jpg`, `pdf`, `png`, `svg`, or `tiff`)---`drawToFile()` will use the extension of your filename to determine what kind of file to create.
 
 ```{r, eval = FALSE}
-
-
 bach |> draw(Semits, color = Instrument,
              mean = TRUE, quantiles = .5, smooth = TRUE,
              conditional = list(mean = TRUE, quantiles = TRUE), 
@@ -437,22 +429,22 @@ However, it's inevitable that you might want to make plots that can't be done wi
 Fortunately, [draw()] is built on top of R's base graphics system, which is extremely powerful, giving you precise control of every aspect of plots.
 
 The simplest option to customize [draw()] plots is to *add* to them using base-R graph functions.
-However, for more complex/customized plots, you'll eventually need to dive deep into base-R graphics (or [ggplot2][#ggplot2]).
+However, for more complex/customized plots, you'll eventually need to dive deep into base-R graphics (or [ggplot2]).
 
 ---
 
-Base-R graphics is centered around a few main plotting functions: [plot()], [barplot()], and [hist()].
-These functions actually work, under the hood, at the core of [draw()].
-Additional functions can then be used to *add* elements on top of plots you already created: [points()], [arrows()], [abline()], [lines()], [axis()], [polygon()], etc.
-These "adding" functions can be used with [draw()] too.
+Base-R graphics is centered around a few main plotting functions: `plot()`, `barplot()`, and `hist()`.
+These functions actually work, under the hood, at the core of `draw()`.
+Additional functions can then be used to *add* elements on top of plots you already created: `points()`, `arrows()`, `abline()`, `lines()`, `axis()`, `polygon()`, etc.
+These "adding" functions can be used with `draw()` too.
 
 
-### Adding plot functions
+## Adding plot functions
 
 
-The best way to "add" content to [draw()] plots by writing code using base-R adding functions, and then using [drawMore].
-For example, we know that [draw()] has the `mean` argument to mark the mean of the data with a cross---but what if you wanted to draw a line across the screen marking the mean?
-There is no [draw()] argument for that (yet), but you can use the base-R [abline()] function to do this---specifically, the `v` argument can be used to draw a vertical line.
+The best way to "add" content to `draw()` plots by writing code using base-R adding functions, and then using `drawMore()`.
+For example, we know that `draw()` has the `mean` argument to mark the mean of the data with a cross---but what if you wanted to draw a line across the screen marking the mean?
+There is no [draw()] argument for that (yet), but you can use the base-R `abline()` function to do this---specifically, the `v` argument can be used to draw a vertical line.
 So we could do something like this:
 
 ```{r}
@@ -462,19 +454,20 @@ bach |>
   drawMore(abline(v = mean(x), col = 'red', lwd = 2))
 
 ```
+
 Maybe we 'd also like to add some text, like the exact value of that mean?
-Use the base-R [mtext()] function:
+Use the base-R `mtext()` function:
 
 ```{r}
-
 bach |>
   draw(Duration, Semits, jitter = 'x') |>
   drawMore(abline(v = mean(x), col = 'red', lwd = 2),
            mtext(paste0('mean duration:\n', round(mean(x), 2)), side = 3, at = mean(x), col = 'red'))
 
 ```
+
 Or maybe you'd like to shade the area containing pitches below middle C, with durations longer than a quarter note.
-We can do this with base-R [polygon()], though it's a bit complicated:
+We can do this with base-R `polygon()`, though it's a bit complicated:
 
 ```{r}
 
@@ -488,7 +481,7 @@ bach |>
 
 ```
 
-Other functions you might want to read about are [arrows()], [graphics::segements()], [points()], [text()].
+Other functions you might want to read about are `arrows()`, `graphics::segments()`, `points()`, `text()`.
 
 # GGplot2
 
