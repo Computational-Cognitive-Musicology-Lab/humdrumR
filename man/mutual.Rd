@@ -13,17 +13,7 @@ mutual(..., base = 2)
 
 \method{mutual}{probability}(x, base = 2)
 
-\method{mutual}{default}(..., base = 2)
-
-pmutual(
-  ...,
-  model,
-  base = 2,
-  condition = NULL,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+pmutual(..., model, base = 2)
 }
 \description{
 The \href{https://en.wikipedia.org/wiki/Mutual_information}{mutual information} is a measure of how statistically

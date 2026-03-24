@@ -497,11 +497,12 @@ print.distribution <- function(dist, digits = 3,
 }
 
 
-Pequation <- function(dist, f = 'P', collapse = ',') {
-  varnames <- varnames(dist)
-  
-  condition <- dist@Condition 
-  
+Pequation <- function(varnames, f = 'P', collapse = ',', condition = NULL) {
+  if (inherits(varnames, 'probability')) {
+    condition <- varnames@Condition 
+    varnames <- varnames(varnames)
+  }
+
   eq <- paste(setdiff(varnames, condition), collapse = collapse)
   if (!is.null(condition)) {
     condition <- paste(condition, collapse = collapse)
@@ -510,6 +511,7 @@ Pequation <- function(dist, f = 'P', collapse = ',') {
   
   paste0(f, '(', eq, ')')
 }
+
 
 prettyN <- function(N, digits = 3L, zeros = '.', expr = FALSE) {
   tens <- ifelse(N == 0, 0, log10(abs(N)) |> floor())
@@ -860,13 +862,18 @@ recomputeP <- function(newx, x) {
 #' @export
 filter.distribution <- function(.data, ..., drop = FALSE) {
   exprs <- rlang::enquos(...)
-  .data[rlang::eval_tidy(exprs[[1]], data = as.data.frame(.data)), , drop = drop]
+  
+  indices <- rlang::eval_tidy(exprs[[1]], data = as.data.frame(.data))
+  
+  .data[ifelse(is.na(indices), FALSE, indices), , drop = drop]
 }
 
 #' @export
 subset.distribution <- function(x, ..., drop = FALSE) {
   exprs <- rlang::enquos(...)
-  x[rlang::eval_tidy(exprs[[1]], data = as.data.frame(x)), , drop = drop]
+  
+  indices <- rlang::eval_tidy(exprs[[1]], data = as.data.frame(.data))
+  x[ifelse(is.na(indices), FALSE, indices), , drop = drop]
 }
 
 ### coercion ----
@@ -2046,14 +2053,17 @@ entropy.probability <-  function(pdist, model, condition = NULL, base = 2) {
             } else {
               # cross entropy of q and p
               aligned <- alignDistributions(pdist, model, funcname = 'xentropy')
-              observed <- aligned$X[[1]]
               expected <- aligned$X[[2]]
+              observed <- aligned$X[[1]]
               equation <- 'H(p, q)'
           }
 
-          expected <- ifelse(expected > 0L, log(expected, base = base), 0) 
+          # expected <- ifelse(expected > 0L, log(expected, base = base), 0) 
+          valid <- expected > 0
+          expected <- expected[valid]
+          observed <- observed[valid] / sum(observed[valid])
             
-          setNames(-sum(observed * expected), equation)
+          setNames(-sum(observed * log(expected, base = base)), equation)
 }
 
 
@@ -2092,7 +2102,7 @@ entropy.default <- function(..., model, base = 2) {
             entropy(pdist(...), model = model, base = base)
           }
 
-#### entropy_by() ----
+#### pentropy() ----
 
 #' Calculate point-wise or contextual entropy
 #' 
@@ -2244,15 +2254,12 @@ xentropy <- function(..., model, base = 2) {
 #' @rdname entropy
 #' @export
 kld <- function(..., model, base = 2) {
-  checks(base, xnumber & xpositive)
+  checks(base, xlen1 & xnumber & xpositive)
   
-  if (missing(model)) .stop("The lkd() function requires a probability distribution passed to the 'model' argument.")
+  if (missing(model)) .stop("The kld() function requires a probability distribution passed to the 'model' argument.")
   
   UseMethod('kld')
 }
-
-
-
 
 #' @rdname entropy
 #' @export
@@ -2265,7 +2272,10 @@ kld.probability <-  function(pdist, model, condition = NULL, base = 2) {
 #' @rdname entropy
 #' @export
 kld.default <- function(..., model, base = 2) {
-  kld(pdist(...), model = model, base = base)
+  result <- kld(pdist(...), model = model, base = base)
+  
+  names(result) <- 'Dkl(p, q)'
+  result
 }
 
 
@@ -2343,14 +2353,10 @@ kld.default <- function(..., model, base = 2) {
 #' @family {Information theory functions} 
 #' @export
 mutual <- function(..., base = 2) {
-  checks(base, xnumber & xpositive)
+  checks(base, xlen1 & xnumber & xpositive)
   
   UseMethod('mutual')
 }
-
-
-
-
 
 
 #' @rdname mutual
@@ -2358,11 +2364,6 @@ mutual <- function(..., base = 2) {
 mutual.default <- function(..., base = 2) {
   mutual.probability(pdist(...), base = base)
 }
-
-
-
-
-
 
 
 #' @rdname mutual
@@ -2391,35 +2392,26 @@ mutual.probability <-  function(x, base = 2) {
 
 
 
-
-#' @rdname mutual
-#' @export
-mutual.default <- function(..., base = 2) {
-  mutual.probability(pdist(...), base = base)
-}
-
-
 ## Point-wise ----
 
 ### like() ----
 
 
+
+
 #' @export
 like <- function(..., model) {
-  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm'))
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm') | xnull)
   
   UseMethod('like')
 }
 
-#' @rdname entropy
-#' @export
-info <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
-  -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
-       base = base)
-}
 
 #' @export
 like.default <- function(..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  checks(na.rm, xTF)
+  checks(.drop, xTF)
+  
   like.data.frame(data.frame(...), model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
 }
 
@@ -2428,8 +2420,9 @@ like.data.frame <- function(df, ..., model) {
   if (missing(model) || is.null(model))  {
     model <- if (is.numeric(df[[1]])) lm(df[,ncol(df):1]) else model <- do.call('pdist', list(df, ...))
     
+  } else {
+    checks(model, xclass(c('lm', 'probability')), argname = 'model', seealso = '?like')
   }
-  
   if (inherits(model, 'probability')) {
     colnames <- colnames(df)
     varnames <- varnames(model)
@@ -2441,10 +2434,57 @@ like.data.frame <- function(df, ..., model) {
   } else {
     dnorm(predict(model, newdata = df, type = 'response'), 0, summary(model)$sigma)
   }
-  
-  
 }
 
+#' @export 
+like.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+
+  quos <- rlang::enexprs(...)
+  humtab <- getHumtab(x, 'D')
+  if (length(quos)) {
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
+   } else {
+    selected <- selectedFields(x)
+    quos <- lapply(selected, rlang::sym)
+    names(quos) <- selected
+   }
+  equation <- Pequation(unlist(lapply(quos, rlang::quo_name)), condition = condition)
+  rlang::eval_tidy(rlang::expr(within(x, !!equation := like.default(!!!quos, model = model, condition = !!condition, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs))))
+
+}
+
+### info() ----
+
+#' @rdname entropy
+#' @export
+info <- function(..., model, base = 2) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm') | xnull)
+  
+  UseMethod('info')
+}
+
+#' @export
+info.default <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  -log(like(..., model = model, condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs), 
+       base = base)
+}
+
+#' @export 
+info.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  quos <- rlang::enexprs(...)
+  humtab <- getHumtab(x, 'D')
+  if (length(quos)) {
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
+  } else {
+    selected <- selectedFields(x)
+    quos <- lapply(selected, rlang::sym)
+    names(quos) <- selected
+  }
+  equation <- Pequation(unlist(lapply(quos, rlang::quo_name)), condition = condition, f = 'h')
+  
+  rlang::eval_tidy(rlang::expr(within(x, !!equation := info.default(!!!quos, model = model, condition = !!condition, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs))))
+  
+}
 
 ### pentropy() ----
 
@@ -2477,12 +2517,19 @@ pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .dro
 
 #' @rdname mutual
 #' @export
-pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+pmutual <- function(..., model, base = 2) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm') | xnull)
+  
+  UseMethod('pmutual')
+}
+
+#' @export
+pmutual.default <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   df <- data.frame(...)
   
-  if (missing(model)) model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
+  if (missing(model) || is.null(model)) model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
   
-  independent <- Reduce('*', lapply(varnames(model), \(j) model[ , j]))
+  independent <- Reduce('%o%', lapply(varnames(model), \(j) model[ , j]))
   
   ic_observed <- info(df, model = model, base = base)
   ic_independent <- info(df, model = independent, base = base)
@@ -2491,8 +2538,23 @@ pmutual <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop
   
 }
 
-
-
+#' @export
+pmutual.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  quos <- rlang::enexprs(...)
+  humtab <- getHumtab(x, 'D')
+  
+  if (length(quos)) {
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
+  } else {
+    selected <- selectedFields(x)
+    quos <- lapply(selected, rlang::sym)
+    names(quos) <- selected
+  }
+  
+  equation <- Pequation(unlist(lapply(quos, rlang::quo_name)), condition = condition, f = 'i', collapse = ';')
+  rlang::eval_tidy(rlang::expr(within(x, !!equation := pmutual.default(!!!quos, model = model, condition = !!condition, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs))))
+  
+}
 ##################################################-
 # table() extensions for humdrumR ---- ###########
 ##################################################-
