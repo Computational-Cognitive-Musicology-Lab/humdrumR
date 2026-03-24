@@ -44,15 +44,7 @@ kld(pdist, model, condition = NULL, base = 2)
 # Default S3 method
 kld(..., model, base = 2)
 
-info(
-  ...,
-  model,
-  base = 2,
-  condition = NULL,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+info(..., model, base = 2)
 ```
 
 ## Arguments

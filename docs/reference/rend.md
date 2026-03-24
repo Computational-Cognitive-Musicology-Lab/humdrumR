@@ -128,7 +128,7 @@ Other Humdrum table pivoting functions:
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -142,56 +142,56 @@ humData |>
 
 humData |> rend(c('Recip', 'Solfa'))
 #> ####################### vvv chor001.krn vvv ########################
-#>      1:  !!!COM: Bach, Johann Sebastian
-#>      2:  !!!CDT: 1685/02/21/-1750/07/28/
-#>      3:  !!!OTL@@DE: Aus meines Herzens Grunde
-#>      4:  !!!OTL@EN:      From the Depths of My Heart
-#>      5:  !!!SCT: BWV 269
-#>      6:  !!!PC#: 1
-#>      7:  !!!AGN: chorale
-#>      8:         **recip       **recip       **recip       **recip    ***
-#>      9:          *ICvox        *ICvox        *ICvox        *ICvox    ***
-#>     10:          *Ibass        *Ibass       *Itenor       *Itenor    ***
-#>     11:         *I"Bass       *I"Bass      *I"Tenor      *I"Tenor    ***
-#>     12:       *>[A,A,B]     *>[A,A,B]     *>[A,A,B]     *>[A,A,B]    ***
-#>     13:    *>norep[A,B]  *>norep[A,B]  *>norep[A,B]  *>norep[A,B]    ***
-#>     14:             *>A           *>A           *>A           *>A    ***
-#>     15:         *clefF4       *clefF4      *clefGv2      *clefGv2    ***
-#>     16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]    ***
-#>     17:             *G:           *G:           *G:           *G:    ***
-#>     18:           *M3/4         *M3/4         *M3/4         *M3/4    ***
-#>     19:          *MM100        *MM100        *MM100        *MM100    ***
-#>     20:               4            do             4            mi    ***
-#>     21:              =1            =1            =1            =1    ***
-#>     22:               4            do             4            mi    ***
-#>     23:               4            la             8            fa    ***
-#>     24:               .             .             8            mi    ***
-#>     25:               4            ti             4            re    ***
-#>     26:              =2            =2            =2            =2    ***
-#>     27:               4            do             4            do    ***
-#>     28:               4            so             4            ti    ***
-#>     29:               .             .             .             .    ***
-#>     30:               4            la             4            do    ***
-#>     31:              =3            =3            =3            =3    ***
-#>     32:               4            fa             8            fa    ***
-#>     33:               .             .             8            mi    ***
-#>     34:               8            mi             4            fa    ***
-#>     35:               8            re             .             .    ***
-#>     36:               4            do             4            so    ***
-#>     37:              =4            =4            =4            =4    ***
-#>     38:               2            so             2            so    ***
-#>     39:               4            do             4            so    ***
-#>     40:              =5            =5            =5            =5    ***
-#>     41:               4            ti             4            re    ***
-#>     42:               4            do             4            mi    ***
-#>     43:               4            re             4            fa    ***
-#>     44:              =6            =6            =6            =6    ***
-#>     45:               4            mi             4            so    ***
-#>     46:               4            fa             4            la    ***
-#>     47:               4            so             8            so    ***
-#>     48:               .             .             8            fa    ***
-#>     49:              =7            =7            =7            =7    ***
-#>     50:               2            do             2            mi    ***
+#>             1:  !!!COM: Bach, Johann Sebastian
+#>             2:  !!!CDT: 1685/02/21/-1750/07/28/
+#>             3:  !!!OTL@@DE: Aus meines Herzens Grunde
+#>             4:  !!!OTL@EN:      From the Depths of My Heart
+#>             5:  !!!SCT: BWV 269
+#>             6:  !!!PC#: 1
+#>             7:  !!!AGN: chorale
+#>             8:         **recip       **recip       **recip       **recip    ***
+#>             9:          *ICvox        *ICvox        *ICvox        *ICvox    ***
+#>            10:          *Ibass        *Ibass       *Itenor       *Itenor    ***
+#>            11:         *I"Bass       *I"Bass      *I"Tenor      *I"Tenor    ***
+#>            12:       *>[A,A,B]     *>[A,A,B]     *>[A,A,B]     *>[A,A,B]    ***
+#>            13:    *>norep[A,B]  *>norep[A,B]  *>norep[A,B]  *>norep[A,B]    ***
+#>            14:             *>A           *>A           *>A           *>A    ***
+#>            15:         *clefF4       *clefF4      *clefGv2      *clefGv2    ***
+#>            16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]    ***
+#>            17:             *G:           *G:           *G:           *G:    ***
+#>            18:           *M3/4         *M3/4         *M3/4         *M3/4    ***
+#>            19:          *MM100        *MM100        *MM100        *MM100    ***
+#>            20:               4            do             4            mi    ***
+#>            21:              =1            =1            =1            =1    ***
+#>            22:               4            do             4            mi    ***
+#>            23:               4            la             8            fa    ***
+#>            24:               .             .             8            mi    ***
+#>            25:               4            ti             4            re    ***
+#>            26:              =2            =2            =2            =2    ***
+#>            27:               4            do             4            do    ***
+#>            28:               4            so             4            ti    ***
+#>            29:               .             .             .             .    ***
+#>            30:               4            la             4            do    ***
+#>            31:              =3            =3            =3            =3    ***
+#>            32:               4            fa             8            fa    ***
+#>            33:               .             .             8            mi    ***
+#>            34:               8            mi             4            fa    ***
+#>            35:               8            re             .             .    ***
+#>            36:               4            do             4            so    ***
+#>            37:              =4            =4            =4            =4    ***
+#>            38:               2            so             2            so    ***
+#>            39:               4            do             4            so    ***
+#>            40:              =5            =5            =5            =5    ***
+#>            41:               4            ti             4            re    ***
+#>            42:               4            do             4            mi    ***
+#>            43:               4            re             4            fa    ***
+#>            44:              =6            =6            =6            =6    ***
+#>            45:               4            mi             4            so    ***
+#>            46:               4            fa             4            la    ***
+#>            47:               4            so             8            so    ***
+#>            48:               .             .             8            fa    ***
+#>            49:              =7            =7            =7            =7    ***
+#>            50:               2            do             2            mi    ***
 #> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ####################### ^^^ chor001.krn ^^^ ########################
 #> 
@@ -199,56 +199,56 @@ humData |> rend(c('Recip', 'Solfa'))
 #> 
 #> ####################### vvv chor004.krn vvv ########################
 #>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     54:               4            do             4            mi    ***
-#>     55:               .             .             .             .    ***
-#>     56:              =5            =5            =5            =5    ***
-#>     57:               4            la             4            la    ***
-#>     58:               .             .             .             .    ***
-#>     59:               8            ti             4            re    ***
-#>     60:               8            do             .             .    ***
-#>     61:               4            re             4            re    ***
-#>     62:               4            so             4            re    ***
-#>     63:              =6            =6            =6            =6    ***
-#>     64:               8            mi             4            so    ***
-#>     65:               8            do             .             .    ***
-#>     66:               4            re             4            fi    ***
-#>     67:               4            so             4            ti    ***
-#>     68:               4            do             4            do    ***
-#>     69:              =7            =7            =7            =7    ***
-#>     70:               4            mi             4            so    ***
-#>     71:               .             .             .             .    ***
-#>     72:               4            do             4            do    ***
-#>     73:               8            fa             4            do    ***
-#>     74:               8            so             .             .    ***
-#>     75:               4            la             4            la    ***
-#>     76:               .             .             .             .    ***
-#>     77:              =8            =8            =8            =8    ***
-#>     78:               4            di             4            te    ***
-#>     79:               4            re             4            la    ***
-#>     80:               4            la             4            la    ***
-#>     81:               4            do             4            so    ***
-#>     82:              =9            =9            =9            =9    ***
-#>     83:               4            so             4            so    ***
-#>     84:               8            la             4            do    ***
-#>     85:               8            ti             .             .    ***
-#>     86:               4            do             4            do    ***
-#>     87:               4            so             8            ti    ***
-#>     88:               .             .             8            so    ***
-#>     89:             =10           =10           =10           =10    ***
-#>     90:               4            fi             2            re    ***
-#>     91:               4            so             .             .    ***
-#>     92:               4            do             4            mi    ***
-#>     93:              ==            ==            ==            ==    ***
-#>     94:              *-            *-            *-            *-    ***
-#>     95:  !!!hum2abc: -Q ''
-#>     96:  !!!title: @{PC#}. @{OTL@@DE}
-#>     97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge***
-#>     98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Lei***
-#>     99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  r***
-#>    100:  !!!YOR4: Chorales (New York: Associated Musi***
-#>    101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.***
-#>    102:  !!!EED:  Craig Stuart Sapp
-#>    103:  !!!EEV:  2009/05/22
+#>            54:               4            do             4            mi    ***
+#>            55:               .             .             .             .    ***
+#>            56:              =5            =5            =5            =5    ***
+#>            57:               4            la             4            la    ***
+#>            58:               .             .             .             .    ***
+#>            59:               8            ti             4            re    ***
+#>            60:               8            do             .             .    ***
+#>            61:               4            re             4            re    ***
+#>            62:               4            so             4            re    ***
+#>            63:              =6            =6            =6            =6    ***
+#>            64:               8            mi             4            so    ***
+#>            65:               8            do             .             .    ***
+#>            66:               4            re             4            fi    ***
+#>            67:               4            so             4            ti    ***
+#>            68:               4            do             4            do    ***
+#>            69:              =7            =7            =7            =7    ***
+#>            70:               4            mi             4            so    ***
+#>            71:               .             .             .             .    ***
+#>            72:               4            do             4            do    ***
+#>            73:               8            fa             4            do    ***
+#>            74:               8            so             .             .    ***
+#>            75:               4            la             4            la    ***
+#>            76:               .             .             .             .    ***
+#>            77:              =8            =8            =8            =8    ***
+#>            78:               4            di             4            te    ***
+#>            79:               4            re             4            la    ***
+#>            80:               4            la             4            la    ***
+#>            81:               4            do             4            so    ***
+#>            82:              =9            =9            =9            =9    ***
+#>            83:               4            so             4            so    ***
+#>            84:               8            la             4            do    ***
+#>            85:               8            ti             .             .    ***
+#>            86:               4            do             4            do    ***
+#>            87:               4            so             8            ti    ***
+#>            88:               .             .             8            so    ***
+#>            89:             =10           =10           =10           =10    ***
+#>            90:               4            fi             2            re    ***
+#>            91:               4            so             .             .    ***
+#>            92:               4            do             4            mi    ***
+#>            93:              ==            ==            ==            ==    ***
+#>            94:              *-            *-            *-            *-    ***
+#>            95:  !!!hum2abc: -Q ''
+#>            96:  !!!title: @{PC#}. @{OTL@@DE}
+#>            97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Seba***
+#>            98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf ***
+#>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bac***
+#>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, In***
+#>           101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+#>           102:  !!!EED:  Craig Stuart Sapp
+#>           103:  !!!EEV:  2009/05/22
 #> ####################### ^^^ chor004.krn ^^^ ########################
 #>            (***four spines/paths not displayed due to screen size***)
 #> 
@@ -261,56 +261,56 @@ humData |> rend(c('Recip', 'Solfa'))
 
 humData |> select(c('Recip', 'Solfa')) |> rend()
 #> ####################### vvv chor001.krn vvv ########################
-#>      1:  !!!COM: Bach, Johann Sebastian
-#>      2:  !!!CDT: 1685/02/21/-1750/07/28/
-#>      3:  !!!OTL@@DE: Aus meines Herzens Grunde
-#>      4:  !!!OTL@EN:      From the Depths of My Heart
-#>      5:  !!!SCT: BWV 269
-#>      6:  !!!PC#: 1
-#>      7:  !!!AGN: chorale
-#>      8:         **recip       **recip       **recip       **recip    ***
-#>      9:          *ICvox        *ICvox        *ICvox        *ICvox    ***
-#>     10:          *Ibass        *Ibass       *Itenor       *Itenor    ***
-#>     11:         *I"Bass       *I"Bass      *I"Tenor      *I"Tenor    ***
-#>     12:       *>[A,A,B]     *>[A,A,B]     *>[A,A,B]     *>[A,A,B]    ***
-#>     13:    *>norep[A,B]  *>norep[A,B]  *>norep[A,B]  *>norep[A,B]    ***
-#>     14:             *>A           *>A           *>A           *>A    ***
-#>     15:         *clefF4       *clefF4      *clefGv2      *clefGv2    ***
-#>     16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]    ***
-#>     17:             *G:           *G:           *G:           *G:    ***
-#>     18:           *M3/4         *M3/4         *M3/4         *M3/4    ***
-#>     19:          *MM100        *MM100        *MM100        *MM100    ***
-#>     20:               4            do             4            mi    ***
-#>     21:              =1            =1            =1            =1    ***
-#>     22:               4            do             4            mi    ***
-#>     23:               4            la             8            fa    ***
-#>     24:               .             .             8            mi    ***
-#>     25:               4            ti             4            re    ***
-#>     26:              =2            =2            =2            =2    ***
-#>     27:               4            do             4            do    ***
-#>     28:               4            so             4            ti    ***
-#>     29:               .             .             .             .    ***
-#>     30:               4            la             4            do    ***
-#>     31:              =3            =3            =3            =3    ***
-#>     32:               4            fa             8            fa    ***
-#>     33:               .             .             8            mi    ***
-#>     34:               8            mi             4            fa    ***
-#>     35:               8            re             .             .    ***
-#>     36:               4            do             4            so    ***
-#>     37:              =4            =4            =4            =4    ***
-#>     38:               2            so             2            so    ***
-#>     39:               4            do             4            so    ***
-#>     40:              =5            =5            =5            =5    ***
-#>     41:               4            ti             4            re    ***
-#>     42:               4            do             4            mi    ***
-#>     43:               4            re             4            fa    ***
-#>     44:              =6            =6            =6            =6    ***
-#>     45:               4            mi             4            so    ***
-#>     46:               4            fa             4            la    ***
-#>     47:               4            so             8            so    ***
-#>     48:               .             .             8            fa    ***
-#>     49:              =7            =7            =7            =7    ***
-#>     50:               2            do             2            mi    ***
+#>             1:  !!!COM: Bach, Johann Sebastian
+#>             2:  !!!CDT: 1685/02/21/-1750/07/28/
+#>             3:  !!!OTL@@DE: Aus meines Herzens Grunde
+#>             4:  !!!OTL@EN:      From the Depths of My Heart
+#>             5:  !!!SCT: BWV 269
+#>             6:  !!!PC#: 1
+#>             7:  !!!AGN: chorale
+#>             8:         **recip       **recip       **recip       **recip    ***
+#>             9:          *ICvox        *ICvox        *ICvox        *ICvox    ***
+#>            10:          *Ibass        *Ibass       *Itenor       *Itenor    ***
+#>            11:         *I"Bass       *I"Bass      *I"Tenor      *I"Tenor    ***
+#>            12:       *>[A,A,B]     *>[A,A,B]     *>[A,A,B]     *>[A,A,B]    ***
+#>            13:    *>norep[A,B]  *>norep[A,B]  *>norep[A,B]  *>norep[A,B]    ***
+#>            14:             *>A           *>A           *>A           *>A    ***
+#>            15:         *clefF4       *clefF4      *clefGv2      *clefGv2    ***
+#>            16:          *k[f#]        *k[f#]        *k[f#]        *k[f#]    ***
+#>            17:             *G:           *G:           *G:           *G:    ***
+#>            18:           *M3/4         *M3/4         *M3/4         *M3/4    ***
+#>            19:          *MM100        *MM100        *MM100        *MM100    ***
+#>            20:               4            do             4            mi    ***
+#>            21:              =1            =1            =1            =1    ***
+#>            22:               4            do             4            mi    ***
+#>            23:               4            la             8            fa    ***
+#>            24:               .             .             8            mi    ***
+#>            25:               4            ti             4            re    ***
+#>            26:              =2            =2            =2            =2    ***
+#>            27:               4            do             4            do    ***
+#>            28:               4            so             4            ti    ***
+#>            29:               .             .             .             .    ***
+#>            30:               4            la             4            do    ***
+#>            31:              =3            =3            =3            =3    ***
+#>            32:               4            fa             8            fa    ***
+#>            33:               .             .             8            mi    ***
+#>            34:               8            mi             4            fa    ***
+#>            35:               8            re             .             .    ***
+#>            36:               4            do             4            so    ***
+#>            37:              =4            =4            =4            =4    ***
+#>            38:               2            so             2            so    ***
+#>            39:               4            do             4            so    ***
+#>            40:              =5            =5            =5            =5    ***
+#>            41:               4            ti             4            re    ***
+#>            42:               4            do             4            mi    ***
+#>            43:               4            re             4            fa    ***
+#>            44:              =6            =6            =6            =6    ***
+#>            45:               4            mi             4            so    ***
+#>            46:               4            fa             4            la    ***
+#>            47:               4            so             8            so    ***
+#>            48:               .             .             8            fa    ***
+#>            49:              =7            =7            =7            =7    ***
+#>            50:               2            do             2            mi    ***
 #> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ####################### ^^^ chor001.krn ^^^ ########################
 #> 
@@ -318,56 +318,56 @@ humData |> select(c('Recip', 'Solfa')) |> rend()
 #> 
 #> ####################### vvv chor004.krn vvv ########################
 #>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     54:               4            do             4            mi    ***
-#>     55:               .             .             .             .    ***
-#>     56:              =5            =5            =5            =5    ***
-#>     57:               4            la             4            la    ***
-#>     58:               .             .             .             .    ***
-#>     59:               8            ti             4            re    ***
-#>     60:               8            do             .             .    ***
-#>     61:               4            re             4            re    ***
-#>     62:               4            so             4            re    ***
-#>     63:              =6            =6            =6            =6    ***
-#>     64:               8            mi             4            so    ***
-#>     65:               8            do             .             .    ***
-#>     66:               4            re             4            fi    ***
-#>     67:               4            so             4            ti    ***
-#>     68:               4            do             4            do    ***
-#>     69:              =7            =7            =7            =7    ***
-#>     70:               4            mi             4            so    ***
-#>     71:               .             .             .             .    ***
-#>     72:               4            do             4            do    ***
-#>     73:               8            fa             4            do    ***
-#>     74:               8            so             .             .    ***
-#>     75:               4            la             4            la    ***
-#>     76:               .             .             .             .    ***
-#>     77:              =8            =8            =8            =8    ***
-#>     78:               4            di             4            te    ***
-#>     79:               4            re             4            la    ***
-#>     80:               4            la             4            la    ***
-#>     81:               4            do             4            so    ***
-#>     82:              =9            =9            =9            =9    ***
-#>     83:               4            so             4            so    ***
-#>     84:               8            la             4            do    ***
-#>     85:               8            ti             .             .    ***
-#>     86:               4            do             4            do    ***
-#>     87:               4            so             8            ti    ***
-#>     88:               .             .             8            so    ***
-#>     89:             =10           =10           =10           =10    ***
-#>     90:               4            fi             2            re    ***
-#>     91:               4            so             .             .    ***
-#>     92:               4            do             4            mi    ***
-#>     93:              ==            ==            ==            ==    ***
-#>     94:              *-            *-            *-            *-    ***
-#>     95:  !!!hum2abc: -Q ''
-#>     96:  !!!title: @{PC#}. @{OTL@@DE}
-#>     97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge***
-#>     98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Lei***
-#>     99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  r***
-#>    100:  !!!YOR4: Chorales (New York: Associated Musi***
-#>    101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.***
-#>    102:  !!!EED:  Craig Stuart Sapp
-#>    103:  !!!EEV:  2009/05/22
+#>            54:               4            do             4            mi    ***
+#>            55:               .             .             .             .    ***
+#>            56:              =5            =5            =5            =5    ***
+#>            57:               4            la             4            la    ***
+#>            58:               .             .             .             .    ***
+#>            59:               8            ti             4            re    ***
+#>            60:               8            do             .             .    ***
+#>            61:               4            re             4            re    ***
+#>            62:               4            so             4            re    ***
+#>            63:              =6            =6            =6            =6    ***
+#>            64:               8            mi             4            so    ***
+#>            65:               8            do             .             .    ***
+#>            66:               4            re             4            fi    ***
+#>            67:               4            so             4            ti    ***
+#>            68:               4            do             4            do    ***
+#>            69:              =7            =7            =7            =7    ***
+#>            70:               4            mi             4            so    ***
+#>            71:               .             .             .             .    ***
+#>            72:               4            do             4            do    ***
+#>            73:               8            fa             4            do    ***
+#>            74:               8            so             .             .    ***
+#>            75:               4            la             4            la    ***
+#>            76:               .             .             .             .    ***
+#>            77:              =8            =8            =8            =8    ***
+#>            78:               4            di             4            te    ***
+#>            79:               4            re             4            la    ***
+#>            80:               4            la             4            la    ***
+#>            81:               4            do             4            so    ***
+#>            82:              =9            =9            =9            =9    ***
+#>            83:               4            so             4            so    ***
+#>            84:               8            la             4            do    ***
+#>            85:               8            ti             .             .    ***
+#>            86:               4            do             4            do    ***
+#>            87:               4            so             8            ti    ***
+#>            88:               .             .             8            so    ***
+#>            89:             =10           =10           =10           =10    ***
+#>            90:               4            fi             2            re    ***
+#>            91:               4            so             .             .    ***
+#>            92:               4            do             4            mi    ***
+#>            93:              ==            ==            ==            ==    ***
+#>            94:              *-            *-            *-            *-    ***
+#>            95:  !!!hum2abc: -Q ''
+#>            96:  !!!title: @{PC#}. @{OTL@@DE}
+#>            97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Seba***
+#>            98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf ***
+#>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bac***
+#>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, In***
+#>           101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+#>           102:  !!!EED:  Craig Stuart Sapp
+#>           103:  !!!EEV:  2009/05/22
 #> ####################### ^^^ chor004.krn ^^^ ########################
 #>            (***four spines/paths not displayed due to screen size***)
 #> 

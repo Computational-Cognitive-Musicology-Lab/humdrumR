@@ -282,7 +282,8 @@ dataset has been grouped, it will stay grouped until you call
 &gt;    38:           59.60870    10     2
 &gt;    39:           64.82979    10     3
 &gt;    40:           69.44186    10     4
-&gt;        humdrumR:::mean(.) Piece Spine</code></pre>
+&gt;        humdrumR:::mean(.) Piece Spine
+&gt;                     &lt;num&gt; &lt;int&gt; &lt;int&gt;</code></pre>
 <p>You can also create new grouping fields on the fly. For example, what
 if, instead of groups for four separate voices, we wanted to group
 bass/tenor and alto/soprano within each piece? We could do this:</p>
@@ -312,7 +313,8 @@ bass/tenor and alto/soprano within each piece? We could do this:</p>
 <span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">18</span><span class="sc">:</span>           <span class="fl">68.54545</span>      <span class="cn">TRUE</span>     <span class="dv">9</span></span>
 <span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">19</span><span class="sc">:</span>           <span class="fl">54.75000</span>     <span class="cn">FALSE</span>    <span class="dv">10</span></span>
 <span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">20</span><span class="sc">:</span>           <span class="fl">67.03333</span>      <span class="cn">TRUE</span>    <span class="dv">10</span></span>
-<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="sc">&gt;</span>        humdrumR<span class="sc">:::</span><span class="fu">mean</span>(.) Spine <span class="sc">&gt;</span> <span class="dv">2</span> Piece</span></code></pre></div>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="sc">&gt;</span>        humdrumR<span class="sc">:::</span><span class="fu">mean</span>(.) Spine <span class="sc">&gt;</span> <span class="dv">2</span> Piece</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="sc">&gt;</span>                     <span class="er">&lt;</span>num<span class="sc">&gt;</span>    <span class="er">&lt;</span>lgcl<span class="sc">&gt;</span> <span class="er">&lt;</span>int<span class="sc">&gt;</span></span></code></pre></div>
 <hr>
 <p>Grouping isn’t just good for calculating single values. We can, for
 instance, tabulate each group separately:</p>
@@ -483,7 +485,7 @@ bar’s bass note by just going:</p>
 <span>  <span class="fu">mutate</span><span class="op">(</span><span class="va">Semits</span> <span class="op">-</span> <span class="va">BarBassNote</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pullHumdrum.html">pull</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Grouping_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="700"></p>
+<p><img src="Grouping_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -493,7 +495,7 @@ bar’s bass note by just going:</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

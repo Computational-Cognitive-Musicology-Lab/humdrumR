@@ -20,7 +20,7 @@ rep(x, ...)
 # S3 method for class 'token'
 unique(x, ...)
 
-# S4 method for class 'token,ANY,ANY,ANY'
+# S4 method for class 'token,ANY,ANY'
 x[i, j, ..., drop = FALSE]
 
 # S4 method for class 'token'

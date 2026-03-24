@@ -133,7 +133,7 @@ Other Contextual grouping functions.:
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -182,46 +182,46 @@ humData |>
    mutate(NotesPerBar = length(Token)) |>
    ungroup()
 #> ######################## vvv chor001.krn vvv #########################
-#>      1:  !!!COM: Bach, Johann Sebastian
-#>      2:  !!!CDT: 1685/02/21/-1750/07/28/
-#>      3:  !!!OTL@@DE: Aus meines Herzens Grunde
-#>      4:  !!!OTL@EN:      From the Depths of My Heart
-#>      5:  !!!SCT: BWV 269
-#>      6:  !!!PC#: 1
-#>      7:  !!!AGN: chorale
-#>      8:           **kern         **kern         **kern         **kern
-#>      9:           *ICvox         *ICvox         *ICvox         *ICvox
-#>     10:           *Ibass        *Itenor         *Ialto        *Isoprn
-#>     11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano
-#>     12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
-#>     13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
-#>     14:              *>A            *>A            *>A            *>A
-#>     15:          *clefF4       *clefGv2        *clefG2        *clefG2
-#>     16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]
-#>     17:              *G:            *G:            *G:            *G:
-#>     18:            *M3/4          *M3/4          *M3/4          *M3/4
-#>     19:           *MM100         *MM100         *MM100         *MM100
-#>     20:                4              4              4              4
-#>     21:               =1             =1             =1             =1
-#>     22:               12             12             12             12
-#>     23:               12             12             12              .
-#>     24:                .             12              .              .
-#>     25:               12             12             12             12
-#>     26:               =2             =2             =2             =2
-#>     27:               11             11             11             11
-#>     28:               11             11              .              .
-#>     29:                .              .              .             11
-#>     30:               11             11             11             11
-#>     31:               =3             =3             =3             =3
-#>     32:               16             16             16             16
-#>     33:                .             16             16              .
-#>     34:               16             16             16              .
-#>     35:               16              .             16             16
-#>     36:               16             16             16             16
-#>     37:               =4             =4             =4             =4
-#>     38:                8              8              8              8
-#>     39:                8              8              8              8
-#>     40:               =5             =5             =5             =5
+#>             1:  !!!COM: Bach, Johann Sebastian
+#>             2:  !!!CDT: 1685/02/21/-1750/07/28/
+#>             3:  !!!OTL@@DE: Aus meines Herzens Grunde
+#>             4:  !!!OTL@EN:      From the Depths of My Heart
+#>             5:  !!!SCT: BWV 269
+#>             6:  !!!PC#: 1
+#>             7:  !!!AGN: chorale
+#>             8:           **kern         **kern         **kern         **kern
+#>             9:           *ICvox         *ICvox         *ICvox         *ICvox
+#>            10:           *Ibass        *Itenor         *Ialto        *Isoprn
+#>            11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano
+#>            12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>            13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>            14:              *>A            *>A            *>A            *>A
+#>            15:          *clefF4       *clefGv2        *clefG2        *clefG2
+#>            16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]
+#>            17:              *G:            *G:            *G:            *G:
+#>            18:            *M3/4          *M3/4          *M3/4          *M3/4
+#>            19:           *MM100         *MM100         *MM100         *MM100
+#>            20:                4              4              4              4
+#>            21:               =1             =1             =1             =1
+#>            22:               12             12             12             12
+#>            23:               12             12             12              .
+#>            24:                .             12              .              .
+#>            25:               12             12             12             12
+#>            26:               =2             =2             =2             =2
+#>            27:               11             11             11             11
+#>            28:               11             11              .              .
+#>            29:                .              .              .             11
+#>            30:               11             11             11             11
+#>            31:               =3             =3             =3             =3
+#>            32:               16             16             16             16
+#>            33:                .             16             16              .
+#>            34:               16             16             16              .
+#>            35:               16              .             16             16
+#>            36:               16             16             16             16
+#>            37:               =4             =4             =4             =4
+#>            38:                8              8              8              8
+#>            39:                8              8              8              8
+#>            40:               =5             =5             =5             =5
 #> 41-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ######################## ^^^ chor001.krn ^^^ #########################
 #> 
@@ -229,48 +229,48 @@ humData |>
 #> 
 #> ######################## vvv chor004.krn vvv #########################
 #>   1-63::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     64:               18             18             18             18
-#>     65:               18              .              .             18
-#>     66:               18             18             18             18
-#>     67:               18             18             18             18
-#>     68:               18             18             18             18
-#>     69:               =7             =7             =7             =7
-#>     70:               20             20             20             20
-#>     71:                .              .             20              .
-#>     72:               20             20             20             20
-#>     73:               20             20             20             20
-#>     74:               20              .              .              .
-#>     75:               20             20             20             20
-#>     76:                .              .             20             20
-#>     77:               =8             =8             =8             =8
-#>     78:               16             16             16             16
-#>     79:               16             16             16             16
-#>     80:               16             16             16             16
-#>     81:               16             16             16             16
-#>     82:               =9             =9             =9             =9
-#>     83:               18             18             18             18
-#>     84:               18             18             18             18
-#>     85:               18              .              .              .
-#>     86:               18             18             18             18
-#>     87:               18             18             18             18
-#>     88:                .             18              .              .
-#>     89:              =10            =10            =10            =10
-#>     90:               11             11             11             11
-#>     91:               11              .             11             11
-#>     92:               11             11             11             11
-#>     93:               ==             ==             ==             ==
-#>     94:               *-             *-             *-             *-
-#>     95:  !!!hum2abc: -Q ''
-#>     96:  !!!title: @{PC#}. @{OTL@@DE}
-#>     97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Jo***
-#>     98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: B***
-#>     99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint:***
-#>    100:  !!!YOR4: Chorales (New York: Associated Music Publi***
-#>    101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, p***
-#>    102:  !!!EED:  Craig Stuart Sapp
-#>    103:  !!!EEV:  2009/05/22
+#>            64:               18             18             18             18
+#>            65:               18              .              .             18
+#>            66:               18             18             18             18
+#>            67:               18             18             18             18
+#>            68:               18             18             18             18
+#>            69:               =7             =7             =7             =7
+#>            70:               20             20             20             20
+#>            71:                .              .             20              .
+#>            72:               20             20             20             20
+#>            73:               20             20             20             20
+#>            74:               20              .              .              .
+#>            75:               20             20             20             20
+#>            76:                .              .             20             20
+#>            77:               =8             =8             =8             =8
+#>            78:               16             16             16             16
+#>            79:               16             16             16             16
+#>            80:               16             16             16             16
+#>            81:               16             16             16             16
+#>            82:               =9             =9             =9             =9
+#>            83:               18             18             18             18
+#>            84:               18             18             18             18
+#>            85:               18              .              .              .
+#>            86:               18             18             18             18
+#>            87:               18             18             18             18
+#>            88:                .             18              .              .
+#>            89:              =10            =10            =10            =10
+#>            90:               11             11             11             11
+#>            91:               11              .             11             11
+#>            92:               11             11             11             11
+#>            93:               ==             ==             ==             ==
+#>            94:               *-             *-             *-             *-
+#>            95:  !!!hum2abc: -Q ''
+#>            96:  !!!title: @{PC#}. @{OTL@@DE}
+#>            97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Sebastian B***
+#>            98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf und H&a***
+#>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***
+#>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***
+#>           101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+#>           102:  !!!EED:  Craig Stuart Sapp
+#>           103:  !!!EEV:  2009/05/22
 #> ######################## ^^^ chor004.krn ^^^ #########################
-#>               (***five global comments truncated due to screen size***)
+#>               (***four global comments truncated due to screen size***)
 #> 
 #>  humdrumR corpus of four pieces.
 #> 

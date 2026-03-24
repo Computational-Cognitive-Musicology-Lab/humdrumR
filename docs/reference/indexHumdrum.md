@@ -202,7 +202,7 @@ For more powerful/flexible indexing options, use
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.
 #> Thirteen files read from disk.
 #> Validating thirteen files...
 #> all valid.
@@ -212,110 +212,110 @@ humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")
 
 humData[1:2]
 #> #################### vvv ACDC_BackInBlack.hum vvv ####################
-#>       1:  !!!Rolling Stone List Rank: 187
-#>       2:  !!!OTL: Back in Black
-#>       3:  !!!COC: AC/DC
-#>       4:  !!!RRD: 1980/
-#>       5:  !!!In original RS 5x20 subset: True
-#>       6:     **harm  **harte   **harm  **harte    **kern  **silbe    ***
-#>       7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.   !T.d.C.        !    ***
-#>       8:          !        !        !        !    !OCT=5        !    ***
-#>       9:         =1       =1       =1       =1        =1       =1    ***
-#>      10:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      11:      *M4/4    *M4/4    *M4/4    *M4/4     *M4/4        *    ***
-#>      12:        *E:      *E:      *E:      *E:    *e:dor        *    ***
-#>      13:          *        *        *        *  *k[f#c#]        *    ***
-#>      14:          r        .        r        .         .        .    ***
-#>      15:         =2       =2       =2       =2        =2       =2    ***
-#>      16:          .        .        .        .         .        .    ***
-#>      17:         =3       =3       =3       =3        =3       =3    ***
-#>      18:    *>Intro  *>Intro  *>Intro  *>Intro   *>Intro  *>Intro    ***
-#>      19:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      20:          I    E:maj        I    E:maj         .        .    ***
-#>      21:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      22:         =4       =4       =4       =4        =4       =4    ***
-#>      23:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      24:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      25:         =5       =5       =5       =5        =5       =5    ***
-#>      26:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      27:          I    E:maj        I    E:maj         .        .    ***
-#>      28:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      29:         =6       =6       =6       =6        =6       =6    ***
-#>      30:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      31:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      32:         =7       =7       =7       =7        =7       =7    ***
-#>      33:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      34:          I    E:maj        I    E:maj         .        .    ***
-#>      35:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      36:         =8       =8       =8       =8        =8       =8    ***
-#>      37:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      38:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      39:         =9       =9       =9       =9        =9       =9    ***
-#>      40:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      41:          I    E:maj        I    E:maj         .        .    ***
-#>      42:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      43:        =10      =10      =10      =10       =10      =10    ***
-#>      44:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      45:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      46:        =11      =11      =11      =11       =11      =11    ***
-#>      47:    *>Verse  *>Verse  *>Verse  *>Verse   *>Verse  *>Verse    ***
-#>      48:      *tb16    *tb16    *tb16    *tb16     *tb16        *    ***
-#>      49:          I    E:maj        I    E:maj        ee     back    ***
-#>      50:          .        .        .        .        ee       in    ***
+#>              1:  !!!Rolling Stone List Rank: 187
+#>              2:  !!!OTL: Back in Black
+#>              3:  !!!COC: AC/DC
+#>              4:  !!!RRD: 1980/
+#>              5:  !!!In original RS 5x20 subset: True
+#>              6:     **harm  **harte   **harm  **harte    **kern  **silbe    ***
+#>              7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.   !T.d.C.        !    ***
+#>              8:          !        !        !        !    !OCT=5        !    ***
+#>              9:         =1       =1       =1       =1        =1       =1    ***
+#>             10:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             11:      *M4/4    *M4/4    *M4/4    *M4/4     *M4/4        *    ***
+#>             12:        *E:      *E:      *E:      *E:    *e:dor        *    ***
+#>             13:          *        *        *        *  *k[f#c#]        *    ***
+#>             14:          r        .        r        .         .        .    ***
+#>             15:         =2       =2       =2       =2        =2       =2    ***
+#>             16:          .        .        .        .         .        .    ***
+#>             17:         =3       =3       =3       =3        =3       =3    ***
+#>             18:    *>Intro  *>Intro  *>Intro  *>Intro   *>Intro  *>Intro    ***
+#>             19:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             20:          I    E:maj        I    E:maj         .        .    ***
+#>             21:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             22:         =4       =4       =4       =4        =4       =4    ***
+#>             23:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             24:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             25:         =5       =5       =5       =5        =5       =5    ***
+#>             26:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             27:          I    E:maj        I    E:maj         .        .    ***
+#>             28:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             29:         =6       =6       =6       =6        =6       =6    ***
+#>             30:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             31:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             32:         =7       =7       =7       =7        =7       =7    ***
+#>             33:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             34:          I    E:maj        I    E:maj         .        .    ***
+#>             35:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             36:         =8       =8       =8       =8        =8       =8    ***
+#>             37:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             38:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             39:         =9       =9       =9       =9        =9       =9    ***
+#>             40:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             41:          I    E:maj        I    E:maj         .        .    ***
+#>             42:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             43:        =10      =10      =10      =10       =10      =10    ***
+#>             44:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             45:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             46:        =11      =11      =11      =11       =11      =11    ***
+#>             47:    *>Verse  *>Verse  *>Verse  *>Verse   *>Verse  *>Verse    ***
+#>             48:      *tb16    *tb16    *tb16    *tb16     *tb16        *    ***
+#>             49:          I    E:maj        I    E:maj        ee     back    ***
+#>             50:          .        .        .        .        ee       in    ***
 #> 51-1073:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> #################### ^^^ ACDC_BackInBlack.hum ^^^ ####################
 #> ################ vvv AlGreen_LetsStayTogether.hum vvv ################
 #>  1-1156:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>    1157:          .        .        .        .         c        _    ***
-#>    1158:          .        .        .        .         d        _    ***
-#>    1159:          .        .        .        .         .        .    ***
-#>    1160:          .        .        .        .         .        .    ***
-#>    1161:          .        .        .        .         c        _    ***
-#>    1162:          .        .        .        .         d        _    ***
-#>    1163:          .        .        .        .         .        .    ***
-#>    1164:          .        .        .        .         .        .    ***
-#>    1165:          .        .        .        .         .        .    ***
-#>    1166:          .        .        .        .         .        .    ***
-#>    1167:          .        .        .        .         .        .    ***
-#>    1168:          .        .        .        .         .        .    ***
-#>    1169:          .        .        .        .         .        .    ***
-#>    1170:          .        .        .        .         .        .    ***
-#>    1171:          .        .        .        .         .        .    ***
-#>    1172:          .        .        .        .         .        .    ***
-#>    1173:          .        .        .        .         .        .    ***
-#>    1174:          .        .        .        .         d    times    ***
-#>    1175:          .        .        .        .         .        .    ***
-#>    1176:          .        .        .        .         .        .    ***
-#>    1177:          .        .        .        .         .        .    ***
-#>    1178:          .        .        .        .         c      are    ***
-#>    1179:          .        .        .        .         .        .    ***
-#>    1180:          .        .        .        .         .        .    ***
-#>    1181:          .        .        .        .         .        .    ***
-#>    1182:        =75      =75      =75      =75       =75      =75    ***
-#>    1183:       *tb8     *tb8     *tb8     *tb8      *tb8        *    ***
-#>    1184:        IV7  B-:maj7       IV   B-:maj         f     good    ***
-#>    1185:          .        .        .        .         .        .    ***
-#>    1186:          .        .        .        .         d       or    ***
-#>    1187:          .        .        .        .         f      bad    ***
-#>    1188:       iii7   A:min7      iii    A:min         .        .    ***
-#>    1189:          .        .        .        .         c        _    ***
-#>    1190:          .        .        .        .         d        _    ***
-#>    1191:          .        .        .        .         f     hap-    ***
-#>    1192:        =76      =76      =76      =76       =76      =76    ***
-#>    1193:         ii    G:min       ii    G:min         .        .    ***
-#>    1194:          .        .        .        .         c      -py    ***
-#>    1195:          .        .        .        .         d       or    ***
-#>    1196:          .        .        .        .         f      sad    ***
-#>    1197:          V    C:maj        V    C:maj         .        .    ***
-#>    1198:          .        .        .        .         f     come    ***
-#>    1199:          .        .        .        .         d       on    ***
-#>    1200:          .        .        .        .         .        .    ***
-#>    1201:         *-       *-       *-       *-        *-       *-    ***
-#>    1202:  !!!ONB: Translated from original encodings ***
-#>    1203:  !!!ONB: Original transcribers noted in comm***
-#>    1204:  !!!YOE: David Temperley, Trevor de Clercq
-#>    1205:  !!!EED: Nathaniel Condit-Schultz
-#>    1206:  !!!ENC: Nathaniel Condit-Schultz, automated***
+#>           1157:          .        .        .        .         c        _    ***
+#>           1158:          .        .        .        .         d        _    ***
+#>           1159:          .        .        .        .         .        .    ***
+#>           1160:          .        .        .        .         .        .    ***
+#>           1161:          .        .        .        .         c        _    ***
+#>           1162:          .        .        .        .         d        _    ***
+#>           1163:          .        .        .        .         .        .    ***
+#>           1164:          .        .        .        .         .        .    ***
+#>           1165:          .        .        .        .         .        .    ***
+#>           1166:          .        .        .        .         .        .    ***
+#>           1167:          .        .        .        .         .        .    ***
+#>           1168:          .        .        .        .         .        .    ***
+#>           1169:          .        .        .        .         .        .    ***
+#>           1170:          .        .        .        .         .        .    ***
+#>           1171:          .        .        .        .         .        .    ***
+#>           1172:          .        .        .        .         .        .    ***
+#>           1173:          .        .        .        .         .        .    ***
+#>           1174:          .        .        .        .         d    times    ***
+#>           1175:          .        .        .        .         .        .    ***
+#>           1176:          .        .        .        .         .        .    ***
+#>           1177:          .        .        .        .         .        .    ***
+#>           1178:          .        .        .        .         c      are    ***
+#>           1179:          .        .        .        .         .        .    ***
+#>           1180:          .        .        .        .         .        .    ***
+#>           1181:          .        .        .        .         .        .    ***
+#>           1182:        =75      =75      =75      =75       =75      =75    ***
+#>           1183:       *tb8     *tb8     *tb8     *tb8      *tb8        *    ***
+#>           1184:        IV7  B-:maj7       IV   B-:maj         f     good    ***
+#>           1185:          .        .        .        .         .        .    ***
+#>           1186:          .        .        .        .         d       or    ***
+#>           1187:          .        .        .        .         f      bad    ***
+#>           1188:       iii7   A:min7      iii    A:min         .        .    ***
+#>           1189:          .        .        .        .         c        _    ***
+#>           1190:          .        .        .        .         d        _    ***
+#>           1191:          .        .        .        .         f     hap-    ***
+#>           1192:        =76      =76      =76      =76       =76      =76    ***
+#>           1193:         ii    G:min       ii    G:min         .        .    ***
+#>           1194:          .        .        .        .         c      -py    ***
+#>           1195:          .        .        .        .         d       or    ***
+#>           1196:          .        .        .        .         f      sad    ***
+#>           1197:          V    C:maj        V    C:maj         .        .    ***
+#>           1198:          .        .        .        .         f     come    ***
+#>           1199:          .        .        .        .         d       on    ***
+#>           1200:          .        .        .        .         .        .    ***
+#>           1201:         *-       *-       *-       *-        *-       *-    ***
+#>           1202:  !!!ONB: Translated from original encodings in the Rolling S***
+#>           1203:  !!!ONB: Original transcribers noted in comments in each spi***
+#>           1204:  !!!YOE: David Temperley, Trevor de Clercq
+#>           1205:  !!!EED: Nathaniel Condit-Schultz
+#>           1206:  !!!ENC: Nathaniel Condit-Schultz, automated
 #> ################ ^^^ AlGreen_LetsStayTogether.hum ^^^ ################
 #>               (***two spines/paths not displayed due to screen size***)
 #> 
@@ -326,56 +326,56 @@ humData[1:2]
 #> 
 humData[-1]
 #> ################ vvv AlGreen_LetsStayTogether.hum vvv ################
-#>       1:  !!!Rolling Stone List Rank: 60
-#>       2:  !!!OTL: Let's Stay Together
-#>       3:  !!!COC: Al Green
-#>       4:  !!!RRD: 1971/
-#>       5:  !!!In original RS 5x20 subset: True
-#>       6:     **harm  **harte   **harm  **harte   **kern  **silbe    ***
-#>       7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.  !T.d.C.        !    ***
-#>       8:          !        !        !        !   !OCT=3        !    ***
-#>       9:         =1       =1       =1       =1       =1       =1    ***
-#>      10:    *>Intro  *>Intro  *>Intro  *>Intro  *>Intro  *>Intro    ***
-#>      11:       *tb2     *tb2     *tb2     *tb2     *tb2        *    ***
-#>      12:      *M4/4    *M4/4    *M4/4    *M4/4    *M4/4        *    ***
-#>      13:        *F:      *F:      *F:      *F:      *F:        *    ***
-#>      14:          *        *        *        *   *k[b-]        *    ***
-#>      15:        ii7   G:min7       ii    G:min        .        .    ***
-#>      16:       iii7   A:min7      iii    A:min        .        .    ***
-#>      17:         =2       =2       =2       =2       =2       =2    ***
-#>      18:        ii7   G:min7       ii    G:min        .        .    ***
-#>      19:       iii7   A:min7      iii    A:min        .        .    ***
-#>      20:         =3       =3       =3       =3       =3       =3    ***
-#>      21:        ii7   G:min7       ii    G:min        .        .    ***
-#>      22:       iii7   A:min7      iii    A:min        .        .    ***
-#>      23:         =4       =4       =4       =4       =4       =4    ***
-#>      24:        ii7   G:min7       ii    G:min        .        .    ***
-#>      25:         V7      C:7        V    C:maj        .        .    ***
-#>      26:         =5       =5       =5       =5       =5       =5    ***
-#>      27:    *>Verse  *>Verse  *>Verse  *>Verse  *>Verse  *>Verse    ***
-#>      28:      *tb32    *tb32    *tb32    *tb32    *tb32        *    ***
-#>      29:          I    F:maj        I    F:maj        A        I    ***
-#>      30:          .        .        .        .        .        .    ***
-#>      31:          .        .        .        .        .        .    ***
-#>      32:          .        .        .        .        G        _    ***
-#>      33:          .        .        .        .        A        _    ***
-#>      34:          .        .        .        .        .        .    ***
-#>      35:          .        .        .        .        .        .    ***
-#>      36:          .        .        .        .        G        _    ***
-#>      37:          .        .        .        .        A        _    ***
-#>      38:          .        .        .        .        .        .    ***
-#>      39:          .        .        .        .        .        .    ***
-#>      40:          .        .        .        .        .        .    ***
-#>      41:          .        .        .        .        .        .    ***
-#>      42:          .        .        .        .        .        .    ***
-#>      43:          .        .        .        .        .        .    ***
-#>      44:          .        .        .        .        .        .    ***
-#>      45:          .        .        .        .        .        .    ***
-#>      46:          .        .        .        .        .        .    ***
-#>      47:          .        .        .        .        .        .    ***
-#>      48:          .        .        .        .        .        .    ***
-#>      49:          .        .        .        .        .        .    ***
-#>      50:          .        .        .        .        .        .    ***
+#>              1:  !!!Rolling Stone List Rank: 60
+#>              2:  !!!OTL: Let's Stay Together
+#>              3:  !!!COC: Al Green
+#>              4:  !!!RRD: 1971/
+#>              5:  !!!In original RS 5x20 subset: True
+#>              6:     **harm  **harte   **harm  **harte   **kern  **silbe    ***
+#>              7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.  !T.d.C.        !    ***
+#>              8:          !        !        !        !   !OCT=3        !    ***
+#>              9:         =1       =1       =1       =1       =1       =1    ***
+#>             10:    *>Intro  *>Intro  *>Intro  *>Intro  *>Intro  *>Intro    ***
+#>             11:       *tb2     *tb2     *tb2     *tb2     *tb2        *    ***
+#>             12:      *M4/4    *M4/4    *M4/4    *M4/4    *M4/4        *    ***
+#>             13:        *F:      *F:      *F:      *F:      *F:        *    ***
+#>             14:          *        *        *        *   *k[b-]        *    ***
+#>             15:        ii7   G:min7       ii    G:min        .        .    ***
+#>             16:       iii7   A:min7      iii    A:min        .        .    ***
+#>             17:         =2       =2       =2       =2       =2       =2    ***
+#>             18:        ii7   G:min7       ii    G:min        .        .    ***
+#>             19:       iii7   A:min7      iii    A:min        .        .    ***
+#>             20:         =3       =3       =3       =3       =3       =3    ***
+#>             21:        ii7   G:min7       ii    G:min        .        .    ***
+#>             22:       iii7   A:min7      iii    A:min        .        .    ***
+#>             23:         =4       =4       =4       =4       =4       =4    ***
+#>             24:        ii7   G:min7       ii    G:min        .        .    ***
+#>             25:         V7      C:7        V    C:maj        .        .    ***
+#>             26:         =5       =5       =5       =5       =5       =5    ***
+#>             27:    *>Verse  *>Verse  *>Verse  *>Verse  *>Verse  *>Verse    ***
+#>             28:      *tb32    *tb32    *tb32    *tb32    *tb32        *    ***
+#>             29:          I    F:maj        I    F:maj        A        I    ***
+#>             30:          .        .        .        .        .        .    ***
+#>             31:          .        .        .        .        .        .    ***
+#>             32:          .        .        .        .        G        _    ***
+#>             33:          .        .        .        .        A        _    ***
+#>             34:          .        .        .        .        .        .    ***
+#>             35:          .        .        .        .        .        .    ***
+#>             36:          .        .        .        .        G        _    ***
+#>             37:          .        .        .        .        A        _    ***
+#>             38:          .        .        .        .        .        .    ***
+#>             39:          .        .        .        .        .        .    ***
+#>             40:          .        .        .        .        .        .    ***
+#>             41:          .        .        .        .        .        .    ***
+#>             42:          .        .        .        .        .        .    ***
+#>             43:          .        .        .        .        .        .    ***
+#>             44:          .        .        .        .        .        .    ***
+#>             45:          .        .        .        .        .        .    ***
+#>             46:          .        .        .        .        .        .    ***
+#>             47:          .        .        .        .        .        .    ***
+#>             48:          .        .        .        .        .        .    ***
+#>             49:          .        .        .        .        .        .    ***
+#>             50:          .        .        .        .        .        .    ***
 #> 51-1206:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ################ ^^^ AlGreen_LetsStayTogether.hum ^^^ ################
 #> 
@@ -383,56 +383,56 @@ humData[-1]
 #> 
 #> ################### vvv TheBeatles_HeyJude.hum vvv ###################
 #>  1-1571:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>    1572:          .        .        .        .        .        .    ***
-#>    1573:          .        .        .        .        .        .    ***
-#>    1574:          .        .        .        .        A       na    ***
-#>    1575:          .        .        .        .        .        .    ***
-#>    1576:          .        .        .        .        c       na    ***
-#>    1577:          .        .        .        .        .        .    ***
-#>    1578:       =130     =130     =130     =130     =130     =130    ***
-#>    1579:      *tb16    *tb16    *tb16    *tb16    *tb16        *    ***
-#>    1580:       -VII   E-:maj     -VII   E-:maj        g       na    ***
-#>    1581:          .        .        .        .        f       na    ***
-#>    1582:          .        .        .        .        g       na    ***
-#>    1583:          .        .        .        .        .        .    ***
-#>    1584:          .        .        .        .        f       na    ***
-#>    1585:          .        .        .        .        .        .    ***
-#>    1586:          .        .        .        .        .        .    ***
-#>    1587:          .        .        .        .        .        .    ***
-#>    1588:          .        .        .        .        .        .    ***
-#>    1589:          .        .        .        .        .        .    ***
-#>    1590:          .        .        .        .        .        .    ***
-#>    1591:          .        .        .        .        .        .    ***
-#>    1592:          .        .        .        .        .        .    ***
-#>    1593:          .        .        .        .        .        .    ***
-#>    1594:          .        .        .        .        .        .    ***
-#>    1595:          .        .        .        .        .        .    ***
-#>    1596:       =131     =131     =131     =131     =131     =131    ***
-#>    1597:         IV   B-:maj       IV   B-:maj        g       na    ***
-#>    1598:          .        .        .        .        f       na    ***
-#>    1599:          .        .        .        .        g       na    ***
-#>    1600:          .        .        .        .        .        .    ***
-#>    1601:          .        .        .        .        f       na    ***
-#>    1602:          .        .        .        .        .        .    ***
-#>    1603:          .        .        .        .        .        .    ***
-#>    1604:          .        .        .        .        .        .    ***
-#>    1605:          .        .        .        .        .        .    ***
-#>    1606:          .        .        .        .        .        .    ***
-#>    1607:          .        .        .        .        .        .    ***
-#>    1608:          .        .        .        .        .        .    ***
-#>    1609:          .        .        .        .       e-      hey    ***
-#>    1610:          .        .        .        .        d        _    ***
-#>    1611:          .        .        .        .        .        .    ***
-#>    1612:          .        .        .        .        c     jude    ***
-#>    1613:       =132     =132     =132     =132     =132     =132    ***
-#>    1614:       *tb1     *tb1     *tb1     *tb1     *tb1        *    ***
-#>    1615:          I    F:maj        I    F:maj        .        .    ***
-#>    1616:         *-       *-       *-       *-       *-       *-    ***
-#>    1617:  !!!ONB: Translated from original encodings***
-#>    1618:  !!!ONB: Original transcribers noted in com***
-#>    1619:  !!!YOE: David Temperley, Trevor de Clercq
-#>    1620:  !!!EED: Nathaniel Condit-Schultz
-#>    1621:  !!!ENC: Nathaniel Condit-Schultz, automate***
+#>           1572:          .        .        .        .        .        .    ***
+#>           1573:          .        .        .        .        .        .    ***
+#>           1574:          .        .        .        .        A       na    ***
+#>           1575:          .        .        .        .        .        .    ***
+#>           1576:          .        .        .        .        c       na    ***
+#>           1577:          .        .        .        .        .        .    ***
+#>           1578:       =130     =130     =130     =130     =130     =130    ***
+#>           1579:      *tb16    *tb16    *tb16    *tb16    *tb16        *    ***
+#>           1580:       -VII   E-:maj     -VII   E-:maj        g       na    ***
+#>           1581:          .        .        .        .        f       na    ***
+#>           1582:          .        .        .        .        g       na    ***
+#>           1583:          .        .        .        .        .        .    ***
+#>           1584:          .        .        .        .        f       na    ***
+#>           1585:          .        .        .        .        .        .    ***
+#>           1586:          .        .        .        .        .        .    ***
+#>           1587:          .        .        .        .        .        .    ***
+#>           1588:          .        .        .        .        .        .    ***
+#>           1589:          .        .        .        .        .        .    ***
+#>           1590:          .        .        .        .        .        .    ***
+#>           1591:          .        .        .        .        .        .    ***
+#>           1592:          .        .        .        .        .        .    ***
+#>           1593:          .        .        .        .        .        .    ***
+#>           1594:          .        .        .        .        .        .    ***
+#>           1595:          .        .        .        .        .        .    ***
+#>           1596:       =131     =131     =131     =131     =131     =131    ***
+#>           1597:         IV   B-:maj       IV   B-:maj        g       na    ***
+#>           1598:          .        .        .        .        f       na    ***
+#>           1599:          .        .        .        .        g       na    ***
+#>           1600:          .        .        .        .        .        .    ***
+#>           1601:          .        .        .        .        f       na    ***
+#>           1602:          .        .        .        .        .        .    ***
+#>           1603:          .        .        .        .        .        .    ***
+#>           1604:          .        .        .        .        .        .    ***
+#>           1605:          .        .        .        .        .        .    ***
+#>           1606:          .        .        .        .        .        .    ***
+#>           1607:          .        .        .        .        .        .    ***
+#>           1608:          .        .        .        .        .        .    ***
+#>           1609:          .        .        .        .       e-      hey    ***
+#>           1610:          .        .        .        .        d        _    ***
+#>           1611:          .        .        .        .        .        .    ***
+#>           1612:          .        .        .        .        c     jude    ***
+#>           1613:       =132     =132     =132     =132     =132     =132    ***
+#>           1614:       *tb1     *tb1     *tb1     *tb1     *tb1        *    ***
+#>           1615:          I    F:maj        I    F:maj        .        .    ***
+#>           1616:         *-       *-       *-       *-       *-       *-    ***
+#>           1617:  !!!ONB: Translated from original encodings in the Rolling ***
+#>           1618:  !!!ONB: Original transcribers noted in comments in each sp***
+#>           1619:  !!!YOE: David Temperley, Trevor de Clercq
+#>           1620:  !!!EED: Nathaniel Condit-Schultz
+#>           1621:  !!!ENC: Nathaniel Condit-Schultz, automated
 #> ################### ^^^ TheBeatles_HeyJude.hum ^^^ ###################
 #>               (***two spines/paths not displayed due to screen size***)
 #> 
@@ -444,56 +444,56 @@ humData[-1]
 
 humData[[ , 3:4]]
 #> ########### vvv ACDC_BackInBlack.hum vvv ###########
-#>       1:  !!!Rolling Stone List Rank: 187
-#>       2:  !!!OTL: Back in Black
-#>       3:  !!!COC: AC/DC
-#>       4:  !!!RRD: 1980/
-#>       5:  !!!In original RS 5x20 subset: True
-#>       6:                **harm             **harte
-#>       7:                 !D.T.               !D.T.
-#>       8:                     !                   !
-#>       9:                    =1                  =1
-#>      10:                  *tb1                *tb1
-#>      11:                 *M4/4               *M4/4
-#>      12:                   *E:                 *E:
-#>      13:                     *                   *
-#>      14:                     r                   .
-#>      15:                    =2                  =2
-#>      16:                     .                   .
-#>      17:                    =3                  =3
-#>      18:               *>Intro             *>Intro
-#>      19:                  *tb2                *tb2
-#>      20:                     I               E:maj
-#>      21:                  -VII               D:maj
-#>      22:                    =4                  =4
-#>      23:                  *tb1                *tb1
-#>      24:                   IVb             A:maj/3
-#>      25:                    =5                  =5
-#>      26:                  *tb2                *tb2
-#>      27:                     I               E:maj
-#>      28:                  -VII               D:maj
-#>      29:                    =6                  =6
-#>      30:                  *tb1                *tb1
-#>      31:                   IVb             A:maj/3
-#>      32:                    =7                  =7
-#>      33:                  *tb2                *tb2
-#>      34:                     I               E:maj
-#>      35:                  -VII               D:maj
-#>      36:                    =8                  =8
-#>      37:                  *tb1                *tb1
-#>      38:                   IVb             A:maj/3
-#>      39:                    =9                  =9
-#>      40:                  *tb2                *tb2
-#>      41:                     I               E:maj
-#>      42:                  -VII               D:maj
-#>      43:                   =10                 =10
-#>      44:                  *tb1                *tb1
-#>      45:                   IVb             A:maj/3
-#>      46:                   =11                 =11
-#>      47:               *>Verse             *>Verse
-#>      48:                 *tb16               *tb16
-#>      49:                     I               E:maj
-#>      50:                     .                   .
+#>              1:  !!!Rolling Stone List Rank: 187
+#>              2:  !!!OTL: Back in Black
+#>              3:  !!!COC: AC/DC
+#>              4:  !!!RRD: 1980/
+#>              5:  !!!In original RS 5x20 subset: True
+#>              6:                **harm             **harte
+#>              7:                 !D.T.               !D.T.
+#>              8:                     !                   !
+#>              9:                    =1                  =1
+#>             10:                  *tb1                *tb1
+#>             11:                 *M4/4               *M4/4
+#>             12:                   *E:                 *E:
+#>             13:                     *                   *
+#>             14:                     r                   .
+#>             15:                    =2                  =2
+#>             16:                     .                   .
+#>             17:                    =3                  =3
+#>             18:               *>Intro             *>Intro
+#>             19:                  *tb2                *tb2
+#>             20:                     I               E:maj
+#>             21:                  -VII               D:maj
+#>             22:                    =4                  =4
+#>             23:                  *tb1                *tb1
+#>             24:                   IVb             A:maj/3
+#>             25:                    =5                  =5
+#>             26:                  *tb2                *tb2
+#>             27:                     I               E:maj
+#>             28:                  -VII               D:maj
+#>             29:                    =6                  =6
+#>             30:                  *tb1                *tb1
+#>             31:                   IVb             A:maj/3
+#>             32:                    =7                  =7
+#>             33:                  *tb2                *tb2
+#>             34:                     I               E:maj
+#>             35:                  -VII               D:maj
+#>             36:                    =8                  =8
+#>             37:                  *tb1                *tb1
+#>             38:                   IVb             A:maj/3
+#>             39:                    =9                  =9
+#>             40:                  *tb2                *tb2
+#>             41:                     I               E:maj
+#>             42:                  -VII               D:maj
+#>             43:                   =10                 =10
+#>             44:                  *tb1                *tb1
+#>             45:                   IVb             A:maj/3
+#>             46:                   =11                 =11
+#>             47:               *>Verse             *>Verse
+#>             48:                 *tb16               *tb16
+#>             49:                     I               E:maj
+#>             50:                     .                   .
 #> 51-1073:::::::::::::::::::::::::::::::::::::::::::::
 #> ########### ^^^ ACDC_BackInBlack.hum ^^^ ###########
 #> 
@@ -501,58 +501,58 @@ humData[[ , 3:4]]
 #> 
 #> ########## vvv TheBeatles_HeyJude.hum vvv ##########
 #>  1-1571:::::::::::::::::::::::::::::::::::::::::::::
-#>    1572:                     .                   .
-#>    1573:                     .                   .
-#>    1574:                     .                   .
-#>    1575:                     .                   .
-#>    1576:                     .                   .
-#>    1577:                     .                   .
-#>    1578:                  =130                =130
-#>    1579:                 *tb16               *tb16
-#>    1580:                  -VII              E-:maj
-#>    1581:                     .                   .
-#>    1582:                     .                   .
-#>    1583:                     .                   .
-#>    1584:                     .                   .
-#>    1585:                     .                   .
-#>    1586:                     .                   .
-#>    1587:                     .                   .
-#>    1588:                     .                   .
-#>    1589:                     .                   .
-#>    1590:                     .                   .
-#>    1591:                     .                   .
-#>    1592:                     .                   .
-#>    1593:                     .                   .
-#>    1594:                     .                   .
-#>    1595:                     .                   .
-#>    1596:                  =131                =131
-#>    1597:                    IV              B-:maj
-#>    1598:                     .                   .
-#>    1599:                     .                   .
-#>    1600:                     .                   .
-#>    1601:                     .                   .
-#>    1602:                     .                   .
-#>    1603:                     .                   .
-#>    1604:                     .                   .
-#>    1605:                     .                   .
-#>    1606:                     .                   .
-#>    1607:                     .                   .
-#>    1608:                     .                   .
-#>    1609:                     .                   .
-#>    1610:                     .                   .
-#>    1611:                     .                   .
-#>    1612:                     .                   .
-#>    1613:                  =132                =132
-#>    1614:                  *tb1                *tb1
-#>    1615:                     I               F:maj
-#>    1616:                    *-                  *-
-#>    1617:  !!!ONB: Translated from original encodings in the***
-#>    1618:  !!!ONB: Original transcribers noted in comments i***
-#>    1619:  !!!YOE: David Temperley, Trevor de Clercq
-#>    1620:  !!!EED: Nathaniel Condit-Schultz
-#>    1621:  !!!ENC: Nathaniel Condit-Schultz, automated
+#>           1572:                     .                   .
+#>           1573:                     .                   .
+#>           1574:                     .                   .
+#>           1575:                     .                   .
+#>           1576:                     .                   .
+#>           1577:                     .                   .
+#>           1578:                  =130                =130
+#>           1579:                 *tb16               *tb16
+#>           1580:                  -VII              E-:maj
+#>           1581:                     .                   .
+#>           1582:                     .                   .
+#>           1583:                     .                   .
+#>           1584:                     .                   .
+#>           1585:                     .                   .
+#>           1586:                     .                   .
+#>           1587:                     .                   .
+#>           1588:                     .                   .
+#>           1589:                     .                   .
+#>           1590:                     .                   .
+#>           1591:                     .                   .
+#>           1592:                     .                   .
+#>           1593:                     .                   .
+#>           1594:                     .                   .
+#>           1595:                     .                   .
+#>           1596:                  =131                =131
+#>           1597:                    IV              B-:maj
+#>           1598:                     .                   .
+#>           1599:                     .                   .
+#>           1600:                     .                   .
+#>           1601:                     .                   .
+#>           1602:                     .                   .
+#>           1603:                     .                   .
+#>           1604:                     .                   .
+#>           1605:                     .                   .
+#>           1606:                     .                   .
+#>           1607:                     .                   .
+#>           1608:                     .                   .
+#>           1609:                     .                   .
+#>           1610:                     .                   .
+#>           1611:                     .                   .
+#>           1612:                     .                   .
+#>           1613:                  =132                =132
+#>           1614:                  *tb1                *tb1
+#>           1615:                     I               F:maj
+#>           1616:                    *-                  *-
+#>           1617:  !!!ONB: Translated from original encodings in the Rolling Stone C***
+#>           1618:  !!!ONB: Original transcribers noted in comments in each spine: !D***
+#>           1619:  !!!YOE: David Temperley, Trevor de Clercq
+#>           1620:  !!!EED: Nathaniel Condit-Schultz
+#>           1621:  !!!ENC: Nathaniel Condit-Schultz, automated
 #> ########## ^^^ TheBeatles_HeyJude.hum ^^^ ##########
-#>                                             (***three
+#>                                               (***two
 #>      global comments truncated due to screen size***)
 #> 
 #>  humdrumR corpus of thirteen pieces.
@@ -562,56 +562,56 @@ humData[[ , 3:4]]
 #> 
 humData[[1:40 , ]]
 #> #################### vvv ACDC_BackInBlack.hum vvv ####################
-#>        1:  !!!Rolling Stone List Rank: 187
-#>        2:  !!!OTL: Back in Black
-#>        3:  !!!COC: AC/DC
-#>        4:  !!!RRD: 1980/
-#>        5:  !!!In original RS 5x20 subset: True
-#>        6:      **harm   **harte    **harm   **harte    **kern   **silbe    ***
-#>        7:     !T.d.C.   !T.d.C.     !D.T.     !D.T.   !T.d.C.         !    ***
-#>        8:           !         !         !         !    !OCT=5         !    ***
-#>        9:          =1        =1        =1        =1        =1        =1    ***
-#>       10:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
-#>       11:       *M4/4     *M4/4     *M4/4     *M4/4     *M4/4         *    ***
-#>       12:         *E:       *E:       *E:       *E:    *e:dor         *    ***
-#>       13:           *         *         *         *  *k[f#c#]         *    ***
-#>       14:           r         .         r         .         .         .    ***
-#>       15:          =2        =2        =2        =2        =2        =2    ***
-#>       16:           .         .         .         .         .         .    ***
-#>       17:          =3        =3        =3        =3        =3        =3    ***
-#>       18:     *>Intro   *>Intro   *>Intro   *>Intro   *>Intro   *>Intro    ***
-#>       19:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
-#>       20:           I     E:maj         I     E:maj         .         .    ***
-#>       21:        -VII     D:maj      -VII     D:maj         .         .    ***
-#>       22:          =4        =4        =4        =4        =4        =4    ***
-#>       23:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
-#>       24:         IVb   A:maj/3       IVb   A:maj/3         .         .    ***
-#>       25:          =5        =5        =5        =5        =5        =5    ***
-#>       26:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
-#>       27:           I     E:maj         I     E:maj         .         .    ***
-#>       28:        -VII     D:maj      -VII     D:maj         .         .    ***
-#>       29:          =6        =6        =6        =6        =6        =6    ***
-#>       30:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
-#>       31:         IVb   A:maj/3       IVb   A:maj/3         .         .    ***
-#>       32:          =7        =7        =7        =7        =7        =7    ***
-#>       33:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
-#>       34:           I     E:maj         I     E:maj         .         .    ***
-#>       35:        -VII     D:maj      -VII     D:maj         .         .    ***
-#>       36:          =8        =8        =8        =8        =8        =8    ***
-#>       37:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
-#>       38:         IVb   A:maj/3       IVb   A:maj/3         .         .    ***
-#>       39:          =9        =9        =9        =9        =9        =9    ***
-#>       40:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
-#>       44:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>       47:     *>Verse   *>Verse   *>Verse   *>Verse   *>Verse   *>Verse    ***
-#>       48:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>      151:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>      161:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>      179:    *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus    ***
-#>      316:     *>Verse   *>Verse   *>Verse   *>Verse   *>Verse   *>Verse    ***
-#>      453:    *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus    ***
-#>      590:      *>Solo    *>Solo    *>Solo    *>Solo    *>Solo    *>Solo    ***
-#>      591:        *tb2      *tb2      *tb2      *tb2      *tb2              ***
+#>               1:  !!!Rolling Stone List Rank: 187
+#>               2:  !!!OTL: Back in Black
+#>               3:  !!!COC: AC/DC
+#>               4:  !!!RRD: 1980/
+#>               5:  !!!In original RS 5x20 subset: True
+#>               6:      **harm   **harte    **harm   **harte    **kern   **silbe    ***
+#>               7:     !T.d.C.   !T.d.C.     !D.T.     !D.T.   !T.d.C.         !    ***
+#>               8:           !         !         !         !    !OCT=5         !    ***
+#>               9:          =1        =1        =1        =1        =1        =1    ***
+#>              10:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
+#>              11:       *M4/4     *M4/4     *M4/4     *M4/4     *M4/4         *    ***
+#>              12:         *E:       *E:       *E:       *E:    *e:dor         *    ***
+#>              13:           *         *         *         *  *k[f#c#]         *    ***
+#>              14:           r         .         r         .         .         .    ***
+#>              15:          =2        =2        =2        =2        =2        =2    ***
+#>              16:           .         .         .         .         .         .    ***
+#>              17:          =3        =3        =3        =3        =3        =3    ***
+#>              18:     *>Intro   *>Intro   *>Intro   *>Intro   *>Intro   *>Intro    ***
+#>              19:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
+#>              20:           I     E:maj         I     E:maj         .         .    ***
+#>              21:        -VII     D:maj      -VII     D:maj         .         .    ***
+#>              22:          =4        =4        =4        =4        =4        =4    ***
+#>              23:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
+#>              24:         IVb   A:maj/3       IVb   A:maj/3         .         .    ***
+#>              25:          =5        =5        =5        =5        =5        =5    ***
+#>              26:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
+#>              27:           I     E:maj         I     E:maj         .         .    ***
+#>              28:        -VII     D:maj      -VII     D:maj         .         .    ***
+#>              29:          =6        =6        =6        =6        =6        =6    ***
+#>              30:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
+#>              31:         IVb   A:maj/3       IVb   A:maj/3         .         .    ***
+#>              32:          =7        =7        =7        =7        =7        =7    ***
+#>              33:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
+#>              34:           I     E:maj         I     E:maj         .         .    ***
+#>              35:        -VII     D:maj      -VII     D:maj         .         .    ***
+#>              36:          =8        =8        =8        =8        =8        =8    ***
+#>              37:        *tb1      *tb1      *tb1      *tb1      *tb1         *    ***
+#>              38:         IVb   A:maj/3       IVb   A:maj/3         .         .    ***
+#>              39:          =9        =9        =9        =9        =9        =9    ***
+#>              40:        *tb2      *tb2      *tb2      *tb2      *tb2         *    ***
+#>              44:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>              47:     *>Verse   *>Verse   *>Verse   *>Verse   *>Verse   *>Verse    ***
+#>              48:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>             151:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>             161:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>             179:    *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus    ***
+#>             316:     *>Verse   *>Verse   *>Verse   *>Verse   *>Verse   *>Verse    ***
+#>             453:    *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus  *>Chorus    ***
+#>             590:      *>Solo    *>Solo    *>Solo    *>Solo    *>Solo    *>Solo    ***
+#>             591:        *tb2      *tb2      *tb2      *tb2      *tb2              ***
 #> 601-1068::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> #################### ^^^ ACDC_BackInBlack.hum ^^^ ####################
 #> 
@@ -619,56 +619,56 @@ humData[[1:40 , ]]
 #> 
 #> ################### vvv TheBeatles_HeyJude.hum vvv ###################
 #>    1-811::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>      846:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>      849:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>      859:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>      894:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>      897:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>      907:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>      942:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>      945:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>      955:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>      990:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>      993:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1003:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1038:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1041:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1051:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1086:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1089:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1099:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1134:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1137:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1147:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1182:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1185:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1195:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1230:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1233:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1243:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1278:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1281:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1291:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1326:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1329:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1339:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1374:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1377:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1387:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1422:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1425:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1435:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1470:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1473:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1483:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1518:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1521:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1531:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1566:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1569:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
-#>     1579:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
-#>     1614:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
-#>     1616:          *-        *-        *-        *-        *-        *-    ***
+#>             846:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>             849:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>             859:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>             894:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>             897:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>             907:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>             942:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>             945:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>             955:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>             990:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>             993:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1003:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1038:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1041:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1051:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1086:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1089:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1099:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1134:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1137:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1147:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1182:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1185:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1195:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1230:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1233:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1243:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1278:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1281:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1291:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1326:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1329:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1339:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1374:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1377:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1387:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1422:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1425:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1435:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1470:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1473:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1483:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1518:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1521:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1531:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1566:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1569:        *tb8      *tb8      *tb8      *tb8      *tb8              ***
+#>            1579:       *tb16     *tb16     *tb16     *tb16     *tb16              ***
+#>            1614:        *tb1      *tb1      *tb1      *tb1      *tb1              ***
+#>            1616:          *-        *-        *-        *-        *-        *-    ***
 #> ################### ^^^ TheBeatles_HeyJude.hum ^^^ ###################
 #>               (***two spines/paths not displayed due to screen size***)
 #> 
@@ -681,56 +681,56 @@ humData[[1:40 , ]]
 # find all pieces which use a flat 3
 humData['b3']
 #> ################ vvv AlGreen_LetsStayTogether.hum vvv ################
-#>       1:  !!!Rolling Stone List Rank: 60
-#>       2:  !!!OTL: Let's Stay Together
-#>       3:  !!!COC: Al Green
-#>       4:  !!!RRD: 1971/
-#>       5:  !!!In original RS 5x20 subset: True
-#>       6:     **harm  **harte   **harm  **harte   **kern  **silbe    ***
-#>       7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.  !T.d.C.        !    ***
-#>       8:          !        !        !        !   !OCT=3        !    ***
-#>       9:         =1       =1       =1       =1       =1       =1    ***
-#>      10:    *>Intro  *>Intro  *>Intro  *>Intro  *>Intro  *>Intro    ***
-#>      11:       *tb2     *tb2     *tb2     *tb2     *tb2        *    ***
-#>      12:      *M4/4    *M4/4    *M4/4    *M4/4    *M4/4        *    ***
-#>      13:        *F:      *F:      *F:      *F:      *F:        *    ***
-#>      14:          *        *        *        *   *k[b-]        *    ***
-#>      15:        ii7   G:min7       ii    G:min        .        .    ***
-#>      16:       iii7   A:min7      iii    A:min        .        .    ***
-#>      17:         =2       =2       =2       =2       =2       =2    ***
-#>      18:        ii7   G:min7       ii    G:min        .        .    ***
-#>      19:       iii7   A:min7      iii    A:min        .        .    ***
-#>      20:         =3       =3       =3       =3       =3       =3    ***
-#>      21:        ii7   G:min7       ii    G:min        .        .    ***
-#>      22:       iii7   A:min7      iii    A:min        .        .    ***
-#>      23:         =4       =4       =4       =4       =4       =4    ***
-#>      24:        ii7   G:min7       ii    G:min        .        .    ***
-#>      25:         V7      C:7        V    C:maj        .        .    ***
-#>      26:         =5       =5       =5       =5       =5       =5    ***
-#>      27:    *>Verse  *>Verse  *>Verse  *>Verse  *>Verse  *>Verse    ***
-#>      28:      *tb32    *tb32    *tb32    *tb32    *tb32        *    ***
-#>      29:          I    F:maj        I    F:maj        A        I    ***
-#>      30:          .        .        .        .        .        .    ***
-#>      31:          .        .        .        .        .        .    ***
-#>      32:          .        .        .        .        G        _    ***
-#>      33:          .        .        .        .        A        _    ***
-#>      34:          .        .        .        .        .        .    ***
-#>      35:          .        .        .        .        .        .    ***
-#>      36:          .        .        .        .        G        _    ***
-#>      37:          .        .        .        .        A        _    ***
-#>      38:          .        .        .        .        .        .    ***
-#>      39:          .        .        .        .        .        .    ***
-#>      40:          .        .        .        .        .        .    ***
-#>      41:          .        .        .        .        .        .    ***
-#>      42:          .        .        .        .        .        .    ***
-#>      43:          .        .        .        .        .        .    ***
-#>      44:          .        .        .        .        .        .    ***
-#>      45:          .        .        .        .        .        .    ***
-#>      46:          .        .        .        .        .        .    ***
-#>      47:          .        .        .        .        .        .    ***
-#>      48:          .        .        .        .        .        .    ***
-#>      49:          .        .        .        .        .        .    ***
-#>      50:          .        .        .        .        .        .    ***
+#>              1:  !!!Rolling Stone List Rank: 60
+#>              2:  !!!OTL: Let's Stay Together
+#>              3:  !!!COC: Al Green
+#>              4:  !!!RRD: 1971/
+#>              5:  !!!In original RS 5x20 subset: True
+#>              6:     **harm  **harte   **harm  **harte   **kern  **silbe    ***
+#>              7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.  !T.d.C.        !    ***
+#>              8:          !        !        !        !   !OCT=3        !    ***
+#>              9:         =1       =1       =1       =1       =1       =1    ***
+#>             10:    *>Intro  *>Intro  *>Intro  *>Intro  *>Intro  *>Intro    ***
+#>             11:       *tb2     *tb2     *tb2     *tb2     *tb2        *    ***
+#>             12:      *M4/4    *M4/4    *M4/4    *M4/4    *M4/4        *    ***
+#>             13:        *F:      *F:      *F:      *F:      *F:        *    ***
+#>             14:          *        *        *        *   *k[b-]        *    ***
+#>             15:        ii7   G:min7       ii    G:min        .        .    ***
+#>             16:       iii7   A:min7      iii    A:min        .        .    ***
+#>             17:         =2       =2       =2       =2       =2       =2    ***
+#>             18:        ii7   G:min7       ii    G:min        .        .    ***
+#>             19:       iii7   A:min7      iii    A:min        .        .    ***
+#>             20:         =3       =3       =3       =3       =3       =3    ***
+#>             21:        ii7   G:min7       ii    G:min        .        .    ***
+#>             22:       iii7   A:min7      iii    A:min        .        .    ***
+#>             23:         =4       =4       =4       =4       =4       =4    ***
+#>             24:        ii7   G:min7       ii    G:min        .        .    ***
+#>             25:         V7      C:7        V    C:maj        .        .    ***
+#>             26:         =5       =5       =5       =5       =5       =5    ***
+#>             27:    *>Verse  *>Verse  *>Verse  *>Verse  *>Verse  *>Verse    ***
+#>             28:      *tb32    *tb32    *tb32    *tb32    *tb32        *    ***
+#>             29:          I    F:maj        I    F:maj        A        I    ***
+#>             30:          .        .        .        .        .        .    ***
+#>             31:          .        .        .        .        .        .    ***
+#>             32:          .        .        .        .        G        _    ***
+#>             33:          .        .        .        .        A        _    ***
+#>             34:          .        .        .        .        .        .    ***
+#>             35:          .        .        .        .        .        .    ***
+#>             36:          .        .        .        .        G        _    ***
+#>             37:          .        .        .        .        A        _    ***
+#>             38:          .        .        .        .        .        .    ***
+#>             39:          .        .        .        .        .        .    ***
+#>             40:          .        .        .        .        .        .    ***
+#>             41:          .        .        .        .        .        .    ***
+#>             42:          .        .        .        .        .        .    ***
+#>             43:          .        .        .        .        .        .    ***
+#>             44:          .        .        .        .        .        .    ***
+#>             45:          .        .        .        .        .        .    ***
+#>             46:          .        .        .        .        .        .    ***
+#>             47:          .        .        .        .        .        .    ***
+#>             48:          .        .        .        .        .        .    ***
+#>             49:          .        .        .        .        .        .    ***
+#>             50:          .        .        .        .        .        .    ***
 #> 51-1206:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ################ ^^^ AlGreen_LetsStayTogether.hum ^^^ ################
 #> 
@@ -738,56 +738,56 @@ humData['b3']
 #> 
 #> ################### vvv TheBeatles_HeyJude.hum vvv ###################
 #>  1-1571:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>    1572:          .        .        .        .        .        .    ***
-#>    1573:          .        .        .        .        .        .    ***
-#>    1574:          .        .        .        .        A       na    ***
-#>    1575:          .        .        .        .        .        .    ***
-#>    1576:          .        .        .        .        c       na    ***
-#>    1577:          .        .        .        .        .        .    ***
-#>    1578:       =130     =130     =130     =130     =130     =130    ***
-#>    1579:      *tb16    *tb16    *tb16    *tb16    *tb16        *    ***
-#>    1580:       -VII   E-:maj     -VII   E-:maj        g       na    ***
-#>    1581:          .        .        .        .        f       na    ***
-#>    1582:          .        .        .        .        g       na    ***
-#>    1583:          .        .        .        .        .        .    ***
-#>    1584:          .        .        .        .        f       na    ***
-#>    1585:          .        .        .        .        .        .    ***
-#>    1586:          .        .        .        .        .        .    ***
-#>    1587:          .        .        .        .        .        .    ***
-#>    1588:          .        .        .        .        .        .    ***
-#>    1589:          .        .        .        .        .        .    ***
-#>    1590:          .        .        .        .        .        .    ***
-#>    1591:          .        .        .        .        .        .    ***
-#>    1592:          .        .        .        .        .        .    ***
-#>    1593:          .        .        .        .        .        .    ***
-#>    1594:          .        .        .        .        .        .    ***
-#>    1595:          .        .        .        .        .        .    ***
-#>    1596:       =131     =131     =131     =131     =131     =131    ***
-#>    1597:         IV   B-:maj       IV   B-:maj        g       na    ***
-#>    1598:          .        .        .        .        f       na    ***
-#>    1599:          .        .        .        .        g       na    ***
-#>    1600:          .        .        .        .        .        .    ***
-#>    1601:          .        .        .        .        f       na    ***
-#>    1602:          .        .        .        .        .        .    ***
-#>    1603:          .        .        .        .        .        .    ***
-#>    1604:          .        .        .        .        .        .    ***
-#>    1605:          .        .        .        .        .        .    ***
-#>    1606:          .        .        .        .        .        .    ***
-#>    1607:          .        .        .        .        .        .    ***
-#>    1608:          .        .        .        .        .        .    ***
-#>    1609:          .        .        .        .       e-      hey    ***
-#>    1610:          .        .        .        .        d        _    ***
-#>    1611:          .        .        .        .        .        .    ***
-#>    1612:          .        .        .        .        c     jude    ***
-#>    1613:       =132     =132     =132     =132     =132     =132    ***
-#>    1614:       *tb1     *tb1     *tb1     *tb1     *tb1        *    ***
-#>    1615:          I    F:maj        I    F:maj        .        .    ***
-#>    1616:         *-       *-       *-       *-       *-       *-    ***
-#>    1617:  !!!ONB: Translated from original encodings***
-#>    1618:  !!!ONB: Original transcribers noted in com***
-#>    1619:  !!!YOE: David Temperley, Trevor de Clercq
-#>    1620:  !!!EED: Nathaniel Condit-Schultz
-#>    1621:  !!!ENC: Nathaniel Condit-Schultz, automate***
+#>           1572:          .        .        .        .        .        .    ***
+#>           1573:          .        .        .        .        .        .    ***
+#>           1574:          .        .        .        .        A       na    ***
+#>           1575:          .        .        .        .        .        .    ***
+#>           1576:          .        .        .        .        c       na    ***
+#>           1577:          .        .        .        .        .        .    ***
+#>           1578:       =130     =130     =130     =130     =130     =130    ***
+#>           1579:      *tb16    *tb16    *tb16    *tb16    *tb16        *    ***
+#>           1580:       -VII   E-:maj     -VII   E-:maj        g       na    ***
+#>           1581:          .        .        .        .        f       na    ***
+#>           1582:          .        .        .        .        g       na    ***
+#>           1583:          .        .        .        .        .        .    ***
+#>           1584:          .        .        .        .        f       na    ***
+#>           1585:          .        .        .        .        .        .    ***
+#>           1586:          .        .        .        .        .        .    ***
+#>           1587:          .        .        .        .        .        .    ***
+#>           1588:          .        .        .        .        .        .    ***
+#>           1589:          .        .        .        .        .        .    ***
+#>           1590:          .        .        .        .        .        .    ***
+#>           1591:          .        .        .        .        .        .    ***
+#>           1592:          .        .        .        .        .        .    ***
+#>           1593:          .        .        .        .        .        .    ***
+#>           1594:          .        .        .        .        .        .    ***
+#>           1595:          .        .        .        .        .        .    ***
+#>           1596:       =131     =131     =131     =131     =131     =131    ***
+#>           1597:         IV   B-:maj       IV   B-:maj        g       na    ***
+#>           1598:          .        .        .        .        f       na    ***
+#>           1599:          .        .        .        .        g       na    ***
+#>           1600:          .        .        .        .        .        .    ***
+#>           1601:          .        .        .        .        f       na    ***
+#>           1602:          .        .        .        .        .        .    ***
+#>           1603:          .        .        .        .        .        .    ***
+#>           1604:          .        .        .        .        .        .    ***
+#>           1605:          .        .        .        .        .        .    ***
+#>           1606:          .        .        .        .        .        .    ***
+#>           1607:          .        .        .        .        .        .    ***
+#>           1608:          .        .        .        .        .        .    ***
+#>           1609:          .        .        .        .       e-      hey    ***
+#>           1610:          .        .        .        .        d        _    ***
+#>           1611:          .        .        .        .        .        .    ***
+#>           1612:          .        .        .        .        c     jude    ***
+#>           1613:       =132     =132     =132     =132     =132     =132    ***
+#>           1614:       *tb1     *tb1     *tb1     *tb1     *tb1        *    ***
+#>           1615:          I    F:maj        I    F:maj        .        .    ***
+#>           1616:         *-       *-       *-       *-       *-       *-    ***
+#>           1617:  !!!ONB: Translated from original encodings in the Rolling ***
+#>           1618:  !!!ONB: Original transcribers noted in comments in each sp***
+#>           1619:  !!!YOE: David Temperley, Trevor de Clercq
+#>           1620:  !!!EED: Nathaniel Condit-Schultz
+#>           1621:  !!!ENC: Nathaniel Condit-Schultz, automated
 #> ################### ^^^ TheBeatles_HeyJude.hum ^^^ ###################
 #>               (***two spines/paths not displayed due to screen size***)
 #> 
@@ -800,113 +800,113 @@ humData['b3']
 # find all records that use a flat 3
 humData[['b3', ]]
 #> ################ vvv AlGreen_LetsStayTogether.hum vvv ################
-#>           1:  !!!Rolling Stone List Rank: 60
-#>           2:  !!!OTL: Let's Stay Together
-#>           3:  !!!COC: Al Green
-#>           4:  !!!RRD: 1971/
-#>           5:  !!!In original RS 5x20 subset: True
-#>           6:       **harm    **harte     **harm    **harte     **kern    ***
-#>           7:      !T.d.C.    !T.d.C.      !D.T.      !D.T.    !T.d.C.    ***
-#>           8:            !          !          !          !     !OCT=3    ***
-#>           9:           =1         =1         =1         =1         =1    ***
-#>          10:      *>Intro    *>Intro    *>Intro    *>Intro    *>Intro    ***
-#>          11:         *tb2       *tb2       *tb2       *tb2       *tb2    ***
-#>          12:        *M4/4      *M4/4      *M4/4      *M4/4      *M4/4    ***
-#>          13:          *F:        *F:        *F:        *F:        *F:    ***
-#>          14:            *          *          *          *     *k[b-]    ***
-#>          15:            .          .          .          .          .    ***
-#>          16:            .          .          .          .          .    ***
-#>          17:           =2         =2         =2         =2         =2    ***
-#>          18:            .          .          .          .          .    ***
-#>          19:            .          .          .          .          .    ***
-#>          20:           =3         =3         =3         =3         =3    ***
-#>          21:            .          .          .          .          .    ***
-#>          22:            .          .          .          .          .    ***
-#>          23:           =4         =4         =4         =4         =4    ***
-#>          24:            .          .          .          .          .    ***
-#>          25:            .          .          .          .          .    ***
-#>          26:           =5         =5         =5         =5         =5    ***
-#>          27:      *>Verse    *>Verse    *>Verse    *>Verse    *>Verse    ***
-#>          28:        *tb32      *tb32      *tb32      *tb32      *tb32    ***
-#>          29:            .          .          .          .          .    ***
-#>          30:            .          .          .          .          .    ***
-#>          31:            .          .          .          .          .    ***
-#>          32:            .          .          .          .          .    ***
-#>          33:            .          .          .          .          .    ***
-#>          34:            .          .          .          .          .    ***
-#>          35:            .          .          .          .          .    ***
-#>          36:            .          .          .          .          .    ***
-#>          37:            .          .          .          .          .    ***
-#>          38:            .          .          .          .          .    ***
-#>          39:            .          .          .          .          .    ***
-#>          40:            .          .          .          .          .    ***
-#>          41:            .          .          .          .          .    ***
-#>          42:            .          .          .          .          .    ***
-#>          43:            .          .          .          .          .    ***
-#>          44:            .          .          .          .          .    ***
-#>          45:            .          .          .          .          .    ***
-#>          46:            .          .          .          .          .    ***
-#>          47:            .          .          .          .          .    ***
-#>          48:            .          .          .          .          .    ***
-#>          49:            .          .          .          .          .    ***
-#>          50:            .          .          .          .          .    ***
-#>     51-1206:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#>              1:  !!!Rolling Stone List Rank: 60
+#>              2:  !!!OTL: Let's Stay Together
+#>              3:  !!!COC: Al Green
+#>              4:  !!!RRD: 1971/
+#>              5:  !!!In original RS 5x20 subset: True
+#>              6:       **harm    **harte     **harm    **harte     **kern    ***
+#>              7:      !T.d.C.    !T.d.C.      !D.T.      !D.T.    !T.d.C.    ***
+#>              8:            !          !          !          !     !OCT=3    ***
+#>              9:           =1         =1         =1         =1         =1    ***
+#>             10:      *>Intro    *>Intro    *>Intro    *>Intro    *>Intro    ***
+#>             11:         *tb2       *tb2       *tb2       *tb2       *tb2    ***
+#>             12:        *M4/4      *M4/4      *M4/4      *M4/4      *M4/4    ***
+#>             13:          *F:        *F:        *F:        *F:        *F:    ***
+#>             14:            *          *          *          *     *k[b-]    ***
+#>             15:            .          .          .          .          .    ***
+#>             16:            .          .          .          .          .    ***
+#>             17:           =2         =2         =2         =2         =2    ***
+#>             18:            .          .          .          .          .    ***
+#>             19:            .          .          .          .          .    ***
+#>             20:           =3         =3         =3         =3         =3    ***
+#>             21:            .          .          .          .          .    ***
+#>             22:            .          .          .          .          .    ***
+#>             23:           =4         =4         =4         =4         =4    ***
+#>             24:            .          .          .          .          .    ***
+#>             25:            .          .          .          .          .    ***
+#>             26:           =5         =5         =5         =5         =5    ***
+#>             27:      *>Verse    *>Verse    *>Verse    *>Verse    *>Verse    ***
+#>             28:        *tb32      *tb32      *tb32      *tb32      *tb32    ***
+#>             29:            .          .          .          .          .    ***
+#>             30:            .          .          .          .          .    ***
+#>             31:            .          .          .          .          .    ***
+#>             32:            .          .          .          .          .    ***
+#>             33:            .          .          .          .          .    ***
+#>             34:            .          .          .          .          .    ***
+#>             35:            .          .          .          .          .    ***
+#>             36:            .          .          .          .          .    ***
+#>             37:            .          .          .          .          .    ***
+#>             38:            .          .          .          .          .    ***
+#>             39:            .          .          .          .          .    ***
+#>             40:            .          .          .          .          .    ***
+#>             41:            .          .          .          .          .    ***
+#>             42:            .          .          .          .          .    ***
+#>             43:            .          .          .          .          .    ***
+#>             44:            .          .          .          .          .    ***
+#>             45:            .          .          .          .          .    ***
+#>             46:            .          .          .          .          .    ***
+#>             47:            .          .          .          .          .    ***
+#>             48:            .          .          .          .          .    ***
+#>             49:            .          .          .          .          .    ***
+#>             50:            .          .          .          .          .    ***
+#> 51-1206:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ################ ^^^ AlGreen_LetsStayTogether.hum ^^^ ################
 #> 
 #>      (two more pieces...)
 #> 
 #> ################### vvv TheBeatles_HeyJude.hum vvv ###################
-#>      1-1472:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>        1473:         *tb8       *tb8       *tb8       *tb8       *tb8    ***
-#>        1474:            .          .          .          .          .    ***
-#>        1475:            .          .          .          .          .    ***
-#>        1476:            .          .          .          .          .    ***
-#>        1477:            .          .          .          .          .    ***
-#>        1478:            .          .          .          .          .    ***
-#>        1479:            .          .          .          .          .    ***
-#>        1480:            .          .          .          .          .    ***
-#>        1481:            .          .          .          .          .    ***
-#>        1482:         =122       =122       =122       =122       =122    ***
-#>        1483:        *tb16      *tb16      *tb16      *tb16      *tb16    ***
-#>   1484-1517:    ==123-124  ==123-124  ==123-124  ==123-124  ==123-124    ***
-#>        1518:         *tb1       *tb1       *tb1       *tb1       *tb1    ***
-#>        1519:            .          .          .          .          .    ***
-#>        1520:         =125       =125       =125       =125       =125    ***
-#>        1521:         *tb8       *tb8       *tb8       *tb8       *tb8    ***
-#>        1522:            .          .          .          .          .    ***
-#>        1523:            .          .          .          .          .    ***
-#>        1524:            .          .          .          .          .    ***
-#>        1525:            .          .          .          .          .    ***
-#>        1526:            .          .          .          .          .    ***
-#>        1527:            .          .          .          .          .    ***
-#>        1528:            .          .          .          .          .    ***
-#>        1529:            .          .          .          .          .    ***
-#>        1530:         =126       =126       =126       =126       =126    ***
-#>        1531:        *tb16      *tb16      *tb16      *tb16      *tb16    ***
-#>   1532-1565:    ==127-128  ==127-128  ==127-128  ==127-128  ==127-128    ***
-#>        1566:         *tb1       *tb1       *tb1       *tb1       *tb1    ***
-#>        1567:            .          .          .          .          .    ***
-#>        1568:         =129       =129       =129       =129       =129    ***
-#>        1569:         *tb8       *tb8       *tb8       *tb8       *tb8    ***
-#>        1570:            .          .          .          .          .    ***
-#>        1571:            .          .          .          .          .    ***
-#>        1572:            .          .          .          .          .    ***
-#>        1573:            .          .          .          .          .    ***
-#>        1574:            .          .          .          .          .    ***
-#>        1575:            .          .          .          .          .    ***
-#>        1576:            .          .          .          .          .    ***
-#>        1577:            .          .          .          .          .    ***
-#>        1578:         =130       =130       =130       =130       =130    ***
-#>        1579:        *tb16      *tb16      *tb16      *tb16      *tb16    ***
-#>   1580-1613:    ==131-132  ==131-132  ==131-132  ==131-132  ==131-132    ***
-#>        1614:         *tb1       *tb1       *tb1       *tb1       *tb1    ***
-#>        1615:            .          .          .          .          .    ***
-#>        1616:           *-         *-         *-         *-         *-    ***
-#>        1617:  !!!ONB: Translated from original encodings ***
-#>        1618:  !!!ONB: Original transcribers noted in comm***
-#>        1619:  !!!YOE: David Temperley, Trevor de Clercq
-#>        1620:  !!!EED: Nathaniel Condit-Schultz
-#>        1621:  !!!ENC: Nathaniel Condit-Schultz, automated***
+#>  1-1472:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#>           1473:         *tb8       *tb8       *tb8       *tb8       *tb8    ***
+#>           1474:            .          .          .          .          .    ***
+#>           1475:            .          .          .          .          .    ***
+#>           1476:            .          .          .          .          .    ***
+#>           1477:            .          .          .          .          .    ***
+#>           1478:            .          .          .          .          .    ***
+#>           1479:            .          .          .          .          .    ***
+#>           1480:            .          .          .          .          .    ***
+#>           1481:            .          .          .          .          .    ***
+#>           1482:         =122       =122       =122       =122       =122    ***
+#>           1483:        *tb16      *tb16      *tb16      *tb16      *tb16    ***
+#>      1484-1517:    ==123-124  ==123-124  ==123-124  ==123-124  ==123-124    ***
+#>           1518:         *tb1       *tb1       *tb1       *tb1       *tb1    ***
+#>           1519:            .          .          .          .          .    ***
+#>           1520:         =125       =125       =125       =125       =125    ***
+#>           1521:         *tb8       *tb8       *tb8       *tb8       *tb8    ***
+#>           1522:            .          .          .          .          .    ***
+#>           1523:            .          .          .          .          .    ***
+#>           1524:            .          .          .          .          .    ***
+#>           1525:            .          .          .          .          .    ***
+#>           1526:            .          .          .          .          .    ***
+#>           1527:            .          .          .          .          .    ***
+#>           1528:            .          .          .          .          .    ***
+#>           1529:            .          .          .          .          .    ***
+#>           1530:         =126       =126       =126       =126       =126    ***
+#>           1531:        *tb16      *tb16      *tb16      *tb16      *tb16    ***
+#>      1532-1565:    ==127-128  ==127-128  ==127-128  ==127-128  ==127-128    ***
+#>           1566:         *tb1       *tb1       *tb1       *tb1       *tb1    ***
+#>           1567:            .          .          .          .          .    ***
+#>           1568:         =129       =129       =129       =129       =129    ***
+#>           1569:         *tb8       *tb8       *tb8       *tb8       *tb8    ***
+#>           1570:            .          .          .          .          .    ***
+#>           1571:            .          .          .          .          .    ***
+#>           1572:            .          .          .          .          .    ***
+#>           1573:            .          .          .          .          .    ***
+#>           1574:            .          .          .          .          .    ***
+#>           1575:            .          .          .          .          .    ***
+#>           1576:            .          .          .          .          .    ***
+#>           1577:            .          .          .          .          .    ***
+#>           1578:         =130       =130       =130       =130       =130    ***
+#>           1579:        *tb16      *tb16      *tb16      *tb16      *tb16    ***
+#>      1580-1613:    ==131-132  ==131-132  ==131-132  ==131-132  ==131-132    ***
+#>           1614:         *tb1       *tb1       *tb1       *tb1       *tb1    ***
+#>           1615:            .          .          .          .          .    ***
+#>           1616:           *-         *-         *-         *-         *-    ***
+#>           1617:  !!!ONB: Translated from original encodings in the Rolling S***
+#>           1618:  !!!ONB: Original transcribers noted in comments in each spi***
+#>           1619:  !!!YOE: David Temperley, Trevor de Clercq
+#>           1620:  !!!EED: Nathaniel Condit-Schultz
+#>           1621:  !!!ENC: Nathaniel Condit-Schultz, automated
 #> ################### ^^^ TheBeatles_HeyJude.hum ^^^ ###################
 #>             (***three spines/paths not displayed due to screen size***)
 #> 
@@ -919,56 +919,56 @@ humData[['b3', ]]
 # Exclusive interpretation indexing
 humData[[deg = 1]]
 #> #################### vvv ACDC_BackInBlack.hum vvv ####################
-#>       1:  !!!Rolling Stone List Rank: 187
-#>       2:  !!!OTL: Back in Black
-#>       3:  !!!COC: AC/DC
-#>       4:  !!!RRD: 1980/
-#>       5:  !!!In original RS 5x20 subset: True
-#>       6:     **harm  **harte   **harm  **harte    **kern  **silbe    ***
-#>       7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.   !T.d.C.        !    ***
-#>       8:          !        !        !        !    !OCT=5        !    ***
-#>       9:         =1       =1       =1       =1        =1       =1    ***
-#>      10:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      11:      *M4/4    *M4/4    *M4/4    *M4/4     *M4/4        *    ***
-#>      12:        *E:      *E:      *E:      *E:    *e:dor        *    ***
-#>      13:          *        *        *        *  *k[f#c#]        *    ***
-#>      14:          r        .        r        .         .        .    ***
-#>      15:         =2       =2       =2       =2        =2       =2    ***
-#>      16:          .        .        .        .         .        .    ***
-#>      17:         =3       =3       =3       =3        =3       =3    ***
-#>      18:    *>Intro  *>Intro  *>Intro  *>Intro   *>Intro  *>Intro    ***
-#>      19:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      20:          I    E:maj        I    E:maj         .        .    ***
-#>      21:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      22:         =4       =4       =4       =4        =4       =4    ***
-#>      23:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      24:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      25:         =5       =5       =5       =5        =5       =5    ***
-#>      26:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      27:          I    E:maj        I    E:maj         .        .    ***
-#>      28:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      29:         =6       =6       =6       =6        =6       =6    ***
-#>      30:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      31:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      32:         =7       =7       =7       =7        =7       =7    ***
-#>      33:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      34:          I    E:maj        I    E:maj         .        .    ***
-#>      35:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      36:         =8       =8       =8       =8        =8       =8    ***
-#>      37:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      38:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      39:         =9       =9       =9       =9        =9       =9    ***
-#>      40:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
-#>      41:          I    E:maj        I    E:maj         .        .    ***
-#>      42:       -VII    D:maj     -VII    D:maj         .        .    ***
-#>      43:        =10      =10      =10      =10       =10      =10    ***
-#>      44:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>      45:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
-#>      46:        =11      =11      =11      =11       =11      =11    ***
-#>      47:    *>Verse  *>Verse  *>Verse  *>Verse   *>Verse  *>Verse    ***
-#>      48:      *tb16    *tb16    *tb16    *tb16     *tb16        *    ***
-#>      49:          I    E:maj        I    E:maj        ee     back    ***
-#>      50:          .        .        .        .        ee       in    ***
+#>              1:  !!!Rolling Stone List Rank: 187
+#>              2:  !!!OTL: Back in Black
+#>              3:  !!!COC: AC/DC
+#>              4:  !!!RRD: 1980/
+#>              5:  !!!In original RS 5x20 subset: True
+#>              6:     **harm  **harte   **harm  **harte    **kern  **silbe    ***
+#>              7:    !T.d.C.  !T.d.C.    !D.T.    !D.T.   !T.d.C.        !    ***
+#>              8:          !        !        !        !    !OCT=5        !    ***
+#>              9:         =1       =1       =1       =1        =1       =1    ***
+#>             10:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             11:      *M4/4    *M4/4    *M4/4    *M4/4     *M4/4        *    ***
+#>             12:        *E:      *E:      *E:      *E:    *e:dor        *    ***
+#>             13:          *        *        *        *  *k[f#c#]        *    ***
+#>             14:          r        .        r        .         .        .    ***
+#>             15:         =2       =2       =2       =2        =2       =2    ***
+#>             16:          .        .        .        .         .        .    ***
+#>             17:         =3       =3       =3       =3        =3       =3    ***
+#>             18:    *>Intro  *>Intro  *>Intro  *>Intro   *>Intro  *>Intro    ***
+#>             19:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             20:          I    E:maj        I    E:maj         .        .    ***
+#>             21:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             22:         =4       =4       =4       =4        =4       =4    ***
+#>             23:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             24:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             25:         =5       =5       =5       =5        =5       =5    ***
+#>             26:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             27:          I    E:maj        I    E:maj         .        .    ***
+#>             28:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             29:         =6       =6       =6       =6        =6       =6    ***
+#>             30:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             31:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             32:         =7       =7       =7       =7        =7       =7    ***
+#>             33:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             34:          I    E:maj        I    E:maj         .        .    ***
+#>             35:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             36:         =8       =8       =8       =8        =8       =8    ***
+#>             37:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             38:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             39:         =9       =9       =9       =9        =9       =9    ***
+#>             40:       *tb2     *tb2     *tb2     *tb2      *tb2        *    ***
+#>             41:          I    E:maj        I    E:maj         .        .    ***
+#>             42:       -VII    D:maj     -VII    D:maj         .        .    ***
+#>             43:        =10      =10      =10      =10       =10      =10    ***
+#>             44:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>             45:        IVb  A:maj/3      IVb  A:maj/3         .        .    ***
+#>             46:        =11      =11      =11      =11       =11      =11    ***
+#>             47:    *>Verse  *>Verse  *>Verse  *>Verse   *>Verse  *>Verse    ***
+#>             48:      *tb16    *tb16    *tb16    *tb16     *tb16        *    ***
+#>             49:          I    E:maj        I    E:maj        ee     back    ***
+#>             50:          .        .        .        .        ee       in    ***
 #> 51-1073:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> #################### ^^^ ACDC_BackInBlack.hum ^^^ ####################
 #> 
@@ -976,56 +976,56 @@ humData[[deg = 1]]
 #> 
 #> ################### vvv TheBeatles_HeyJude.hum vvv ###################
 #>  1-1571:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>    1572:          .        .        .        .         .        .    ***
-#>    1573:          .        .        .        .         .        .    ***
-#>    1574:          .        .        .        .         A       na    ***
-#>    1575:          .        .        .        .         .        .    ***
-#>    1576:          .        .        .        .         c       na    ***
-#>    1577:          .        .        .        .         .        .    ***
-#>    1578:       =130     =130     =130     =130      =130     =130    ***
-#>    1579:      *tb16    *tb16    *tb16    *tb16     *tb16        *    ***
-#>    1580:       -VII   E-:maj     -VII   E-:maj         g       na    ***
-#>    1581:          .        .        .        .         f       na    ***
-#>    1582:          .        .        .        .         g       na    ***
-#>    1583:          .        .        .        .         .        .    ***
-#>    1584:          .        .        .        .         f       na    ***
-#>    1585:          .        .        .        .         .        .    ***
-#>    1586:          .        .        .        .         .        .    ***
-#>    1587:          .        .        .        .         .        .    ***
-#>    1588:          .        .        .        .         .        .    ***
-#>    1589:          .        .        .        .         .        .    ***
-#>    1590:          .        .        .        .         .        .    ***
-#>    1591:          .        .        .        .         .        .    ***
-#>    1592:          .        .        .        .         .        .    ***
-#>    1593:          .        .        .        .         .        .    ***
-#>    1594:          .        .        .        .         .        .    ***
-#>    1595:          .        .        .        .         .        .    ***
-#>    1596:       =131     =131     =131     =131      =131     =131    ***
-#>    1597:         IV   B-:maj       IV   B-:maj         g       na    ***
-#>    1598:          .        .        .        .         f       na    ***
-#>    1599:          .        .        .        .         g       na    ***
-#>    1600:          .        .        .        .         .        .    ***
-#>    1601:          .        .        .        .         f       na    ***
-#>    1602:          .        .        .        .         .        .    ***
-#>    1603:          .        .        .        .         .        .    ***
-#>    1604:          .        .        .        .         .        .    ***
-#>    1605:          .        .        .        .         .        .    ***
-#>    1606:          .        .        .        .         .        .    ***
-#>    1607:          .        .        .        .         .        .    ***
-#>    1608:          .        .        .        .         .        .    ***
-#>    1609:          .        .        .        .        e-      hey    ***
-#>    1610:          .        .        .        .         d        _    ***
-#>    1611:          .        .        .        .         .        .    ***
-#>    1612:          .        .        .        .         c     jude    ***
-#>    1613:       =132     =132     =132     =132      =132     =132    ***
-#>    1614:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
-#>    1615:          I    F:maj        I    F:maj         .        .    ***
-#>    1616:         *-       *-       *-       *-        *-       *-    ***
-#>    1617:  !!!ONB: Translated from original encodings ***
-#>    1618:  !!!ONB: Original transcribers noted in comm***
-#>    1619:  !!!YOE: David Temperley, Trevor de Clercq
-#>    1620:  !!!EED: Nathaniel Condit-Schultz
-#>    1621:  !!!ENC: Nathaniel Condit-Schultz, automated***
+#>           1572:          .        .        .        .         .        .    ***
+#>           1573:          .        .        .        .         .        .    ***
+#>           1574:          .        .        .        .         A       na    ***
+#>           1575:          .        .        .        .         .        .    ***
+#>           1576:          .        .        .        .         c       na    ***
+#>           1577:          .        .        .        .         .        .    ***
+#>           1578:       =130     =130     =130     =130      =130     =130    ***
+#>           1579:      *tb16    *tb16    *tb16    *tb16     *tb16        *    ***
+#>           1580:       -VII   E-:maj     -VII   E-:maj         g       na    ***
+#>           1581:          .        .        .        .         f       na    ***
+#>           1582:          .        .        .        .         g       na    ***
+#>           1583:          .        .        .        .         .        .    ***
+#>           1584:          .        .        .        .         f       na    ***
+#>           1585:          .        .        .        .         .        .    ***
+#>           1586:          .        .        .        .         .        .    ***
+#>           1587:          .        .        .        .         .        .    ***
+#>           1588:          .        .        .        .         .        .    ***
+#>           1589:          .        .        .        .         .        .    ***
+#>           1590:          .        .        .        .         .        .    ***
+#>           1591:          .        .        .        .         .        .    ***
+#>           1592:          .        .        .        .         .        .    ***
+#>           1593:          .        .        .        .         .        .    ***
+#>           1594:          .        .        .        .         .        .    ***
+#>           1595:          .        .        .        .         .        .    ***
+#>           1596:       =131     =131     =131     =131      =131     =131    ***
+#>           1597:         IV   B-:maj       IV   B-:maj         g       na    ***
+#>           1598:          .        .        .        .         f       na    ***
+#>           1599:          .        .        .        .         g       na    ***
+#>           1600:          .        .        .        .         .        .    ***
+#>           1601:          .        .        .        .         f       na    ***
+#>           1602:          .        .        .        .         .        .    ***
+#>           1603:          .        .        .        .         .        .    ***
+#>           1604:          .        .        .        .         .        .    ***
+#>           1605:          .        .        .        .         .        .    ***
+#>           1606:          .        .        .        .         .        .    ***
+#>           1607:          .        .        .        .         .        .    ***
+#>           1608:          .        .        .        .         .        .    ***
+#>           1609:          .        .        .        .        e-      hey    ***
+#>           1610:          .        .        .        .         d        _    ***
+#>           1611:          .        .        .        .         .        .    ***
+#>           1612:          .        .        .        .         c     jude    ***
+#>           1613:       =132     =132     =132     =132      =132     =132    ***
+#>           1614:       *tb1     *tb1     *tb1     *tb1      *tb1        *    ***
+#>           1615:          I    F:maj        I    F:maj         .        .    ***
+#>           1616:         *-       *-       *-       *-        *-       *-    ***
+#>           1617:  !!!ONB: Translated from original encodings in the Rolling S***
+#>           1618:  !!!ONB: Original transcribers noted in comments in each spi***
+#>           1619:  !!!YOE: David Temperley, Trevor de Clercq
+#>           1620:  !!!EED: Nathaniel Condit-Schultz
+#>           1621:  !!!ENC: Nathaniel Condit-Schultz, automated
 #> ################### ^^^ TheBeatles_HeyJude.hum ^^^ ###################
 #>               (***two spines/paths not displayed due to screen size***)
 #> 

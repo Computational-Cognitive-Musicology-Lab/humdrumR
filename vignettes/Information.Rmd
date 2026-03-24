@@ -120,7 +120,7 @@ numbers |> round(1) |> as.character() |> count()
 ### Counting real data
 
 
-Enough with the artificial examples; let's have a go at using [count()] on some musical data.
+Enough with the artificial examples; let's have a go at using `count()` on some musical data.
 This should feel familiar, given we've done similar stuff before in other articles:
 
 ```{r}
@@ -140,7 +140,7 @@ bach |> count(Pitch, Rhythm, sort = TRUE)
 ```
 
 Woh, there are a lot of `.` values in that last table!---that dot is a shorthand for "zero."
-The reason there are so many zeros is because [count()], by default, recognizes every possible combination of values that could occur, even if they never occur.
+The reason there are so many zeros is because `count()`, by default, recognizes every possible combination of values that could occur, even if they never occur.
 To get rid of these unused levels, we can set `.drop = TRUE`.
 
 ```{r}
@@ -174,9 +174,9 @@ bach |>
 
 ## Probabilities
 
-The [pdist()] function is a partner to the [count()] function.
+The `pdist()` function is a partner to the `count()` function.
 It computes the *proportion* of input data which equals each unique value---which we can interpret as *probabilities*.
-Note that [pdist()] has all the same arguments as [count()] (`sort`, `.drop`, etc.).
+Note that `pdist()` has all the same arguments as `count()` (`sort`, `.drop`, etc.).
 
 
 ```{r}
@@ -196,12 +196,12 @@ bach |>
 
 Cool! But what are the `~` and `m` about?
 The tilde (`~`) means that the probability printed in the table is being rounded---because who wants to see their screen filled with numbers like `0.0012449583492384`? 
-By rounding off probabilities when showing you the [pdist()] table, `r hm` keeps it (relatively) readable.
+By rounding off probabilities when showing you the `pdist()` table, `r hm` keeps it (relatively) readable.
 The little `m` serves a similar purpose: the "m" is short for "milli," which means the probability is actually one thousand times smaller than printed.
 Thus, the probability `0.000012` will print as `0.012m`---again, to keep things (relatively) readable.
 If you get really small values, you might see a $\mu$ printed, which is short for "micro" (one millionth).
 
-If we really want a readable table, we might just want to filter out the really small numbers, which we can do just like we did with a [count()] table, except we'll refer to `p` (probability) instead of `n` (count).
+If we really want a readable table, we might just want to filter out the really small numbers, which we can do just like we did with a `count()` table, except we'll refer to `p` (probability) instead of `n` (count).
 
 ```{r}
 bach |>  
@@ -214,7 +214,7 @@ bach |>
 
 ### Joint and conditional probabilities
 
-When we apply [pdist()] to two or more variables, it by default computes the *joint probability*: the probability of each combination of values.
+When we apply `pdist()` to two or more variables, it by default computes the *joint probability*: the probability of each combination of values.
 These probabilities (the entire multidimensional table) will sum to 1.
 It is often useful to instead compute *conditional probabilities*: the probabilities of observing some variables *given* other variables.
 We can do this with the `condition` argument.
@@ -237,7 +237,7 @@ Each *column* in this table will sum to 1.
 ## Marginal distributions
 
 When you have a multi-dimensional count/proportion table, you might want to "collapse" some dimensions, to get what's called the marginal distribution.
-You can do this with a [count()]/[pdist()] table simply, by indexing by dimension (either by name or by index):
+You can do this with a `count()`/`pdist()` table simply, by indexing by dimension (either by name or by index):
 
 ```{r}
 
@@ -293,7 +293,7 @@ Also, notice that the result of using `cbind` is now a "plain" R data.frame---th
 
 ### Estimating joint probabilities
 
-We've [seen][#marginal-distributions] that we can take a two (or more) dimensional table and "collapse" one dimension to get a 1-dimensional marginal distribution.
+We've [seen](#marginal-distributions) that we can take a two (or more) dimensional table and "collapse" one dimension to get a 1-dimensional marginal distribution.
 What if want to reverse this?
 Combine two one-dimensional distributions to get a two dimensional one?
 Wait! 
@@ -345,18 +345,18 @@ bach |>
 # Modeling probability and likelihood
 
 
-Statisticians refer to the sorts of distributions created by [count()] or and [pdist()] as *empirical distributions*---distributions of a sample of data.
+Statisticians refer to the sorts of distributions created by `count()` or and `pdist()` as *empirical distributions*---distributions of a sample of data.
 We will often regard a empirical distribution as an estimate, or "model," of some real-world probability distribution.
 For example, the Bach chorales are often considered an idealized model of "common practice tonality" in general.
-If we observe, for example, that $\approx$1.04% of notes in our Bach chorale data are E flats, we might estimate that about 1.04% of notes in "common practice music" more generally are E flats.
-Or to put it in a probabilistic way, if we randomly select a note from a common-practice piece, the *estimated* probability of that note being an E flat is about 1.04%---this is based on our current model, which is based on our empirical analysis of the first 10 chorales.
+If we observe, for example, that $\approx 1.04$ % of notes in our Bach chorale data are E flats, we might estimate that about 1.04% of notes in "common practice music" more generally are E flats.
+Or to put it in a probabilistic way, if we randomly select a note from a common-practice piece, the *estimated* probability of that note being an E flat is about 1.04%---this estimate is based on our current model, which is based on our empirical analysis of the first 10 chorales.
 
 
 ### Likelihood
 
 Sometimes, we'd like to ask what probability a model assigns to each data point in sample.
 This kind of "retrospective probability" assignment is called a *likelihood*.
-In `r hm`, we can assign likelihoods quite easily using the [like()] function.
+In `r hm`, we can assign likelihoods quite easily using the `like()` function.
 Consider this simple vector again:
 
 ```{r}
@@ -377,8 +377,8 @@ like(v1)
 ```
 
 What's happening here?
-Notice that [like()] assigns each data point a likelihood by looking that value up in the `p1` table.
-For example, `b` makes up `.3` of `v1`, so every time there is `b` in the input, [like()] assigns `.3`.
+Notice that `like()` assigns each data point a likelihood by looking that value up in the `p1` table.
+For example, `b` makes up `.3` of `v1`, so every time there is `b` in the input, `like()` assigns `0.3`.
 If we do this with our Bach data, we'd see that every E flat that appears gets that 1.04% (`0.0104`) value that we just talked about:
 
 
@@ -399,7 +399,7 @@ bach |> like(Pitch, Rhythm)
 
 
 Here's a thought: what if we know the rhythm value in advance, and we want to estimate the likelihood of each pitch given the rhythm?
-This is the "conditional likelihood," and we can compute it using the same `condition` rgument we used with [pdist()]:
+This is the "conditional likelihood" and we can compute it using the same `condition` argument we used with `pdist()`:
 
 ```{r}
 
@@ -410,11 +410,11 @@ bach |> like(Pitch, Rhythm, condition = 'Rhythm')
 ### Using a different model
 
 Remember, there is no "true" or correct probability model for a given data.
-We should never say the "probability of E flat *is* 1.04%"---rather, that is our "estimated probability of E flat."
-It is very common, as a basic analysis step, to compute the empirical distribution of a data sample, then immediately use that distribution as a probability model of that data...essentially, using the data as a model of itself.
-This is what [like()] does by default.
+We should never say the "probability of E flat **is** 1.04%"---rather, 1.04% is our "estimated probability of E flat."
+It is very common, as a basic analysis step, to compute the empirical distribution of a data sample then immediately use that distribution as a probability model of that data...essentially, using the data as a model of itself.
+This is what `like()` does by default.
 However, we might sometimes want to take a different tack, assigning likelihoods to our data based on a different model.
-For example, what if we observed a different sample of lowercase letters:
+For example, what if we observed a different sample of lowercase letters?:
 
 ```{r}
 v3 <- c('a', 'a','b','b','b','b','b','c','c')
@@ -436,6 +436,7 @@ like(lower = v3, model = pdist(lower = v1))
 
 We do this sort of thing with real data all the time.
 For example, we might want to assign probabilities to the notes in the first Bach chorale, based on the empirical probabilities observed in all the *other* chorales.
+(This is similar to "[leave-one-out](https://en.wikipedia.org/wiki/Cross-validation_(statistics)#Leave-one-out_cross-validation)" cross validation.)
 
 ```{r}
 
@@ -453,13 +454,13 @@ bach |> like(Pitch, model = allExcept1)
 
 
 
-Working with actually likelihoods, as we do above, is rarely a good idea, because in practice the likelihoods can get so small that we run into problems representing them in our computers.
-Thus, we usually, compute the log of the likelihood, like this:
+Working with actually likelihoods, as we do above, is rarely a good idea because, in practice, the likelihoods can get so small that we run into problems representing them in our computers.
+Thus, we usually compute the log of the likelihood, like this:
 
 ```{r}
 bach |>
   like(Pitch, model = allExcept1) |>
-  within(log(., base = 2))
+  within(LogLike = log(., base = 2))
    
 
 ```
@@ -476,14 +477,13 @@ If we do this, we get whats called the **information content** of each data poin
 The smaller the information content the *more likely*---and thus more predictable and less informative---a data point is.
 The higher the information content, the *less likely*---and thus more surprising and more informative---a data point is.
 This way of interpreting inverted log probabilities is the core of **information theory**.
-We can estimate the information content directly using the [info()] function, which is used just like the [like()] function:
+We can estimate the information content directly using the `info()` function, which is used just like the `like()` function:
 
 ```{r}
 
 info(v1)
 
 bach |>
-  kern(simple = TRUE) |>
   info(Pitch, model = allExcept1)
 ```
 
@@ -496,8 +496,8 @@ Information content and (log)likelihood associate values with each and every dat
 If we have a random variable (or sample from one), we can also ask how much information each data point contains *on average*.
 This is called the (Shannon) **entropy**.
 Entropy is simply the average information content---which is really a property of the probability distribution.
-To compute entropy, we can pass a probability distribution (created with [pdist()]) to the [entropy()] function.
-(You can also pass variables straight to [entropy()], and it will run [pdist()] automatically.)
+To compute entropy, we can pass a probability distribution (created with `pdist()`) to the `entropy()` function.
+(You can also pass variables straight to `entropy()`, and it will run `pdist()` automatically.)
 
 ```{r}
 
@@ -510,6 +510,7 @@ bach |> entropy(Pitch)
 
 We should remind ourselves that what we are computing here is the *empirical entropy*---the entropy of the probability distribution we are estimating from our data.
 The *true* entropy of pitch in common practice music is certainly not this exact number, but we might argue/hope that the empirical entropy we observe in these ten Bach chorales is a reasonable estimate of the true entropy of common practice music.
+Also, we are only considering the entropy/likelihood of pitches, taken as a set of independent observations---this is a very simplistic perspective on pitch in music, so we aren't modeling the "empirical entropy of the Bach chorales," but rather that "empirical entropy of the marginal distribution of pitch in the Bach chorales."
 
 ### Multi-dimensional entropy
 
@@ -566,8 +567,8 @@ We'll start by looking at the marginal (independent) entropy of each variable:
 
 bach |> select(Token) |> mutate(ComplexPitch = kern(Token)) -> bach
 
-bach |> entropy(ComplexPitch)
 bach |> entropy(Instrument)
+bach |> entropy(ComplexPitch)
 
 ```
 
@@ -604,19 +605,19 @@ We can interpret this as saying that knowing which voice is singing provides us 
 #### Pointwise mutual information
 
 We aren't quite done with mutual information yet.
-We've [already learned][#entropy] that the entropy of a distribution is the average of the information content of all the observations.
+We've [already learned](#entropy) that the entropy of a distribution is the average of the information content of all the observations.
 Similarly, we can view mutual information as an average.
 But an average of what?
-Basically, if we look at each data point (with multiple variables) we can compare the estimated information content based on the actual (observed) joint probability with the "naive" joint probability which we would observe if the variables were independent.
+Basically, if we look at each data point (which may includes multiple variables) we can compare the estimated information content based on the actual (observed) joint probability with the "naive" joint probability which we would observe if the variables were independent.
 When they are different, it means that a data combination is more or less probable than we'd expect *if the variables were independent*.
 The average of the log of the ratio between the two values is the mutual information;
 The individual log ratios (one for each data point) are then the *pointwise mutual information*.
-Luckily for us, `r hm` includes the [pmutual()] function, which we can use just like [info()] or [like()]:
+Luckily for us, `r hm` includes the `pmutual()` function, which we can use just like `info()` or `like()`:
 
 ```{r}
 bach |>
   filter(File == 1) |>
-  mutual(Pitch, Rhythm)
+  pmutual(Pitch, Rhythm)
 
 ```
 
@@ -630,11 +631,11 @@ If is negative, this indicates that it is *less* likely to occur.
 
 ### Using a different model (cross entropy)
 
-[Above][#using-a-different-model], we saw that we could assign likelihoods to one set of data based on a model extracted from different data.
+[Above](#using-a-different-model), we saw that we could assign likelihoods to one set of data based on a model extracted from different data.
 For example, assigning likelihoods to pitches in one chorale based on the distribution of pitches in the other nine chorales.
 We can do the same thing when computing entropy.
 The result is called the *cross entropy*, and it is an excellent measure of how well a model "fits" some data.
-We can compute the cross entropy using the [xentropy()] function, which requires a `model` argument.
+We can compute the cross entropy using the `xentropy()` function, which requires a `model` argument.
 
 ```{r}
 bach |>
@@ -656,7 +657,7 @@ Take a moment to check what keys our nine chorales are in:
 bach |> group_by(File) |> with(unique(Key))
 ```
 
-Lets try computing the (cross) entropy of Chorale 1 using either (1) Chorale 5, which is also in G major or (2) Chorale 4, which is in E major.
+Lets try computing the (cross) entropy of Chorale 1 using either (1) Chorale 5, which is also in G major or (2) Chorale 4, which is in E major, as a model.
 
 ```{r}
 
@@ -672,12 +673,12 @@ bach |> filter(File == 1) |> with(xentropy(Pitch, model = EmajorP))
 If we compute the (cross) entropy of pitches in the first G major chorale using the distribution of pitches in the other G major Chorale (#5), the fit is really good---only slightly higher than the first Chorale's "self" entropy.
 On the other hand, if we use the E major Chorale as the model, the fit is quite a bit worse (`r bach |> filter(File == 1) |>  with(xentropy(Pitch, model = EmajorP)) |> round(2)`).
 How would we interpret that?
-Well, if our goal is to generalize about how frequently different pitches occur common practice music which is composed *in G major*, but we use E major Chorales to come up with those probabilities, we'll end up underestimating a lot.
+Well, if our goal is to generalize about how frequently different pitches occur in common practice music which is composed *in G major*, but we use E major Chorales to come up with those probabilities, we'll end up underestimating a lot.
 For example, our `EmajorP` model says that the note D natural should only occur about 2% of the time, and that the note G natural should occur...never.
 That is obviously a bad model of *G major* music!
 This is why the cross entropy for predicting the first (G major) chorale using the `EmajorP` data is high---it's a bad fit.
 
-Obviously, `EmajorP` would be a better model of common practice music that is composed in E major!
+Obviously, `EmajorP` would be a better model of common practice music that is composed in E major.
 But...that doesn't mean we believe that `EmajorP` is a great model of the distribution of pitches in common practice E major, or that `GmajorP` is a great model of music composed in G major---they are each only based on one short piece by Bach!
 If we want better estimates of the *true* distribution of pitches in common practice music (in whatever key), it would be better to base them on larger and more representative samples of music.
 We could, for a starting point, look at the distribution of pitches in *all* Bach's G major or E major chorales---this would give us much better estimates than models based on *one* piece.

@@ -1,7 +1,7 @@
 # Filtering humdrum data
 
 Welcome to “Filtering humdrum data”! This article explains how
-humdrum$`_{\mathbb{R}}`$ can be used find subsets of humdrum data. Most
+humdrum$_{\mathbb{R}}$ can be used find subsets of humdrum data. Most
 humdrum datasets contain a wealth of information: rhythms, pitches,
 lyrics, etc. However, the particular analysis you want to conduct today
 might not need all that information. The first step after [loading
@@ -48,10 +48,10 @@ use a single pair of matches brackets (`[ ]`) or a double pair
 used in normal R objects, check out the [R
 primer](https://humdrumR.ccml.gtcmt.gatech.edu/articles/RPrimer.md "Basics of R")—you
 really don’t *need* to do this before getting into
-humdrum$`_{\mathbb{R}}`$, but you might want to eventually.
+humdrum$_{\mathbb{R}}$, but you might want to eventually.
 
 We can use the single-bracket `[]` or double-bracket `[[]]` commands to
-index our humdrum$`_{\mathbb{R}}`$ data objects.
+index our humdrum$_{\mathbb{R}}$ data objects.
 
 - The single-brackets are used to index whole *pieces* in your data.
 - The double-brackets are used to index *within* pieces in your data.
@@ -438,8 +438,8 @@ chorales[6:10]
 
 #### Character indices (for single-brackets)
 
-If you supply a humdrum$`_{\mathbb{R}}`$ object single-bracket index a
-`character` string, humdrum$`_{\mathbb{R}}`$ will treat that string as a
+If you supply a humdrum$_{\mathbb{R}}$ object single-bracket index a
+`character` string, humdrum$_{\mathbb{R}}$ will treat that string as a
 regular expression and return all the files that contain a match to that
 expression in *any* data token—even if there is only one.
 
@@ -556,7 +556,7 @@ actually needed. Basically, commands should look like this:
 #### Numeric indices (for double-brackets)
 
 `Numeric` values `i` *or* `j` can be given to double-bracket
-humdrum$`_{\mathbb{R}}`$ index commands. For `i`, the number is simply
+humdrum$_{\mathbb{R}}$ index commands. For `i`, the number is simply
 matched to record numbers in each file. For example, you could extract
 the first fifty records from each file as so:
 
@@ -805,19 +805,19 @@ chorales[[150:200, ]]
 ```
 
 We only get three files back, because the other seven files don’t have
-any records above 150! (Notice that humdrum$`_{\mathbb{R}}`$ won’t
-remove the Exclusive interpretation or spine spine closing (`*-`)
-records…since that would break the humdrum syntax. However, if you only
-query for the exclusive interpretation or reference record rows, the
-output will be empty. For example, `chorales[[1, ]]` returns empty
-humdrumR object because the first row in all chorales files are
-reference record, not kern data.)
+any records above 150! (Notice that humdrum$_{\mathbb{R}}$ won’t remove
+the Exclusive interpretation or spine spine closing (`*-`) records…since
+that would break the humdrum syntax. However, if you only query for the
+exclusive interpretation or reference record rows, the output will be
+empty. For example, `chorales[[1, ]]` returns empty humdrumR object
+because the first row in all chorales files are reference record, not
+kern data.)
 
 #### Character indices (for double-brackets)
 
 `Character` string values `i` *or* `j` can also be given to
-double-bracket humdrum$`_{\mathbb{R}}`$ index commands.
-Humdrum$`_{\mathbb{R}}`$ will treat string as a regular expression and
+double-bracket humdrum$_{\mathbb{R}}$ index commands.
+Humdrum$_{\mathbb{R}}$ will treat string as a regular expression and
 return all records (`i`) or spines (`j`) that any match to that
 expression in a data token—even if there is only one. For example, let’s
 (again) say we are interesting in studying flats. Since `**kern`
@@ -1312,7 +1312,7 @@ chorales[[ , '-', drop = FALSE]]
 
 A nifty feature of R is that if you supply negative numbers to an
 indexer, R will *remove* those numbers. This works in
-humdrum$`_{\mathbb{R}}`$ too, so if you want all the files *except* the
+humdrum$_{\mathbb{R}}$ too, so if you want all the files *except* the
 first file, you could write:
 
 ``` r
@@ -1567,16 +1567,16 @@ chorales[[-1:-20, ]]
 >               *Token :: character
 ```
 
-(Again, humdrum$`_{\mathbb{R}}`$ won’t remove the Exclusive
-interpretation or spine spine closing (`*-`) records…since that would
-break the humdrum syntax.)
+(Again, humdrum$_{\mathbb{R}}$ won’t remove the Exclusive interpretation
+or spine spine closing (`*-`) records…since that would break the humdrum
+syntax.)
 
 ## General Filtering
 
 The indexing commands (previous sections) only get you so far. If you
 want to be more precise about filtering, use the tidy-verse
 [`filter()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.md)
-method for humdrum$`_{\mathbb{R}}`$ data.
+method for humdrum$_{\mathbb{R}}$ data.
 [`filter()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.md)
 works exactly like
 [mutate.humdrumR](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html#tidyverse-style "HumdrumR data fields article").
@@ -2325,8 +2325,8 @@ we still have four spines, but spines 2–4 are just emptied. This is
 correct. What
 [`filter()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.md)
 actually does is turn any filtered data points into null (`d`) data
-points. Humdrum$`_{\mathbb{R}}`$ then ignores that data automatically.
-Why do we do this? There are several reasons:
+points. Humdrum$_{\mathbb{R}}$ then ignores that data automatically. Why
+do we do this? There are several reasons:
 
 1.  Sometimes, seeing the full structure remain in place is
     cleaner/easier to interpret than actually removing them. Basically,
@@ -2533,7 +2533,7 @@ chorales |>
 
 ## Complements
 
-When humdrum$`_{\mathbb{R}}`$ filters, it does not completely
+When humdrum$_{\mathbb{R}}$ filters, it does not completely
 discard/erase the data. The output of
 [`filter()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.md)
 is a subset of the original data: the *complement* of that subset is

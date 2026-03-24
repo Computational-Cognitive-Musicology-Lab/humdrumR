@@ -2,18 +2,18 @@
 
 Welcome to “Getting to know your humdrum data”! This article explains
 how you can find essential metainformation about your data with
-humdrum$`_{\mathbb{R}}`$: how much data is there, and how is it
+humdrum$_{\mathbb{R}}$: how much data is there, and how is it
 structured? If you don’t understand your data, you won’t be able to do
 intelligent analyses of it.
 
 This article, like all of our articles, closely parallels information in
-humdrum$`_{\mathbb{R}}`$’s detailed code documentation, which can be
-found in the
+humdrum$_{\mathbb{R}}$’s detailed code documentation, which can be found
+in the
 “[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#summarizing "HumdrumR function reference, Summarizing")”
 section of the
-humdrum$`_{\mathbb{R}}`$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
-You can also find this information within R, once
-humdrum$`_{\mathbb{R}}`$ is loaded, using
+humdrum$_{\mathbb{R}}$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once humdrum$_{\mathbb{R}}$
+is loaded, using
 [`?summary.humdrumR`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.md).
 
 ## Know your data
@@ -41,10 +41,10 @@ see if they look the way you *think* they should look.
 
 Once your data is
 [read](https://humdrumR.ccml.gtcmt.gatech.edu/articles/ReadWrite.md "Reading and writing humdrum data, article"),
-the next step is to use humdrum$`_{\mathbb{R}}`$ to get high-level
+the next step is to use humdrum$_{\mathbb{R}}$ to get high-level
 summaries of the content of *all* the files in your data.
 
-Humdrum$`_{\mathbb{R}}`$ defines a number of tools to quickly summarize
+Humdrum$_{\mathbb{R}}$ defines a number of tools to quickly summarize
 the structure and content of a humdrum data set. One of the most basic
 functions in R is
 [`summary()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.md);
@@ -52,7 +52,7 @@ Calling
 [`summary()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.md)
 on a [humdrumR
 object](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md)
-will print a concise version of the output of humdrum$`_{\mathbb{R}}`$’s
+will print a concise version of the output of humdrum$_{\mathbb{R}}$’s
 [five summary
 functions](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humSummary.md),
 which are described in detail below. Let’s load our built-in
@@ -348,8 +348,8 @@ interpretations(variations)
 Ah, this time we see that each file has a `**function` and a `**harm`
 spine, as well as two `**kern` spines. In fact, the “Tallies” at the
 bottom tells us that all 20 files have the same exclusive
-interpretations (in the same order), which humdrum$`_{\mathbb{R}}`$
-labels `{A}`: `**function, **harm, **kern, **kern`.
+interpretations (in the same order), which humdrum$_{\mathbb{R}}$ labels
+`{A}`: `**function, **harm, **kern, **kern`.
 
 ## Summarizing Metadata
 
@@ -476,7 +476,7 @@ reference(chorales)[3, ]
 >            COM:   Bach, Johann Sebastian
 >            EED: Craig Stuart Sapp
 >            EEV: 2009/05/22
->            EMD: Edited in humdrumR 0.7.0.7 on 2026-02-24
+>            EMD: Edited in humdrumR 0.7.0.7 on 2026-03-24
 >        OTL@@DE:   Ich dank dir, lieber Herre
 >            PC#:   2
 >            SCT:   BWV 347
@@ -488,9 +488,9 @@ reference(chorales)[3, ]
 
 ## Summarizing Data
 
-The next thing to do, when getting started with a
-humdrum$`_{\mathbb{R}}`$ data analysis, is to get a sense of the data
-*content* itself. What tokens does our data actually contain? R’s
+The next thing to do, when getting started with a humdrum$_{\mathbb{R}}$
+data analysis, is to get a sense of the data *content* itself. What
+tokens does our data actually contain? R’s
 [`unique()`](https://rdrr.io/r/base/unique.html),
 [`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md),
 and [`sort()`](https://rdrr.io/r/base/sort.html) functions are perfect

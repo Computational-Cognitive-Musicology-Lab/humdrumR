@@ -106,12 +106,12 @@ decide how to parse an input string. There are three regular-expression
 patterns for rhythm that `rhythmInterval()` knows how to parse
 automatically:
 
-|  |  |  |
-|----|----|----|
-| Representation | Exclusive | Example |
-| [Recip](https://www.humdrum.org/rep/recip/index.html) | \*\*recip | `4.` |
-| [Note values](https://en.wikipedia.org/wiki/Note_value) | \*\*notevalue | `𝅘𝅥 𝅭` |
-| [Time durations](https://www.humdrum.org/rep/dur/index.html) | \*\*dur | `/1.5` |
+|                                                              |               |         |
+|--------------------------------------------------------------|---------------|---------|
+| Representation                                               | Exclusive     | Example |
+| [Recip](https://www.humdrum.org/rep/recip/index.html)        | \*\*recip     | `4.`    |
+| [Note values](https://en.wikipedia.org/wiki/Note_value)      | \*\*notevalue | `𝅘𝅥 𝅭`   |
+| [Time durations](https://www.humdrum.org/rep/dur/index.html) | \*\*dur       | `/1.5`  |
 
 ### Exclusive Dispatch
 

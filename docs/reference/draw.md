@@ -101,18 +101,18 @@ following table indicates the seven possible plot types, and which
 combinations of `x` and `y` variable classes result in each type. The
 links in the table lead to detailed documentation for each type of plot.
 
-|  |  |  |
-|----|----|----|
-| `x` | `y` | Plot type |
-| `numeric` | (missing) | [Density Histogram/Contour](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_density.md) |
-| (missing) | `numeric` | [Quantile plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_Qplot.md) |
-|  |  | (or Violin plot) |
-| `numeric` | `numeric` | [Scatter/line plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_scatter.md) |
-| `character`/`factor` | `numeric` | [Violin plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_violins.md) |
-| `numeric` | `character` or `factor` | [Area chart](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_area.md) |
-| `character`/ `factor` | (missing) | [Bar plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.md) |
-| (missing) | `character`/`factor` | [Bar plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.md) |
-| `character`/`factor` | `character`/`factor` | [Heat map](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_heat.md) |
+|                       |                         |                                                                                               |
+|-----------------------|-------------------------|-----------------------------------------------------------------------------------------------|
+| `x`                   | `y`                     | Plot type                                                                                     |
+| `numeric`             | (missing)               | [Density Histogram/Contour](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_density.md) |
+| (missing)             | `numeric`               | [Quantile plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_Qplot.md)               |
+|                       |                         | (or Violin plot)                                                                              |
+| `numeric`             | `numeric`               | [Scatter/line plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_scatter.md)         |
+| `character`/`factor`  | `numeric`               | [Violin plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_violins.md)               |
+| `numeric`             | `character` or `factor` | [Area chart](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_area.md)                   |
+| `character`/ `factor` | (missing)               | [Bar plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.md)                  |
+| (missing)             | `character`/`factor`    | [Bar plot](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.md)                  |
+| `character`/`factor`  | `character`/`factor`    | [Heat map](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_heat.md)                     |
 
 ### Drawing dimensions of data
 
@@ -281,8 +281,8 @@ draw(x)
 #>     }
 #> }, add = expression(), layout = list(layout = 1L, layout_heights = 1, 
 #>     layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x5bbea8011868>
-#> <environment: 0x5bbea800ee10>
+#> <bytecode: 0x566d40b18390>
+#> <environment: 0x566d40b0ed20>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -344,8 +344,8 @@ draw( , x)
 #>     }
 #> }, add = expression(), layout = list(layout = 1L, layout_heights = 1, 
 #>     layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x5bbea8011868>
-#> <environment: 0x5bbea7cdd590>
+#> <bytecode: 0x566d40b18390>
+#> <environment: 0x566d406da210>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -410,8 +410,8 @@ draw(x, y, title = "Linear regression", lm = TRUE)
 #>     }
 #> }, add = expression(), layout = list(layout = 1L, layout_heights = 1, 
 #>     layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x5bbea8011868>
-#> <environment: 0x5bbea78a3d10>
+#> <bytecode: 0x566d40b18390>
+#> <environment: 0x566d404a20f0>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")

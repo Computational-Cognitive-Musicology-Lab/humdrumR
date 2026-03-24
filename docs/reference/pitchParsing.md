@@ -147,20 +147,20 @@ of regular-expressions and exclusive interpretations to decide how to
 parse an input string. There are twelve regular-expression patterns for
 pitch that `tonalInterval()` knows how to parse automatically:
 
-|  |  |  |
-|----|----|----|
-| Representation | Exclusive | Example |
-| [Kern](https://www.humdrum.org/rep/kern/index.html) | \*\*kern | `ee-` |
-| [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch) | \*\*pitch | `Eb5` |
-| [Helmholtz pitch](https://en.wikipedia.org/wiki/Solf%C3%A8ge) | none | `eb'` |
-| [Lilypond pitch](https://lilypond.org/doc/v2.22/Documentation/notation/pitches) | none | `ees'` |
-| [German pitch](https://www.humdrum.org/rep/Tonh/index.html) notation | \*\*Tonh | `S5` |
-| [Interval](https://en.wikipedia.org/wiki/Interval_(music)) | \*\*hint/\*\*mint/\*\*int | `+m3` |
-| [Scale degree](https://en.wikipedia.org/wiki/Degree_(music)) | \*\*deg or \*\*degree | `^^3-` or `3-/5` |
-| [Pitch Class](https://en.wikipedia.org/wiki/Pitch_class#Integer_notation) | \*\*pc | `3` |
-| Relative-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) | \*\*solfa | `^me` |
-| Fixed-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge) | \*\*solfg | `mi~b5` |
-| [Swara](https://en.wikipedia.org/wiki/Svara) | \*\*bhatk | `g` |
+|                                                                                 |                           |                  |
+|---------------------------------------------------------------------------------|---------------------------|------------------|
+| Representation                                                                  | Exclusive                 | Example          |
+| [Kern](https://www.humdrum.org/rep/kern/index.html)                             | \*\*kern                  | `ee-`            |
+| [Scientific Pitch](https://en.wikipedia.org/wiki/Scientific_pitch)              | \*\*pitch                 | `Eb5`            |
+| [Helmholtz pitch](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                   | none                      | `eb'`            |
+| [Lilypond pitch](https://lilypond.org/doc/v2.22/Documentation/notation/pitches) | none                      | `ees'`           |
+| [German pitch](https://www.humdrum.org/rep/Tonh/index.html) notation            | \*\*Tonh                  | `S5`             |
+| [Interval](https://en.wikipedia.org/wiki/Interval_(music))                      | \*\*hint/\*\*mint/\*\*int | `+m3`            |
+| [Scale degree](https://en.wikipedia.org/wiki/Degree_(music))                    | \*\*deg or \*\*degree     | `^^3-` or `3-/5` |
+| [Pitch Class](https://en.wikipedia.org/wiki/Pitch_class#Integer_notation)       | \*\*pc                    | `3`              |
+| Relative-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge)               | \*\*solfa                 | `^me`            |
+| Fixed-do [Solfege](https://en.wikipedia.org/wiki/Solf%C3%A8ge)                  | \*\*solfg                 | `mi~b5`          |
+| [Swara](https://en.wikipedia.org/wiki/Svara)                                    | \*\*bhatk                 | `g`              |
 
 ### Exclusive Dispatch
 

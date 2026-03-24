@@ -1,7 +1,7 @@
 # Contextualizing humdrum data
 
 Welcome to “Contextualizing humdrum data”! This article explains how
-humdrum$`_{\mathbb{R}}`$ can be used to contextualize musical data. When
+humdrum$_{\mathbb{R}}$ can be used to contextualize musical data. When
 analyzing musical data, we often treat each and every data token as a
 separate, independent “data point.” However, in many cases, we want to
 consider data points *in context*—what other data points are nearby in
@@ -10,17 +10,17 @@ syntax](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md)
 encodes data in temporal order, the “context” usually means either “what
 is happening before or after this data point?” or “what else is
 happening at the same time as this this data point?”
-Humdrum$`_{\mathbb{R}}`$ provides a number of ways of analyzing data “in
+Humdrum$_{\mathbb{R}}$ provides a number of ways of analyzing data “in
 context.”
 
 This article, like all of our articles, closely parallels information in
-humdrum$`_{\mathbb{R}}`$’s detailed code documentation, which can be
-found in the
+humdrum$_{\mathbb{R}}$’s detailed code documentation, which can be found
+in the
 “[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#reading-and-writing#manipulating-humdrum-data "HumdrumR function reference, Manipulating humdrum data")”
 section of the
-humdrum$`_{\mathbb{R}}`$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu/articles/humdrumR.ccml.gtcmt.gatech.edu).
-You can also find this information within R, once
-humdrum$`_{\mathbb{R}}`$ is loaded, using
+humdrum$_{\mathbb{R}}$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu/articles/humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once humdrum$_{\mathbb{R}}$
+is loaded, using
 [`?context`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.md),
 `group_by`, or
 [`?withinHumdrum`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md).
@@ -28,7 +28,7 @@ humdrum$`_{\mathbb{R}}`$ is loaded, using
 ## Groupby
 
 The most conventionally “R-style” way to look at data context is using
-R/humdrum$`_{\mathbb{R}}`$’s various “group by” options. This
+R/humdrum$_{\mathbb{R}}$’s various “group by” options. This
 functionality is described elsewhere, for example in the [Working With
 Data](https://humdrumR.ccml.gtcmt.gatech.edu/articles/WorkingWithData.md)
 article, and in the
@@ -41,7 +41,7 @@ temporal context, here are a few good options:
 
 #### Group by Record
 
-All humdrum$`_{\mathbb{R}}`$ data has a `Record` field, indicating data
+All humdrum$_{\mathbb{R}}$ data has a `Record` field, indicating data
 points that occur at the same time. Using
 [`group_by()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.md)
 we can perform calculations grouped by record. Let’s load our trusty
@@ -80,7 +80,7 @@ you’ll almost always want to have `Piece` as a grouping factor.
 #### Group by Bar
 
 Most humdrum data includes bar lines, indicated by `=`. When
-humdrum$`_{\mathbb{R}}`$ reads data (`?readHumdrumR`) data, it will look
+humdrum$_{\mathbb{R}}$ reads data (`?readHumdrumR`) data, it will look
 at these barlines, count them in each file, and put that count into a
 field called `Bar`
 ([`?fields`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md)).
@@ -401,7 +401,7 @@ windows at regular locations. We can do this using the
 [`hop()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.md)
 function.
 ([`hop()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.md) is a
-humdrum$`_{\mathbb{R}}`$ function which is very similar to R’s base
+humdrum$_{\mathbb{R}}$ function which is very similar to R’s base
 [`seq()`](https://rdrr.io/r/base/seq.html) function; however,
 [`hop()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/hop.md) has
 some special features and, more importantly, gets special treatment from
@@ -1118,8 +1118,8 @@ chorales |>
 ------------------------------------------------------------------------
 
 Note that these regular windows are examples of N-grams.
-Humdrum$`_{\mathbb{R}}`$ also defines another approach to defining
-N-grams which will generally be faster than using
+Humdrum$_{\mathbb{R}}$ also defines another approach to defining N-grams
+which will generally be faster than using
 [`context()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.md)—this
 alternative approach is described in the last section of this article.
 
@@ -3581,7 +3581,7 @@ nested |>
 In the previous section, we saw that the
 [`context()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.md)
 function can be used to create n-grams (and so much more).
-Humdrum$`_{\mathbb{R}}`$ also offers a different, lag-based, approach to
+Humdrum$_{\mathbb{R}}$ also offers a different, lag-based, approach to
 doing n-gram analyses. The lag-based approach is more fully vectorized
 than
 [`context()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/context.md)

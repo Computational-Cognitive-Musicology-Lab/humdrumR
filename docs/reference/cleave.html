@@ -234,7 +234,7 @@ similar function to <code>cleave()</code>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/MozartVariations/.*.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Eight files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating eight files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -245,82 +245,82 @@ similar function to <code>cleave()</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">cleave</span><span class="op">(</span><span class="fl">3</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### vvv M354_00_01a_a.krn vvv ####################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   1:  </span><span style="color: #00BBBB;">!!!COM: Mozart</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   2:  </span><span style="color: #00BBBB;">!!!OTL: Zwolf Variationen in Es, uber die Romanze '***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   3:  </span><span style="color: #00BBBB;">!!!Variation: Theme a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   4:  </span><span style="color: #BB0000;">     **function     **harm        **kern**kern</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   5:  </span><span style="color: #BB00BB;">              *          *      *clefF4*clefG2</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   6:  </span><span style="color: #BB00BB;">              *          *          *k[b-e-a-]</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   7:  </span><span style="color: #BB00BB;">          *M2/4      *M2/4               *M2/4</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   8:  </span><span style="color: #BB00BB;">           *E-:       *E-:                *E-:</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   9:  </span><span style="color: #00BB00; text-decoration: underline;">             =1         =1                  =1</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  10:  </span><span style="color: #BBBB00;">             2T         2I4EE- 4GG 4BB- 4...B-         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  11:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">           4r8e-L 8g         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  12:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             8e-J 8g         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  13:  </span><span style="color: #00BB00; text-decoration: underline;">             =2         =2                  =2</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  14:  </span><span style="color: #BBBB00;">             2T         2I          8r4.e- 4.g         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                 8E-         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">               8EE-L         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">         8GGJ8B- 8e-         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #00BB00; text-decoration: underline;">             =3         =3                  =3</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #BBBB00;">            4.D        4.V         4.BB-8dL 8f         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">              8dJ 8f         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             (8dL 8f         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">             8D         8I         8E-8e-J) 8g         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #00BB00; text-decoration: underline;">             =4         =4                  =4</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BB00BB;">              *          *                   *</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00;">             4D        4V7             8DL[8fL      8b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">           8BB-J8fJ]      8a-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00;">             4T         4I             8E-L8e-       8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">              *          *                   *</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             8EE-J8r         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">             *-         *-                  *-</span><span style="color: #BBBB00;">         </span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1:  !!!COM: Mozart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2:  !!!OTL: Zwolf Variationen in Es, uber die Romanze 'Je suis Lindor' ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3:  !!!Variation: Theme a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           4:       **function     **harm        **kern**kern         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           5:                *          *      *clefF4*clefG2         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           6:                *          *          *k[b-e-a-]         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           7:            *M2/4      *M2/4               *M2/4         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           8:             *E-:       *E-:                *E-:         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           9:               =1         =1                  =1         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          10:               2T         2I4EE- 4GG 4BB- 4...B-         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          11:                .          .           4r8e-L 8g         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          12:                .          .             8e-J 8g         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          13:               =2         =2                  =2         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          14:               2T         2I          8r4.e- 4.g         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:                .          .                 8E-         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:                .          .               8EE-L         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:                .          .         8GGJ8B- 8e-         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:               =3         =3                  =3         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:              4.D        4.V         4.BB-8dL 8f         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:                .          .              8dJ 8f         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:                .          .             (8dL 8f         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:               8D         8I         8E-8e-J) 8g         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:               =4         =4                  =4         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:                *          *                   *         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:               4D        4V7             8DL[8fL      8b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:                .          .           8BB-J8fJ]      8a-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:               4T         4I             8E-L8e-       8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:                *          *                   *        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:                .          .             8EE-J8r         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:               *-         *-                  *-         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### ^^^ M354_00_01a_a.krn ^^^ ####################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 		(six more pieces...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### vvv M354_01_04d_a.krn vvv ####################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             (16ccLL</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                16b-</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">               8f16a</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             16b-JJ)</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #00BB00; text-decoration: underline;">            =41        =41                 =41      =41</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00;">             2D       2V7d          8r(16ee-LL      2A-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                16dd</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">         4B- 4f16cc#</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             16ddJJ)</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             (16ccLL</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                16b-</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">           8B- 8f16a</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             16b-JJ)</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">              *          *                  *v       *v</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #00BB00; text-decoration: underline;">            =42        =42                 =42</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">              *          *             *clefF4</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  31:  </span><span style="color: #BBBB00;">             4T        4Ib          8r(16ee-LL         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  32:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                16ff         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  33:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">         8G 8e-16gg)         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  34:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">              16b'JJ         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  35:  </span><span style="color: #BBBB00;">             4P        4IV           8r(16ccLL         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  36:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                16dd         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  37:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">       8A- 8e-16ee-)         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  38:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">             16a-'JJ         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  39:  </span><span style="color: #00BB00; text-decoration: underline;">            =43        =43                 =43</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  40:  </span><span style="color: #BB00BB;">              *          *                  *^</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  41:  </span><span style="color: #BBBB00;">             4D        4Cc            8r(16gLL     2BB-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  42:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                16a-</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  43:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">            (8G16b-)</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  44:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">              16e'JJ</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  45:  </span><span style="color: #BBBB00;">             4D        4V7          8A-L(16fLL</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  46:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">                 16g</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  47:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">           8FJ)16a-)</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  48:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">              16d'JJ</span><span style="color: #BBBB00; font-weight: 100;">        .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  49:  </span><span style="color: #BB00BB;">              *          *                  *v       *v</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  50:  </span><span style="color: #00BB00; text-decoration: underline;">            =44        =44                 =44</span><span style="color: #BBBB00;">         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  51:  </span><span style="color: #BBBB00;">             2T         2I             8E-L4e-         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  52:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">               8BB-J         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  53:  </span><span style="color: #BBBB00; font-weight: 100;">              .          .</span><span style="color: #BBBB00;">              4EE-4r         </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  54:  </span><span style="color: #BB00BB;">             *-         *-                  *-</span><span style="color: #BBBB00;">         </span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:                .          .             (16ccLL        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:                .          .                16b-        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:                .          .               8f16a        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:                .          .             16b-JJ)        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:              =41        =41                 =41      =41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:               2D       2V7d          8r(16ee-LL      2A-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:                .          .                16dd        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:                .          .         4B- 4f16cc#        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:                .          .             16ddJJ)        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:                .          .             (16ccLL        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:                .          .                16b-        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:                .          .           8B- 8f16a        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:                .          .             16b-JJ)        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:                *          *                  *v       *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:              =42        =42                 =42         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:                *          *             *clefF4         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          31:               4T        4Ib          8r(16ee-LL         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          32:                .          .                16ff         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          33:                .          .         8G 8e-16gg)         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          34:                .          .              16b'JJ         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          35:               4P        4IV           8r(16ccLL         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          36:                .          .                16dd         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          37:                .          .       8A- 8e-16ee-)         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          38:                .          .             16a-'JJ         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          39:              =43        =43                 =43         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          40:                *          *                  *^         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          41:               4D        4Cc            8r(16gLL     2BB-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          42:                .          .                16a-        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          43:                .          .            (8G16b-)        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          44:                .          .              16e'JJ        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          45:               4D        4V7          8A-L(16fLL        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          46:                .          .                 16g        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          47:                .          .           8FJ)16a-)        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          48:                .          .              16d'JJ        .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          49:                *          *                  *v       *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          50:              =44        =44                 =44         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          51:               2T         2I             8E-L4e-         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          52:                .          .               8BB-J         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          53:                .          .              4EE-4r         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          54:               *-         *-                  *-         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### ^^^ M354_01_04d_a.krn ^^^ ####################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              (***one global comment truncated due to screen size***)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -332,82 +332,82 @@ similar function to <code>cleave()</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">cleave</span><span class="op">(</span>Path <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">1</span>, newFields <span class="op">=</span> <span class="st">'Ossia'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### vvv M354_00_01a_a.krn vvv ######################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   1:  </span><span style="color: #00BBBB;">!!!COM: Mozart</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   2:  </span><span style="color: #00BBBB;">!!!OTL: Zwolf Variationen in Es, uber die Romanze '***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   3:  </span><span style="color: #00BBBB;">!!!Variation: Theme a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   4:  </span><span style="color: #BB0000;">    **function    **harm              **kern            **kern</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   5:  </span><span style="color: #BB00BB;">             *         *             *clefF4           *clefG2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   6:  </span><span style="color: #BB00BB;">             *         *          *k[b-e-a-]        *k[b-e-a-]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   7:  </span><span style="color: #BB00BB;">         *M2/4     *M2/4               *M2/4             *M2/4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   8:  </span><span style="color: #BB00BB;">          *E-:      *E-:                *E-:              *E-:</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   9:  </span><span style="color: #00BB00; text-decoration: underline;">            =1        =1                  =1                =1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  10:  </span><span style="color: #BBBB00;">            2T        2I   4EE- 4GG 4BB- 4E-    4B- 4e- 4g 4b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  11:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                  4r           8e-L 8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  12:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           8e-J 8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  13:  </span><span style="color: #00BB00; text-decoration: underline;">            =2        =2                  =2                =2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  14:  </span><span style="color: #BBBB00;">            2T        2I                  8r          4.e- 4.g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                 8E-</span><span style="color: #BBBB00; font-weight: 100;">                 .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8EE-L</span><span style="color: #BBBB00; font-weight: 100;">                 .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                8GGJ           8B- 8e-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #00BB00; text-decoration: underline;">            =3        =3                  =3                =3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #BBBB00;">           4.D       4.V               4.BB-            8dL 8f</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            8dJ 8f</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           (8dL 8f</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">            8D        8I                 8E-          8e-J) 8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #00BB00; text-decoration: underline;">            =4        =4                  =4                =4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BB00BB;">             *         *                   *                *^</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00;">            4D       4V7                 8DL           [8fL8b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8BB-J           8fJ]8a-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00;">            4T        4I                8E-L             8e-8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">             *         *                   *                *v</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8EE-J                8r</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">            *-        *-                  *-                *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1:  !!!COM: Mozart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2:  !!!OTL: Zwolf Variationen in Es, uber die Romanze 'Je suis Lindor' ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3:  !!!Variation: Theme a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           4:      **function    **harm              **kern            **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           5:               *         *             *clefF4           *clefG2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           6:               *         *          *k[b-e-a-]        *k[b-e-a-]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           7:           *M2/4     *M2/4               *M2/4             *M2/4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           8:            *E-:      *E-:                *E-:              *E-:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           9:              =1        =1                  =1                =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          10:              2T        2I   4EE- 4GG 4BB- 4E-    4B- 4e- 4g 4b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          11:               .         .                  4r           8e-L 8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          12:               .         .                   .           8e-J 8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          13:              =2        =2                  =2                =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          14:              2T        2I                  8r          4.e- 4.g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:               .         .                 8E-                 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:               .         .               8EE-L                 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:               .         .                8GGJ           8B- 8e-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:              =3        =3                  =3                =3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:             4.D       4.V               4.BB-            8dL 8f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:               .         .                   .            8dJ 8f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:               .         .                   .           (8dL 8f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:              8D        8I                 8E-          8e-J) 8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:              =4        =4                  =4                =4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:               *         *                   *                *^</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:              4D       4V7                 8DL           [8fL8b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:               .         .               8BB-J           8fJ]8a-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:              4T        4I                8E-L             8e-8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:               *         *                   *                *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:               .         .               8EE-J                8r</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:              *-        *-                  *-                *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### ^^^ M354_00_01a_a.krn ^^^ ######################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 		(six more pieces...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### vvv M354_01_04d_a.krn vvv ######################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">1-14::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           (16ccLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                  8f               16a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16b-JJ)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #00BB00; text-decoration: underline;">           =41       =41                 =41               =41</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00;">            2D      2V7d               8r2A-          (16ee-LL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16dd</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">              4B- 4f             16cc#</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16ddJJ)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           (16ccLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">              8B- 8f               16a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16b-JJ)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">             *         *                  *v                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #00BB00; text-decoration: underline;">           =42       =42                 =42               =42</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">             *         *             *clefF4                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  31:  </span><span style="color: #BBBB00;">            4T       4Ib                  8r          (16ee-LL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  32:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16ff</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  33:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">              8G 8e-             16gg)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  34:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            16b'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  35:  </span><span style="color: #BBBB00;">            4P       4IV                  8r           (16ccLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  36:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16dd</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  37:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">             8A- 8e-            16ee-)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  38:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16a-'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  39:  </span><span style="color: #00BB00; text-decoration: underline;">           =43       =43                 =43               =43</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  40:  </span><span style="color: #BB00BB;">             *         *                  *^                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  41:  </span><span style="color: #BBBB00;">            4D       4Cc              8r2BB-            (16gLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  42:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16a-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  43:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                 (8G             16b-)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  44:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            16e'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  45:  </span><span style="color: #BBBB00;">            4D       4V7                8A-L            (16fLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  46:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">               16g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  47:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                8FJ)             16a-)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  48:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            16d'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  49:  </span><span style="color: #BB00BB;">             *         *                  *v                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  50:  </span><span style="color: #00BB00; text-decoration: underline;">           =44       =44                 =44               =44</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  51:  </span><span style="color: #BBBB00;">            2T        2I                8E-L               4e-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  52:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8BB-J</span><span style="color: #BBBB00; font-weight: 100;">                 .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  53:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                4EE-                4r</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  54:  </span><span style="color: #BB00BB;">            *-        *-                  *-                *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1-14::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:               .         .                   .           (16ccLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:               .         .                   .              16b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:               .         .                  8f               16a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:               .         .                   .           16b-JJ)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:             =41       =41                 =41               =41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:              2D      2V7d               8r2A-          (16ee-LL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:               .         .                   .              16dd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:               .         .              4B- 4f             16cc#</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:               .         .                   .           16ddJJ)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:               .         .                   .           (16ccLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:               .         .                   .              16b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:               .         .              8B- 8f               16a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:               .         .                   .           16b-JJ)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:               *         *                  *v                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:             =42       =42                 =42               =42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:               *         *             *clefF4                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          31:              4T       4Ib                  8r          (16ee-LL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          32:               .         .                   .              16ff</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          33:               .         .              8G 8e-             16gg)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          34:               .         .                   .            16b'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          35:              4P       4IV                  8r           (16ccLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          36:               .         .                   .              16dd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          37:               .         .             8A- 8e-            16ee-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          38:               .         .                   .           16a-'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          39:             =43       =43                 =43               =43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          40:               *         *                  *^                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          41:              4D       4Cc              8r2BB-            (16gLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          42:               .         .                   .              16a-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          43:               .         .                 (8G             16b-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          44:               .         .                   .            16e'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          45:              4D       4V7                8A-L            (16fLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          46:               .         .                   .               16g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          47:               .         .                8FJ)             16a-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          48:               .         .                   .            16d'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          49:               *         *                  *v                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          50:             =44       =44                 =44               =44</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          51:              2T        2I                8E-L               4e-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          52:               .         .               8BB-J                 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          53:               .         .                4EE-                4r</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          54:              *-        *-                  *-                *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### ^^^ M354_01_04d_a.krn ^^^ ######################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 (***one global comment truncated due to screen size***)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -419,82 +419,82 @@ similar function to <code>cleave()</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">cleavePaths</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### vvv M354_00_01a_a.krn vvv ######################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   1:  </span><span style="color: #00BBBB;">!!!COM: Mozart</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   2:  </span><span style="color: #00BBBB;">!!!OTL: Zwolf Variationen in Es, uber die Romanze '***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   3:  </span><span style="color: #00BBBB;">!!!Variation: Theme a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   4:  </span><span style="color: #BB0000;">    **function    **harm              **kern            **kern</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   5:  </span><span style="color: #BB00BB;">             *         *             *clefF4           *clefG2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   6:  </span><span style="color: #BB00BB;">             *         *          *k[b-e-a-]        *k[b-e-a-]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   7:  </span><span style="color: #BB00BB;">         *M2/4     *M2/4               *M2/4             *M2/4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   8:  </span><span style="color: #BB00BB;">          *E-:      *E-:                *E-:              *E-:</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   9:  </span><span style="color: #00BB00; text-decoration: underline;">            =1        =1                  =1                =1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  10:  </span><span style="color: #BBBB00;">            2T        2I   4EE- 4GG 4BB- 4E-    4B- 4e- 4g 4b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  11:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                  4r           8e-L 8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  12:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           8e-J 8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  13:  </span><span style="color: #00BB00; text-decoration: underline;">            =2        =2                  =2                =2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  14:  </span><span style="color: #BBBB00;">            2T        2I                  8r          4.e- 4.g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                 8E-</span><span style="color: #BBBB00; font-weight: 100;">                 .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8EE-L</span><span style="color: #BBBB00; font-weight: 100;">                 .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                8GGJ           8B- 8e-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #00BB00; text-decoration: underline;">            =3        =3                  =3                =3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #BBBB00;">           4.D       4.V               4.BB-            8dL 8f</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            8dJ 8f</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           (8dL 8f</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">            8D        8I                 8E-          8e-J) 8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #00BB00; text-decoration: underline;">            =4        =4                  =4                =4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BB00BB;">             *         *                   *                *^</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00;">            4D       4V7                 8DL           [8fL8b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8BB-J           8fJ]8a-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00;">            4T        4I                8E-L             8e-8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">             *         *                   *                *v</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8EE-J                8r</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">            *-        *-                  *-                *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1:  !!!COM: Mozart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2:  !!!OTL: Zwolf Variationen in Es, uber die Romanze 'Je suis Lindor' ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3:  !!!Variation: Theme a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           4:      **function    **harm              **kern            **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           5:               *         *             *clefF4           *clefG2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           6:               *         *          *k[b-e-a-]        *k[b-e-a-]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           7:           *M2/4     *M2/4               *M2/4             *M2/4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           8:            *E-:      *E-:                *E-:              *E-:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           9:              =1        =1                  =1                =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          10:              2T        2I   4EE- 4GG 4BB- 4E-    4B- 4e- 4g 4b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          11:               .         .                  4r           8e-L 8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          12:               .         .                   .           8e-J 8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          13:              =2        =2                  =2                =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          14:              2T        2I                  8r          4.e- 4.g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:               .         .                 8E-                 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:               .         .               8EE-L                 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:               .         .                8GGJ           8B- 8e-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:              =3        =3                  =3                =3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:             4.D       4.V               4.BB-            8dL 8f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:               .         .                   .            8dJ 8f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:               .         .                   .           (8dL 8f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:              8D        8I                 8E-          8e-J) 8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:              =4        =4                  =4                =4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:               *         *                   *                *^</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:              4D       4V7                 8DL           [8fL8b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:               .         .               8BB-J           8fJ]8a-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:              4T        4I                8E-L             8e-8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:               *         *                   *                *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:               .         .               8EE-J                8r</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:              *-        *-                  *-                *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### ^^^ M354_00_01a_a.krn ^^^ ######################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 		(six more pieces...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### vvv M354_01_04d_a.krn vvv ######################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">1-14::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           (16ccLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                  8f               16a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16b-JJ)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #00BB00; text-decoration: underline;">           =41       =41                 =41               =41</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00;">            2D      2V7d               8r2A-          (16ee-LL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16dd</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">              4B- 4f             16cc#</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16ddJJ)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           (16ccLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">              8B- 8f               16a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16b-JJ)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">             *         *                  *v                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #00BB00; text-decoration: underline;">           =42       =42                 =42               =42</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">             *         *             *clefF4                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  31:  </span><span style="color: #BBBB00;">            4T       4Ib                  8r          (16ee-LL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  32:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16ff</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  33:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">              8G 8e-             16gg)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  34:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            16b'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  35:  </span><span style="color: #BBBB00;">            4P       4IV                  8r           (16ccLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  36:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16dd</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  37:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">             8A- 8e-            16ee-)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  38:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">           16a-'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  39:  </span><span style="color: #00BB00; text-decoration: underline;">           =43       =43                 =43               =43</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  40:  </span><span style="color: #BB00BB;">             *         *                  *^                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  41:  </span><span style="color: #BBBB00;">            4D       4Cc              8r2BB-            (16gLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  42:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">              16a-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  43:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                 (8G             16b-)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  44:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            16e'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  45:  </span><span style="color: #BBBB00;">            4D       4V7                8A-L            (16fLL</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  46:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">               16g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  47:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                8FJ)             16a-)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  48:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .                   .</span><span style="color: #BBBB00;">            16d'JJ</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  49:  </span><span style="color: #BB00BB;">             *         *                  *v                 *</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  50:  </span><span style="color: #00BB00; text-decoration: underline;">           =44       =44                 =44               =44</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  51:  </span><span style="color: #BBBB00;">            2T        2I                8E-L               4e-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  52:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">               8BB-J</span><span style="color: #BBBB00; font-weight: 100;">                 .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  53:  </span><span style="color: #BBBB00; font-weight: 100;">             .         .</span><span style="color: #BBBB00;">                4EE-                4r</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  54:  </span><span style="color: #BB00BB;">            *-        *-                  *-                *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1-14::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:               .         .                   .           (16ccLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:               .         .                   .              16b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:               .         .                  8f               16a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:               .         .                   .           16b-JJ)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:             =41       =41                 =41               =41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:              2D      2V7d               8r2A-          (16ee-LL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:               .         .                   .              16dd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:               .         .              4B- 4f             16cc#</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:               .         .                   .           16ddJJ)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:               .         .                   .           (16ccLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:               .         .                   .              16b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:               .         .              8B- 8f               16a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:               .         .                   .           16b-JJ)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:               *         *                  *v                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:             =42       =42                 =42               =42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:               *         *             *clefF4                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          31:              4T       4Ib                  8r          (16ee-LL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          32:               .         .                   .              16ff</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          33:               .         .              8G 8e-             16gg)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          34:               .         .                   .            16b'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          35:              4P       4IV                  8r           (16ccLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          36:               .         .                   .              16dd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          37:               .         .             8A- 8e-            16ee-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          38:               .         .                   .           16a-'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          39:             =43       =43                 =43               =43</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          40:               *         *                  *^                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          41:              4D       4Cc              8r2BB-            (16gLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          42:               .         .                   .              16a-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          43:               .         .                 (8G             16b-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          44:               .         .                   .            16e'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          45:              4D       4V7                8A-L            (16fLL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          46:               .         .                   .               16g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          47:               .         .                8FJ)             16a-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          48:               .         .                   .            16d'JJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          49:               *         *                  *v                 *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          50:             =44       =44                 =44               =44</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          51:              2T        2I                8E-L               4e-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          52:               .         .               8BB-J                 .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          53:               .         .                4EE-                4r</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          54:              *-        *-                  *-                *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### ^^^ M354_01_04d_a.krn ^^^ ######################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 (***one global comment truncated due to screen size***)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -507,82 +507,82 @@ similar function to <code>cleave()</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">cleave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'function'</span>, <span class="st">'harm'</span><span class="op">)</span>, newFields <span class="op">=</span> <span class="st">'Harmony'</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### vvv M354_00_01a_a.krn vvv ######################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   1:  </span><span style="color: #00BBBB;">!!!COM: Mozart</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   2:  </span><span style="color: #00BBBB;">!!!OTL: Zwolf Variationen in Es, uber die Roman***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   3:  </span><span style="color: #00BBBB;">!!!Variation: Theme a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   4:  </span><span style="color: #BB0000;">  **function**harm             **kern</span><span style="color: #BBBB00;">      </span><span style="color: #BB0000;">          **kern</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   5:  </span><span style="color: #BB00BB;">                 *            *clefF4</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">         *clefG2</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   6:  </span><span style="color: #BB00BB;">                 *         *k[b-e-a-]</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">      *k[b-e-a-]</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   7:  </span><span style="color: #BB00BB;">             *M2/4              *M2/4</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">           *M2/4</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   8:  </span><span style="color: #BB00BB;">              *E-:               *E-:</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">            *E-:</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   9:  </span><span style="color: #00BB00; text-decoration: underline;">                =1                 =1</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">              =1</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  10:  </span><span style="color: #BBBB00;">              2T2I  4EE- 4GG 4BB- 4E-        4B- 4e- 4g 4b-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  11:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">                 4r               8e-L 8g</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  12:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">               8e-J 8g</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  13:  </span><span style="color: #00BB00; text-decoration: underline;">                =2                 =2</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">              =2</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  14:  </span><span style="color: #BBBB00;">              2T2I                 8r              4.e- 4.g</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">                8E-      </span><span style="color: #BBBB00; font-weight: 100;">               .</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">              8EE-L      </span><span style="color: #BBBB00; font-weight: 100;">               .</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">               8GGJ               8B- 8e-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #00BB00; text-decoration: underline;">                =3                 =3</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">              =3</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #BBBB00;">            4.D4.V              4.BB-                8dL 8f</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">                8dJ 8f</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">               (8dL 8f</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">              8D8I                8E-              8e-J) 8g</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #00BB00; text-decoration: underline;">                =4                 =4</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">              =4</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BB00BB;">                 *                  *</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">              *^</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00;">             4D4V7                8DL                  [8fL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">              8BB-J                  8fJ]</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00;">              4T4I               8E-L                   8e-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">                 *                  *</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">              *v</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">              8EE-J                    8r</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">                *-                 *-</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">              *-</span>    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1:  !!!COM: Mozart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2:  !!!OTL: Zwolf Variationen in Es, uber die Romanze 'Je suis Lind***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3:  !!!Variation: Theme a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           4:    **function**harm             **kern                **kern    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           5:                   *            *clefF4               *clefG2    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           6:                   *         *k[b-e-a-]            *k[b-e-a-]    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           7:               *M2/4              *M2/4                 *M2/4    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           8:                *E-:               *E-:                  *E-:    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           9:                  =1                 =1                    =1    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          10:                2T2I  4EE- 4GG 4BB- 4E-        4B- 4e- 4g 4b-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          11:                   .                 4r               8e-L 8g    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          12:                   .                  .               8e-J 8g    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          13:                  =2                 =2                    =2    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          14:                2T2I                 8r              4.e- 4.g    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:                   .                8E-                     .    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:                   .              8EE-L                     .    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:                   .               8GGJ               8B- 8e-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:                  =3                 =3                    =3    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:              4.D4.V              4.BB-                8dL 8f    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:                   .                  .                8dJ 8f    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:                   .                  .               (8dL 8f    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:                8D8I                8E-              8e-J) 8g    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:                  =4                 =4                    =4    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:                   *                  *                    *^    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:               4D4V7                8DL                  [8fL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:                   .              8BB-J                  8fJ]    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:                4T4I               8E-L                   8e-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:                   *                  *                    *v    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:                   .              8EE-J                    8r    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:                  *-                 *-                    *-    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### ^^^ M354_00_01a_a.krn ^^^ ######################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 		(six more pieces...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### vvv M354_01_04d_a.krn vvv ######################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">1-14::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">         (16ccLL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">            16b-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">                 8f</span><span style="color: #BBBB00; font-weight: 100;">     .</span><span style="color: #BBBB00;">             16a</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">         16b-JJ)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #00BB00; text-decoration: underline;">               =41                =41   =41             =41</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00;">            2D2V7d                 8r   2A-        (16ee-LL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">            16dd</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">             4B- 4f</span><span style="color: #BBBB00; font-weight: 100;">     .</span><span style="color: #BBBB00;">           16cc#</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">         16ddJJ)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">         (16ccLL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">            16b-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">             8B- 8f</span><span style="color: #BBBB00; font-weight: 100;">     .</span><span style="color: #BBBB00;">             16a</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">         16b-JJ)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">                 *                 *v    *v               *</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #00BB00; text-decoration: underline;">               =42                =42</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">             =42</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">                 *            *clefF4</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">               *</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  31:  </span><span style="color: #BBBB00;">             4T4Ib                 8r              (16ee-LL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  32:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">                  16ff</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  33:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">             8G 8e-                 16gg)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  34:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">                16b'JJ</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  35:  </span><span style="color: #BBBB00;">             4P4IV                 8r               (16ccLL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  36:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">                  16dd</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  37:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">            8A- 8e-                16ee-)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  38:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .</span><span style="color: #BBBB00;">               16a-'JJ</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  39:  </span><span style="color: #00BB00; text-decoration: underline;">               =43                =43</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">             =43</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  40:  </span><span style="color: #BB00BB;">                 *                 *^</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">               *</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  41:  </span><span style="color: #BBBB00;">             4D4Cc                 8r  2BB-          (16gLL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  42:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">            16a-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  43:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">                (8G</span><span style="color: #BBBB00; font-weight: 100;">     .</span><span style="color: #BBBB00;">           16b-)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  44:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">          16e'JJ</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  45:  </span><span style="color: #BBBB00;">             4D4V7               8A-L</span><span style="color: #BBBB00; font-weight: 100;">     .</span><span style="color: #BBBB00;">          (16fLL</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  46:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">             16g</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  47:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">               8FJ)</span><span style="color: #BBBB00; font-weight: 100;">     .</span><span style="color: #BBBB00;">           16a-)</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  48:  </span><span style="color: #BBBB00; font-weight: 100;">                 .                  .     .</span><span style="color: #BBBB00;">          16d'JJ</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  49:  </span><span style="color: #BB00BB;">                 *                 *v    *v               *</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  50:  </span><span style="color: #00BB00; text-decoration: underline;">               =44                =44</span><span style="color: #BBBB00;">      </span><span style="color: #00BB00; text-decoration: underline;">             =44</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  51:  </span><span style="color: #BBBB00;">              2T2I               8E-L                   4e-</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  52:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">              8BB-J      </span><span style="color: #BBBB00; font-weight: 100;">               .</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  53:  </span><span style="color: #BBBB00; font-weight: 100;">                 .</span><span style="color: #BBBB00;">               4EE-                    4r</span>    ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  54:  </span><span style="color: #BB00BB;">                *-                 *-</span><span style="color: #BBBB00;">      </span><span style="color: #BB00BB;">              *-</span>    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1-14::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:                   .                  .     .         (16ccLL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:                   .                  .     .            16b-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:                   .                 8f     .             16a    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:                   .                  .     .         16b-JJ)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:                 =41                =41   =41             =41    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:              2D2V7d                 8r   2A-        (16ee-LL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:                   .                  .     .            16dd    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:                   .             4B- 4f     .           16cc#    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:                   .                  .     .         16ddJJ)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:                   .                  .     .         (16ccLL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:                   .                  .     .            16b-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:                   .             8B- 8f     .             16a    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:                   .                  .     .         16b-JJ)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:                   *                 *v    *v               *    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:                 =42                =42                   =42    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:                   *            *clefF4                     *    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          31:               4T4Ib                 8r              (16ee-LL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          32:                   .                  .                  16ff    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          33:                   .             8G 8e-                 16gg)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          34:                   .                  .                16b'JJ    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          35:               4P4IV                 8r               (16ccLL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          36:                   .                  .                  16dd    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          37:                   .            8A- 8e-                16ee-)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          38:                   .                  .               16a-'JJ    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          39:                 =43                =43                   =43    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          40:                   *                 *^                     *    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          41:               4D4Cc                 8r  2BB-          (16gLL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          42:                   .                  .     .            16a-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          43:                   .                (8G     .           16b-)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          44:                   .                  .     .          16e'JJ    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          45:               4D4V7               8A-L     .          (16fLL    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          46:                   .                  .     .             16g    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          47:                   .               8FJ)     .           16a-)    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          48:                   .                  .     .          16d'JJ    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          49:                   *                 *v    *v               *    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          50:                 =44                =44                   =44    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          51:                2T2I               8E-L                   4e-    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          52:                   .              8BB-J                     .    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          53:                   .               4EE-                    4r    ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          54:                  *-                 *-                    *-    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ##################### ^^^ M354_01_04d_a.krn ^^^ ######################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                 (***one spine/path not displayed due to screen size***)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -595,82 +595,82 @@ similar function to <code>cleave()</code>.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">cleave</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'kern'</span>, <span class="st">'function'</span>, <span class="st">'harm'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### vvv M354_00_01a_a.krn vvv ####################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   1:  </span><span style="color: #00BBBB;">!!!COM: Mozart</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   2:  </span><span style="color: #00BBBB;">!!!OTL: Zwolf Variationen in Es, uber die Romanze '***</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   3:  </span><span style="color: #00BBBB;">!!!Variation: Theme a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   4:  </span><span style="color: #BB0000;">**kern**functio...ha</span><span style="color: #BBBB00;">        </span><span style="color: #BB0000;">**kern**functio...ha</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   5:  </span><span style="color: #BB00BB;">             *clefF4</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">             *clefG2</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   6:  </span><span style="color: #BB00BB;">          *k[b-e-a-]</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">          *k[b-e-a-]</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   7:  </span><span style="color: #BB00BB;">               *M2/4</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">               *M2/4</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   8:  </span><span style="color: #BB00BB;">                *E-:</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                *E-:</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   9:  </span><span style="color: #00BB00; text-decoration: underline;">                  =1</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                  =1</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  10:  </span><span style="color: #BBBB00;">4EE- 4GG 4BB- 4...T2          4B- 4e- 4g 4b-2T2I       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  11:  </span><span style="color: #BBBB00;">                  4r                     8e-L 8g       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  12:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                     8e-J 8g       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  13:  </span><span style="color: #00BB00; text-decoration: underline;">                  =2</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                  =2</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  14:  </span><span style="color: #BBBB00;">              8r2T2I                4.e- 4.g2T2I       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00;">                 8E-        </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00;">               8EE-L        </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00;">                8GGJ                     8B- 8e-       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #00BB00; text-decoration: underline;">                  =3</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                  =3</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #BBBB00;">         4.BB-4.D4.V                8dL 8f4.D4.V       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                      8dJ 8f       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                     (8dL 8f       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">             8E-8D8I                8e-J) 8g8D8I       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #00BB00; text-decoration: underline;">                  =4</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                  =4</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BB00BB;">                   *</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                  *^</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00;">            8DL4D4V7                   [8fL4D4V7    8b-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00;">               8BB-J                        8fJ]    8a-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00;">            8E-L4T4I                     8e-4T4I     8g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">                   *</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                  *v     *v</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #BBBB00;">               8EE-J                          8r       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">                  *-</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                  *-</span><span style="color: #BBBB00;">       </span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1:  !!!COM: Mozart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           2:  !!!OTL: Zwolf Variationen in Es, uber die Romanze 'Je suis Lindor' ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           3:  !!!Variation: Theme a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           4:  **kern**functio...ha        **kern**functio...ha       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           5:               *clefF4                     *clefG2       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           6:            *k[b-e-a-]                  *k[b-e-a-]       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           7:                 *M2/4                       *M2/4       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           8:                  *E-:                        *E-:       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           9:                    =1                          =1       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          10:  4EE- 4GG 4BB- 4...T2          4B- 4e- 4g 4b-2T2I       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          11:                    4r                     8e-L 8g       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          12:                     .                     8e-J 8g       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          13:                    =2                          =2       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          14:                8r2T2I                4.e- 4.g2T2I       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:                   8E-                           .       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:                 8EE-L                           .       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:                  8GGJ                     8B- 8e-       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:                    =3                          =3       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:           4.BB-4.D4.V                8dL 8f4.D4.V       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:                     .                      8dJ 8f       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:                     .                     (8dL 8f       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:               8E-8D8I                8e-J) 8g8D8I       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:                    =4                          =4       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:                     *                          *^       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:              8DL4D4V7                   [8fL4D4V7    8b-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:                 8BB-J                        8fJ]    8a-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:              8E-L4T4I                     8e-4T4I     8g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:                     *                          *v     *v</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:                 8EE-J                          8r       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:                    *-                          *-       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### ^^^ M354_00_01a_a.krn ^^^ ####################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 		(six more pieces...)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### vvv M354_01_04d_a.krn vvv ####################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  15:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">             (16ccLL       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  16:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">                16b-       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  17:  </span><span style="color: #BBBB00;">                  8f</span><span style="color: #BBBB00; font-weight: 100;">       .</span><span style="color: #BBBB00;">                 16a       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  18:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">             16b-JJ)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  19:  </span><span style="color: #00BB00; text-decoration: underline;">                 =41     =41                 =41</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  20:  </span><span style="color: #BBBB00;">            8r2D2V7d     2A-      (16ee-LL2D2V7d       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  21:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">                16dd       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  22:  </span><span style="color: #BBBB00;">              4B- 4f</span><span style="color: #BBBB00; font-weight: 100;">       .</span><span style="color: #BBBB00;">               16cc#       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  23:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">             16ddJJ)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  24:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">             (16ccLL       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  25:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">                16b-       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  26:  </span><span style="color: #BBBB00;">              8B- 8f</span><span style="color: #BBBB00; font-weight: 100;">       .</span><span style="color: #BBBB00;">                 16a       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  27:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">             16b-JJ)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  28:  </span><span style="color: #BB00BB;">                  *v      *v                   *</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  29:  </span><span style="color: #00BB00; text-decoration: underline;">                 =42</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                 =42</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  30:  </span><span style="color: #BB00BB;">             *clefF4</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                   *</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  31:  </span><span style="color: #BBBB00;">             8r4T4Ib               (16ee-LL4T4Ib       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  32:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                        16ff       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  33:  </span><span style="color: #BBBB00;">              8G 8e-                       16gg)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  34:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                      16b'JJ       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  35:  </span><span style="color: #BBBB00;">             8r4P4IV                (16ccLL4P4IV       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  36:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                        16dd       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  37:  </span><span style="color: #BBBB00;">             8A- 8e-                      16ee-)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  38:  </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">                     16a-'JJ       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  39:  </span><span style="color: #00BB00; text-decoration: underline;">                 =43</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                 =43</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  40:  </span><span style="color: #BB00BB;">                  *^</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                   *</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  41:  </span><span style="color: #BBBB00;">             8r4D4Cc    2BB-         (16gLL4D4Cc       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  42:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">                16a-       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  43:  </span><span style="color: #BBBB00;">                 (8G</span><span style="color: #BBBB00; font-weight: 100;">       .</span><span style="color: #BBBB00;">               16b-)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  44:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">              16e'JJ       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  45:  </span><span style="color: #BBBB00;">           8A-L4D4V7</span><span style="color: #BBBB00; font-weight: 100;">       .</span><span style="color: #BBBB00;">         (16fLL4D4V7       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  46:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">                 16g       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  47:  </span><span style="color: #BBBB00;">                8FJ)</span><span style="color: #BBBB00; font-weight: 100;">       .</span><span style="color: #BBBB00;">               16a-)       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  48:  </span><span style="color: #BBBB00; font-weight: 100;">                   .       .</span><span style="color: #BBBB00;">              16d'JJ       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  49:  </span><span style="color: #BB00BB;">                  *v      *v                   *</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  50:  </span><span style="color: #00BB00; text-decoration: underline;">                 =44</span><span style="color: #BBBB00;">        </span><span style="color: #00BB00; text-decoration: underline;">                 =44</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  51:  </span><span style="color: #BBBB00;">            8E-L2T2I                     4e-2T2I       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  52:  </span><span style="color: #BBBB00;">               8BB-J        </span><span style="color: #BBBB00; font-weight: 100;">                   .</span><span style="color: #BBBB00;">       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  53:  </span><span style="color: #BBBB00;">                4EE-                          4r       </span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  54:  </span><span style="color: #BB00BB;">                  *-</span><span style="color: #BBBB00;">        </span><span style="color: #BB00BB;">                  *-</span><span style="color: #BBBB00;">       </span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1-14:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          15:                     .       .             (16ccLL       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          16:                     .       .                16b-       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          17:                    8f       .                 16a       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          18:                     .       .             16b-JJ)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19:                   =41     =41                 =41       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          20:              8r2D2V7d     2A-      (16ee-LL2D2V7d       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          21:                     .       .                16dd       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          22:                4B- 4f       .               16cc#       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          23:                     .       .             16ddJJ)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          24:                     .       .             (16ccLL       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          25:                     .       .                16b-       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          26:                8B- 8f       .                 16a       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          27:                     .       .             16b-JJ)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          28:                    *v      *v                   *       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          29:                   =42                         =42       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          30:               *clefF4                           *       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          31:               8r4T4Ib               (16ee-LL4T4Ib       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          32:                     .                        16ff       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          33:                8G 8e-                       16gg)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          34:                     .                      16b'JJ       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          35:               8r4P4IV                (16ccLL4P4IV       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          36:                     .                        16dd       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          37:               8A- 8e-                      16ee-)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          38:                     .                     16a-'JJ       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          39:                   =43                         =43       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          40:                    *^                           *       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          41:               8r4D4Cc    2BB-         (16gLL4D4Cc       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          42:                     .       .                16a-       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          43:                   (8G       .               16b-)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          44:                     .       .              16e'JJ       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          45:             8A-L4D4V7       .         (16fLL4D4V7       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          46:                     .       .                 16g       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          47:                  8FJ)       .               16a-)       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          48:                     .       .              16d'JJ       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          49:                    *v      *v                   *       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          50:                   =44                         =44       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          51:              8E-L2T2I                     4e-2T2I       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          52:                 8BB-J                           .       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          53:                  4EE-                          4r       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          54:                    *-                          *-       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> #################### ^^^ M354_01_04d_a.krn ^^^ ####################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              (***one global comment truncated due to screen size***)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -689,7 +689,7 @@ similar function to <code>cleave()</code>.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

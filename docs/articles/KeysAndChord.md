@@ -12,8 +12,8 @@ A diatonic set can be ordered either by line-of-fifths position:
 |:--------|:----|:----|:----|:----|:----|:----|:----|
 | Note    | F   | C   | G   | D   | A   | E   | B   |
 
-or in “scale-order,” which corresponds to steps of $`+2`$ (or $`-5`$)
-modulo 7.
+or in “scale-order,” which corresponds to steps of $+2$ (or $-5$) modulo
+7.
 
 | **LoF**  | 0   | 2   | 4   | -1  | 1   | 3   | 5   |
 |:---------|:----|:----|:----|:----|:----|:----|:----|
@@ -29,8 +29,8 @@ chords used in tonal music are subsets of the full diatonic set, in
 particular three-note *triads*.
 
 When viewing a diatonic set as a chord, we traditionally order the set
-as a sequence of ascending thirds, corresponding to intervals of $`+4`$
-on the line-of-fifths, modulo 7. These *tertian* steps are usually not
+as a sequence of ascending thirds, corresponding to intervals of $+4$ on
+the line-of-fifths, modulo 7. These *tertian* steps are usually not
 wrapped to the octave, resulting in steps 9, 11, and 13, instead of 2,
 4, and 6.
 
@@ -39,14 +39,14 @@ wrapped to the octave, resulting in steps 9, 11, and 13, instead of 2,
 | **Note** | C   | E   | G   | B   | D   | F   | A   |
 | **Step** | 1   | 3   | 5   | 7   | 9   | 11  | 13  |
 
-There are $`2^7=`$ 128 possible subsets that can be formed from the full
-diatonic set. Of these, the seven possibilities that are built from
+There are $2^{7} =$ 128 possible subsets that can be formed from the
+full diatonic set. Of these, the seven possibilities that are built from
 consecutive tertian steps are theoretically privileged : i.e.,
-$`\{\{1\}, \{1,3\}, \{1,3,5\}, \{1,3,5,7\}, \{1,3,5,7,9\}, \{1,3,5,7,9,11\}, \{1,3,5,7,9,11,13\}\}`$.
+$\{\{ 1\},\{ 1,3\},\{ 1,3,5\},\{ 1,3,5,7\},\{ 1,3,5,7,9\},\{ 1,3,5,7,9,11\},\{ 1,3,5,7,9,11,13\}\}$.
 
 A few other possible sets are fairly commonplace in Western theory as
-well: $`\{1,5, 11\}`$ (“sus4”), $`\{1,3,5,9\}`$ (“add9”),
-$`\{1,3,5,13\}`$ (“add6”), etc.
+well: $\{ 1,5,11\}$ (“sus4”), $\{ 1,3,5,9\}$ (“add9”), $\{ 1,3,5,13\}$
+(“add6”), etc.
 
 ### Concrete Representations
 
@@ -54,9 +54,9 @@ There are numerous ways tertian sets of notes are traditionally notated
 or annotated as character strings. Unfortunately, these systems are not
 always rigorously consistent or logical, with convenient shorthands for
 common chords which lead to ambiguity, and/or practices rooted in
-traditional practices with little relevance. Humdrum$`_{\mathbb{R}}`$
-aims to provide a general approach to make reading/writing chord
-annotations in many forms possible.
+traditional practices with little relevance. Humdrum$_{\mathbb{R}}$ aims
+to provide a general approach to make reading/writing chord annotations
+in many forms possible.
 
 A chord representation consists of at least one of the following
 elements:

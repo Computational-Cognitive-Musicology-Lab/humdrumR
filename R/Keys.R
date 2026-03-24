@@ -194,6 +194,7 @@ getMode <- function(dset) {
     sign - root
 }
 
+
 getAlterations <- function(dset) {
     # colnames represent the MAJOR degrees
     alterations <- dset@Alteration %<-matchdim% dset

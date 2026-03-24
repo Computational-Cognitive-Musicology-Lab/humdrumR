@@ -1,16 +1,16 @@
 # Time, rhythm, and meter in humdrumR
 
-As a computational musicology toolkit, humdrum$`_{\mathbb{R}}`$’s tools
+As a computational musicology toolkit, humdrum$_{\mathbb{R}}$’s tools
 for analyzing and manipulating rhythmic (timing) information are just
 about the most important tools in the toolbox. For the most part,
-humdrum$`_{\mathbb{R}}`$’s rhythm tools are focused on the Western
-notions of rhythm and meter, but the tools can easily be generalized to
-more diverse notions of rhythm and time.
+humdrum$_{\mathbb{R}}$’s rhythm tools are focused on the Western notions
+of rhythm and meter, but the tools can easily be generalized to more
+diverse notions of rhythm and time.
 
 ## Durations
 
 The fundamental unit of rhythm is a “duration”—a span of time.
-Humdrum$`_{\mathbb{R}}`$ defines a suite of rhythm functions, notably
+Humdrum$_{\mathbb{R}}$ defines a suite of rhythm functions, notably
 [`recip()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/recip.md)
 and
 [`duration()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/duration.md).
@@ -131,7 +131,7 @@ Unlike `scale`, which controls the *output* scale, `unit` controls the
 input scale. This is most useful with numeric values. What do we mean by
 “controls the input scale”? Imagine we have a bunch of duration values
 as numbers, like `c(1, 1.5, 2, 1, 0.5, 1)`. But what unit is these
-numbers counting? By default, humdrum$`_{\mathbb{R}}`$ treats them as
+numbers counting? By default, humdrum$_{\mathbb{R}}$ treats them as
 *whole notes*, so `0.5` is a half note, right? However, we might prefer
 to think of these numbers as units of quarter notes—a very common
 approach. This is what the `unit` argument is for. Because it is an
@@ -624,7 +624,7 @@ timeline(melody, pickup = melody != '2e')
 This might seem *less* intuitive! However, this approach can be very
 useful when working with actual humdrumR datasets. In many humdrum
 datasets, pickup measures are indicated by have barlines labeled `=0` or
-`=-`. When humdrum$`_{\mathbb{R}}`$ reads a file, it counts the barlines
+`=-`. When humdrum$_{\mathbb{R}}$ reads a file, it counts the barlines
 and creates a field called `Bar`, and it numbers pickup measures as zero
 (or negative numbers, if there are more than one). This means pickups
 will have `Bar < 1`. So, in our Bach chorales:
@@ -729,8 +729,8 @@ which outputs a timeline in clock-time, using the
 [`dur()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/time.md)
 format. In order to do this
 [`timestamp()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.md)
-needs to know a tempo: by default, humdrum$`_{\mathbb{R}}`$ will pass
-the `BPM` field from humdrum data (if there is one) to
+needs to know a tempo: by default, humdrum$_{\mathbb{R}}$ will pass the
+`BPM` field from humdrum data (if there is one) to
 [`timestamp()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.md).
 If the `BPM` argument is not provided, the default is 60
 beats-per-minute.
@@ -817,10 +817,10 @@ and
 [`subpos()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/timecount.md)
 commands are great if we want count in a single beat/measure unit. To
 take things to the next level(s), we need to consider musical *meter*.
-From the point of view of humdrum$`_{\mathbb{R}}`$, “meter” is a set of
+From the point of view of humdrum$_{\mathbb{R}}$, “meter” is a set of
 multiple “beat levels” occurring at the same time (in parallel), with
 “lower” (faster/shorter) levels nested inside “higher” (slower/longer)
-levels. humdrum$`_{\mathbb{R}}`$ defines a number of useful tools for
+levels. humdrum$_{\mathbb{R}}$ defines a number of useful tools for
 applying metric analyses to rhythmic data.
 
 #### Metric levels
@@ -866,7 +866,7 @@ The whole-note level is `1` and (in this case) the eighth-note level is
 
 Along with
 [`metlev()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.md),
-humdrum$`_{\mathbb{R}}`$ provides two complementary functions called
+humdrum$_{\mathbb{R}}$ provides two complementary functions called
 [`metcount()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.md),
 [`metsubpos()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.md).
 As you might guess, these are metric parallels of

@@ -1,14 +1,14 @@
 # Complex humdrum syntax
 
 Welcome to “Complex humdrum syntax”! This article explains how
-humdrum$`_{\mathbb{R}}`$ handles spine paths and multi-stop data tokens.
+humdrum$_{\mathbb{R}}$ handles spine paths and multi-stop data tokens.
 
 ## Complex humdrum syntax
 
 The [humdrum
 syntax](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md "The Humdrum Syntax")
 includes a few complex structures: *spine paths* and *multi-stops*
-(a.k.a., sub-tokens). Humdrum$`_{\mathbb{R}}`$ incorporates these
+(a.k.a., sub-tokens). Humdrum$_{\mathbb{R}}$ incorporates these
 complexities into its data model, no problem, but they do make things
 more complicated, and may require some thought depending on the analyses
 you are trying to do. Understanding the how paths/stops are used is not
@@ -16,7 +16,7 @@ at all necessary if the data you are interested in doesn’t include spine
 paths or multi-stops! You can always skip this article and come back to
 it at a later time.
 
-The way humdrum$`_{\mathbb{R}}`$ incorporates paths/stops is really just
+The way humdrum$_{\mathbb{R}}$ incorporates paths/stops is really just
 an extension of our basic data model, as described in our [Data
 Fields](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.md "HumdrumR Data Fields article")
 article. You should definitely read and understand that article before
@@ -26,7 +26,7 @@ the humdrum table.
 
 ## Spine paths
 
-Humdrum$`_{\mathbb{R}}`$ treats spine paths as “sub-spines” of the main
+Humdrum$_{\mathbb{R}}$ treats spine paths as “sub-spines” of the main
 spine which they split from, and keeps track of each path (if any) in
 the `Path` field. The starting path (leftmost) is numbered path `0`—in
 datasets with no spine paths, the `Path` field will be all zeros. Other
@@ -217,7 +217,7 @@ paths2 |> print(view = "table")
 >               *Token :: character
 ```
 
-Notice that humdrum$`_{\mathbb{R}}`$ prints paths in a way that is more
+Notice that humdrum$_{\mathbb{R}}$ prints paths in a way that is more
 readable than reading humdrum syntax directly: paths are “shifted” over
 into columns that align. This is an option to the function
 [`as.matrix.humdrumR()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humCoercion.md).
@@ -233,7 +233,7 @@ analyses—for example, if the paths are used to store
 analyses—especially, if you are analyzing data in a linear/melodic way—,
 incorporating/handling spine paths may be very difficult, with no
 obviously correct way to do it. In fact, many of
-humdrum$`_{\mathbb{R}}`$’s standard “lagged” functions—like
+humdrum$_{\mathbb{R}}$’s standard “lagged” functions—like
 [`ditto()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/ditto.md),
 [`mint()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.md), and
 [`timeline()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.md)—can
@@ -313,7 +313,7 @@ paths2 |> expandPaths(asSpines = TRUE)
 >               *Token :: character
 ```
 
-Humdrum$`_{\mathbb{R}}`$’s [tidyverse
+Humdrum$_{\mathbb{R}}$’s [tidyverse
 methods](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md),
 like `mutate()` and
 [`within()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md),
@@ -404,9 +404,9 @@ entirely separately from the rest.
 In humdrum syntax, multiple tokens can be placed “in the same place”
 (i.e., same record, same spine) by simply separating them with spaces.
 (This is most commonly used to represent chords in `**kern` data.) In
-humdrum$`_{\mathbb{R}}`$, we call these “Stops”—as always, **every**
+humdrum$_{\mathbb{R}}$, we call these “Stops”—as always, **every**
 humdrum token, including stops, get their own row in a
-humdrum$`_{\mathbb{R}}`$[humdrum
+humdrum$_{\mathbb{R}}$[humdrum
 table](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md).
 Thus, we need the `Stop` field to tell us which stop a token came from!
 In much data, all/most tokens are simply `Stop == 1` (the first
@@ -484,7 +484,7 @@ notes, for example, tokens in stops might be treated no differently than
 any other data. In other analyses—especially, if you are analyzing data
 in a linear/melodic way—, incorporating/handling multiple stops may be
 very difficult, with no obviously correct way to do it. In fact, many of
-humdrum$`_{\mathbb{R}}`$’s standard “lagged” functions—like
+humdrum$_{\mathbb{R}}$’s standard “lagged” functions—like
 [`ditto()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/ditto.md),
 [`mint()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.md), and
 [`timeline()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/timeline.md)—can

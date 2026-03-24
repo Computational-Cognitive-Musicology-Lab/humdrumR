@@ -2,7 +2,8 @@
 
 This function generates a [gamut](https://en.wikipedia.org/wiki/Gamut):
 an ordered range of notes used in music. It is used to generate
-[`factor()`](https://rdrr.io/r/base/factor.html) levels for [pitch
+[`factor()`](https://rdrr.io/pkg/data.table/man/fctr.html) levels for
+[pitch
 functions](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchFunctions.md).
 The output format of the gamut is controlled by the `deparser` argument
 (a function) and any `deparseArgs` that are passed to it, defaulting to

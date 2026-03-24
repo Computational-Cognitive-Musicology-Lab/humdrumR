@@ -264,7 +264,7 @@ function applies `timecount()` within a metric framework.
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -274,56 +274,56 @@ humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 
 show(within(humData, timecount(Token, unit = TimeSignature, pickup = Bar < 1)))
 #> ######################## vvv chor001.krn vvv #########################
-#>      1:  !!!COM: Bach, Johann Sebastian
-#>      2:  !!!CDT: 1685/02/21/-1750/07/28/
-#>      3:  !!!OTL@@DE: Aus meines Herzens Grunde
-#>      4:  !!!OTL@EN:      From the Depths of My Heart
-#>      5:  !!!SCT: BWV 269
-#>      6:  !!!PC#: 1
-#>      7:  !!!AGN: chorale
-#>      8:           **kern         **kern         **kern         **kern
-#>      9:           *ICvox         *ICvox         *ICvox         *ICvox
-#>     10:           *Ibass        *Itenor         *Ialto        *Isoprn
-#>     11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano
-#>     12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
-#>     13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
-#>     14:              *>A            *>A            *>A            *>A
-#>     15:          *clefF4       *clefGv2        *clefG2        *clefG2
-#>     16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]
-#>     17:              *G:            *G:            *G:            *G:
-#>     18:            *M3/4          *M3/4          *M3/4          *M3/4
-#>     19:           *MM100         *MM100         *MM100         *MM100
-#>     20:               -1             -1             -1             -1
-#>     21:               =1             =1             =1             =1
-#>     22:                1              1              1              1
-#>     23:                1              1              1              .
-#>     24:                .              1              .              .
-#>     25:                1              1              1              1
-#>     26:               =2             =2             =2             =2
-#>     27:                2              2              2              2
-#>     28:                2              2              .              .
-#>     29:                .              .              .              2
-#>     30:                2              2              2              2
-#>     31:               =3             =3             =3             =3
-#>     32:                3              3              3              3
-#>     33:                .              3              3              .
-#>     34:                3              3              3              .
-#>     35:                3              .              3              3
-#>     36:                3              3              3              3
-#>     37:               =4             =4             =4             =4
-#>     38:                4              4              4              4
-#>     39:                4              4              4              4
-#>     40:               =5             =5             =5             =5
-#>     41:                5              5              5              5
-#>     42:                5              5              5              .
-#>     43:                5              5              5              5
-#>     44:               =6             =6             =6             =6
-#>     45:                6              6              6              6
-#>     46:                6              6              .              6
-#>     47:                6              6              6              .
-#>     48:                .              6              .              .
-#>     49:               =7             =7             =7             =7
-#>     50:                7              7              7              7
+#>             1:  !!!COM: Bach, Johann Sebastian
+#>             2:  !!!CDT: 1685/02/21/-1750/07/28/
+#>             3:  !!!OTL@@DE: Aus meines Herzens Grunde
+#>             4:  !!!OTL@EN:      From the Depths of My Heart
+#>             5:  !!!SCT: BWV 269
+#>             6:  !!!PC#: 1
+#>             7:  !!!AGN: chorale
+#>             8:           **kern         **kern         **kern         **kern
+#>             9:           *ICvox         *ICvox         *ICvox         *ICvox
+#>            10:           *Ibass        *Itenor         *Ialto        *Isoprn
+#>            11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano
+#>            12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>            13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>            14:              *>A            *>A            *>A            *>A
+#>            15:          *clefF4       *clefGv2        *clefG2        *clefG2
+#>            16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]
+#>            17:              *G:            *G:            *G:            *G:
+#>            18:            *M3/4          *M3/4          *M3/4          *M3/4
+#>            19:           *MM100         *MM100         *MM100         *MM100
+#>            20:               -1             -1             -1             -1
+#>            21:               =1             =1             =1             =1
+#>            22:                1              1              1              1
+#>            23:                1              1              1              .
+#>            24:                .              1              .              .
+#>            25:                1              1              1              1
+#>            26:               =2             =2             =2             =2
+#>            27:                2              2              2              2
+#>            28:                2              2              .              .
+#>            29:                .              .              .              2
+#>            30:                2              2              2              2
+#>            31:               =3             =3             =3             =3
+#>            32:                3              3              3              3
+#>            33:                .              3              3              .
+#>            34:                3              3              3              .
+#>            35:                3              .              3              3
+#>            36:                3              3              3              3
+#>            37:               =4             =4             =4             =4
+#>            38:                4              4              4              4
+#>            39:                4              4              4              4
+#>            40:               =5             =5             =5             =5
+#>            41:                5              5              5              5
+#>            42:                5              5              5              .
+#>            43:                5              5              5              5
+#>            44:               =6             =6             =6             =6
+#>            45:                6              6              6              6
+#>            46:                6              6              .              6
+#>            47:                6              6              6              .
+#>            48:                .              6              .              .
+#>            49:               =7             =7             =7             =7
+#>            50:                7              7              7              7
 #> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ######################## ^^^ chor001.krn ^^^ #########################
 #> 
@@ -331,58 +331,58 @@ show(within(humData, timecount(Token, unit = TimeSignature, pickup = Bar < 1)))
 #> 
 #> ######################## vvv chor004.krn vvv #########################
 #>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     54:                4              4              4              4
-#>     55:                .              .              4              .
-#>     56:               =5             =5             =5             =5
-#>     57:                5              5              5              5
-#>     58:                .              .              5              .
-#>     59:                5              5              5              5
-#>     60:                5              .              .              .
-#>     61:                5              5              5              5
-#>     62:                5              5              5              5
-#>     63:               =6             =6             =6             =6
-#>     64:                6              6              6              6
-#>     65:                6              .              .              6
-#>     66:                6              6              6              6
-#>     67:                6              6              6              6
-#>     68:                6              6              6              6
-#>     69:               =7             =7             =7             =7
-#>     70:                7              7              7              7
-#>     71:                .              .              7              .
-#>     72:                7              7              7              7
-#>     73:                7              7              7              7
-#>     74:                7              .              .              .
-#>     75:                7              7              7              7
-#>     76:                .              .              7              7
-#>     77:               =8             =8             =8             =8
-#>     78:                8              8              8              8
-#>     79:                8              8              8              8
-#>     80:                8              8              8              8
-#>     81:                8              8              8              8
-#>     82:               =9             =9             =9             =9
-#>     83:                9              9              9              9
-#>     84:                9              9              9              9
-#>     85:                9              .              .              .
-#>     86:                9              9              9              9
-#>     87:                9              9              9              9
-#>     88:                .              9              .              .
-#>     89:              =10            =10            =10            =10
-#>     90:               10             10             10             10
-#>     91:               10              .             10             10
-#>     92:               10             10             10             10
-#>     93:               ==             ==             ==             ==
-#>     94:               *-             *-             *-             *-
-#>     95:  !!!hum2abc: -Q ''
-#>     96:  !!!title: @{PC#}. @{OTL@@DE}
-#>     97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Jo***
-#>     98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: B***
-#>     99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint:***
-#>    100:  !!!YOR4: Chorales (New York: Associated Music Publi***
-#>    101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, p***
-#>    102:  !!!EED:  Craig Stuart Sapp
-#>    103:  !!!EEV:  2009/05/22
+#>            54:                4              4              4              4
+#>            55:                .              .              4              .
+#>            56:               =5             =5             =5             =5
+#>            57:                5              5              5              5
+#>            58:                .              .              5              .
+#>            59:                5              5              5              5
+#>            60:                5              .              .              .
+#>            61:                5              5              5              5
+#>            62:                5              5              5              5
+#>            63:               =6             =6             =6             =6
+#>            64:                6              6              6              6
+#>            65:                6              .              .              6
+#>            66:                6              6              6              6
+#>            67:                6              6              6              6
+#>            68:                6              6              6              6
+#>            69:               =7             =7             =7             =7
+#>            70:                7              7              7              7
+#>            71:                .              .              7              .
+#>            72:                7              7              7              7
+#>            73:                7              7              7              7
+#>            74:                7              .              .              .
+#>            75:                7              7              7              7
+#>            76:                .              .              7              7
+#>            77:               =8             =8             =8             =8
+#>            78:                8              8              8              8
+#>            79:                8              8              8              8
+#>            80:                8              8              8              8
+#>            81:                8              8              8              8
+#>            82:               =9             =9             =9             =9
+#>            83:                9              9              9              9
+#>            84:                9              9              9              9
+#>            85:                9              .              .              .
+#>            86:                9              9              9              9
+#>            87:                9              9              9              9
+#>            88:                .              9              .              .
+#>            89:              =10            =10            =10            =10
+#>            90:               10             10             10             10
+#>            91:               10              .             10             10
+#>            92:               10             10             10             10
+#>            93:               ==             ==             ==             ==
+#>            94:               *-             *-             *-             *-
+#>            95:  !!!hum2abc: -Q ''
+#>            96:  !!!title: @{PC#}. @{OTL@@DE}
+#>            97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Sebastian B***
+#>            98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf und H&a***
+#>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***
+#>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***
+#>           101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+#>           102:  !!!EED:  Craig Stuart Sapp
+#>           103:  !!!EEV:  2009/05/22
 #> ######################## ^^^ chor004.krn ^^^ #########################
-#>               (***five global comments truncated due to screen size***)
+#>               (***four global comments truncated due to screen size***)
 #> 
 #>  humdrumR corpus of four pieces.
 #> 
@@ -393,56 +393,56 @@ show(within(humData, timecount(Token, unit = TimeSignature, pickup = Bar < 1)))
 
 show(within(humData, timecount(Token, unit = tactus(TimeSignature))))
 #> ######################## vvv chor001.krn vvv #########################
-#>      1:  !!!COM: Bach, Johann Sebastian
-#>      2:  !!!CDT: 1685/02/21/-1750/07/28/
-#>      3:  !!!OTL@@DE: Aus meines Herzens Grunde
-#>      4:  !!!OTL@EN:      From the Depths of My Heart
-#>      5:  !!!SCT: BWV 269
-#>      6:  !!!PC#: 1
-#>      7:  !!!AGN: chorale
-#>      8:           **kern         **kern         **kern         **kern
-#>      9:           *ICvox         *ICvox         *ICvox         *ICvox
-#>     10:           *Ibass        *Itenor         *Ialto        *Isoprn
-#>     11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano
-#>     12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
-#>     13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
-#>     14:              *>A            *>A            *>A            *>A
-#>     15:          *clefF4       *clefGv2        *clefG2        *clefG2
-#>     16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]
-#>     17:              *G:            *G:            *G:            *G:
-#>     18:            *M3/4          *M3/4          *M3/4          *M3/4
-#>     19:           *MM100         *MM100         *MM100         *MM100
-#>     20:               -1             -1             -1             -1
-#>     21:               =1             =1             =1             =1
-#>     22:                1              1              1              1
-#>     23:                2              2              2              .
-#>     24:                .              2              .              .
-#>     25:                3              3              3              3
-#>     26:               =2             =2             =2             =2
-#>     27:                4              4              4              4
-#>     28:                5              5              .              .
-#>     29:                .              .              .              5
-#>     30:                6              6              6              6
-#>     31:               =3             =3             =3             =3
-#>     32:                7              7              7              7
-#>     33:                .              7              7              .
-#>     34:                8              8              8              .
-#>     35:                8              .              8              8
-#>     36:                9              9              9              9
-#>     37:               =4             =4             =4             =4
-#>     38:               10             10             10             10
-#>     39:               12             12             12             12
-#>     40:               =5             =5             =5             =5
-#>     41:               13             13             13             13
-#>     42:               14             14             14              .
-#>     43:               15             15             15             15
-#>     44:               =6             =6             =6             =6
-#>     45:               16             16             16             16
-#>     46:               17             17              .             17
-#>     47:               18             18             18              .
-#>     48:                .             18              .              .
-#>     49:               =7             =7             =7             =7
-#>     50:               19             19             19             19
+#>             1:  !!!COM: Bach, Johann Sebastian
+#>             2:  !!!CDT: 1685/02/21/-1750/07/28/
+#>             3:  !!!OTL@@DE: Aus meines Herzens Grunde
+#>             4:  !!!OTL@EN:      From the Depths of My Heart
+#>             5:  !!!SCT: BWV 269
+#>             6:  !!!PC#: 1
+#>             7:  !!!AGN: chorale
+#>             8:           **kern         **kern         **kern         **kern
+#>             9:           *ICvox         *ICvox         *ICvox         *ICvox
+#>            10:           *Ibass        *Itenor         *Ialto        *Isoprn
+#>            11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano
+#>            12:        *>[A,A,B]      *>[A,A,B]      *>[A,A,B]      *>[A,A,B]
+#>            13:     *>norep[A,B]   *>norep[A,B]   *>norep[A,B]   *>norep[A,B]
+#>            14:              *>A            *>A            *>A            *>A
+#>            15:          *clefF4       *clefGv2        *clefG2        *clefG2
+#>            16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]
+#>            17:              *G:            *G:            *G:            *G:
+#>            18:            *M3/4          *M3/4          *M3/4          *M3/4
+#>            19:           *MM100         *MM100         *MM100         *MM100
+#>            20:               -1             -1             -1             -1
+#>            21:               =1             =1             =1             =1
+#>            22:                1              1              1              1
+#>            23:                2              2              2              .
+#>            24:                .              2              .              .
+#>            25:                3              3              3              3
+#>            26:               =2             =2             =2             =2
+#>            27:                4              4              4              4
+#>            28:                5              5              .              .
+#>            29:                .              .              .              5
+#>            30:                6              6              6              6
+#>            31:               =3             =3             =3             =3
+#>            32:                7              7              7              7
+#>            33:                .              7              7              .
+#>            34:                8              8              8              .
+#>            35:                8              .              8              8
+#>            36:                9              9              9              9
+#>            37:               =4             =4             =4             =4
+#>            38:               10             10             10             10
+#>            39:               12             12             12             12
+#>            40:               =5             =5             =5             =5
+#>            41:               13             13             13             13
+#>            42:               14             14             14              .
+#>            43:               15             15             15             15
+#>            44:               =6             =6             =6             =6
+#>            45:               16             16             16             16
+#>            46:               17             17              .             17
+#>            47:               18             18             18              .
+#>            48:                .             18              .              .
+#>            49:               =7             =7             =7             =7
+#>            50:               19             19             19             19
 #> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ######################## ^^^ chor001.krn ^^^ #########################
 #> 
@@ -450,58 +450,58 @@ show(within(humData, timecount(Token, unit = tactus(TimeSignature))))
 #> 
 #> ######################## vvv chor004.krn vvv #########################
 #>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     54:               16             16             16             16
-#>     55:                .              .             16              .
-#>     56:               =5             =5             =5             =5
-#>     57:               17             17             17             17
-#>     58:                .              .             17              .
-#>     59:               18             18             18             18
-#>     60:               18              .              .              .
-#>     61:               19             19             19             19
-#>     62:               20             20             20             20
-#>     63:               =6             =6             =6             =6
-#>     64:               21             21             21             21
-#>     65:               21              .              .             21
-#>     66:               22             22             22             22
-#>     67:               23             23             23             23
-#>     68:               24             24             24             24
-#>     69:               =7             =7             =7             =7
-#>     70:               25             25             25             25
-#>     71:                .              .             25              .
-#>     72:               26             26             26             26
-#>     73:               27             27             27             27
-#>     74:               27              .              .              .
-#>     75:               28             28             28             28
-#>     76:                .              .             28             28
-#>     77:               =8             =8             =8             =8
-#>     78:               29             29             29             29
-#>     79:               30             30             30             30
-#>     80:               31             31             31             31
-#>     81:               32             32             32             32
-#>     82:               =9             =9             =9             =9
-#>     83:               33             33             33             33
-#>     84:               34             34             34             34
-#>     85:               34              .              .              .
-#>     86:               35             35             35             35
-#>     87:               36             36             36             36
-#>     88:                .             36              .              .
-#>     89:              =10            =10            =10            =10
-#>     90:               37             37             37             37
-#>     91:               38              .             38             38
-#>     92:               39             39             39             39
-#>     93:               ==             ==             ==             ==
-#>     94:               *-             *-             *-             *-
-#>     95:  !!!hum2abc: -Q ''
-#>     96:  !!!title: @{PC#}. @{OTL@@DE}
-#>     97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Jo***
-#>     98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: B***
-#>     99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint:***
-#>    100:  !!!YOR4: Chorales (New York: Associated Music Publi***
-#>    101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, p***
-#>    102:  !!!EED:  Craig Stuart Sapp
-#>    103:  !!!EEV:  2009/05/22
+#>            54:               16             16             16             16
+#>            55:                .              .             16              .
+#>            56:               =5             =5             =5             =5
+#>            57:               17             17             17             17
+#>            58:                .              .             17              .
+#>            59:               18             18             18             18
+#>            60:               18              .              .              .
+#>            61:               19             19             19             19
+#>            62:               20             20             20             20
+#>            63:               =6             =6             =6             =6
+#>            64:               21             21             21             21
+#>            65:               21              .              .             21
+#>            66:               22             22             22             22
+#>            67:               23             23             23             23
+#>            68:               24             24             24             24
+#>            69:               =7             =7             =7             =7
+#>            70:               25             25             25             25
+#>            71:                .              .             25              .
+#>            72:               26             26             26             26
+#>            73:               27             27             27             27
+#>            74:               27              .              .              .
+#>            75:               28             28             28             28
+#>            76:                .              .             28             28
+#>            77:               =8             =8             =8             =8
+#>            78:               29             29             29             29
+#>            79:               30             30             30             30
+#>            80:               31             31             31             31
+#>            81:               32             32             32             32
+#>            82:               =9             =9             =9             =9
+#>            83:               33             33             33             33
+#>            84:               34             34             34             34
+#>            85:               34              .              .              .
+#>            86:               35             35             35             35
+#>            87:               36             36             36             36
+#>            88:                .             36              .              .
+#>            89:              =10            =10            =10            =10
+#>            90:               37             37             37             37
+#>            91:               38              .             38             38
+#>            92:               39             39             39             39
+#>            93:               ==             ==             ==             ==
+#>            94:               *-             *-             *-             *-
+#>            95:  !!!hum2abc: -Q ''
+#>            96:  !!!title: @{PC#}. @{OTL@@DE}
+#>            97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Sebastian B***
+#>            98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf und H&a***
+#>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***
+#>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***
+#>           101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+#>           102:  !!!EED:  Craig Stuart Sapp
+#>           103:  !!!EEV:  2009/05/22
 #> ######################## ^^^ chor004.krn ^^^ #########################
-#>               (***five global comments truncated due to screen size***)
+#>               (***four global comments truncated due to screen size***)
 #> 
 #>  humdrumR corpus of four pieces.
 #> 

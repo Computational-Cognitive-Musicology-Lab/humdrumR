@@ -1,7 +1,7 @@
 # Grouping humdrum data
 
 Welcome to “Grouping humdrum data”! This article explains functionality
-humdrum$`_{\mathbb{R}}`$ has to break your data into subgroups, and work
+humdrum$_{\mathbb{R}}$ has to break your data into subgroups, and work
 with each subgroup separately.
 
 In this article, we’ll once again work with our prepackaged `chorales`
@@ -143,13 +143,13 @@ case the `Piece` field—and breaks the humdrum table into groups based on
 those values. So whereever `Piece == 1`, that’s a group; wherever
 `Piece == 2`, that’s another group, etc. After
 [`group_by()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.md)
-is applied, the humdrum$`_{\mathbb{R}}`$ dataset is grouped, and any
+is applied, the humdrum$_{\mathbb{R}}$ dataset is grouped, and any
 subsequent tidy-commands will automatically be applied *within* the
 groups.
 
 ------------------------------------------------------------------------
 
-Once a humdrum$`_{\mathbb{R}}`$ dataset has been grouped, it will stay
+Once a humdrum$_{\mathbb{R}}$ dataset has been grouped, it will stay
 grouped until you call
 [`ungroup()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/groupHumdrum.md)
 on it!
@@ -212,6 +212,7 @@ chorales |>
 >    39:           64.82979    10     3
 >    40:           69.44186    10     4
 >        humdrumR:::mean(.) Piece Spine
+>                     <num> <int> <int>
 ```
 
 You can also create new grouping fields on the fly. For example, what
@@ -246,6 +247,7 @@ chorales |>
 >    19:           54.75000     FALSE    10
 >    20:           67.03333      TRUE    10
 >        humdrumR:::mean(.) Spine > 2 Piece
+>                     <num>    <lgcl> <int>
 ```
 
 ------------------------------------------------------------------------
@@ -288,12 +290,12 @@ chorales |>
 
 #### By file
 
-It is *very* common in humdrum$`_{\mathbb{R}}`$ analyses that we want to
+It is *very* common in humdrum$_{\mathbb{R}}$ analyses that we want to
 apply commands grouped by piece. In most cases, two pieces of music are
 completely separate entities, so it makes sense to apply
 calculations/manipulations separately to each piece. However,
-humdrum$`_{\mathbb{R}}`$ won’t (always) do this for you. You might
-think, “I want to count how many notes occur in each record” and run the
+humdrum$_{\mathbb{R}}$ won’t (always) do this for you. You might think,
+“I want to count how many notes occur in each record” and run the
 command `group_by(Record)`—but watch out! Grouping by `Record` will
 group *all* the records 1s across all the pieces, all the record 2s
 across all the pieces, etc. What you probably want is

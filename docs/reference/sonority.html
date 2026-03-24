@@ -200,7 +200,7 @@ and the set <em>B♭, D, F, B♮</em> will be interpreted as <em>B♭, D, F, C�
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">chorale</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/chor001.krn'</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -210,23 +210,23 @@ and the set <em>B♭, D, F, B♮</em> will be interpreted as <em>B♭, D, F, C�
 <span class="r-in"><span><span class="va">chorale</span> <span class="op">&lt;-</span> <span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorale</span>, dataTypes <span class="op">=</span> <span class="st">'Dd'</span>, <span class="fu"><a href="ditto.html">ditto</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">Token_dittoed</span><span class="op">)</span> </span></span>
 <span class="r-in"><span><span class="va">chorale</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span>,<span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **kern         **kern         **kern         **kern</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   20:  </span><span style="color: #BBBB00;">            4GG             4B             4d             4g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   22:  </span><span style="color: #BBBB00;">             4G             4B             4d             2g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   23:  </span><span style="color: #BBBB00;">             4E            8cL             4e             2g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   24:  </span><span style="color: #BBBB00;">             4E            8BJ             4e             2g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   25:  </span><span style="color: #BBBB00;">            4F#             4A             4d            4dd</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   27:  </span><span style="color: #BBBB00;">             4G             4G             2d            4.b</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   28:  </span><span style="color: #BBBB00;">             4D            4F#             2d            4.b</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   29:  </span><span style="color: #BBBB00;">             4D            4F#             2d             8a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   30:  </span><span style="color: #BBBB00;">             4E             4G             4B             4g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8:           **kern         **kern         **kern         **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    20:              4GG             4B             4d             4g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    21:               =1             =1             =1             =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    22:               4G             4B             4d             2g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    23:               4E            8cL             4e             2g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    24:               4E            8BJ             4e             2g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    25:              4F#             4A             4d            4dd</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    26:               =2             =2             =2             =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    27:               4G             4G             2d            4.b</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    28:               4D            4F#             2d            4.b</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    29:               4D            4F#             2d             8a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    30:               4E             4G             4B             4g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    52:              *&gt;B            *&gt;B            *&gt;B            *&gt;B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   124:               *-             *-             *-             *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
@@ -235,23 +235,23 @@ and the set <em>B♭, D, F, B♮</em> will be interpreted as <em>B♭, D, F, C�
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorale</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span>,<span class="op">]</span><span class="op">]</span>, <span class="fu">sonority</span><span class="op">(</span><span class="va">Token_dittoed</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **kern         **kern         **kern         **kern</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   20:  </span><span style="color: #BBBB00;">              G              G              G              G</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   22:  </span><span style="color: #BBBB00;">              G              G              G              G</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   23:  </span><span style="color: #BBBB00;">            C/E            C/E            C/E            C/E</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   24:  </span><span style="color: #BBBB00;">           Emin           Emin           Emin           Emin</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   25:  </span><span style="color: #BBBB00;">           D/F#           D/F#           D/F#           D/F#</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   27:  </span><span style="color: #BBBB00;">              G              G              G              G</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   28:  </span><span style="color: #BBBB00;">         Bmin/D         Bmin/D         Bmin/D         Bmin/D</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   29:  </span><span style="color: #BBBB00;">              D              D              D              D</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   30:  </span><span style="color: #BBBB00;">           Emin           Emin           Emin           Emin</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8:           **kern         **kern         **kern         **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    20:                G              G              G              G</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    21:               =1             =1             =1             =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    22:                G              G              G              G</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    23:              C/E            C/E            C/E            C/E</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    24:             Emin           Emin           Emin           Emin</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    25:             D/F#           D/F#           D/F#           D/F#</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    26:               =2             =2             =2             =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    27:                G              G              G              G</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    28:           Bmin/D         Bmin/D         Bmin/D         Bmin/D</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    29:                D              D              D              D</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    30:             Emin           Emin           Emin           Emin</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    52:              *&gt;B            *&gt;B            *&gt;B            *&gt;B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   124:               *-             *-             *-             *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
@@ -261,23 +261,23 @@ and the set <em>B♭, D, F, B♮</em> will be interpreted as <em>B♭, D, F, C�
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorale</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span>,<span class="op">]</span><span class="op">]</span>, <span class="fu">sonority</span><span class="op">(</span><span class="va">Token_dittoed</span>, deparser <span class="op">=</span> <span class="va">harm</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **kern         **kern         **kern         **kern</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   20:  </span><span style="color: #BBBB00;">              I              I              I              I</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   21:  </span><span style="color: #00BB00; text-decoration: underline;">             =1             =1             =1             =1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   22:  </span><span style="color: #BBBB00;">              I              I              I              I</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   23:  </span><span style="color: #BBBB00;">            IVb            IVb            IVb            IVb</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   24:  </span><span style="color: #BBBB00;">             vi             vi             vi             vi</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   25:  </span><span style="color: #BBBB00;">             Vb             Vb             Vb             Vb</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   26:  </span><span style="color: #00BB00; text-decoration: underline;">             =2             =2             =2             =2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   27:  </span><span style="color: #BBBB00;">              I              I              I              I</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   28:  </span><span style="color: #BBBB00;">           iiib           iiib           iiib           iiib</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   29:  </span><span style="color: #BBBB00;">              V              V              V              V</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   30:  </span><span style="color: #BBBB00;">             vi             vi             vi             vi</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8:           **kern         **kern         **kern         **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    20:                I              I              I              I</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    21:               =1             =1             =1             =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    22:                I              I              I              I</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    23:              IVb            IVb            IVb            IVb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    24:               vi             vi             vi             vi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    25:               Vb             Vb             Vb             Vb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    26:               =2             =2             =2             =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    27:                I              I              I              I</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    28:             iiib           iiib           iiib           iiib</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    29:                V              V              V              V</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    30:               vi             vi             vi             vi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    52:              *&gt;B            *&gt;B            *&gt;B            *&gt;B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   124:               *-             *-             *-             *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
@@ -293,7 +293,7 @@ and the set <em>B♭, D, F, B♮</em> will be interpreted as <em>B♭, D, F, C�
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

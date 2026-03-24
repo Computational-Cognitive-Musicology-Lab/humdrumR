@@ -87,18 +87,7 @@ while the point-wise mutual information can be calculated using <code>pmutual()<
 <span><span class="co"># S3 method for class 'probability'</span></span>
 <span><span class="fu">mutual</span><span class="op">(</span><span class="va">x</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Default S3 method</span></span>
-<span><span class="fu">mutual</span><span class="op">(</span><span class="va">...</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">pmutual</span><span class="op">(</span></span>
-<span>  <span class="va">...</span>,</span>
-<span>  <span class="va">model</span>,</span>
-<span>  base <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  condition <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  na.rm <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  .drop <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  binArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pmutual</span><span class="op">(</span><span class="va">...</span>, <span class="va">model</span>, base <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -168,11 +157,9 @@ The overall mutual information is the average over all the point-wise values
 <span class="r-out co"><span class="r-pr">#&gt;</span>       0.1887219 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">pmutual</span><span class="op">(</span><span class="va">guitar</span>, <span class="va">metal</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Failed to parse glue component</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="font-weight: bold;">Caused by error in `parse()`:</span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> &lt;text&gt;:1:11: unexpected symbol</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> 1:    NULL   base</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span>               ^</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  0.5849625  0.5849625  0.5849625  0.5849625  0.5849625  0.5849625</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] -1.0000000 -1.0000000 -1.0000000 -1.0000000  0.5849625  0.5849625</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13]  0.5849625  0.5849625  0.5849625  0.5849625</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -181,7 +168,7 @@ The overall mutual information is the average over all the point-wise values
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

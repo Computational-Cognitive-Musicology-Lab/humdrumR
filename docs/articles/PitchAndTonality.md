@@ -1,16 +1,16 @@
 # Pitch and tonality in humdrumR
 
-As a computational musicology toolkit, humdrum$`_{\mathbb{R}}`$’s tools
+As a computational musicology toolkit, humdrum$_{\mathbb{R}}$’s tools
 for analyzing and manipulating pitch data are just about the most
 important tools in the toolbox. For the most part,
-humdrum$`_{\mathbb{R}}`$’s pitch tools are focused on the Western system
+humdrum$_{\mathbb{R}}$’s pitch tools are focused on the Western system
 of tonality, and tools for representing pitches in a tonal context are
 the focus of *this* vignette—we also have standard tools for looking at
 pitch from a Western, 12-tone atonal setting as well.
 
 ## Pitches and Intervals
 
-Humdrum$`_{\mathbb{R}}`$ defines a suite of “pitch functions,” like
+Humdrum$_{\mathbb{R}}$ defines a suite of “pitch functions,” like
 [`kern()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/kern.md),
 [`solfa()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfa.md),
 [`interval()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/interval.md),
@@ -174,7 +174,7 @@ information with different/changing keys.
 ### Working with pitch representations
 
 Let’s have a look at using pitch functions on real data. Let’s load
-humdrum$`_{\mathbb{R}}`$’s built-in Bach chorales:
+humdrum$_{\mathbb{R}}$’s built-in Bach chorales:
 
 ``` r
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
@@ -182,8 +182,8 @@ chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
 These chorales are full of `**kern` data in the (default) `Token` field,
 which can easily be parsed/translated. Maybe we’d like to convert the
-`**kern` to semitones. Humdrum$`_{\mathbb{R}}`$’s pitch functions can
-all be used in
+`**kern` to semitones. Humdrum$_{\mathbb{R}}$’s pitch functions can all
+be used in
 [humdrum-style](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html#humdrum-style "HumdrumR data fields article, humdrum-style section"),
 so using
 [`semits()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/semits.md)
@@ -573,7 +573,7 @@ chorales |>
 
 ### Transposition
 
-All of humdrum$`_{\mathbb{R}}`$’s pitch functions have built-in
+All of humdrum$_{\mathbb{R}}$’s pitch functions have built-in
 transposition functionality. You can use this functionality by passing a
 named list of arguments to the
 [`transpose()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/transpose.md)
@@ -650,7 +650,7 @@ mint(input)
 
 If you use
 [`mint()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.md) in
-humdrum- or tidy- style on a humdrum$`_{\mathbb{R}}`$ dataobject,
+humdrum- or tidy- style on a humdrum$_{\mathbb{R}}$ dataobject,
 [`mint()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.md) will
 automatically be called within each spine/path in each file (this is
 accomplished using the `groupby` argument to

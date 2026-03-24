@@ -85,7 +85,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2026-02-24</h4>
+            <h4 data-toc-skip class="date">2026-03-24</h4>
       
 
       <div class="d-none name"><code>Plots.Rmd</code></div>
@@ -96,7 +96,8 @@ Condit-Schultz</h4>
 <p>Welcome to “Making plots with
 humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>”!
 R has two major plotting systems that are widely used: 1) R’s built-in
-[base graphics][graphics-package] functions and 2) the more modern <a href="#ggplot2">ggplot2</a>.
+base graphics functions (<code>?graphics-package</code>) and 2) the more
+modern <a href="#ggplot2">ggplot2</a>.
 Humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>
 is compatible with both of these systems.
 Humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>
@@ -111,9 +112,10 @@ data, if that floats your boat.</p>
 plot:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bach</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/.*krn'</span><span class="op">)</span></span></code></pre></div>
-<p>We’ll use [semits()] and [duration()] to convert pitch and rhythmic
-information into numbers, and [solfa()] and [recip()] to represent them
-in categorical form.</p>
+<p>We’ll use <code><a href="../reference/semits.html">semits()</a></code> and <code><a href="../reference/duration.html">duration()</a></code> to
+convert pitch and rhythmic information into numbers, and
+<code><a href="../reference/solfa.html">solfa()</a></code> and <code><a href="../reference/recip.html">recip()</a></code> to represent them in
+categorical form.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Semits <span class="op">=</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,</span>
@@ -124,12 +126,12 @@ in categorical form.</p>
 </h2>
 <p>Humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>’s
 <a href="#draw">draw()</a> function is basically a fancy wrapper around
-base-R functions like [plot()] and [hist()]. Like these functions, using
-<a href="#draw">draw()</a> is simple: just pass data ([atomic][vector]
-vectors) in to get a plot. The <a href="#draw">draw()</a> function will
-look at the input arguments you give it, and make an appropriate plot
-for that input type. Currently, <code><a href="../reference/draw.html">draw()</a></code> can make seven
-different types of plots, depending on the input passed to it.</p>
+base-R functions like <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist()</a></code>. Like
+these functions, using <a href="#draw">draw()</a> is simple: just pass
+data (atomic vectors <code><a href="https://rdrr.io/r/base/vector.html" class="external-link">?vector</a></code>) in to get a plot. The <a href="#draw">draw()</a> function will look at the input arguments you
+give it, and make an appropriate plot for that input type. Currently,
+<code><a href="../reference/draw.html">draw()</a></code> can make seven different types of plots, depending
+on the input passed to it.</p>
 <p>To decide what kind of plot to make, <a href="#draw">draw()</a> looks
 at its first two arguments, <code>x</code> and <code>y</code>, which
 represent (you guessed it) the X and Y axes. Here are the types of plots
@@ -137,63 +139,73 @@ associated with different types of <code>x</code>/<code>y</code>
 arguments:</p>
 <table class="table">
 <colgroup>
-<col width="38%">
+<col width="28%">
+<col width="19%">
 <col width="26%">
-<col width="35%">
+<col width="26%">
 </colgroup>
 <thead><tr class="header">
 <th><code>x</code></th>
 <th><code>y</code></th>
 <th>Plot type</th>
+<th>Function</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td><code>numeric</code></td>
 <td>(missing)</td>
-<td>[Density Histogram/Contour][draw_density()]</td>
+<td>Density Histogram/Contour</td>
+<td><code><a href="../reference/draw_density.html">draw_density()</a></code></td>
 </tr>
 <tr class="even">
 <td>(missing)</td>
 <td><code>numeric</code></td>
-<td>[Quantile plot][draw_Qplot()]</td>
+<td>Quantile plot</td>
+<td><code><a href="../reference/draw_Qplot.html">draw_Qplot()</a></code></td>
 </tr>
 <tr class="odd">
 <td></td>
 <td></td>
 <td>(or Violin plot)</td>
+<td></td>
 </tr>
 <tr class="even">
 <td><code>numeric</code></td>
 <td><code>numeric</code></td>
-<td>[Scatter/line plot][draw_scatter()]</td>
+<td>Scatter/line plot</td>
+<td><code><a href="../reference/draw_scatter.html">draw_scatter()</a></code></td>
 </tr>
 <tr class="odd">
 <td>
 <code>character</code>/<code>factor</code>
 </td>
 <td><code>numeric</code></td>
-<td>[Violin plot][draw_violins]</td>
+<td>Violin plot</td>
+<td><code><a href="../reference/draw_violins.html">draw_violins()</a></code></td>
 </tr>
 <tr class="even">
 <td><code>numeric</code></td>
 <td>
 <code>character</code> or <code>factor</code>
 </td>
-<td>[Area chart][draw_area()]</td>
+<td>Area chart</td>
+<td><code><a href="../reference/draw_area.html">draw_area()</a></code></td>
 </tr>
 <tr class="odd">
 <td>
 <code>character</code>/ <code>factor</code>
 </td>
 <td>(missing)</td>
-<td>[barplot][draw_barplot()]</td>
+<td>barplot</td>
+<td><code><a href="../reference/draw_barplot.html">draw_barplot()</a></code></td>
 </tr>
 <tr class="even">
 <td>(missing)</td>
 <td>
 <code>character</code>/<code>factor</code>
 </td>
-<td>[barplot][draw_barplot()]</td>
+<td>barplot</td>
+<td><code><a href="../reference/draw_barplot.html">draw_barplot()</a></code></td>
 </tr>
 <tr class="odd">
 <td>
@@ -202,7 +214,8 @@ arguments:</p>
 <td>
 <code>character</code>/<code>factor</code>
 </td>
-<td>[Heat map][draw_heat()]</td>
+<td>Heat map</td>
+<td><code><a href="../reference/draw_heat.html">draw_heat()</a></code></td>
 </tr>
 </tbody>
 </table>
@@ -212,35 +225,36 @@ arguments:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span> , <span class="va">Semits</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-4-2.png" class="r-plt" width="700"></p>
-<p>On the X axis, numeric data is drawn as a [density
-histogram][draw_density()]; on the Y axis, a [quantile
-plot][draw_Qplot()]. What if we pass two numeric variables
+<p><img src="Plots_files/figure-html/unnamed-chunk-4-2.png" class="r-plt" alt="" width="700"></p>
+<p>On the X axis, numeric data is drawn as a density histogram
+(<code><a href="../reference/draw_density.html">draw_density()</a></code>); on the Y axis, a quantile plot
+(<code><a href="../reference/draw_Qplot.html">draw_Qplot()</a></code>). What if we pass two numeric variables
 (<code>Semits</code> <em>and</em> <code>Duration</code>)? We get a
 scatter plot:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
 <p>We can see that there are really only eight duration values in the
 data (because durations in music scores aren’t really continuous
-numbers). To make the data easier to make sense of, we can use the
+numbers). To make the data easier to interpret, we can use the
 <code>jitter</code> argument to randomly move points a little bit, so
 you can see how many there are. (Also check out the <code>lm</code>
 argument.)</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, jitter <span class="op">=</span> <span class="st">'xy'</span>, lm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" width="700">
-Maybe it would make more sense with duration on a logarithmic scale?</p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
+<p>Maybe it would make more sense with duration on a logarithmic
+scale?</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, jitter <span class="op">=</span> <span class="st">'xy'</span>, log <span class="op">=</span> <span class="st">'x'</span>, lm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 <p>It does appear that there is a positive corelation/slope between
 duration and pitch (though this is not a statistical test!), but it
 still bothers me that the duration values aren’t really continous
@@ -250,53 +264,54 @@ duration, which are <code>character</code> strings:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Recip</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
 <p>We can also check out other categorical data, like the
 <code>Instrument</code> field, which records the voice type in our
 chorale data:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Instrument</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Instrument</span>, <span class="va">Recip</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" alt="" width="700"></p>
 <p>But going back to our original goal, what if you mix number and
 categorical data?</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Recip</span>, <span class="va">Semits</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 <p>The relationship between duration and pitch height does seem
 plausible, though it is weak. What about a relationship we’d expect to
-be a bit stronger. Let’s look at voice type vs pitch height (we’ll make
+be a bit stronger? Let’s look at voice type vs pitch height (we’ll make
 two plots, flipping the X and Y axes):</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Instrument</span>, <span class="va">Semits</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, <span class="va">Instrument</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-11-2.png" class="r-plt" alt="" width="700"></p>
 <p>There is a clear relationship between voice type and pitch
 height—which is, of course, what we’d expect!</p>
-<div class="section level4">
-<h4 id="title-and-axis-labels">Title and Axis Labels<a class="anchor" aria-label="anchor" href="#title-and-axis-labels"></a>
-</h4>
+<div class="section level3">
+<h3 id="title-and-axis-labels">Title and Axis Labels<a class="anchor" aria-label="anchor" href="#title-and-axis-labels"></a>
+</h3>
 <p>Use the <code>title</code> (and/or <code>subtitle</code>) arguments
-to set a plot title. You an also use <code>xlabel</code> and
+to set a plot title. You can also use <code>xlabel</code> and
 <code>ylabel</code> to set the axis labels.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Instrument</span>, <span class="va">Semits</span>, </span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Instrument</span>, <span class="va">Semits</span>, </span>
 <span>             title <span class="op">=</span> <span class="st">'Violin Plot of Pitch by Voice Type'</span>, subtitle <span class="op">=</span> <span class="st">'In 371 Bach Chorales'</span>,</span>
 <span>             ylabel <span class="op">=</span> <span class="st">'Semitones'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" width="700">
-## Plotting more dimensions</p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="" width="700"></p>
+</div>
+<div class="section level3">
+<h3 id="plotting-more-dimensions">Plotting more dimensions<a class="anchor" aria-label="anchor" href="#plotting-more-dimensions"></a>
+</h3>
 <p>When plotting data, we can use other “dimensions” than X and Y
 position to show data. For example, color. Look what happens if we pass
 <code>Instrument</code> (or another categorical variable) as the
@@ -307,15 +322,15 @@ position to show data. For example, color. Look what happens if we pass
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">Instrument</span>, <span class="va">Semits</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Pitch by Voice Type'</span>,</span>
 <span>             xlabel <span class="op">=</span> <span class="st">'Semitones'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" width="700"></p>
-<p>We can also use <code>color</code> to <em>add</em> dimensional to a
-plot. For example, we can go back to our duration-pitch plot, but use
+<p><img src="Plots_files/figure-html/unnamed-chunk-13-1.png" class="r-plt" alt="" width="700"></p>
+<p>We can also use <code>color</code> to <em>add</em> dimensionality to
+a plot. For example, we can go back to our duration-pitch plot, but use
 color to represent voice types:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, jitter <span class="op">=</span> <span class="st">'x'</span>, lm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             color <span class="op">=</span> <span class="va">Instrument</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="" width="700"></p>
 <p>What if we want a separate regression line for each group? Use the
 <code>conditional</code> argument to indicate that we want
 <code>lm</code> computed separately within groups:</p>
@@ -323,7 +338,7 @@ color to represent voice types:</p>
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, jitter <span class="op">=</span> <span class="st">'x'</span>, lm <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             color <span class="op">=</span> <span class="va">Instrument</span>, conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>lm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="" width="700"></p>
 <p>We can also use <code>pointStyle</code> and <code>pointSize</code>
 arguments to represent dimensions of data.</p>
 </div>
@@ -332,7 +347,7 @@ arguments to represent dimensions of data.</p>
 </h3>
 <p>The <a href="#draw">draw()</a> function has a bunch more cool
 arguments. Below we show a bunch of arguments used when plotting a
-1-dimensional distrubution of numeric values. Many (but not all) of the
+1-dimensional distribution of numeric values. Many (but not all) of the
 arguments shown below can be used with other types of plots—and other
 types of plots also have their own special arguments, which you can read
 about in the manual pages.</p>
@@ -344,35 +359,34 @@ which can be used to add the mean or quantiles of numeric data to a
 plot. For example, looking at the semitone value, we can mark the mean
 semitone and the 25th-75th interquartile range, like this:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">.75</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">.75</span><span class="op">)</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             subtitle <span class="op">=</span> <span class="st">'Showing the mean and interquartile range'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" width="700">
-The median value is the 50% quantile, so you could use that instead:</p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="700"></p>
+<p>The median value is the 50% quantile, so you could use that
+instead:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, quantiles <span class="op">=</span> <span class="fl">.5</span>, </span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>, subtitle <span class="op">=</span> <span class="st">'Showing the median'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" width="700">
-If you want to group the histogram by color again, you can use the
+<p><img src="Plots_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="700"></p>
+<p>If you want to group the histogram by color again, you can use the
 <code>conditional</code> argument to control whether you compute the
 mean/quantiles separately for each group, or not. As before, let’s turn
 on <code>smooth = TRUE</code>, cause otherwise the histogram gets a bit
 messy:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, color <span class="op">=</span> <span class="va">Instrument</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, color <span class="op">=</span> <span class="va">Instrument</span>,</span>
 <span>             mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="fl">.5</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>, subtitle <span class="op">=</span> <span class="st">'Showing the overall mean and median'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, color <span class="op">=</span> <span class="va">Instrument</span>,</span>
 <span>             mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="fl">.5</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>, subtitle <span class="op">=</span> <span class="st">'Showing the mean and median of each voice type'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-18-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-18-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level4">
 <h4 id="showing-points-and-counts">Showing points and counts<a class="anchor" aria-label="anchor" href="#showing-points-and-counts"></a>
@@ -383,69 +397,63 @@ a data, and it may obscure true aspects of the data. Notably, the
 idea to take a look at how much data there is using
 <code>showCounts</code>:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             showCounts <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             subtitle <span class="op">=</span> <span class="st">'Showing count in each bin'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="" width="700"></p>
 <p>You can also use <code>showPoints</code> to actually <em>show</em>
 all the data points, spread out above the histogram:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             showPoints <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             subtitle <span class="op">=</span> <span class="st">'Showing all data points'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="" width="700"></p>
 <p>Ah! Using <code>showPoints</code> reminds us that the semitone data
 is not really continuous, and that there are clear bars of more common
 (C) and less common (F#) notes thoughout the range of data.</p>
 <hr>
 <p>We can also manipulate our histogram/density plots by passing
-arguments through to the underlying [hist()] and [density()] functions.
-You can look at those function manuals to learn all the possibilities,
-but for now, you can focus on the <code>breaks</code> argument (for
-histograms) and the <code>bw</code> (bandwidth) argument (for smooth
-density contours):</p>
+arguments through to the underlying <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist()</a></code> and
+<code><a href="https://rdrr.io/r/stats/density.html" class="external-link">density()</a></code> functions. You can look at those function manuals
+to learn all the possibilities, but for now, you can focus on the
+<code>breaks</code> argument (for histograms) and the <code>bw</code>
+(bandwidth) argument (for smooth density contours):</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             breaks <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>,title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             breaks <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-21-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-21-2.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             bw <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             bw <span class="op">=</span> <span class="fl">.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-22-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-22-2.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level4">
 <h4 id="normal-reference">Normal Reference<a class="anchor" aria-label="anchor" href="#normal-reference"></a>
 </h4>
-<p>Anotehr cool argument is <code>normalReference</code>, which can be
+<p>Another cool argument is <code>normalReference</code>, which can be
 used to overlay a “reference” normal (Gaussian) distribution on a plot
 of numeric data. The mean and standard deviation of this “reference”
 distribution are taken from the data. If the data is normally
-distributed, it should come close to the reference distribution—if the
+distributed, it should come close to the reference distribution; if the
 data clearly mismatches the reference, this means the data is not well
 approximated by a normal distribution.</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>,</span>
 <span>             normalReference <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-23-1.png" class="r-plt" alt="" width="700"></p>
 <p>We can see that the semitone data is skewed a bit, compared to a
 normal distribution. Maybe, the pitches are normally distributed within
 each voice?</p>
@@ -454,7 +462,7 @@ each voice?</p>
 <span>             color <span class="op">=</span> <span class="va">Instrument</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales, by Voice Type'</span>,</span>
 <span>             normalReference <span class="op">=</span> <span class="cn">TRUE</span>, conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>normalReference <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-24-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-24-1.png" class="r-plt" alt="" width="700"></p>
 <p>The data in each voice group is a bit less skewed, but still diverges
 from normal a little bit.</p>
 </div>
@@ -467,20 +475,20 @@ from normal a little bit.</p>
 </h4>
 <p>Another approach is to create multiple plots for different groups. We
 can do this with the <code>facets</code> argument. See what happens we
-pass <code>list(Instrument(</code> to <code>facets</code>, instead of
+pass <code>list(Instrument)</code> to <code>facets</code>, instead of
 color:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             facets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">Instrument</span><span class="op">)</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales, by Voice Type'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-25-1.png" class="r-plt" alt="" width="700"></p>
 <p>To put the plots side by side, make the first argument of the
 <code>facets</code> list <code>NULL</code>:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Recip</span>, <span class="va">Semits</span>, mean <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             facets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">Instrument</span><span class="op">)</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales, by Voice Type'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-26-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-26-1.png" class="r-plt" alt="" width="700"></p>
 <p>To arrange plots in two dimensions, pass a <code>facet</code> with
 two elements (the first for rows, the second for columns).</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
@@ -488,14 +496,14 @@ two elements (the first for rows, the second for columns).</p>
 <span>             facets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="../reference/is.major.html">is.major</a></span><span class="op">(</span><span class="va">Key</span><span class="op">)</span>, <span class="st">'Major'</span>, <span class="st">'Minor'</span><span class="op">)</span>, </span>
 <span>                           <span class="va">Instrument</span><span class="op">)</span>,</span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales, by Voice Type'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-27-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level4">
 <h4 id="besidebelow">Beside/Below<a class="anchor" aria-label="anchor" href="#besidebelow"></a>
 </h4>
 <p>Another option is to explicitly place plots side-by-side (or one
-above the other) using the [drawBeside()] or [drawBelow()] functions,
-which can be combined:</p>
+above the other) using the <code><a href="../reference/drawMultiple.html">drawBeside()</a></code> or
+<code><a href="../reference/drawMultiple.html">drawBelow()</a></code> functions, which can be combined:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">histogram</span> <span class="op">&lt;-</span> <span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span><span class="op">)</span></span>
@@ -503,20 +511,20 @@ which can be combined:</p>
 <span><span class="va">scatter</span> <span class="op">&lt;-</span> <span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/drawMultiple.html">drawBeside</a></span><span class="op">(</span><span class="va">histogram</span>, <span class="va">violins</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-28-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-28-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/drawMultiple.html">drawBelow</a></span><span class="op">(</span><span class="va">histogram</span>, <span class="va">violins</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-28-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-28-2.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/drawMultiple.html">drawBelow</a></span><span class="op">(</span><span class="fu"><a href="../reference/drawMultiple.html">drawBeside</a></span><span class="op">(</span><span class="va">histogram</span>, <span class="va">violins</span><span class="op">)</span>, <span class="va">scatter</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-28-3.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-28-3.png" class="r-plt" alt="" width="700"></p>
 <p>Use <code><a href="../reference/drawMultiple.html">drawNothing()</a></code> to insert empty spots in a layout you
 are creating:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="../reference/drawMultiple.html">drawBelow</a></span><span class="op">(</span><span class="fu"><a href="../reference/drawMultiple.html">drawBeside</a></span><span class="op">(</span><span class="va">histogram</span>, <span class="va">violins</span><span class="op">)</span>, <span class="fu"><a href="../reference/drawMultiple.html">drawBeside</a></span><span class="op">(</span><span class="va">scatter</span>, <span class="fu"><a href="../reference/drawMultiple.html">drawNothing</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-29-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-29-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level3">
@@ -525,15 +533,13 @@ are creating:</p>
 <p>Making pretty plots on the fly is all well and good, but what if want
 to save them for later, or use them in a paper? We can save any plot
 created by <a href="#draw">draw()</a> to a file by passing it to
-[drawToFile()]. The only the thing you need is a filename with an
-extension (either <code>bmp</code>, <code>jpg</code>, <code>pdf</code>,
-<code>png</code>, <code>svg</code>, or <code>tiff</code>)—[drawToFile()]
-will use the extension of your filename to determine what kind of file
-to create.</p>
+<code><a href="../reference/drawToFile.html">drawToFile()</a></code>. The only the thing you need is a filename
+with an extension (either <code>bmp</code>, <code>jpg</code>,
+<code>pdf</code>, <code>png</code>, <code>svg</code>, or
+<code>tiff</code>)—<code><a href="../reference/drawToFile.html">drawToFile()</a></code> will use the extension of
+your filename to determine what kind of file to create.</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, color <span class="op">=</span> <span class="va">Instrument</span>,</span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Semits</span>, color <span class="op">=</span> <span class="va">Instrument</span>,</span>
 <span>             mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="fl">.5</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>             conditional <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>mean <span class="op">=</span> <span class="cn">TRUE</span>, quantiles <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, </span>
 <span>             title <span class="op">=</span> <span class="st">'Distribution of pitch in Chorales'</span>, subtitle <span class="op">=</span> <span class="st">'Showing the mean and median of each voice type'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -560,44 +566,45 @@ of plots.</p>
 <p>The simplest option to customize <a href="#draw">draw()</a> plots is
 to <em>add</em> to them using base-R graph functions. However, for more
 complex/customized plots, you’ll eventually need to dive deep into
-base-R graphics (or [ggplot2][#ggplot2]).</p>
+base-R graphics (or <a href="#ggplot2">ggplot2</a>).</p>
 <hr>
 <p>Base-R graphics is centered around a few main plotting functions:
-[plot()], [barplot()], and [hist()]. These functions actually work,
-under the hood, at the core of <a href="#draw">draw()</a>. Additional
-functions can then be used to <em>add</em> elements on top of plots you
-already created: [points()], [arrows()], [abline()], [lines()],
-[axis()], [polygon()], etc. These “adding” functions can be used with <a href="#draw">draw()</a> too.</p>
-<div class="section level4">
-<h4 id="adding-plot-functions">Adding plot functions<a class="anchor" aria-label="anchor" href="#adding-plot-functions"></a>
-</h4>
-<p>The best way to “add” content to <a href="#draw">draw()</a> plots by
-writing code using base-R adding functions, and then using [drawMore].
-For example, we know that <a href="#draw">draw()</a> has the
-<code>mean</code> argument to mark the mean of the data with a cross—but
-what if you wanted to draw a line across the screen marking the mean?
-There is no <a href="#draw">draw()</a> argument for that (yet), but you
-can use the base-R [abline()] function to do this—specifically, the
-<code>v</code> argument can be used to draw a vertical line. So we could
-do something like this:</p>
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot()</a></code>, and <code><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist()</a></code>.
+These functions actually work, under the hood, at the core of
+<code><a href="../reference/draw.html">draw()</a></code>. Additional functions can then be used to
+<em>add</em> elements on top of plots you already created:
+<code><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points()</a></code>, <code><a href="https://rdrr.io/r/graphics/arrows.html" class="external-link">arrows()</a></code>, <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline()</a></code>,
+<code><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines()</a></code>, <code><a href="https://rdrr.io/r/graphics/axis.html" class="external-link">axis()</a></code>, <code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon()</a></code>, etc.
+These “adding” functions can be used with <code><a href="../reference/draw.html">draw()</a></code> too.</p>
+<div class="section level3">
+<h3 id="adding-plot-functions">Adding plot functions<a class="anchor" aria-label="anchor" href="#adding-plot-functions"></a>
+</h3>
+<p>The best way to “add” content to <code><a href="../reference/draw.html">draw()</a></code> plots by writing
+code using base-R adding functions, and then using
+<code><a href="../reference/drawMore.html">drawMore()</a></code>. For example, we know that <code><a href="../reference/draw.html">draw()</a></code>
+has the <code>mean</code> argument to mark the mean of the data with a
+cross—but what if you wanted to draw a line across the screen marking
+the mean? There is no <a href="#draw">draw()</a> argument for that
+(yet), but you can use the base-R <code><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline()</a></code> function to do
+this—specifically, the <code>v</code> argument can be used to draw a
+vertical line. So we could do something like this:</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, jitter <span class="op">=</span> <span class="st">'x'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/drawMore.html">drawMore</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'red'</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-31-1.png" class="r-plt" width="700">
-Maybe we ’d also like to add some text, like the exact value of that
-mean? Use the base-R [mtext()] function:</p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-31-1.png" class="r-plt" alt="" width="700"></p>
+<p>Maybe we ’d also like to add some text, like the exact value of that
+mean? Use the base-R <code><a href="https://rdrr.io/r/graphics/mtext.html" class="external-link">mtext()</a></code> function:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">bach</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="va">bach</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="va">Duration</span>, <span class="va">Semits</span>, jitter <span class="op">=</span> <span class="st">'x'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/drawMore.html">drawMore</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'red'</span>, lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>           <span class="fu"><a href="https://rdrr.io/r/graphics/mtext.html" class="external-link">mtext</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'mean duration:\n'</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>, side <span class="op">=</span> <span class="fl">3</span>, at <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, col <span class="op">=</span> <span class="st">'red'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-32-1.png" class="r-plt" width="700">
-Or maybe you’d like to shade the area containing pitches below middle C,
-with durations longer than a quarter note. We can do this with base-R
-[polygon()], though it’s a bit complicated:</p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-32-1.png" class="r-plt" alt="" width="700"></p>
+<p>Or maybe you’d like to shade the area containing pitches below middle
+C, with durations longer than a quarter note. We can do this with base-R
+<code><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon()</a></code>, though it’s a bit complicated:</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span></span>
@@ -605,9 +612,10 @@ with durations longer than a quarter note. We can do this with base-R
 <span>  <span class="fu"><a href="../reference/drawMore.html">drawMore</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html" class="external-link">polygon</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.25</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">.25</span><span class="op">)</span>, </span>
 <span>                   y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">25</span>, <span class="op">-</span><span class="fl">25</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>                   col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/rgb.html" class="external-link">rgb</a></span><span class="op">(</span><span class="fl">.5</span>, <span class="fl">.5</span>,<span class="fl">1</span> ,<span class="fl">.5</span>, alpha <span class="op">=</span> <span class="fl">.1</span><span class="op">)</span>, border <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-33-1.png" class="r-plt" width="700"></p>
-<p>Other functions you might want to read about are [arrows()],
-[graphics::segements()], [points()], [text()].</p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-33-1.png" class="r-plt" alt="" width="700"></p>
+<p>Other functions you might want to read about are
+<code><a href="https://rdrr.io/r/graphics/arrows.html" class="external-link">arrows()</a></code>, <code><a href="https://rdrr.io/r/graphics/segments.html" class="external-link">graphics::segments()</a></code>,
+<code><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points()</a></code>, <code><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text()</a></code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -628,30 +636,30 @@ above:</p>
 <span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(Duration, Semits)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span>
 <span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span>  [<span class="dv">1</span>m [<span class="dv">22</span>mRemoved <span class="dv">4</span> rows containing missing values or values outside the scale range</span>
 <span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a><span class="sc">&gt;</span>    (<span class="st">`</span><span class="at">geom_point()</span><span class="st">`</span>).</span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-35-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-35-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">bach</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">Recip</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-36-1.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-36-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a></span>
 <span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>bach <span class="sc">|&gt;</span></span>
 <span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(Semits)) <span class="sc">+</span> <span class="fu">geom_histogram</span>()</span>
 <span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span>  [<span class="dv">1</span>m [<span class="dv">22</span>mRemoved <span class="dv">4</span> rows containing non<span class="sc">-</span>finite outside the scale range</span>
 <span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a><span class="sc">&gt;</span>    (<span class="st">`</span><span class="at">stat_bin()</span><span class="st">`</span>).</span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-36-2.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-36-2.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a></span>
 <span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a>bach <span class="sc">|&gt;</span></span>
 <span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(Semits)) <span class="sc">+</span> <span class="fu">geom_density</span>()</span>
 <span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span>  [<span class="dv">1</span>m [<span class="dv">22</span>mRemoved <span class="dv">4</span> rows containing non<span class="sc">-</span>finite outside the scale range</span>
 <span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a><span class="sc">&gt;</span>    (<span class="st">`</span><span class="at">stat_density()</span><span class="st">`</span>).</span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-36-3.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-36-3.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a></span>
 <span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a>bach <span class="sc">|&gt;</span></span>
 <span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(Instrument, Semits)) <span class="sc">+</span> <span class="fu">geom_violin</span>()</span>
 <span id="cb46-4"><a href="#cb46-4" tabindex="-1"></a><span class="sc">&gt;</span>    Warning<span class="sc">:</span>  [<span class="dv">1</span>m [<span class="dv">22</span>mRemoved <span class="dv">4</span> rows containing non<span class="sc">-</span>finite outside the scale range</span>
 <span id="cb46-5"><a href="#cb46-5" tabindex="-1"></a><span class="sc">&gt;</span>    (<span class="st">`</span><span class="at">stat_ydensity()</span><span class="st">`</span>).</span></code></pre></div>
-<p><img src="Plots_files/figure-html/unnamed-chunk-36-4.png" class="r-plt" width="700"></p>
+<p><img src="Plots_files/figure-html/unnamed-chunk-36-4.png" class="r-plt" alt="" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -660,7 +668,7 @@ above:</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

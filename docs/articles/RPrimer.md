@@ -1,12 +1,12 @@
 # An R primer for humdrumR users
 
-Humdrum$`_{\mathbb{R}}`$ is a package for the R programming language.
-You don’t need to be an R master to use humdrum$`_{\mathbb{R}}`$, but
-there are some basic concepts from R that you will need to learn, and
+Humdrum$_{\mathbb{R}}$ is a package for the R programming language. You
+don’t need to be an R master to use humdrum$_{\mathbb{R}}$, but there
+are some basic concepts from R that you will need to learn, and
 ultimately, if you want to get really advanced, you’ll need to develop
 some R skills. This document is a basic primer for R, which will teach
 you the basics you need to know in order to make the most out of
-humdrum$`_{\mathbb{R}}`$.
+humdrum$_{\mathbb{R}}$.
 
 ## Basic Commands
 
@@ -48,7 +48,7 @@ c(1, 2, 3) # three arguments
 >    [1] 1 2 3
 
 Sys.time() # no arguments!
->    [1] "2026-02-24 16:54:54 EST"
+>    [1] "2026-03-24 15:44:05 EDT"
 ```
 
 Different functions have different arguments they recognize, with
@@ -212,9 +212,9 @@ allows us to think of and use collections of data as single thing. If I
 give you, say, ten thousand numbers, you don’t have to worry about
 manipulating ten thousand things: rather, you just work with *one*
 thing: a vector, which happens to be of length 10,000. In R, we call
-this **vectorization**—generally, in R and in humdrum$`_{\mathbb{R}}`$
-we will constantly be taking advantage of vectorization to make our
-lives super easy!
+this **vectorization**—generally, in R and in humdrum$_{\mathbb{R}}$ we
+will constantly be taking advantage of vectorization to make our lives
+super easy!
 
 ------------------------------------------------------------------------
 
@@ -577,8 +577,8 @@ vectors all their original lengths.
   vector (or [`list()`](https://rdrr.io/r/base/list.html))?
 - [`head()`](https://rdrr.io/r/utils/head.html) and
   [`tail()`](https://rdrr.io/r/utils/head.html) — Return the first or
-  last $`N`$ elements of a vector.
-  - Provide the `n` argument a natural number to control $`N`$.
+  last $N$ elements of a vector.
+  - Provide the `n` argument a natural number to control $N$.
 
 #### Sequences and Indices
 
@@ -601,18 +601,18 @@ vectors all their original lengths.
 
 #### Arithmetic
 
-- `x + y` — Addition; $`x + y`$.
-- `x - y` — Subtraction; $`x - y`$.
-- `-x` — Negation; $`-x`$.
-- `x * y` — Multiplication; $`xy`$
-- `x^y` — Exponentiation; $`x^y`$.
-  - Use parentheses for things like `x^(1/3)`; $`x^{\frac{1}{3}}`$.
-- `x / y` — Real division; $`\frac{x}{y}`$.
+- `x + y` — Addition; $x + y$.
+- `x - y` — Subtraction; $x - y$.
+- `-x` — Negation; $- x$.
+- `x * y` — Multiplication; $xy$
+- `x^y` — Exponentiation; $x^{y}$.
+  - Use parentheses for things like `x^(1/3)`; $x^{\frac{1}{3}}$.
+- `x / y` — Real division; $\frac{x}{y}$.
 - `x %/% y` — [Euclidean
   division](https://en.wikipedia.org/wiki/Euclidean_division);
-  $`\lfloor \frac{x}{y} \rfloor`$.
+  $\lfloor\frac{x}{y}\rfloor$.
   - E.g., whole-number division with remainder.
-- `x %% y` — `x` modulo `y`; $`x \mod y`$.
+- `x %% y` — `x` modulo `y`; $x{\mspace{8mu}\operatorname{mod}\ y}$.
   - E.g., remainder after whole-number division.
 - `diff(x)` — This function calculates the differences between
   consecutive values in a numeric vector.
@@ -620,11 +620,11 @@ vectors all their original lengths.
 
 #### Other Math functions
 
-- `sqrt(x)` — Square-root of numbers; $`\sqrt{x}`$.
-- `abs(x)` — Absolute value of numbers; $`|x|`$
-- `round(x)` — Round number to nearest integer; $`\lfloor x \rceil`$
-- `log(x)` — Log of number (natural log by default); $`\log(x)`$
-- `sign(x)` — Sign (1, -1, or 0) of x; $`\text{sgn}\ x`$
+- `sqrt(x)` — Square-root of numbers; $\sqrt{x}$.
+- `abs(x)` — Absolute value of numbers; $|x|$
+- `round(x)` — Round number to nearest integer; $\lfloor x\rceil$
+- `log(x)` — Log of number (natural log by default); $\log(x)$
+- `sign(x)` — Sign (1, -1, or 0) of x; $\text{sgn}\ x$
 
 #### Distribution and Tendency Functions
 
@@ -649,7 +649,7 @@ vectors all their original lengths.
 - [`table()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/distribution.md)
   — Tabulate all unique values in vector, or cross-tabulate across
   multiple vectors.
-  - When using humdrum$`_{\mathbb{R}}`$, you should use the similar
+  - When using humdrum$_{\mathbb{R}}$, you should use the similar
     \[count()\] instead!
 
 ## Useful tricks

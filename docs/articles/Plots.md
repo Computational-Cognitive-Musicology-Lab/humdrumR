@@ -1,10 +1,10 @@
 # Making plots with humdrumR
 
-Welcome to “Making plots with humdrum$`_{\mathbb{R}}`$”! R has two major
-plotting systems that are widely used: 1) R’s built-in \[base
-graphics\]\[graphics-package\] functions and 2) the more modern
-[ggplot2](#ggplot2). Humdrum$`_{\mathbb{R}}`$ is compatible with both of
-these systems. Humdrum$`_{\mathbb{R}}`$ also has it’s own, built-in
+Welcome to “Making plots with humdrum$_{\mathbb{R}}$”! R has two major
+plotting systems that are widely used: 1) R’s built-in base graphics
+functions (`?graphics-package`) and 2) the more modern
+[ggplot2](#ggplot2). Humdrum$_{\mathbb{R}}$ is compatible with both of
+these systems. Humdrum$_{\mathbb{R}}$ also has it’s own, built-in
 [draw()](#draw) function, which is basically a spiffy (easier to use)
 extension of base-R graphics.
 
@@ -12,7 +12,7 @@ In this vignette we give a detailed showcase of the features of
 [draw()](#draw). We’ll then we go over some basic concepts from base-R
 graphics, which you can use if you want to customize [draw()](#draw)
 plots. Finally, we’ll show you how to use [ggplot2](#ggplot2) with
-humdrum$`_{\mathbb{R}}`$ data, if that floats your boat.
+humdrum$_{\mathbb{R}}$ data, if that floats your boat.
 
 ------------------------------------------------------------------------
 
@@ -22,9 +22,15 @@ Let’s load some humdrum data, and create some data fields to plot:
 bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 ```
 
-We’ll use \[semits()\] and \[duration()\] to convert pitch and rhythmic
-information into numbers, and \[solfa()\] and \[recip()\] to represent
-them in categorical form.
+We’ll use
+[`semits()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/semits.md)
+and
+[`duration()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/duration.md)
+to convert pitch and rhythmic information into numbers, and
+[`solfa()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfa.md)
+and
+[`recip()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/recip.md)
+to represent them in categorical form.
 
 ``` r
 bach |>
@@ -35,12 +41,14 @@ bach |>
 
 ## Draw()
 
-Humdrum$`_{\mathbb{R}}`$’s [draw()](#draw) function is basically a fancy
-wrapper around base-R functions like \[plot()\] and \[hist()\]. Like
-these functions, using [draw()](#draw) is simple: just pass data
-(\[atomic\]\[vector\] vectors) in to get a plot. The [draw()](#draw)
-function will look at the input arguments you give it, and make an
-appropriate plot for that input type. Currently,
+Humdrum$_{\mathbb{R}}$’s [draw()](#draw) function is basically a fancy
+wrapper around base-R functions like
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
+[`hist()`](https://rdrr.io/r/graphics/hist.html). Like these functions,
+using [draw()](#draw) is simple: just pass data (atomic vectors
+[`?vector`](https://rdrr.io/r/base/vector.html)) in to get a plot. The
+[draw()](#draw) function will look at the input arguments you give it,
+and make an appropriate plot for that input type. Currently,
 [`draw()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.md) can
 make seven different types of plots, depending on the input passed to
 it.
@@ -50,17 +58,17 @@ two arguments, `x` and `y`, which represent (you guessed it) the X and Y
 axes. Here are the types of plots associated with different types of
 `x`/`y` arguments:
 
-| `x` | `y` | Plot type |
-|----|----|----|
-| `numeric` | (missing) | \[Density Histogram/Contour\]\[draw_density()\] |
-| (missing) | `numeric` | \[Quantile plot\]\[draw_Qplot()\] |
-|  |  | (or Violin plot) |
-| `numeric` | `numeric` | \[Scatter/line plot\]\[draw_scatter()\] |
-| `character`/`factor` | `numeric` | \[Violin plot\]\[draw_violins\] |
-| `numeric` | `character` or `factor` | \[Area chart\]\[draw_area()\] |
-| `character`/ `factor` | (missing) | \[barplot\]\[draw_barplot()\] |
-| (missing) | `character`/`factor` | \[barplot\]\[draw_barplot()\] |
-| `character`/`factor` | `character`/`factor` | \[Heat map\]\[draw_heat()\] |
+| `x`                   | `y`                     | Plot type                 | Function                                                                             |
+|-----------------------|-------------------------|---------------------------|--------------------------------------------------------------------------------------|
+| `numeric`             | (missing)               | Density Histogram/Contour | [`draw_density()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_density.md) |
+| (missing)             | `numeric`               | Quantile plot             | [`draw_Qplot()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_Qplot.md)     |
+|                       |                         | (or Violin plot)          |                                                                                      |
+| `numeric`             | `numeric`               | Scatter/line plot         | [`draw_scatter()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_scatter.md) |
+| `character`/`factor`  | `numeric`               | Violin plot               | [`draw_violins()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_violins.md) |
+| `numeric`             | `character` or `factor` | Area chart                | [`draw_area()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_area.md)       |
+| `character`/ `factor` | (missing)               | barplot                   | [`draw_barplot()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.md) |
+| (missing)             | `character`/`factor`    | barplot                   | [`draw_barplot()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_barplot.md) |
+| `character`/`factor`  | `character`/`factor`    | Heat map                  | [`draw_heat()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_heat.md)       |
 
 To see this in action, let’s see what happens if we pass our `Semits`
 field as either the first (`x`) or second (`y`) argument to
@@ -80,10 +88,12 @@ bach |> draw( , Semits)
 
 ![](Plots_files/figure-html/unnamed-chunk-4-2.png)
 
-On the X axis, numeric data is drawn as a \[density
-histogram\]\[draw_density()\]; on the Y axis, a \[quantile
-plot\]\[draw_Qplot()\]. What if we pass two numeric variables (`Semits`
-*and* `Duration`)? We get a scatter plot:
+On the X axis, numeric data is drawn as a density histogram
+([`draw_density()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_density.md));
+on the Y axis, a quantile plot
+([`draw_Qplot()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw_Qplot.md)).
+What if we pass two numeric variables (`Semits` *and* `Duration`)? We
+get a scatter plot:
 
 ``` r
 
@@ -94,8 +104,8 @@ bach |> draw(Duration, Semits)
 
 We can see that there are really only eight duration values in the data
 (because durations in music scores aren’t really continuous numbers). To
-make the data easier to make sense of, we can use the `jitter` argument
-to randomly move points a little bit, so you can see how many there are.
+make the data easier to interpret, we can use the `jitter` argument to
+randomly move points a little bit, so you can see how many there are.
 (Also check out the `lm` argument.)
 
 ``` r
@@ -103,8 +113,9 @@ to randomly move points a little bit, so you can see how many there are.
 bach |> draw(Duration, Semits, jitter = 'xy', lm = TRUE)
 ```
 
-![](Plots_files/figure-html/unnamed-chunk-6-1.png) Maybe it would make
-more sense with duration on a logarithmic scale?
+![](Plots_files/figure-html/unnamed-chunk-6-1.png)
+
+Maybe it would make more sense with duration on a logarithmic scale?
 
 ``` r
 
@@ -157,7 +168,7 @@ bach |> draw(Recip, Semits)
 
 The relationship between duration and pitch height does seem plausible,
 though it is weak. What about a relationship we’d expect to be a bit
-stronger. Let’s look at voice type vs pitch height (we’ll make two
+stronger? Let’s look at voice type vs pitch height (we’ll make two
 plots, flipping the X and Y axes):
 
 ``` r
@@ -177,21 +188,20 @@ bach |> draw(Semits, Instrument)
 There is a clear relationship between voice type and pitch height—which
 is, of course, what we’d expect!
 
-#### Title and Axis Labels
+### Title and Axis Labels
 
 Use the `title` (and/or `subtitle`) arguments to set a plot title. You
-an also use `xlabel` and `ylabel` to set the axis labels.
+can also use `xlabel` and `ylabel` to set the axis labels.
 
 ``` r
-
-
 bach |> draw(Instrument, Semits, 
              title = 'Violin Plot of Pitch by Voice Type', subtitle = 'In 371 Bach Chorales',
              ylabel = 'Semitones')
 ```
 
-![](Plots_files/figure-html/unnamed-chunk-12-1.png) \## Plotting more
-dimensions
+![](Plots_files/figure-html/unnamed-chunk-12-1.png)
+
+### Plotting more dimensions
 
 When plotting data, we can use other “dimensions” than X and Y position
 to show data. For example, color. Look what happens if we pass
@@ -207,9 +217,9 @@ bach |> draw(color = Instrument, Semits, smooth = TRUE,
 
 ![](Plots_files/figure-html/unnamed-chunk-13-1.png)
 
-We can also use `color` to *add* dimensional to a plot. For example, we
-can go back to our duration-pitch plot, but use color to represent voice
-types:
+We can also use `color` to *add* dimensionality to a plot. For example,
+we can go back to our duration-pitch plot, but use color to represent
+voice types:
 
 ``` r
 
@@ -238,7 +248,7 @@ dimensions of data.
 
 The [draw()](#draw) function has a bunch more cool arguments. Below we
 show a bunch of arguments used when plotting a 1-dimensional
-distrubution of numeric values. Many (but not all) of the arguments
+distribution of numeric values. Many (but not all) of the arguments
 shown below can be used with other types of plots—and other types of
 plots also have their own special arguments, which you can read about in
 the manual pages.
@@ -251,14 +261,14 @@ semitone value, we can mark the mean semitone and the 25th-75th
 interquartile range, like this:
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE, quantiles = c(.25, .75),
              title = 'Distribution of pitch in Chorales',
              subtitle = 'Showing the mean and interquartile range')
 ```
 
-![](Plots_files/figure-html/unnamed-chunk-16-1.png) The median value is
-the 50% quantile, so you could use that instead:
+![](Plots_files/figure-html/unnamed-chunk-16-1.png)
+
+The median value is the 50% quantile, so you could use that instead:
 
 ``` r
 
@@ -266,14 +276,14 @@ bach |> draw(Semits, quantiles = .5,
              title = 'Distribution of pitch in Chorales', subtitle = 'Showing the median')
 ```
 
-![](Plots_files/figure-html/unnamed-chunk-17-1.png) If you want to group
-the histogram by color again, you can use the `conditional` argument to
-control whether you compute the mean/quantiles separately for each
-group, or not. As before, let’s turn on `smooth = TRUE`, cause otherwise
-the histogram gets a bit messy:
+![](Plots_files/figure-html/unnamed-chunk-17-1.png)
+
+If you want to group the histogram by color again, you can use the
+`conditional` argument to control whether you compute the mean/quantiles
+separately for each group, or not. As before, let’s turn on
+`smooth = TRUE`, cause otherwise the histogram gets a bit messy:
 
 ``` r
-
 bach |> draw(Semits, color = Instrument,
              mean = TRUE, quantiles = .5, smooth = TRUE, 
              title = 'Distribution of pitch in Chorales', subtitle = 'Showing the overall mean and median')
@@ -299,7 +309,6 @@ of data isn’t shown in a histogram. It can be a good idea to take a look
 at how much data there is using `showCounts`:
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE,
              showCounts = TRUE,
              title = 'Distribution of pitch in Chorales',
@@ -312,7 +321,6 @@ You can also use `showPoints` to actually *show* all the data points,
 spread out above the histogram:
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE,
              showPoints = TRUE,
              title = 'Distribution of pitch in Chorales',
@@ -328,13 +336,14 @@ common (F#) notes thoughout the range of data.
 ------------------------------------------------------------------------
 
 We can also manipulate our histogram/density plots by passing arguments
-through to the underlying \[hist()\] and \[density()\] functions. You
-can look at those function manuals to learn all the possibilities, but
-for now, you can focus on the `breaks` argument (for histograms) and the
+through to the underlying
+[`hist()`](https://rdrr.io/r/graphics/hist.html) and
+[`density()`](https://rdrr.io/r/stats/density.html) functions. You can
+look at those function manuals to learn all the possibilities, but for
+now, you can focus on the `breaks` argument (for histograms) and the
 `bw` (bandwidth) argument (for smooth density contours):
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
              breaks = 20)
 ```
@@ -342,7 +351,6 @@ bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
 ![](Plots_files/figure-html/unnamed-chunk-21-1.png)
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
              breaks = 40)
 ```
@@ -350,7 +358,6 @@ bach |> draw(Semits, mean = TRUE,title = 'Distribution of pitch in Chorales',
 ![](Plots_files/figure-html/unnamed-chunk-21-2.png)
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE, smooth = TRUE,
              title = 'Distribution of pitch in Chorales',
              bw = 1)
@@ -359,7 +366,6 @@ bach |> draw(Semits, mean = TRUE, smooth = TRUE,
 ![](Plots_files/figure-html/unnamed-chunk-22-1.png)
 
 ``` r
-
 bach |> draw(Semits, mean = TRUE, smooth = TRUE,
              title = 'Distribution of pitch in Chorales',
              bw = .5)
@@ -369,11 +375,11 @@ bach |> draw(Semits, mean = TRUE, smooth = TRUE,
 
 #### Normal Reference
 
-Anotehr cool argument is `normalReference`, which can be used to overlay
+Another cool argument is `normalReference`, which can be used to overlay
 a “reference” normal (Gaussian) distribution on a plot of numeric data.
 The mean and standard deviation of this “reference” distribution are
 taken from the data. If the data is normally distributed, it should come
-close to the reference distribution—if the data clearly mismatches the
+close to the reference distribution; if the data clearly mismatches the
 reference, this means the data is not well approximated by a normal
 distribution.
 
@@ -407,7 +413,7 @@ from normal a little bit.
 
 Another approach is to create multiple plots for different groups. We
 can do this with the `facets` argument. See what happens we pass
-`list(Instrument(` to `facets`, instead of color:
+`list(Instrument)` to `facets`, instead of color:
 
 ``` r
 bach |> draw(Duration, Semits, mean = TRUE, smooth = TRUE,
@@ -443,8 +449,11 @@ bach |> draw(Recip, Semits, mean = TRUE, smooth = TRUE,
 #### Beside/Below
 
 Another option is to explicitly place plots side-by-side (or one above
-the other) using the \[drawBeside()\] or \[drawBelow()\] functions,
-which can be combined:
+the other) using the
+[`drawBeside()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawMultiple.md)
+or
+[`drawBelow()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawMultiple.md)
+functions, which can be combined:
 
 ``` r
 
@@ -485,14 +494,15 @@ drawBelow(drawBeside(histogram, violins), drawBeside(scatter, drawNothing()))
 
 Making pretty plots on the fly is all well and good, but what if want to
 save them for later, or use them in a paper? We can save any plot
-created by [draw()](#draw) to a file by passing it to \[drawToFile()\].
+created by [draw()](#draw) to a file by passing it to
+[`drawToFile()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawToFile.md).
 The only the thing you need is a filename with an extension (either
-`bmp`, `jpg`, `pdf`, `png`, `svg`, or `tiff`)—\[drawToFile()\] will use
-the extension of your filename to determine what kind of file to create.
+`bmp`, `jpg`, `pdf`, `png`, `svg`, or
+`tiff`)—[`drawToFile()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawToFile.md)
+will use the extension of your filename to determine what kind of file
+to create.
 
 ``` r
-
-
 bach |> draw(Semits, color = Instrument,
              mean = TRUE, quantiles = .5, smooth = TRUE,
              conditional = list(mean = TRUE, quantiles = TRUE), 
@@ -509,38 +519,52 @@ drawToFile(violins, 'Violins.svg')
 
 ## Customizing draw() plots
 
-We’ve shown here that humdrum$`_{\mathbb{R}}`$’s [draw()](#draw)
-function has a lot of great options. However, it’s inevitable that you
-might want to make plots that can’t be done with [draw()](#draw)—or
-`ggplot`. Fortunately, [draw()](#draw) is built on top of R’s base
-graphics system, which is extremely powerful, giving you precise control
-of every aspect of plots.
+We’ve shown here that humdrum$_{\mathbb{R}}$’s [draw()](#draw) function
+has a lot of great options. However, it’s inevitable that you might want
+to make plots that can’t be done with [draw()](#draw)—or `ggplot`.
+Fortunately, [draw()](#draw) is built on top of R’s base graphics
+system, which is extremely powerful, giving you precise control of every
+aspect of plots.
 
 The simplest option to customize [draw()](#draw) plots is to *add* to
 them using base-R graph functions. However, for more complex/customized
 plots, you’ll eventually need to dive deep into base-R graphics (or
-\[ggplot2\]\[#ggplot2\]).
+[ggplot2](#ggplot2)).
 
 ------------------------------------------------------------------------
 
 Base-R graphics is centered around a few main plotting functions:
-\[plot()\], \[barplot()\], and \[hist()\]. These functions actually
-work, under the hood, at the core of [draw()](#draw). Additional
-functions can then be used to *add* elements on top of plots you already
-created: \[points()\], \[arrows()\], \[abline()\], \[lines()\],
-\[axis()\], \[polygon()\], etc. These “adding” functions can be used
-with [draw()](#draw) too.
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html),
+[`barplot()`](https://rdrr.io/r/graphics/barplot.html), and
+[`hist()`](https://rdrr.io/r/graphics/hist.html). These functions
+actually work, under the hood, at the core of
+[`draw()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.md).
+Additional functions can then be used to *add* elements on top of plots
+you already created:
+[`points()`](https://rdrr.io/r/graphics/points.html),
+[`arrows()`](https://rdrr.io/r/graphics/arrows.html),
+[`abline()`](https://rdrr.io/r/graphics/abline.html),
+[`lines()`](https://rdrr.io/r/graphics/lines.html),
+[`axis()`](https://rdrr.io/r/graphics/axis.html),
+[`polygon()`](https://rdrr.io/r/graphics/polygon.html), etc. These
+“adding” functions can be used with
+[`draw()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.md)
+too.
 
-#### Adding plot functions
+### Adding plot functions
 
-The best way to “add” content to [draw()](#draw) plots by writing code
-using base-R adding functions, and then using \[drawMore\]. For example,
-we know that [draw()](#draw) has the `mean` argument to mark the mean of
-the data with a cross—but what if you wanted to draw a line across the
-screen marking the mean? There is no [draw()](#draw) argument for that
-(yet), but you can use the base-R \[abline()\] function to do
-this—specifically, the `v` argument can be used to draw a vertical line.
-So we could do something like this:
+The best way to “add” content to
+[`draw()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.md)
+plots by writing code using base-R adding functions, and then using
+[`drawMore()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/drawMore.md).
+For example, we know that
+[`draw()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.md) has
+the `mean` argument to mark the mean of the data with a cross—but what
+if you wanted to draw a line across the screen marking the mean? There
+is no [draw()](#draw) argument for that (yet), but you can use the
+base-R [`abline()`](https://rdrr.io/r/graphics/abline.html) function to
+do this—specifically, the `v` argument can be used to draw a vertical
+line. So we could do something like this:
 
 ``` r
 
@@ -549,22 +573,25 @@ bach |>
   drawMore(abline(v = mean(x), col = 'red', lwd = 2))
 ```
 
-![](Plots_files/figure-html/unnamed-chunk-31-1.png) Maybe we ’d also
-like to add some text, like the exact value of that mean? Use the base-R
-\[mtext()\] function:
+![](Plots_files/figure-html/unnamed-chunk-31-1.png)
+
+Maybe we ’d also like to add some text, like the exact value of that
+mean? Use the base-R [`mtext()`](https://rdrr.io/r/graphics/mtext.html)
+function:
 
 ``` r
-
 bach |>
   draw(Duration, Semits, jitter = 'x') |>
   drawMore(abline(v = mean(x), col = 'red', lwd = 2),
            mtext(paste0('mean duration:\n', round(mean(x), 2)), side = 3, at = mean(x), col = 'red'))
 ```
 
-![](Plots_files/figure-html/unnamed-chunk-32-1.png) Or maybe you’d like
-to shade the area containing pitches below middle C, with durations
-longer than a quarter note. We can do this with base-R \[polygon()\],
-though it’s a bit complicated:
+![](Plots_files/figure-html/unnamed-chunk-32-1.png)
+
+Or maybe you’d like to shade the area containing pitches below middle C,
+with durations longer than a quarter note. We can do this with base-R
+[`polygon()`](https://rdrr.io/r/graphics/polygon.html), though it’s a
+bit complicated:
 
 ``` r
 
@@ -577,14 +604,17 @@ bach |>
 
 ![](Plots_files/figure-html/unnamed-chunk-33-1.png)
 
-Other functions you might want to read about are \[arrows()\],
-\[graphics::segements()\], \[points()\], \[text()\].
+Other functions you might want to read about are
+[`arrows()`](https://rdrr.io/r/graphics/arrows.html),
+[`graphics::segments()`](https://rdrr.io/r/graphics/segments.html),
+[`points()`](https://rdrr.io/r/graphics/points.html),
+[`text()`](https://rdrr.io/r/graphics/text.html).
 
 ## GGplot2
 
 [GGplot2](https://ggplot2.tidyverse.org/) is probably R’s most popular
-graphing library. Humdrum$`_{\mathbb{R}}`$ has methods to enable us to
-use `ggplot2` with humdrum data.
+graphing library. Humdrum$_{\mathbb{R}}$ has methods to enable us to use
+`ggplot2` with humdrum data.
 
 ``` r
 library(ggplot2)

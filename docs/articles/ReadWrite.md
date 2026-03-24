@@ -1,17 +1,17 @@
 # Reading and writing humdrum data
 
 Welcome to “Reading and writing data with humdrumR”! This article will
-give you a detailed overview of humdrum$`_{\mathbb{R}}`$’s data reading
+give you a detailed overview of humdrum$_{\mathbb{R}}$’s data reading
 and writing functionality.
 
 This article, like all of our articles, closely parallels information in
-humdrum$`_{\mathbb{R}}`$’s detailed code documentation, which can be
-found in the “[Reference \> Reading and
+humdrum$_{\mathbb{R}}$’s detailed code documentation, which can be found
+in the “[Reference \> Reading and
 Writing](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html#reading-and-writing "HumdrumR function reference, Reading and Writing")”
 section of the
-humdrum$`_{\mathbb{R}}`$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
-You can also find this information within R, once
-humdrum$`_{\mathbb{R}}`$ is loaded, using
+humdrum$_{\mathbb{R}}$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once humdrum$_{\mathbb{R}}$
+is loaded, using
 [`?readHumdrum`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
 or
 [`?writeHumdrum`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/writeHumdrum.md).
@@ -20,20 +20,20 @@ or
 
 The
 [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
-function is the gateway to humdrum$`_{\mathbb{R}}`$: it is the function
-we use to read humdrum data, encoded in
+function is the gateway to humdrum$_{\mathbb{R}}$: it is the function we
+use to read humdrum data, encoded in
 [humdrum-syntax](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md "The humdrum syntax, article")
 text files, into R.
 
 ------------------------------------------------------------------------
 
 In the following examples, we will make use the small number of raw
-humdrum data files which are included with humdrum$`_{\mathbb{R}}`$. To
+humdrum data files which are included with humdrum$_{\mathbb{R}}$. To
 access these files, we need to navigate to the directory where your
-computer installed humdrum$`_{\mathbb{R}}`$—fortunately,
-humdrum$`_{\mathbb{R}}`$ records where this directory is on your
-computer in a variable called `humdrumRroot`. Once we load the
-humdrum$`_{\mathbb{R}}`$ library, we just need to set our R “working
+computer installed humdrum$_{\mathbb{R}}$—fortunately,
+humdrum$_{\mathbb{R}}$ records where this directory is on your computer
+in a variable called `humdrumRroot`. Once we load the
+humdrum$_{\mathbb{R}}$ library, we just need to set our R “working
 directory” to that location using
 [`setwd()`](https://rdrr.io/r/base/getwd.html).
 
@@ -209,11 +209,11 @@ includes directory paths (relative or absolute)—using your operating
 system’s appropriate delimiter ("\\ for windows, "/" for everybody
 else)—*and* a pattern for matching file paths. *Each* directory is also
 treated as a regular expression, possibly matching multiple directories.
-Let’s break this down: humdrum$`_{\mathbb{R}}`$ splits your
-REpath-pattern input string into three parts: `"HumdrumData"`,
-`"BachChorales"`, *and* `"chor.*.krn"`, and treats *each* of the three
-as regular expressions. The first two expressions are used to match
-directories, while the last expression is used to match files. So, while
+Let’s break this down: humdrum$_{\mathbb{R}}$ splits your REpath-pattern
+input string into three parts: `"HumdrumData"`, `"BachChorales"`, *and*
+`"chor.*.krn"`, and treats *each* of the three as regular expressions.
+The first two expressions are used to match directories, while the last
+expression is used to match files. So, while
 `readHumdrum('HumdrumData/BeethovenVariations/.*.krn')` matches all the
 files with the “.krn” extension in the “BeethovenVariations” directories
 and `readHumdrum('HumdrumData/MozartVariations/.*.krn')` matches all the
@@ -398,10 +398,10 @@ readHumdrum('HumdrumData/.*/.*')
 >               *Token :: character
 ```
 
-> Note: Since humdrum$`_{\mathbb{R}}`$ can read files from multiple
+> Note: Since humdrum$_{\mathbb{R}}$ can read files from multiple
 > directories at once, it is possible that two or more files with the
 > same file name, but in different directories are matched. If this
-> happens, humdrum$`_{\mathbb{R}}`$ will read both files, but identifies
+> happens, humdrum$_{\mathbb{R}}$ will read both files, but identifies
 > each file with enough of its directory path to make sure you can
 > distinguish them.
 
@@ -630,11 +630,11 @@ REpath-patterns:
 
 ##### Pattern Names
 
-Whenever we specify more than one REpath-pattern,
-humdrum$`_{\mathbb{R}}`$ gives them names which we can access in the
-`Label` field of the resulting humdrum$`_{\mathbb{R}}`$ data object. You
-can choose these labels by giving names to the patterns in your
-multi-pattern vectors: Thus, we could write
+Whenever we specify more than one REpath-pattern, humdrum$_{\mathbb{R}}$
+gives them names which we can access in the `Label` field of the
+resulting humdrum$_{\mathbb{R}}$ data object. You can choose these
+labels by giving names to the patterns in your multi-pattern vectors:
+Thus, we could write
 
 ``` r
 readHumdrum('HumdrumData',
@@ -762,9 +762,9 @@ want to use to find them, you might start be using
 [`findHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
 takes the same input as
 [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md),
-but doesn’t fully parse the input into humdrum$`_{\mathbb{R}}`$.
-Instead, it returns a `data.table` containing matching filenames (if
-any) and raw file content.
+but doesn’t fully parse the input into humdrum$_{\mathbb{R}}$. Instead,
+it returns a `data.table` containing matching filenames (if any) and raw
+file content.
 
 If you use the `verbose = TRUE` option for either
 [`findHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
@@ -789,14 +789,14 @@ humdrum but
 [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
 won’t read it, use
 [`validateHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/validateHumdrum.md)
-to see a detailed report of the problem. Humdrum$`_{\mathbb{R}}`$ won’t
+to see a detailed report of the problem. Humdrum$_{\mathbb{R}}$ won’t
 read files with *any* humdrum-syntax violations, even relatively minor
 ones. Once you see the problems that
 [`validateHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/validateHumdrum.md)
 is finding in your data, you’ll need to fix them yourself before you can
-use humdrum$`_{\mathbb{R}}`$ on the data. Check out the
+use humdrum$_{\mathbb{R}}$ on the data. Check out the
 [validateHumdrum](https://humdrumR.ccml.gtcmt.gatech.edu/articles/reference/validateHumdrum.md)
-documentation to learn more about humdrum$`_{\mathbb{R}}`$’s data
+documentation to learn more about humdrum$_{\mathbb{R}}$’s data
 validation tools, and how they can be used to identify errors in your
 humdrum data.
 
@@ -818,8 +818,8 @@ prints out a few messages describing its process.
     identified, and their text is read into R.
 2.  Next, these files are checked to see if they are valid humdrum
     files.
-3.  The files are parsed—i.e., translated into
-    humdrum$`_{\mathbb{R}}`$’s [data.table
+3.  The files are parsed—i.e., translated into humdrum$_{\mathbb{R}}$’s
+    [data.table
     backend](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumTable.md).
     This step takes the longest by far, as it includes parsing all the
     humdrum files’ data tokens, interpretations, reference records, and
@@ -830,14 +830,14 @@ prints out a few messages describing its process.
 
 ### Parsing Metadata
 
-By default, humdrum$`_{\mathbb{R}}`$ parses all metadata in the humdrum
+By default, humdrum$_{\mathbb{R}}$ parses all metadata in the humdrum
 files it reads. This includes the true global metadata for files,
 encoded in humdrum *reference records*, as well as the more local
 *tandem interpretations*.
 
 #### Reference Records
 
-By default, humdrum$`_{\mathbb{R}}`$ parses all reference records in the
+By default, humdrum$_{\mathbb{R}}$ parses all reference records in the
 files it reads, creating a unique field for each reference key. (If
 there are more than one instance of any given key, they are combined in
 a string separated by semicolons.) If there are a lot of unique
@@ -902,11 +902,11 @@ real-time metainformation associated with specific spines—review our
 syntax](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md)
 vignette for more details.
 
-Humdrum$`_{\mathbb{R}}`$ can read any arbitrary tandem interpretations
-in humdrum data. However, if non-standard interpretations are used,
-humdrum$`_{\mathbb{R}}`$ has no way of knowing how to parse them.
+Humdrum$_{\mathbb{R}}$ can read any arbitrary tandem interpretations in
+humdrum data. However, if non-standard interpretations are used,
+humdrum$_{\mathbb{R}}$ has no way of knowing how to parse them.
 
-By default, humdrum$`_{\mathbb{R}}`$ always reads tandem interpretations
+By default, humdrum$_{\mathbb{R}}$ always reads tandem interpretations
 into a field called `Tandem`. This field tabulates all tandem
 interpretations that have so far appeared in a spine in order,
 concatenating them into a single comma-delimited, from most recent to
@@ -940,11 +940,11 @@ piled up separately, just like any other interpretation, even though
 they are of the same tandem class, and the `"D:"` should supersede the
 `"C:"`. Why do this? Well, *in general* there is no way to know if an
 arbitrary tandem interpretations are of the same class. If you create
-some humdrum data with new interpretations in it,
-humdrum$`_{\mathbb{R}}`$ doesn’t know how to parse them, so will just
-pile them up like this in the `Tandem` field.
+some humdrum data with new interpretations in it, humdrum$_{\mathbb{R}}$
+doesn’t know how to parse them, so will just pile them up like this in
+the `Tandem` field.
 
-Fortunately, humdrum$`_{\mathbb{R}}`$*does* know how to parse many
+Fortunately, humdrum$_{\mathbb{R}}$*does* know how to parse many
 standard tandem interpretations. If you run the command
 
 ``` r
@@ -1038,10 +1038,10 @@ The complement of
 [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
 is, of course,
 [`writeHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/writeHumdrum.md),
-which takes a humdrum$`_{\mathbb{R}}`$ data object and writes it to new
+which takes a humdrum$_{\mathbb{R}}$ data object and writes it to new
 data files. The content of the files which exactly match what is shown
-to you in the “humdrum” view, when you print humdrum$`_{\mathbb{R}}`$,
-so whatever fields are
+to you in the “humdrum” view, when you print humdrum$_{\mathbb{R}}$, so
+whatever fields are
 [selected](https://humdrumR.ccml.gtcmt.gatech.edu/reference/DataFields.html#selecting-fields%20Getting%20started%20with%20humdrumR%20article;%20selecting%20fields%20section%22)
 are written to files. The only question, then, is what files it writes
 to.
@@ -1094,6 +1094,6 @@ will ask you to confirm before proceeding.
 
 `!!!EMD:` is a humdrum reference code, meaning “*Document modification
 description*.” This code is used to keep track of modifications to
-humdrum datasets. Humdrum$`_{\mathbb{R}}`$ will, by default, insert an
+humdrum datasets. Humdrum$_{\mathbb{R}}$ will, by default, insert an
 `!!!EMD` record into any files it writes, saying: “Edited using
 humdrumR, version 0.7.0.7 on (*current data/time*).”

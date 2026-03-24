@@ -1,25 +1,25 @@
 # HumdrumR Data Fields
 
-Welcome to “Humdrum$`_{\mathbb{R}}`$ data fields”! This article explains
-how humdrum$`_{\mathbb{R}}`$ encodes different pieces of musical data in
+Welcome to “Humdrum$_{\mathbb{R}}$ data fields”! This article explains
+how humdrum$_{\mathbb{R}}$ encodes different pieces of musical data in
 the “fields” of a R data.frame. Understanding data fields is essential
-to making effective use of humdrum$`_{\mathbb{R}}`$.
+to making effective use of humdrum$_{\mathbb{R}}$.
 
 This article, like all of our articles, closely parallels information in
-humdrum$`_{\mathbb{R}}`$’s detailed code documentation, which can be
-found in the
+humdrum$_{\mathbb{R}}$’s detailed code documentation, which can be found
+in the
 “[Reference](https://humdrumR.ccml.gtcmt.gatech.edu/reference/index.html#reading-and-writing "HumdrumR function reference, Reading and Writing")”
 section of the
-humdrum$`_{\mathbb{R}}`$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
-You can also find this information within R, once
-humdrum$`_{\mathbb{R}}`$ is loaded, using
+humdrum$_{\mathbb{R}}$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu).
+You can also find this information within R, once humdrum$_{\mathbb{R}}$
+is loaded, using
 [`?fields`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md)
 or
 [`?withinHumdrum`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md).
 
 ## The HumdrumR Data Model
 
-Humdrum$`_{\mathbb{R}}`$ bridges with *data* world of
+Humdrum$_{\mathbb{R}}$ bridges with *data* world of
 [humdrum](https://www.humdrum.org) with the *coding and analysis* world
 of R. It does this by mapping between the [humdrum data
 syntax](https://www.humdrum.org) and a R *data.frame*.
@@ -32,7 +32,7 @@ understanding of the humdrum syntax! Read about the syntax at
 article](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md "The Humdrum Syntax")
 on the topic.
 
-This article only covers how humdrum$`_{\mathbb{R}}`$ handles basic,
+This article only covers how humdrum$_{\mathbb{R}}$ handles basic,
 common humdrum syntax. The humdrum syntax includes a few more complex
 structures—*spine paths* and *multi-stops* (a.k.a., sub-tokens)—which
 are discussed in our [Complex humdrum
@@ -45,7 +45,7 @@ Data.frames are the heart and soul of R. A data.frame is simply a
 two-dimensional table of named columns. Each column is a vector of
 values, all of which are the same length.
 
-In humdrum$`_{\mathbb{R}}`$, every single token in a collection of
+In humdrum$_{\mathbb{R}}$, every single token in a collection of
 humdrum-syntax text files is given its own *row* in a data.frame, which
 we call the “**humdrum table**.” For example, consider this simple,
 humdrum-syntax file:
@@ -76,9 +76,9 @@ print the same file, but with *each* token bracketed by `<` and `>`:
     >    <==>                          <==>                          
     >    <*->                          <*->
 
-So what happens when humdrum$`_{\mathbb{R}}`$ reads this file? (This
-file is bundled with humdrum$`_{\mathbb{R}}`$ in the
-`"humdrumRroot/examples"` directory; See the [Getting
+So what happens when humdrum$_{\mathbb{R}}$ reads this file? (This file
+is bundled with humdrum$_{\mathbb{R}}$ in the `"humdrumRroot/examples"`
+directory; See the [Getting
 started](https://humdrumR.ccml.gtcmt.gatech.edu/articles/GettingStarted.md "Getting started with humdrumR article")
 article for an explanation.)
 
@@ -105,7 +105,7 @@ example1
 
 We see the same thing we saw earlier, when we were reading real humdrum
 data from the `"HumdrumData"` folder. But what’s under the hood? We can
-tell humdrum$`_{\mathbb{R}}`$ that we’d like to see the underlying
+tell humdrum$_{\mathbb{R}}$ that we’d like to see the underlying
 **humdrum table** by explicitly printing the data, and setting
 `view = "table"`. Compare the difference between these two commands:
 
@@ -157,12 +157,12 @@ example1 |> print(view = "table")
 ```
 
 When we use `view = "humdrum"`, we see the default
-humdrum$`_{\mathbb{R}}`$ view of the data in humdrum syntax. However,
-with `view = "table"`, we are showing the underling humdrum table. We
-can see that there is one row for *each and every* token, with different
-columns indicating which `File`, `Spine`, and `Record` each token comes
-from. In humdrum$`_{\mathbb{R}}`$, we refer to the columns of the
-humdrum table as **fields**.
+humdrum$_{\mathbb{R}}$ view of the data in humdrum syntax. However, with
+`view = "table"`, we are showing the underling humdrum table. We can see
+that there is one row for *each and every* token, with different columns
+indicating which `File`, `Spine`, and `Record` each token comes from. In
+humdrum$_{\mathbb{R}}$, we refer to the columns of the humdrum table as
+**fields**.
 
 ------------------------------------------------------------------------
 
@@ -264,17 +264,17 @@ example1
 We see four fields in the table: `Piece`, `Spine`, `Record`, and
 `Token`.
 
-- `Token` is the primary data field in all humdrum$`_{\mathbb{R}}`$
-  data, containing the actual data tokens that originated in the humdrum
-  data files your read. You’ll see lots and lots of references to
-  `Token` throughout these articles, and in the
-  humdrum$`_{\mathbb{R}}`$[documentation](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html "HumdrumR function reference")!
+- `Token` is the primary data field in all humdrum$_{\mathbb{R}}$ data,
+  containing the actual data tokens that originated in the humdrum data
+  files your read. You’ll see lots and lots of references to `Token`
+  throughout these articles, and in the
+  humdrum$_{\mathbb{R}}$[documentation](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html "HumdrumR function reference")!
 - `Piece`, `Spine`, and `Record` are “structural fields,” indicating
   where each data token is located in the humdrum syntax.
 
 These four fields are just the tip of the iceberg!
-Humdrum$`_{\mathbb{R}}`$ datasets will generally have many more
-fields—you can see them all listed by using
+Humdrum$_{\mathbb{R}}$ datasets will generally have many more fields—you
+can see them all listed by using
 [`fields()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md)
 commands:
 
@@ -305,6 +305,7 @@ fields(example1)
 >    21:          Stop   integer      Structure        0     FALSE      FALSE
 >    22:          Type character      Structure        0     FALSE      FALSE
 >                 Name     Class           Type Selected GroupedBy Complement
+>               <char>    <char>         <char>    <int>    <lgcl>     <lgcl>
 ```
 
 We see that there are six fields (columns), and that they are divided
@@ -487,7 +488,7 @@ example1 |> select(everything())
 If you call
 [`select()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/selectedFields.md)
 with no arguments, the `Token` field will be selected. The `Token` field
-is always the starting point of humdrum$`_{\mathbb{R}}`$ analysis, so it
+is always the starting point of humdrum$_{\mathbb{R}}$ analysis, so it
 is helpful to be able to “reset” by going back to `Token`.
 
 ------------------------------------------------------------------------
@@ -529,8 +530,8 @@ you want to look at lots of fields at once set
 #### Accessing fields
 
 Sometimes, we might want to just pull fields out of the
-humdrum$`_{\mathbb{R}}`$ data table, turning them into “plain” R data.
-The best way to do this is with the
+humdrum$_{\mathbb{R}}$ data table, turning them into “plain” R data. The
+best way to do this is with the
 [`pull()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pullHumdrum.md)
 function.
 
@@ -591,13 +592,13 @@ example1 |> pull_data.frame(everything())
 >    4          1    1 BasicExample.krn
 >    5          2    1 BasicExample.krn
 >    6          3    1 BasicExample.krn
->                                                                                   Filepath
->    1 /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/examples/BasicExample.krn
->    2 /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/examples/BasicExample.krn
->    3 /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/examples/BasicExample.krn
->    4 /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/examples/BasicExample.krn
->    5 /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/examples/BasicExample.krn
->    6 /home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/examples/BasicExample.krn
+>                                                                                     Filepath
+>    1 /home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/examples/BasicExample.krn
+>    2 /home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/examples/BasicExample.krn
+>    3 /home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/examples/BasicExample.krn
+>    4 /home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/examples/BasicExample.krn
+>    5 /home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/examples/BasicExample.krn
+>    6 /home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/examples/BasicExample.krn
 >      Global Label ParentPath Path Piece Record Spine Stop Type
 >    1  FALSE    _1          0    0     1      6     1    1    D
 >    2  FALSE    _1          0    0     1      7     1    1    D
@@ -613,7 +614,7 @@ So we have a bunch of “fields”—how to we work with them? One option is
 to “pull” the fields we want out—as explained above in the [accessing
 fields](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html#accessing-fields "Getting started with humdrumR article; accessing fields section")
 sections above—and then work with them like any normal R data
-structures. However, humdrum$`_{\mathbb{R}}`$ has a number of useful
+structures. However, humdrum$_{\mathbb{R}}$ has a number of useful
 features that only available when we keep our data wrapped up in the
 `humdrumR` data object. Instead, we can access and manipulate our fields
 directly within the humdrum table.
@@ -632,8 +633,8 @@ readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor0') -> chorales
 In our [quick
 start](https://humdrumR.ccml.gtcmt.gatech.edu/articles/GettingStarted.html#quick-start "Getting started with humdrumR article"),
 we showed you the simplest and most intuitive way to manipulate
-humdrum$`_{\mathbb{R}}`$ data: simply pipe data directly to any
-humdrum$`_{\mathbb{R}}`$ function.
+humdrum$_{\mathbb{R}}$ data: simply pipe data directly to any
+humdrum$_{\mathbb{R}}$ function.
 
 ``` r
 chorales |> 
@@ -778,6 +779,7 @@ fields(chorales)
 >    41:            Stop   integer      Structure        0     FALSE      FALSE
 >    42:            Type character      Structure        0     FALSE      FALSE
 >                   Name     Class           Type Selected GroupedBy Complement
+>                 <char>    <char>         <char>    <int>    <lgcl>     <lgcl>
 ```
 
 So when we write something like `chorales |> pitch()`, how does the
@@ -1226,8 +1228,8 @@ which field is selected, which can lead to common errors!
 ##### Multiple fields
 
 Once we get to have more than one field to work with, it gets harder to
-use the “humdrum style.” Most humdrum$`_{\mathbb{R}}`$ function wills
-only pipe the *first* selected field, so it doesn’t matter if you select
+use the “humdrum style.” Most humdrum$_{\mathbb{R}}$ function wills only
+pipe the *first* selected field, so it doesn’t matter if you select
 multiple fields. However, the
 [`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
 function can accept multiple fields. Now that we’ve created a `Pitch`
@@ -1268,7 +1270,7 @@ chorales |>
 
 The “humdrum style” from the previous section is a wonderful place to
 start, but it has a few limitations. The main one is **it only works
-with humdrum$`_{\mathbb{R}}`$ functions**. If you try to use base-R
+with humdrum$_{\mathbb{R}}$ functions**. If you try to use base-R
 function like `chorales |> mean()` or a tidyverse function like
 `chorales |> map()`, you’ll get an error. What’s more, the humdrum style
 is limited in the complexity of commands you can execute.
@@ -1374,7 +1376,7 @@ What happened here?
 
 Of course,
 [`mint()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/int.md) is a
-humdrum$`_{\mathbb{R}}`$ function, so we could do this simple command
+humdrum$_{\mathbb{R}}$ function, so we could do this simple command
 without using `mutate()`, by calling `chorales |> mint()` in “humdrum
 style.” However, by using `mutate()` we can do a few nifty things. For
 one, we can execute more complex commands involving any of our fields:
@@ -1470,7 +1472,7 @@ chorales |>
 
 ------------------------------------------------------------------------
 
-We can use non-humdrum$`_{\mathbb{R}}`$ functions, like
+We can use non-humdrum$_{\mathbb{R}}$ functions, like
 [`gsub()`](https://rdrr.io/r/base/grep.html),
 [`nchar()`](https://rdrr.io/r/base/nchar.html), or
 [`mean()`](https://rdrr.io/r/base/mean.html):
@@ -1752,7 +1754,7 @@ chorales |>
 ### Base-R style (With and Within)
 
 In addition to the tidyverse “verbs” `mutate()` and `summarize()`,
-humdrum$`_{\mathbb{R}}`$ also defines methods of the base-R functions
+humdrum$_{\mathbb{R}}$ also defines methods of the base-R functions
 `with` and
 [`within()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md).
 These functions work a lot like `mutate()` and `summarize()`, but are
@@ -1772,16 +1774,15 @@ used in many articles!
 You might be wondering, especially if you already a strong R user, why
 not just
 [pull](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.html#accessing-fields "Getting started with humdrumR article; accessing fields section")
-the data fields out of the humdrum$`_{\mathbb{R}}`$ data and use
-“normal” base-R, or perhaps tidyverse functions. You certainly can do
-that! However, humdrum$`_{\mathbb{R}}`$ offers a number of special
-features that make it particularly useful for musicological analysis of
-humdrum data.
+the data fields out of the humdrum$_{\mathbb{R}}$ data and use “normal”
+base-R, or perhaps tidyverse functions. You certainly can do that!
+However, humdrum$_{\mathbb{R}}$ offers a number of special features that
+make it particularly useful for musicological analysis of humdrum data.
 
 #### Humdrum syntax
 
 An obvious example, is that as long as your data is in
-humdrum$`_{\mathbb{R}}`$ data object, you have the option of viewing the
+humdrum$_{\mathbb{R}}$ data object, you have the option of viewing the
 data in its humdrum-syntax form. This allows you to “see” where things
 are happening in the original data/score, which maintains a transparency
 that affords good research. You can also generate new humdrum syntax
@@ -1791,10 +1792,10 @@ it to new humdrum-syntax files.
 
 #### Isolating data tokens
 
-By default, Humdrum$`_{\mathbb{R}}`$ commands only operate on humdrum
+By default, Humdrum$_{\mathbb{R}}$ commands only operate on humdrum
 *data* tokens, ignoring bar lines, intepretations, and null data tokens.
 You can override this by providing a `dataTypes` argument to most
-humdrum$`_{\mathbb{R}}`$ functions. For example, compare these two
+humdrum$_{\mathbb{R}}$ functions. For example, compare these two
 commands:
 
 ``` r
@@ -1968,14 +1969,14 @@ chorales |>
 >                Token    :: character
 ```
 
-If you pull your data out of humdrum$`_{\mathbb{R}}`$, you’ll have to
+If you pull your data out of humdrum$_{\mathbb{R}}$, you’ll have to
 manually manage what data types you want to work with yourself.
 
 #### Automatic field arguments
 
-For some functions, humdrum$`_{\mathbb{R}}`$ will automatically pass
+For some functions, humdrum$_{\mathbb{R}}$ will automatically pass
 specific fields as arguments to functions you call. For example,
-humdrum$`_{\mathbb{R}}`$[pitch
+humdrum$_{\mathbb{R}}$[pitch
 functions](https://humdrumR.ccml.gtcmt.gatech.edu/references/pitchFunctions.md "HumdrumR pitch functions")
 like
 [`solfa()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/solfa.md)
@@ -1983,7 +1984,7 @@ like
 Many humdrum data sets will have a `Key` field, which is automatically
 created if you read data files containing key interpretations, like
 `G*:`. Unless you explicitly override it with a different `Key`
-argument, humdrum$`_{\mathbb{R}}`$ will automatically pass the `Key`
+argument, humdrum$_{\mathbb{R}}$ will automatically pass the `Key`
 argument to pitch functions. Thus:
 
 ``` r
@@ -1992,7 +1993,7 @@ identical(chorales |> mutate(Solfa = solfa(Token)),
 >    [1] TRUE
 ```
 
-Many humdrum$`_{\mathbb{R}}`$ functions are automatically passed the
+Many humdrum$_{\mathbb{R}}$ functions are automatically passed the
 `Exclusive` field, to help them decide how to parse data. Other examples
 of “automatic arguments” include functions like
 [`metlev()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/metlev.md),
@@ -2285,7 +2286,7 @@ because it is a bar), the token 4G from record 22 to record 23, etc..
 
 #### Special syntactic “sugar”
 
-Humdrum$`_{\mathbb{R}}`$ also provides some additional “syntatic” sugar
+Humdrum$_{\mathbb{R}}$ also provides some additional “syntatic” sugar
 features. The simplest example is the `.` variable, which will be
 automatically replaced with first selected field when using
 tidyverse-style function. This is helpful when in pipes where you might
@@ -2384,7 +2385,7 @@ type this out: we can just type `.`.
 
 ------------------------------------------------------------------------
 
-All of humdrum$`_{\mathbb{R}}`$’s syntactic tricks are fully explained
+All of humdrum$_{\mathbb{R}}$’s syntactic tricks are fully explained
 elsewhere, including in the
 [?withinHumdrum](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md "Within humdrum data")
 documentation.
@@ -2393,8 +2394,8 @@ documentation.
 
 Once you get the hang of our humdrum- and tidyverse- style manipulation
 of humdrum data fields, you’ll want to read about some of the important,
-advanced features humdrum$`_{\mathbb{R}}`$ offers. When you are ready,
-you can continue learning about other features humdrum$`_{\mathbb{R}}`$
+advanced features humdrum$_{\mathbb{R}}$ offers. When you are ready, you
+can continue learning about other features humdrum$_{\mathbb{R}}$
 provides for manipulating and analyzing humdrum data:
 
 - [Filtering humdrum

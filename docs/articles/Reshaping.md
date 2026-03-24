@@ -2,7 +2,7 @@
 
 Welcome to “Shaping humdrum data”! This article explains various steps
 you can, and often need, to take to prepare humdrum datasets for
-analysis, using humdrum$`_{\mathbb{R}}`$.
+analysis, using humdrum$_{\mathbb{R}}$.
 
 One of the great strengths of the [humdrum
 syntax](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md "Intro to the humdrum syntax")
@@ -25,7 +25,7 @@ our data:
     separated.
 
 Consider the following small humdrum file, which is bundled with
-humdrum$`_{\mathbb{R}}`$.
+humdrum$_{\mathbb{R}}$.
 
 ``` r
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
@@ -64,8 +64,8 @@ decide what combinations of these seven information streams consitute a
 
 The first step is often to simply remove data we don’t need. In *this*
 article, we’ll show you the most common, basic, ways you might filter
-your data. For more details about other humdrum$`_{\mathbb{R}}`$
-filtering functionality, check out the [data
+your data. For more details about other humdrum$_{\mathbb{R}}$ filtering
+functionality, check out the [data
 filtering](https://humdrumR.ccml.gtcmt.gatech.edu/articles/Filtering.md "Filtering humdrum data article")
 article.
 
@@ -448,7 +448,7 @@ example |>
 ## Cleave (Pasting/Aligning)
 
 The next step might be to align/combine information that is currently
-separated. In many humdrum$`_{\mathbb{R}}`$ datasets, we have multiple
+separated. In many humdrum$_{\mathbb{R}}$ datasets, we have multiple
 pieces of information spread across multiple spines, or in some cases,
 across spine paths or stops. If, given our research question, we need to
 think of multiple pieces of information as describing a *single data
@@ -628,7 +628,7 @@ example |>
 ```
 
 Since we are cleaving by the name of exclusive interpretation here,
-humdrum$`_{\mathbb{R}}`$ names the new field with the capitalized
+humdrum$_{\mathbb{R}}$ names the new field with the capitalized
 exclusive interpretation name by default.
 
 We may customize the new field name as before:
@@ -769,7 +769,7 @@ example_stops
 >               *Token :: character
 ```
 
-By default, humdrum$`_{\mathbb{R}}`$ treats each token (note) in *each*
+By default, humdrum$_{\mathbb{R}}$ treats each token (note) in *each*
 stop as a separate data observation, with its own row in the humdrum
 table view. If we are studying harmony, we might want to align those
 stops “on top” of each other, in different fields. But, we can cleave

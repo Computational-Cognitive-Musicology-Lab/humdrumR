@@ -170,7 +170,7 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">chorale</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">'HumdrumData/BachChorales/chor001.krn'</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -179,23 +179,23 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span><span class="va">chorale</span><span class="op">[[</span><span class="fl">100</span><span class="op">:</span><span class="fl">110</span>, <span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">         **kern         **kern         **kern         **kern</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  100:  </span><span style="color: #00BB00; text-decoration: underline;">            =17            =17            =17            =17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  101:  </span><span style="color: #BBBB00;">            8EL             4B          8f#L]            4.g</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  102:  </span><span style="color: #BBBB00;">             8D</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">            8eJ</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  103:  </span><span style="color: #BBBB00;">             8C             4c            8eL</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  104:  </span><span style="color: #BBBB00;">            8BB</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">           8f#J             8a</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  105:  </span><span style="color: #BBBB00;">            8AA             4d             4g             4b</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  106:  </span><span style="color: #BBBB00;">           8GGJ</span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  107:  </span><span style="color: #00BB00; text-decoration: underline;">            =18            =18            =18            =18</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  108:  </span><span style="color: #BBBB00;">            2D;            2d;           2f#;            2a;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  109:  </span><span style="color: #BBBB00;">            [4G             4d             4g             4b</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  110:  </span><span style="color: #00BB00; text-decoration: underline;">            =19            =19            =19            =19</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8:           **kern         **kern         **kern         **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    52:              *&gt;B            *&gt;B            *&gt;B            *&gt;B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   100:              =17            =17            =17            =17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   101:              8EL             4B          8f#L]            4.g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   102:               8D              .            8eJ              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   103:               8C             4c            8eL              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   104:              8BB              .           8f#J             8a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   105:              8AA             4d             4g             4b</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   106:             8GGJ              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   107:              =18            =18            =18            =18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   108:              2D;            2d;           2f#;            2a;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   109:              [4G             4d             4g             4b</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   110:              =19            =19            =19            =19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   124:               *-             *-             *-             *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
@@ -204,23 +204,23 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">chorale</span><span class="op">[[</span><span class="fl">100</span><span class="op">:</span><span class="fl">110</span>, <span class="op">]</span><span class="op">]</span>, <span class="fu">accidental</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">    8:  </span><span style="color: #BB0000;">   **accidental   **accidental   **accidental   **accidental</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   12:  </span><span style="color: #BB00BB;">      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   13:  </span><span style="color: #BB00BB;">   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   14:  </span><span style="color: #BB00BB;">            *&gt;A            *&gt;A            *&gt;A            *&gt;A</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">   52:  </span><span style="color: #BB00BB;">            *&gt;B            *&gt;B            *&gt;B            *&gt;B</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  100:  </span><span style="color: #00BB00; text-decoration: underline;">            =17            =17            =17            =17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  101:  </span><span style="color: #BBBB00;">              n              n              n              n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  102:  </span><span style="color: #BBBB00;">              n</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              n</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  103:  </span><span style="color: #BBBB00;">              n              n              n</span><span style="color: #BBBB00; font-weight: 100;">              .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  104:  </span><span style="color: #BBBB00;">              n</span><span style="color: #BBBB00; font-weight: 100;">              .</span><span style="color: #BBBB00;">              n              n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  105:  </span><span style="color: #BBBB00;">              n              n              n              n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  106:  </span><span style="color: #BBBB00;">              n</span><span style="color: #BBBB00; font-weight: 100;">              .              .              .</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  107:  </span><span style="color: #00BB00; text-decoration: underline;">            =18            =18            =18            =18</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  108:  </span><span style="color: #BBBB00;">              n              n              n              n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  109:  </span><span style="color: #BBBB00;">              n              n              n              n</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  110:  </span><span style="color: #00BB00; text-decoration: underline;">            =19            =19            =19            =19</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #000000; font-style: italic;">  124:  </span><span style="color: #BB00BB;">             *-             *-             *-             *-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     8:     **accidental   **accidental   **accidental   **accidental</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    52:              *&gt;B            *&gt;B            *&gt;B            *&gt;B</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   100:              =17            =17            =17            =17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   101:                n              n              n              n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   102:                n              .              n              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   103:                n              n              n              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   104:                n              .              n              n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   105:                n              n              n              n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   106:                n              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   107:              =18            =18            =18            =18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   108:                n              n              n              n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   109:                n              n              n              n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   110:              =19            =19            =19            =19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   124:               *-             *-             *-             *-</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
@@ -235,7 +235,7 @@ If <code>inPlace = FALSE</code>, only the pitch output information will be retur
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

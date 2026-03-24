@@ -85,7 +85,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2026-02-24</h4>
+            <h4 data-toc-skip class="date">2026-03-24</h4>
       
 
       <div class="d-none name"><code>PitchAndTonality.Rmd</code></div>
@@ -383,7 +383,7 @@ values:</p>
 <span>  <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/pullHumdrum.html">pull</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span>main <span class="op">=</span> <span class="st">'Histogram of semits() in 10 chorales'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
 <div class="section level4">
 <h4 id="keys">Keys<a class="anchor" aria-label="anchor" href="#keys"></a>
 </h4>
@@ -625,20 +625,20 @@ if you want to tabulate pitch classes, for example:</p>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>generic <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span>, generic <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-18-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 <div class="section level3">
 <h3 id="transposition">Transposition<a class="anchor" aria-label="anchor" href="#transposition"></a>
@@ -675,14 +675,14 @@ from a data set, this makes it very easy to, say, transpose all
 <span>  <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span>, transposeArgs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>to <span class="op">=</span> <span class="st">'C:'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-21-1.png" class="r-plt" alt="" width="700"></p>
 <p>This looks exactly like calling <code><a href="../reference/solfa.html">solfa()</a></code>:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/solfa.html">solfa</a></span><span class="op">(</span>simple <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/count.html">count</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/draw.html">draw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" width="700"></p>
+<p><img src="PitchAndTonality_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -1133,7 +1133,7 @@ for details.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:100px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

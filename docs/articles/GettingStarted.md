@@ -1,10 +1,10 @@
 # Getting started with humdrumR
 
-Welcome to “Getting started with humdrum$`_{\mathbb{R}}`$”! This article
-provides a quick introduction to the basics of humdrum$`_{\mathbb{R}}`$,
+Welcome to “Getting started with humdrum$_{\mathbb{R}}$”! This article
+provides a quick introduction to the basics of humdrum$_{\mathbb{R}}$,
 getting you started loading humdrum data and performing (very) simple
 analyses of humdrum data. Before you continue, make sure
-humdrum$`_{\mathbb{R}}`$ is installed: [how to install
+humdrum$_{\mathbb{R}}$ is installed: [how to install
 humdrumR](https://humdrumr.ccml.gtcmt.gatech.edu/#installing-humdrum_mathbbr "Installing humdrumR").  
 Once it’s installed, you can open an R session and load the library
 using the command
@@ -12,12 +12,12 @@ using the command
 are ready to rock!
 
 This article, like all of our articles, closely parallels information in
-humdrum$`_{\mathbb{R}}`$’s detailed code documentation, which can be
-found in the
+humdrum$_{\mathbb{R}}$’s detailed code documentation, which can be found
+in the
 “[Reference](https://humdrumr.ccml.gtcmt.gatech.edu/reference/index.html "HumdrumR function reference")”
 section of the
-humdrum$`_{\mathbb{R}}`$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu/articles/humdrumR.ccml.gtcmt.gatech.edu).
-Once humdrum$`_{\mathbb{R}}`$ is installed and loaded, the code
+humdrum$_{\mathbb{R}}$[homepage](https://humdrumR.ccml.gtcmt.gatech.edu/articles/humdrumR.ccml.gtcmt.gatech.edu).
+Once humdrum$_{\mathbb{R}}$ is installed and loaded, the code
 documentation can also be accessed directly within an R session by using
 the `?` command, like
 [`?humdrumR`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumR.md),
@@ -34,13 +34,12 @@ see the corresponding documentation.
 
 Let’s just dive right in!
 
-To illustrate how humdrum$`_{\mathbb{R}}`$ works, we’ll need some
-[humdrum
+To illustrate how humdrum$_{\mathbb{R}}$ works, we’ll need some [humdrum
 data](https://humdrumR.ccml.gtcmt.gatech.edu/articles/HumdrumSyntax.md "The Humdrum Syntax")
-to work with. Fortunately, humdrum$`_{\mathbb{R}}`$ comes packaged with
-a small number of humdrum data files just for you to play around with.
+to work with. Fortunately, humdrum$_{\mathbb{R}}$ comes packaged with a
+small number of humdrum data files just for you to play around with.
 These files are stored in the directory where your computer installed
-humdrum$`_{\mathbb{R}}`$, in a subdirectory called “`HumdrumData`”. You
+humdrum$_{\mathbb{R}}$, in a subdirectory called “`HumdrumData`”. You
 can move your R session to this directory using R’s “set working
 directory” command: `setwd(humdrumRroot)`. Once you’re in the humdrumR
 directory, you can use the base R `dir` function to see what humdrum
@@ -72,7 +71,7 @@ ten chorales by J.S. Bach; each file contains four spines (columns) of
 `**kern` data, representing musical pitch and rhythm (among other
 things). Take a minute to find the files in your computer’s
 finder/explorer and open them up with a simple text editor. One of the
-core philosophies of humdrum$`_{\mathbb{R}}`$ is that we maintain a
+core philosophies of humdrum$_{\mathbb{R}}$ is that we maintain a
 direct, transparent relationship with our symbolic data—so always take
 the time to look at your data! You can also do this within Rstudio’s
 “Files” pane—in fact, Rstudio will make things extra easy for you
@@ -82,8 +81,7 @@ Directory” to quickly find the files.
 ### Reading humdrum data
 
 Now that we’ve found some humdrum data to look at, let’s read it into
-humdrum$`_{\mathbb{R}}`$. We can do this using
-humdrum$`_{\mathbb{R}}`$’s
+humdrum$_{\mathbb{R}}$. We can do this using humdrum$_{\mathbb{R}}$’s
 [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
 command. Try this:
 
@@ -97,7 +95,7 @@ This command does two things:
 1.  The
     [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
     function will read the “chor001.krn” file into R and create a
-    humdrum$`_{\mathbb{R}}`$ data object from it.
+    humdrum$_{\mathbb{R}}$ data object from it.
 2.  This new object will be saved to a variable called `chor1`. (The
     name ‘chor1’ is just a name I chose—you are welcome to give it a
     different name if you want.)
@@ -257,7 +255,7 @@ article](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.md "HumdrumR
 
 Cool! Still, looking at a single humdrum file is not really that
 exciting. The whole point of using computers is that they allow us to
-work with large amounts of data. Luckily, humdrum$`_{\mathbb{R}}`$ makes
+work with large amounts of data. Luckily, humdrum$_{\mathbb{R}}$ makes
 this very easy. Check out this next command:
 
 ``` r
@@ -355,10 +353,10 @@ chorales
 Wow! We’ve now got a “humdrumR corpus of ten pieces”—and that’s nothing:
 [`readHumdrum()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/readHumdrum.md)
 will work just as well reading hundreds or thousands of files! Notice
-that when you print a humdrum$`_{\mathbb{R}}`$ object,
-humdrum$`_{\mathbb{R}}`$ shows you the beginning of the first file and
-the end of the last file, as well as telling you how many files there
-are in total.
+that when you print a humdrum$_{\mathbb{R}}$ object,
+humdrum$_{\mathbb{R}}$ shows you the beginning of the first file and the
+end of the last file, as well as telling you how many files there are in
+total.
 
 ------------------------------------------------------------------------
 
@@ -816,7 +814,7 @@ quarter-note E4 (`4e`), which occurs 103 times.
 To make our tallies more useful, we might want to count only the pitch
 or rhythm part of the `**kern` data. To do this, we need to to be able
 to extract the pitch/rhythm from the original `**kern` tokens, which we
-can do that using humdrum$`_{\mathbb{R}}`$’s suite of
+can do that using humdrum$_{\mathbb{R}}$’s suite of
 [pitch](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html)
 and
 [rhythm](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/rhythmFunctions.html)
@@ -998,7 +996,7 @@ chorales |>
 ```
 
 Pretty cool, but still quite a big table. Maybe we’d like to ignore
-octave information for now? Luckily, humdrum$`_{\mathbb{R}}`$’s [pitch
+octave information for now? Luckily, humdrum$_{\mathbb{R}}$’s [pitch
 functions](https://computational-cognitive-musicology-lab.github.io/humdrumR/reference/pitchFunctions.html)
 have a “`simple`” argument, which can be used to ask for only *simple*
 pitch information (no octave).
@@ -1032,7 +1030,7 @@ chorales |>
 ```
 
 We can make plot of our nice simple-pitch table, using
-humdrum$`_{\mathbb{R}}`$’s
+humdrum$_{\mathbb{R}}$’s
 [`draw()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/draw.md)
 function:
 
@@ -1099,7 +1097,7 @@ chorales |>
 Let’s try something even cooler. Notice that, in the chorale data, there
 are tandem interpretations that look like `*G:` and `*E:`. These are
 indications of the key. Anytime you read humdrum data that has these key
-interpretations, humdrum$`_{\mathbb{R}}`$ will read them into a “field”
+interpretations, humdrum$_{\mathbb{R}}$ will read them into a “field”
 called `Key`. We could, for example, count all the notes sung when the
 key is G major like this:
 
@@ -1130,8 +1128,8 @@ chorales |>
 ```
 
 Guess what? There are a bunch more “fields” hidden in your
-humdrum$`_{\mathbb{R}}`$ data object that you can use…and you can make
-your own! Check out our next article, on humdrum$`_{\mathbb{R}}`$’s data
+humdrum$_{\mathbb{R}}$ data object that you can use…and you can make
+your own! Check out our next article, on humdrum$_{\mathbb{R}}$’s data
 [fields](https://humdrumR.ccml.gtcmt.gatech.edu/articles/DataFields.md "HumdrumR data fields"),
 to learn more.
 

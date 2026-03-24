@@ -137,7 +137,7 @@ to see what fields are available, and how they are ordered. To actually
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpEuDntc/temp_libpathb11a7693ac44/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -158,56 +158,56 @@ humData |> select(fieldTypes = 'Structure') |> selectedFields()
 
 humData |> select(4)
 #> ######################## vvv chor001.krn vvv #########################
-#>      1:  !!!COM: Bach, Johann Sebastian
-#>      2:  !!!CDT: 1685/02/21/-1750/07/28/
-#>      3:  !!!OTL@@DE: Aus meines Herzens Grunde
-#>      4:  !!!OTL@EN:      From the Depths of My Heart
-#>      5:  !!!SCT: BWV 269
-#>      6:  !!!PC#: 1
-#>      7:  !!!AGN: chorale
-#>      8:                0              0              0              0
-#>      9:                0              0              0              0
-#>     10:                0              0              0              0
-#>     11:                0              0              0              0
-#>     12:                0              0              0              0
-#>     13:                0              0              0              0
-#>     14:                0              0              0              0
-#>     15:                0              0              0              0
-#>     16:                0              0              0              0
-#>     17:                0              0              0              0
-#>     18:                0              0              0              0
-#>     19:                0              0              0              0
-#>     20:                0              0              0              0
-#>     21:                0              0              0              0
-#>     22:                0              0              0              0
-#>     23:                0              0              0              0
-#>     24:                0              0              0              0
-#>     25:                0              0              0              0
-#>     26:                0              0              0              0
-#>     27:                0              0              0              0
-#>     28:                0              0              0              0
-#>     29:                0              0              0              0
-#>     30:                0              0              0              0
-#>     31:                0              0              0              0
-#>     32:                0              0              0              0
-#>     33:                0              0              0              0
-#>     34:                0              0              0              0
-#>     35:                0              0              0              0
-#>     36:                0              0              0              0
-#>     37:                0              0              0              0
-#>     38:                0              0              0              0
-#>     39:                0              0              0              0
-#>     40:                0              0              0              0
-#>     41:                0              0              0              0
-#>     42:                0              0              0              0
-#>     43:                0              0              0              0
-#>     44:                0              0              0              0
-#>     45:                0              0              0              0
-#>     46:                0              0              0              0
-#>     47:                0              0              0              0
-#>     48:                0              0              0              0
-#>     49:                0              0              0              0
-#>     50:                0              0              0              0
+#>             1:  !!!COM: Bach, Johann Sebastian
+#>             2:  !!!CDT: 1685/02/21/-1750/07/28/
+#>             3:  !!!OTL@@DE: Aus meines Herzens Grunde
+#>             4:  !!!OTL@EN:      From the Depths of My Heart
+#>             5:  !!!SCT: BWV 269
+#>             6:  !!!PC#: 1
+#>             7:  !!!AGN: chorale
+#>             8:                0              0              0              0
+#>             9:                0              0              0              0
+#>            10:                0              0              0              0
+#>            11:                0              0              0              0
+#>            12:                0              0              0              0
+#>            13:                0              0              0              0
+#>            14:                0              0              0              0
+#>            15:                0              0              0              0
+#>            16:                0              0              0              0
+#>            17:                0              0              0              0
+#>            18:                0              0              0              0
+#>            19:                0              0              0              0
+#>            20:                0              0              0              0
+#>            21:                0              0              0              0
+#>            22:                0              0              0              0
+#>            23:                0              0              0              0
+#>            24:                0              0              0              0
+#>            25:                0              0              0              0
+#>            26:                0              0              0              0
+#>            27:                0              0              0              0
+#>            28:                0              0              0              0
+#>            29:                0              0              0              0
+#>            30:                0              0              0              0
+#>            31:                0              0              0              0
+#>            32:                0              0              0              0
+#>            33:                0              0              0              0
+#>            34:                0              0              0              0
+#>            35:                0              0              0              0
+#>            36:                0              0              0              0
+#>            37:                0              0              0              0
+#>            38:                0              0              0              0
+#>            39:                0              0              0              0
+#>            40:                0              0              0              0
+#>            41:                0              0              0              0
+#>            42:                0              0              0              0
+#>            43:                0              0              0              0
+#>            44:                0              0              0              0
+#>            45:                0              0              0              0
+#>            46:                0              0              0              0
+#>            47:                0              0              0              0
+#>            48:                0              0              0              0
+#>            49:                0              0              0              0
+#>            50:                0              0              0              0
 #> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ######################## ^^^ chor001.krn ^^^ #########################
 #> 
@@ -215,58 +215,58 @@ humData |> select(4)
 #> 
 #> ######################## vvv chor004.krn vvv #########################
 #>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     54:                0              0              0              0
-#>     55:                0              0              0              0
-#>     56:                0              0              0              0
-#>     57:                0              0              0              0
-#>     58:                0              0              0              0
-#>     59:                0              0              0              0
-#>     60:                0              0              0              0
-#>     61:                0              0              0              0
-#>     62:                0              0              0              0
-#>     63:                0              0              0              0
-#>     64:                0              0              0              0
-#>     65:                0              0              0              0
-#>     66:                0              0              0              0
-#>     67:                0              0              0              0
-#>     68:                0              0              0              0
-#>     69:                0              0              0              0
-#>     70:                0              0              0              0
-#>     71:                0              0              0              0
-#>     72:                0              0              0              0
-#>     73:                0              0              0              0
-#>     74:                0              0              0              0
-#>     75:                0              0              0              0
-#>     76:                0              0              0              0
-#>     77:                0              0              0              0
-#>     78:                0              0              0              0
-#>     79:                0              0              0              0
-#>     80:                0              0              0              0
-#>     81:                0              0              0              0
-#>     82:                0              0              0              0
-#>     83:                0              0              0              0
-#>     84:                0              0              0              0
-#>     85:                0              0              0              0
-#>     86:                0              0              0              0
-#>     87:                0              0              0              0
-#>     88:                0              0              0              0
-#>     89:                0              0              0              0
-#>     90:                0              0              0              0
-#>     91:                0              0              0              0
-#>     92:                0              0              0              0
-#>     93:                1              1              1              1
-#>     94:                1              1              1              1
-#>     95:  !!!hum2abc: -Q ''
-#>     96:  !!!title: @{PC#}. @{OTL@@DE}
-#>     97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Jo***
-#>     98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: B***
-#>     99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint:***
-#>    100:  !!!YOR4: Chorales (New York: Associated Music Publi***
-#>    101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, p***
-#>    102:  !!!EED:  Craig Stuart Sapp
-#>    103:  !!!EEV:  2009/05/22
+#>            54:                0              0              0              0
+#>            55:                0              0              0              0
+#>            56:                0              0              0              0
+#>            57:                0              0              0              0
+#>            58:                0              0              0              0
+#>            59:                0              0              0              0
+#>            60:                0              0              0              0
+#>            61:                0              0              0              0
+#>            62:                0              0              0              0
+#>            63:                0              0              0              0
+#>            64:                0              0              0              0
+#>            65:                0              0              0              0
+#>            66:                0              0              0              0
+#>            67:                0              0              0              0
+#>            68:                0              0              0              0
+#>            69:                0              0              0              0
+#>            70:                0              0              0              0
+#>            71:                0              0              0              0
+#>            72:                0              0              0              0
+#>            73:                0              0              0              0
+#>            74:                0              0              0              0
+#>            75:                0              0              0              0
+#>            76:                0              0              0              0
+#>            77:                0              0              0              0
+#>            78:                0              0              0              0
+#>            79:                0              0              0              0
+#>            80:                0              0              0              0
+#>            81:                0              0              0              0
+#>            82:                0              0              0              0
+#>            83:                0              0              0              0
+#>            84:                0              0              0              0
+#>            85:                0              0              0              0
+#>            86:                0              0              0              0
+#>            87:                0              0              0              0
+#>            88:                0              0              0              0
+#>            89:                0              0              0              0
+#>            90:                0              0              0              0
+#>            91:                0              0              0              0
+#>            92:                0              0              0              0
+#>            93:                1              1              1              1
+#>            94:                1              1              1              1
+#>            95:  !!!hum2abc: -Q ''
+#>            96:  !!!title: @{PC#}. @{OTL@@DE}
+#>            97:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Sebastian B***
+#>            98:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf und H&a***
+#>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***
+#>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***
+#>           101:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+#>           102:  !!!EED:  Craig Stuart Sapp
+#>           103:  !!!EEV:  2009/05/22
 #> ######################## ^^^ chor004.krn ^^^ #########################
-#>               (***five global comments truncated due to screen size***)
+#>               (***four global comments truncated due to screen size***)
 #> 
 #>  humdrumR corpus of four pieces.
 #> 
@@ -278,56 +278,56 @@ humData |> select(4)
 #> 
 humData |> select(1:3, fieldTypes = 'Structure')
 #> ################### vvv chor001.krn vvv ####################
-#>      1:      1chor001.krn                                    ***
-#>      2:      1chor001.krn                                    ***
-#>      3:      1chor001.krn                                    ***
-#>      4:      1chor001.krn                                    ***
-#>      5:      1chor001.krn                                    ***
-#>      6:      1chor001.krn                                    ***
-#>      7:      1chor001.krn                                    ***
-#>      8:      1chor001.krn    1chor001.krn    1chor001.krn    ***
-#>      9:            *ICvox          *ICvox          *ICvox    ***
-#>     10:            *Ibass         *Itenor          *Ialto    ***
-#>     11:           *I"Bass        *I"Tenor         *I"Alto    ***
-#>     12:         *>[A,A,B]       *>[A,A,B]       *>[A,A,B]    ***
-#>     13:      *>norep[A,B]    *>norep[A,B]    *>norep[A,B]    ***
-#>     14:               *>A             *>A             *>A    ***
-#>     15:           *clefF4        *clefGv2         *clefG2    ***
-#>     16:            *k[f#]          *k[f#]          *k[f#]    ***
-#>     17:               *G:             *G:             *G:    ***
-#>     18:             *M3/4           *M3/4           *M3/4    ***
-#>     19:            *MM100          *MM100          *MM100    ***
-#>     20:     11chor001.krn   11chor001.krn   11chor001.krn    ***
-#>     21:                =1              =1              =1    ***
-#>     22:     21chor001.krn   21chor001.krn   21chor001.krn    ***
-#>     23:     31chor001.krn   31chor001.krn   31chor001.krn    ***
-#>     24:     41chor001.krn   41chor001.krn   41chor001.krn    ***
-#>     25:     51chor001.krn   51chor001.krn   51chor001.krn    ***
-#>     26:                =2              =2              =2    ***
-#>     27:     61chor001.krn   61chor001.krn   61chor001.krn    ***
-#>     28:     71chor001.krn   71chor001.krn   71chor001.krn    ***
-#>     29:     81chor001.krn   81chor001.krn   81chor001.krn    ***
-#>     30:     91chor001.krn   91chor001.krn   91chor001.krn    ***
-#>     31:                =3              =3              =3    ***
-#>     32:    101chor001.krn  101chor001.krn  101chor001.krn    ***
-#>     33:    111chor001.krn  111chor001.krn  111chor001.krn    ***
-#>     34:    121chor001.krn  121chor001.krn  121chor001.krn    ***
-#>     35:    131chor001.krn  131chor001.krn  131chor001.krn    ***
-#>     36:    141chor001.krn  141chor001.krn  141chor001.krn    ***
-#>     37:                =4              =4              =4    ***
-#>     38:    151chor001.krn  151chor001.krn  151chor001.krn    ***
-#>     39:    161chor001.krn  161chor001.krn  161chor001.krn    ***
-#>     40:                =5              =5              =5    ***
-#>     41:    171chor001.krn  171chor001.krn  171chor001.krn    ***
-#>     42:    181chor001.krn  181chor001.krn  181chor001.krn    ***
-#>     43:    191chor001.krn  191chor001.krn  191chor001.krn    ***
-#>     44:                =6              =6              =6    ***
-#>     45:    201chor001.krn  201chor001.krn  201chor001.krn    ***
-#>     46:    211chor001.krn  211chor001.krn  211chor001.krn    ***
-#>     47:    221chor001.krn  221chor001.krn  221chor001.krn    ***
-#>     48:    231chor001.krn  231chor001.krn  231chor001.krn    ***
-#>     49:                =7              =7              =7    ***
-#>     50:    241chor001.krn  241chor001.krn  241chor001.krn    ***
+#>             1:      1chor001.krn                                    ***
+#>             2:      1chor001.krn                                    ***
+#>             3:      1chor001.krn                                    ***
+#>             4:      1chor001.krn                                    ***
+#>             5:      1chor001.krn                                    ***
+#>             6:      1chor001.krn                                    ***
+#>             7:      1chor001.krn                                    ***
+#>             8:      1chor001.krn    1chor001.krn    1chor001.krn    ***
+#>             9:            *ICvox          *ICvox          *ICvox    ***
+#>            10:            *Ibass         *Itenor          *Ialto    ***
+#>            11:           *I"Bass        *I"Tenor         *I"Alto    ***
+#>            12:         *>[A,A,B]       *>[A,A,B]       *>[A,A,B]    ***
+#>            13:      *>norep[A,B]    *>norep[A,B]    *>norep[A,B]    ***
+#>            14:               *>A             *>A             *>A    ***
+#>            15:           *clefF4        *clefGv2         *clefG2    ***
+#>            16:            *k[f#]          *k[f#]          *k[f#]    ***
+#>            17:               *G:             *G:             *G:    ***
+#>            18:             *M3/4           *M3/4           *M3/4    ***
+#>            19:            *MM100          *MM100          *MM100    ***
+#>            20:     11chor001.krn   11chor001.krn   11chor001.krn    ***
+#>            21:                =1              =1              =1    ***
+#>            22:     21chor001.krn   21chor001.krn   21chor001.krn    ***
+#>            23:     31chor001.krn   31chor001.krn   31chor001.krn    ***
+#>            24:     41chor001.krn   41chor001.krn   41chor001.krn    ***
+#>            25:     51chor001.krn   51chor001.krn   51chor001.krn    ***
+#>            26:                =2              =2              =2    ***
+#>            27:     61chor001.krn   61chor001.krn   61chor001.krn    ***
+#>            28:     71chor001.krn   71chor001.krn   71chor001.krn    ***
+#>            29:     81chor001.krn   81chor001.krn   81chor001.krn    ***
+#>            30:     91chor001.krn   91chor001.krn   91chor001.krn    ***
+#>            31:                =3              =3              =3    ***
+#>            32:    101chor001.krn  101chor001.krn  101chor001.krn    ***
+#>            33:    111chor001.krn  111chor001.krn  111chor001.krn    ***
+#>            34:    121chor001.krn  121chor001.krn  121chor001.krn    ***
+#>            35:    131chor001.krn  131chor001.krn  131chor001.krn    ***
+#>            36:    141chor001.krn  141chor001.krn  141chor001.krn    ***
+#>            37:                =4              =4              =4    ***
+#>            38:    151chor001.krn  151chor001.krn  151chor001.krn    ***
+#>            39:    161chor001.krn  161chor001.krn  161chor001.krn    ***
+#>            40:                =5              =5              =5    ***
+#>            41:    171chor001.krn  171chor001.krn  171chor001.krn    ***
+#>            42:    181chor001.krn  181chor001.krn  181chor001.krn    ***
+#>            43:    191chor001.krn  191chor001.krn  191chor001.krn    ***
+#>            44:                =6              =6              =6    ***
+#>            45:    201chor001.krn  201chor001.krn  201chor001.krn    ***
+#>            46:    211chor001.krn  211chor001.krn  211chor001.krn    ***
+#>            47:    221chor001.krn  221chor001.krn  221chor001.krn    ***
+#>            48:    231chor001.krn  231chor001.krn  231chor001.krn    ***
+#>            49:                =7              =7              =7    ***
+#>            50:    241chor001.krn  241chor001.krn  241chor001.krn    ***
 #> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::
 #> ################### ^^^ chor001.krn ^^^ ####################
 #> 
@@ -335,56 +335,56 @@ humData |> select(1:3, fieldTypes = 'Structure')
 #> 
 #> ################### vvv chor004.krn vvv ####################
 #>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::
-#>     54:    292chor004.krn  292chor004.krn  292chor004.krn    ***
-#>     55:    302chor004.krn  302chor004.krn  302chor004.krn    ***
-#>     56:                =5              =5              =5    ***
-#>     57:    312chor004.krn  312chor004.krn  312chor004.krn    ***
-#>     58:    322chor004.krn  322chor004.krn  322chor004.krn    ***
-#>     59:    332chor004.krn  332chor004.krn  332chor004.krn    ***
-#>     60:    342chor004.krn  342chor004.krn  342chor004.krn    ***
-#>     61:    352chor004.krn  352chor004.krn  352chor004.krn    ***
-#>     62:    362chor004.krn  362chor004.krn  362chor004.krn    ***
-#>     63:                =6              =6              =6    ***
-#>     64:    372chor004.krn  372chor004.krn  372chor004.krn    ***
-#>     65:    382chor004.krn  382chor004.krn  382chor004.krn    ***
-#>     66:    392chor004.krn  392chor004.krn  392chor004.krn    ***
-#>     67:    402chor004.krn  402chor004.krn  402chor004.krn    ***
-#>     68:    412chor004.krn  412chor004.krn  412chor004.krn    ***
-#>     69:                =7              =7              =7    ***
-#>     70:    422chor004.krn  422chor004.krn  422chor004.krn    ***
-#>     71:    432chor004.krn  432chor004.krn  432chor004.krn    ***
-#>     72:    442chor004.krn  442chor004.krn  442chor004.krn    ***
-#>     73:    452chor004.krn  452chor004.krn  452chor004.krn    ***
-#>     74:    462chor004.krn  462chor004.krn  462chor004.krn    ***
-#>     75:    472chor004.krn  472chor004.krn  472chor004.krn    ***
-#>     76:    482chor004.krn  482chor004.krn  482chor004.krn    ***
-#>     77:                =8              =8              =8    ***
-#>     78:    492chor004.krn  492chor004.krn  492chor004.krn    ***
-#>     79:    502chor004.krn  502chor004.krn  502chor004.krn    ***
-#>     80:    512chor004.krn  512chor004.krn  512chor004.krn    ***
-#>     81:    522chor004.krn  522chor004.krn  522chor004.krn    ***
-#>     82:                =9              =9              =9    ***
-#>     83:    532chor004.krn  532chor004.krn  532chor004.krn    ***
-#>     84:    542chor004.krn  542chor004.krn  542chor004.krn    ***
-#>     85:    552chor004.krn  552chor004.krn  552chor004.krn    ***
-#>     86:    562chor004.krn  562chor004.krn  562chor004.krn    ***
-#>     87:    572chor004.krn  572chor004.krn  572chor004.krn    ***
-#>     88:    582chor004.krn  582chor004.krn  582chor004.krn    ***
-#>     89:               =10             =10             =10    ***
-#>     90:    592chor004.krn  592chor004.krn  592chor004.krn    ***
-#>     91:    602chor004.krn  602chor004.krn  602chor004.krn    ***
-#>     92:    612chor004.krn  612chor004.krn  612chor004.krn    ***
-#>     93:                ==              ==              ==    ***
-#>     94:                *-              *-              *-    ***
-#>     95:      2chor004.krn                                    ***
-#>     96:      2chor004.krn                                    ***
-#>     97:      2chor004.krn                                    ***
-#>     98:      2chor004.krn                                    ***
-#>     99:      2chor004.krn                                    ***
-#>    100:      2chor004.krn                                    ***
-#>    101:      2chor004.krn                                    ***
-#>    102:      2chor004.krn                                    ***
-#>    103:      2chor004.krn                                    ***
+#>            54:    292chor004.krn  292chor004.krn  292chor004.krn    ***
+#>            55:    302chor004.krn  302chor004.krn  302chor004.krn    ***
+#>            56:                =5              =5              =5    ***
+#>            57:    312chor004.krn  312chor004.krn  312chor004.krn    ***
+#>            58:    322chor004.krn  322chor004.krn  322chor004.krn    ***
+#>            59:    332chor004.krn  332chor004.krn  332chor004.krn    ***
+#>            60:    342chor004.krn  342chor004.krn  342chor004.krn    ***
+#>            61:    352chor004.krn  352chor004.krn  352chor004.krn    ***
+#>            62:    362chor004.krn  362chor004.krn  362chor004.krn    ***
+#>            63:                =6              =6              =6    ***
+#>            64:    372chor004.krn  372chor004.krn  372chor004.krn    ***
+#>            65:    382chor004.krn  382chor004.krn  382chor004.krn    ***
+#>            66:    392chor004.krn  392chor004.krn  392chor004.krn    ***
+#>            67:    402chor004.krn  402chor004.krn  402chor004.krn    ***
+#>            68:    412chor004.krn  412chor004.krn  412chor004.krn    ***
+#>            69:                =7              =7              =7    ***
+#>            70:    422chor004.krn  422chor004.krn  422chor004.krn    ***
+#>            71:    432chor004.krn  432chor004.krn  432chor004.krn    ***
+#>            72:    442chor004.krn  442chor004.krn  442chor004.krn    ***
+#>            73:    452chor004.krn  452chor004.krn  452chor004.krn    ***
+#>            74:    462chor004.krn  462chor004.krn  462chor004.krn    ***
+#>            75:    472chor004.krn  472chor004.krn  472chor004.krn    ***
+#>            76:    482chor004.krn  482chor004.krn  482chor004.krn    ***
+#>            77:                =8              =8              =8    ***
+#>            78:    492chor004.krn  492chor004.krn  492chor004.krn    ***
+#>            79:    502chor004.krn  502chor004.krn  502chor004.krn    ***
+#>            80:    512chor004.krn  512chor004.krn  512chor004.krn    ***
+#>            81:    522chor004.krn  522chor004.krn  522chor004.krn    ***
+#>            82:                =9              =9              =9    ***
+#>            83:    532chor004.krn  532chor004.krn  532chor004.krn    ***
+#>            84:    542chor004.krn  542chor004.krn  542chor004.krn    ***
+#>            85:    552chor004.krn  552chor004.krn  552chor004.krn    ***
+#>            86:    562chor004.krn  562chor004.krn  562chor004.krn    ***
+#>            87:    572chor004.krn  572chor004.krn  572chor004.krn    ***
+#>            88:    582chor004.krn  582chor004.krn  582chor004.krn    ***
+#>            89:               =10             =10             =10    ***
+#>            90:    592chor004.krn  592chor004.krn  592chor004.krn    ***
+#>            91:    602chor004.krn  602chor004.krn  602chor004.krn    ***
+#>            92:    612chor004.krn  612chor004.krn  612chor004.krn    ***
+#>            93:                ==              ==              ==    ***
+#>            94:                *-              *-              *-    ***
+#>            95:      2chor004.krn                                    ***
+#>            96:      2chor004.krn                                    ***
+#>            97:      2chor004.krn                                    ***
+#>            98:      2chor004.krn                                    ***
+#>            99:      2chor004.krn                                    ***
+#>           100:      2chor004.krn                                    ***
+#>           101:      2chor004.krn                                    ***
+#>           102:      2chor004.krn                                    ***
+#>           103:      2chor004.krn                                    ***
 #> ################### ^^^ chor004.krn ^^^ ####################
 #>       (***one spine/path not displayed due to screen size***)
 #> 

@@ -22,18 +22,7 @@ mutual(..., base = 2)
 # S3 method for class 'probability'
 mutual(x, base = 2)
 
-# Default S3 method
-mutual(..., base = 2)
-
-pmutual(
-  ...,
-  model,
-  base = 2,
-  condition = NULL,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+pmutual(..., model, base = 2)
 ```
 
 ## Details
@@ -120,9 +109,7 @@ mutual(guitar, metal)
 #>       0.1887219 
 
 pmutual(guitar, metal)
-#> Error: Failed to parse glue component
-#> Caused by error in `parse()`:
-#> ! <text>:1:11: unexpected symbol
-#> 1:    NULL   base
-#>               ^
+#>  [1]  0.5849625  0.5849625  0.5849625  0.5849625  0.5849625  0.5849625
+#>  [7] -1.0000000 -1.0000000 -1.0000000 -1.0000000  0.5849625  0.5849625
+#> [13]  0.5849625  0.5849625  0.5849625  0.5849625
 ```
