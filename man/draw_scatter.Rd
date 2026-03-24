@@ -4,9 +4,9 @@
 \alias{draw_scatter}
 \title{Draw a scatter plot}
 \usage{
-draw(x # numeric,
-     y # numeric,  
-     col = NA)
+draw(x, y , col = NA) 
+       x is numeric
+       y is numeric
 }
 \arguments{
 \item{log}{\emph{\strong{Should X and/or Y axes be drawn on a logarithmic scale?}}

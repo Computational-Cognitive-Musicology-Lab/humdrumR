@@ -869,9 +869,9 @@ draw.default <- function(x, y, facets = list(),
 #' so that many data points fall on top of each other.
 #' 
 #'   
-#' @usage draw(x # numeric,
-#'      y # numeric,  
-#'      col = NA)
+#' @usage draw(x, y , col = NA) 
+#'        # where x is numeric
+#'        # and   y is numeric
 #' @inheritParams draw
 draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
                          normalReference = FALSE, mean = FALSE, quantiles = c(), lm = FALSE,
@@ -1099,8 +1099,8 @@ draw_scatter <- function(x, y, log = '', jitter = '', line = FALSE,
 #' of `"x"` (draw X on a logarithmic scale). 
 #' 
 #'
-#' @usage draw(x # numeric,  
-#'      color = NA)
+#' @usage draw(x, color = NA)
+#'            # where x is numeric
 #' @inheritParams draw
 draw_density <- function(x, y, log = '', 
                            breaks = 'Sturges', bw = 'nrd', normalReference = FALSE, 
@@ -1380,8 +1380,8 @@ draw_density <- function(x, y, log = '',
 #' 
 #' See [draw_violins].
 #'   
-#' @usage draw( , y # numeric,  
-#'      col = NA)
+#' @usage draw( , y, col = NA)
+#'       # where y is numeric
 #' @inheritParams draw
 #' @inheritParams draw_scatter
 draw_Qplot <- function(x, y, log = '', line = FALSE, 
@@ -1559,11 +1559,8 @@ draw_Qplot <- function(x, y, log = '', line = FALSE,
 #'
 #' @inheritSection draw General Draw Arguments
 #' 
-#' @usage draw(x # table/counts, 
-#'      col = NA)
-#'      
-#' draw( , y # table/counts, 
-#'      col = NA)
+#' @usage draw(x, col = NA)
+#'            # where x is table/count data
 #' @inheritParams draw
 #' @inheritParams draw_scatter
 draw_barplot <- function(counts, log = '', 
@@ -1906,8 +1903,9 @@ draw_heat <- function(tab, log = '', xlim = NULL, ylim = NULL, showCounts = FALS
 #' Must be a single `character` string, either `""` (linear scale)
 #' of `"y"` (draw Y on a logarithmic scale ).
 #'  
-#' @usage draw(x # discrete,  
-#'      y # numeric)
+#' @usage draw(x, y)
+#'      # where x is discrete data
+#'      # and   y is numeric
 #' @inheritParams draw
 #' @export
 draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE, 
@@ -2176,9 +2174,9 @@ draw_violins <- function(x, y, smooth = TRUE, conditional = FALSE,
 #' Must be a single `character` string, either `""` (linear scale)
 #' of `"x"` (draw X on a logarithmic scale ).
 #'  
-#' @usage draw(x # numeric,  
-#'      y # discrete,
-#'      col = NA # colors chosen automatically)
+#' @usage draw(x, y, col = NA) 
+#'      # where x is numeric
+#'      # and   y is discrete data
 #' @inheritParams draw
 draw_area <- function(x, y, log = '', 
                       center = TRUE, smooth = TRUE, conditional = FALSE, 
