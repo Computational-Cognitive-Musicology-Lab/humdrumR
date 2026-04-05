@@ -24,7 +24,7 @@ varnames(x) <- value
   syntaxHighlight = humdrumRoption("syntaxHighlight"),
   wide = TRUE,
   printZeros = TRUE,
-  zeros = "."
+  zeros = if (inherits(dist, "entropy")) "0" else "."
 )
 
 \S4method{sort}{distribution}(x, decreasing = TRUE)

@@ -4,11 +4,8 @@
 \alias{draw_barplot}
 \title{Draw bar plot}
 \usage{
-draw(x # table/counts, 
-     col = NA)
-     
-draw( , y # table/counts, 
-     col = NA)
+draw(x, col = NA)
+           # where x is table/count data
 }
 \arguments{
 \item{log}{\emph{\strong{Should X and/or Y axes be drawn on a logarithmic scale?}}

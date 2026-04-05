@@ -4,8 +4,8 @@
 \alias{draw_density}
 \title{Draw density plot (histogram or contour)}
 \usage{
-draw(x # numeric,  
-     color = NA)
+draw(x, color = NA)
+           # where x is numeric
 }
 \arguments{
 \item{log}{\emph{\strong{Should X axis be drawn on a logarithmic scale?}}

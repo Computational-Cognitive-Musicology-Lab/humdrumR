@@ -5,8 +5,8 @@
 \title{Draw a scatter plot}
 \usage{
 draw(x, y , col = NA) 
-       x is numeric
-       y is numeric
+       # where x is numeric
+       # and   y is numeric
 }
 \arguments{
 \item{log}{\emph{\strong{Should X and/or Y axes be drawn on a logarithmic scale?}}
