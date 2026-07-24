@@ -4,8 +4,9 @@
 \alias{draw_violins}
 \title{Draw "violin" plot}
 \usage{
-draw(x # discrete,  
-     y # numeric)
+draw(x, y)
+     # where x is discrete data
+     # and   y is numeric
 }
 \arguments{
 \item{smooth}{\emph{\strong{Should a smoothed density curve be estimated for each group?}}

@@ -288,6 +288,7 @@ NULL
 setClass('distribution', contains = 'data.frame', slots = c(Sort = 'integer'))
 setClass('count', contains = 'distribution')
 setClass('probability', contains = 'distribution', slots = c(N = 'integer', Condition = 'maybecharacter'))
+setClass('entropy', contains = 'distribution', slots = c(N = 'integer', Condition = 'maybecharacter', Across = 'character', Base = 'numeric'))
 
 setValidity('distribution',
             function(object) {
@@ -330,30 +331,43 @@ setValidity('probability',
               if (length(errors)) errors else TRUE
             })
 
+setValidity('entropy',
+            function(object) {
+              ncol <- ncol(object)
+              vals <- object@.Data[[ncol]]
+              errors <- c(
+                if (names(object)[ncol] != 'H') 'The last column of a entropy distribution object must be named "H"',
+                if (class(object@.Data[[ncol]]) != 'numeric') 'The "H" column of a probability distribution object must of class "numeric"',
+                if (any(vals < 0, na.rm = TRUE)) 'Entropy distributions cannot hold negative values'
+              )
+              if (length(errors)) errors else TRUE
+            })
+
 ### Constructors ----
 
-distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
+distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL, Base = 2, Across = character(0)) {
   df <- as.data.frame(x)
   args <- list(new('distribution', df, Sort = Sort))
   
-  if (class(type) != 'character') {
-    
-    if (class(type)[1] == 'probability') {
-      N <- type@N
-      Condition <- type@Condition
-      type <- 'p'
-    }  else {
-      type <- class(type)[1]
-    }
-   
-  }
-    
-  if (type == 'p') {
-    new('probability', df, N = N, Condition = Condition, Sort = Sort)
-  } else {
-    new('count', df, Sort = Sort)
-  }
+  if (class(type) != 'character') { 
+      # this is used when we are creating a new distribution based on on old one
+      # the old distribution is passed as the "type" argument, so we look at it's class to decide what to do
+    oldDist <- type
+    type <- dist_type(oldDist)
 
+    if (type %in% c('p', 'H')) {
+      N <- oldDist@N
+      Condition <- oldDist@Condition
+    } 
+    if (type == 'H') {
+        Base <- oldDist@Base
+    }
+  }
+    
+  switch(type,
+         p = new('probability', df, N = N, Condition = Condition, Sort = Sort),
+         n = new('count', df, Sort = Sort),
+         H = new('entropy', df, N = N, Condition = Condition, Across = Across,  Base = Base, Sort = Sort))
 }
   
 
@@ -362,14 +376,14 @@ distribution <- function(x, type, Sort = 0L, N = 0L, Condition = NULL) {
 ### Accessors ----
 
 
-dist_type <- function(dist) intersect(colnames(dist), c('n', 'p'))
+dist_type <- function(dist) intersect(colnames(dist), c('n', 'p', 'H'))
 getValues <- function(dist) as.data.frame(dist)[ , dist_type(dist)]
 getLevels <- function(dist) as.data.frame(dist)[ , varnames(dist), drop = FALSE]
 getLevelString <- function(dist, sep = '.') do.call('paste', c(getLevels(dist), list(sep = sep)))
  
 #' @rdname distribution
 #' @export
-varnames <- function(x) setdiff(colnames(x), c('n', 'p'))
+varnames <- function(x) setdiff(colnames(x), c('n', 'p', 'H'))
 
 #' @rdname distribution
 #' @export
@@ -393,7 +407,7 @@ print.distribution <- function(dist, digits = 3,
                                syntaxHighlight = humdrumRoption('syntaxHighlight'),
                                wide = TRUE,
                                printZeros = TRUE,
-                               zeros = '.') {
+                               zeros = if (inherits(dist, 'entropy')) '0' else '.') {
   
   checks(syntaxHighlight, xTF)
   checks(wide, xTF)
@@ -402,7 +416,10 @@ print.distribution <- function(dist, digits = 3,
   
   type <- dist_type(dist)
   message <- paste0('humdrumR ', 
-                    if (type == 'p') paste0('probability distribution ', Pequation(dist)) else 'count distribution')
+	switch(type,
+	       p = paste0('probability distribution ', Pequation(dist)),
+	       n = 'count distribution',
+	       H = paste0('entropy distribution ', Pequation(dist, 'H'))))
   
   varnames <- varnames(dist)
   
@@ -417,7 +434,11 @@ print.distribution <- function(dist, digits = 3,
   X <- getValues(dist)
   zero <- X == 0
   
-  X <- if (type == 'p') prettyP(X, digits = digits, zeros = zeros) else prettyN(X, digits = digits, zeros = zeros)
+  X <- switch(type, 
+              p = prettyP(X, digits = digits, zeros = zeros),
+              n = prettyN(X, digits = digits, zeros = zeros),
+              H = prettyH(X, digits = digits, zeros = zeros))
+
   
   # do we scale or round?
   scale <- attr(X, 'scale')
@@ -428,14 +449,15 @@ print.distribution <- function(dist, digits = 3,
   if (attr(X, 'approx')) scale <- paste0(scale, ', ~rounded')
   message <- paste0(message, scale)
   
+  Xname <- if (type == 'H') paste0('H(', paste(dist@Across, collapse = ','), ')') else type
   dist <- getLevels(dist)
-  dist[[type]] <- X
-  
+  dist[[Xname]] <- X
+
   # check if we can widen
   iswide <- FALSE
   printmat <- (if(wide && sort == 0L && length(varnames) >= 2L) {
     
-    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(varnames[2])), fill = attr(X, 'zerofill'), value.var = type))
+    wide <- as.matrix(dcast(as.data.table(dist), rlang::new_formula(quote(...), rlang::sym(varnames[2])), fill = attr(X, 'zerofill'), value.var = Xname))
     
     factorcols <- colnames(wide) %in% varnames
     toprow    <- ifelse( factorcols, colnames(wide), '')
@@ -496,11 +518,14 @@ print.distribution <- function(dist, digits = 3,
   invisible(dist)
 }
 
-
 Pequation <- function(varnames, f = 'P', collapse = ',', condition = NULL) {
   if (inherits(varnames, 'probability')) {
     condition <- varnames@Condition 
     varnames <- varnames(varnames)
+  }
+  if (inherits(varnames, 'entropy')) {
+    condition <- varnames@Condition
+    varnames <- union(varnames@Condition, varnames@Across)
   }
 
   eq <- paste(setdiff(varnames, condition), collapse = collapse)
@@ -613,6 +638,14 @@ prettyP <- function(P, digits = 3L, zeros = '.') {
   
 }
 
+
+prettyH <- function(H, digits = 3, zeros = '0') {
+     output <- format(H, scientific = FALSE, digits = digits, justify = 'left') 
+     if (zeros != '0') output[H == 0] <- zeros
+     attr(output, 'scale') <- character(0)
+     attr(output, 'approx') <- FALSE
+     output
+}
 
 prettyBins <- function(x, maxUnique = 20, quantiles = 0, right = TRUE, ...) {
   checks(maxUnique, xlen1 & xpositive & xwholenum, argname = 'binArgs(maxUnique = )', seealso = '?count')
@@ -811,6 +844,29 @@ setMethod('[', c('probability', 'missing', 'atomic'),
               newConditions <- intersect(conditions, varnames)
               if (length(newConditions)) output <- conditional(output, newConditions)
             }
+            
+            
+            if (drop) as.data.frame(output) else output
+
+          })
+
+#' @export
+setMethod('[', c('entropy', 'missing', 'atomic'),
+          function(x, i, j, ..., drop = FALSE) {
+
+            conditions <- x@Condition
+
+            N <- x@N[do.call(paste, c(getLevels(x), list(sep = '.')))] 
+
+            levels <- getLevels(x)
+
+            newN <- tapply(N, levels[, j], sum)
+            x$H <- x$H * N / newN[as.matrix(levels[, j, drop = FALSE])]
+            # do indexing
+            output <- callNextMethod(x = x, j = j, drop = FALSE)
+            
+            output@Condition <- j
+            output@Across <- x@Across
             
             
             if (drop) as.data.frame(output) else output
@@ -1646,7 +1702,7 @@ pdist.count <-  function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE, 
   
   df$p <- df$n / n
   df$n <- NULL
-  
+
   dist <- distribution(df, 'p', N = n)
   if (!is.null(condition)) dist <- conditional(dist, condition = condition)
   
@@ -1734,8 +1790,8 @@ pdist.humdrumR <- function(x, ..., condition = NULL, na.rm = FALSE, sort = FALSE
             humtab <- getHumtab(x, 'D')
             if (length(quos)) {
               names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
-              
-              rlang::eval_tidy(rlang::expr(pdist(humtab, !!!quos, condition = !!condition, na.rm = !!na.rm, sort = !!sort, .drop = !!.drop, binArgs = !!binArgs)))
+    				  quo <- rlang::quo(with(x, pdist.default(!!!quos, sort = !!sort, condition = !!condition, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs)))
+    				  rlang::eval_tidy(quo)
             } else {
               selectedFields <- selectedFields(x)
               names(selectedFields) <- selectedFields
@@ -1804,7 +1860,7 @@ conditional <- function(pdist, condition) {
 }
             
 unconditional <- function(dist) {
-  if (!inherits(dist, 'probability') || is.null(dist@Condition)) return(dist)
+  if (!inherits(dist, c('probability', 'entropy')) || is.null(dist@Condition)) return(dist)
   N <- sum(dist@N)
   margins <- dist@N / N
   
@@ -2182,7 +2238,7 @@ entropy.default <- function(..., model, base = 2) {
 #' @family {Information theory functions} 
 #' @seealso The HumdrumR [information theory][information] overview.
 #' @export
-entropy_by <- function(..., condition, independent = TRUE, base = 2) {
+entropy_by <- function(..., condition, base = 2) {
   checks(base, xlen1 & xnumber & xpositive)
 
   UseMethod('entropy_by')
@@ -2191,45 +2247,33 @@ entropy_by <- function(..., condition, independent = TRUE, base = 2) {
 
 #' @rdname entropy_by
 #' @export
-entropy_by.probability <-  function(pdist, condition, independent = TRUE, base = 2) {
+entropy_by.probability <-  function(pdist, condition = NULL, base = 2) {
+  condition <- if (is.null(condition)) pdist@Condition else condition
+
+  n <- pdist@N
+  pdist <- unconditional(pdist) 
+
   varnames <- varnames(pdist)
   checks(condition, xlen & ((xcharacter & xlegal(varnames)) | (xnatural & xmax(length(varnames)))))
   
-  if (!is.null(pdist@Condition) && any(base %in% pdist@Condition)) {
-    pdist <- conditional(unconditional(pdist), setdiff(pdist@Condition, base))
-  }
+
+  pdf <- as.data.table(as.data.frame(pdist))
+  pdf <- pdf[ ,  {
+    p <- p / sum(p)
+    list(H = -sum(log(p, base = base) * p, na.rm = TRUE))
+
+  }, by = condition] 
+
   
-  # if (length(setdiff(condition, varnames))) .stop("We can't group this probability distribution by non-existent variable<s|>",
-                                                 # "{harvard(setdiff(by, varnames), 'or', TRUE)}.", ifelse = length(setdiff(condition, varnames)) > 1)
-  
-  grouping <- as.data.frame(pdist)[ , condition , drop = FALSE]
-  
-  expected <- if (!independent) unconditional(pdist)$p else tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , condition , drop = FALSE], \(x) x / sum(x))
-  observed <- tapply_inplace(unconditional(pdist)$p, as.data.frame(pdist)[ , c(pdist@Condition, condition) , drop = FALSE], \(x) log(x / sum(x), base = base))
-# 
-#   Hs <- tapply(pdist$p, ,
-#                \(ps) {
-#                  browser()
-#                  if (independent) ps <- ps / sum(ps)
-#                  -sum(ps * log(ps, base = base), na.rm = TRUE)
-#                })
-  
-  Hs <- -tapply(expected * observed, as.data.frame(pdist)[ , condition , drop = FALSE], sum, na.rm = TRUE)
-  
-  equation <- Pequation(pdist[ , setdiff(varnames, condition)], 'H')
-  equation <- gsub('\\)$', '', equation)
-  equations <- paste0(equation, ';', 
-                      paste(condition, collapse = '.'), '=',
-                      names(Hs), ')')
-  names(Hs) <- equations
-  Hs
+  distribution(as.data.frame(pdf), 'H', N = n, Condition = condition, Across = setdiff(varnames, condition), Base = base)
+
   
 }
 
 #' @rdname entropy_by
 #' @export
-entropy_by.default <- function(..., condition, independent = TRUE, base = 2) {
-  entropy_by(pdist(...), condition = condition, independent = independent, base = base)
+entropy_by.default <- function(..., condition, base = 2) {
+  entropy_by(pdist(..., condition = condition), base = base)
 }
 
 
@@ -2491,14 +2535,22 @@ info.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FALSE,
 
 #' @rdname entropy_by
 #' @export
-pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+pentropy <- function(..., model, base = 2) {
+  if (!missing(model)) checks(model, xinherits('probability') | xinherits('lm') | xnull)
+
+	UseMethod('pentropy')
+
+}
+
+#' @export
+pentropy.default <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
   df <- data.frame(...)
   
-  if (missing(model)) {
+  if (missing(model) || is.null(model)) {
     if (is.null(condition)) condition <- names(df)[-1]
     model <- pdist(..., condition = condition, na.rm = na.rm, .drop = .drop, binArgs = binArgs)
   }
-  
+
   if (is.null(model@Condition)) .stop("pentropy() requires a conditional probability model. The model provided has no condition variables.")
   
   conditions <- model@Condition
@@ -2509,9 +2561,26 @@ pentropy <- function(..., model, base = 2, condition = NULL, na.rm = FALSE, .dro
                          -sum(P * log(P, base = base), na.rm = TRUE)
                        })
   
-  entropymat[as.matrix(df[,conditions, drop=FALSE])]
+  c(entropymat[as.matrix(df[,conditions, drop=FALSE])])
 }
 
+#' @export
+pentropy.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FALSE, .drop = FALSE, binArgs = list()) {
+  quos <- rlang::enexprs(...)
+  humtab <- getHumtab(x, 'D')
+  
+  if (length(quos)) {
+    names(quos) <- ifelse(.names(quos) == '', sapply(quos, rlang::as_label), .names(quos))
+  } else {
+    selected <- selectedFields(x)
+    quos <- lapply(selected, rlang::sym)
+    names(quos) <- selected
+  }
+  
+  equation <- Pequation(names(quos), condition = condition, f = 'H')
+  rlang::eval_tidy(rlang::expr(within(x, !!equation := pentropy.default(!!!quos, model = model, condition = !!condition, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs))))
+  
+}
 
 ### pmutual() ----
 
@@ -2555,6 +2624,9 @@ pmutual.humdrumR <- function(x, ..., model = NULL, condition = NULL, na.rm = FAL
   rlang::eval_tidy(rlang::expr(within(x, !!equation := pmutual.default(!!!quos, model = model, condition = !!condition, na.rm = !!na.rm, .drop = !!.drop, binArgs = binArgs))))
   
 }
+
+
+
 ##################################################-
 # table() extensions for humdrumR ---- ###########
 ##################################################-

@@ -4,9 +4,9 @@
 \alias{draw_area}
 \title{Draw area plot}
 \usage{
-draw(x # numeric,  
-     y # discrete,
-     col = NA # colors chosen automatically)
+draw(x, y, col = NA) 
+     # where x is numeric
+     # and   y is discrete data
 }
 \arguments{
 \item{log}{\emph{\strong{Should X axis be drawn on a logarithmic scale?}}

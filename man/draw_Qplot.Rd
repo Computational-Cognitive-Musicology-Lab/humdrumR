@@ -4,8 +4,8 @@
 \alias{draw_Qplot}
 \title{Draw quantile plot}
 \usage{
-draw( , y # numeric,  
-     col = NA)
+draw( , y, col = NA)
+      # where y is numeric
 }
 \arguments{
 \item{log}{\emph{\strong{Should Y axis be drawn on a logarithmic scale?}}

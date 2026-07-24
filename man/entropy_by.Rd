@@ -7,21 +7,13 @@
 \alias{pentropy}
 \title{Calculate point-wise or contextual entropy}
 \usage{
-entropy_by(..., condition, independent = TRUE, base = 2)
+entropy_by(..., condition, base = 2)
 
-\method{entropy_by}{probability}(pdist, condition, independent = TRUE, base = 2)
+\method{entropy_by}{probability}(pdist, condition = NULL, base = 2)
 
-\method{entropy_by}{default}(..., condition, independent = TRUE, base = 2)
+\method{entropy_by}{default}(..., condition, base = 2)
 
-pentropy(
-  ...,
-  model,
-  base = 2,
-  condition = NULL,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+pentropy(..., model, base = 2)
 }
 \arguments{
 \item{...}{\emph{\strong{Distribution (or atomic vectors) to compute entropy of.}}
@@ -98,7 +90,7 @@ not the information content of each observed data point.
 The HumdrumR \link[=information]{information theory} overview.
 
 Other {Information theory functions}: 
-\code{\link{entropy}()},
+\code{\link{entropy}},
 \code{\link{mutual}()}
 }
 \concept{{Information theory functions}}
