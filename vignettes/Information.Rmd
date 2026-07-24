@@ -30,7 +30,7 @@ This function can be used to count the number of unique values in a singe vector
 Let's take a moment to explain all of what `count()` can do, starting from the basics.
 The `count()` function accepts one or more atomic vectors, all of which must be the same length.
 It counts all the unique combination of values across the vectors, and builds a table.
-This can be illustrates with some simple examples:
+This can be illustrated with some simple examples:
 
 ```{r}
 
