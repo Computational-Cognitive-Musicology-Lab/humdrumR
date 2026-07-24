@@ -6,8 +6,8 @@ TimeSignature		M[1-9][0-9]*/((16)|(32)|[1248]) 	M_/_	Tandem
 Mensuration		met\([^)]*\) 	met(_)	Tandem
 BPM		MM[0-9]+ 	MM_	Tandem
 Timebase		tb[1-9][0-9]*%?[1-9]?[0-9]*[.]* 	tb_	Tandem
-Instrument		I[^C,]+ 	I_	Tandem
-InstrumentClass		IC[^,]* 	IC_	Tandem
+Instrument		I[^C,][^,]* 	I_	Tandem
+InstrumentClass		IC[^,]+ 	IC_	Tandem
 TransposingInstrument		ITr[^,]* 	ITr_	Tandem
 kernPitch	kern	([A-Ga-g])\1*([#-])*\2*	c	Exclusive
 Beam 	kern	([/\\]?(L+K*)?)|([/\\]?(J+k*)?)	/Jk	Exclusive
