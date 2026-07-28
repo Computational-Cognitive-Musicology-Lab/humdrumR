@@ -131,7 +131,7 @@ The \code{n} (count) column is always an \code{integer} vector, where are \eqn{\
 The \code{p} (proportion) column is always a \code{numeric} vector, where \eqn{\forall p, 1 \geq p \geq 0}.
 
 We define \code{as.matrix()} and \code{as.array()} methods for \code{distribution} objects.
-The \code{as.array()} method results in an \code{\link[=array]{array()}} with the same dimensionality
+The \code{as.array()} method results in an \code{\link[bit64:matrix64]{bit64::array()}} with the same dimensionality
 as the distribution.
 In contrast, the \code{as.matrix()} function will force distributions with more than two dimensions
 into two dimensions, by collapsing combining all dimensions greater than two with the first dimension:

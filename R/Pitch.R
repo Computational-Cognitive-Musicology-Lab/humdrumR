@@ -2651,7 +2651,7 @@ setMethod('as.numeric',   'tonalInterval', tint2double)
 #' 
 #' This function generates a [gamut](https://en.wikipedia.org/wiki/Gamut):
 #' an ordered range of notes used in music.
-#' It is used to generate [factor()] levels for [pitch functions][pitchFunctions].
+#' It is used to generate [factor][base::factor] levels for [pitch functions][pitchFunctions].
 #' The output format of the gamut is controlled by the `deparser` argument (a function) and any `deparseArgs`
 #' that are passed to it, defaulting to [kern()].
 #' 

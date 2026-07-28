@@ -461,7 +461,7 @@ NULL
 #' 
 #' Any [atomic vector][vector] with at least two 
 #' unique values, or "levels", can be used as a grouping factor---generally,
-#' grouping vectors are coerced into [factor]s.
+#' grouping vectors are coerced into [factor][base::factor]s.
 #' Each unique level in a grouping vector/factor represents a single group.
 #' Any vector, or [data.frame] that is *the same length/height* as the grouping factor
 #' can then be broken into these groups, taking all the indices where the grouping factor

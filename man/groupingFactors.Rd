@@ -21,7 +21,7 @@ In \code{humdrumR}, we adopt the tidyverse \link[dplyr:dplyr-package]{dplyr::dpl
 
 Any \link[=vector]{atomic vector} with at least two
 unique values, or "levels", can be used as a grouping factor---generally,
-grouping vectors are coerced into \link{factor}s.
+grouping vectors are coerced into \link[base:factor]{factor}s.
 Each unique level in a grouping vector/factor represents a single group.
 Any vector, or \link{data.frame} that is \emph{the same length/height} as the grouping factor
 can then be broken into these groups, taking all the indices where the grouping factor

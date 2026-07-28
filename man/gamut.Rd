@@ -48,7 +48,7 @@ Must be a \link[=pitchFunctions]{pitch function}.}
 \description{
 This function generates a \href{https://en.wikipedia.org/wiki/Gamut}{gamut}:
 an ordered range of notes used in music.
-It is used to generate \code{\link[=factor]{factor()}} levels for \link[=pitchFunctions]{pitch functions}.
+It is used to generate \link[base:factor]{factor} levels for \link[=pitchFunctions]{pitch functions}.
 The output format of the gamut is controlled by the \code{deparser} argument (a function) and any \code{deparseArgs}
 that are passed to it, defaulting to \code{\link[=kern]{kern()}}.
 }
