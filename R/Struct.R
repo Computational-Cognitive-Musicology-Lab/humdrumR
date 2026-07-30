@@ -436,7 +436,7 @@ setMethod('[', c(x = 'struct', i = 'numeric', j = 'missing'),
             if (!is.null(ncol(x)) && ncol(x) == 0L) return(x) # in this case, the slots are already empty so no further changes are needed.
             
             # do it! 
-            setSlots(x) <- lapply(getSlots(x), '[', i = i.internal)
+            setSlots(x) <- lapply(getSlots(x), \(slot) slot[i.internal])
             
             if (drop) dropdim(x) else x
           })
