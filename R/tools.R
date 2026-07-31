@@ -2155,7 +2155,13 @@ namesInExpr <- function(names, expr, applyTo = 'symbol') {
 
 substituteName <- function(expr, subs) {
   if (length(subs) == 0) return(expr)
-  
+
+  if (rlang::is_quosure(expr)) {
+    # unwrap the quosure to its expression, substitute, then rewrap (keeping the
+    # quosure's environment) -- avoids the deprecated `[[.quosure` subsetting below
+    return(rlang::quo_set_expr(expr, Recall(rlang::quo_get_expr(expr), subs)))
+  }
+
   if (is.call(expr) && length(expr) > 1L) {
    
             for (i in 2:length(expr)) {

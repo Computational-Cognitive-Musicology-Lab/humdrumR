@@ -41,10 +41,14 @@
 #' @name humdrumR
 #' @importFrom MASS fractions
 #' @importFrom combinat permn
-#' @importFrom utils combn
+#' @importFrom utils combn data head packageVersion tail
 #' @importFrom glue glue glue_collapse
 #' @importFrom abind abind
 #' @importFrom stringr str_count str_detect str_dup str_extract str_match str_pad str_replace str_split str_sub str_sort
+#' @importFrom stats coef cov density dnorm lm median model.frame predict qnorm quantile rbeta runif sd setNames var
+#' @import methods
+#' @importFrom graphics abline arrows barplot box contour grconvertX grconvertY hist layout legend lines mtext par plot.new plot.window points polygon strheight strwidth text
+#' @importFrom grDevices axisTicks col2rgb colorRampPalette colors dev.off palette rgb
 #' @importFrom stringi stri_enc_detect stri_read_raw stri_trans_totitle stri_enc_isascii stri_enc_isutf16be stri_enc_isutf16le stri_enc_isutf32be stri_enc_isutf32be stri_enc_isutf8
 #' @importFrom rlang %|% %||% 
 #' @importFrom bit64 as.integer64 is.integer64
