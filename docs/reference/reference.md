@@ -133,7 +133,7 @@ reference('OTL')
 
 rs <- readHumdrum(humdrumRroot, "HumdrumData/RollingStone/.*hum")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/RollingStone/.*hum' matches 13 text files in 1 directory.
 #> Thirteen files read from disk.
 #> Validating thirteen files...
 #> all valid.

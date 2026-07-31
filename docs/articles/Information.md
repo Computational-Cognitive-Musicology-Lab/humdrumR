@@ -21,7 +21,7 @@ can do, starting from the basics. The
 [`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
 function accepts one or more atomic vectors, all of which must be the
 same length. It counts all the unique combination of values across the
-vectors, and builds a table. This can be illustrates with some simple
+vectors, and builds a table. This can be illustrated with some simple
 examples:
 
 ``` r
@@ -163,7 +163,7 @@ If you have a distribution of continuous numbers, you probably don’t
 want to count every unique value (because there will be one of each).
 Thus,
 [`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
-will (attempt to) treat numeric values in a smart way by binning them
+will (attempt) to treat numeric values in a smart way by binning them
 into ranges using the base-R
 [`hist()`](https://rdrr.io/r/graphics/hist.html) function’s binning
 algorithm. So for example:
@@ -370,15 +370,14 @@ numbers |> round(1) |> as.character() |> count()
 #### Counting real data
 
 Enough with the artificial examples; let’s have a go at using
-`count()` on some musical data. This should feel familiar, given we’ve
-done similar stuff before in other articles:
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+on some musical data. This should feel familiar, given we’ve done
+similar stuff before in other articles:
 
 ``` r
 bach <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn')
 
-bach |> 
-  mutate(Pitch = kern(Token, simple = TRUE),
-         Rhythm = recip(Token)) -> bach
+bach |> mutate(Pitch = kern(Token, simple = TRUE), Rhythm = recip(Token)) -> bach
 
 bach |> count(Pitch, na.rm = TRUE)
 >    humdrumR count distribution 
@@ -579,9 +578,10 @@ bach |> count(Pitch, Rhythm, sort = TRUE)
 
 Woh, there are a lot of `.` values in that last table!—that dot is a
 shorthand for “zero.” The reason there are so many zeros is because
-`count()`, by default, recognizes every possible combination of values
-that could occur, even if they never occur. To get rid of these unused
-levels, we can set `.drop = TRUE`.
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md),
+by default, recognizes every possible combination of values that could
+occur, even if they never occur. To get rid of these unused levels, we
+can set `.drop = TRUE`.
 
 ``` r
 bach |> count(Pitch, Rhythm, sort = TRUE, .drop = TRUE)
@@ -740,10 +740,16 @@ bach |>
 
 ### Probabilities
 
-The `pdist()` function is a partner to the `count()` function. It
-computes the *proportion* of input data which equals each unique
-value—which we can interpret as *probabilities*. Note that `pdist()`
-has all the same arguments as `count()` (`sort`, `.drop`, etc.).
+The
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+function is a partner to the
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+function. It computes the *proportion* of input data which equals each
+unique value—which we can interpret as *probabilities*. Note that
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+has all the same arguments as
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+(`sort`, `.drop`, etc.).
 
 ``` r
 bach |>  
@@ -951,18 +957,19 @@ bach |>
 Cool! But what are the `~` and `m` about? The tilde (`~`) means that the
 probability printed in the table is being rounded—because who wants to
 see their screen filled with numbers like `0.0012449583492384`? By
-rounding off probabilities when showing you the `pdist()` table,
-humdrum$_{\mathbb{R}}$ keeps it (relatively) readable. The little `m`
-serves a similar purpose: the “m” is short for “milli,” which means the
-probability is actually one thousand times smaller than printed. Thus,
-the probability `0.000012` will print as `0.012m`—again, to keep things
-(relatively) readable. If you get really small values, you might see a
-$\mu$ printed, which is short for “micro” (one millionth).
+rounding off probabilities when showing you the
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+table, humdrum$_{\mathbb{R}}$ keeps it (relatively) readable. The little
+`m` serves a similar purpose: the “m” is short for “milli,” which means
+the probability is actually one thousand times smaller than printed.
+Thus, the probability `0.000012` will print as `0.012m`—again, to keep
+things (relatively) readable. If you get really small values, you might
+see a $\mu$ printed, which is short for “micro” (one millionth).
 
 If we really want a readable table, we might just want to filter out the
 really small numbers, which we can do just like we did with a
-`count()` table, except we’ll refer to `p` (probability) instead of
-`n` (count).
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+table, except we’ll refer to `p` (probability) instead of `n` (count).
 
 ``` r
 bach |>  
@@ -996,12 +1003,14 @@ bach |>
 
 #### Joint and conditional probabilities
 
-When we apply `pdist()` to two or more variables, it by default
-computes the *joint probability*: the probability of each combination of
-values. These probabilities (the entire multidimensional table) will sum
-to 1. It is often useful to instead compute *conditional probabilities*:
-the probabilities of observing some variables *given* other variables.
-We can do this with the `condition` argument. Simply indicate which
+When we apply
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+to two or more variables, it by default computes the *joint
+probability*: the probability of each combination of values. These
+probabilities (the entire multidimensional table) will sum to 1. It is
+often useful to instead compute *conditional probabilities*: the
+probabilities of observing some variables *given* other variables. We
+can do this with the `condition` argument. Simply indicate which
 dimension(s) to condition on, either by index or by name:
 
 ``` r
@@ -1190,15 +1199,15 @@ bach |>
 ```
 
 So here we are seeing the probability of each pitch value *given* each
-possible rhythmic value. 
-The `p` values for *each* rhythmic value will sum to 1.
+possible rhythmic value. Each *column* in this table will sum to 1.
 
 ### Marginal distributions
 
 When you have a multi-dimensional count/proportion table, you might want
 to “collapse” some dimensions, to get what’s called the marginal
-distribution. You can do this with a `count()`/`pdist()` table
-simply by indexing by dimension (either by name or by index):
+distribution. You can do this with a
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)/[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+table simply, by indexing by dimension (either by name or by index):
 
 ``` r
 bach |>
@@ -1318,8 +1327,8 @@ chor1 + chor2
 >        c  27
 >       c#  33
 >        d  72
->       d#   4
 >       e-   .
+>       d#   4
 >        e  62
 >        f   1
 >       f#  49
@@ -1339,8 +1348,8 @@ cbind(chor1, chor2)
 >       c    27    0
 >       c#    0   33
 >       d    48   24
->       d#    0    4
 >       e-    0    0
+>       d#    0    4
 >       e    21   41
 >       f     1    0
 >       f#   22   27
@@ -1362,16 +1371,16 @@ together.
 
 #### Estimating joint probabilities
 
-We’ve [seen](#marginal-distributions) that we can take a two (or
-more) dimensional table and “collapse” one dimension to get a
-1-dimensional marginal distribution. What if want to reverse this?
-Combine two one-dimensional distributions to get a two dimensional one?
-Wait! There is *no a general way to correctly to do this*—just because
-we know the marginal distributions of two variables doesn’t mean we know
-what their joint distribution would be. However, if we **assume** that
-the two distributions are *independent* of each other, we can compute
-what their joint distribution *would* be—it ends up being the product of
-the marginal distributions. We can think of this as a simple, “naive”
+We’ve [seen](#marginal-distributions) that we can take a two (or more)
+dimensional table and “collapse” one dimension to get a 1-dimensional
+marginal distribution. What if want to reverse this? Combine two
+one-dimensional distributions to get a two dimensional one? Wait! There
+is *no a general way to correctly to do this*—just because we know the
+marginal distributions of two variables doesn’t mean we know what their
+joint distribution would be. However, if we **assume** that the two
+distributions are *independent* of each other, we can compute what their
+joint distribution *would* be—it ends up being the product of the
+marginal distributions. We can think of this as a simple, “naive”
 estimate of the joint probability.
 
 To illustrate this, let’s compute Rhythm and Pitch for our Bach
@@ -1772,27 +1781,30 @@ bach |>
 
 ## Modeling probability and likelihood
 
-Statisticians refer to the sorts of distributions created by `count()`
-or and `pdist()` as *empirical distributions*—distributions of a
-sample of data. We will often regard a empirical distribution as an
-estimate, or “model,” of some real-world probability distribution. For
-example, the Bach chorales are often considered an idealized model of
-“common practice tonality” in general. If we observe, for example, that
-\$\$1.04% of notes in our Bach chorale data are E flats, we might
-estimate that about 1.04% of notes in “common practice music” more
-generally are E flats. Or to put it in a probabilistic way, if we
-randomly select a note from a common-practice piece, the *estimated*
-probability of that note being an E flat is about 1.04%—this is based on
-our current model, which is based on our empirical analysis of the first
-10 chorales.
+Statisticians refer to the sorts of distributions created by
+[`count()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+or and
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
+as *empirical distributions*—distributions of a sample of data. We will
+often regard a empirical distribution as an estimate, or “model,” of
+some real-world probability distribution. For example, the Bach chorales
+are often considered an idealized model of “common practice tonality” in
+general. If we observe, for example, that $\approx 1.04$ % of notes in
+our Bach chorale data are E flats, we might estimate that about 1.04% of
+notes in “common practice music” more generally are E flats. Or to put
+it in a probabilistic way, if we randomly select a note from a
+common-practice piece, the *estimated* probability of that note being an
+E flat is about 1.04%—this estimate is based on our current model, which
+is based on our empirical analysis of the first 10 chorales.
 
 #### Likelihood
 
 Sometimes, we’d like to ask what probability a model assigns to each
 data point in sample. This kind of “retrospective probability”
 assignment is called a *likelihood*. In humdrum$_{\mathbb{R}}$, we can
-assign likelihoods quite easily using the \[like()\] function. Consider
-this simple vector again:
+assign likelihoods quite easily using the
+[`like()`](https://rdrr.io/pkg/data.table/man/like.html) function.
+Consider this simple vector again:
 
 ``` r
 
@@ -1812,12 +1824,13 @@ like(v1)
 >     [1] 0.4 0.3 0.3 0.4 0.3 0.3 0.4 0.3 0.3 0.4
 ```
 
-What’s happening here? Notice that \[like()\] assigns each data point a
-likelihood by looking that value up in the `p1` table. For example, `b`
-makes up `.3` of `v1`, so every time there is `b` in the input,
-\[like()\] assigns `.3`. If we do this with our Bach data, we’d see that
-every E flat that appears gets that 1.04% (`0.0104`) value that we just
-talked about:
+What’s happening here? Notice that
+[`like()`](https://rdrr.io/pkg/data.table/man/like.html) assigns each
+data point a likelihood by looking that value up in the `p1` table. For
+example, `b` makes up `.3` of `v1`, so every time there is `b` in the
+input, [`like()`](https://rdrr.io/pkg/data.table/man/like.html) assigns
+`0.3`. If we do this with our Bach data, we’d see that every E flat that
+appears gets that 1.04% (`0.0104`) value that we just talked about:
 
 ``` r
 bach |> like(Pitch)
@@ -1988,8 +2001,9 @@ bach |> like(Pitch, Rhythm)
 
 Here’s a thought: what if we know the rhythm value in advance, and we
 want to estimate the likelihood of each pitch given the rhythm? This is
-the “conditional likelihood,” and we can compute it using the same
-`condition` rgument we used with `pdist()`:
+the “conditional likelihood” and we can compute it using the same
+`condition` argument we used with
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md):
 
 ``` r
 bach |> like(Pitch, Rhythm, condition = 'Rhythm')
@@ -2076,15 +2090,16 @@ bach |> like(Pitch, Rhythm, condition = 'Rhythm')
 #### Using a different model
 
 Remember, there is no “true” or correct probability model for a given
-data. We should never say the “probability of E flat *is* 1.04%”—rather,
-that is our “estimated probability of E flat.” It is very common, as a
-basic analysis step, to compute the empirical distribution of a data
-sample, then immediately use that distribution as a probability model of
-that data…essentially, using the data as a model of itself. This is what
-\[like()\] does by default. However, we might sometimes want to take a
-different tack, assigning likelihoods to our data based on a different
-model. For example, what if we observed a different sample of lowercase
-letters:
+data. We should never say the “probability of E flat **is**
+1.04%”—rather, 1.04% is our “estimated probability of E flat.” It is
+very common, as a basic analysis step, to compute the empirical
+distribution of a data sample then immediately use that distribution as
+a probability model of that data…essentially, using the data as a model
+of itself. This is what
+[`like()`](https://rdrr.io/pkg/data.table/man/like.html) does by
+default. However, we might sometimes want to take a different tack,
+assigning likelihoods to our data based on a different model. For
+example, what if we observed a different sample of lowercase letters?:
 
 ``` r
 v3 <- c('a', 'a','b','b','b','b','b','c','c')
@@ -2108,7 +2123,9 @@ like(lower = v3, model = pdist(lower = v1))
 We do this sort of thing with real data all the time. For example, we
 might want to assign probabilities to the notes in the first Bach
 chorale, based on the empirical probabilities observed in all the
-*other* chorales.
+*other* chorales. (This is similar to
+“[leave-one-out](https://en.wikipedia.org/wiki/Cross-validation_(statistics)#Leave-one-out_cross-validation)”
+cross validation.)
 
 ``` r
 
@@ -2199,15 +2216,15 @@ bach |> like(Pitch, model = allExcept1)
 
 ## Information Theory
 
-Working with actually likelihoods, as we do above, is rarely a good
-idea, because in practice the likelihoods can get so small that we run
-into problems representing them in our computers. Thus, we usually,
-compute the log of the likelihood, like this:
+Working with actually likelihoods, as we do above, is rarely a good idea
+because, in practice, the likelihoods can get so small that we run into
+problems representing them in our computers. Thus, we usually compute
+the log of the likelihood, like this:
 
 ``` r
 bach |>
   like(Pitch, model = allExcept1) |>
-  within(log(., base = 2))
+  within(LogLike = log(., base = 2))
 >    ####################### vvv chor001.krn vvv ########################
 >                1:  !!!COM: Bach, Johann Sebastian
 >                2:  !!!CDT: 1685/02/21/-1750/07/28/
@@ -2282,11 +2299,11 @@ bach |>
 >       humdrumR corpus of ten pieces.
 >    
 >       Data fields: 
->                P(Pitch)         :: numeric
->                Pitch            :: character (**kern tokens)
->                Rhythm           :: character (**recip tokens)
->                Token            :: character
->               *log(., base = 2) :: numeric
+>               *LogLike  :: numeric
+>                P(Pitch) :: numeric
+>                Pitch    :: character (**kern tokens)
+>                Rhythm   :: character (**recip tokens)
+>                Token    :: character
 ```
 
 That’s the “log likelihood.”
@@ -2306,8 +2323,10 @@ more predictable and less informative—a data point is. The higher the
 information content, the *less likely*—and thus more surprising and more
 informative—a data point is. This way of interpreting inverted log
 probabilities is the core of **information theory**. We can estimate the
-information content directly using the \[info()\] function, which is
-used just like the \[like()\] function:
+information content directly using the
+[`info()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md)
+function, which is used just like the
+[`like()`](https://rdrr.io/pkg/data.table/man/like.html) function:
 
 ``` r
 info(v1)
@@ -2315,10 +2334,85 @@ info(v1)
 >     [9] 1.736966 1.321928
 
 bach |>
-  kern(simple = TRUE) |>
   info(Pitch, model = allExcept1)
+>    ###################### vvv chor001.krn vvv ######################
+>                1:  !!!COM: Bach, Johann Sebastian
+>                2:  !!!CDT: 1685/02/21/-1750/07/28/
+>                3:  !!!OTL@@DE: Aus meines Herzens Grunde
+>                4:  !!!OTL@EN:      From the Depths of My Heart
+>                5:  !!!SCT: BWV 269
+>                6:  !!!PC#: 1
+>                7:  !!!AGN: chorale
+>                8:              **kern            **kern            **kern    ***
+>                9:              *ICvox            *ICvox            *ICvox    ***
+>               10:              *Ibass           *Itenor            *Ialto    ***
+>               11:             *I"Bass          *I"Tenor           *I"Alto    ***
+>               12:           *>[A,A,B]         *>[A,A,B]         *>[A,A,B]    ***
+>               13:        *>norep[A,B]      *>norep[A,B]      *>norep[A,B]    ***
+>               14:                 *>A               *>A               *>A    ***
+>               15:             *clefF4          *clefGv2           *clefG2    ***
+>               16:              *k[f#]            *k[f#]            *k[f#]    ***
+>               17:                 *G:               *G:               *G:    ***
+>               18:               *M3/4             *M3/4             *M3/4    ***
+>               19:              *MM100            *MM100            *MM100    ***
+>               20:    3.55901404868352  3.07800251200127  3.42642840906571    ***
+>               21:                  =1                =1                =1    ***
+>               22:    3.55901404868352  3.07800251200127  3.42642840906571    ***
+>               23:    2.81588966163854  3.42642840906571  2.81588966163854    ***
+>               24:                   .  3.07800251200127                 .    ***
+>               25:     3.7839804136838  2.90623616373479  3.42642840906571    ***
+>               26:                  =2                =2                =2    ***
+>               27:    3.55901404868352  3.55901404868352  3.42642840906571    ***
+>               28:    3.42642840906571   3.7839804136838                 .    ***
+>               29:                   .                 .                 .    ***
+>               30:    2.81588966163854  3.55901404868352  3.07800251200127    ***
+>    31-133:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+>    ###################### ^^^ chor001.krn ^^^ ######################
 >    
->    Empty humdrumR object
+>           (eight more pieces...)
+>    
+>    ###################### vvv chor010.krn vvv ######################
+>      1-70:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+>               71:    3.42642840906571   3.7839804136838  3.42642840906571    ***
+>               72:                   .  3.55901404868352                 .    ***
+>               73:    3.42642840906571                 .  3.42642840906571    ***
+>               74:                   .   3.7839804136838                 .    ***
+>               75:    3.55901404868352  3.55901404868352  3.07800251200127    ***
+>               76:                 =11               =11               =11    ***
+>               77:    3.42642840906571  3.55901404868352  2.81588966163854    ***
+>               78:    2.90623616373479  2.90623616373479  2.81588966163854    ***
+>               79:    2.81588966163854  4.33772418379423  2.81588966163854    ***
+>               80:                   .                 .  3.42642840906571    ***
+>               81:                 =12               =12               =12    ***
+>               82:    4.19901791296264  2.90623616373479  3.42642840906571    ***
+>               83:    3.42642840906571  3.55901404868352  3.42642840906571    ***
+>               84:    5.19901791296264  3.55901404868352  3.42642840906571    ***
+>               85:    2.90623616373479  2.90623616373479                 .    ***
+>               86:                 =13               =13               =13    ***
+>               87:    4.33772418379423  3.07800251200127  3.42642840906571    ***
+>               88:    2.90623616373479  2.90623616373479  3.42642840906571    ***
+>               89:    2.81588966163854  4.33772418379423  3.07800251200127    ***
+>               90:                  ==                ==                ==    ***
+>               91:                  *-                *-                *-    ***
+>               92:  !!!hum2abc: -Q ''
+>               93:  !!!title: @{PC#}. @{OTL@@DE}
+>               94:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Se***
+>               95:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkop***
+>               96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. B***
+>               97:  !!!YOR4: Chorales (New York: Associated Music Publishers, ***
+>               98:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.***
+>               99:  !!!EED:  Craig Stuart Sapp
+>              100:  !!!EEV:  2009/05/22
+>    ###################### ^^^ chor010.krn ^^^ ######################
+>               (***one spine/path not displayed due to screen size***)
+>    
+>       humdrumR corpus of ten pieces.
+>    
+>       Data fields: 
+>                Pitch    :: character (**kern tokens)
+>                Rhythm   :: character (**recip tokens)
+>                Token    :: character
+>               *h(Pitch) :: numeric
 ```
 
 Notice that is exactly like the log likelihood, just negated (`-3.42`
@@ -2334,8 +2428,14 @@ can also ask how much information each data point contains *on average*.
 This is called the (Shannon) **entropy**. Entropy is simply the average
 information content—which is really a property of the probability
 distribution. To compute entropy, we can pass a probability distribution
-(created with `pdist()`) to the \[entropy()\] function. (You can also
-pass variables straight to \[entropy()\], and it will run `pdist()`
+(created with
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md))
+to the
+[`entropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md)
+function. (You can also pass variables straight to
+[`entropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md),
+and it will run
+[`pdist()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/count.md)
 automatically.)
 
 ``` r
@@ -2354,7 +2454,12 @@ We should remind ourselves that what we are computing here is the
 estimating from our data. The *true* entropy of pitch in common practice
 music is certainly not this exact number, but we might argue/hope that
 the empirical entropy we observe in these ten Bach chorales is a
-reasonable estimate of the true entropy of common practice music.
+reasonable estimate of the true entropy of common practice music. Also,
+we are only considering the entropy/likelihood of pitches, taken as a
+set of independent observations—this is a very simplistic perspective on
+pitch in music, so we aren’t modeling the “empirical entropy of the Bach
+chorales,” but rather that “empirical entropy of the marginal
+distribution of pitch in the Bach chorales.”
 
 #### Multi-dimensional entropy
 
@@ -2425,12 +2530,12 @@ marginal (independent) entropy of each variable:
 ``` r
 bach |> select(Token) |> mutate(ComplexPitch = kern(Token)) -> bach
 
-bach |> entropy(ComplexPitch)
->    H(ComplexPitch) 
->           5.017594
 bach |> entropy(Instrument)
 >    H(Instrument) 
 >         1.996911
+bach |> entropy(ComplexPitch)
+>    H(ComplexPitch) 
+>           5.017594
 ```
 
 What we see here makes sense: the entropy of the voice is almost exactly
@@ -2475,11 +2580,11 @@ this as saying that knowing which voice is singing provides us with
 
 ##### Pointwise mutual information
 
-We aren’t quite done with mutual information yet. We’ve \[already
-learned\]\[#entropy\] that the entropy of a distribution is the average
-of the information content of all the observations. Similarly, we can
-view mutual information as an average. But an average of what?
-Basically, if we look at each data point (with multiple variables) we
+We aren’t quite done with mutual information yet. We’ve [already
+learned](#entropy) that the entropy of a distribution is the average of
+the information content of all the observations. Similarly, we can view
+mutual information as an average. But an average of what? Basically, if
+we look at each data point (which may includes multiple variables) we
 can compare the estimated information content based on the actual
 (observed) joint probability with the “naive” joint probability which we
 would observe if the variables were independent. When they are
@@ -2488,15 +2593,158 @@ than we’d expect *if the variables were independent*. The average of the
 log of the ratio between the two values is the mutual information; The
 individual log ratios (one for each data point) are then the *pointwise
 mutual information*. Luckily for us, humdrum$_{\mathbb{R}}$ includes the
-\[pmutual()\] function, which we can use just like \[info()\] or
-\[like()\]:
+[`pmutual()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutual.md)
+function, which we can use just like
+[`info()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md)
+or [`like()`](https://rdrr.io/pkg/data.table/man/like.html):
 
 ``` r
 bach |>
   filter(File == 1) |>
-  mutual(Pitch, Rhythm)
->    I(Pitch;Rhythm) 
->          0.1241893
+  pmutual(Pitch, Rhythm)
+>    ######################## vvv chor001.krn vvv #########################
+>        1:  !!!COM: Bach, Johann Sebastian
+>        2:  !!!CDT: 1685/02/21/-1750/07/28/
+>        3:  !!!OTL@@DE: Aus meines Herzens Grunde
+>        4:  !!!OTL@EN:      From the Depths of My Heart
+>        5:  !!!SCT: BWV 269
+>        6:  !!!PC#: 1
+>        7:  !!!AGN: chorale
+>        8:                 **kern              **kern               **kern    ***
+>        9:                 *ICvox              *ICvox               *ICvox    ***
+>       10:                 *Ibass             *Itenor               *Ialto    ***
+>       11:                *I"Bass            *I"Tenor              *I"Alto    ***
+>       12:              *>[A,A,B]           *>[A,A,B]            *>[A,A,B]    ***
+>       13:           *>norep[A,B]        *>norep[A,B]         *>norep[A,B]    ***
+>       14:                    *>A                 *>A                  *>A    ***
+>       15:                *clefF4            *clefGv2              *clefG2    ***
+>       16:                 *k[f#]              *k[f#]               *k[f#]    ***
+>       17:                    *G:                 *G:                  *G:    ***
+>       18:                  *M3/4               *M3/4                *M3/4    ***
+>       19:                 *MM100              *MM100               *MM100    ***
+>       20:      0.146437997841273    0.22181980968341   -0.129087352175718    ***
+>       21:                     =1                  =1                   =1    ***
+>       22:      0.146437997841273    0.22181980968341   -0.129087352175718    ***
+>       23:      0.124958270430821   0.598889458763233    0.124958270430821    ***
+>       24:                      .  -0.553113634681816                    .    ***
+>       25:      -0.20519033126151   -0.65264930823273   -0.129087352175718    ***
+>       26:                     =2                  =2                   =2    ***
+>       27:      0.146437997841273   0.146437997841273    0.875729664122058    ***
+>       28:     -0.129087352175718   -0.20519033126151                    .    ***
+>       29:                      .                   .                    .    ***
+>       30:      0.124958270430821   0.146437997841273     0.22181980968341    ***
+>       31:                     =3                  =3                   =3    ***
+>       32:     0.0843162859334758   0.598889458763233    0.446886365318184    ***
+>       33:                      .  -0.553113634681816   -0.745758712624212    ***
+>       34:     -0.553113634681816  0.0843162859334758    0.446886365318184    ***
+>       35:      0.616811366760496                   .    0.742342248844355    ***
+>       36:      0.146437997841273  -0.129087352175718    0.146437997841273    ***
+>       37:                     =4                  =4                   =4    ***
+>       38:      0.875729664122058   0.875729664122058   -0.320667548681445    ***
+>       39:      0.146437997841273  -0.129087352175718    0.146437997841273    ***
+>       40:                     =5                  =5                   =5    ***
+>       41:      -0.20519033126151   -0.65264930823273   -0.129087352175718    ***
+>       42:      0.146437997841273    0.22181980968341    0.124958270430821    ***
+>       43:      -0.65264930823273  0.0843162859334758    -0.20519033126151    ***
+>       44:                     =6                  =6                   =6    ***
+>       45:       0.22181980968341  -0.129087352175718  -0.0900546205400286    ***
+>       46:     0.0843162859334758   0.124958270430821                    .    ***
+>       47:     -0.129087352175718  -0.745758712624212    -0.20519033126151    ***
+>       48:                      .   0.598889458763233                    .    ***
+>       49:                     =7                  =7                   =7    ***
+>       50:    -0.0900546205400286   -1.03116093148646    0.875729664122058    ***
+>       51:                   =:|!                =:|!                 =:|!    ***
+>       52:                    *>B                 *>B                  *>B    ***
+>       53:      0.146437997841273  -0.129087352175718    0.146437997841273    ***
+>       54:                     =8                  =8                   =8    ***
+>       55:      0.146437997841273  -0.129087352175718   -0.612007323735384    ***
+>       56:                      .                   .    0.742342248844355    ***
+>       57:      -0.65264930823273  0.0843162859334758    0.446886365318184    ***
+>       58:                      .                   .    0.742342248844355    ***
+>       59:       0.22181980968341  -0.553113634681816    0.146437997841273    ***
+>       60:                      .   0.616811366760496                    .    ***
+>       61:                     =9                  =9                   =9    ***
+>       62:       1.25424128737579  -0.553113634681816   -0.612007323735384    ***
+>       63:                      .   0.598889458763233    0.616811366760496    ***
+>       64:                      .  -0.129087352175718   -0.612007323735384    ***
+>       65:      0.616811366760496                   .    0.742342248844355    ***
+>       66:      0.146437997841273  -0.129087352175718    0.146437997841273    ***
+>       67:                    =10                 =10                  =10    ***
+>       68:      0.875729664122058   0.875729664122058   -0.320667548681445    ***
+>       69:      0.124958270430821    0.22181980968341    0.124958270430821    ***
+>       70:                    =11                 =11                  =11    ***
+>       71:      0.124958270430821   0.146437997841273    0.124958270430821    ***
+>       72:     -0.129087352175718    0.22181980968341    0.742342248844355    ***
+>       73:                      .                   .   -0.612007323735384    ***
+>       74:     0.0843162859334758   0.124958270430821    -0.65264930823273    ***
+>       75:                    =12                 =12                  =12    ***
+>       76:       1.25424128737579   0.875729664122058    -0.65264930823273    ***
+>       77:                      .                   .    0.780310099043376    ***
+>       78:      0.598889458763233                   .                    .    ***
+>       79:     -0.129087352175718  -0.129087352175718                    .    ***
+>       80:                      .                   .    0.742342248844355    ***
+>       81:                    =13                 =13                  =13    ***
+>       82:     -0.612007323735384   0.669278786654632  -0.0900546205400286    ***
+>       83:      0.616811366760496                   .                    .    ***
+>       84:       0.22181980968341                   .                    .    ***
+>       85:      0.146437997841273                   .    0.932313192488426    ***
+>       86:                    =14                 =14                  =14    ***
+>       87:      -1.20108593292877   -1.20108593292877   -0.838515853544064    ***
+>       88:      0.146437997841273  -0.129087352175718    0.146437997841273    ***
+>       89:                    =15                 =15                  =15    ***
+>       90:      -0.20519033126151  -0.745758712624212    0.254241287375788    ***
+>       91:                      .   0.598889458763233                    .    ***
+>       92:      0.146437997841273    0.22181980968341                    .    ***
+>       93:                      .                   .   -0.612007323735384    ***
+>       94:      -0.65264930823273  0.0843162859334758    -0.20519033126151    ***
+>       95:                    =16                 =16                  =16    ***
+>       96:       0.22181980968341   0.875729664122058  -0.0900546205400286    ***
+>       97:      0.146437997841273                   .                    .    ***
+>       98:     -0.129087352175718  -0.745758712624212    -0.20519033126151    ***
+>       99:                      .   0.598889458763233                    .    ***
+>      100:                    =17                 =17                  =17    ***
+>      101:      0.446886365318184    0.22181980968341    0.742342248844355    ***
+>      102:     -0.745758712624212                   .    0.446886365318184    ***
+>      103:      0.598889458763233  0.0843162859334758    0.446886365318184    ***
+>      104:     -0.553113634681816                   .    0.742342248844355    ***
+>      105:      0.616811366760496  -0.129087352175718    0.146437997841273    ***
+>      106:     -0.612007323735384                   .                    .    ***
+>      107:                    =18                 =18                  =18    ***
+>      108:      0.875729664122058   0.875729664122058   -0.320667548681445    ***
+>      109:      0.146437997841273  -0.129087352175718    0.146437997841273    ***
+>      110:                    =19                 =19                  =19    ***
+>      111:      0.146437997841273   0.875729664122058    0.553801569234696    ***
+>      112:      -0.20519033126151                   .                    .    ***
+>      113:      0.124958270430821   0.124958270430821   -0.612007323735384    ***
+>      114:                      .                   .    0.742342248844355    ***
+>      115:                    =20                 =20                  =20    ***
+>      116:      0.446886365318184  -0.838515853544064  -0.0900546205400286    ***
+>      117:     -0.745758712624212                   .                    .    ***
+>      118:     0.0843162859334758                   .                    .    ***
+>      119:     -0.129087352175718  -0.745758712624212    -0.20519033126151    ***
+>      120:                      .   0.598889458763233                    .    ***
+>      121:                    =21                 =21                  =21    ***
+>      122:      0.610385097601063    1.08431628593348    0.669278786654632    ***
+>      123:                     ==                  ==                   ==    ***
+>      124:                     *-                  *-                   *-    ***
+>      125:  !!!hum2abc: -Q ''
+>      126:  !!!title: @{PC#}. @{OTL@@DE}
+>      127:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Sebastian ***
+>      128:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf und H&***
+>      129:  !!!YOR3: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371***
+>      130:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.***
+>      131:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+>      132:  !!!EED:  Craig Stuart Sapp
+>      133:  !!!EEV:  2009/05/22
+>    ######################## ^^^ chor001.krn ^^^ #########################
+>                    (***one spine/path not displayed due to screen size***)
+>    
+>       Data fields: 
+>                ComplexPitch    :: character (**kern tokens)
+>                Pitch           :: character (**kern tokens)
+>                Rhythm          :: character (**recip tokens)
+>                Token           :: character
+>               *i(Pitch;Rhythm) :: numeric
 ```
 
 What do these numbers mean? If a pointwise mutual information value is
@@ -2508,13 +2756,14 @@ likely to occur.)
 
 #### Using a different model (cross entropy)
 
-\[Above\]\[#using-a-different-model\], we saw that we could assign
+[Above](#using-a-different-model), we saw that we could assign
 likelihoods to one set of data based on a model extracted from different
 data. For example, assigning likelihoods to pitches in one chorale based
 on the distribution of pitches in the other nine chorales. We can do the
 same thing when computing entropy. The result is called the *cross
 entropy*, and it is an excellent measure of how well a model “fits” some
-data. We can compute the cross entropy using the \[xentropy()\]
+data. We can compute the cross entropy using the
+[`xentropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md)
 function, which requires a `model` argument.
 
 ``` r
@@ -2548,7 +2797,7 @@ bach |> group_by(File) |> with(unique(Key))
 
 Lets try computing the (cross) entropy of Chorale 1 using either (1)
 Chorale 5, which is also in G major or (2) Chorale 4, which is in E
-major.
+major, as a model.
 
 ``` r
 bach |> filter(File == 5) |> pdist(Pitch) -> GmajorP
@@ -2569,7 +2818,7 @@ chorale using the distribution of pitches in the other G major Chorale
 Chorale’s “self” entropy. On the other hand, if we use the E major
 Chorale as the model, the fit is quite a bit worse (3.65). How would we
 interpret that? Well, if our goal is to generalize about how frequently
-different pitches occur common practice music which is composed *in G
+different pitches occur in common practice music which is composed *in G
 major*, but we use E major Chorales to come up with those probabilities,
 we’ll end up underestimating a lot. For example, our `EmajorP` model
 says that the note D natural should only occur about 2% of the time, and
@@ -2579,7 +2828,7 @@ the first (G major) chorale using the `EmajorP` data is high—it’s a bad
 fit.
 
 Obviously, `EmajorP` would be a better model of common practice music
-that is composed in E major! But…that doesn’t mean we believe that
+that is composed in E major. But…that doesn’t mean we believe that
 `EmajorP` is a great model of the distribution of pitches in common
 practice E major, or that `GmajorP` is a great model of music composed
 in G major—they are each only based on one short piece by Bach! If we
@@ -2631,23 +2880,475 @@ bach |> filter(File == 1) |> kld(Pitch, model = EmajorP)
 This is the same information we saw before, really, but perhaps easier
 to interpret. Close to zero is good fit; Larger numbers are worse fit.
 
-### Contextual Entropy
+### Pointwise Entropy
 
-Many researchers reading this article so far might be a little
-confused—particularly regarding the definition of “conditional entropy”
-we’ve used so far. This is because there is another very common way that
-“conditional entropy” has been used extensivly in music research, which
-we haven’t discussed so far. This approach, because it has become so
-common, is often called “conditional entropy”—or just “entropy”—in
-papers, even though this is a *slight* abuse/simplification of the
-terminology.
+Many researchers reading this article so far might be a little confused
+regarding the definition of “conditional entropy” we’ve used so far.
+This is because there is another very common way that “conditional
+entropy” has been used extensively in music research which we haven’t
+discussed so far. This approach, because it has become so common, is
+often called “conditional entropy”—or just “entropy”—in papers, even
+though this is a slight abuse of the terminology.
 
-Properly, as described in the previous section, entropy and conditional
-entropy are properties of a probability distribution over one or more
-variables: you get one value for the whole distribution. However, it can
-be interesting and fruitful to consider, as we progress through a piece
-of music and we make (likely unconscious) probabilistic guesses about
-what notes will happen to next, what the entropy of those probabilities
-are at each moment. This is, essentially, a conditional entropy, but its
-the entropy conditioned on the current musical context (based on some
-probability model) *in isolation*.
+Properly, as described in the previous sections, the conditional entropy
+of a set of variables is a *single* value—the *average* information
+content of those variables *given* some other conditioning variables. In
+contrast, we can look at each data point, and ask what the entropy
+associated with conditioning variables at that point is. To clarify this
+distinction, let’s back up. Consider this small set of data:
+
+``` r
+chords <- c('Cmaj', 'Cmaj', 'Cmaj', 'Gmaj', 'Cmaj', 'Cmaj', 'Cmaj','Gmaj')
+notes  <- c('c',    'c',    'c',    'd',    'c',   'c',     'c', 'b')
+
+data.frame(Harmony = chords, Melody = notes)
+>      Harmony Melody
+>    1    Cmaj      c
+>    2    Cmaj      c
+>    3    Cmaj      c
+>    4    Gmaj      d
+>    5    Cmaj      c
+>    6    Cmaj      c
+>    7    Cmaj      c
+>    8    Gmaj      b
+```
+
+Lets look at the entropy of the melody, conditioned on the harmony. We
+can start by looking at the conditional probability distribution (though
+we can probably do this in our head here!):
+
+``` r
+pdist(Harmony = chords, Melody = notes, condition = 'Harmony')
+>    humdrumR probability distribution P(Melody|Harmony) 
+>    Harmony  Melody           
+>                  b     c    d
+>       Cmaj       .   1.0    .
+>       Gmaj      .5     .   .5
+>                  b     c    d
+>    Harmony  Melody           
+>    humdrumR probability distribution P(Melody|Harmony)
+```
+
+So, when the chord is `Cmaj`, there is 100% chance that the melody is
+`c`; when the chord is `Gmaj`, the melody splits 50/50 between `d` and
+`b`. Those are the likelihood values, and we can assign them to each
+data point using
+[`like()`](https://rdrr.io/pkg/data.table/man/like.html)—and let’s do
+the information content too, because it’s just the negative log of the
+likelihood anyway:
+
+``` r
+likelihood  <- like(Harmony = chords, Melody = notes, condition = 'Harmony')
+information <- info(Harmony = chords, Melody = notes, condition = 'Harmony')
+
+data.frame(Harmony = chords, Melody = notes, Likelihood = likelihood, Information = information)
+>      Harmony Melody Likelihood Information
+>    1    Cmaj      c        1.0           0
+>    2    Cmaj      c        1.0           0
+>    3    Cmaj      c        1.0           0
+>    4    Gmaj      d        0.5           1
+>    5    Cmaj      c        1.0           0
+>    6    Cmaj      c        1.0           0
+>    7    Cmaj      c        1.0           0
+>    8    Gmaj      b        0.5           1
+```
+
+When the likelihoods are converted to information content they end up
+being `0` bits ($p = 1$) or `1` bit ($p = 0.5$). So, what’s the
+conditional entropy? It’s the average of those eight point-wise
+`Information` values: 0.25.
+
+``` r
+entropy(Harmony = chords, Melody = notes, condition = 'Harmony')
+>    H(Melody|Harmony) 
+>                 0.25
+```
+
+Notice that the conditional entropy is one quarter of a bit, not half a
+bit. This is because the `Cmaj` condition occurs more often than the
+`Gmaj` condition; i.e., there are six `Cmaj` data points (`0` bits) and
+only two `Gmaj` data points (`1` bit), which averages out to 0.25. This
+is the proper interpretation of “conditional entropy,” as we already
+learned about.
+
+But what if we simply want to know what the average information content
+is for *each* condition—in this case, each chord—? Conditional entropy
+doesn’t tell me that, because it averages across all the chords.
+Luckily, we have the
+[`entropy_by()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
+function:
+
+``` r
+entropy_by(Harmony = chords, Melody = notes, condition = 'Harmony')
+>    humdrumR entropy distribution H(Melody|Harmony) 
+>    Harmony  H(Melody)
+>       Cmaj          0
+>       Gmaj          1
+>    Harmony  H(Melody)
+>    humdrumR entropy distribution H(Melody|Harmony)
+```
+
+Ah, now we get the entropy of each condition! Basically,
+[`entropy_by()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
+is short for “entropy by condition.” Now, next we simply want to assign
+the values from this table “pointwise” to the original data points,
+which we can do with the
+[`pentropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
+function:
+
+``` r
+pH <- pentropy(Harmony = chords, Melody = notes, condition = 'Harmony')
+
+data.frame(Harmony = chords, Melody = notes, PEntropy = pH)
+>      Harmony Melody PEntropy
+>    1    Cmaj      c        0
+>    2    Cmaj      c        0
+>    3    Cmaj      c        0
+>    4    Gmaj      d        1
+>    5    Cmaj      c        0
+>    6    Cmaj      c        0
+>    7    Cmaj      c        0
+>    8    Gmaj      b        1
+```
+
+This gives us what we wanted: the “current” conditional entropy at each
+data point.
+
+#### Real data
+
+Let’s try out the
+[`entropy_by()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
+and
+[`pentropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
+functions with some real data. Starting with entropy by condition:
+
+``` r
+bach |> entropy_by(Pitch, Rhythm, condition = "Rhythm")
+>    humdrumR entropy distribution H(Pitch|Rhythm) 
+>    Rhythm  H(Pitch)
+>        16      3.06
+>         8      3.61
+>        8.      0.00
+>         4      3.63
+>        4.      3.24
+>         2      3.38
+>        2.      3.05
+>         1      0.00
+>    Rhythm  H(Pitch)
+>    humdrumR entropy distribution H(Pitch|Rhythm)
+```
+
+Generally, the empirical entropy of pitch doesn’t seem to vary much
+depending on the rhythmic duration, which I guess isn’t that surprising
+for chorale data. But what about those zeroes? Aren’t they something.
+Those zeroes mean that dotted-eighth-notes and whole notes are always
+the same pitch, so there is zero entropy—but this is just because they
+only happen once each in our data!
+
+``` r
+bach |> count(Rhythm)
+>    humdrumR count distribution, ~rounded 
+>    Rhythm       n
+>        16      17
+>         8     706
+>        8.       1
+>         4  ~1.43k
+>        4.      28
+>         2     222
+>        2.      21
+>         1       1
+>    Rhythm       n
+>    humdrumR count distribution, ~rounded
+```
+
+This is another good illustration that the *empirical* entropy in a
+dataset is not necessarily a good estimate of the true entropy in music.
+Let’s look at something that is (possibly) more interesting:
+
+``` r
+bach |> entropy_by(Pitch, Instrument, condition = "Instrument")
+>    humdrumR entropy distribution H(Pitch|Instrument) 
+>    Instrument  H(Pitch)
+>        I"Alto      3.41
+>        I"Bass      3.67
+>     I"Soprano      3.40
+>       I"Tenor      3.53
+>    Instrument  H(Pitch)
+>    humdrumR entropy distribution H(Pitch|Instrument)
+```
+
+There’s not *much* variation between voices either, but the variation
+here at least makes sense: the bass voice has the most entropy (perhaps
+because it leaps more) while the two inner voices (alto and tenor)
+voices have the least pitch entropy. Of course, this is a very minimal
+definition of pitch, so we should take this with a grain of salt.
+
+------------------------------------------------------------------------
+
+Let’s check that the
+[`pentropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
+function works as we hope:
+
+``` r
+bach |> pentropy(Pitch, Instrument, condition = 'Instrument')
+>    ##################### vvv chor001.krn vvv ######################
+>                1:  !!!COM: Bach, Johann Sebastian
+>                2:  !!!CDT: 1685/02/21/-1750/07/28/
+>                3:  !!!OTL@@DE: Aus meines Herzens Grunde
+>                4:  !!!OTL@EN:      From the Depths of My Heart
+>                5:  !!!SCT: BWV 269
+>                6:  !!!PC#: 1
+>                7:  !!!AGN: chorale
+>                8:              **kern            **kern           **kern    ***
+>                9:              *ICvox            *ICvox           *ICvox    ***
+>               10:              *Ibass           *Itenor           *Ialto    ***
+>               11:             *I"Bass          *I"Tenor          *I"Alto    ***
+>               12:           *>[A,A,B]         *>[A,A,B]        *>[A,A,B]    ***
+>               13:        *>norep[A,B]      *>norep[A,B]     *>norep[A,B]    ***
+>               14:                 *>A               *>A              *>A    ***
+>               15:             *clefF4          *clefGv2          *clefG2    ***
+>               16:              *k[f#]            *k[f#]           *k[f#]    ***
+>               17:                 *G:               *G:              *G:    ***
+>               18:               *M3/4             *M3/4            *M3/4    ***
+>               19:              *MM100            *MM100           *MM100    ***
+>               20:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               21:                  =1                =1               =1    ***
+>               22:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               23:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               24:                   .  3.53274838036562                .    ***
+>               25:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               26:                  =2                =2               =2    ***
+>               27:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               28:    3.66716836587307  3.53274838036562                .    ***
+>               29:                   .                 .                .    ***
+>               30:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>    31-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+>    ##################### ^^^ chor001.krn ^^^ ######################
+>    
+>           (eight more pieces...)
+>    
+>    ##################### vvv chor010.krn vvv ######################
+>      1-70::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+>               71:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               72:                   .  3.53274838036562                .    ***
+>               73:    3.66716836587307                 .  3.4124404841983    ***
+>               74:                   .  3.53274838036562                .    ***
+>               75:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               76:                 =11               =11              =11    ***
+>               77:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               78:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               79:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               80:                   .                 .  3.4124404841983    ***
+>               81:                 =12               =12              =12    ***
+>               82:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               83:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               84:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               85:    3.66716836587307  3.53274838036562                .    ***
+>               86:                 =13               =13              =13    ***
+>               87:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               88:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               89:    3.66716836587307  3.53274838036562  3.4124404841983    ***
+>               90:                  ==                ==               ==    ***
+>               91:                  *-                *-               *-    ***
+>               92:  !!!hum2abc: -Q ''
+>               93:  !!!title: @{PC#}. @{OTL@@DE}
+>               94:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann S***
+>               95:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitko***
+>               96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. ***
+>               97:  !!!YOR4: Chorales (New York: Associated Music Publishers,***
+>               98:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V***
+>               99:  !!!EED:  Craig Stuart Sapp
+>              100:  !!!EEV:  2009/05/22
+>    ##################### ^^^ chor010.krn ^^^ ######################
+>              (***one spine/path not displayed due to screen size***)
+>    
+>       humdrumR corpus of ten pieces.
+>    
+>       Data fields: 
+>                ComplexPitch        :: character (**kern tokens)
+>               *H(Pitch|Instrument) :: numeric
+>                Pitch               :: character (**kern tokens)
+>                Rhythm              :: character (**recip tokens)
+>                Token               :: character
+```
+
+#### Conditioning on context
+
+Lots of research in music cognition has pointed the importance of
+predicting the next musical event (note or chord, usually) based on the
+previous event(s). In humdrum$_{\mathbb{R}}$, we can take advantage of
+our
+[lag](https://humdrumR.ccml.gtcmt.gatech.edu/articles/Context.html#n-grams%20Contextualizing%20humdrum%20data%20with%20N-grams)
+features to compute conditional entropy based on past context. So, for
+example, to compute the conditional entropy of each simple pitch given
+the previous pitch, we could do this:
+
+``` r
+# plain pitch entropy
+bach |> entropy(Pitch) 
+>    H(Pitch) 
+>    3.616216
+
+# use lag = 1 to get the previous data point
+bach |> entropy(Pitch, PrevPitch = Pitch[lag = 1], condition = 'PrevPitch')
+>    H(Pitch|PrevPitch) 
+>              2.705926
+```
+
+So overall, knowing the previous pitch reduces entropy. Of course, we
+now know how to see what the entropy is for each condition:
+
+``` r
+bach |> entropy_by(Pitch, PrevPitch = Pitch[lag = 1], condition = 'PrevPitch')
+>    humdrumR entropy distribution H(Pitch|PrevPitch) 
+>    PrevPitch  H(Pitch)
+>            c     2.784
+>           c#     2.400
+>           d-     2.213
+>            d     2.719
+>           d#     1.227
+>           e-     2.493
+>            e     3.033
+>           e#     1.299
+>            f     2.697
+>           f#     2.622
+>           g-     0.000
+>            g     2.885
+>           g#     2.130
+>           a-     2.488
+>            a     2.909
+>           a#     0.866
+>           b-     2.378
+>            b     2.723
+>           NA     3.146
+>    PrevPitch  H(Pitch)
+>    humdrumR entropy distribution H(Pitch|PrevPitch)
+```
+
+We get one weird zero again (because g-flat only happens once in these
+ten chorales) but everything else makes sense: for example, sharp notes
+like g# and d# are relatively low entropy because they probably tend to
+act as leading tones. This would probably be more informative if we also
+conditioned on key:
+
+``` r
+bach |> entropy_by(Pitch, PrevPitch = Pitch[lag = 1], Key, condition = c('PrevPitch', 'Key'))
+>    humdrumR entropy distribution H(Pitch|PrevPitch,Key) 
+>    PrevPitch    Key                                   
+>                  a:     A:     E:     F:  f:dor     G:
+>           NA  1.906  1.500  1.500  1.500  1.500  1.500
+>            c  1.938  0.000  0.000  2.387  2.458  1.896
+>           c#  0.000  2.184  2.547  0.000  0.000  1.157
+>           d-  0.000  0.000  0.000  0.000  2.213  0.000
+>            d  2.031  2.053  0.811  2.040  1.585  2.448
+>           d#  0.722  1.281  1.299  0.000  0.000  0.000
+>           e-  0.000  0.000  0.000  0.000  2.432  0.000
+>            e  2.778  2.773  2.616  1.988  1.252  2.600
+>           e#  0.000  0.918  1.000  0.000  0.000  0.000
+>            f  1.502  0.000  0.000  2.243  2.525  0.000
+>           f#  1.566  2.412  2.435  0.000  0.000  1.779
+>           g-  0.000  0.000  0.000  0.000  0.000  0.000
+>            g  2.420  1.208  0.000  2.182  2.557  2.509
+>           g#  0.988  2.080  2.366  0.000  0.000  0.866
+>           a-  0.000  0.000  0.000  0.000  2.488  0.000
+>            a  2.632  2.620  1.784  2.286  1.500  2.523
+>           a#  0.000  0.000  1.252  0.000  0.000  0.000
+>           b-  0.000  0.000  0.000  1.000  2.257  0.000
+>            b  1.880  2.304  2.717  1.000  0.000  2.381
+>                  a:     A:     E:     F:  f:dor     G:
+>    PrevPitch    Key                                   
+>    humdrumR entropy distribution H(Pitch|PrevPitch,Key)
+```
+
+Nice! Notice how the note f-natural is relatively low entropy in the
+keys of G major and A minor, but high entropy in the keys of F major and
+F dorian—which is exactly what we’d expect.
+
+Finally, we can apply these same models point-wise, so we can track how
+these conditional/contextual entropies change through each piece: This
+is exactly the way “entropy” is often used in music cognition research.
+
+``` r
+bach |> pentropy(Pitch, PrevPitch = Pitch[lag = 1], Key, condition = c('PrevPitch', 'Key'))
+>    ####################### vvv chor001.krn vvv #######################
+>                1:  !!!COM: Bach, Johann Sebastian
+>                2:  !!!CDT: 1685/02/21/-1750/07/28/
+>                3:  !!!OTL@@DE: Aus meines Herzens Grunde
+>                4:  !!!OTL@EN:      From the Depths of My Heart
+>                5:  !!!SCT: BWV 269
+>                6:  !!!PC#: 1
+>                7:  !!!AGN: chorale
+>                8:               **kern             **kern            **kern    ***
+>                9:               *ICvox             *ICvox            *ICvox    ***
+>               10:               *Ibass            *Itenor            *Ialto    ***
+>               11:              *I"Bass           *I"Tenor           *I"Alto    ***
+>               12:            *>[A,A,B]          *>[A,A,B]         *>[A,A,B]    ***
+>               13:         *>norep[A,B]       *>norep[A,B]      *>norep[A,B]    ***
+>               14:                  *>A                *>A               *>A    ***
+>               15:              *clefF4           *clefGv2           *clefG2    ***
+>               16:               *k[f#]             *k[f#]            *k[f#]    ***
+>               17:                  *G:                *G:               *G:    ***
+>               18:                *M3/4              *M3/4             *M3/4    ***
+>               19:               *MM100             *MM100            *MM100    ***
+>               20:                    .                  .                 .    ***
+>               21:                   =1                 =1                =1    ***
+>               22:     2.50889428153327   2.38100054468805  2.44801860756626    ***
+>               23:     2.50889428153327   2.38100054468805  2.44801860756626    ***
+>               24:                    .   1.89609502987381                 .    ***
+>               25:     2.60048027044198   2.38100054468805  2.60048027044198    ***
+>               26:                   =2                 =2                =2    ***
+>               27:     1.77887432766071   2.52308214817404  2.44801860756626    ***
+>               28:     2.50889428153327   2.50889428153327                 .    ***
+>               29:                    .                  .                 .    ***
+>               30:     2.44801860756626   1.77887432766071  2.44801860756626    ***
+>    31-133:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+>    ####################### ^^^ chor001.krn ^^^ #######################
+>    
+>           (eight more pieces...)
+>    
+>    ####################### vvv chor010.krn vvv #######################
+>      1-70:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+>               71:      1.9383112445326    1.9383112445326  2.77761691119536    ***
+>               72:                    .    1.5655962303576                 .    ***
+>               73:     2.03059983227804                  .  2.03059983227804    ***
+>               74:                    .   2.41987070272086                 .    ***
+>               75:     2.03059983227804    1.5655962303576   1.9383112445326    ***
+>               76:                  =11                =11               =11    ***
+>               77:     2.41987070272086   2.41987070272086  1.87966439800145    ***
+>               78:      1.9383112445326   2.41987070272086  2.77761691119536    ***
+>               79:     2.63163176581085   2.63163176581085  2.77761691119536    ***
+>               80:                    .                  .  2.77761691119536    ***
+>               81:                  =12                =12               =12    ***
+>               82:     2.77761691119536  0.988180837004676  2.03059983227804    ***
+>               83:     1.50161447181018   2.63163176581085   1.9383112445326    ***
+>               84:      1.9383112445326   2.41987070272086   1.9383112445326    ***
+>               85:                    0   2.41987070272086                 .    ***
+>               86:                  =13                =13               =13    ***
+>               87:     2.63163176581085   2.63163176581085  2.03059983227804    ***
+>               88:    0.988180837004676   1.87966439800145  2.03059983227804    ***
+>               89:     2.63163176581085   2.63163176581085   1.9383112445326    ***
+>               90:                   ==                 ==                ==    ***
+>               91:                   *-                 *-                *-    ***
+>               92:  !!!hum2abc: -Q ''
+>               93:  !!!title: @{PC#}. @{OTL@@DE}
+>               94:  !!!YOR1: 371 vierstimmige Choralges&auml;nge von Johann Seba***
+>               95:  !!!YOR2: 4th ed. by Alfred D&ouml;rffel (Leipzig: Breitkopf ***
+>               96:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bac***
+>               97:  !!!YOR4: Chorales (New York: Associated Music Publishers, In***
+>               98:  !!!SMS: B&H, 4th ed, Alfred D&ouml;rffel, c.1875, plate V.A.10
+>               99:  !!!EED:  Craig Stuart Sapp
+>              100:  !!!EEV:  2009/05/22
+>    ####################### ^^^ chor010.krn ^^^ #######################
+>                 (***one spine/path not displayed due to screen size***)
+>    
+>       humdrumR corpus of ten pieces.
+>    
+>       Data fields: 
+>                ComplexPitch           :: character (**kern tokens)
+>               *H(Pitch|PrevPitch,Key) :: numeric
+>                Pitch                  :: character (**kern tokens)
+>                Rhythm                 :: character (**recip tokens)
+>                Token                  :: character
+```
+
+This can be extended to higher-order N-grams without any difficulty.

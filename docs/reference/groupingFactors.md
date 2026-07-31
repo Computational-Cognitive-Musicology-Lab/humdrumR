@@ -20,10 +20,10 @@ function (and/or the `.by` argument).
 Any [atomic vector](https://rdrr.io/r/base/vector.html) with at least
 two unique values, or "levels", can be used as a grouping
 factor—generally, grouping vectors are coerced into
-[factor](https://rdrr.io/pkg/data.table/man/fctr.html)s. Each unique
-level in a grouping vector/factor represents a single group. Any vector,
-or [data.frame](https://rdrr.io/r/base/data.frame.html) that is *the
-same length/height* as the grouping factor can then be broken into these
+[factor](https://rdrr.io/r/base/factor.html)s. Each unique level in a
+grouping vector/factor represents a single group. Any vector, or
+[data.frame](https://rdrr.io/r/base/data.frame.html) that is *the same
+length/height* as the grouping factor can then be broken into these
 groups, taking all the indices where the grouping factor equals each
 group in turn. Since we generally try to work with data.frames, which by
 definition contain a bunch of vectors that are the same length, we can

@@ -1289,10 +1289,12 @@ colMins <- function(x, na.rm = TRUE, ties.method = 'first') {
 }
 
 reduce_fraction <- function(n, d) {
+	  na <- is.na(n) | is.na(d)
     # Used by rational initialize method
     sign <- sign(n)
     n <- abs(n)
-    gcds <- do(gcd, list(n, d))
+    gcds <- gcd(n[!na], d[!na])
+
     num <- n %/% gcds
     den <- d %/% gcds
     list(Numerator = sign * num, Denominator = den)

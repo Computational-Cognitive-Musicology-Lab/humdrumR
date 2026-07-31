@@ -281,8 +281,8 @@ draw(x)
 #>     }
 #> }, add = expression(), layout = list(layout = 1L, layout_heights = 1, 
 #>     layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x566d40b18390>
-#> <environment: 0x566d40b0ed20>
+#> <bytecode: 0x593b85d83580>
+#> <environment: 0x593b85cbdb98>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -344,8 +344,8 @@ draw( , x)
 #>     }
 #> }, add = expression(), layout = list(layout = 1L, layout_heights = 1, 
 #>     layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x566d40b18390>
-#> <environment: 0x566d406da210>
+#> <bytecode: 0x593b85d83580>
+#> <environment: 0x593b84eecef0>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -410,8 +410,8 @@ draw(x, y, title = "Linear regression", lm = TRUE)
 #>     }
 #> }, add = expression(), layout = list(layout = 1L, layout_heights = 1, 
 #>     layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x566d40b18390>
-#> <environment: 0x566d404a20f0>
+#> <bytecode: 0x593b85d83580>
+#> <environment: 0x593b81bb0570>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")

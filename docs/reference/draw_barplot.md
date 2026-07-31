@@ -11,11 +11,10 @@ dimension are split across draw facets.
 
 ## Usage
 
-    draw(x # table/counts,
-         col = NA)
-
-    draw( , y # table/counts,
-         col = NA)
+``` r
+draw(x, col = NA)
+           # where x is table/count data
+```
 
 ## Arguments
 

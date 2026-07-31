@@ -92,7 +92,7 @@ theory](https://humdrumR.ccml.gtcmt.gatech.edu/reference/information.md)
 overview.
 
 Other Information theory functions:
-[`entropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md),
+[`entropy`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md),
 [`entropy_by()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy_by.md)
 
 ## Examples

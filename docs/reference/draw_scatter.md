@@ -6,9 +6,11 @@ leftmost point to rightmost.
 
 ## Usage
 
-    draw(x # numeric,
-         y # numeric,
-         col = NA)
+``` r
+draw(x, y , col = NA) 
+       # where x is numeric
+       # and   y is numeric
+```
 
 ## Arguments
 

@@ -77,7 +77,7 @@ Let's first extract `semits()` data, so it is easy to get the lowest value:
 ```{r}
 chorales |>
   mutate(Semits = semits(Token),
-         Kern = kern(Token)) -> chorales
+         SciPitch = pitch(Token)) -> chorales
 
 ```
 
@@ -86,7 +86,7 @@ We can now group bars (within pieces, once again!), get the minimum (using `whic
 ```{r}
 chorales |>
   group_by(Piece, Bar) |>
-  with(Kern[which.min(Semits)]) |>
+  with(SciPitch[which.min(Semits)]) |>
   count() |> table() -> lownotes
 
 lownotes[lownotes > 0]
@@ -606,7 +606,7 @@ chorales |>
 ```
 
 When using `with()`/`mutate()`/etc., instead of writing `lag(x, n = 1)`, we can write `x[lag = 1]`.
-We can then paste a field (like `Kern`) to itself *lagged*, like this:
+We can then paste a field (like `SciPitch`) to itself *lagged*, like this:
 
 ```{r, scroll.height='800px'}
 chorales |>

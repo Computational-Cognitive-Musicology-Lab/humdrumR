@@ -685,9 +685,16 @@ entropy(chord, note, condition = 'note') # conditional entropy
 #>     0.6258146 
 
 entropy_by(chord, note, condition = 'note') # conditional entropy, by condition
-#> H(chord;note=1) H(chord;note=2) H(chord;note=3) H(chord;note=4) H(chord;note=5) 
-#>       1.0000000       0.0000000       0.0000000       0.9182958       0.9182958 
-#> H(chord;note=6) H(chord;note=7) 
-#>       0.0000000       0.0000000 
+#> humdrumR entropy distribution H(chord|note) 
+#> note  H(chord)
+#>    1     1.000
+#>    2     0.000
+#>    3     0.000
+#>    4     0.918
+#>    5     0.918
+#>    6     0.000
+#>    7     0.000
+#> note  H(chord)
+#> humdrumR entropy distribution H(chord|note) 
 
 ```

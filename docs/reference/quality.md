@@ -132,7 +132,7 @@ Other partial pitch functions:
 ``` r
 chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001.krn')
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BachChorales/chor001.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.

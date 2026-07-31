@@ -1748,7 +1748,7 @@ localDuration <- function(x, choose = min, deparser = duration, ..., Exclusive =
 #' timeline(tokens)
 #' timestamp(tokens, BPM = '90')
 #' 
-#' B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
+#' B075 <- readHumsrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
 #' within(B075, timeline(Token))
 #' 
 #' @seealso {The [timecount()] and [metcount()] functions provide "higher level" musical interpretations of timeline information.}   
@@ -1759,6 +1759,7 @@ timeline.default <- function(x, start = 0, pickup = NULL, ...,
                              Exclusive = NULL, threadNA = TRUE, total = FALSE, parseArgs = list(), groupby = list()) {
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive, ...), parseArgs))
+	
   
   excluded <- if (is.null(Exclusive)) logical(length(rints)) else !Exclusive %in% attributes(rints)$dispatch$Exclusive
   
@@ -1798,6 +1799,7 @@ timeline <- humdrumRgeneric(timeline.default)
 #' @export 
 timestamp.default <- function(x, BPM = 60, start = 0, pickup = NULL, minutes = TRUE, ..., 
                               Exclusive = NULL, threadNA = TRUE, total = FALSE, parseArgs = list(), groupby = list()) {
+
   
   rints <- do('rhythmInterval', c(list(x, Exclusive = Exclusive, ...), parseArgs))
   seconds <- rint2seconds(rints, BPM = BPM)

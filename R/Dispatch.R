@@ -467,6 +467,7 @@ regexDispatch <- function(str, dispatchDF, multiDispatch = FALSE, outputClass = 
 #' @rdname humdrumDispatch
 #' @export
 exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outputClass = 'character', inPlace = FALSE, ...) {
+
   if (!is.null(getExclusive(x))) Exclusive <- getExclusive(x)
   if (is.null(Exclusive)) Exclusive <- dispatchDF$Exclusives[[1]][1]
   if (length(Exclusive) < length(x)) Exclusive <- rep(Exclusive, length.out = length(x))
@@ -476,6 +477,7 @@ exclusiveDispatch <- function(x, dispatchDF, Exclusive, regexApply = TRUE, outpu
   dispatchDF <- dispatchDF[sapply(dispatchDF$Exclusives, \(exc) any(Exclusive %in% exc)), ]
   
 
+	dispatchDF <<- dispatchDF
   dispatchDF$regex <- lapply(dispatchDF$regex, \(re) if (rlang::is_function(re)) re(...) else getRE(re))
   
   result <- vectorNA(length(x), outputClass)

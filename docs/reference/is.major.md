@@ -35,7 +35,7 @@ is.minor(x)
   ***Parameters passed to the parsers
   ([`tertianSet()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.md)
   and
-  [`diatonicSet()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html)).***
+  [`diatonicSet()`](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html)).***
 
 ## Details
 
@@ -46,7 +46,7 @@ or
 sets. If called on anything else, the functions first call the
 [`tertianSet()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.md)
 parser. If any values fail to parse (returning `NA`), the
-[`diatonicSet()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html)
+[`diatonicSet()`](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html)
 parser is called on them.
 
 ## See also

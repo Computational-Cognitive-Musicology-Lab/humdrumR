@@ -96,7 +96,7 @@ data, so it is easy to get the lowest value:
 ``` r
 chorales |>
   mutate(Semits = semits(Token),
-         Kern = kern(Token)) -> chorales
+         SciPitch = pitch(Token)) -> chorales
 ```
 
 We can now group bars (within pieces, once again!), get the minimum
@@ -106,19 +106,19 @@ tabulate them.
 ``` r
 chorales |>
   group_by(Piece, Bar) |>
-  with(Kern[which.min(Semits)]) |>
+  with(SciPitch[which.min(Semits)]) |>
   count() |> table() -> lownotes
 
 lownotes[lownotes > 0]
->    with(group_by(chorales, Piece, Bar), Kern[which.min(Semits)])
->     DD  EE  FF FF#  GG GG# AA-  AA BB-  BB   C  C#   D  D#  E-   E  E#   F  F#   G 
+>    with(group_by(chorales, Piece, Bar), SciPitch[which.min(Semits)])
+>     D2  E2  F2 F#2  G2 G#2 Ab2  A2 Bb2  B2  C3 C#3  D3 D#3 Eb3  E3 E#3  F3 F#3  G3 
 >      1   6   9   3  21   1   3  23   7  23   9  15  19   2   1  17   1   1   5   4 
->     G#   A 
+>    G#3  A3 
 >      1   4
 ```
 
-The highest lowest-note-in-bar is A. The most common lowest-note-in-bar
-is AA.
+The highest lowest-note-in-bar is A3. The most common lowest-note-in-bar
+is A2.
 
 ------------------------------------------------------------------------
 
@@ -213,10 +213,10 @@ chorales
 >       humdrumR corpus of ten pieces.
 >    
 >       Data fields: 
->                Kern    :: character (**kern tokens)
->               *LowNote :: integer (**semits tokens)
->                Semits  :: integer (**semits tokens)
->                Token   :: character
+>               *LowNote  :: integer (**semits tokens)
+>                SciPitch :: character (**pitch tokens)
+>                Semits   :: integer (**semits tokens)
+>                Token    :: character
 ```
 
 (Note that we use
@@ -305,8 +305,8 @@ chorales |>
 >       humdrumR corpus of ten pieces.
 >    
 >       Data fields: 
->                Kern             :: character (**kern tokens)
 >                LowNote          :: integer (**semits tokens)
+>                SciPitch         :: character (**pitch tokens)
 >                Semits           :: integer (**semits tokens)
 >               *Semits - LowNote :: integer (**semits tokens)
 >                Token            :: character
@@ -3664,7 +3664,7 @@ chorales |>
 When using
 [`with()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/withinHumdrum.md)/`mutate()`/etc.,
 instead of writing `lag(x, n = 1)`, we can write `x[lag = 1]`. We can
-then paste a field (like `Kern`) to itself *lagged*, like this:
+then paste a field (like `SciPitch`) to itself *lagged*, like this:
 
 ``` r
 chorales |>

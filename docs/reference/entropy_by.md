@@ -13,23 +13,15 @@ music.
 ## Usage
 
 ``` r
-entropy_by(..., condition, independent = TRUE, base = 2)
+entropy_by(..., condition, base = 2)
 
 # S3 method for class 'probability'
-entropy_by(pdist, condition, independent = TRUE, base = 2)
+entropy_by(pdist, condition = NULL, base = 2)
 
 # Default S3 method
-entropy_by(..., condition, independent = TRUE, base = 2)
+entropy_by(..., condition, base = 2)
 
-pentropy(
-  ...,
-  model,
-  base = 2,
-  condition = NULL,
-  na.rm = FALSE,
-  .drop = FALSE,
-  binArgs = list()
-)
+pentropy(..., model, base = 2)
 ```
 
 ## Arguments
@@ -131,5 +123,5 @@ theory](https://humdrumR.ccml.gtcmt.gatech.edu/reference/information.md)
 overview.
 
 Other Information theory functions:
-[`entropy()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md),
+[`entropy`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/entropy.md),
 [`mutual()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/mutual.md)

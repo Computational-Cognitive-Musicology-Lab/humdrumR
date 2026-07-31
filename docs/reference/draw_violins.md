@@ -12,8 +12,11 @@ will throw an error if the `x` argument has more than 25 unique values.
 
 ## Usage
 
-    draw(x # discrete,
-         y # numeric)
+``` r
+draw(x, y)
+     # where x is discrete data
+     # and   y is numeric
+```
 
 ## Arguments
 

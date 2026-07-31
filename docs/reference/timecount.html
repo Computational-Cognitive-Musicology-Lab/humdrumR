@@ -281,7 +281,7 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpJ87G8p/temp_libpath21f9ad8f3b5c/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -290,14 +290,242 @@ It may be better to use <code>round(timeline())</code> in cases where you want t
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">show</span><span class="op">(</span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu">timecount</span><span class="op">(</span><span class="va">Token</span>, unit <span class="op">=</span> <span class="va">TimeSignature</span>, pickup <span class="op">=</span> <span class="va">Bar</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>number of items to replace is not a multiple of replacement length</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>number of items to replace is not a multiple of replacement length</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'show': Supplied 842 items to be assigned to 194 items of column 'Pickup'. If you wish to 'recycle' the RHS please use rep() to make this intent clear to readers of your code.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             1:  !!!COM: Bach, Johann Sebastian</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             3:  !!!OTL@@DE: Aus meines Herzens Grunde</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             4:  !!!OTL@EN:      From the Depths of My Heart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             5:  !!!SCT: BWV 269</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             6:  !!!PC#: 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             7:  !!!AGN: chorale</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             8:           **kern         **kern         **kern         **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             9:           *ICvox         *ICvox         *ICvox         *ICvox</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            10:           *Ibass        *Itenor         *Ialto        *Isoprn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            15:          *clefF4       *clefGv2        *clefG2        *clefG2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            17:              *G:            *G:            *G:            *G:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            18:            *M3/4          *M3/4          *M3/4          *M3/4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            19:           *MM100         *MM100         *MM100         *MM100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            20:               -1             -1             -1             -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            21:               =1             =1             =1             =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            22:                1              1              1              1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            23:                1              1              1              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            24:                .              1              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            25:                1              1              1              1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            26:               =2             =2             =2             =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            27:                2              2              2              2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            28:                2              2              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            29:                .              .              .              2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            30:                2              2              2              2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            31:               =3             =3             =3             =3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            32:                3              3              3              3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            33:                .              3              3              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            34:                3              3              3              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            35:                3              .              3              3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            36:                3              3              3              3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            37:               =4             =4             =4             =4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            38:                4              4              4              4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            39:                4              4              4              4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            40:               =5             =5             =5             =5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            41:                5              5              5              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            42:                5              5              5              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            43:                5              5              5              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            44:               =6             =6             =6             =6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            45:                6              6              6              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            46:                6              6              .              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            47:                6              6              6              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            48:                .              6              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            49:               =7             =7             =7             =7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            50:                7              7              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 		(two more pieces...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor004.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            54:                4              4              4              4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            55:                .              .              4              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            56:               =5             =5             =5             =5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            57:                5              5              5              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            58:                .              .              5              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            59:                5              5              5              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            60:                5              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            61:                5              5              5              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            62:                5              5              5              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            63:               =6             =6             =6             =6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            64:                6              6              6              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            65:                6              .              .              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            66:                6              6              6              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            67:                6              6              6              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            68:                6              6              6              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            69:               =7             =7             =7             =7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            70:                7              7              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            71:                .              .              7              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            72:                7              7              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            73:                7              7              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            74:                7              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            75:                7              7              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            76:                .              .              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            77:               =8             =8             =8             =8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            78:                8              8              8              8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            79:                8              8              8              8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            80:                8              8              8              8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            81:                8              8              8              8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            82:               =9             =9             =9             =9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            83:                9              9              9              9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            84:                9              9              9              9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            85:                9              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            86:                9              9              9              9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            87:                9              9              9              9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            88:                .              9              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            89:              =10            =10            =10            =10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            90:               10             10             10             10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            91:               10              .             10             10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            92:               10             10             10             10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            93:               ==             ==             ==             ==</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            94:               *-             *-             *-             *-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            95:  !!!hum2abc: -Q ''</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            96:  !!!title: @{PC#}. @{OTL@@DE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            97:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            98:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           101:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           102:  !!!EED:  Craig Stuart Sapp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           103:  !!!EEV:  2009/05/22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor004.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               (***four global comments truncated due to screen size***)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	humdrumR corpus of four pieces.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                     :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::timecount(...) :: integer</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">show</span><span class="op">(</span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">humData</span>, <span class="fu">timecount</span><span class="op">(</span><span class="va">Token</span>, unit <span class="op">=</span> <span class="fu"><a href="tactus.html">tactus</a></span><span class="op">(</span><span class="va">TimeSignature</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>number of items to replace is not a multiple of replacement length</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>number of items to replace is not a multiple of replacement length</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'object' in selecting a method for function 'show': Supplied 842 items to be assigned to 194 items of column 'Pickup'. If you wish to 'recycle' the RHS please use rep() to make this intent clear to readers of your code.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor001.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             1:  !!!COM: Bach, Johann Sebastian</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             2:  !!!CDT: 1685/02/21/-1750/07/28/</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             3:  !!!OTL@@DE: Aus meines Herzens Grunde</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             4:  !!!OTL@EN:      From the Depths of My Heart</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             5:  !!!SCT: BWV 269</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             6:  !!!PC#: 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             7:  !!!AGN: chorale</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             8:           **kern         **kern         **kern         **kern</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             9:           *ICvox         *ICvox         *ICvox         *ICvox</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            10:           *Ibass        *Itenor         *Ialto        *Isoprn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            11:          *I"Bass       *I"Tenor        *I"Alto     *I"Soprano</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            12:        *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]      *&gt;[A,A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            13:     *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]   *&gt;norep[A,B]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            14:              *&gt;A            *&gt;A            *&gt;A            *&gt;A</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            15:          *clefF4       *clefGv2        *clefG2        *clefG2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            16:           *k[f#]         *k[f#]         *k[f#]         *k[f#]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            17:              *G:            *G:            *G:            *G:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            18:            *M3/4          *M3/4          *M3/4          *M3/4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            19:           *MM100         *MM100         *MM100         *MM100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            20:               -1             -1             -1             -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            21:               =1             =1             =1             =1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            22:                1              1              1              1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            23:                2              2              2              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            24:                .              2              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            25:                3              3              3              3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            26:               =2             =2             =2             =2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            27:                4              4              4              4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            28:                5              5              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            29:                .              .              .              5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            30:                6              6              6              6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            31:               =3             =3             =3             =3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            32:                7              7              7              7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            33:                .              7              7              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            34:                8              8              8              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            35:                8              .              8              8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            36:                9              9              9              9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            37:               =4             =4             =4             =4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            38:               10             10             10             10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            39:               12             12             12             12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            40:               =5             =5             =5             =5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            41:               13             13             13             13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            42:               14             14             14              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            43:               15             15             15             15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            44:               =6             =6             =6             =6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            45:               16             16             16             16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            46:               17             17              .             17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            47:               18             18             18              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            48:                .             18              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            49:               =7             =7             =7             =7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            50:               19             19             19             19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51-133::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor001.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 		(two more pieces...)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## vvv chor004.krn vvv #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   1-53::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            54:               16             16             16             16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            55:                .              .             16              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            56:               =5             =5             =5             =5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            57:               17             17             17             17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            58:                .              .             17              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            59:               18             18             18             18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            60:               18              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            61:               19             19             19             19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            62:               20             20             20             20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            63:               =6             =6             =6             =6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            64:               21             21             21             21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            65:               21              .              .             21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            66:               22             22             22             22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            67:               23             23             23             23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            68:               24             24             24             24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            69:               =7             =7             =7             =7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            70:               25             25             25             25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            71:                .              .             25              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            72:               26             26             26             26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            73:               27             27             27             27</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            74:               27              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            75:               28             28             28             28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            76:                .              .             28             28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            77:               =8             =8             =8             =8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            78:               29             29             29             29</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            79:               30             30             30             30</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            80:               31             31             31             31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            81:               32             32             32             32</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            82:               =9             =9             =9             =9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            83:               33             33             33             33</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            84:               34             34             34             34</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            85:               34              .              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            86:               35             35             35             35</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            87:               36             36             36             36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            88:                .             36              .              .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            89:              =10            =10            =10            =10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            90:               37             37             37             37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            91:               38              .             38             38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            92:               39             39             39             39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            93:               ==             ==             ==             ==</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            94:               *-             *-             *-             *-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            95:  !!!hum2abc: -Q ''</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            96:  !!!title: @{PC#}. @{OTL@@DE}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            97:  !!!YOR1: 371 vierstimmige Choralges&amp;auml;nge von Johann Sebastian B***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            98:  !!!YOR2: 4th ed. by Alfred D&amp;ouml;rffel (Leipzig: Breitkopf und H&amp;a***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            99:  !!!YOR2: c.1875). 178 pp. Plate "V.A.10".  reprint: J.S. Bach, 371 ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           100:  !!!YOR4: Chorales (New York: Associated Music Publishers, Inc., c.1***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           101:  !!!SMS: B&amp;H, 4th ed, Alfred D&amp;ouml;rffel, c.1875, plate V.A.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           102:  !!!EED:  Craig Stuart Sapp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           103:  !!!EEV:  2009/05/22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ######################## ^^^ chor004.krn ^^^ #########################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               (***four global comments truncated due to screen size***)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	humdrumR corpus of four pieces.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                                                     :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::timecount(Token, unit = tactus(TimeSignature)) :: integer</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span> </span></span>
 <span class="r-in"><span>  </span></span>
 </code></pre></div>

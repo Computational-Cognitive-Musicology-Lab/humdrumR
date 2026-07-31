@@ -189,7 +189,7 @@ atomic types](https://rdrr.io/r/base/vector.html) into diatonicSets.
 This can be done using the [as](https://rdrr.io/r/methods/as.html)
 function—e.g., `as(3, "diatonicSet")`—or more intuitively using the
 function
-[`diatonicSet()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html).
+[`diatonicSet()`](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html).
 Coercision methods are defined for
 
 - [integer](https://rdrr.io/r/base/integer.html): interpreted as root of
@@ -207,7 +207,7 @@ Coercision methods are defined for
 ## See also
 
 The main way to create `diatonicSet` S4 objects is with the
-[`diatonicSet()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html)
+[`diatonicSet()`](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html)
 pitch parser.
 
 Other Tonal S4 classes:

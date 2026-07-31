@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Reading and writing humdrum data • humdrumR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Reading and writing humdrum data">
@@ -85,7 +85,7 @@
                         <h4 data-toc-skip class="author">Nathaniel
 Condit-Schultz</h4>
             
-            <h4 data-toc-skip class="date">2026-03-24</h4>
+            <h4 data-toc-skip class="date">2026-07-30</h4>
       
 
       <div class="d-none name"><code>ReadWrite.Rmd</code></div>
@@ -998,8 +998,8 @@ you run the command</p>
 <span id="cb24-20"><a href="#cb24-20" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">5</span><span class="sc">:</span>                                      met\\([<span class="sc">^</span>)]<span class="sc">*</span>\\) <span class="fu">met</span>(_) Tandem</span>
 <span id="cb24-21"><a href="#cb24-21" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">6</span><span class="sc">:</span>                                            MM[<span class="dv">0-9</span>]<span class="sc">+</span>    MM_ Tandem</span>
 <span id="cb24-22"><a href="#cb24-22" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">7</span><span class="sc">:</span>                     tb[<span class="dv">1-9</span>][<span class="dv">0-9</span>]<span class="sc">*</span>%?[<span class="dv">1-9</span>]?[<span class="dv">0-9</span>]<span class="sc">*</span>[.]<span class="sc">*</span>    tb_ Tandem</span>
-<span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">8</span><span class="sc">:</span>                                             I[<span class="sc">^</span>C,]<span class="sc">+</span>     I_ Tandem</span>
-<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">9</span><span class="sc">:</span>                                             IC[<span class="sc">^</span>,]<span class="sc">*</span>    IC_ Tandem</span>
+<span id="cb24-23"><a href="#cb24-23" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">8</span><span class="sc">:</span>                                         I[<span class="sc">^</span>C,][<span class="sc">^</span>,]<span class="sc">*</span>     I_ Tandem</span>
+<span id="cb24-24"><a href="#cb24-24" tabindex="-1"></a><span class="sc">&gt;</span>     <span class="dv">9</span><span class="sc">:</span>                                             IC[<span class="sc">^</span>,]<span class="sc">+</span>    IC_ Tandem</span>
 <span id="cb24-25"><a href="#cb24-25" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">10</span><span class="sc">:</span>                                            ITr[<span class="sc">^</span>,]<span class="sc">*</span>   ITr_ Tandem</span></code></pre></div>
 <p>we see that there are currently ten classes of tandem interpretations
 that <code>humdrumR</code> recognizes, each associated with a regular

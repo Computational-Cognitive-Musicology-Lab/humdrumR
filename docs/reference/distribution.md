@@ -22,7 +22,7 @@ print(
   syntaxHighlight = humdrumRoption("syntaxHighlight"),
   wide = TRUE,
   printZeros = TRUE,
-  zeros = "."
+  zeros = if (inherits(dist, "entropy")) "0" else "."
 )
 
 # S4 method for class 'distribution'
@@ -151,8 +151,8 @@ We define
 and [`as.array()`](https://rdrr.io/r/base/array.html) methods for
 `distribution` objects. The
 [`as.array()`](https://rdrr.io/r/base/array.html) method results in an
-[`array()`](https://rdrr.io/r/base/array.html) with the same
-dimensionality as the distribution. In contrast, the
+[`bit64::array()`](https://bit64.r-lib.org/reference/matrix64.html) with
+the same dimensionality as the distribution. In contrast, the
 [`as.matrix()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humCoercion.md)
 function will force distributions with more than two dimensions into two
 dimensions, by collapsing combining all dimensions greater than two with

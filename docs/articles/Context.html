@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Contextualizing humdrum data • humdrumR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Contextualizing humdrum data">
@@ -182,22 +182,22 @@ to get the lowest value:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Semits <span class="op">=</span> <span class="fu"><a href="../reference/semits.html">semits</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span>,</span>
-<span>         Kern <span class="op">=</span> <span class="fu"><a href="../reference/kern.html">kern</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
+<span>         SciPitch <span class="op">=</span> <span class="fu"><a href="../reference/pitch.html">pitch</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">chorales</span></span></code></pre></div>
 <p>We can now group bars (within pieces, once again!), get the minimum
 (using <code><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min()</a></code>), and tabulate them.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">group_by</span>(Piece, Bar) <span class="sc">|&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">with</span>(Kern[<span class="fu">which.min</span>(Semits)]) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">with</span>(SciPitch[<span class="fu">which.min</span>(Semits)]) <span class="sc">|&gt;</span></span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="fu">count</span>() <span class="sc">|&gt;</span> <span class="fu">table</span>() <span class="ot">-&gt;</span> lownotes</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>lownotes[lownotes <span class="sc">&gt;</span> <span class="dv">0</span>]</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="fu">with</span>(<span class="fu">group_by</span>(chorales, Piece, Bar), Kern[<span class="fu">which.min</span>(Semits)])</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="sc">&gt;</span>     DD  EE  FF FF<span class="co">#  GG GG# AA-  AA BB-  BB   C  C#   D  D#  E-   E  E#   F  F#   G </span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="fu">with</span>(<span class="fu">group_by</span>(chorales, Piece, Bar), SciPitch[<span class="fu">which.min</span>(Semits)])</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="sc">&gt;</span>     D2  E2  F2 F<span class="co">#2  G2 G#2 Ab2  A2 Bb2  B2  C3 C#3  D3 D#3 Eb3  E3 E#3  F3 F#3  G3 </span></span>
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">1</span>   <span class="dv">6</span>   <span class="dv">9</span>   <span class="dv">3</span>  <span class="dv">21</span>   <span class="dv">1</span>   <span class="dv">3</span>  <span class="dv">23</span>   <span class="dv">7</span>  <span class="dv">23</span>   <span class="dv">9</span>  <span class="dv">15</span>  <span class="dv">19</span>   <span class="dv">2</span>   <span class="dv">1</span>  <span class="dv">17</span>   <span class="dv">1</span>   <span class="dv">1</span>   <span class="dv">5</span>   <span class="dv">4</span> </span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="sc">&gt;</span>     G<span class="co">#   A </span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="sc">&gt;</span>    G<span class="co">#3  A3 </span></span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="sc">&gt;</span>      <span class="dv">1</span>   <span class="dv">4</span></span></code></pre></div>
-<p>The highest lowest-note-in-bar is A. The most common
-lowest-note-in-bar is AA.</p>
+<p>The highest lowest-note-in-bar is A3. The most common
+lowest-note-in-bar is A2.</p>
 <hr>
 <p>For further analysis, we might want to save the lowest-note into a
 new field, so we’ll use <code>mutate()</code>. By default, the
@@ -285,10 +285,10 @@ result throughout its group, which is usually what we want:</p>
 &gt;       humdrumR corpus of ten pieces.
 &gt;    
 &gt;       Data fields: 
-&gt;                Kern    :: character (**kern tokens)
-&gt;               *LowNote :: integer (**semits tokens)
-&gt;                Semits  :: integer (**semits tokens)
-&gt;                Token   :: character</code></pre>
+&gt;               *LowNote  :: integer (**semits tokens)
+&gt;                SciPitch :: character (**pitch tokens)
+&gt;                Semits   :: integer (**semits tokens)
+&gt;                Token    :: character</code></pre>
 <p>(Note that we use <code><a href="../reference/groupHumdrum.html">ungroup()</a></code> before overwriting
 <code>chorales</code>, so that grouping doesn’t affect our future
 analyses.) We could then, for example, subtract the bar’s lowest note
@@ -370,8 +370,8 @@ from each note:</p>
 &gt;       humdrumR corpus of ten pieces.
 &gt;    
 &gt;       Data fields: 
-&gt;                Kern             :: character (**kern tokens)
 &gt;                LowNote          :: integer (**semits tokens)
+&gt;                SciPitch         :: character (**pitch tokens)
 &gt;                Semits           :: integer (**semits tokens)
 &gt;               *Semits - LowNote :: integer (**semits tokens)
 &gt;                Token            :: character</code></pre>
@@ -3551,7 +3551,7 @@ Let’s work again with the chorales, using just simple
 <p>When using <code><a href="../reference/withinHumdrum.html">with()</a></code>/<code>mutate()</code>/etc., instead of
 writing <code>lag(x, n = 1)</code>, we can write
 <code>x[lag = 1]</code>. We can then paste a field (like
-<code>Kern</code>) to itself <em>lagged</em>, like this:</p>
+<code>SciPitch</code>) to itself <em>lagged</em>, like this:</p>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/withinHumdrum.html">within</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">Kern</span>, <span class="va">Kern</span><span class="op">[</span>lag <span class="op">=</span> <span class="fl">1</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">'|'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>

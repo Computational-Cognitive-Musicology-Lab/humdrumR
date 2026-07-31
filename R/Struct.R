@@ -121,7 +121,7 @@ setValidity('struct',
                 #
                 slots <- getSlots(object)
                 slotlen <- length(slots[[1]])
-                slots <- lapply(slots, '[', i = !Reduce('&', lapply(slots, duplicated)))
+                slots <- lapply(slots, \(slot) slot[!Reduce('&', lapply(slots, duplicated))])
                 
                 dim <- object@dim
                 
@@ -539,7 +539,7 @@ setMethod('[', c(x = 'struct', i = 'missing', j = 'numeric'),
               if (nrow(x) == 0L) return(x) # in this case, the slots are already empty so no further changes are needed.
               
               # do it! 
-              setSlots(x) <- lapply(getSlots(x), '[', i = j.internal)
+              setSlots(x) <- lapply(getSlots(x), \(slot) slot[j.internal])
               
               if (drop) dropdim(x) else x
           })
@@ -601,7 +601,7 @@ setMethod('[', c(x = 'struct'),
                   
                   x@dim[2] <- 1L
                   x@dim[1] <- length(i)
-                  setSlots(x) <- lapply(getSlots(x), '[', i.internal)
+                  setSlots(x) <- lapply(getSlots(x), \(slot) slot[i.internal])
                   x@rownames %!<-% rownames(x)[i]
                   x@colnames   <- NULL
              

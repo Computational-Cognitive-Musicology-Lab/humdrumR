@@ -197,7 +197,7 @@ tokens <- c('4.GG', '8G', '16E', '16F#', '16G', '16D', 'q8D#', '4E')
 timeline(tokens)
 timestamp(tokens, BPM = '90')
 
-B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
+B075 <- readHumsrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_0._a.krn")
 within(B075, timeline(Token))
 
 }

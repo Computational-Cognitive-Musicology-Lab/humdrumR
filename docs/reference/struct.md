@@ -37,7 +37,7 @@ Important `humdrumR` classes which inherit from `struct` include:
 - [tonal
   intervals](https://humdrumR.ccml.gtcmt.gatech.edu/reference/tonalIntervalS4.md)
 
-- [diatonicSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html)
+- [diatonicSet](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html)
 
 - [tertianSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.md)
 
@@ -182,7 +182,7 @@ method!
 Examples of `struct` subclasses:
 [tonalInterval](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchParsing.md)
 [rhythmInterval](https://humdrumR.ccml.gtcmt.gatech.edu/reference/rhythmParsing.md)
-[diatonicSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html)
+[diatonicSet](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html)
 [tertianSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.md)
 
 ## Examples

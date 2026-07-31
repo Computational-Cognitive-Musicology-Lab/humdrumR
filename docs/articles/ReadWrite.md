@@ -970,8 +970,8 @@ knownInterpretations[Type == 'Tandem']
 >     5:                                      met\\([^)]*\\) met(_) Tandem
 >     6:                                            MM[0-9]+    MM_ Tandem
 >     7:                     tb[1-9][0-9]*%?[1-9]?[0-9]*[.]*    tb_ Tandem
->     8:                                             I[^C,]+     I_ Tandem
->     9:                                             IC[^,]*    IC_ Tandem
+>     8:                                         I[^C,][^,]*     I_ Tandem
+>     9:                                             IC[^,]+    IC_ Tandem
 >    10:                                            ITr[^,]*   ITr_ Tandem
 ```
 

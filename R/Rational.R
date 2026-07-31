@@ -48,16 +48,16 @@ setMethod('initialize', 'rational',
               .Object <- callNextMethod()
               # negative numbers should live in the numerator
               na <- is.na(Numerator) | is.na(Denominator)
-              
+
               Numerator[!na & Denominator < 0L] <- -Numerator[!na & Denominator < 0L]
               Denominator <- abs(Denominator)
               
-              fraction <- reduce_fraction(Numerator, Denominator)
+              fraction <- reduce_fraction(Numerator[!na], Denominator[!na])
               # fraction <- do.call('match_size', fraction) 
               # fraction <- lapply(fraction, as.integer64)
               
-              .Object@Numerator <- fraction$Numerator
-              .Object@Denominator <- fraction$Denominator
+              .Object@Numerator[!na] <- fraction$Numerator
+              .Object@Denominator[!na] <- fraction$Denominator
               .Object
               
           })
@@ -487,7 +487,8 @@ setMethod('as.rational', 'numeric',
               
               denominator[is.na(denominator)] <- 1L
               
-              rational(numerator, denominator)
+							rational(numerator, denominator)
+
               
           })
 

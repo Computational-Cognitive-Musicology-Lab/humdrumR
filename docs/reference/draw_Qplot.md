@@ -11,8 +11,10 @@ diagram can be drawn by setting `violin = TRUE`.
 
 ## Usage
 
-    draw( , y # numeric,
-         col = NA)
+``` r
+draw( , y, col = NA)
+      # where y is numeric
+```
 
 ## Arguments
 

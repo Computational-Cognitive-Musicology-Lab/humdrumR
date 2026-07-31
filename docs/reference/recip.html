@@ -180,7 +180,8 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.  8   16  16  16  16  1%0 4  </span>
 <span class="r-in"><span><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span>, <span class="fu"><a href="https://rdrr.io/r/base/parse.html" class="external-link">parse</a></span><span class="op">(</span>grace <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in while (any(doubles &lt;- den &lt;= 1L &amp; den &gt;= 0.25 &amp; num &gt; 2L &amp; num &lt;     16L &amp; num%%2 == 0 &amp; num%%5 != 0)) {    den &lt;- .ifelse(doubles, den/2, den)    num &lt;- .ifelse(doubles, num/2, num)}:</span> missing value where TRUE/FALSE needed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4. 8  16 16 16 16 .  4 </span>
 <span class="r-in"><span><span class="fu">recip</span><span class="op">(</span><span class="va">tokens</span>, scale <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> **recip (character)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.  4   8   8   8   8   1%0 2  </span>
@@ -194,7 +195,7 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">B075</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BeethovenVariations/B075_00_05_a.krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpJ87G8p/temp_libpath21f9ad8f3b5c/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> One file read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating one file...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -202,10 +203,46 @@ or how rhythms are <a href="rhythmParsing.html">parsed</a> and <a href="rhythmDe
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Assembling corpus...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">within</a></span><span class="op">(</span><span class="va">B075</span>, subset <span class="op">=</span> <span class="va">Spine</span> <span class="op">&gt;</span> <span class="fl">2</span>,  <span class="fu">recip</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in while (any(doubles &lt;- den &lt;= 1L &amp; den &gt;= 0.25 &amp; num &gt; 2L &amp; num &lt;     16L &amp; num%%2 == 0 &amp; num%%5 != 0)) {    den &lt;- .ifelse(doubles, den/2, den)    num &lt;- .ifelse(doubles, num/2, num)}:</span> missing value where TRUE/FALSE needed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###################### vvv B075_00_05_a.krn vvv ######################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    1:  !!!COM: Beethoven</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    2:  !!!OTL: 7 Variations on a Quartet by Winter</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    3:  !!!Variation: Theme e</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    4:      ****recip    ****recip       ****recip           ****recip</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5:              .            .               .                   .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    6:              .            .               .                   .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    7:          *M2/4        *M2/4           *M2/4               *M2/4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    8:              .            .               .                   .</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    9:          FALSE       FALSE4           TRUE4        TRUE TRUE4 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   10:            =37          =37             =37                 =37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   11:          FALSE       FALSE2    TRUE TRUE2 2        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   12:              .            .               .        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   13:              .            .               .        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   14:              .            .               .        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   15:            =38          =38             =38                 =38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   16:              .            .               .    TRUE TRUE1%0 1%0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   17:          FALSE       FALSE4    TRUE TRUE4 4        TRUE TRUE4 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   18:          FALSE       FALSE4    TRUE TRUE4 4        TRUE TRUE4 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   19:            =39          =39             =39                 =39</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   20:          FALSE       FALSE4    TRUE TRUE8 8        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   21:              .            .    TRUE TRUE8 8        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   22:          FALSE       FALSE4    TRUE TRUE8 8        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   23:              .            .    TRUE TRUE8 8        TRUE TRUE8 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   24:            =40          =40             =40                 =40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   25:          FALSE       FALSE2           TRUE4        TRUE TRUE4 4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   26:              .            .           TRUE4               TRUE4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   27:             *-           *-              *-                  *-</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ###################### ^^^ B075_00_05_a.krn ^^^ ######################</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Data fields: </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	         Token                   :: character</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *humdrumR:::recip(Token) :: character (**recip tokens)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 	        *subset                  :: logical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="withinHumdrum.html">with</a></span><span class="op">(</span><span class="va">B075</span>, subset <span class="op">=</span> <span class="va">Spine</span> <span class="op">&gt;</span> <span class="fl">2</span>, <span class="fu">recip</span><span class="op">(</span><span class="va">Token</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="distribution.html">table</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in h(simpleError(msg, call)):</span> error in evaluating the argument 'x' in selecting a method for function 'table': missing value where TRUE/FALSE needed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1%0   8   4   2   1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2  24  21   4   0 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

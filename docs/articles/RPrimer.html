@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>An R primer for humdrumR users • humdrumR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="An R primer for humdrumR users">
@@ -139,7 +139,7 @@ or more input arguments:</p>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">Sys.time</span>() <span class="co"># no arguments!</span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2026-03-24 15:44:05 EDT"</span></span></code></pre></div>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"2026-07-30 21:39:28 EDT"</span></span></code></pre></div>
 <p>Different functions have different arguments they recognize, with
 specific names. For example, the function <code><a href="https://rdrr.io/r/base/Log.html" class="external-link">log()</a></code> takes two
 arguments, called <code>x</code> and <code>base</code>. Other functions
@@ -416,7 +416,7 @@ sample a handful letters and table the result?</p>
 E.g., if a letter never appears in the sample, it doesn’t get
 counted.</p>
 <p>Let’s try something new: before sampling, I will call the command
-<code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code> on <code>letters</code>:</p>
+<code><a href="https://bit64.r-lib.org/reference/factor.html" class="external-link">factor()</a></code> on <code>letters</code>:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a></span>
 <span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">factor</span>(letters) <span class="sc">|&gt;</span> <span class="fu">sample</span>(<span class="dv">15</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> <span class="fu">table</span>()</span>
 <span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
@@ -425,7 +425,7 @@ counted.</p>
 <p>Ah! Now our table includes all possible letters, even though many of
 them appear <code>0</code> times.</p>
 <hr>
-<p>So how does this work? Well the <code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code> function looks
+<p>So how does this work? Well the <code><a href="https://bit64.r-lib.org/reference/factor.html" class="external-link">factor()</a></code> function looks
 at a <code>character</code> vector and outputs a new “factor” vector.
 The factor vector acts just like a <code>character</code> vector, except
 it remembers all the unique values, or “levels”, in the vector:</p>
@@ -439,7 +439,7 @@ it remembers all the unique values, or “levels”, in the vector:</p>
 want them.</p>
 <p>You can access, or set, the levels of a factor using these using the
 <code><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels()</a></code> function, or with the <code>levels</code> argument
-to the <code><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor()</a></code> function itself. Maybe we want to tabulate
+to the <code><a href="https://bit64.r-lib.org/reference/factor.html" class="external-link">factor()</a></code> function itself. Maybe we want to tabulate
 the letters, but put the vowels first:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a></span>
 <span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">factor</span>(letters, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">'a'</span>, <span class="st">'e'</span>, <span class="st">'i'</span>, <span class="st">'o'</span>, <span class="st">'u'</span>,</span>
@@ -684,7 +684,7 @@ string of a character vector.</li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>−</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x - y</annotation></semantics></math>.</li>
 <li>
 <code>-x</code> — Negation;
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">-x</annotation></semantics></math>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">-x</annotation></semantics></math>.</li>
 <li>
 <code>x * y</code> — Multiplication;
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mi>y</mi></mrow><annotation encoding="application/x-tex">xy</annotation></semantics></math>

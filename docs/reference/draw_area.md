@@ -10,9 +10,11 @@ histograms on top of each other.
 
 ## Usage
 
-    draw(x # numeric,
-         y # discrete,
-         col = NA # colors chosen automatically)
+``` r
+draw(x, y, col = NA) 
+     # where x is numeric
+     # and   y is discrete data
+```
 
 ## Arguments
 

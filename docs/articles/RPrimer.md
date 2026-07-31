@@ -48,7 +48,7 @@ c(1, 2, 3) # three arguments
 >    [1] 1 2 3
 
 Sys.time() # no arguments!
->    [1] "2026-03-24 15:44:05 EDT"
+>    [1] "2026-07-30 21:39:28 EDT"
 ```
 
 Different functions have different arguments they recognize, with
@@ -347,7 +347,8 @@ Notice that not all the letters from table appear in the output. E.g.,
 if a letter never appears in the sample, it doesn’t get counted.
 
 Let’s try something new: before sampling, I will call the command
-[`factor()`](https://rdrr.io/r/base/factor.html) on `letters`:
+[`factor()`](https://bit64.r-lib.org/reference/factor.html) on
+`letters`:
 
 ``` r
 factor(letters) |> sample(15, replace = TRUE) |> table()
@@ -362,10 +363,10 @@ them appear `0` times.
 ------------------------------------------------------------------------
 
 So how does this work? Well the
-[`factor()`](https://rdrr.io/r/base/factor.html) function looks at a
-`character` vector and outputs a new “factor” vector. The factor vector
-acts just like a `character` vector, except it remembers all the unique
-values, or “levels”, in the vector:
+[`factor()`](https://bit64.r-lib.org/reference/factor.html) function
+looks at a `character` vector and outputs a new “factor” vector. The
+factor vector acts just like a `character` vector, except it remembers
+all the unique values, or “levels”, in the vector:
 
 ``` r
 factor(letters)
@@ -380,8 +381,8 @@ the levels, so you can make tables ordered the way you want them.
 You can access, or set, the levels of a factor using these using the
 [`levels()`](https://rdrr.io/r/base/levels.html) function, or with the
 `levels` argument to the
-[`factor()`](https://rdrr.io/r/base/factor.html) function itself. Maybe
-we want to tabulate the letters, but put the vowels first:
+[`factor()`](https://bit64.r-lib.org/reference/factor.html) function
+itself. Maybe we want to tabulate the letters, but put the vowels first:
 
 ``` r
 factor(letters, levels = c('a', 'e', 'i', 'o', 'u',
@@ -603,7 +604,7 @@ vectors all their original lengths.
 
 - `x + y` — Addition; $x + y$.
 - `x - y` — Subtraction; $x - y$.
-- `-x` — Negation; $- x$.
+- `-x` — Negation; $-x$.
 - `x * y` — Multiplication; $xy$
 - `x^y` — Exponentiation; $x^{y}$.
   - Use parentheses for things like `x^(1/3)`; $x^{\frac{1}{3}}$.

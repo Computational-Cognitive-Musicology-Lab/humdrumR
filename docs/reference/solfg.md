@@ -168,9 +168,9 @@ documentation](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchDeparsing.m
 ### Key
 
 The `Key` argument must be a
-[diatonicSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html),
-or something that can be parsed into one. The `Key` argument is passed
-to the
+[diatonicSet](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html), or
+something that can be parsed into one. The `Key` argument is passed to
+the
 [parser](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchParsing.md),
 deparser, *and* transpose—*unless* an alternate `Key` is passed to
 `transposeArgs` or `parseArgs`. Various deparsing options use the `Key`
@@ -217,11 +217,11 @@ the output `c('d', 'e', 'f#')`. The possible transpose args are:
   `length == 1 | length == (x)`)
 
 - `from`
-  ([diatonicSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html),
+  ([diatonicSet](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html),
   `length == 1 | length == (x)`)
 
 - `to`
-  ([diatonicSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html),
+  ([diatonicSet](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html),
   `length == 1 | length == (x)`)
 
 - `real` (`logical`, `length == 1`) Should transposition be real or
@@ -359,7 +359,7 @@ results
 
 exampleHumdrum <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpjOz08Z/temp_libpath13452e707787ad/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.

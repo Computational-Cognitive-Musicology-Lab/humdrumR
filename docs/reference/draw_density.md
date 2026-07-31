@@ -10,8 +10,10 @@ colors.
 
 ## Usage
 
-    draw(x # numeric,
-         color = NA)
+``` r
+draw(x, color = NA)
+           # where x is numeric
+```
 
 ## Arguments
 
