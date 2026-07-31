@@ -211,7 +211,7 @@ test_that('distribution stuff, 2+D',{
 })
 
 
-expect_that('Can create distributions from other things', {
+test_that('Can create distributions from other things', {
   set.seed(2)
   N <- 10000
   num <-  rchisq(N, 2)
@@ -234,7 +234,7 @@ expect_that('Can create distributions from other things', {
   
 })
 
-expect_that('Distribution arithmetic works', {
+test_that('Distribution arithmetic works', {
   set.seed(2)
   N <- 1000
   
@@ -257,7 +257,7 @@ expect_that('Distribution arithmetic works', {
   expect_true(all(count(X = c(cat1, cat2)) == (count(X = cat1) + count(X = cat2))))
 })
 
-expect_that('pdist and count are consistent', {
+test_that('pdist and count are consistent', {
   set.seed(1)
   N <- 10000
   num <-  rchisq(N, 2)
@@ -278,7 +278,7 @@ expect_that('pdist and count are consistent', {
   expect_equal(pdist(count(Cat = cat, num), condition = 'Cat'), pdist(Cat = cat, num, condition = 'Cat'))
   
   expect_equal(pdist(cat, num, condition = 'cat'), pdist(cat, num, condition = 1))
-  expect_equal(pdist(cat, num, condition = 'num') |> unconditional(), 
+  expect_equal(pdist(cat, num, condition = 'num') |> (humdrumR:::unconditional)(), 
                pdist(cat, num))
   
   
@@ -320,34 +320,34 @@ test_that('Entropy stuff', {
     
     Hc <- H(cat)
     Hc2 <- H(cat2)
-    joint <- H(cat, cat2)
+    joint <- H(cat, cat2) |> unname()
     
     # conditional
-    expect_equivalent(joint, Hc + H(cat, cat2, condition = 'cat'))
-    expect_equivalent(joint, Hc2 + H(cat, cat2, condition = 'cat2'))
+    expect_equal(joint, unname(Hc + H(cat, cat2, condition = 'cat')))
+    expect_equal(joint, unname(Hc2 + H(cat, cat2, condition = 'cat2')))
     
     # mutual
-    expect_equivalent(joint, Hc + Hc2 - mutual(cat, cat2))
-    expect_equivalent(mutual(x= cat, y = cat), H(cat))
-    expect_equivalent(mutual(cat, cat2), mean(pmutual(cat, cat2)))
+    expect_equal(joint, unname(Hc + Hc2 - mutual(cat, cat2)))
+    expect_equal(mutual(x= cat, y = cat) |> unname(), H(cat) |> unname())
+    expect_equal(mutual(cat, cat2) |> unname(), mean(pmutual(cat, cat2)) |> unname())
     
     
     # info and entropy
     catx <- ifelse(seq_along(cat) %in% sample(length(cat), N / 4), 'a', cat)
     
-    expect_equivalent(mean(info(cat)), H(cat))
-    expect_equivalent(mean(info(x = cat, y = catx)), H(cat, catx))
-    expect_equivalent(mean(info(cat, catx, condition = 'cat')), H(cat, catx, condition = 'cat'))
+    expect_equal(mean(info(cat)), H(cat) |> unname())
+    expect_equal(mean(info(x = cat, y = catx)), H(cat, catx) |> unname() )
+    expect_equal(mean(info(cat, catx, condition = 'cat')), H(cat, catx, condition = 'cat') |> unname())
     
-    expect_equivalent(-sum(log(like(cat, model = pdist(cat = catx)), base = 2)) / N, xentropy(cat, model = pdist(cat = catx)))
-    expect_equivalent(-sum(log(like(cat, model = pdist(cat = catx)))) / N, xentropy(cat, model = pdist(cat = catx), base = exp(1)))
+    expect_equal(-sum(log(like(cat, model = pdist(cat = catx)), base = 2)) / N, xentropy(cat, model = pdist(cat = catx)) |> unname())
+    expect_equal(-sum(log(like(cat, model = pdist(cat = catx)))) / N, xentropy(cat, model = pdist(cat = catx), base = exp(1)) |> unname())
     
     
     # cross and kld
-    expect_gt(xentropy(cat, model = pdist(cat = catx)), H(cat))
-    expect_equivalent(xentropy(cat, model = pdist(cat)), H(cat))
-    expect_equivalent(kld(cat, model = pdist(cat = catx)) + H(cat), xentropy(cat, model = pdist(cat = catx)))
-    expect_equivalent(mean(info(cat, model = pdist(cat = catx))), H(cat, model = pdist(cat = catx)))
+    expect_gt(xentropy(cat, model = pdist(cat = catx)) |> unname(), H(cat) |> unname())
+    expect_equal(xentropy(cat, model = pdist(cat)) |> unname(), H(cat) |> unname())
+    expect_equal(unname(kld(cat, model = pdist(cat = catx)) + H(cat)), xentropy(cat, model = pdist(cat = catx)) |> unname())
+    expect_equal(mean(info(cat, model = pdist(cat = catx))), H(cat, model = pdist(cat = catx)) |> unname())
   }
   
 
@@ -358,9 +358,9 @@ test_that('Entropy stuff', {
   
   by <- entropy_by(chord, note, condition = 'note')
   expect_equal(unname(entropy(chord, note, condition = 'note')), # conditional entropy,
-               mean(by[as.integer(note)]))
+               mean(table(by)[as.integer(note)]))
   
-  expect_equal(range(by), c(0, 1))
+  expect_equal(unname(range(by)), c(0, 1))
   
 })
 

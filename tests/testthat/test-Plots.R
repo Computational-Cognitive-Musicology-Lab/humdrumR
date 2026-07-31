@@ -215,4 +215,6 @@ shinyApp(ui = sidebarLayout(sidebarPanel = sidebarPanel(width = c(2,10),numericI
                    rlang::expr(if (is.factor(!!cex)) cex else abs(!!cex) + 1)
                  }
 
-                 pch <- rlang::parse_expr(args$pch)
+                 pch <- rlang::parse_expr(args$pch) 
+																			 }) })
+}

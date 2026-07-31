@@ -1,3 +1,13 @@
+# humdrumR 7.1.0
+
+It's been a long time since an update!
+In the meantime, we've fixed a large number of bugs as they've cropped up.
+
+More significantly, the draw (plotting) function and our whole suite of "distribution" and information theory tools have been revamped and improved.
+There are also two new vignettes to go along with these tools.
+
+Finally, and most importantly, we're debuting our new logo!
+
 # humdrumR 7.0.7
 
 Fixed a bugs in timeline(), so it is now working, though I still hasn't been extensively tested and I consider it "under development."

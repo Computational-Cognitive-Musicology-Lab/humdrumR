@@ -2311,8 +2311,9 @@ withinExpression <- function(expr, predicate = \(...) TRUE, func, applyTo = 'cal
   if (exprA$Type %in% applyTo) {
     hit <- do...(predicate, exprA, envir = envir)
     if (hit) {
+      if (is.null(exprA$Environment)) exprA$Environment <- envir # threads any parent quosure environments down (must happen BEFORE func, since func may eval args in this environment)
       exprA <- func(exprA)
-    } 
+    }
   } else {
     hit <- FALSE
   }
@@ -2997,8 +2998,57 @@ syntaxHighlight <- function(token, dataTypes) {
   style[dataTypes == 'M'] <- 'underline'
   style[dataTypes == 'd'] <- 'blur'
   
-  textstyle(token, 
+  textstyle(token,
             colors[dataTypes],
             NULL, #ifelse(dataType == 'M', 'light gray', ''),
             style)
+}
+
+
+# Debugging ----
+
+## These tools are like a "non-interactive browser()".
+## Drop saveenv('label') into a function to snapshot its evaluation
+## environment into a global list, then poke at it later with
+## withdump()/getdump()/dumpenv() without having to stop execution.
+
+saveenv <- function(label, into = '.dumps') {
+    if (missing(label) || !is.character(label) || length(label) != 1L) .stop("`saveenv()` requires a single character `label`.")
+    env <- parent.frame()
+
+    dumps <- if (exists(into, envir = globalenv(), inherits = FALSE)) get(into, envir = globalenv()) else list()
+    dumps[[label]] <- env # overwrite any previous capture under this label
+    assign(into, dumps, envir = globalenv())
+
+    message('saveenv: captured environment of `', label, '` into `', into, '$', label, '`.')
+    invisible(env)
+}
+
+getdump <- function(label, from = '.dumps') {
+    if (missing(label) || !is.character(label) || length(label) != 1L) .stop("`{sys.call()[[1L]]}` requires a single character `label`.")
+    if (!exists(from, envir = globalenv(), inherits = FALSE)) .stop("There is no dump called `{from}` in the global environment.")
+    dumps <- get(from, envir = globalenv())
+    if (!label %in% names(dumps)) .stop("`{from}` holds no dump called {.show_values(label)}.")
+
+    dumps[[label]]
+}
+
+withdump <- function(label, expr, from = '.dumps') {
+    env <- getdump(label, from = from)
+    eval(substitute(expr), envir = env)
+}
+
+# Copy the labeled environment's variables straight into the global environment.
+dumpenv <- function(label, from = '.dumps') {
+    env  <- getdump(label, from = from)
+    vars <- ls(env, all.names = TRUE)
+    for (v in vars) assign(v, get(v, envir = env), envir = globalenv())
+
+    message('dumpenv: dumped ', num2print(length(vars)), ' variable(s) from `', label, '` into the global environment.')
+    invisible(env)
+}
+
+cleardump <- function(into = '.dumps') {
+    if (exists(into, envir = globalenv(), inherits = FALSE)) rm(list = into, envir = globalenv())
+    invisible(NULL)
 }

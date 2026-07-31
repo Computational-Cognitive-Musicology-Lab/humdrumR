@@ -245,8 +245,7 @@ For example:
 ```{r, scroll.height='800px'}
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
-chorales |>
-  timeline()
+chorales |> timeline()
 
 
 ```
@@ -269,8 +268,7 @@ If we load our MCFlow data and run `timeline()`, we'll see the timeline computed
 ```{r}
 mcflow <- readHumdrum(humdrumRroot, 'HumdrumData/RapFlow/.*rap')
 
-mcflow |>
-  timeline()
+mcflow |> timeline()
 
 ```
 
@@ -279,8 +277,7 @@ It would be helpful to get the "total" timeline for the file, by specifying `tot
 
 
 ```{r}
-mcflow |>
-  timeline(total = TRUE)
+mcflow |> timeline(total = TRUE)
 ```
 
 Nice!
@@ -352,8 +349,7 @@ So, in our Bach chorales:
 
 ```{r, scroll.height='800px'}
 
-chorales |>
-  timeline(pickup = Bar < 1)
+chorales |> timeline(pickup = Bar < 1)
 
 
 ```

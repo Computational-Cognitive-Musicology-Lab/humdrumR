@@ -333,6 +333,7 @@ reduceFigures <- function(alterations, extensions,
                           extension.sep = '', flat = '-', minor = 'm', diminish = 'o', ...) {
   if (is.null(extensions)) extensions <- array("", dim = dim(alterations))
   if (is.null(alterations)) alterations <- array("", dim = dim(extensions))
+
   
   inverted <- inversion > 0L
   
@@ -388,24 +389,24 @@ reduceFigures <- function(alterations, extensions,
   
   extensions[which(tags == 'no')] <- ((col(extensions)[which(tags == 'no')] - 1L) * 2L) + 1L
   #
-  if (extension.shorthand) {
-    # if (extension.simple && any(inverted)) {
-      # extensions[inverted, ] <- genericstep(extensions[inverted, ])
-    # }
+
+	##############
+	# create "shorthand" versions of figurations 
+	######
+	if (extension.shorthand) {
     chorddegree <- sweep(extensions, 1, 2L * inversion, '+')
     chorddegree[chorddegree %in% c(8L, 10L, 12L)] <- chorddegree[chorddegree %in% c(8L, 10L, 12L)] - 7L
     chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] <- chorddegree[which(chorddegree > 13L, arr.ind = TRUE)] - 14L
-    
-    hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, \(row) max(4L, which.max(row))), '<') 
-    if (any(inverted)) hide <- hide & !sweep(chorddegree > 4, 1, inverted, '&') 
-    
-    
-    extensions[(hide & alterations == "" & is.na(tags))] <- NA_integer_
-    
-    hidebass <- if (is.null(root)) extensions == 1 else (extensions == 1 & !row(extensions) %in% which(inverted))
-    extensions[hidebass] <- NA_integer_
-    alterations[hidebass] <- NA_character_
-  }
+  
+  	hide <- sweep(col(chorddegree), 1, apply(chorddegree, 1, \(row) max(4L, which.max(row))), '<')
+  	if (any(inverted)) {
+			hide[inverted, ] <- (chorddegree[inverted, ] %in% c(5L)) | extensions[inverted, ] == 1L
+		} 
+	} else {
+			hide <- extensions == 1L # if (is.null(root)) extensions == 1 else (extensions == 1 & !row(extensions) %in% which(inverted))
+	}
+  extensions[(hide & alterations == "" & is.na(tags))] <- NA_integer_
+
 
   
   # order
@@ -507,18 +508,10 @@ tset2figuredBass <- function(x, Key = dset(0, 0), figArgs = list(),  inversion =
   
   if (!inversion) figures[getInversion(x) > 0L] <- NA_character_
   
-  figures
+  figures <- ifelse(grepl('#|', figures), gsub('#1', '', figures), figures)
+  figures <- ifelse(grepl('-|', figures), gsub('b1', '', figures), figures)
+	figures
   
-  
-  # if (extension.shorthand) {
-  #   figures <- stringr::str_replace(figures,'([^913])753|^753', '\\17')
-  #   figures <- stringr::str_replace(figures, '([^9713])63|^63', '\\16')
-  #   figures <- stringr::str_replace(figures, '([^9713])653|^653', '\\165')
-  #   figures <- stringr::str_replace(figures, '([^9713])643|^643', '\\143')
-  #   figures <- stringr::str_replace(figures, '([^9713])642|^642', '\\142')
-  # }
-  # 
-  # figures
   
   
 }
@@ -631,7 +624,9 @@ tset2harte <- function(x, Key = NULL, figArgs = list(), flat = '-', sep = ':', .
   if (length(parts$figuration)) {
     parts$figuration <- local({
       fig <- gsub(',?no[13579][13]?', '', parts$figuration)
-      fig <- paste0('(1', gsub('n', '', fig), ')')
+			fig <- gsub('n', '', fig)
+			fig <- gsub(',1,', ',', fig)
+      fig <- paste0('(1', fig, ')')
       shorthand <- c('3,5' = 'maj', 'b3,5' = 'min', 'b3,b5' = 'dim', '3,#5' = 'aug',
                      '3,5,7' = 'maj7', 'b3,5,b7' = 'min7', '3,5,b7' = '7', 'b3,b5,b7' = 'hdim7', 'b3,b5,bb7' = 'dim7', 'b3,5,7' = 'minmaj7',
                      '3,5,6' = 'maj6', 'b3,5,6' = 'min6',
@@ -1351,7 +1346,7 @@ setAs('tertianSet', 'diatonicSet', function(from) tset(from@Root, from@Signature
 #' 
 #' + Jazz/Pop
 #'   + [chord()]
-#'   + [harte()]
+#'   + harte()
 #' + Classical
 #'   + [figuredBass()]
 #'   + [tertian()]
@@ -1521,7 +1516,7 @@ chord <- humdrumRgeneric(chord.default)
 harte.default <- makeChordTransformer(tset2harte, 'harte')
 #' @export
 harte.humdrumR <- humdrumRmethod(harte.default)
-#' export
+#' @export
 harte <- humdrumRgeneric(harte.default)
 
 #' Figured bass representation of harmony

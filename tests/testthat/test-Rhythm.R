@@ -105,11 +105,11 @@ test_that("timeline() and timestamp() work correctly", {
 
   chorale <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor001*.krn')
   # 
-  expect_equivalent(chorale |> timeline() |> pull() |> mean(), 7.241266376)
-  expect_equivalent(chorale |> timeline(total = FALSE) |> pull() |> length(),
+  expect_equal(chorale |> timeline() |> pull() |> mean(), 7.241266376)
+  expect_equal(chorale |> timeline(total = FALSE) |> pull() |> length(),
                     getHumtab(chorale, 'D') |> nrow())
-  expect_equivalent(chorale |> timeline(total = TRUE) |> pull() |> mean(), 7.589062500)
-  expect_equivalent(chorale |> timeline(total = TRUE) |> pull() |> length(),
+  expect_equal(chorale |> timeline(total = TRUE) |> pull() |> mean(), 7.589062500)
+  expect_equal(chorale |> timeline(total = TRUE) |> pull() |> length(),
                     getHumtab(chorale, 'Dd') |> nrow())
 })
 

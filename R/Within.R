@@ -810,7 +810,10 @@ quoForceHumdrumRcalls <- function(quosures) {
   # we use ::: because the ls() output includes methods that aren't actually exported (:: won't work).
   # we don't include infix functions line %~%
   
-  humdrumRpackage <- ls('package:humdrumR') |> grep(pattern = '%', x = _, value = TRUE, invert = TRUE)
+  # We use getNamespaceExports() rather than ls('package:humdrumR') because the latter includes
+  # imported functions (e.g., graphics::barplot) when the package is loaded via devtools::load_all()
+  # (as it is during testing), which caused calls like barplot() to be wrongly rewritten to humdrumR:::barplot().
+  humdrumRpackage <- getNamespaceExports('humdrumR') |> grep(pattern = '%', x = _, value = TRUE, invert = TRUE)
   humdrumRpackage <- setdiff(humdrumRpackage, 'count')
   # we can't do it to count because the count() generic was originally exported by dplyr
   # there might other functions which need to be added to this list?
@@ -1013,6 +1016,7 @@ activateQuo <- function(funcQuosure, dotField) {
   # target [humdrumRclass] object in place 
   # of any `.` subexpressions.
   dotField <- rlang::sym(dotField)
+
   substituteName(funcQuosure, list(. = dotField))
 
   # dotField <- rlang::syms(dotField)
@@ -1094,7 +1098,7 @@ interpolateVariablesQuo <- function(quo, variables) {
 #### Lag/Led vectors ----
 
 laggedQuo <- function(funcQuosure, fields) {
-  
+
   predicate <- \(Head, Args) Head == '[' && any(tolower(names(Args)) %in% c('lag', 'lead')) 
   
   do <- \(exprA) {

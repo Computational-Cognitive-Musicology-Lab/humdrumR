@@ -41,7 +41,7 @@ The functions are:
 \item Jazz/Pop
 \itemize{
 \item \code{\link[=chord]{chord()}}
-\item \code{\link[=harte]{harte()}}
+\item harte()
 }
 \item Classical
 \itemize{
