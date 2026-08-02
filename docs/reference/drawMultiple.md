@@ -78,8 +78,8 @@ draw(x1, title = 'Histogram of x1') |> drawBeside(draw( ,x1, title = 'Q-plot of 
 #> lapply(fs, function(f) if (class(f) == "draw_object") .drawSelf(f) else f()), 
 #>     add = expression(), layout = list(layout = 1:2, layout_widths = c(1, 
 #>     1), layout_heights = c(1, 1)), aspect = 1.33333333333333)
-#> <bytecode: 0x593b866e62d8>
-#> <environment: 0x593b86ea5018>
+#> <bytecode: 0x58cb5a3e4138>
+#> <environment: 0x58cb61b0ea00>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -105,8 +105,8 @@ draw(x1, title = 'Histogram of x1') |> drawBeside(draw( ,x1, title = 'Thinner Q-
 #> lapply(fs, function(f) if (class(f) == "draw_object") .drawSelf(f) else f()), 
 #>     add = expression(), layout = list(layout = 1:2, layout_widths = c(2, 
 #>     1), layout_heights = c(1, 1)), aspect = 1.33333333333333)
-#> <bytecode: 0x593b866e62d8>
-#> <environment: 0x593b86840038>
+#> <bytecode: 0x58cb5a3e4138>
+#> <environment: 0x58cb5e2f7408>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -133,8 +133,8 @@ draw(x1) |> drawBeside(draw(x2)) |> drawBeside(draw(x1, x2))
 #>     add = expression(), layout = list(layout = c(1L, 2L, 3L, 
 #>     3L), layout_widths = c(1, 1), layout_heights = c(1, 1)), 
 #>     aspect = 1.33333333333333)
-#> <bytecode: 0x593b866e62d8>
-#> <environment: 0x593b865e2370>
+#> <bytecode: 0x58cb5a3e4138>
+#> <environment: 0x58cb5de649c8>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -161,8 +161,8 @@ draw(x1) |> drawBeside(draw(x2), draw(x1, x2))
 #>     add = expression(), layout = list(layout = c(1L, 2L, 3L, 
 #>     3L), layout_widths = c(1, 1, 1), layout_heights = c(1, 1, 
 #>     1)), aspect = 1.33333333333333)
-#> <bytecode: 0x593b866e62d8>
-#> <environment: 0x593b816dc310>
+#> <bytecode: 0x58cb5a3e4138>
+#> <environment: 0x58cb63062300>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -189,8 +189,8 @@ draw(x1) |> drawBeside(draw(x2)) |> drawBelow(draw(x1, x2))
 #>     add = expression(), layout = list(layout = c(1L, 3L, 2L, 
 #>     3L), layout_widths = c(1, 1), layout_heights = c(1, 1)), 
 #>     aspect = 1.33333333333333)
-#> <bytecode: 0x593b866e62d8>
-#> <environment: 0x593b80c6e2b8>
+#> <bytecode: 0x58cb5a3e4138>
+#> <environment: 0x58cb6622ca28>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")
@@ -220,8 +220,8 @@ drawBeside(draw(x1), draw(, x1)) |> drawBelow(drawBeside(draw(x2), drawNothing()
 #>     add = expression(), layout = list(layout = c(1L, 3L, 2L, 
 #>     4L), layout_widths = c(1, 1), layout_heights = c(1, 1)), 
 #>     aspect = 1.33333333333333)
-#> <bytecode: 0x593b866e62d8>
-#> <environment: 0x593b820993e0>
+#> <bytecode: 0x58cb5a3e4138>
+#> <environment: 0x58cb64cd6d68>
 #> attr(,"add")
 #> expression()
 #> attr(,"layout")

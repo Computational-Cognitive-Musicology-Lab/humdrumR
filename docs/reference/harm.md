@@ -111,11 +111,11 @@ tertian <- c('AM', 'AMm/3', 'DM', 'Dm', 'B-MM', 'AM/5', 'EMmm')
 harm(tertian, Key = 'A:')
 #> [1] "I"    "Im7b" "IV"   "iv"   "-II7" "Ic"   "Vm9" 
 roman(tertian, Key = 'A:')
-#> [1] "I"     "I6m53" "IV"    "iv"    "-II7"  "I641"  "Vm9"  
+#> [1] "I"    "I6m5" "IV"   "iv"   "-II7" "I64"  "Vm9" 
 
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.
@@ -126,5 +126,5 @@ B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.
 with(B075[[ , 2]], harm(Token))
 #> [1] "I"   "I"   "V7b" "I"   "IV"  "V7"  "I"  
 with(B075[[ , 2]], roman(Token))
-#> [1] "I"    "I"    "V653" "I"    "IV"   "V7"   "I"   
+#> [1] "I"   "I"   "V65" "I"   "IV"  "V7"  "I"  
 ```

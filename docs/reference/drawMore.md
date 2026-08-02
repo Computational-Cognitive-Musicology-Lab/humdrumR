@@ -82,8 +82,8 @@ draw(x) |> drawMore(abline(v = mean(x)))
 #>     }
 #> }, add = expression(abline(v = mean(x))), layout = list(layout = 1L, 
 #>     layout_heights = 1, layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x593b85d83580>
-#> <environment: 0x593b80116118>
+#> <bytecode: 0x58cb5cfa7548>
+#> <environment: 0x58cb6313dc68>
 #> attr(,"add")
 #> expression(abline(v = mean(x)))
 #> attr(,"layout")
@@ -148,8 +148,8 @@ draw( , y = x) |> drawMore(mtext(paste0('SD: ', sd(y) |> round(2)), side = 3, ce
 #> }, add = expression(mtext(paste0("SD: ", round(sd(y), 2)), side = 3, 
 #>     cex = 1.2), abline(h = mean(y), col = "red")), layout = list(
 #>     layout = 1L, layout_heights = 1, layout_widths = 1), aspect = 1.33333333333333)
-#> <bytecode: 0x593b85d83580>
-#> <environment: 0x593b87c45010>
+#> <bytecode: 0x58cb5cfa7548>
+#> <environment: 0x58cb6466eef8>
 #> attr(,"add")
 #> expression(mtext(paste0("SD: ", round(sd(y), 2)), side = 3, cex = 1.2), 
 #>     abline(h = mean(y), col = "red"))

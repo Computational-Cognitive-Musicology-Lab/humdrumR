@@ -3078,10 +3078,12 @@ bach |> entropy_by(Pitch, Instrument, condition = "Instrument")
 ```
 
 There’s not *much* variation between voices either, but the variation
-here at least makes sense: the bass voice has the most entropy (perhaps
-because it leaps more) while the two inner voices (alto and tenor)
-voices have the least pitch entropy. Of course, this is a very minimal
-definition of pitch, so we should take this with a grain of salt.
+here at least makes sense: for example, the bass voice has the most
+entropy, perhaps because it leaps more. The soprano has the least
+entropy (though basically tied with the alto), perhaps reflecting that
+the soprano lines are drawn from fixed prexisting chant melodies. Of
+course, this is a very minimal definition of pitch, so we should take
+this all with a grain of salt.
 
 ------------------------------------------------------------------------
 

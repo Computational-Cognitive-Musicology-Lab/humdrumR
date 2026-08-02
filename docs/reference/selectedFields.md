@@ -137,7 +137,7 @@ to see what fields are available, and how they are ordered. To actually
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.

@@ -77,11 +77,11 @@ figuredBass(romanNumerals)
 tertian <- c('CM', 'CMm/3', 'FM', 'Fm', 'D-MM', 'GMmm')
 
 figuredBass(tertian)
-#> [1] "C|"     "E|6b53" "F|"     "F|b3"   "D-|7b5" "G|b9"  
+#> [1] "C|"     "E|6b5"  "F|"     "F|b3"   "D-|7b5" "G|b9"  
 
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.
@@ -89,5 +89,5 @@ B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.
 #> Assembling corpus...
 #> Done!
 with(B075[[ , 2]], figuredBass(Token))
-#> [1] "F|"    "F|"    "e|653" "F|"    "B-|"   "c|7"   "F|"   
+#> [1] "F|"   "F|"   "e|65" "F|"   "B-|"  "c|7"  "F|"  
 ```

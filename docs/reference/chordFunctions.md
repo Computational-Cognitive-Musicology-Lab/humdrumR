@@ -57,7 +57,7 @@ are:
 
   - [`chord()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chord.md)
 
-  - [`harte()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harte.md)
+  - harte()
 
 - Classical
 

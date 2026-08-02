@@ -101,29 +101,29 @@ indicated in the record where they occur. The output looks like this:
 ``` r
 validateHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B.*.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BeethovenVariations/B.*.krn' matches 12 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BeethovenVariations/B.*.krn' matches 12 text files in 1 directory.
 #> Twelve files read from disk.
 #> Validating twelve files...
 #> all valid.
 
 errorFrame <- validateHumdrum(humdrumRroot, "HumdrumData/InvalidFile.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> eight errors in one files...
 #> zero valid files.
 errorFrame
-#>                                                                                     Filepath
-#>                                                                                       <char>
-#> 1: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 2: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 3: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 4: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 5: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 6: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 7: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
-#> 8: /home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/InvalidFile.krn
+#>                                                                                    Filepath
+#>                                                                                      <char>
+#> 1: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 2: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 3: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 4: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 5: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 6: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 7: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
+#> 8: /home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/InvalidFile.krn
 #>    Record                                                 Error
 #>     <int>                                                <char>
 #> 1:      4 ** and *- records in file are missing or don't add up

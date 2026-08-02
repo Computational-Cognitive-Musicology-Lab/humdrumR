@@ -21,7 +21,7 @@
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -2997,11 +2997,12 @@ music. Let’s look at something that is (possibly) more interesting:</p>
 <span id="cb51-9"><a href="#cb51-9" tabindex="-1"></a><span class="sc">&gt;</span>    Instrument  <span class="fu">H</span>(Pitch)</span>
 <span id="cb51-10"><a href="#cb51-10" tabindex="-1"></a><span class="sc">&gt;</span>    humdrumR entropy distribution <span class="fu">H</span>(Pitch<span class="sc">|</span>Instrument)</span></code></pre></div>
 <p>There’s not <em>much</em> variation between voices either, but the
-variation here at least makes sense: the bass voice has the most entropy
-(perhaps because it leaps more) while the two inner voices (alto and
-tenor) voices have the least pitch entropy. Of course, this is a very
-minimal definition of pitch, so we should take this with a grain of
-salt.</p>
+variation here at least makes sense: for example, the bass voice has the
+most entropy, perhaps because it leaps more. The soprano has the least
+entropy (though basically tied with the alto), perhaps reflecting that
+the soprano lines are drawn from fixed prexisting chant melodies. Of
+course, this is a very minimal definition of pitch, so we should take
+this all with a grain of salt.</p>
 <hr>
 <p>Let’s check that the <code><a href="../reference/entropy_by.html">pentropy()</a></code> function works as we
 hope:</p>

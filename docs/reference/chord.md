@@ -80,8 +80,7 @@ harte(
 
 For more rigorous, consistent work, we recommend the
 [Harte](https://github.com/Computational-Cognitive-Musicology-Lab/Star-Wars-Thematic-Corpus)
-notation, which is the standard used by MIREX, etc. The
-[`harte()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/harte.md)
+notation, which is the standard used by MIREX, etc. The `harte()`
 function will output standard Harte symbols.
 
 ## Examples
@@ -96,7 +95,7 @@ chord(romanNumerals, Key = 'A:')
 
 B075 <- readHumdrum(humdrumRroot, "HumdrumData/BeethovenVariations/B075_00_05_a.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/Rtmpjdf00d/temp_libpath10ef5c6bd813c9/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BeethovenVariations/B075_00_05_a.krn' matches 1 text files in 1 directory.
 #> One file read from disk.
 #> Validating one file...
 #> all valid.

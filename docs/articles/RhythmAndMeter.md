@@ -284,8 +284,7 @@ multiple stops. For example:
 ``` r
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/chor.*.krn')
 
-chorales |>
-  timeline()
+chorales |> timeline()
 ```
 
 ```
@@ -390,8 +389,7 @@ we’ll see the timeline computed for the `**recip` spine:
 ``` r
 mcflow <- readHumdrum(humdrumRroot, 'HumdrumData/RapFlow/.*rap')
 
-mcflow |>
-  timeline()
+mcflow |> timeline()
 >    #################### vvv 2pac_IGetAround.rap vvv #####################
 >                1:     **recip  **stress    **tone   **break   **rhyme     **ipa    ***
 >                2:    *>Verse1  *>Verse1  *>Verse1  *>Verse1  *>Verse1  *>Verse1    ***
@@ -476,8 +474,7 @@ helpful to get the “total” timeline for the file, by specifying
 `total = TRUE`:
 
 ``` r
-mcflow |>
-  timeline(total = TRUE)
+mcflow |> timeline(total = TRUE)
 >    #################### vvv 2pac_IGetAround.rap vvv #####################
 >                1:     **recip  **stress    **tone   **break   **rhyme     **ipa    ***
 >                2:    *>Verse1  *>Verse1  *>Verse1  *>Verse1  *>Verse1  *>Verse1    ***
@@ -631,8 +628,7 @@ will have `Bar < 1`. So, in our Bach chorales:
 
 ``` r
 
-chorales |>
-  timeline(pickup = Bar < 1)
+chorales |> timeline(pickup = Bar < 1)
 ```
 
 ```
