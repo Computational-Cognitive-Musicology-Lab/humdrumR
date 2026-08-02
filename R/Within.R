@@ -949,13 +949,16 @@ checkRecycling <- function(humtab, recycle, fields, withFunc) {
 
 
 concatinateQuosures <- function(quosures, alignLeft) {
+  newFields <- names(quosures)
+	newFields <- newFields[!grepl('^tmp', newFields)]
+
   quosure <- rlang::quo({
     {!!!quosures}
   
-    c(parseResults(list(!!!(rlang::syms(names(quosures)))), inlen = length(Token), alignLeft = !!alignLeft))
+    c(parseResults(list(!!!(rlang::syms(newFields))), inlen = length(Token), alignLeft = !!alignLeft))
   })
   
-  attr(quosure, 'newFields') <- names(quosures)
+  attr(quosure, 'newFields') <- newFields
   quosure
 }
 
