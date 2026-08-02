@@ -1,12 +1,12 @@
 
 
-<img src='humdrumR_logo.svg' style="padding-top:50px; width:300px;"/>
+<img src='humdrumR_logo.svg' alt="humdurmR logo: a humingbird beating a drum" style="padding-top:50px; width:300px;"/>
 
 Welcome to the main website of humdrum$_{\mathbb{R}}$!
 
 
 
-## What is humdrum$_{\mathbb{R}}$?
+## What is humdrumℝ?
 
 Humdrum$_{\mathbb{R}}$ is an [R package](https://en.wikipedia.org/wiki/R_package): a "library" of preexisting code for the
 [R programming language](https://en.wikipedia.org/wiki/R_(programming_language)).
@@ -41,7 +41,7 @@ R is programming language, designed from the ground up for statistical computing
 R has many features which make it ideal for data analysis, particularly if research and analysis is your only background in programming.
 Our [R primer](articles/RPrimer.html "An R primer for humdrumR users") introduces the core concepts of R programming.
 
-## What can humdrum$_{\mathbb{R}}$ do?
+## What can humdrumℝ do?
 
 Humdrum$_{\mathbb{R}}$ provides a number of tools for working with [humdrum data](http://www.humdrum.org/guide/ch05/) and more generally, musicological analysis.
 Humdrum$_{\mathbb{R}}$ does seven main things:
@@ -54,7 +54,7 @@ The most important part of a `humdrumR` object is the "*humdrum table*" which it
 You can read about how the humdrum-syntax data is represented in the [getting started with humdrumR](articles/GettingStarted.html "Getting started with humdrumR")
 vignette.
 
-![](man/figures/DataModelDiagram.png){width=600px}
+![Diagram showing arrows between two boxes labeled "humdrum syntax" and "data.table" respectively.](man/figures/DataModelDiagram.png){width=600px}
 
 For more details, read the [humdrumR class](reference/humdrumRclass.html) 
 and [humdrum table](reference/humTable.html);
@@ -118,7 +118,7 @@ Humdrum$_{\mathbb{R}}$ provides several useful development tools, including our 
 which makes it easy to dispatch different methods based on matches to regular expressions.
 
 
-## Installing humdrum$_{\mathbb{R}}$
+## Installing humdrumℝ
 
 ### Installing R
 
@@ -126,7 +126,7 @@ To use humdrum$_{\mathbb{R}}$, you'll first need to install [R](https://www.r-pr
 We *highly* recommend that you install the Integrated Development Environment [RStudio](https://rstudio.com/) as well!
 This link---[Installing R and RStudio](https://rstudio-education.github.io/hopr/starting.html)---is a good starting place.
 
-### Installing humdrum$_{\mathbb{R}}$
+### Installing humdrumℝ
 
 Humdrum$_{\mathbb{R}}$ is not yet available on the standard R package repository, [CRAN](https://cran.r-project.org/), so (for now) it can only be installed from this github repository.
 To install the latest version (master branch) of humdrum$_{\mathbb{R}}$, you'll first need to install the R package [devtools](https://www.rdocumentation.org/packages/devtools/versions/2.2.1)---`devtools` is used for creating and maintaining R packages.
@@ -147,7 +147,7 @@ devtools::install_github("Computational-Cognitive-Musicology-Lab/humdrumR")
 
 ```
 
-#### Humdrum$_{\mathbb{R}}$ source
+#### Humdrumℝ source
 
 Another option---useful, if you want to inspect, or contribute to, the humdrum$_{\mathbb{R}}$ source code---is to actually download the humdrum$_{\mathbb{R}}$ package source from github and install it directly.
 You'll first need to install [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
@@ -188,7 +188,7 @@ library(humdrumR)
 
 ```
 
-### Updating humdrum$_{\mathbb{R}}$
+### Updating humdrumℝ
 
 Humdrum$_{\mathbb{R}}$ is under active development, with new features being added, documentation being updated, and bugs being fixed on a weekly basis.
 We recommend you keep up to date with the newest version of humdrum$_{\mathbb{R}}$.
@@ -206,7 +206,7 @@ You can then rerun `devtools::install()`.
 
 
 
-## Learning humdrum$_{\mathbb{R}}$
+## Learning humdrumℝ
 
 To learn how to use humdrum$_{\mathbb{R}}$
 the "Articles" list at the top of this page is the best place to start---in particular,
