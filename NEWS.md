@@ -1,3 +1,8 @@
+# humdrumR 7.1.1
+
+Added new feature where you can return multiple fields from one expression in a with/within.humdrumR() call, 
+specifically by returning a data.frame.
+
 # humdrumR 7.1.0
 
 It's been a long time since an update!
