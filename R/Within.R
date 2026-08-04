@@ -1016,7 +1016,7 @@ visibleQuo <- function(quo, env = rlang::quo_get_env(quo)) {
 
 parseResults <- function(results, inlen, fieldNames, alignLeft, recycleArg, withFunc) {
 	# data.frame results are separated out
-	dfs <- sapply(results, is.data.frame)
+	dfs <- sapply(results, \(result) class(result)[1] %in% c('data.frame', 'data.table', 'tbl_df'))
 	if (any(dfs)) {
 		fieldNames[dfs] <- Map(\(fieldName, dfNames, explicit) {
 														 dfNames[dfNames == ''] <- paste0('col', seq_along(dfNames))[dfNames == '']
