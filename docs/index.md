@@ -1,8 +1,8 @@
-![](humdrumR_logo.svg)
+![humdurmR logo: a humingbird beating a drum](humdrumR_logo.svg)
 
 Welcome to the main website of humdrum$_{\mathbb{R}}$!
 
-## What is humdrum$_{\mathbb{R}}$?
+## What is humdrumℝ?
 
 Humdrum$_{\mathbb{R}}$ is an [R
 package](https://en.wikipedia.org/wiki/R_package): a “library” of
@@ -49,7 +49,7 @@ background in programming. Our [R
 primer](https://humdrumR.ccml.gtcmt.gatech.edu/articles/RPrimer.md "An R primer for humdrumR users")
 introduces the core concepts of R programming.
 
-## What can humdrum$_{\mathbb{R}}$ do?
+## What can humdrumℝ do?
 
 Humdrum$_{\mathbb{R}}$ provides a number of tools for working with
 [humdrum data](http://www.humdrum.org/guide/ch05/) and more generally,
@@ -65,7 +65,11 @@ how the humdrum-syntax data is represented in the [getting started with
 humdrumR](https://humdrumR.ccml.gtcmt.gatech.edu/articles/GettingStarted.md "Getting started with humdrumR")
 vignette.
 
-![](reference/figures/DataModelDiagram.png)
+![Diagram showing arrows between two boxes labeled “humdrum syntax” and
+“data.table” respectively.](reference/figures/DataModelDiagram.png)
+
+Diagram showing arrows between two boxes labeled “humdrum syntax” and
+“data.table” respectively.
 
 For more details, read the [humdrumR
 class](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumRclass.md)
@@ -165,7 +169,7 @@ system](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humdrumDispatch.md),
 which makes it easy to dispatch different methods based on matches to
 regular expressions.
 
-## Installing humdrum$_{\mathbb{R}}$
+## Installing humdrumℝ
 
 ### Installing R
 
@@ -176,7 +180,7 @@ recommend that you install the Integrated Development Environment
 RStudio](https://rstudio-education.github.io/hopr/starting.html)—is a
 good starting place.
 
-### Installing humdrum$_{\mathbb{R}}$
+### Installing humdrumℝ
 
 Humdrum$_{\mathbb{R}}$ is not yet available on the standard R package
 repository, [CRAN](https://cran.r-project.org/), so (for now) it can
@@ -196,7 +200,7 @@ session, type:
 
     devtools::install_github("Computational-Cognitive-Musicology-Lab/humdrumR")
 
-#### Humdrum$_{\mathbb{R}}$ source
+#### Humdrumℝ source
 
 Another option—useful, if you want to inspect, or contribute to, the
 humdrum$_{\mathbb{R}}$ source code—is to actually download the
@@ -234,7 +238,7 @@ used it by simply calling:
 
     library(humdrumR)
 
-### Updating humdrum$_{\mathbb{R}}$
+### Updating humdrumℝ
 
 Humdrum$_{\mathbb{R}}$ is under active development, with new features
 being added, documentation being updated, and bugs being fixed on a
@@ -257,7 +261,7 @@ This will “pull” the latest changes down to your local machine. You can
 then rerun
 [`devtools::install()`](https://devtools.r-lib.org/reference/install.html).
 
-## Learning humdrum$_{\mathbb{R}}$
+## Learning humdrumℝ
 
 To learn how to use humdrum$_{\mathbb{R}}$ the “Articles” list at the
 top of this page is the best place to start—in particular, the [Getting

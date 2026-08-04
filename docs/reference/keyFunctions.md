@@ -42,7 +42,7 @@ modify, data representing diatonic key information. The functions are:
 
 To better understand how these functions work, read about how diatonic
 keys are
-[represented](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html),
+[represented](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html),
 [parsed](https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyParsing.md),
 and
 [deparsed](https://humdrumR.ccml.gtcmt.gatech.edu/reference/keyDeparsing.md).

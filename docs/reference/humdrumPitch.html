@@ -9,7 +9,7 @@ for representing and manipulating musical pitch information."></head><body>
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,7 +77,7 @@ for representing and manipulating musical pitch information.</p>
 <p>There are four data types extensively used in <code>humdrumR</code> to encode/process <a href="https://en.wikipedia.org/wiki/Tonality" class="external-link">tonal</a> musical information:</p><ul><li><p><a href="https://rdrr.io/r/base/integer.html" class="external-link">integers</a> — used to encode "<a href="https://en.wikipedia.org/wiki/Circle_of_fifths" class="external-link">line-of-fifths</a>" tonal information</p></li>
 <li><p><a href="tonalIntervalS4.html">tonalInterval</a> — embeds line-of-fifth tonal integers alongside <a href="https://en.wikipedia.org/wiki/Octave" class="external-link">octave</a>
 and <a href='"https://en.wikipedia.org/wiki/Cent_(music)"' class="external-link">cent</a> information to encode most tonal pitch representations (solfege, intervals, letternames, etc.)</p></li>
-<li><p><a href="https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html" class="external-link">diatonicSet</a> — combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).</p></li>
+<li><p><a href="https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html">diatonicSet</a> — combines line-of-fifth tonal integer representations to represent diatonic tonality, including alterations of basic diatonic scale(s).</p></li>
 <li><p><a href="chordParsing.html">tertianSet</a> — an extension of <code>diatonicSet</code> used to encode  <a href="https://en.wikipedia.org/wiki/Tertian" class="external-link">tertian</a> diatonic harmonies.</p></li>
 </ul><p>Users will rarely need to engage with these data types.
 Rather, users will work with humdrum data where pitch information is encoded in strings, and wish to manipulate and analyze such data.

@@ -7,8 +7,8 @@ inputs and transpositions take place as `tonalInterval`s or
 `diatonicSet`s, but any numeric or character string representation of
 pitches can be transposed as well. This function is incorporated
 directly into [pitch
-functions](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html), and
-thence, all [pitch
+functions](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html),
+and thence, all [pitch
 translation](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitchFunctions.md)
 functions, so you probably won't call it directly very often.
 

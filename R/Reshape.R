@@ -88,11 +88,13 @@ expandPaths.humdrumR <- function(x, asSpines = TRUE) {
     
     putHumtab(x) <- expandPaths.data.table(getHumtab(x), asSpines = asSpines)
     
-    x
+    reKey(x)
 }
 #' @export
 expandPaths.data.table <- function(humtab, asSpines = TRUE) {
     if (!any(humtab$Path > 0L, na.rm = TRUE)) return(humtab)
+
+		humtab <- data.table::copy(humtab)
     
     humtab[ , Piece.Spine.Record := paste(Piece, Spine, Record, sep = ':')]
     humtab[ , Piece.Spine := paste(Piece, Spine, sep = ':')]

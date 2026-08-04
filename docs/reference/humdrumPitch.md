@@ -20,8 +20,8 @@ information:
   information to encode most tonal pitch representations (solfege,
   intervals, letternames, etc.)
 
-- [diatonicSet](https://rdrr.io/pkg/humdrumR/man/diatonicSetS4.html) —
-  combines line-of-fifth tonal integer representations to represent
+- [diatonicSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/diatonicSetS4.html)
+  — combines line-of-fifth tonal integer representations to represent
   diatonic tonality, including alterations of basic diatonic scale(s).
 
 - [tertianSet](https://humdrumR.ccml.gtcmt.gatech.edu/reference/chordParsing.md)

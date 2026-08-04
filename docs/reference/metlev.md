@@ -434,7 +434,7 @@ metcount(rhythm, meter = 'M6/8', offBeats = FALSE)
 # chorales
 chorales <- readHumdrum(humdrumRroot, 'HumdrumData/BachChorales/.*krn') 
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BachChorales/.*krn' matches 10 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/.*krn' matches 10 text files in 1 directory.
 #> Ten files read from disk.
 #> Validating ten files...
 #> all valid.

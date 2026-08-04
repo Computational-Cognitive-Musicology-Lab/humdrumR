@@ -1096,4 +1096,4 @@ will ask you to confirm before proceeding.
 description*.” This code is used to keep track of modifications to
 humdrum datasets. Humdrum$_{\mathbb{R}}$ will, by default, insert an
 `!!!EMD` record into any files it writes, saying: “Edited using
-humdrumR, version 0.7.1.0 on (*current data/time*).”
+humdrumR, version 0.7.1.1 on (*current data/time*).”

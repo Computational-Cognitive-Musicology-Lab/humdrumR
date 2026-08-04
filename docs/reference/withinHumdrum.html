@@ -23,7 +23,7 @@ are equivalent to using with()/within() with particular arguments.'></head><body
     <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -279,7 +279,7 @@ See the <code><a href="ditto.html">ditto()</a></code> manual for an example appl
 Keep in mind that <code>humdrumR</code> dynamically updates what tokens are considered "null" (<code>"d"</code>) based on what fields
 are <a href="selectedFields.html">selected</a>.</p>
 <p>If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
-Each expression can refer variables assigned in the previous expression (examples below).</p>
+Each expression can refer to variables assigned in the previous expression (examples below).</p>
 <p><em>Note</em>: Within any of these expressions, the humdrumR namespace takes priority.
 This means that, for example, if you use <code><a href="lag.html">lag()</a></code> within an expression, the humdrumR version of <code><a href="lag.html">lag()</a></code>
 will be used, even if you have loaded other packages which have their own <code><a href="lag.html">lag()</a></code> function.
@@ -418,7 +418,7 @@ For example,</p>
 (<code>Spine == 2</code>) as the second argument.
 Thus, <code>within</code> translates the previous expression to this:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>humData <span class="sc">|&gt;</span> <span class="fu">within</span>(<span class="fu">list</span>(Token[Spine <span class="sc">==</span> <span class="dv">1</span>], Token[Spine <span class="sc">==</span> <span class="dv">2</span>]))</span></code></pre><p></p></div>
-<p>Splatting can be little weird, because there is nothing to assure that the splatted arguments
+<p>Splatting can be a little weird, because there is nothing to assure that the splatted arguments
 are all the same length, which we usually want (<a href="vectorization.html">vectorization</a>).
 For example, in the previous example, there is no guarantee that <code>Token[Spine == 1]</code> and <code>Token[Spine == 2]</code> are the same length.
 This just means we should only use splatting if we really understand the groups we are splatting.
@@ -476,7 +476,7 @@ After evaluation, the expanded parts of the data are then removed from the outpu
 are what they do with the <em>results</em> of expressions passed to them.
 The major difference is that <code>within()</code>, <code>mutate()</code>, and <code>reframe()</code> put results into new <a href="humTable.html">fields</a>
 in a <a href="humdrumRclass.html">humdrumR data</a>, while <code>with()</code> and <code>summarize()</code> just return their results in "normal" R.
-The other differences between the functions simply relate to how the <code>recycle</code> and <code>drop</code> arguments are used (details below).</p>
+Other differences between the functions simply relate to how the <code>recycle</code> and <code>drop</code> arguments are used (details below).</p>
 <p>The <code>recycle</code> argument controls how the results of your code are, or aren't, <a href="recycling.html">recycled (or padded)</a>.
 When you write code using your <a href="humdrumRclass.html">humdrumR data</a>'s <code><a href="humTable.html">fields()</a></code>
 as input, your results are inspected to see how long they are compared to the length of the input field(s).
@@ -490,7 +490,7 @@ There are seven options:</p><ul><li><p><code>"no"</code>: The result is not recy
 <li><p><code>"never"</code>: The result can never be recycled. Unlike "no", "never" treats differing input and output lengths as an error.</p></li>
 <li><p><code>"summarize"</code>: if the result is not scalar, <em>even if it matches the input length</em>, you see an error. The result is not recycled.</p></li>
 </ul><p>The result of padding/recycling also depends on the <code>alignLeft</code> argument:
-If <code>alignLeft = TRUE</code>, results are padded to the right: like <code>c(result, NA, NA, ...)</code>;
+If <code>alignLeft = TRUE</code>, results are padded on the right: like <code>c(result, NA, NA, ...)</code>;
 If <code>alignLeft = FALSE</code>, results are padded on the left: like <code>c(..., NA, NA, results)</code>.
 Recycling is also affected if the result's length does not evenly divide the input length.
 For example, consider a result <code>c(1, 2, 3)</code> which needs to be recycled to length <code>10</code>:
@@ -502,7 +502,7 @@ If <code>alignLeft = FALSE</code>, the result is recycled <code>c(3, 1, 2, 3, 1,
 <p>The humdrumR <code>with()</code> and <code>summarize()</code> methods return "normal" R data objects.
 The only difference between the <code>with()</code> and <code>summarize()</code> methods is their default  <code>drop</code> and <code>recycle</code> arguments:</p><ul><li><p><code>with(..., drop = TRUE, recycle = 'no')</code></p></li>
 <li><p><code>summarize(..., drop = FALSE, recycle = 'summarize')</code></p></li>
-</ul><p>If <code>drop = TRUE</code>, these methods return whatever your code's result is, with no parsing.
+</ul><p>If <code>drop = TRUE</code>, these methods return whatever your code's result is with no parsing.
 This can be <em>any</em> kind of R data,
 including <a href="https://rdrr.io/r/base/vector.html" class="external-link">vectors</a> or objects like <a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm fits</a>
 or <a href="https://rdrr.io/r/base/table.html" class="external-link">tables</a>.
@@ -591,6 +591,21 @@ so the <code>Semits &lt;- semits(Token)</code> expression is doing nothing usefu
 </div>
 
 <div class="section">
+<h3 id="returning-multiple-fields">Returning multiple fields<a class="anchor" aria-label="anchor" href="#returning-multiple-fields"></a></h3>
+
+
+<p>Sometimes, you might need to create a single expression which returns two or more fields.
+To do this, simply return a <code>data.frame</code> (or <code>tibble</code> or <code>data.table</code>).
+Each column of the <code>data.frame</code> will return as it's own field.
+If the <code>data.frame</code> columns are named, those names will be used as field names.
+If the <code>data.frame</code> columns are named <em>and</em> the whole expression is named, the expression
+name is pasted to the front of the column names.</p>
+<p>The following example will create two fields, named <code>Pitch.Simple</code> and <code>Pitch.Complex</code>.</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">within</span>(humData, <span class="at">Pitch =</span> <span class="fu">data.frame</span>(<span class="at">Simple =</span> <span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                                   <span class="at">Complex =</span> <span class="fu">kern</span>(Token, <span class="at">simple =</span> <span class="cn">FALSE</span>)))</span></code></pre><p></p></div>
+</div>
+
+<div class="section">
 <h3 id="piped-references">Piped references<a class="anchor" aria-label="anchor" href="#piped-references"></a></h3>
 
 
@@ -599,9 +614,17 @@ so any assignments in a previous expression will be visible to the next expressi
 This means we can, for example, do this:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">within</span>(humData,</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>       Kern <span class="ot">&lt;-</span> <span class="fu">kern</span>(Token),</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>       Kern2 <span class="ot">&lt;-</span> <span class="fu">paste0</span>(Kern, <span class="fu">nchar</span>(Kern)))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>       KernN <span class="ot">&lt;-</span> <span class="fu">paste0</span>(Kern, <span class="fu">nchar</span>(Kern)))</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span></code></pre><p></p></div>
 <p>the use of <code>Kern</code> in the second expression will refer to the <code>Kern</code> assigned in the previous expression.</p>
+<p>Sometimes you might want to save the result of an expression <em>only</em> to use in a later expression,
+and <em>not</em> to save into a field.
+You can do this be assigning to any field name that begins with <code>.</code>.
+For example, if you only wanted the kern token with pasted length (<code>KernN</code> above), you could do this:</p>
+<p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">within</span>(humData,</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>       .Kern <span class="ot">&lt;-</span> <span class="fu">kern</span>(Token),</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>       KernN <span class="ot">&lt;-</span> <span class="fu">paste0</span>(.Kern, <span class="fu">nchar</span>(.Kern)))</span></code></pre><p></p></div>
+<p>The object <code>.Kern</code> is visible in the second expression, but doesn't get saved into a field.</p>
 </div>
 
     </div>
@@ -637,7 +660,7 @@ in these cases, it may be hard to predict which data lands where.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -751,7 +774,7 @@ in these cases, it may be hard to predict which data lands where.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/BachChorales/chor00[1-4].krn"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Four files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating four files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>

@@ -202,7 +202,7 @@ For more powerful/flexible indexing options, use
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpL03I08/temp_libpath1dfb3eb89ac20/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.
 #> Thirteen files read from disk.
 #> Validating thirteen files...
 #> all valid.

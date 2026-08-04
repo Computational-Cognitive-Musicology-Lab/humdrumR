@@ -769,6 +769,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   
   if (expandPaths) {
     humtab <- humtab[!is.na(ParentPath)]
+		humtab[ , '_rowKey_' := seq_len(nrow(humtab))]
   }
   
   list(humtab = humtab, dataTypes = dataTypes,
