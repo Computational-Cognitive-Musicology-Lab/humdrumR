@@ -69,7 +69,7 @@
 #' are [selected][selectedFields].
 #' 
 #' If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
-#' Each expression can refer variables assigned in the previous expression (examples below).
+#' Each expression can refer to variables assigned in the previous expression (examples below).
 #' 
 #' *Note*: Within any of these expressions, the humdrumR namespace takes priority.
 #' This means that, for example, if you use `lag()` within an expression, the humdrumR version of `lag()`
@@ -257,7 +257,7 @@
 #' humData |> within(list(Token[Spine == 1], Token[Spine == 2]))
 #' ```
 #' 
-#' Splatting can be little weird, because there is nothing to assure that the splatted arguments 
+#' Splatting can be a little weird, because there is nothing to assure that the splatted arguments 
 #' are all the same length, which we usually want ([vectorization]).
 #' For example, in the previous example, there is no guarantee that `Token[Spine == 1]` and `Token[Spine == 2]` are the same length.
 #' This just means we should only use splatting if we really understand the groups we are splatting.
@@ -309,7 +309,7 @@
 #' are what they do with the *results* of expressions passed to them.
 #' The major difference is that `within()`, `mutate()`, and `reframe()` put results into new [fields]
 #' in a [humdrumR data][humdrumRclass], while `with()` and `summarize()` just return their results in "normal" R.
-#' The other differences between the functions simply relate to how the `recycle` and `drop` arguments are used (details below).
+#' Other differences between the functions simply relate to how the `recycle` and `drop` arguments are used (details below).
 #' 
 #' The `recycle` argument controls how the results of your code are, or aren't, [recycled (or padded)][recycling].
 #' When you write code using your [humdrumR data][humdrumRclass]'s [fields()]
@@ -327,7 +327,7 @@
 #' + `"summarize"`: if the result is not scalar, *even if it matches the input length*, you see an error. The result is not recycled.
 #' 
 #' The result of padding/recycling also depends on the `alignLeft` argument:
-#' If `alignLeft = TRUE`, results are padded to the right: like `c(result, NA, NA, ...)`;
+#' If `alignLeft = TRUE`, results are padded on the right: like `c(result, NA, NA, ...)`;
 #' If `alignLeft = FALSE`, results are padded on the left: like `c(..., NA, NA, results)`.
 #' Recycling is also affected if the result's length does not evenly divide the input length.
 #' For example, consider a result `c(1, 2, 3)` which needs to be recycled to length `10`:
@@ -343,7 +343,7 @@
 #' + `with(..., drop = TRUE, recycle = 'no')`
 #' + `summarize(..., drop = FALSE, recycle = 'summarize')`
 #'
-#' If `drop = TRUE`, these methods return whatever your code's result is, with no parsing.
+#' If `drop = TRUE`, these methods return whatever your code's result is with no parsing.
 #' This can be *any* kind of R data, 
 #' including [vectors][vector] or objects like [lm fits][lm]
 #' or [tables][base::table].
@@ -401,6 +401,7 @@
 #' + Tidyverse [mutate()][dplyr::mutate] style: provide the expression as a named argument with `=`.
 #'   + Example: `mutate(humData, Kern = kern(Token))`.
 #'   
+#'
 #' Either style can be used with any of the `humdrumR` methods.
 #' When using `<-`, only top-level assignment will create a new field, which means only one field can be assigned per expression.
 #' For example, 
@@ -440,6 +441,22 @@
 #' 
 #' Of course, only the result of `recip(Token)` would be saved to `Recip`, 
 #' so the `Semits <- semits(Token)` expression is doing nothing useful here.
+#'
+#' ### Returning multiple fields
+#'
+#' Sometimes, you might need to create a single expression which returns two or more fields.
+#' To do this, simply return a `data.frame` (or `tibble` or `data.table`).
+#' Each column of the `data.frame` will return as it's own field.
+#' If the `data.frame` columns are named, those names will be used as field names.
+#' If the `data.frame` columns are named *and* the whole expression is named, the expression
+#' name is pasted to the front of the column names.
+#'
+#' The following example will create two fields, named `Pitch.Simple` and `Pitch.Complex`.
+#'
+#' ```
+#' within(humData, Pitch = data.frame(Simple = kern(Token, simple = TRUE), 
+#'                                    Complex = kern(Token, simple = FALSE)))
+#' ```
 #' 
 #' ### Piped references
 #' 
@@ -450,12 +467,24 @@
 #' ```
 #' within(humData, 
 #'        Kern <- kern(Token),
-#'        Kern2 <- paste0(Kern, nchar(Kern)))
+#'        KernN <- paste0(Kern, nchar(Kern)))
 #' 
 #' ```
 #'  
 #' the use of `Kern` in the second expression will refer to the `Kern` assigned in the previous expression.
-#' 
+#'
+#' Sometimes you might want to save the result of an expression *only* to use in a later expression,
+#' and *not* to save into a field.
+#' You can do this be assigning to any field name that begins with `.`.
+#' For example, if you only wanted the kern token with pasted length (`KernN` above), you could do this:
+#'
+#' ```
+#' within(humData,
+#'        .Kern <- kern(Token),
+#'        KernN <- paste0(.Kern, nchar(.Kern)))
+#' ```
+#'
+#' The object `.Kern` is visible in the second expression, but doesn't get saved into a field.
 #' 
 #' @section Evaluating expressions in groups or windows:
 #' 

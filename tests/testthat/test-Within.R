@@ -162,6 +162,8 @@ test_that("Examples from withinHumdrum docs work", {
   expect_false(any(Count1 == Count3))
   expect_false(any(Count2 == Count4))
   
+  expect_equal(fields(within(chorales, Pitch = data.frame(Simple = kern(Token, simple = TRUE), Complex = kern(Token, simple = FALSE))))$Name,
+							 c('Pitch.Complex', 'Pitch.Simple', 'Token'))
   
   #
   expect_identical(with(chorales, lag(Token, 1)), with(chorales, Token[lag = 1]))
@@ -171,9 +173,15 @@ test_that("Examples from withinHumdrum docs work", {
   
   expect_identical(with(chorales, 
                         Kern <- kern(Token),
-                        Kern2 <- paste0(Kern, nchar(Kern))),
+                        KernN <- paste0(Kern, nchar(Kern))),
                    with(chorales,
-                        Kern2 <- paste0(kern(Token), nchar(kern(Token)))))
+                        KernN <- paste0(kern(Token), nchar(kern(Token)))))
+
+	expect_identical(with(chorales,
+												.Kern <- kern(Token), 
+												KernN <- paste0(.Kern, nchar(.Kern))),
+									 with(chorales,
+												KernN <- paste0(kern(Token), nchar(kern(Token)))))
 })
 
 test_that("Assignment and multiple do expressions work correctly in with.humdrumR", {
