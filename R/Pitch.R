@@ -3944,8 +3944,8 @@ tintPartition <- function(tint, partitions = c('compound', 'harmonic', 'specific
   
   partitions <- matched(partitions, c('compound', 'harmonic', 'specific'))
   
-  Key <- diatonicSet(Key %||% dset(0, 0))
   match_size(tint = tint, Key = Key, toEnv = TRUE)
+  Key <- diatonicSet(Key %||% dset(0, 0))
   
   octave <- if ('compound' %in% partitions) {
     compound <- tintPartition_compound(tint, octave.round)
