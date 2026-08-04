@@ -204,7 +204,7 @@ Keep in mind that \code{humdrumR} dynamically updates what tokens are considered
 are \link[=selectedFields]{selected}.
 
 If multiple expression arguments are provided, each expression is evaluated in order, from left to right.
-Each expression can refer variables assigned in the previous expression (examples below).
+Each expression can refer to variables assigned in the previous expression (examples below).
 
 \emph{Note}: Within any of these expressions, the humdrumR namespace takes priority.
 This means that, for example, if you use \code{lag()} within an expression, the humdrumR version of \code{lag()}
@@ -379,7 +379,7 @@ Thus, \code{within} translates the previous expression to this:
 \if{html}{\out{<div class="sourceCode">}}\preformatted{humData |> within(list(Token[Spine == 1], Token[Spine == 2]))
 }\if{html}{\out{</div>}}
 
-Splatting can be little weird, because there is nothing to assure that the splatted arguments
+Splatting can be a little weird, because there is nothing to assure that the splatted arguments
 are all the same length, which we usually want (\link{vectorization}).
 For example, in the previous example, there is no guarantee that \code{Token[Spine == 1]} and \code{Token[Spine == 2]} are the same length.
 This just means we should only use splatting if we really understand the groups we are splatting.
@@ -435,7 +435,7 @@ The only differences between the \code{with()}, \code{within()}, \code{mutate()}
 are what they do with the \emph{results} of expressions passed to them.
 The major difference is that \code{within()}, \code{mutate()}, and \code{reframe()} put results into new \link{fields}
 in a \link[=humdrumRclass]{humdrumR data}, while \code{with()} and \code{summarize()} just return their results in "normal" R.
-The other differences between the functions simply relate to how the \code{recycle} and \code{drop} arguments are used (details below).
+Other differences between the functions simply relate to how the \code{recycle} and \code{drop} arguments are used (details below).
 
 The \code{recycle} argument controls how the results of your code are, or aren't, \link[=recycling]{recycled (or padded)}.
 When you write code using your \link[=humdrumRclass]{humdrumR data}'s \code{\link[=fields]{fields()}}
@@ -454,7 +454,7 @@ There are seven options:
 }
 
 The result of padding/recycling also depends on the \code{alignLeft} argument:
-If \code{alignLeft = TRUE}, results are padded to the right: like \code{c(result, NA, NA, ...)};
+If \code{alignLeft = TRUE}, results are padded on the right: like \code{c(result, NA, NA, ...)};
 If \code{alignLeft = FALSE}, results are padded on the left: like \code{c(..., NA, NA, results)}.
 Recycling is also affected if the result's length does not evenly divide the input length.
 For example, consider a result \code{c(1, 2, 3)} which needs to be recycled to length \code{10}:
@@ -469,7 +469,7 @@ The only difference between the \code{with()} and \code{summarize()} methods is 
 \item \code{summarize(..., drop = FALSE, recycle = 'summarize')}
 }
 
-If \code{drop = TRUE}, these methods return whatever your code's result is, with no parsing.
+If \code{drop = TRUE}, these methods return whatever your code's result is with no parsing.
 This can be \emph{any} kind of R data,
 including \link[=vector]{vectors} or objects like \link[=lm]{lm fits}
 or \link[base:table]{tables}.
@@ -579,6 +579,22 @@ so the \code{Semits <- semits(Token)} expression is doing nothing useful here.
 
 }
 
+\subsection{Returning multiple fields}{
+
+Sometimes, you might need to create a single expression which returns two or more fields.
+To do this, simply return a \code{data.frame} (or \code{tibble} or \code{data.table}).
+Each column of the \code{data.frame} will return as it's own field.
+If the \code{data.frame} columns are named, those names will be used as field names.
+If the \code{data.frame} columns are named \emph{and} the whole expression is named, the expression
+name is pasted to the front of the column names.
+
+The following example will create two fields, named \code{Pitch.Simple} and \code{Pitch.Complex}.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, Pitch = data.frame(Simple = kern(Token, simple = TRUE), 
+                                   Complex = kern(Token, simple = FALSE)))
+}\if{html}{\out{</div>}}
+}
+
 \subsection{Piped references}{
 
 All argument expressions passed to the \code{with()}/\code{within()} methods are evaluated in order, from left to right,
@@ -587,11 +603,23 @@ This means we can, for example, do this:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData, 
        Kern <- kern(Token),
-       Kern2 <- paste0(Kern, nchar(Kern)))
+       KernN <- paste0(Kern, nchar(Kern)))
 
 }\if{html}{\out{</div>}}
 
 the use of \code{Kern} in the second expression will refer to the \code{Kern} assigned in the previous expression.
+
+Sometimes you might want to save the result of an expression \emph{only} to use in a later expression,
+and \emph{not} to save into a field.
+You can do this be assigning to any field name that begins with \code{.}.
+For example, if you only wanted the kern token with pasted length (\code{KernN} above), you could do this:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{within(humData,
+       .Kern <- kern(Token),
+       KernN <- paste0(.Kern, nchar(.Kern)))
+}\if{html}{\out{</div>}}
+
+The object \code{.Kern} is visible in the second expression, but doesn't get saved into a field.
 }
 }
 

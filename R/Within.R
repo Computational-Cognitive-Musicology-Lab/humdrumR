@@ -758,7 +758,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   humtab <- evaluateDoQuo(quosure, humtab, dataTypes, groupFields, humdrumR@Context) 
 
 	# This might be different now because data.frame returns can introduce new names:
-	newFields <- setdiff(colnames(humtab), c(fields$Name, '_rowKey_', '_recycled_')) |> grep('^Exclusive\\.', x = _, value = TRUE, invert = TRUE)
+	newFields <- setdiff(colnames(humtab), c(fields$Name, '_rowKey_', '_recycled_')) |> grep('^Exclusive\\.|^_complement_', x = _, value = TRUE, invert = TRUE)
   
 	visible <- attr(humtab[[tail(x = newFields, 1)]], 'visible') %||% TRUE
 
