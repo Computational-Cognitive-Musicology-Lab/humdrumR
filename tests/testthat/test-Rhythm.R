@@ -42,7 +42,7 @@ test_that("ioi and sumTies work correctly", {
   mc <- cleave(mc[[ , c(1, 6)]], 1:2, newFields = 'IPA')
   mc <- within(mc, IOI <- ioi(Token, onsets = IPA != 'R', finalOnset = TRUE))
   
-  pairs <- with(humdrumR:::selectFields(mc, 'IOI'),  data.frame(IOI, Token))
+  pairs <- with(mc |> select(IOI),  list(IOI, Token))
   expect_true(all(Reduce('>=', lapply(pairs, duration))))
   
   # sumTies()
