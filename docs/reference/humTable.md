@@ -459,7 +459,7 @@ family of functions.
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/BachChorales/chor00[1-4].krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor00[1-4].krn' matches 4 text files in 1 directory.
 #> Four files read from disk.
 #> Validating four files...
 #> all valid.
@@ -648,17 +648,17 @@ getHumtab(humData)
 #> 1688:   -Q '' @{PC#}. @{OTL@@DE}         NA     4 chor004.krn
 #>                                                                                                 Filepath
 #>                                                                                                   <char>
-#>    1: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    2: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    3: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    4: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>    5: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    1: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    2: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    3: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    4: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>    5: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
 #>   ---                                                                                                   
-#> 1684: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1685: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1686: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1687: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 1688: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1684: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1685: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1686: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1687: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 1688: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
 #>       Global  Label ParentPath  Path Piece Record Spine  Stop   Type
 #>       <lgcl> <char>      <int> <int> <int>  <int> <int> <int> <char>
 #>    1:   TRUE     _1         NA    NA     1      1    NA    NA      G
@@ -805,17 +805,17 @@ getHumtab(humData, dataTypes = 'D')
 #> 842:   -Q '' @{PC#}. @{OTL@@DE}         61     4 chor004.krn
 #>                                                                                                Filepath
 #>                                                                                                  <char>
-#>   1: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   2: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   3: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   4: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
-#>   5: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   1: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   2: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   3: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   4: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
+#>   5: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor001.krn
 #>  ---                                                                                                   
-#> 838: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 839: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 840: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 841: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
-#> 842: /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 838: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 839: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 840: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 841: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
+#> 842: /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/BachChorales/chor004.krn
 #>      Global  Label ParentPath  Path Piece Record Spine  Stop   Type
 #>      <lgcl> <char>      <int> <int> <int>  <int> <int> <int> <char>
 #>   1:  FALSE     _1          0     0     1     20     1     1      D

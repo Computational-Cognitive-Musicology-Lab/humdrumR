@@ -71,7 +71,19 @@ Either type of bracket can accept either `numeric` or `character` vectors to ind
 
 ---
 
-To do indexing in a pipe, using the `index()` (`[]`) and `index2()` commands (`[[]]`).
+To do indexing in a pipe, you can (since R 4.3.0) use the `_` placeholder.
+For example, the commands above are equivalent to:
+
+```{r}
+
+myname |> _[1:3]
+
+myname |> _[5:10]
+
+myname |> _[c(1,5)]
+
+
+```
 
 ## Single-bracket indexing
 
@@ -330,7 +342,7 @@ But from before, we know that there are a lot more flats in the fourth file (aft
 
 chorales |>
   filter(Token %~% '-') |>
-  index(4)
+  _[4]
 
 
 ```

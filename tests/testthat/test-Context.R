@@ -183,15 +183,14 @@ test_that('context() man examples work', {
    expect_equal(chorales |>
                    humdrumR::context(open = hop(), open + 3) |>
                    within(paste(Token, collapse = ',')) |>
-                   as.lines() |> 
-                  index(50),
+                   as.lines() |> _[50],
                 setNames("2GG;,4GG,4GG,4AA\t2B;,4d,4d,4c\t2d;,[4g,8gL],8f#J\t2g;,4b,4b,4cc", '1.50') )
    
    # phrases leading to fermatas
    expect_equal(chorales |>
                   humdrumR::context(open = 1 | prevclose + 1, close = ';', overlap = 'none') |>
                   within(paste(Token, collapse = ','), alignLeft = FALSE) |>
-                  pull() |> index(20),
+                  pull() |> _[20],
                 "4b,2dd,4cc,4b,2a,2g;")
    
 })

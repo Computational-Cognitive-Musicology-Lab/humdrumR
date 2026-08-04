@@ -453,8 +453,6 @@ combineFields <- function(humdrumR, ...) {
 #' Unlike the more flexible/powerful [subset()/filter()][subset.humdrumR()] methods,
 #' the indexing operators are generally destructive (by default), meaning filtered data can no longer
 #' be accessed after indexing.
-#' The functions `index()` and `index2()` are synonyms for single and double brackets respectively, 
-#' which can be used in pipes.
 #' 
 #' 
 #' @details 
@@ -625,7 +623,7 @@ combineFields <- function(humdrumR, ...) {
 #' humData[[deg = 1]]
 #'
 #' # pipe indexing
-#' humData |> index(1:3) |> index2(20:30)
+#' humData |> _[1:3] |> _[[20:30]]
 
 #' 
 #' @seealso {For more powerful/flexible indexing options, use [subset()/filter()][subset.humdrumR].}
@@ -881,50 +879,4 @@ setMethod('[[',  signature = c(x = 'humdrumR', i = 'missing', j = 'missing'),
            
             x
           })
-
-
-
-## Indexing in pipes ----
-
-
-#' @rdname indexHumdrum
-#' @export
-index <- function(x, i, j, drop = TRUE) {
-  
-  i <- rlang::enexpr(i)
-  j <- rlang::enexpr(j)
-  
-  if (missing(i) && missing(j)) return(x)
-  
-  expr <- rlang::expr(x[])
-  if (!missing(i)) expr[[3]] <- i
-  if (!missing(j)) expr[[4]] <- j
-  if (!is.null(dim)) expr$drop <- drop
-  if (inherits(x, 'data.table') && !missing(j)) x$with = FALSE
-  
-  
-  rlang::eval_tidy(expr)
-  # 
-  # pat <- paste0(missing(i), missing(j))
-  # 
-  # switch(pat,
-  #        'TRUETRUE' = x,
-  #        'TRUEFALSE' = x[  , j, drop = drop],
-  #        'FALSETRUE' = if (length(dim(x)) > 1L) x[i ,  , drop = drop] else x[i],
-  #        'FALSEFALSE' = x[i, j, drop = drop])
-}
-
-#' @rdname indexHumdrum
-#' @export
-index2 <- function(x, i, j, drop = TRUE) {
-  
-  pat <- paste0(missing(i), missing(j))
-  
-  if (!is.humdrumR(x)) return(x[[i]])
-  switch(pat,
-         'TRUETRUE' = x,
-         'TRUEFALSE' = x[[  , j, drop]],
-         'FALSETRUE' = x[[i ,  , drop]],
-         'FALSEFALSE' = x[[i, j, drop]])
-}
 

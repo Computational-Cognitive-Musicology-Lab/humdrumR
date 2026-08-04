@@ -593,12 +593,12 @@ example1 |> pull_data.frame(everything())
 >    5          2    1 BasicExample.krn
 >    6          3    1 BasicExample.krn
 >                                                                                     Filepath
->    1 /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/examples/BasicExample.krn
->    2 /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/examples/BasicExample.krn
->    3 /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/examples/BasicExample.krn
->    4 /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/examples/BasicExample.krn
->    5 /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/examples/BasicExample.krn
->    6 /home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/examples/BasicExample.krn
+>    1 /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/examples/BasicExample.krn
+>    2 /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/examples/BasicExample.krn
+>    3 /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/examples/BasicExample.krn
+>    4 /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/examples/BasicExample.krn
+>    5 /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/examples/BasicExample.krn
+>    6 /home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/examples/BasicExample.krn
 >      Global Label ParentPath Path Piece Record Spine Stop Type
 >    1  FALSE    _1          0    0     1      6     1    1    D
 >    2  FALSE    _1          0    0     1      7     1    1    D

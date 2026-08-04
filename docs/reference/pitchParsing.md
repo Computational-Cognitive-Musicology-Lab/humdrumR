@@ -581,19 +581,19 @@ simple parts and octaves:
 |-------|-----------|-----------|-----------|-----------|-----------|
 |       | round     | floor     | ceiling   | trunc     | expand    |
 | -P12: | -P15 + P4 | -P15 + P4 | -P8 - P5  | -P8 - P5  | -P15 + P4 |
-| -P11: | -P8 - P4  | -P15 + P5 | -P8 - P4  | -P8 - P4  | -P15 + P5 |
-| -P8:  | -P8 + P1  | -P8 + P1  | -P8 + P1  | -P8 + P1  | -P8 + P1  |
-| -P5:  | -P8 + P4  | -P8 + P4  | +P1 - P5  | +P1 - P5  | -P8 + P4  |
-| -P4:  | +P1 - P4  | -P8 + P5  | +P1 - P4  | +P1 - P4  | -P8 + P5  |
-| P1:   | +P1 + P1  | +P1 + P1  | +P1 + P1  | +P1 + P1  | +P1 + P1  |
-| +P4:  | +P1 + P4  | +P1 + P4  | +P8 - P5  | +P1 + P4  | +P8 - P5  |
-| +P5:  | +P8 - P4  | +P1 + P5  | +P8 - P4  | +P1 + P5  | +P8 - P4  |
-| +P8:  | +P8 + P1  | +P8 + P1  | +P8 + P1  | +P8 + P1  | +P8 + P1  |
-| +P11: | +P8 + P4  | +P8 + P4  | +P15 - P5 | +P8 + P4  | +P15 - P5 |
 | +P12: | +P15 - P4 | +P8 + P5  | +P15 - P4 | +P8 + P5  | +P15 - P4 |
-| +P15: | +P15 + P1 | +P15 + P1 | +P15 + P1 | +P15 + P1 | +P15 + P1 |
-| +P18: | +P15 + P4 | +P15 + P4 | +P22 - P5 | +P15 + P4 | +P22 - P5 |
+| +P8:  | +P8 + P1  | +P8 + P1  | +P8 + P1  | +P8 + P1  | +P8 + P1  |
+| -P5:  | -P8 + P4  | -P8 + P4  | +P1 - P5  | +P1 - P5  | -P8 + P4  |
 | +P19: | +P22 - P4 | +P15 + P5 | +P22 - P4 | +P15 + P5 | +P22 - P4 |
+| +P15: | +P15 + P1 | +P15 + P1 | +P15 + P1 | +P15 + P1 | +P15 + P1 |
+| +P4:  | +P1 + P4  | +P1 + P4  | +P8 - P5  | +P1 + P4  | +P8 - P5  |
+| +P26: | +P29 - P4 | +P22 + P5 | +P29 - P4 | +P22 + P5 | +P29 - P4 |
+| +P22: | +P22 + P1 | +P22 + P1 | +P22 + P1 | +P22 + P1 | +P22 + P1 |
+| +P11: | +P8 + P4  | +P8 + P4  | +P15 - P5 | +P8 + P4  | +P15 - P5 |
+| +P33: | +P36 - P4 | +P29 + P5 | +P36 - P4 | +P29 + P5 | +P36 - P4 |
+| +P29: | +P29 + P1 | +P29 + P1 | +P29 + P1 | +P29 + P1 | +P29 + P1 |
+| +P18: | +P15 + P4 | +P15 + P4 | +P22 - P5 | +P15 + P4 | +P22 - P5 |
+| +P40: | +P43 - P4 | +P36 + P5 | +P43 - P4 | +P36 + P5 | +P43 - P4 |
 
 Notice that, if `octave.floor` is being used, all simple intervals are
 represented as ascending.
@@ -603,23 +603,23 @@ pitch](https://humdrumR.ccml.gtcmt.gatech.edu/reference/pitch.md)
 representations, the `octave.round` option allows you to control which
 octave notes are associated with. The following table illustrates:
 
-|      |       |       |         |       |        |
-|------|-------|-------|---------|-------|--------|
-|      | round | floor | ceiling | trunc | expand |
-| FF:  | F2    | F2    | F3      | F3    | F2     |
-| GG:  | G3    | G2    | G3      | G3    | G2     |
-| C:   | C3    | C3    | C3      | C3    | C3     |
-| F:   | F3    | F3    | F4      | F4    | F3     |
-| G:   | G4    | G3    | G4      | G4    | G3     |
-| c:   | C4    | C4    | C4      | C4    | C4     |
-| f:   | F4    | F4    | F5      | F4    | F5     |
-| g:   | G5    | G4    | G5      | G4    | G5     |
-| cc:  | C5    | C5    | C5      | C5    | C5     |
-| ff:  | F5    | F5    | F6      | F5    | F6     |
-| gg:  | G6    | G5    | G6      | G5    | G6     |
-| ccc: | C6    | C6    | C6      | C6    | C6     |
-| fff: | F6    | F6    | F7      | F6    | F7     |
-| ggg: | G7    | G6    | G7      | G6    | G7     |
+|         |       |       |         |       |        |
+|---------|-------|-------|---------|-------|--------|
+|         | round | floor | ceiling | trunc | expand |
+| FF:     | F2    | F2    | F3      | F3    | F2     |
+| gg:     | G6    | G5    | G6      | G5    | G6     |
+| cc:     | C5    | C5    | C5      | C5    | C5     |
+| F:      | F3    | F3    | F4      | F4    | F3     |
+| ggg:    | G7    | G6    | G7      | G6    | G7     |
+| ccc:    | C6    | C6    | C6      | C6    | C6     |
+| f:      | F4    | F4    | F5      | F4    | F5     |
+| gggg:   | G8    | G7    | G8      | G7    | G8     |
+| cccc:   | C7    | C7    | C7      | C7    | C7     |
+| ff:     | F5    | F5    | F6      | F5    | F6     |
+| ggggg:  | G9    | G8    | G9      | G8    | G9     |
+| ccccc:  | C8    | C8    | C8      | C8    | C8     |
+| fff:    | F6    | F6    | F7      | F6    | F7     |
+| gggggg: | G10   | G9    | G10     | G9    | G10    |
 
 #### Absolute or Relative (contour) Octave
 

@@ -476,7 +476,7 @@ reference(chorales)[3, ]
 >            COM:   Bach, Johann Sebastian
 >            EED: Craig Stuart Sapp
 >            EEV: 2009/05/22
->            EMD: Edited in humdrumR 0.7.1.1 on 2026-08-03
+>            EMD: Edited in humdrumR 0.7.1.1 on 2026-08-04
 >        OTL@@DE:   Ich dank dir, lieber Herre
 >            PC#:   2
 >            SCT:   BWV 347

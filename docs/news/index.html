@@ -4,7 +4,7 @@
 
 
     <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
-    <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
+    <a href="https://gatech.edu" class="external-link"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.1</small>
@@ -63,6 +63,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="7.1.1" id="humdrumr-711">humdrumR 7.1.1<a class="anchor" aria-label="anchor" href="#humdrumr-711"></a></h2>
 <p>Added new feature where you can return multiple fields from one expression in a with/within.humdrumR() call, specifically by returning a data.frame.</p>
+<p>Also, since R 4.3.0 allows us to use <code>[]</code> in pipes, using the <code>_</code> placeholder, we’ve removed the <code>index()</code> and <code>index2()</code> commands. The existence of these commands was causing some problems with the new versions of pkgdown (their bug, not ours), and there’s no compelling reason to keep them.</p>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="7.1.0" id="humdrumr-710">humdrumR 7.1.0<a class="anchor" aria-label="anchor" href="#humdrumr-710"></a></h2>
@@ -173,7 +174,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

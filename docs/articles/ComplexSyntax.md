@@ -135,7 +135,7 @@ paths1 |> print(view = "table")
 Here is a more complex example:
 
 ``` r
-paths2 <- readHumdrum('examples/Paths2.krn')
+paths2 <- readHumdrum(humdrumRroot, 'examples/Paths2.krn')
 
 paths2 |> print(view = "humdrum")
 >    ######################### vvv Paths2.krn vvv #########################

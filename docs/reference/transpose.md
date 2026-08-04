@@ -122,16 +122,16 @@ illustrate, here is the sequence `{C F# G D# E B- A A- G C# D B D- C}`
 transposed tonally within C major by all seven possible generic
 intervals, with `enharmonicWrap = 12`:
 
-|          |                                 |
-|----------|---------------------------------|
-| Interval | Output                          |
-| Unison   | C F# G D E B- A A- G C D B D- C |
-| 2nd      | D G A E F c B B- A D E c E- D   |
-| 3rd      | E A B F# G d- c c B E F d F E   |
-| 4th      | F B c G A e- d d- c F# G e G F  |
-| 5th      | G c d A B f e e- d G A f A- G   |
-| 6th      | A d e B c g f f e A B g B- A    |
-| 7th      | B e f c d a- g g f B c a c B    |
+|          |                                                                                                                                                                    |
+|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Interval | Output                                                                                                                                                             |
+| Unison   | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P1, real = FALSE), width=3), collapse = ''), '}')` |
+| 2nd      | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M2, real = FALSE), width=3), collapse = ''), '}')` |
+| 3rd      | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M3, real = FALSE), width=3), collapse = ''), '}')` |
+| 4th      | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P4, real = FALSE), width=3), collapse = ''), '}')` |
+| 5th      | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = P5, real = FALSE), width=3), collapse = ''), '}')` |
+| 6th      | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M6, real = FALSE), width=3), collapse = ''), '}')` |
+| 7th      | `r paste0('{', paste(format(transpose(c('C', 'F#', 'G', 'D#','E','B-','A','A-','G','C#','D','B','D-','C'), by = M7, real = FALSE), width=3), collapse = ''), '}')` |
 
 ## Specifying Transpositions
 

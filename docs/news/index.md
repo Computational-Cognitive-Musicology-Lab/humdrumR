@@ -6,6 +6,12 @@ Added new feature where you can return multiple fields from one
 expression in a with/within.humdrumR() call, specifically by returning a
 data.frame.
 
+Also, since R 4.3.0 allows us to use `[]` in pipes, using the `_`
+placeholder, we’ve removed the `index()` and `index2()` commands. The
+existence of these commands was causing some problems with the new
+versions of pkgdown (their bug, not ours), and there’s no compelling
+reason to keep them.
+
 ## humdrumR 7.1.0
 
 It’s been a long time since an update! In the meantime, we’ve fixed a

@@ -11,8 +11,6 @@
 \alias{[[,humdrumR,missing,character-method}
 \alias{[[,humdrumR,ANY,ANY-method}
 \alias{[[,humdrumR,missing,missing-method}
-\alias{index}
-\alias{index2}
 \title{Indexing humdrumR objects}
 \usage{
 humData[] # returns unchanged
@@ -32,10 +30,6 @@ humData[[ , 'regex']]
 humData[[x:y, l:m]]
 
 humData[[ , , regex]]
-
-index(x, i, j, drop = TRUE)
-
-index2(x, i, j, drop = TRUE)
 }
 \arguments{
 \item{x}{\emph{\strong{HumdrumR data to index.}}
@@ -63,8 +57,6 @@ pieces, spines, or records from the \link[=humTable]{humdrum table}.
 Unlike the more flexible/powerful \link[=subset.humdrumR]{subset()/filter()} methods,
 the indexing operators are generally destructive (by default), meaning filtered data can no longer
 be accessed after indexing.
-The functions \code{index()} and \code{index2()} are synonyms for single and double brackets respectively,
-which can be used in pipes.
 }
 \details{
 In R, the fundamental \link[base:Extract]{indexing operators}, \verb{[]} and \verb{[[]]},
@@ -212,7 +204,7 @@ humData[['b3', ]]
 humData[[deg = 1]]
 
 # pipe indexing
-humData |> index(1:3) |> index2(20:30)
+humData |> _[1:3] |> _[[20:30]]
 
 }
 \seealso{

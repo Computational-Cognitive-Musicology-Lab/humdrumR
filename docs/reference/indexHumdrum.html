@@ -4,21 +4,17 @@ be used to filter humdrumR data, by removing specific
 pieces, spines, or records from the humdrum table.
 Unlike the more flexible/powerful subset()/filter() methods,
 the indexing operators are generally destructive (by default), meaning filtered data can no longer
-be accessed after indexing.
-The functions index() and index2() are synonyms for single and double brackets respectively,
-which can be used in pipes."><meta property="og:description" content="R's built-in indexing operators, [] (single brakcets) and [[]] (double brackets) can
+be accessed after indexing."><meta property="og:description" content="R's built-in indexing operators, [] (single brakcets) and [[]] (double brackets) can
 be used to filter humdrumR data, by removing specific
 pieces, spines, or records from the humdrum table.
 Unlike the more flexible/powerful subset()/filter() methods,
 the indexing operators are generally destructive (by default), meaning filtered data can no longer
-be accessed after indexing.
-The functions index() and index2() are synonyms for single and double brackets respectively,
-which can be used in pipes."></head><body>
+be accessed after indexing."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
     <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
-    <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
+    <a href="https://gatech.edu" class="external-link"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.1</small>
@@ -81,9 +77,7 @@ be used to filter <a href="humdrumRclass.html">humdrumR data</a>, by removing sp
 pieces, spines, or records from the <a href="humTable.html">humdrum table</a>.
 Unlike the more flexible/powerful <a href="subset.humdrumR.html">subset()/filter()</a> methods,
 the indexing operators are generally destructive (by default), meaning filtered data can no longer
-be accessed after indexing.
-The functions <code>index()</code> and <code>index2()</code> are synonyms for single and double brackets respectively,
-which can be used in pipes.</p>
+be accessed after indexing.</p>
     </div>
 
     <div class="section level2">
@@ -104,11 +98,7 @@ which can be used in pipes.</p>
 <span></span>
 <span><span class="va">humData</span><span class="op">[[</span><span class="va">x</span><span class="op">:</span><span class="va">y</span>, <span class="va">l</span><span class="op">:</span><span class="va">m</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">humData</span><span class="op">[[</span>, , <span class="va">regex</span><span class="op">]</span><span class="op">]</span></span>
-<span></span>
-<span><span class="fu">index</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, <span class="va">j</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">index2</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, <span class="va">j</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">humData</span><span class="op">[[</span>, , <span class="va">regex</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -264,7 +254,7 @@ this example, only the kern spines (if there are any) are indexed!</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">humData</span> <span class="op">&lt;-</span> <span class="fu"><a href="readHumdrum.html">readHumdrum</a></span><span class="op">(</span><span class="va">humdrumRroot</span>, <span class="st">"HumdrumData/RollingStoneCorpus/*.hum"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Finding and reading files...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 	REpath-pattern '/home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Thirteen files read from disk.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Validating thirteen files...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> all valid.</span>
@@ -1098,7 +1088,7 @@ this example, only the kern spines (if there are any) are indexed!</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># pipe indexing</span></span></span>
-<span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="fu">index</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu">index2</span><span class="op">(</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">humData</span> <span class="op">|&gt;</span> <span class="va">_</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">|&gt;</span> <span class="va">_</span><span class="op">[[</span><span class="fl">20</span><span class="op">:</span><span class="fl">30</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ############### vvv ACDC_BackInBlack.hum vvv ################</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      6:            **harm         **harte          **harm    ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     10:              *tb1            *tb1            *tb1    ***</span>
@@ -1217,7 +1207,7 @@ this example, only the kern spines (if there are any) are indexed!</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

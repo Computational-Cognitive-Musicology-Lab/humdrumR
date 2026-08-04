@@ -672,7 +672,7 @@ spines for this.)
 example <- readHumdrum(humdrumRroot, 'examples/Reshaping_example.hum')
 
 example |>
-  index2( , '**kern') |>
+  _[[ , '**kern']] |>
   kern(simple = TRUE) |>
   cleave(c(1, 2)) |> 
   count()

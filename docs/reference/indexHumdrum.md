@@ -8,9 +8,7 @@ table](https://humdrumR.ccml.gtcmt.gatech.edu/reference/humTable.md).
 Unlike the more flexible/powerful
 [subset()/filter()](https://humdrumR.ccml.gtcmt.gatech.edu/reference/subset.humdrumR.md)
 methods, the indexing operators are generally destructive (by default),
-meaning filtered data can no longer be accessed after indexing. The
-functions `index()` and `index2()` are synonyms for single and double
-brackets respectively, which can be used in pipes.
+meaning filtered data can no longer be accessed after indexing.
 
 ## Usage
 
@@ -32,10 +30,6 @@ humData[[, "regex"]]
 humData[[x:y, l:m]]
 
 humData[[, , regex]]
-
-index(x, i, j, drop = TRUE)
-
-index2(x, i, j, drop = TRUE)
 ```
 
 ## Arguments
@@ -202,7 +196,7 @@ For more powerful/flexible indexing options, use
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/RollingStoneCorpus/*.hum")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/RollingStoneCorpus/*.hum' matches 13 text files in 1 directory.
 #> Thirteen files read from disk.
 #> Validating thirteen files...
 #> all valid.
@@ -1036,7 +1030,7 @@ humData[[deg = 1]]
 #> 
 
 # pipe indexing
-humData |> index(1:3) |> index2(20:30)
+humData |> _[1:3] |> _[[20:30]]
 #> ############### vvv ACDC_BackInBlack.hum vvv ################
 #>      6:            **harm         **harte          **harm    ***
 #>     10:              *tb1            *tb1            *tb1    ***

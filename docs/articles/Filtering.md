@@ -61,11 +61,19 @@ vectors to index by.
 
 ------------------------------------------------------------------------
 
-To do indexing in a pipe, using the
-[`index()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/indexHumdrum.md)
-(`[]`) and
-[`index2()`](https://humdrumR.ccml.gtcmt.gatech.edu/reference/indexHumdrum.md)
-commands (`[[]]`).
+To do indexing in a pipe, you can (since R 4.3.0) use the `_`
+placeholder. For example, the commands above are equivalent to:
+
+``` r
+myname |> _[1:3]
+>    [1] "N" "A" "T"
+
+myname |> _[5:10]
+>    [1] "C" "O" "N" "D" "I" "T"
+
+myname |> _[c(1,5)]
+>    [1] "N" "C"
+```
 
 ### Single-bracket indexing
 
@@ -1857,7 +1865,7 @@ before, we know that there are a lot more flats in the fourth file
 
 chorales |>
   filter(Token %~% '-') |>
-  index(4)
+  _[4]
 ```
 
 ```

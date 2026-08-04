@@ -215,7 +215,7 @@ Other Humdrum table pivoting functions:
 ``` r
 humData <- readHumdrum(humdrumRroot, "HumdrumData/MozartVariations/.*.krn")
 #> Finding and reading files...
-#>  REpath-pattern '/home/nat/.tmp/RtmpGCgWwF/temp_libpath2869ab26c00287/humdrumR/HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.
+#>  REpath-pattern '/home/nat/.tmp/RtmpBDgnJw/temp_libpath28db92437ebb13/humdrumR/HumdrumData/MozartVariations/.*.krn' matches 8 text files in 1 directory.
 #> Eight files read from disk.
 #> Validating eight files...
 #> all valid.

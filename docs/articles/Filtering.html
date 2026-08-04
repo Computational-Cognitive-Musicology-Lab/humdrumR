@@ -18,7 +18,7 @@
 
 
     <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
-    <a href="https://gatech.edu" class="external-link"><img src="gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
+    <a href="https://gatech.edu" class="external-link"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/gt-logo.svg" alt="Georgia Tech" style="height:50px; padding-right:20px;"></a> <a href="https://ccml.gtcmt.gatech.edu" class="external-link"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/CCMLbanner.png" alt="CCMLab" style="height:80px; padding-right:20px;"></a>
     <a class="navbar-brand me-2" href="../index.html">humdrumR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1.1</small>
@@ -149,9 +149,18 @@ data.</li>
 <p>Either type of bracket can accept either <code>numeric</code> or
 <code>character</code> vectors to index by.</p>
 <hr>
-<p>To do indexing in a pipe, using the <code><a href="../reference/indexHumdrum.html">index()</a></code>
-(<code>[]</code>) and <code><a href="../reference/indexHumdrum.html">index2()</a></code> commands
-(<code>[[]]</code>).</p>
+<p>To do indexing in a pipe, you can (since R 4.3.0) use the
+<code>_</code> placeholder. For example, the commands above are
+equivalent to:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>myname <span class="sc">|&gt;</span> _[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"N"</span> <span class="st">"A"</span> <span class="st">"T"</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>myname <span class="sc">|&gt;</span> _[<span class="dv">5</span><span class="sc">:</span><span class="dv">10</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"C"</span> <span class="st">"O"</span> <span class="st">"N"</span> <span class="st">"D"</span> <span class="st">"I"</span> <span class="st">"T"</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>myname <span class="sc">|&gt;</span> _[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>)]</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="sc">&gt;</span>    [<span class="dv">1</span>] <span class="st">"N"</span> <span class="st">"C"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="single-bracket-indexing">Single-bracket indexing<a class="anchor" aria-label="anchor" href="#single-bracket-indexing"></a>
 </h3>
@@ -165,7 +174,7 @@ some of those files, you’d use the single-brackets <code>[]</code>.</p>
 single-bracket index command, that number will select the
 <code>i</code>th file in the dataset. For example, if we want to look
 only at the fifth chorale, we can call:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor005.krn vvv #########################
@@ -347,7 +356,7 @@ only at the fifth chorale, we can call:</p>
 &gt;       Data fields: 
 &gt;               *Token :: character</code></pre>
 <p>We can also give the command a vector of <code>i</code> numbers:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span>,<span class="fl">5</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -427,7 +436,7 @@ only at the fifth chorale, we can call:</p>
 &gt;               *Token :: character</code></pre>
 <p>You might want to use the R sequence command, <code>:</code>, to
 select a range of numbers:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[</span><span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor006.krn vvv #########################
@@ -519,84 +528,84 @@ if there is only one.</p>
 <p>For example, we might be only interested in files that use flat
 notes. Since <code>**kern</code> represents flats with “<code>-</code>”,
 we can simply write:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>chorales[<span class="st">'-'</span>]</span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## vvv chor003.krn vvv #########################</span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">3</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span><span class="er">@</span>DE<span class="sc">:</span> Ach Gott, vom Himmel sieh darein</span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">4</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span>EN<span class="sc">:</span> Oh God, look down from Heaven</span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>OPR<span class="sc">:</span> Cantata BWV <span class="dv">153</span><span class="sc">:</span> Schau, lieber Gott, wie meine Feind</span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">153</span><span class="sc">/</span><span class="dv">1</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 3</span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">8</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">9</span><span class="sc">:</span>           <span class="er">**</span>kern         <span class="sc">**</span>kern         <span class="sc">**</span>kern         <span class="sc">**</span>kern</span>
-<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">10</span><span class="sc">:</span>           <span class="er">*</span>ICvox         <span class="sc">*</span>ICvox         <span class="sc">*</span>ICvox         <span class="sc">*</span>ICvox</span>
-<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">11</span><span class="sc">:</span>           <span class="er">*</span>Ibass        <span class="sc">*</span>Itenor         <span class="sc">*</span>Ialto        <span class="sc">*</span>Isoprn</span>
-<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">12</span><span class="sc">:</span>          <span class="er">*</span>I<span class="st">"Bass       *I"</span>Tenor        <span class="sc">*</span>I<span class="st">"Alto     *I"</span>Soprano</span>
-<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">13</span><span class="sc">:</span>        <span class="er">*&gt;</span>[A,A,B]      <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]      <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]      <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]</span>
-<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">14</span><span class="sc">:</span>     <span class="er">*&gt;</span>norep[A,B]   <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]   <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]   <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]</span>
-<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">15</span><span class="sc">:</span>              <span class="er">*&gt;</span>A            <span class="sc">*</span><span class="er">&gt;</span>A            <span class="sc">*</span><span class="er">&gt;</span>A            <span class="sc">*</span><span class="er">&gt;</span>A</span>
-<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">16</span><span class="sc">:</span>          <span class="er">*</span>clefF4       <span class="sc">*</span>clefGv2        <span class="sc">*</span>clefG2        <span class="sc">*</span>clefG2</span>
-<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">17</span><span class="sc">:</span>           <span class="er">*</span>k[f<span class="co">#]         *k[f#]         *k[f#]         *k[f#]</span></span>
-<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">18</span><span class="sc">:</span>              <span class="er">*</span>a<span class="sc">:</span>            <span class="er">*</span>a<span class="sc">:</span>            <span class="er">*</span>a<span class="sc">:</span>            <span class="er">*</span>a<span class="sc">:</span></span>
-<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">19</span><span class="sc">:</span>          <span class="sc">!</span>dorian        <span class="sc">!</span>dorian        <span class="sc">!</span>dorian        <span class="sc">!</span>dorian</span>
-<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">20</span><span class="sc">:</span>            <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>          <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>          <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>          <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span></span>
-<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">21</span><span class="sc">:</span>          <span class="er">*</span><span class="fu">met</span>(c)        <span class="sc">*</span><span class="fu">met</span>(c)        <span class="sc">*</span><span class="fu">met</span>(c)        <span class="sc">*</span><span class="fu">met</span>(c)</span>
-<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">22</span><span class="sc">:</span>           <span class="er">*</span>MM100         <span class="sc">*</span>MM100         <span class="sc">*</span>MM100         <span class="sc">*</span>MM100</span>
-<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">23</span><span class="sc">:</span>               <span class="dv">4</span>E             <span class="dv">4</span>e            <span class="dv">4</span>g<span class="co">#             4b</span></span>
-<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">24</span><span class="sc">:</span>               <span class="er">=</span><span class="dv">1</span>             <span class="ot">=</span><span class="dv">1</span>             <span class="ot">=</span><span class="dv">1</span>             <span class="ot">=</span><span class="dv">1</span></span>
-<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">25</span><span class="sc">:</span>               <span class="dv">4</span>A             <span class="dv">4</span>e             <span class="dv">4</span>a            <span class="dv">4</span>cc</span>
-<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">26</span><span class="sc">:</span>               <span class="dv">4</span>B             <span class="dv">4</span>d            <span class="dv">4</span>g<span class="co">#             4b</span></span>
-<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">27</span><span class="sc">:</span>               <span class="dv">4</span>c             <span class="dv">4</span>e             <span class="dv">4</span>a             <span class="dv">4</span>a</span>
-<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">28</span><span class="sc">:</span>              <span class="dv">8</span>BL            <span class="dv">8</span>dL           <span class="dv">8</span>g<span class="co">#L            4ee</span></span>
-<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">29</span><span class="sc">:</span>              <span class="dv">8</span>AJ            <span class="dv">8</span>cJ            <span class="dv">8</span>aJ              .</span>
-<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">30</span><span class="sc">:</span>               <span class="er">=</span><span class="dv">2</span>             <span class="ot">=</span><span class="dv">2</span>             <span class="ot">=</span><span class="dv">2</span>             <span class="ot">=</span><span class="dv">2</span></span>
-<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">31-110</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## ^^^ chor003.krn ^^^ #########################</span></span>
-<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="er">&gt;</span>    </span>
-<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="er">&gt;</span>           (three more pieces...)</span>
-<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## vvv chor010.krn vvv #########################</span></span>
-<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">1-70</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">71</span><span class="sc">:</span>               <span class="dv">4</span>D            <span class="dv">8</span>F<span class="co">#             4d             4b</span></span>
-<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">72</span><span class="sc">:</span>                .             <span class="dv">4</span>G              .              .</span>
-<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">73</span><span class="sc">:</span>               <span class="dv">4</span>D              .             <span class="dv">4</span>c             <span class="dv">4</span>a</span>
-<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">74</span><span class="sc">:</span>                .            <span class="dv">8</span>F<span class="co">#              .              .</span></span>
-<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">75</span><span class="sc">:</span>             <span class="dv">2</span>GG;            <span class="dv">2</span>G;            <span class="dv">2</span>B;            <span class="dv">2</span>g;</span>
-<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">76</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">11</span>            <span class="ot">=</span><span class="dv">11</span>            <span class="ot">=</span><span class="dv">11</span>            <span class="ot">=</span><span class="dv">11</span></span>
-<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">77</span><span class="sc">:</span>               <span class="dv">2</span>C             <span class="dv">2</span>G             <span class="dv">2</span>e             <span class="dv">2</span>g</span>
-<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">78</span><span class="sc">:</span>              <span class="dv">4</span>AA             <span class="dv">4</span>A             <span class="dv">4</span>e            <span class="dv">4</span>cc</span>
-<span id="cb9-50"><a href="#cb9-50" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">79</span><span class="sc">:</span>               <span class="dv">4</span>E            <span class="dv">4</span>G<span class="co">#            8eL             4b</span></span>
-<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">80</span><span class="sc">:</span>                .              .            <span class="dv">8</span>dJ              .</span>
-<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">81</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">12</span>            <span class="ot">=</span><span class="dv">12</span>            <span class="ot">=</span><span class="dv">12</span>            <span class="ot">=</span><span class="dv">12</span></span>
-<span id="cb9-53"><a href="#cb9-53" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">82</span><span class="sc">:</span>               <span class="dv">4</span>F             <span class="dv">4</span>A             <span class="dv">4</span>c             <span class="dv">4</span>a</span>
-<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">83</span><span class="sc">:</span>               <span class="dv">4</span>C             <span class="dv">4</span>G             <span class="dv">4</span>c             <span class="dv">4</span>e</span>
-<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">84</span><span class="sc">:</span>             <span class="dv">4</span>BB<span class="sc">-</span>             <span class="dv">4</span>G            [<span class="dv">2</span>d             <span class="dv">4</span>g</span>
-<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">85</span><span class="sc">:</span>              <span class="dv">4</span>AA             <span class="dv">4</span>A              .             <span class="dv">4</span>f</span>
-<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">86</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">13</span>            <span class="ot">=</span><span class="dv">13</span>            <span class="ot">=</span><span class="dv">13</span>            <span class="ot">=</span><span class="dv">13</span></span>
-<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>             <span class="dv">4</span>GG<span class="co">#             4B            4d]            1e;</span></span>
-<span id="cb9-59"><a href="#cb9-59" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>              <span class="dv">4</span>AA             <span class="dv">4</span>A             <span class="dv">4</span>c              .</span>
-<span id="cb9-60"><a href="#cb9-60" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>             <span class="dv">2</span>EE;          <span class="dv">2</span>G<span class="co">#X;            2B;              .</span></span>
-<span id="cb9-61"><a href="#cb9-61" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>               <span class="er">==</span>             <span class="er">==</span>             <span class="er">==</span>             <span class="er">==</span></span>
-<span id="cb9-62"><a href="#cb9-62" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>               <span class="er">*</span><span class="sc">-</span>             <span class="er">*</span><span class="sc">-</span>             <span class="er">*</span><span class="sc">-</span>             <span class="er">*</span><span class="sc">-</span></span>
-<span id="cb9-63"><a href="#cb9-63" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">92</span><span class="sc">:</span>  <span class="sc">!!!</span>hum2abc<span class="sc">:</span> <span class="sc">-</span>Q <span class="st">''</span></span>
-<span id="cb9-64"><a href="#cb9-64" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">93</span><span class="sc">:</span>  <span class="sc">!!!</span>title<span class="sc">:</span> <span class="er">@</span>{PC<span class="co">#}. @{OTL@@DE}</span></span>
-<span id="cb9-65"><a href="#cb9-65" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">94</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR1<span class="sc">:</span> <span class="dv">371</span> vierstimmige Choralges<span class="sc">&amp;</span>auml;nge von Johann Sebastian B<span class="sc">**</span><span class="er">*</span></span>
-<span id="cb9-66"><a href="#cb9-66" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">95</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> <span class="dv">4</span>th ed. by Alfred D<span class="sc">&amp;</span>ouml;<span class="fu">rffel</span> (Leipzig<span class="sc">:</span> Breitkopf und H<span class="sc">&amp;</span>a<span class="sc">**</span><span class="er">*</span></span>
-<span id="cb9-67"><a href="#cb9-67" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">96</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> c<span class="fl">.1875</span>). <span class="dv">178</span> pp. Plate <span class="st">"V.A.10"</span>.  reprint<span class="sc">:</span> J.S. Bach, <span class="dv">371</span> <span class="sc">**</span><span class="er">*</span></span>
-<span id="cb9-68"><a href="#cb9-68" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">97</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR4<span class="sc">:</span> <span class="fu">Chorales</span> (New York<span class="sc">:</span> Associated Music Publishers, Inc., c<span class="fl">.1</span><span class="sc">**</span><span class="er">*</span></span>
-<span id="cb9-69"><a href="#cb9-69" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">98</span><span class="sc">:</span>  <span class="sc">!!!</span>SMS<span class="sc">:</span> B<span class="sc">&amp;</span>H, <span class="dv">4</span>th ed, Alfred D<span class="sc">&amp;</span>ouml;rffel, c<span class="fl">.1875</span>, plate V.A<span class="fl">.10</span></span>
-<span id="cb9-70"><a href="#cb9-70" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">99</span><span class="sc">:</span>  <span class="sc">!!!</span>EED<span class="sc">:</span>  Craig Stuart Sapp</span>
-<span id="cb9-71"><a href="#cb9-71" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">100</span><span class="sc">:</span>  <span class="sc">!!!</span>EEV<span class="sc">:</span>  <span class="dv">2009</span><span class="sc">/</span><span class="dv">05</span><span class="sc">/</span><span class="dv">22</span></span>
-<span id="cb9-72"><a href="#cb9-72" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## ^^^ chor010.krn ^^^ #########################</span></span>
-<span id="cb9-73"><a href="#cb9-73" tabindex="-1"></a><span class="er">&gt;</span>                  (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
-<span id="cb9-74"><a href="#cb9-74" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb9-75"><a href="#cb9-75" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five pieces.</span>
-<span id="cb9-76"><a href="#cb9-76" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb9-77"><a href="#cb9-77" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
-<span id="cb9-78"><a href="#cb9-78" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>chorales[<span class="st">'-'</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## vvv chor003.krn vvv #########################</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">3</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span><span class="er">@</span>DE<span class="sc">:</span> Ach Gott, vom Himmel sieh darein</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">4</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span>EN<span class="sc">:</span> Oh God, look down from Heaven</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>OPR<span class="sc">:</span> Cantata BWV <span class="dv">153</span><span class="sc">:</span> Schau, lieber Gott, wie meine Feind</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">153</span><span class="sc">/</span><span class="dv">1</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 3</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">8</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">9</span><span class="sc">:</span>           <span class="er">**</span>kern         <span class="sc">**</span>kern         <span class="sc">**</span>kern         <span class="sc">**</span>kern</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">10</span><span class="sc">:</span>           <span class="er">*</span>ICvox         <span class="sc">*</span>ICvox         <span class="sc">*</span>ICvox         <span class="sc">*</span>ICvox</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">11</span><span class="sc">:</span>           <span class="er">*</span>Ibass        <span class="sc">*</span>Itenor         <span class="sc">*</span>Ialto        <span class="sc">*</span>Isoprn</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">12</span><span class="sc">:</span>          <span class="er">*</span>I<span class="st">"Bass       *I"</span>Tenor        <span class="sc">*</span>I<span class="st">"Alto     *I"</span>Soprano</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">13</span><span class="sc">:</span>        <span class="er">*&gt;</span>[A,A,B]      <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]      <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]      <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">14</span><span class="sc">:</span>     <span class="er">*&gt;</span>norep[A,B]   <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]   <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]   <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">15</span><span class="sc">:</span>              <span class="er">*&gt;</span>A            <span class="sc">*</span><span class="er">&gt;</span>A            <span class="sc">*</span><span class="er">&gt;</span>A            <span class="sc">*</span><span class="er">&gt;</span>A</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">16</span><span class="sc">:</span>          <span class="er">*</span>clefF4       <span class="sc">*</span>clefGv2        <span class="sc">*</span>clefG2        <span class="sc">*</span>clefG2</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">17</span><span class="sc">:</span>           <span class="er">*</span>k[f<span class="co">#]         *k[f#]         *k[f#]         *k[f#]</span></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">18</span><span class="sc">:</span>              <span class="er">*</span>a<span class="sc">:</span>            <span class="er">*</span>a<span class="sc">:</span>            <span class="er">*</span>a<span class="sc">:</span>            <span class="er">*</span>a<span class="sc">:</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">19</span><span class="sc">:</span>          <span class="sc">!</span>dorian        <span class="sc">!</span>dorian        <span class="sc">!</span>dorian        <span class="sc">!</span>dorian</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">20</span><span class="sc">:</span>            <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>          <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>          <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>          <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">21</span><span class="sc">:</span>          <span class="er">*</span><span class="fu">met</span>(c)        <span class="sc">*</span><span class="fu">met</span>(c)        <span class="sc">*</span><span class="fu">met</span>(c)        <span class="sc">*</span><span class="fu">met</span>(c)</span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">22</span><span class="sc">:</span>           <span class="er">*</span>MM100         <span class="sc">*</span>MM100         <span class="sc">*</span>MM100         <span class="sc">*</span>MM100</span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">23</span><span class="sc">:</span>               <span class="dv">4</span>E             <span class="dv">4</span>e            <span class="dv">4</span>g<span class="co">#             4b</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">24</span><span class="sc">:</span>               <span class="er">=</span><span class="dv">1</span>             <span class="ot">=</span><span class="dv">1</span>             <span class="ot">=</span><span class="dv">1</span>             <span class="ot">=</span><span class="dv">1</span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">25</span><span class="sc">:</span>               <span class="dv">4</span>A             <span class="dv">4</span>e             <span class="dv">4</span>a            <span class="dv">4</span>cc</span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">26</span><span class="sc">:</span>               <span class="dv">4</span>B             <span class="dv">4</span>d            <span class="dv">4</span>g<span class="co">#             4b</span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">27</span><span class="sc">:</span>               <span class="dv">4</span>c             <span class="dv">4</span>e             <span class="dv">4</span>a             <span class="dv">4</span>a</span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">28</span><span class="sc">:</span>              <span class="dv">8</span>BL            <span class="dv">8</span>dL           <span class="dv">8</span>g<span class="co">#L            4ee</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">29</span><span class="sc">:</span>              <span class="dv">8</span>AJ            <span class="dv">8</span>cJ            <span class="dv">8</span>aJ              .</span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">30</span><span class="sc">:</span>               <span class="er">=</span><span class="dv">2</span>             <span class="ot">=</span><span class="dv">2</span>             <span class="ot">=</span><span class="dv">2</span>             <span class="ot">=</span><span class="dv">2</span></span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">31-110</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## ^^^ chor003.krn ^^^ #########################</span></span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="er">&gt;</span>    </span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="er">&gt;</span>           (three more pieces...)</span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## vvv chor010.krn vvv #########################</span></span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">1-70</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">71</span><span class="sc">:</span>               <span class="dv">4</span>D            <span class="dv">8</span>F<span class="co">#             4d             4b</span></span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">72</span><span class="sc">:</span>                .             <span class="dv">4</span>G              .              .</span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">73</span><span class="sc">:</span>               <span class="dv">4</span>D              .             <span class="dv">4</span>c             <span class="dv">4</span>a</span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">74</span><span class="sc">:</span>                .            <span class="dv">8</span>F<span class="co">#              .              .</span></span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">75</span><span class="sc">:</span>             <span class="dv">2</span>GG;            <span class="dv">2</span>G;            <span class="dv">2</span>B;            <span class="dv">2</span>g;</span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">76</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">11</span>            <span class="ot">=</span><span class="dv">11</span>            <span class="ot">=</span><span class="dv">11</span>            <span class="ot">=</span><span class="dv">11</span></span>
+<span id="cb10-48"><a href="#cb10-48" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">77</span><span class="sc">:</span>               <span class="dv">2</span>C             <span class="dv">2</span>G             <span class="dv">2</span>e             <span class="dv">2</span>g</span>
+<span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">78</span><span class="sc">:</span>              <span class="dv">4</span>AA             <span class="dv">4</span>A             <span class="dv">4</span>e            <span class="dv">4</span>cc</span>
+<span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">79</span><span class="sc">:</span>               <span class="dv">4</span>E            <span class="dv">4</span>G<span class="co">#            8eL             4b</span></span>
+<span id="cb10-51"><a href="#cb10-51" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">80</span><span class="sc">:</span>                .              .            <span class="dv">8</span>dJ              .</span>
+<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">81</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">12</span>            <span class="ot">=</span><span class="dv">12</span>            <span class="ot">=</span><span class="dv">12</span>            <span class="ot">=</span><span class="dv">12</span></span>
+<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">82</span><span class="sc">:</span>               <span class="dv">4</span>F             <span class="dv">4</span>A             <span class="dv">4</span>c             <span class="dv">4</span>a</span>
+<span id="cb10-54"><a href="#cb10-54" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">83</span><span class="sc">:</span>               <span class="dv">4</span>C             <span class="dv">4</span>G             <span class="dv">4</span>c             <span class="dv">4</span>e</span>
+<span id="cb10-55"><a href="#cb10-55" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">84</span><span class="sc">:</span>             <span class="dv">4</span>BB<span class="sc">-</span>             <span class="dv">4</span>G            [<span class="dv">2</span>d             <span class="dv">4</span>g</span>
+<span id="cb10-56"><a href="#cb10-56" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">85</span><span class="sc">:</span>              <span class="dv">4</span>AA             <span class="dv">4</span>A              .             <span class="dv">4</span>f</span>
+<span id="cb10-57"><a href="#cb10-57" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">86</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">13</span>            <span class="ot">=</span><span class="dv">13</span>            <span class="ot">=</span><span class="dv">13</span>            <span class="ot">=</span><span class="dv">13</span></span>
+<span id="cb10-58"><a href="#cb10-58" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>             <span class="dv">4</span>GG<span class="co">#             4B            4d]            1e;</span></span>
+<span id="cb10-59"><a href="#cb10-59" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>              <span class="dv">4</span>AA             <span class="dv">4</span>A             <span class="dv">4</span>c              .</span>
+<span id="cb10-60"><a href="#cb10-60" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>             <span class="dv">2</span>EE;          <span class="dv">2</span>G<span class="co">#X;            2B;              .</span></span>
+<span id="cb10-61"><a href="#cb10-61" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>               <span class="er">==</span>             <span class="er">==</span>             <span class="er">==</span>             <span class="er">==</span></span>
+<span id="cb10-62"><a href="#cb10-62" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>               <span class="er">*</span><span class="sc">-</span>             <span class="er">*</span><span class="sc">-</span>             <span class="er">*</span><span class="sc">-</span>             <span class="er">*</span><span class="sc">-</span></span>
+<span id="cb10-63"><a href="#cb10-63" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">92</span><span class="sc">:</span>  <span class="sc">!!!</span>hum2abc<span class="sc">:</span> <span class="sc">-</span>Q <span class="st">''</span></span>
+<span id="cb10-64"><a href="#cb10-64" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">93</span><span class="sc">:</span>  <span class="sc">!!!</span>title<span class="sc">:</span> <span class="er">@</span>{PC<span class="co">#}. @{OTL@@DE}</span></span>
+<span id="cb10-65"><a href="#cb10-65" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">94</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR1<span class="sc">:</span> <span class="dv">371</span> vierstimmige Choralges<span class="sc">&amp;</span>auml;nge von Johann Sebastian B<span class="sc">**</span><span class="er">*</span></span>
+<span id="cb10-66"><a href="#cb10-66" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">95</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> <span class="dv">4</span>th ed. by Alfred D<span class="sc">&amp;</span>ouml;<span class="fu">rffel</span> (Leipzig<span class="sc">:</span> Breitkopf und H<span class="sc">&amp;</span>a<span class="sc">**</span><span class="er">*</span></span>
+<span id="cb10-67"><a href="#cb10-67" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">96</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> c<span class="fl">.1875</span>). <span class="dv">178</span> pp. Plate <span class="st">"V.A.10"</span>.  reprint<span class="sc">:</span> J.S. Bach, <span class="dv">371</span> <span class="sc">**</span><span class="er">*</span></span>
+<span id="cb10-68"><a href="#cb10-68" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">97</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR4<span class="sc">:</span> <span class="fu">Chorales</span> (New York<span class="sc">:</span> Associated Music Publishers, Inc., c<span class="fl">.1</span><span class="sc">**</span><span class="er">*</span></span>
+<span id="cb10-69"><a href="#cb10-69" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">98</span><span class="sc">:</span>  <span class="sc">!!!</span>SMS<span class="sc">:</span> B<span class="sc">&amp;</span>H, <span class="dv">4</span>th ed, Alfred D<span class="sc">&amp;</span>ouml;rffel, c<span class="fl">.1875</span>, plate V.A<span class="fl">.10</span></span>
+<span id="cb10-70"><a href="#cb10-70" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">99</span><span class="sc">:</span>  <span class="sc">!!!</span>EED<span class="sc">:</span>  Craig Stuart Sapp</span>
+<span id="cb10-71"><a href="#cb10-71" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">100</span><span class="sc">:</span>  <span class="sc">!!!</span>EEV<span class="sc">:</span>  <span class="dv">2009</span><span class="sc">/</span><span class="dv">05</span><span class="sc">/</span><span class="dv">22</span></span>
+<span id="cb10-72"><a href="#cb10-72" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## ^^^ chor010.krn ^^^ #########################</span></span>
+<span id="cb10-73"><a href="#cb10-73" tabindex="-1"></a><span class="er">&gt;</span>                  (<span class="sc">**</span><span class="er">*</span>four global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
+<span id="cb10-74"><a href="#cb10-74" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb10-75"><a href="#cb10-75" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five pieces.</span>
+<span id="cb10-76"><a href="#cb10-76" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb10-77"><a href="#cb10-77" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
+<span id="cb10-78"><a href="#cb10-78" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span></code></pre></div>
 <p>Look at that, five of our ten chorales contain <em>at least one</em>
 flat. The other chorales have zero flats. Notice that we still get the
 <em>whole</em> files returned to us!</p>
@@ -641,7 +650,7 @@ humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semant
 index commands. For <code>i</code>, the number is simply matched to
 record numbers in each file. For example, you could extract the first
 fifty records from each file as so:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[[</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, <span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -721,7 +730,7 @@ fifty records from each file as so:</p>
 <p>For <code>j</code>, the number is matched to the spines in each file
 (from left to right). So if you wanted the second spine in each file,
 you’d write:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span><span class="op">[[</span> , <span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    #### vvv chor001.krn vvv ####
 &gt;                1:  !!!COM: Bach, Johann Sebastian
@@ -801,7 +810,7 @@ you’d write:</p>
 &gt;               *Token :: character</code></pre>
 <p>If you give indices that are larger than the number of records or
 spines in a file, that file will be dropped. For example, if we call</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[[</span><span class="fl">150</span><span class="op">:</span><span class="fl">200</span>, <span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor005.krn vvv #########################
@@ -894,7 +903,7 @@ expression in a data token—even if there is only one. For example, let’s
 (again) say we are interesting in studying flats. Since
 <code>**kern</code> represents flats as “<code>-</code>”, we can find
 records that contain a flat by calling:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[[</span><span class="st">'-'</span>, <span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor003.krn vvv #########################
@@ -978,7 +987,7 @@ only get five files back, because only five of the chorales contain
 don’t contain a flat are completely stripped away, leaving a (handful)
 of records with at least one flat.</p>
 <p>If we do the same thing with <code>j</code> (spines)</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span><span class="op">[[</span> , <span class="st">'-'</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    #### vvv chor003.krn vvv ####
 &gt;                1:  !!!COM: Bach, Johann Sebastian
@@ -1063,7 +1072,7 @@ file, what is now spine <code>1</code> was the old spine <code>2</code>,
 which we can tell because that instrument interpretation is
 <code>*Itenor</code>. However, if you look at the last of the five
 files</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[[</span> , <span class="st">'-'</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">5</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    #### vvv chor010.krn vvv ####
@@ -1177,7 +1186,7 @@ files</p>
 actually the original spine <code>1</code> in that file. And wait,
 there’s more! If we dig in and look at the other files returned to us
 (which aren’t shown by default),</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span><span class="op">[[</span> , <span class="st">'-'</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor006.krn vvv #########################
 &gt;       1:  !!!COM: Bach, Johann Sebastian
@@ -1271,7 +1280,7 @@ spine numbers. Fortunately, for you there is an option that might
 helpful, which you will learn more about below: try specifying
 <code>drop = FALSE</code>. (The <code>drop</code> argument is less
 intuitive, but is the standard R argument for this sort of thing.)</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span><span class="op">[[</span> , <span class="st">'-'</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor003.krn vvv #########################
 &gt;                1:  !!!COM: Bach, Johann Sebastian
@@ -1358,7 +1367,7 @@ indexer, R will <em>remove</em> those numbers. This works in
 humdrum<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi></mi><mi>ℝ</mi></msub><annotation encoding="application/x-tex">_{\mathbb{R}}</annotation></semantics></math>
 too, so if you want all the files <em>except</em> the first file, you
 could write:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor002.krn vvv #########################
 &gt;                1:  !!!COM: Bach, Johann Sebastian
@@ -1437,7 +1446,7 @@ could write:</p>
 &gt;               *Token :: character</code></pre>
 <p>Or if you want all the spines <em>except</em> the fourth spine,
 write</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[[</span> , <span class="op">-</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -1516,7 +1525,7 @@ write</p>
 &gt;       Data fields: 
 &gt;               *Token :: character</code></pre>
 <p>Or if you want to remove the first 20 records from each file:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span><span class="op">[[</span><span class="op">-</span><span class="fl">1</span><span class="op">:</span><span class="op">-</span><span class="fl">20</span>, <span class="op">]</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 300px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -1616,7 +1625,7 @@ filter out data which matches <code>FALSE</code>.</p>
 <p>We can reproduce the functionality of the <code>[]</code> and
 <code>[[]]</code> indexing operators (previous section) using
 <code><a href="../reference/subset.humdrumR.html">filter()</a></code>:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -1700,7 +1709,7 @@ odd numbered records <em>and</em> even numbered spines in even numbered
 records. We’ll use Rs modulo command <code>%%</code> to separate even
 and odd numbers (<code>odd %% 2 == 1</code>,
 <code>even %% 2 == 0</code>).</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="op">(</span><span class="va">Record</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">==</span> <span class="op">(</span><span class="va">Spine</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -1781,7 +1790,7 @@ and odd numbers (<code>odd %% 2 == 1</code>,
 &gt;               *Token :: character</code></pre>
 <p>Would we ever want to do that? Probably not. However, returning to
 our flats, study, lets grab <em>all</em> the flat notes:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Token</span> <span class="op"><a href="../reference/RegexFind.html">%~%</a></span> <span class="st">'-'</span><span class="op">)</span></span></code></pre></div>
@@ -1863,11 +1872,11 @@ our flats, study, lets grab <em>all</em> the flat notes:</p>
 <p>Woh, we’re only seeing a couple of B flats in these files! But from
 before, we know that there are a lot more flats in the fourth file
 (after losing the files with no flats):</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Token</span> <span class="op"><a href="../reference/RegexFind.html">%~%</a></span> <span class="st">'-'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/indexHumdrum.html">index</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="va">_</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor008.krn vvv #########################
 &gt;        1:  !!!COM: Bach, Johann Sebastian
 &gt;        2:  !!!CDT: 1685/02/21/-1750/07/28/
@@ -2060,94 +2069,9 @@ bar, if there are <em>any</em> flats, return <code>TRUE</code> for the
 <em>whole</em> bar.” By default, <code><a href="../reference/subset.humdrumR.html">filter()</a></code> will <a href="../reference/recycling.html">recycle</a> scalar results, so if you
 return a single <code>TRUE</code>/<code>FALSE</code>, it will be
 recycled to fill the whole group.</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a></span>
-<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
-<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a>  <span class="fu">group_by</span>(Piece, Bar) <span class="sc">|&gt;</span></span>
-<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">any</span>(Token <span class="sc">%~%</span> <span class="st">'-'</span>))</span>
-<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## vvv chor003.krn vvv #########################</span></span>
-<span id="cb40-6"><a href="#cb40-6" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
-<span id="cb40-7"><a href="#cb40-7" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
-<span id="cb40-8"><a href="#cb40-8" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">3</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span><span class="er">@</span>DE<span class="sc">:</span> Ach Gott, vom Himmel sieh darein</span>
-<span id="cb40-9"><a href="#cb40-9" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">4</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span>EN<span class="sc">:</span> Oh God, look down from Heaven</span>
-<span id="cb40-10"><a href="#cb40-10" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>OPR<span class="sc">:</span> Cantata BWV <span class="dv">153</span><span class="sc">:</span> Schau, lieber Gott, wie meine Feind</span>
-<span id="cb40-11"><a href="#cb40-11" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">153</span><span class="sc">/</span><span class="dv">1</span></span>
-<span id="cb40-12"><a href="#cb40-12" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 3</span></span>
-<span id="cb40-13"><a href="#cb40-13" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">8</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
-<span id="cb40-14"><a href="#cb40-14" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">9</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
-<span id="cb40-15"><a href="#cb40-15" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">10</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
-<span id="cb40-16"><a href="#cb40-16" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">11</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
-<span id="cb40-17"><a href="#cb40-17" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">12</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
-<span id="cb40-18"><a href="#cb40-18" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">13</span><span class="sc">:</span>       <span class="er">*&gt;</span>[A,A,B]     <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]     <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]     <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]</span>
-<span id="cb40-19"><a href="#cb40-19" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">14</span><span class="sc">:</span>    <span class="er">*&gt;</span>norep[A,B]  <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]  <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]  <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]</span>
-<span id="cb40-20"><a href="#cb40-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">15</span><span class="sc">:</span>             <span class="er">*&gt;</span>A           <span class="sc">*</span><span class="er">&gt;</span>A           <span class="sc">*</span><span class="er">&gt;</span>A           <span class="sc">*</span><span class="er">&gt;</span>A</span>
-<span id="cb40-21"><a href="#cb40-21" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">16</span><span class="sc">:</span>         <span class="er">*</span>clefF4      <span class="sc">*</span>clefGv2       <span class="sc">*</span>clefG2       <span class="sc">*</span>clefG2</span>
-<span id="cb40-22"><a href="#cb40-22" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">17</span><span class="sc">:</span>          <span class="er">*</span>k[f<span class="co">#]        *k[f#]        *k[f#]        *k[f#]</span></span>
-<span id="cb40-23"><a href="#cb40-23" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">18</span><span class="sc">:</span>             <span class="er">*</span>a<span class="sc">:</span>           <span class="er">*</span>a<span class="sc">:</span>           <span class="er">*</span>a<span class="sc">:</span>           <span class="er">*</span>a<span class="sc">:</span></span>
-<span id="cb40-24"><a href="#cb40-24" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">19</span><span class="sc">:</span>         <span class="sc">!</span>dorian       <span class="sc">!</span>dorian       <span class="sc">!</span>dorian       <span class="sc">!</span>dorian</span>
-<span id="cb40-25"><a href="#cb40-25" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">20</span><span class="sc">:</span>           <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span></span>
-<span id="cb40-26"><a href="#cb40-26" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">21</span><span class="sc">:</span>         <span class="er">*</span><span class="fu">met</span>(c)       <span class="sc">*</span><span class="fu">met</span>(c)       <span class="sc">*</span><span class="fu">met</span>(c)       <span class="sc">*</span><span class="fu">met</span>(c)</span>
-<span id="cb40-27"><a href="#cb40-27" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">22</span><span class="sc">:</span>          <span class="er">*</span>MM100        <span class="sc">*</span>MM100        <span class="sc">*</span>MM100        <span class="sc">*</span>MM100</span>
-<span id="cb40-28"><a href="#cb40-28" tabindex="-1"></a><span class="sc">&gt;</span>            <span class="dv">23-53</span><span class="sc">:</span>        <span class="er">=====</span><span class="dv">1-4</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">1-4</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">1-4</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">1-4</span></span>
-<span id="cb40-29"><a href="#cb40-29" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">54</span><span class="sc">:</span>             <span class="er">*&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B</span>
-<span id="cb40-30"><a href="#cb40-30" tabindex="-1"></a><span class="sc">&gt;</span>            <span class="dv">55-86</span><span class="sc">:</span>        <span class="er">=====</span><span class="dv">5-9</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">5-9</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">5-9</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">5-9</span></span>
-<span id="cb40-31"><a href="#cb40-31" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>             <span class="dv">4</span>G<span class="co">#            4B            4e           4ee</span></span>
-<span id="cb40-32"><a href="#cb40-32" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>             <span class="dv">8</span>AL            <span class="dv">4</span>A            <span class="dv">4</span>e           <span class="dv">4</span>cc</span>
-<span id="cb40-33"><a href="#cb40-33" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>             <span class="dv">8</span>GJ             .             .             .</span>
-<span id="cb40-34"><a href="#cb40-34" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>             <span class="dv">8</span>FL            <span class="dv">4</span>A            <span class="dv">4</span>f           <span class="dv">4</span>dd</span>
-<span id="cb40-35"><a href="#cb40-35" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>             <span class="dv">8</span>EJ             .             .             .</span>
-<span id="cb40-36"><a href="#cb40-36" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">92-110</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span id="cb40-37"><a href="#cb40-37" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## ^^^ chor003.krn ^^^ #########################</span></span>
-<span id="cb40-38"><a href="#cb40-38" tabindex="-1"></a><span class="er">&gt;</span>    </span>
-<span id="cb40-39"><a href="#cb40-39" tabindex="-1"></a><span class="er">&gt;</span>           (three more pieces...)</span>
-<span id="cb40-40"><a href="#cb40-40" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb40-41"><a href="#cb40-41" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## vvv chor010.krn vvv #########################</span></span>
-<span id="cb40-42"><a href="#cb40-42" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">1-38</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
-<span id="cb40-43"><a href="#cb40-43" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">39</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-44"><a href="#cb40-44" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">40</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-45"><a href="#cb40-45" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">41</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span></span>
-<span id="cb40-46"><a href="#cb40-46" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">42</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-47"><a href="#cb40-47" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">43</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-48"><a href="#cb40-48" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">44</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-49"><a href="#cb40-49" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">45</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-50"><a href="#cb40-50" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">46</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-51"><a href="#cb40-51" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">47</span><span class="sc">:</span>           <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span>         <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span>         <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span>         <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span></span>
-<span id="cb40-52"><a href="#cb40-52" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">48</span><span class="sc">:</span>             <span class="er">*&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B</span>
-<span id="cb40-53"><a href="#cb40-53" tabindex="-1"></a><span class="sc">&gt;</span>            <span class="dv">49-81</span><span class="sc">:</span>      <span class="er">======</span><span class="dv">7-12</span>    <span class="sc">==</span><span class="er">====</span><span class="dv">7-12</span>    <span class="sc">==</span><span class="er">====</span><span class="dv">7-12</span>    <span class="sc">==</span><span class="er">====</span><span class="dv">7-12</span></span>
-<span id="cb40-54"><a href="#cb40-54" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">82</span><span class="sc">:</span>              <span class="dv">4</span>F            <span class="dv">4</span>A            <span class="dv">4</span>c            <span class="dv">4</span>a</span>
-<span id="cb40-55"><a href="#cb40-55" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">83</span><span class="sc">:</span>              <span class="dv">4</span>C            <span class="dv">4</span>G            <span class="dv">4</span>c            <span class="dv">4</span>e</span>
-<span id="cb40-56"><a href="#cb40-56" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">84</span><span class="sc">:</span>            <span class="dv">4</span>BB<span class="sc">-</span>            <span class="dv">4</span>G           [<span class="dv">2</span>d            <span class="dv">4</span>g</span>
-<span id="cb40-57"><a href="#cb40-57" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">85</span><span class="sc">:</span>             <span class="dv">4</span>AA            <span class="dv">4</span>A             .            <span class="dv">4</span>f</span>
-<span id="cb40-58"><a href="#cb40-58" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">86</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span></span>
-<span id="cb40-59"><a href="#cb40-59" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-60"><a href="#cb40-60" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-61"><a href="#cb40-61" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>               .             .             .             .</span>
-<span id="cb40-62"><a href="#cb40-62" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>              <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span></span>
-<span id="cb40-63"><a href="#cb40-63" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>              <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span></span>
-<span id="cb40-64"><a href="#cb40-64" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">92</span><span class="sc">:</span>  <span class="sc">!!!</span>hum2abc<span class="sc">:</span> <span class="sc">-</span>Q <span class="st">''</span></span>
-<span id="cb40-65"><a href="#cb40-65" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">93</span><span class="sc">:</span>  <span class="sc">!!!</span>title<span class="sc">:</span> <span class="er">@</span>{PC<span class="co">#}. @{OTL@@DE}</span></span>
-<span id="cb40-66"><a href="#cb40-66" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">94</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR1<span class="sc">:</span> <span class="dv">371</span> vierstimmige Choralges<span class="sc">&amp;</span>auml;nge von Johann Sebastia<span class="sc">**</span><span class="er">*</span></span>
-<span id="cb40-67"><a href="#cb40-67" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">95</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> <span class="dv">4</span>th ed. by Alfred D<span class="sc">&amp;</span>ouml;<span class="fu">rffel</span> (Leipzig<span class="sc">:</span> Breitkopf und <span class="sc">**</span><span class="er">*</span></span>
-<span id="cb40-68"><a href="#cb40-68" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">96</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> c<span class="fl">.1875</span>). <span class="dv">178</span> pp. Plate <span class="st">"V.A.10"</span>.  reprint<span class="sc">:</span> J.S. Bach, <span class="dv">3</span><span class="sc">**</span><span class="er">*</span></span>
-<span id="cb40-69"><a href="#cb40-69" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">97</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR4<span class="sc">:</span> <span class="fu">Chorales</span> (New York<span class="sc">:</span> Associated Music Publishers, Inc., <span class="sc">**</span><span class="er">*</span></span>
-<span id="cb40-70"><a href="#cb40-70" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">98</span><span class="sc">:</span>  <span class="sc">!!!</span>SMS<span class="sc">:</span> B<span class="sc">&amp;</span>H, <span class="dv">4</span>th ed, Alfred D<span class="sc">&amp;</span>ouml;rffel, c<span class="fl">.1875</span>, plate V.A<span class="fl">.10</span></span>
-<span id="cb40-71"><a href="#cb40-71" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">99</span><span class="sc">:</span>  <span class="sc">!!!</span>EED<span class="sc">:</span>  Craig Stuart Sapp</span>
-<span id="cb40-72"><a href="#cb40-72" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">100</span><span class="sc">:</span>  <span class="sc">!!!</span>EEV<span class="sc">:</span>  <span class="dv">2009</span><span class="sc">/</span><span class="dv">05</span><span class="sc">/</span><span class="dv">22</span></span>
-<span id="cb40-73"><a href="#cb40-73" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## ^^^ chor010.krn ^^^ #########################</span></span>
-<span id="cb40-74"><a href="#cb40-74" tabindex="-1"></a><span class="er">&gt;</span>                  (<span class="sc">**</span><span class="er">*</span>five global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
-<span id="cb40-75"><a href="#cb40-75" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb40-76"><a href="#cb40-76" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five pieces.</span>
-<span id="cb40-77"><a href="#cb40-77" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb40-78"><a href="#cb40-78" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
-<span id="cb40-79"><a href="#cb40-79" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span>
-<span id="cb40-80"><a href="#cb40-80" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
-<span id="cb40-81"><a href="#cb40-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (two groups)</span>
-<span id="cb40-82"><a href="#cb40-82" tabindex="-1"></a><span class="sc">&gt;</span>                Bar   <span class="sc">::</span> integer</span>
-<span id="cb40-83"><a href="#cb40-83" tabindex="-1"></a><span class="sc">&gt;</span>                Piece <span class="sc">::</span> integer</span></code></pre></div>
-<p>Not enough context for you? Maybe we should group the bars into
-even-odd pairs:</p>
 <div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a></span>
 <span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
-<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>  <span class="fu">group_by</span>(Piece, <span class="fu">floor</span>(Bar <span class="sc">/</span> <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>  <span class="fu">group_by</span>(Piece, Bar) <span class="sc">|&gt;</span></span>
 <span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">any</span>(Token <span class="sc">%~%</span> <span class="st">'-'</span>))</span>
 <span id="cb41-5"><a href="#cb41-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## vvv chor003.krn vvv #########################</span></span>
 <span id="cb41-6"><a href="#cb41-6" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
@@ -2203,9 +2127,9 @@ even-odd pairs:</p>
 <span id="cb41-56"><a href="#cb41-56" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">84</span><span class="sc">:</span>            <span class="dv">4</span>BB<span class="sc">-</span>            <span class="dv">4</span>G           [<span class="dv">2</span>d            <span class="dv">4</span>g</span>
 <span id="cb41-57"><a href="#cb41-57" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">85</span><span class="sc">:</span>             <span class="dv">4</span>AA            <span class="dv">4</span>A             .            <span class="dv">4</span>f</span>
 <span id="cb41-58"><a href="#cb41-58" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">86</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span></span>
-<span id="cb41-59"><a href="#cb41-59" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>            <span class="dv">4</span>GG<span class="co">#            4B           4d]           1e;</span></span>
-<span id="cb41-60"><a href="#cb41-60" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>             <span class="dv">4</span>AA            <span class="dv">4</span>A            <span class="dv">4</span>c             .</span>
-<span id="cb41-61"><a href="#cb41-61" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>            <span class="dv">2</span>EE;         <span class="dv">2</span>G<span class="co">#X;           2B;             .</span></span>
+<span id="cb41-59"><a href="#cb41-59" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb41-60"><a href="#cb41-60" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb41-61"><a href="#cb41-61" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>               .             .             .             .</span>
 <span id="cb41-62"><a href="#cb41-62" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>              <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span></span>
 <span id="cb41-63"><a href="#cb41-63" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>              <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span></span>
 <span id="cb41-64"><a href="#cb41-64" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">92</span><span class="sc">:</span>  <span class="sc">!!!</span>hum2abc<span class="sc">:</span> <span class="sc">-</span>Q <span class="st">''</span></span>
@@ -2223,11 +2147,96 @@ even-odd pairs:</p>
 <span id="cb41-76"><a href="#cb41-76" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five pieces.</span>
 <span id="cb41-77"><a href="#cb41-77" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb41-78"><a href="#cb41-78" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
-<span id="cb41-79"><a href="#cb41-79" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token        <span class="sc">::</span> character</span>
+<span id="cb41-79"><a href="#cb41-79" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token <span class="sc">::</span> character</span>
 <span id="cb41-80"><a href="#cb41-80" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
 <span id="cb41-81"><a href="#cb41-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (two groups)</span>
-<span id="cb41-82"><a href="#cb41-82" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="fu">floor</span>(Bar<span class="sc">/</span><span class="dv">2</span>) <span class="sc">::</span> numeric</span>
-<span id="cb41-83"><a href="#cb41-83" tabindex="-1"></a><span class="sc">&gt;</span>                Piece        <span class="sc">::</span> integer</span></code></pre></div>
+<span id="cb41-82"><a href="#cb41-82" tabindex="-1"></a><span class="sc">&gt;</span>                Bar   <span class="sc">::</span> integer</span>
+<span id="cb41-83"><a href="#cb41-83" tabindex="-1"></a><span class="sc">&gt;</span>                Piece <span class="sc">::</span> integer</span></code></pre></div>
+<p>Not enough context for you? Maybe we should group the bars into
+even-odd pairs:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a>chorales <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a>  <span class="fu">group_by</span>(Piece, <span class="fu">floor</span>(Bar <span class="sc">/</span> <span class="dv">2</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">any</span>(Token <span class="sc">%~%</span> <span class="st">'-'</span>))</span>
+<span id="cb42-5"><a href="#cb42-5" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## vvv chor003.krn vvv #########################</span></span>
+<span id="cb42-6"><a href="#cb42-6" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">1</span><span class="sc">:</span>  <span class="sc">!!!</span>COM<span class="sc">:</span> Bach, Johann Sebastian</span>
+<span id="cb42-7"><a href="#cb42-7" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">2</span><span class="sc">:</span>  <span class="sc">!!!</span>CDT<span class="sc">:</span> <span class="dv">1685</span><span class="sc">/</span><span class="dv">02</span><span class="sc">/</span><span class="dv">21</span><span class="sc">/-</span><span class="dv">1750</span><span class="sc">/</span><span class="dv">07</span><span class="sc">/</span><span class="dv">28</span><span class="sc">/</span></span>
+<span id="cb42-8"><a href="#cb42-8" tabindex="-1"></a><span class="er">&gt;</span>                <span class="dv">3</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span><span class="er">@</span>DE<span class="sc">:</span> Ach Gott, vom Himmel sieh darein</span>
+<span id="cb42-9"><a href="#cb42-9" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">4</span><span class="sc">:</span>  <span class="sc">!!!</span>OTL<span class="sc">@</span>EN<span class="sc">:</span> Oh God, look down from Heaven</span>
+<span id="cb42-10"><a href="#cb42-10" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">5</span><span class="sc">:</span>  <span class="sc">!!!</span>OPR<span class="sc">:</span> Cantata BWV <span class="dv">153</span><span class="sc">:</span> Schau, lieber Gott, wie meine Feind</span>
+<span id="cb42-11"><a href="#cb42-11" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">6</span><span class="sc">:</span>  <span class="sc">!!!</span>SCT<span class="sc">:</span> BWV <span class="dv">153</span><span class="sc">/</span><span class="dv">1</span></span>
+<span id="cb42-12"><a href="#cb42-12" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">7</span><span class="sc">:</span>  <span class="sc">!!!</span>PC<span class="co">#: 3</span></span>
+<span id="cb42-13"><a href="#cb42-13" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">8</span><span class="sc">:</span>  <span class="sc">!!!</span>AGN<span class="sc">:</span> chorale</span>
+<span id="cb42-14"><a href="#cb42-14" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="dv">9</span><span class="sc">:</span>          <span class="er">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern        <span class="sc">**</span>kern</span>
+<span id="cb42-15"><a href="#cb42-15" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">10</span><span class="sc">:</span>          <span class="er">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox        <span class="sc">*</span>ICvox</span>
+<span id="cb42-16"><a href="#cb42-16" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">11</span><span class="sc">:</span>          <span class="er">*</span>Ibass       <span class="sc">*</span>Itenor        <span class="sc">*</span>Ialto       <span class="sc">*</span>Isoprn</span>
+<span id="cb42-17"><a href="#cb42-17" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">12</span><span class="sc">:</span>         <span class="er">*</span>I<span class="st">"Bass      *I"</span>Tenor       <span class="sc">*</span>I<span class="st">"Alto    *I"</span>Soprano</span>
+<span id="cb42-18"><a href="#cb42-18" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">13</span><span class="sc">:</span>       <span class="er">*&gt;</span>[A,A,B]     <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]     <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]     <span class="sc">*</span><span class="er">&gt;</span>[A,A,B]</span>
+<span id="cb42-19"><a href="#cb42-19" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">14</span><span class="sc">:</span>    <span class="er">*&gt;</span>norep[A,B]  <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]  <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]  <span class="sc">*</span><span class="er">&gt;</span>norep[A,B]</span>
+<span id="cb42-20"><a href="#cb42-20" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">15</span><span class="sc">:</span>             <span class="er">*&gt;</span>A           <span class="sc">*</span><span class="er">&gt;</span>A           <span class="sc">*</span><span class="er">&gt;</span>A           <span class="sc">*</span><span class="er">&gt;</span>A</span>
+<span id="cb42-21"><a href="#cb42-21" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">16</span><span class="sc">:</span>         <span class="er">*</span>clefF4      <span class="sc">*</span>clefGv2       <span class="sc">*</span>clefG2       <span class="sc">*</span>clefG2</span>
+<span id="cb42-22"><a href="#cb42-22" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">17</span><span class="sc">:</span>          <span class="er">*</span>k[f<span class="co">#]        *k[f#]        *k[f#]        *k[f#]</span></span>
+<span id="cb42-23"><a href="#cb42-23" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">18</span><span class="sc">:</span>             <span class="er">*</span>a<span class="sc">:</span>           <span class="er">*</span>a<span class="sc">:</span>           <span class="er">*</span>a<span class="sc">:</span>           <span class="er">*</span>a<span class="sc">:</span></span>
+<span id="cb42-24"><a href="#cb42-24" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">19</span><span class="sc">:</span>         <span class="sc">!</span>dorian       <span class="sc">!</span>dorian       <span class="sc">!</span>dorian       <span class="sc">!</span>dorian</span>
+<span id="cb42-25"><a href="#cb42-25" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">20</span><span class="sc">:</span>           <span class="er">*</span>M4<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span>         <span class="sc">*</span>M4<span class="sc">/</span><span class="dv">4</span></span>
+<span id="cb42-26"><a href="#cb42-26" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">21</span><span class="sc">:</span>         <span class="er">*</span><span class="fu">met</span>(c)       <span class="sc">*</span><span class="fu">met</span>(c)       <span class="sc">*</span><span class="fu">met</span>(c)       <span class="sc">*</span><span class="fu">met</span>(c)</span>
+<span id="cb42-27"><a href="#cb42-27" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">22</span><span class="sc">:</span>          <span class="er">*</span>MM100        <span class="sc">*</span>MM100        <span class="sc">*</span>MM100        <span class="sc">*</span>MM100</span>
+<span id="cb42-28"><a href="#cb42-28" tabindex="-1"></a><span class="sc">&gt;</span>            <span class="dv">23-53</span><span class="sc">:</span>        <span class="er">=====</span><span class="dv">1-4</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">1-4</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">1-4</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">1-4</span></span>
+<span id="cb42-29"><a href="#cb42-29" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">54</span><span class="sc">:</span>             <span class="er">*&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B</span>
+<span id="cb42-30"><a href="#cb42-30" tabindex="-1"></a><span class="sc">&gt;</span>            <span class="dv">55-86</span><span class="sc">:</span>        <span class="er">=====</span><span class="dv">5-9</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">5-9</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">5-9</span>      <span class="sc">==</span><span class="er">===</span><span class="dv">5-9</span></span>
+<span id="cb42-31"><a href="#cb42-31" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>             <span class="dv">4</span>G<span class="co">#            4B            4e           4ee</span></span>
+<span id="cb42-32"><a href="#cb42-32" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>             <span class="dv">8</span>AL            <span class="dv">4</span>A            <span class="dv">4</span>e           <span class="dv">4</span>cc</span>
+<span id="cb42-33"><a href="#cb42-33" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>             <span class="dv">8</span>GJ             .             .             .</span>
+<span id="cb42-34"><a href="#cb42-34" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>             <span class="dv">8</span>FL            <span class="dv">4</span>A            <span class="dv">4</span>f           <span class="dv">4</span>dd</span>
+<span id="cb42-35"><a href="#cb42-35" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>             <span class="dv">8</span>EJ             .             .             .</span>
+<span id="cb42-36"><a href="#cb42-36" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="dv">92-110</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
+<span id="cb42-37"><a href="#cb42-37" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## ^^^ chor003.krn ^^^ #########################</span></span>
+<span id="cb42-38"><a href="#cb42-38" tabindex="-1"></a><span class="er">&gt;</span>    </span>
+<span id="cb42-39"><a href="#cb42-39" tabindex="-1"></a><span class="er">&gt;</span>           (three more pieces...)</span>
+<span id="cb42-40"><a href="#cb42-40" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb42-41"><a href="#cb42-41" tabindex="-1"></a><span class="er">&gt;</span>    <span class="do">######################## vvv chor010.krn vvv #########################</span></span>
+<span id="cb42-42"><a href="#cb42-42" tabindex="-1"></a><span class="er">&gt;</span>      <span class="dv">1-38</span><span class="sc">:::</span><span class="er">:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::</span></span>
+<span id="cb42-43"><a href="#cb42-43" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">39</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-44"><a href="#cb42-44" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">40</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-45"><a href="#cb42-45" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">41</span><span class="sc">:</span>              <span class="er">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span>            <span class="ot">=</span><span class="dv">5</span></span>
+<span id="cb42-46"><a href="#cb42-46" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">42</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-47"><a href="#cb42-47" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">43</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-48"><a href="#cb42-48" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">44</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-49"><a href="#cb42-49" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">45</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-50"><a href="#cb42-50" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">46</span><span class="sc">:</span>               .             .             .             .</span>
+<span id="cb42-51"><a href="#cb42-51" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">47</span><span class="sc">:</span>           <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span>         <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span>         <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span>         <span class="er">=</span><span class="dv">6</span><span class="sc">:</span><span class="er">|</span><span class="sc">!</span></span>
+<span id="cb42-52"><a href="#cb42-52" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">48</span><span class="sc">:</span>             <span class="er">*&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B           <span class="sc">*</span><span class="er">&gt;</span>B</span>
+<span id="cb42-53"><a href="#cb42-53" tabindex="-1"></a><span class="sc">&gt;</span>            <span class="dv">49-81</span><span class="sc">:</span>      <span class="er">======</span><span class="dv">7-12</span>    <span class="sc">==</span><span class="er">====</span><span class="dv">7-12</span>    <span class="sc">==</span><span class="er">====</span><span class="dv">7-12</span>    <span class="sc">==</span><span class="er">====</span><span class="dv">7-12</span></span>
+<span id="cb42-54"><a href="#cb42-54" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">82</span><span class="sc">:</span>              <span class="dv">4</span>F            <span class="dv">4</span>A            <span class="dv">4</span>c            <span class="dv">4</span>a</span>
+<span id="cb42-55"><a href="#cb42-55" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">83</span><span class="sc">:</span>              <span class="dv">4</span>C            <span class="dv">4</span>G            <span class="dv">4</span>c            <span class="dv">4</span>e</span>
+<span id="cb42-56"><a href="#cb42-56" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">84</span><span class="sc">:</span>            <span class="dv">4</span>BB<span class="sc">-</span>            <span class="dv">4</span>G           [<span class="dv">2</span>d            <span class="dv">4</span>g</span>
+<span id="cb42-57"><a href="#cb42-57" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">85</span><span class="sc">:</span>             <span class="dv">4</span>AA            <span class="dv">4</span>A             .            <span class="dv">4</span>f</span>
+<span id="cb42-58"><a href="#cb42-58" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">86</span><span class="sc">:</span>             <span class="er">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span>           <span class="ot">=</span><span class="dv">13</span></span>
+<span id="cb42-59"><a href="#cb42-59" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">87</span><span class="sc">:</span>            <span class="dv">4</span>GG<span class="co">#            4B           4d]           1e;</span></span>
+<span id="cb42-60"><a href="#cb42-60" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">88</span><span class="sc">:</span>             <span class="dv">4</span>AA            <span class="dv">4</span>A            <span class="dv">4</span>c             .</span>
+<span id="cb42-61"><a href="#cb42-61" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">89</span><span class="sc">:</span>            <span class="dv">2</span>EE;         <span class="dv">2</span>G<span class="co">#X;           2B;             .</span></span>
+<span id="cb42-62"><a href="#cb42-62" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">90</span><span class="sc">:</span>              <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span>            <span class="er">==</span></span>
+<span id="cb42-63"><a href="#cb42-63" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">91</span><span class="sc">:</span>              <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span>            <span class="er">*</span><span class="sc">-</span></span>
+<span id="cb42-64"><a href="#cb42-64" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">92</span><span class="sc">:</span>  <span class="sc">!!!</span>hum2abc<span class="sc">:</span> <span class="sc">-</span>Q <span class="st">''</span></span>
+<span id="cb42-65"><a href="#cb42-65" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">93</span><span class="sc">:</span>  <span class="sc">!!!</span>title<span class="sc">:</span> <span class="er">@</span>{PC<span class="co">#}. @{OTL@@DE}</span></span>
+<span id="cb42-66"><a href="#cb42-66" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">94</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR1<span class="sc">:</span> <span class="dv">371</span> vierstimmige Choralges<span class="sc">&amp;</span>auml;nge von Johann Sebastia<span class="sc">**</span><span class="er">*</span></span>
+<span id="cb42-67"><a href="#cb42-67" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">95</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> <span class="dv">4</span>th ed. by Alfred D<span class="sc">&amp;</span>ouml;<span class="fu">rffel</span> (Leipzig<span class="sc">:</span> Breitkopf und <span class="sc">**</span><span class="er">*</span></span>
+<span id="cb42-68"><a href="#cb42-68" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">96</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR2<span class="sc">:</span> c<span class="fl">.1875</span>). <span class="dv">178</span> pp. Plate <span class="st">"V.A.10"</span>.  reprint<span class="sc">:</span> J.S. Bach, <span class="dv">3</span><span class="sc">**</span><span class="er">*</span></span>
+<span id="cb42-69"><a href="#cb42-69" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">97</span><span class="sc">:</span>  <span class="sc">!!!</span>YOR4<span class="sc">:</span> <span class="fu">Chorales</span> (New York<span class="sc">:</span> Associated Music Publishers, Inc., <span class="sc">**</span><span class="er">*</span></span>
+<span id="cb42-70"><a href="#cb42-70" tabindex="-1"></a><span class="er">&gt;</span>               <span class="dv">98</span><span class="sc">:</span>  <span class="sc">!!!</span>SMS<span class="sc">:</span> B<span class="sc">&amp;</span>H, <span class="dv">4</span>th ed, Alfred D<span class="sc">&amp;</span>ouml;rffel, c<span class="fl">.1875</span>, plate V.A<span class="fl">.10</span></span>
+<span id="cb42-71"><a href="#cb42-71" tabindex="-1"></a><span class="sc">&gt;</span>               <span class="dv">99</span><span class="sc">:</span>  <span class="sc">!!!</span>EED<span class="sc">:</span>  Craig Stuart Sapp</span>
+<span id="cb42-72"><a href="#cb42-72" tabindex="-1"></a><span class="sc">&gt;</span>              <span class="dv">100</span><span class="sc">:</span>  <span class="sc">!!!</span>EEV<span class="sc">:</span>  <span class="dv">2009</span><span class="sc">/</span><span class="dv">05</span><span class="sc">/</span><span class="dv">22</span></span>
+<span id="cb42-73"><a href="#cb42-73" tabindex="-1"></a><span class="sc">&gt;</span>    <span class="do">######################## ^^^ chor010.krn ^^^ #########################</span></span>
+<span id="cb42-74"><a href="#cb42-74" tabindex="-1"></a><span class="er">&gt;</span>                  (<span class="sc">**</span><span class="er">*</span>five global comments truncated due to screen size<span class="sc">**</span><span class="er">*</span>)</span>
+<span id="cb42-75"><a href="#cb42-75" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb42-76"><a href="#cb42-76" tabindex="-1"></a><span class="er">&gt;</span>       humdrumR corpus of five pieces.</span>
+<span id="cb42-77"><a href="#cb42-77" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb42-78"><a href="#cb42-78" tabindex="-1"></a><span class="er">&gt;</span>       Data fields<span class="sc">:</span> </span>
+<span id="cb42-79"><a href="#cb42-79" tabindex="-1"></a><span class="er">&gt;</span>               <span class="er">*</span>Token        <span class="sc">::</span> character</span>
+<span id="cb42-80"><a href="#cb42-80" tabindex="-1"></a><span class="sc">&gt;</span>    </span>
+<span id="cb42-81"><a href="#cb42-81" tabindex="-1"></a><span class="er">&gt;</span>       Grouping fields<span class="sc">:</span> (two groups)</span>
+<span id="cb42-82"><a href="#cb42-82" tabindex="-1"></a><span class="sc">&gt;</span>                <span class="fu">floor</span>(Bar<span class="sc">/</span><span class="dv">2</span>) <span class="sc">::</span> numeric</span>
+<span id="cb42-83"><a href="#cb42-83" tabindex="-1"></a><span class="sc">&gt;</span>                Piece        <span class="sc">::</span> integer</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="removing-vs-filtering">Removing vs Filtering<a class="anchor" aria-label="anchor" href="#removing-vs-filtering"></a>
@@ -2236,7 +2245,7 @@ even-odd pairs:</p>
 <code>[]</code> and <code>[[]]</code>, <code><a href="../reference/subset.humdrumR.html">filter()</a></code> doesn’t
 seem to actually <em>remove</em> data that you filter out. So when we
 say</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>   <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <pre style="height: 800px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -2347,7 +2356,7 @@ that 1) you explicitly want to remove them and 2) the humdrum syntax is
 not broken, because only whole records/spines/paths/files are
 removed.</p>
 <p>So for our spines example:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2429,7 +2438,7 @@ removed.</p>
 &gt;       Data fields: 
 &gt;               *Token :: character</code></pre>
 <p>or for records:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Record</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%%</a></span> <span class="fl">2</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2520,7 +2529,7 @@ filters, it does not completely discard/erase the data. The output of
 <code><a href="../reference/subset.humdrumR.html">filter()</a></code> is a subset of the original data: the
 <em>complement</em> of that subset is retained (but hidden). This allows
 us to restore the filtered data, using <code><a href="../reference/subset.humdrumR.html">unfilter()</a></code>:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">unfilter</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -2601,7 +2610,7 @@ us to restore the filtered data, using <code><a href="../reference/subset.humdru
 &gt;               *Token :: character</code></pre>
 <p>We can also expliticely switch to the complement using the
 <code><a href="../reference/subset.humdrumR.html">complement()</a></code> command:</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">complement</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -2691,7 +2700,7 @@ obvious.</p>
 the phrase endings (<code>;</code>) in each chorale. We could filter our
 data, and simply <code><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along()</a></code> (enumerate) the fermatas in
 each bar:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Token</span> <span class="op"><a href="../reference/RegexFind.html">%~%</a></span> <span class="st">';'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/groupHumdrum.html">group_by</a></span><span class="op">(</span><span class="va">Piece</span>, <span class="va">Spine</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -2846,7 +2855,7 @@ each bar:</p>
 number of each fermata. But wait, using filter <em>removed</em> most of
 our tokens, so we can only see the notes during the fermatas, not
 leading up to them.</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/selectedFields.html">select</a></span><span class="op">(</span><span class="va">Token</span><span class="op">)</span></span></code></pre></div>
 <pre style="height: 1500px; overflow: auto; resize: vertical;"><code>&gt;    ######################## vvv chor001.krn vvv #########################
@@ -2931,7 +2940,7 @@ leading up to them.</p>
 &gt;                Spine    :: integer</code></pre>
 <p>Luckily, we can <code><a href="../reference/subset.humdrumR.html">unfilter()</a></code>, then filter again by
 bar:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">unfilter</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/groupHumdrum.html">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -3022,7 +3031,7 @@ bar:</p>
 </h5>
 <p>What if you wanted to transpose the bass voice an octave higher, but
 keep the other voices the same? Well, we could try:</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Transposed <span class="op">=</span> <span class="fu"><a href="../reference/transpose.html">transpose</a></span><span class="op">(</span><span class="va">Token</span>, by <span class="op">=</span> <span class="st">'P8'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -3114,7 +3123,7 @@ the <code>Tranposed</code> field has no complement data: it didn’t exist
 until after the filter was applied. Luckily, we can tell
 <code><a href="../reference/subset.humdrumR.html">unfilter()</a></code> to use a specific complement, using the
 <code>complement</code> argument:</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chorales</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/subset.humdrumR.html">filter</a></span><span class="op">(</span><span class="va">Spine</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">mutate</span><span class="op">(</span>Transposed <span class="op">=</span> <span class="fu"><a href="../reference/transpose.html">transpose</a></span><span class="op">(</span><span class="va">Token</span>, by <span class="op">=</span> <span class="st">'P8'</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -3211,7 +3220,7 @@ different fields into one field!</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
+  <p><a href="https://humdrumR.ccml.gtcmt.gatech.edu"><img src="https://humdrumR.ccml.gtcmt.gatech.edu/humdrumR_logo.svg" alt="humdrumR" style="height:80px;"></a></p>
 </div>
 
 <div class="pkgdown-footer-right">

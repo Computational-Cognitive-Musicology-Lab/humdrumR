@@ -302,11 +302,11 @@ test_that("int, mint, and hint work", {
     
     expect_true(with(chorale |> subset(Spine < 3), all(as.character(Bass) == as.character(Lag))))
     
-    expect_equal(chorale |> select(Token) |> mint() |> table() |> index('+M2'), setNames(45, '+M2'))
+    expect_equal(chorale |> select(Token) |> mint() |> table() |> _['+M2'], setNames(45, '+M2'))
     
-    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 4) |> table() |> index('-M17'), setNames(7L, '-M17'))
-    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 4) |> table() |> index('-P4'), setNames(9L, '-P4'))
-    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 3) |> table() |> index('-P4'), setNames(17L, '-P4'))
+    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 4) |> table() |> _['-M17'], setNames(7L, '-M17'))
+    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 4) |> table() |> _['-P4'], setNames(9L, '-P4'))
+    expect_equal(chorale |> select(Token) |> hint(Token, lag = Spine == 3) |> table() |> _['-P4'], setNames(17L, '-P4'))
     
     
     
