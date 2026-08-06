@@ -3370,7 +3370,7 @@ legend_col_discrete <- function(categories, palette, pch, side, marginLines, col
   text(xpos[2], grconvertY(.81, 'ndc', 'user'), pos = 3, col.legend, col = par('col.lab'), xpd = NA)
 }
 
-legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, side, marginLines, col.legend = '') {
+legend_col_continuous <- function(var, palette, pch = NULL, smooth_legend = TRUE, side, marginLines, col.legend = '', ...) {
   
   xpos <- grconvertX(marginLines[[side]][3:4], 'inches', 'user')
   col.labs <- pretty(var, min.n = 5, n = 10) |> format(big.mark = ',', digits = 2)
