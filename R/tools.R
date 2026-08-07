@@ -1085,13 +1085,17 @@ stretch <- function(x, length.out = if (hasdim(x)) dim(x) else length(x)) {
 .fillout <- function(x, length.out, recycle = TRUE) {
   if (length(length.out) <= 0) .stop(ifelse = recycle, "You can't <recycle|stretch> vector with a length argument of less than length 1.")
 
-  if (!(is.vector(x) || is.integer64(x))) return(x)
+  # is.struct() (inherits-based) is checked explicitly because is.vector() is a
+  # base primitive and won't S4-dispatch to the struct method inside the namespace.
+  if (!(is.vector(x) || is.integer64(x) || is.struct(x))) return(x)
 
   if (!hasdim(x)) {
     if (length(length.out) > 1) {
       x <- cbind(x) 
     } else {
-      return (if (recycle) rep_len(x, length.out) else x[seq_len(length.out)])
+      # NB: recycle via indexing (not rep_len(x, ...)) so it works for S4 struct
+      # types too --- rep_len is a base primitive and does not do S4 dispatch.
+      return (if (recycle) x[rep_len(seq_len(length(x)), length.out)] else x[seq_len(length.out)])
     }
     
   } 
