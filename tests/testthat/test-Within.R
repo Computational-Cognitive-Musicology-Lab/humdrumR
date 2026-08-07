@@ -243,6 +243,11 @@ test_that("Assignment and multiple do expressions work correctly in with.humdrum
   
   expect_equal(names(with(chorales, mean(nchar(Token)), .by = 'Spine')), paste0('Spine', 1:4))
   
+
+	# overwriting existing field should work
+
+	expect_equal(chorales |> mutate(Squared = nchar(Token)^2), 
+							 chorales |> mutate(Squared = nchar(Token)) |> mutate(Squared = Squared^2))
 })
 
   

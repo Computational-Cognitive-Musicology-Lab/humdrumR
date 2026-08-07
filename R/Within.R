@@ -748,19 +748,17 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   groupFields <- getGroupingFields(humdrumR, .by, withFunc) 
   
   quosure <- prepareQuosures(humtab, quosures, dotField, recycle, variables, withFunc, alignLeft)
-  newFields <- attr(quosure, 'newFields')
-  
-  # Check that structural fields aren't getting overwritten
-  checkOverwrites(newFields, fields$Name, withFunc) # this happens before any execution
+  assignNames <- attr(quosure, 'newFields')
+  checkOverwrites(assignNames, fields$Name, withFunc) # this happens before any execution
  
   ## Evaluate quosures
-  # new fields are created in place
   humtab <- evaluateDoQuo(quosure, humtab, dataTypes, groupFields, humdrumR@Context) 
+	mutateFields <- attr(humtab, 'resultFields')
+	attr(humtab, 'resultFields') <- NULL
+	# This is sdifferent from assignNames because data.frame returns can introduce new names:
 
-	# This might be different now because data.frame returns can introduce new names:
-	newFields <- setdiff(colnames(humtab), c(fields$Name, '_rowKey_', '_recycled_')) |> grep('^Exclusive\\.|^_complement_', x = _, value = TRUE, invert = TRUE)
   
-	visible <- attr(humtab[[tail(x = newFields, 1)]], 'visible') %||% TRUE
+	visible <- (attr(humtab[[tail(x = mutateFields, 1)]], 'visible') %||% TRUE)
 
 	if (recycle %in% c('no', 'summarize')) {
 		humtab <- humtab[`_recycled_` == FALSE]
@@ -774,7 +772,7 @@ withHumdrum <- function(humdrumR, ..., dataTypes = 'D', recycle = 'never',
   
   list(humtab = humtab, dataTypes = dataTypes,
        visible = visible, 
-       groupFields = groupFields, newFields = newFields)
+       groupFields = groupFields, newFields = mutateFields)
 }
 
 
@@ -1395,11 +1393,11 @@ evaluateDoQuo <- function(quosure, humtab, dataTypes, groupFields, windowFrame) 
 		results[ , (groupFields) := NULL]
 	}
 
-    
-	checkOverwrites(setdiff(names(results), c('_rowKey_', '_recycled_')), 
-									names(humtab), 'with./within.humdrumR') # this is needed in case data.frame returns introduce new problematic names
+  resultFields <-  setdiff(names(results), c('_rowKey_', '_recycled_'))
+	checkOverwrites(resultFields, names(humtab), 'with./within.humdrumR') # this is needed in case data.frame returns introduce new problematic names
 
-	humtab <- results[humtab, on = '_rowKey_']
+	humtab <- results[humtab[ , !colnames(humtab) %in% resultFields, with = FALSE], on = '_rowKey_']
+	attr(humtab, 'resultFields') <- resultFields
 
 	humtab
   
