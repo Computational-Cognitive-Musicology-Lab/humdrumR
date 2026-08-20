@@ -604,15 +604,24 @@ draw.default <- function(x, y, facets = list(),
   } 
   
   na <-  (if (is.null(x)) FALSE else is.na(x)) | (if (is.null(y)) FALSE else is.na(y))
+	if (all(na)) .stop("The data you are drawing is all NA values.")
   if (any(na)) {
     .message('The data you are drawing includes {num2word(sum(na))} NA values. These are being ignored.')
     
-    x <- x[!na]
-    y <- y[!na]
-    if (length(color) == length(na)) color <- color[!na]
-    if (length(pointSize) == length(na)) pointSize <- pointSize[!na]
-    if (length(pointStyle) == length(na)) pointStyle <- pointStyle[!na]
-    facets <- lapply(facets, '[', i = !na)
+		if (is.atomic(x)) {
+    	x <- x[!na]
+    	y <- y[!na]
+    	if (length(color) == length(na)) color <- color[!na]
+    	if (length(pointSize) == length(na)) pointSize <- pointSize[!na]
+    	if (length(pointStyle) == length(na)) pointStyle <- pointStyle[!na]
+    	facets <- lapply(facets, '[', i = !na)
+		} else {
+			if (is.data.frame(x)) {
+				na <- rowSums(na) == 0L
+				x <- x[na, ]
+			} 
+		}
+
   }
   
   if (length(facets)) {
@@ -1597,7 +1606,7 @@ draw_barplot <- function(counts, log = '',
   type <- if (is.null(stacked)) 'both' else { if (stacked) 'stacked' else 'beside'}
   space <- if (type == 'stacked') .5 else c(0, 1 + nrow(counts) %/% 8) 
   
-  ylim <- ylim %||% c(0, if (type != 'beside') max(colSums(counts)) else  max(counts))
+  ylim <- ylim %||% c(0, if (type != 'beside') max(colSums(counts, na.rm = TRUE)) else  max(counts, na.rm = TRUE))
   
   col <- prep_col_categories(col %||% rownames(counts), rownames(counts), alpha = alpha, log = log, ...)
   if (type != 'stacked' && length(dim(counts))) col$legend <- NULL
@@ -1613,8 +1622,8 @@ draw_barplot <- function(counts, log = '',
                               ylim = list(ylim, xlim)[[horizontal + 1L]],
                               log = log)
   # axes
-  proportions <- pretty(ylim / sum(counts), n = 10L, min.n = 5L)
-  proportions <- setNames(proportions * sum(counts), proportions)
+  proportions <- pretty(ylim / sum(counts, na.rm = TRUE), n = 10L, min.n = 5L)
+  proportions <- setNames(proportions * sum(counts, na.rm = TRUE), proportions)
   
   axes <- data.table(side = if (horizontal) c(1, 3) else c(2, 4),
                      ticks = list(proportions, pretty(ylim, n = 10L, min.n = 5L)),
@@ -2445,9 +2454,14 @@ setMethod('.draw', c('numeric', 'numeric'), draw_scatter)
 
 #### numeric X discrete ----
 
-setMethod('.draw', c('discrete', 'numeric'), draw_violins)
-setMethod('.draw', c('numeric', 'discrete'), draw_area)
-
+setMethod('.draw', c('discrete', 'numeric'), 
+					function(x, y, ...) {
+						if (is.integer(y) && length(unique(y)) <= 10L) draw_barplot(table(x, y), ...) else draw_violins(x, y, ...)
+					})
+setMethod('.draw', c('numeric', 'discrete'), 
+					function(x, y, ...) {
+						if (is.integer(x) && length(unique(x)) <= 10L) draw_barplot(table(x, y), ...) else draw_area(x, y, ...)
+					})
 #### discrete only ----
 setMethod('.draw', c('discrete', 'NULL'),
           function(x, y, ...) draw_barplot(table(x), ...))
@@ -2458,12 +2472,14 @@ setMethod('.draw', c('NULL', 'discrete'),
 setMethod('.draw', c('discrete', 'discrete'),
           function(x, y, ...) draw_barplot(table(x, y), ...))
 
+
 ### tables ----
 
 
 
 setMethod('.draw', c('table', 'NULL'), 
           function(x, y, ..., col = NA, pch = NA, cex = NA) {
+						browser()
             if (length(dim(x)) > 2) {
               
               full <- list(x = apply(x, 1:2, sum) |> as.table(),
