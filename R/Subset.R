@@ -250,8 +250,7 @@ removeNull.data.table <- function(hum, by = 'Piece', nullTypes = 'GLIMd', ...) {
               na.rm = TRUE)) hum[[comp]] <- NULL
     }
   }
-  
-  hum
+  setorder(hum, `_rowKey_`)
   
 }
 
